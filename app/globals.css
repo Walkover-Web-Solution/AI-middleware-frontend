@@ -2,32 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+/* Hide the button container by default */
+.button-container {
+    visibility: hidden;
+    white-space: nowrap; /* Ensure buttons don't wrap */
   }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  
+  /* Show the button container when the row is hovered */
+  .hover-row:hover .button-container {
+    visibility: visible;
   }
-}
+  
+  /* Style for the buttons (customize as needed) */
+  .table-button {
+    margin-left: 5px; /* Space between buttons */
+    /* Add more styling here */
+  }
+  
+  /* Ensure the row has a cursor pointer to indicate it's interactive */
+  .hover-row {
+    cursor: pointer;
+  }

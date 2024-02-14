@@ -1,7 +1,11 @@
-import { Inter } from "next/font/google";
-import "./globals.css";
+import { Syne } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
+
+import "./globals.css";
+import Wrapper from "@/wrapper/Wrapper";
+import Navbar from "@/components/navbar";
+
+const inter = Syne({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Create Next App",
@@ -10,8 +14,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" data-theme="wireframe">
+      <body suppressHydrationWarning>
+        <Wrapper>
+          <Navbar />
+          {children}
+          </Wrapper>
+       
+        </body>
     </html>
   );
 }
