@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
- model : {} ,
- modelInfo : {},
+ model : [] ,
+ modelInfo : [],
   loading: false,
 };
 

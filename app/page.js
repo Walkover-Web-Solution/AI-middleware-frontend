@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
  
 import { useRouter } from 'next/navigation'
+import { getAllBridges } from "@/api";
 // import { getAllBridges } from "@/api";
 
 export default  function Home () {
@@ -12,8 +13,17 @@ export default  function Home () {
   const allBridges = useCustomSelector((state) => state.bridgeReducer.allBridges) || []
   const dispatch = useDispatch()
   const router = useRouter()
+  const getBridges = async () => {
+    try {
+      const response = await getAllBridges();
+      console.log(response, "response")
+    } catch (error) {
+      console.error(error);
+    }
+  }
   useEffect(() => {
      dispatch(getAllBridgesAction())
+    //  getBridges() 
   },[])
   const columns = [ "name", "_id", "service"];
 
@@ -42,7 +52,7 @@ export default  function Home () {
       ))}
       <td className="button-container gap-3 flex justify-center align-center">
         {/* Buttons are hidden by default, shown on row hover */}
-        <button className="btn btn-sm">History</button>
+        <button onClick={() => router.push(`/history/${item._id}`)} className="btn btn-sm">History</button>
         <button onClick={() => router.push(`/configure/${item._id}`)} className="btn btn-sm">Configure</button>
       </td>
     </tr>

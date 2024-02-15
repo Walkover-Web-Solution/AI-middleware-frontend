@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
- history : {} ,
- thread : {},
+ history : [] ,
+ thread : [],
   loading: false,
   success : false
 };

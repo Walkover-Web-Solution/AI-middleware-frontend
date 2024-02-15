@@ -3,12 +3,12 @@ import { fetchAllHistoryReducer, fetchThreadReducer } from "../reducer/historyRe
 
 
 
-export const getHistoryAction = () => async (dispatch, getState) => {
+export const getHistoryAction = (id) => async (dispatch, getState) => {
     try {
         const dataToSend = {
             "org_id":"124dfgh67ghj"
         }
-      const data = await axios.post(`http://localhost:7072/api/v1/config/history/6ae25830-c74a-11ee-afda-7b5d9670126d/` , dataToSend );
+      const data = await axios.get(`http://localhost:7072/api/v1/config/history/${id}/` , dataToSend );
       dispatch(fetchAllHistoryReducer(data.data));
     } catch (error) {
       console.error(error);
@@ -16,12 +16,13 @@ export const getHistoryAction = () => async (dispatch, getState) => {
   };
 
 
-  export const getThread = () => async (dispatch, getState) => {
+  export const getThread = (thread_id , id) => async (dispatch, getState) => {
     try {
+      
         const dataToSend = {
             "org_id":"124dfgh67ghj"
         }
-      const data = await axios.post(`http://localhost:7072/api/v1/config/threads/123456789fdss/6ae25830-c74a-11ee-afda-7b5d9670126d/` , dataToSend );
+      const data = await axios.get(`http://localhost:7072/api/v1/config/threads/${thread_id}/${id}/` , dataToSend );
       dispatch(fetchThreadReducer(data.data));
     } catch (error) {
       console.error(error);
