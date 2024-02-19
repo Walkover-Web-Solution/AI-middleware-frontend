@@ -1,10 +1,11 @@
 "use client"
+import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { getHistoryAction, getThread } from '@/store/action/historyAction'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
-export default function page({ params }) {
+function page({ params }) {
 
   const { historyData, thread } = useCustomSelector(
     (state) => ({
@@ -90,3 +91,4 @@ export default function page({ params }) {
   )
 }
 
+export default  Protected(page)

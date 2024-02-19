@@ -1,5 +1,6 @@
 "use client"
 
+import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { getSingleBridgesAction } from '@/store/action/bridgeAction'
 import { getModelAction } from '@/store/action/modelAction'
@@ -7,7 +8,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
 
-export default function page({ params }) {
+function page({ params }) {
 
   const dispatch = useDispatch()
 
@@ -153,4 +154,4 @@ export default function page({ params }) {
     </div>
   )
 }
-
+export default Protected(page)

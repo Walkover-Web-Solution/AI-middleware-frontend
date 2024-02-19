@@ -1,64 +1,61 @@
+
 "use client"
-import { useCustomSelector } from "@/customSelector/customSelector";
-import { createBridgeAction, getAllBridgesAction, getSingleBridgesAction, updateBridgeAction } from "@/store/action/bridgeAction";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
- 
-import { useRouter } from 'next/navigation'
-import { getAllBridges } from "@/api";
-// import { getAllBridges } from "@/api";
 
-export default  function Home () {
+import React, {  useLayoutEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation';
+import WithAuth from '@/components/withauth';
 
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.allBridges) || []
-  const dispatch = useDispatch()
-  const router = useRouter()
-  const getBridges = async () => {
-    try {
-      const response = await getAllBridges();
-    } catch (error) {
-      console.error(error);
+function page ({params}) {
+
+  const router = useRouter();
+
+  async function runEffect() {
+    if (localStorage.getItem('proxy_auth_token')){
+      router.replace("/bridges");
+      return ;
     }
+      const configuration = {
+        referenceId: '870623l170791725365ccbfc587143',
+        success: (data) => {
+          // get verified token in response
+          console.log('success response', data)
+        },
+        failure: (error) => {
+          // handle error
+          console.log('failure reason', error)
+        }
+      }
+      const script = document.createElement('script')
+      script.type = 'text/javascript'
+      script.onload = () => {
+        const checkInitVerification = setInterval(() => {
+          if (typeof initVerification === 'function') {
+            clearInterval(checkInitVerification)
+            initVerification(configuration)
+          }
+        }, 100)
+      }
+      script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js'
+      document.body.appendChild(script)
   }
-  useEffect(() => {
-     dispatch(getAllBridgesAction())
-    //  getBridges() 
+  useLayoutEffect(() => {
+    runEffect()
   },[])
-  const columns = [ "name", "_id", "service"];
 
- return (
-
-    <table className="table">
-      <thead>
-        <tr>
-          {columns.map(column => (
-            <th key={column}>{column.replace(/_/g, ' ').charAt(0).toUpperCase() + column.replace(/_/g, ' ').slice(1)}</th> // Beautify the column headers
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {/* {allBridges.map((item) => (
-          <tr key={item._id} className="hover cursor-pointer">
-            {columns.map(column => (
-              <td key={`${item._id}-${column}`}>{item[column]}</td>
-            ))}
-          </tr>
-        ))} */}
-         {allBridges.map((item) => (
-    <tr key={item._id} className="hover-row hover">
-      {columns.map(column => (
-        <td key={`${item._id}-${column}`}>{item[column]}</td>
-      ))}
-      <td className="button-container gap-3 flex justify-center align-center">
-        {/* Buttons are hidden by default, shown on row hover */}
-        <button onClick={() => router.push(`/history/${item._id}`)} className="btn btn-sm">History</button>
-        <button onClick={() => router.push(`/configure/${item._id}`)} className="btn btn-sm">Configure</button>
-      </td>
-    </tr>
-  ))}
-      </tbody>
-    </table>
-
-
-  );
+//   const redirectToProject = async () => {
+//     console.log(localStorage)
+//     const token = localStorage.getItem('proxy_auth_token')
+//     if (token) {
+//       // if (process.env.REACT_APP_API_ENVIRONMENT === 'local') {
+//         localStorage.setItem('accessToken', token)
+//       // }
+//   }
+// }
+  return (
+    <div>
+       <div id='870623l170791725365ccbfc587143' />
+   </div>
+  )
 }
+
+export default WithAuth(page)
