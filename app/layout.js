@@ -15,14 +15,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-theme="dark">
-      
+
       <body suppressHydrationWarning>
         <Wrapper>
           <Navbar />
           {children}
-          </Wrapper>
-       
-        </body>
+        </Wrapper>
+
+      </body>
     </html>
   );
 }

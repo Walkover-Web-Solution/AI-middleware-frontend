@@ -5,7 +5,6 @@ import axios from "axios"
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL
 
-console.log(URL,888);
 
 export const getSingleModels = async () => {
     try {

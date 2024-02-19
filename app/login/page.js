@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 
-function page () {
+function page ({params}) {
 
   useEffect(() => {
     const configuration = {
@@ -22,7 +22,7 @@ function page () {
     script.onload = () => {
       const checkInitVerification = setInterval(() => {
         if (typeof initVerification === 'function') {
-          clearInterval(checkInitVerification)
+          clearInterval(checkInitVerification) 
           initVerification(configuration)
         }
       }, 100)
@@ -30,6 +30,7 @@ function page () {
     script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js'
 
     document.body.appendChild(script)
+    console.log(script, 'sssss');
   },[])
 
   return (
@@ -59,7 +60,7 @@ function page () {
         </div>
         <div className="form-control mt-6">
           <button className="btn btn-primary">Login</button>
-          <div id='870623l170791725365ccbfc587143' />
+          {/* <div id='870623l170791725365ccbfc587143' /> */}
         </div>
       </form>
     </div>

@@ -5,10 +5,10 @@ import { fetchAllHistoryReducer, fetchThreadReducer } from "../reducer/historyRe
 
 export const getHistoryAction = (id) => async (dispatch, getState) => {
     try {
-        const dataToSend = {
-            "org_id":"124dfgh67ghj"
-        }
-      const data = await axios.get(`http://localhost:7072/api/v1/config/history/${id}/` , dataToSend );
+      const headers = {
+        'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.sKbA7M0mmWG1A6Rk41t1KapUAc3WpKv0xHPzdWPxh7Q'
+      };
+      const data = await axios.get(`http://localhost:7072/api/v1/config/history/${id}/` , { headers } );
       dispatch(fetchAllHistoryReducer(data.data));
     } catch (error) {
       console.error(error);
@@ -19,10 +19,10 @@ export const getHistoryAction = (id) => async (dispatch, getState) => {
   export const getThread = (thread_id , id) => async (dispatch, getState) => {
     try {
       
-        const dataToSend = {
-            "org_id":"124dfgh67ghj"
-        }
-      const data = await axios.get(`http://localhost:7072/api/v1/config/threads/${thread_id}/${id}/` , dataToSend );
+      const headers = {
+        'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.sKbA7M0mmWG1A6Rk41t1KapUAc3WpKv0xHPzdWPxh7Q'
+      };
+      const data = await axios.get(`http://localhost:7072/api/v1/config/threads/${thread_id}/${id}/` ,  { headers } );
       dispatch(fetchThreadReducer(data.data));
     } catch (error) {
       console.error(error);

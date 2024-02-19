@@ -16,7 +16,6 @@ export default  function Home () {
   const getBridges = async () => {
     try {
       const response = await getAllBridges();
-      console.log(response, "response")
     } catch (error) {
       console.error(error);
     }
