@@ -18,22 +18,22 @@ function page({ params }) {
 
   // const [openAccordionIndex, setOpenAccordionIndex] = useState(0);
 
-
   const bridgeData = useCustomSelector((state) => state.bridgeReducer.allBridgesMap?.[params?.id]);
-
+  
   const [selectedModel, setSelectedModel] = useState(bridgeData?.configuration?.model); // State to store the selected model
-
-
+  
+  
   const { modelData, modelInfo } = useCustomSelector(
     (state) => ({
       modelData: state?.modelReducer?.model,
       modelInfo: state?.modelReducer?.modelInfo?.[(selectedModel || state.bridgeReducer.allBridgesMap?.[params?.id]?.configuration?.model)?.replaceAll("-", "_")?.replaceAll(".", "_")]
     })
-  )
-
-  // const [temp, setTemp] = useState(Number(bridgeData?.configuration?.temperature || modelInfo?.temperature[0]))
-  // const [maxTokens, setMaxTokens] = useState(modelInfo?.max_tokens[0]);
-
+    )
+    
+    // const [temp, setTemp] = useState(Number(bridgeData?.configuration?.temperature || modelInfo?.temperature[0]))
+    // const [maxTokens, setMaxTokens] = useState(modelInfo?.max_tokens[0]);
+    
+    console.log(modelInfo , "modelInfo")
 
   const handleModelChange = (e) => {
     console.log(e.target.value)
