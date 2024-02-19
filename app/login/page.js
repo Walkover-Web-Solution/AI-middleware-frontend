@@ -4,35 +4,50 @@ import React, { useEffect } from 'react'
 
 function page ({params}) {
 
-  useEffect(() => {
-    const configuration = {
-      referenceId: '870623l170791725365ccbfc587143',
-      success: (data) => {
-        // get verified token in response
-        console.log('success response', data)
-      },
-      failure: (error) => {
-        // handle error
-        console.log('failure reason', error)
-      }
-    }
 
-    const script = document.createElement('script')
-    script.type = 'text/javascript'
-    script.onload = () => {
-      const checkInitVerification = setInterval(() => {
-        if (typeof initVerification === 'function') {
-          clearInterval(checkInitVerification) 
-          initVerification(configuration)
+  async function runEffect() {
+    if (!localStorage.getItem('proxy_auth_token')){
+      const configuration = {
+        referenceId: '870623l170791725365ccbfc587143',
+        success: (data) => {
+          // get verified token in response
+          console.log('success response', data)
+        },
+        failure: (error) => {
+          // handle error
+          console.log('failure reason', error)
         }
-      }, 100)
+      }
+  
+      const script = document.createElement('script')
+      script.type = 'text/javascript'
+      script.onload = () => {
+        const checkInitVerification = setInterval(() => {
+          if (typeof initVerification === 'function') {
+            clearInterval(checkInitVerification)
+            initVerification(configuration)
+          }
+        }, 100)
+      }
+      script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js'
+  
+      document.body.appendChild(script)
     }
-    script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js'
-
-    document.body.appendChild(script)
-    console.log(script, 'sssss');
+    redirectToProject()
+  }
+  useEffect(() => {
+    runEffect()
   },[])
 
+  const redirectToProject = async () => {
+    console.log(localStorage)
+    const token = localStorage.getItem('proxy_auth_token')
+    if (token) {
+      // if (process.env.REACT_APP_API_ENVIRONMENT === 'local') {
+        localStorage.setItem('accessToken', token)
+      // }
+  }
+}
   return (
     <div>
       <div className="hero min-h-screen bg-base-200">
@@ -60,7 +75,7 @@ function page ({params}) {
         </div>
         <div className="form-control mt-6">
           <button className="btn btn-primary">Login</button>
-          {/* <div id='870623l170791725365ccbfc587143' /> */}
+          <div id='870623l170791725365ccbfc587143' />
         </div>
       </form>
     </div>
