@@ -1,5 +1,5 @@
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer } from "../reducer/bridgeReducer";
-import axios from "axios";
+import axios from "@/utils/interceptor";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
@@ -33,10 +33,7 @@ export const createBridgeAction = () => async (dispatch, getState) => {
 
 export const getAllBridgesAction = () => async (dispatch, getState) => {
   try {
-    const headers = {
-      'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.sKbA7M0mmWG1A6Rk41t1KapUAc3WpKv0xHPzdWPxh7Q'
-    };
-    const response = await axios.get(`http://localhost:7072/api/v1/config/getbridges/all` ,  { headers } );
+    const response = await axios.get(`http://localhost:7072/api/v1/config/getbridges/all` ,   );
     // const response = await getAllBridges();
     console.log(response, "response")
     dispatch(fetchAllBridgeReducer(response.data.bridges));
