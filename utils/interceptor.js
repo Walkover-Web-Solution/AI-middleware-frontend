@@ -4,7 +4,7 @@ axios.interceptors.request.use(
     async (config) => {
         let token
         if(config.url.includes("routes.msg91.com")) token = localStorage.getItem("proxy_auth_token")
-        else token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpcCI6Il9JUCIsIm9yZyI6eyJpZCI6IjEyNGRmZ2g2N2doaiJ9LCJ1c2VyIjp7ImlkIjoiMTI0ZGZnaDY3Z2hqIn19.528o-s4ALXMa7G6YE96nF_t1oLXDrBuRRdfUMr--628';
+        else token =  process.env.AUTHORIZATION_CODE
         if (token && config.url.includes("routes.msg91.com")) {
             config.headers['proxy_auth_token'] = token
         }
