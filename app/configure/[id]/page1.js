@@ -46,7 +46,6 @@ function Page({ params }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(cloneModelInfo);
   };
 
   return (
@@ -89,7 +88,6 @@ function Page({ params }) {
                             id={key} // Add this id attribute
                             type="range"
                             min={cloneModelInfo[key]?.min}
-                            // onMouseUp={(e)=> console.log("")}
                             max={cloneModelInfo[key]?.max}
                             step={cloneModelInfo[key]?.step}
                             value={cloneModelInfo[key]?.default}

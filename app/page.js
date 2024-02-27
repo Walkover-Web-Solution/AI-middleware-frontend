@@ -42,15 +42,6 @@ function page ({params}) {
     runEffect()
   },[])
 
-//   const redirectToProject = async () => {
-//     console.log(localStorage)
-//     const token = localStorage.getItem('proxy_auth_token')
-//     if (token) {
-//       // if (process.env.REACT_APP_API_ENVIRONMENT === 'local') {
-//         localStorage.setItem('accessToken', token)
-//       // }
-//   }
-// }
   return (
     <div style={{width : "100vw" , height : "100vh"}} className=' flex justify-center items-center'>
        <div id='870623l170791725365ccbfc587143' />

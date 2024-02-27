@@ -3,9 +3,10 @@
 import axios from "@/utils/interceptor"
 
 
+const URL = process.env.NEXT_PUBLIC_SERVER_URL;
+const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
 
-const URL = process.env.SERVER_URL
-const PROXY_URL = process.env.PROXY_URL
+
 
 
 export const getSingleModels = async () => {
@@ -22,7 +23,7 @@ export const getSingleModels = async () => {
 
 export  const getSingleBridge = async (bridgeId) => {
     try {
-      const response  = await axios.get(`${URL}/v1/config/getbridges/${bridgeId}`)
+      const response  = await axios.get(`${URL}/api/v1/config/getbridges/${bridgeId}`)
       return response
     } catch (error) {
       console.error(error)
@@ -131,10 +132,18 @@ export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) 
   }
 
   export const createAuthKey = async (dataToSend) => {
-    console.log(dataToSend)
     try {
-      await axios.post(`${PROXY_URL}/api/c/authkey` , dataToSend)
+      return await axios.post(`${PROXY_URL}/api/c/authkey` , dataToSend)
 
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  export const deleteAuthkey = async(id) => {
+    
+    try {
+      await axios.delete(`${PROXY_URL}/api/c/authkey/${id}`)
     } catch (error) {
       console.error(error)
     }

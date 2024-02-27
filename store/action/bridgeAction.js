@@ -1,10 +1,11 @@
+import { getAllBridges, getSingleBridge } from "@/api";
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer } from "../reducer/bridgeReducer";
 import axios from "@/utils/interceptor";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   try {
-    const data = await axios.get(`http://localhost:7072/api/v1/config/getbridges/${id}`);
+    const data = await getSingleBridge(id);
     dispatch(fetchSingleBridgeReducer(data.data));
   } catch (error) {
     console.error(error);
@@ -33,9 +34,7 @@ export const createBridgeAction = () => async (dispatch, getState) => {
 
 export const getAllBridgesAction = () => async (dispatch, getState) => {
   try {
-    const response = await axios.get(`http://localhost:7072/api/v1/config/getbridges/all` ,   );
-    // const response = await getAllBridges();
-    // console.log(response, "response")
+    const response = await getAllBridges();
     dispatch(fetchAllBridgeReducer(response.data.bridges));
   } catch (error) {
     console.error(error);

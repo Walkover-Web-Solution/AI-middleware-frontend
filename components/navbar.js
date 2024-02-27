@@ -10,7 +10,6 @@ import Protected from './protected'
 function Navbar() {
     const router = useRouter()
     const path = usePathname()
-    console.log(path  , "path")
     const dispatch = useDispatch()
     const userdetails = useCustomSelector((state) => state?.userDetailsReducer?.userDetails)
 

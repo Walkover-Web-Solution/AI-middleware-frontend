@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { cloneDeep } from "lodash";
 
 const initialState = {
  authData : [] ,
@@ -10,19 +11,24 @@ export const authDataReducer = createSlice({
   initialState,
   reducers: {
     fetchAllAuthData : (state, action) => {
-       console.log(action.payload , "hello")
       state.authData = action.payload
     //   state.modelInfo = action.payload.modelInfo
     } ,
-    createAuthData : (state, action) => {
+    addAuthData : (state, action) => {
         state.authData = [action.payload.data , ...state.authData]
+    },
+    removeAuthData : (state , action) => {
+      const cloneData =  cloneDeep(state.authData)
+      cloneData.splice(cloneData[action.payload] , 1)
+      state.authData = [...cloneData]
     }
   },
 });
 
 export const {
     fetchAllAuthData , 
-    createAuthData  
+    addAuthData  , 
+    removeAuthData
 } = authDataReducer.actions;
 export default authDataReducer.reducer;
 

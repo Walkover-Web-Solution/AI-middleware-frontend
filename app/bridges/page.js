@@ -4,13 +4,14 @@ import { getAllBridgesAction} from "@/store/action/bridgeAction";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
  
-import { useRouter } from 'next/navigation'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import Protected from "@/components/protected";
 
 
 function Home () {
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.allBridges) || []
+  const path = usePathname()
   const dispatch = useDispatch()
   const router = useRouter()
 
@@ -22,6 +23,13 @@ function Home () {
 
  return (
 
+ 
+
+<div className="drawer lg:drawer-open">
+<input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+<div className="drawer-content flex pl-2 flex-col items-start justify-start">
+  <div className="flex w-full justify-start gap-16 items-start">
+    <div className="w-full">
     <table className="table">
       <thead>
         <tr>
@@ -44,6 +52,21 @@ function Home () {
   ))}
       </tbody>
     </table>
+    </div>
+  </div>
+
+</div>
+<div className="drawer-side">
+  <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
+  <ul className="menu p-4 w-50   min-h-full bg-base-200 text-base-content">
+    {/* Sidebar content here */}
+    <li><button className={path==="/bridges" ? "btn-active" : ""}  >Configure </button></li>
+    <li><button className={path==="/apikey" ? "btn-active" : ""} >Api key</button></li>
+  </ul>
+
+</div>  
+</div>
+    
 
 
   );
