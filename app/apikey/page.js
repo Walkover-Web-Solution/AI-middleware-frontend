@@ -2,7 +2,7 @@
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
@@ -12,6 +12,7 @@ function Page() {
   const authData = useCustomSelector((state) => state?.authDataReducer?.authData || [])
   const [singleAuthData, setSingleAuthData] = useState({})
   const path = usePathname()
+  const route = useRouter()
   // const [authData, setAuthData] = useState([])
 
   useEffect(() => {
@@ -62,7 +63,6 @@ function Page() {
       <div className="drawer-content flex pl-2 flex-col items-start justify-start">
         <div className="flex w-full justify-start gap-16 items-start">
           <div className="w-full">
-            <>
               <button className="btn float-end mt-2 btn-sm mr-3 btn-primary" onClick={() => document.getElementById('my_modal_5').showModal()}>+ create new key</button>
 
               <table className="table">
@@ -148,7 +148,6 @@ function Page() {
                   </div>
                 </div>
               </dialog>
-            </>
           </div>
         </div>
 
@@ -157,8 +156,8 @@ function Page() {
         <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
         <ul className="menu p-4 w-50   min-h-full bg-base-200 text-base-content">
           {/* Sidebar content here */}
-          <li><button className={path==="/bridges" ? "btn-active" : ""}  >Configure </button></li>
-          <li><button className={path==="/apikey" ? "btn-active" : ""} >Api key</button></li>
+          <li><button className={path==="/bridges" ? "btn-active" : ""} onClick={()=> route.replace("/bridges")} >Configure </button></li>
+          <li><button className={path==="/apikey" ? "btn-active" : ""}  onClick={()=> route.replace("/apikey")}>Api key</button></li>
         </ul>
 
       </div>  
