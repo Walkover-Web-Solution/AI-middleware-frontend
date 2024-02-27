@@ -1,101 +1,124 @@
 "use client"
-
-// import { getSingleBridge } from '@/api'
+import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { getSingleBridgesAction } from '@/store/action/bridgeAction'
-import { dryRunAction } from '@/store/action/dryRunAction'
 import { getModelAction } from '@/store/action/modelAction'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import _ from 'lodash'
 
+function Page({ params }) {
+  const dispatch = useDispatch()
 
-export default function page({ params }) {
-
-  
-  const dispatch = useDispatch();
   const bridgeData = useCustomSelector((state) => state.bridgeReducer.allBridgesMap?.[params?.id]);
-  const temperature = useCustomSelector((state) => state.bridgeReducer.allBridgesMap?.[params?.id]?.configuration?.temperature  );
-  const [selectedModel, setSelectedModel] = useState(bridgeData?.configuration?.temperature); // State to store the selected model
-  const modelInfo = useCustomSelector((state) => state.modelReducer.modelInfo)?.[selectedModel?.replaceAll("-", "_")?.replaceAll(".", "_")]
-  const modelData = useCustomSelector((state) => state.modelReducer.model);
-  const [range, setRange] = useState(temperature)
-
-  console.log(modelData, bridgeData, bridgeData?.configuration?.temperature , selectedModel  , modelInfo ,  "bridgeData", "modelData")
-
-  useEffect(() => {
-    // (async () =>{ const data =  await getSingleBridge(params.id)})()
-    dispatch(getSingleBridgesAction(params.id))
-    dispatch(getModelAction())
-  }, [])
-
-
-  const [openAccordionIndex, setOpenAccordionIndex] = useState(0);
-
-  const handleAccordionToggle = (index) => {
-    setOpenAccordionIndex(index === openAccordionIndex ? -1 : index);
-  };
-
-  const handleRangeChange = (e) => {
-    console.log(e.target.value)
-    setRange(e.target.value)
-  }
-
-
+  const [selectedModel, setSelectedModel] = useState(bridgeData?.bridges?.configuration?.model);
+  // const { modelData, modelInfo } = useCustomSelector((state) => ({
+  //   modelData: state?.modelReducer?.model,
+  //   modelInfo: state?.modelReducer?.modelInfo?.[(selectedModel || state.bridgeReducer.allBridgesMap?.[params?.id]?.configuration?.model)?.replaceAll("-", "_")?.replaceAll(".", "_")]
+  // }));
+  const [cloneModelInfo, setCloneModelInfo] = useState({});
 
   const handleModelChange = (e) => {
-    console.log(e.target.value)
-    setSelectedModel(e.target.value); // Update the state with the selected model
+    setSelectedModel(e.target.value);
+  };
+
+  useEffect(() => {
+    dispatch(getSingleBridgesAction(params.id));
+    dispatch(getModelAction());
+    setCloneModelInfo({ ...modelInfo });
+  }, [modelInfo]);
+
+  const handleInputChange = (e, key) => {
+    if (document.getElementById(key) && cloneModelInfo[key]?.field === "slider") document.getElementById(key).value = e.target.value;
+    const updatedModelInfo = {
+      ...cloneModelInfo,
+      [key]: {
+        ...cloneModelInfo[key],
+        default: e.target.value
+      }
+    };
+      setCloneModelInfo(updatedModelInfo);
+
+    // Update the range input value
+  };
+
+  
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(cloneModelInfo);
   };
 
   return (
     <div>
-      <div className="drawer  lg:drawer-open">
+      <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center justify-center">
-          {/* Page content here */}
           <label htmlFor="my-drawer-2" className="btn btn-primary drawer-button lg:hidden">Open drawer</label>
 
         </div>
         <div className="drawer-side w-9">
           <label htmlFor="my-drawer-4" aria-label="close sidebar" className="drawer-overlay"></label>
           <div className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
-            <div onClick={() => handleAccordionToggle(0)} className="collapse collapse-plus bg-base-200">
-              <input type="radio" name="my-accordion-3" checked={openAccordionIndex === 0} />
-              <div className="collapse-title text-xl font-medium">
-                Parameters
-              </div>
-              <div onClick={(e) => e.stopPropagation()} className="flex flex-col gap-5 collapse-content">
-                <div>
-                  <p>Foundation Model</p>
-                  <select className="select select-bordered w-full max-w-xs"  value={selectedModel} onChange={handleModelChange} >
-                    <option disabled selected> {bridgeData?.configuration?.model || "select model"} </option>
-                    {modelData && modelData?.map((item) => (<option key={item} value={item}>{item}</option>))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-5">
-                  <div className="flex justify-between"><p>Temperature</p> <p>{range || temperature}</p></div>
-                  <input type="range" min={0} max={2} step={0.1} value={range} onChange={handleRangeChange} className="range range-xs" />
-                </div>
-              </div>
-            </div>
-            <div onClick={() => handleAccordionToggle(1)} className="collapse collapse-plus bg-base-200">
-              <input type="radio" name="my-accordion-3" checked={openAccordionIndex === 1} />
-              <div className="collapse-title text-xl font-medium">
-                Advanced Parameters
-              </div>
+            <details className="collapse bg-base-200">
+              <summary className="collapse-title text-xl font-medium">Parameters</summary>
               <div className="collapse-content">
-                <p>hello</p>
+                {/* <form onSubmit={handleSubmit}> */}
+                  <div>
+                    <p>Foundation Model</p>
+                    <select
+                      className="select select-bordered w-full max-w-xs"
+                      value={selectedModel}
+                      onChange={handleModelChange}
+                      name="selectedModel" // Add name attribute
+                    >
+                      <option disabled selected> {bridgeData?.configuration?.model || "select model"} </option>
+                      {modelData && modelData.map((item) => (<option key={item} value={item}>{item}</option>))}
+                    </select>
+                  </div>
+
+                  <div>
+                    {modelInfo && Object.keys(modelInfo).map((key) => (
+                      <div className="flex flex-col gap-5" key={key}>
+                        <div className="flex justify-between">
+                          <p>{key}</p>
+                          <p>{typeof cloneModelInfo[key]?.default === 'object' ? JSON.stringify(cloneModelInfo[key]?.default) : cloneModelInfo[key]?.default}</p>
+                        </div>
+                        {cloneModelInfo[key]?.field === "slider" ?
+                          <input
+                            id={key} // Add this id attribute
+                            type="range"
+                            min={cloneModelInfo[key]?.min}
+                            // onMouseUp={(e)=> console.log("")}
+                            max={cloneModelInfo[key]?.max}
+                            step={cloneModelInfo[key]?.step}
+                            value={cloneModelInfo[key]?.default}
+                            onChange={(e) => handleInputChange(e, key)}
+                            className="range range-xs"
+                            name={key} // Add name attribute
+                          />
+                          : cloneModelInfo[key]?.field === 'text' || 'drop' ?
+                            <input
+                              type="text"
+                              required={cloneModelInfo[key]?.level === 1 ? true : false}
+                              value={typeof cloneModelInfo[key]?.default === 'object' ? JSON.stringify(cloneModelInfo[key]?.default) : cloneModelInfo[key]?.default}
+                              onChange={(e) => handleInputChange(e, key)}
+                              className="input input-bordered"
+                              name={key} // Add name attribute
+                            /> : "hello"
+                        }
+                      </div>
+                    ))}
+                  </div>
+                  <button onClick={handleSubmit}>Submit</button>
+                {/* </form> */}
               </div>
-            </div>
-
+            </details>
           </div>
-
         </div>
       </div>
-      {/* <button onClick={()=> dispatch(getModelAction())}>get Models</button> */}
-      <button onClick={() => dispatch(dryRunAction())}>Dry Run </button>
     </div>
   )
 }
 
+export default Protected(Page)

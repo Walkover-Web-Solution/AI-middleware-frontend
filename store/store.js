@@ -3,6 +3,8 @@ import  bridgeReducer  from "./reducer/bridgeReducer";
 import  modelReducer  from "./reducer/modelReducer";
 import  historyReducer  from "./reducer/historyReducer";
 import  dryRunReducer  from "./reducer/dryRunReducer";
+import userDetailsReducer from "./reducer/userDetailsReducer"
+import authDataReducer from "./reducer/authkeyReducer"
 
 
 
@@ -12,6 +14,8 @@ export const store = configureStore({
         bridgeReducer ,
         modelReducer ,
         historyReducer, 
-        dryRunReducer
+        dryRunReducer ,
+        userDetailsReducer ,
+        authDataReducer
     },
 })

@@ -10,7 +10,7 @@ const Wrapper = ({ children }) => {
   return (
     <>
       <Provider store={store}>
-        <div className="w-full h-screen relative overflow-hidden">
+        <div className="w-full h-svh relative overflow-hidden">
           {children}
         </div>
       </Provider>

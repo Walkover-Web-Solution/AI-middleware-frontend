@@ -1,9 +1,11 @@
 "use client"
 
-import axios from "axios"
+import axios from "@/utils/interceptor"
 
 
-const URL = process.env.NEXT_PUBLIC_SERVER_URL
+
+const URL = process.env.SERVER_URL
+const PROXY_URL = process.env.PROXY_URL
 
 
 export const getSingleModels = async () => {
@@ -20,7 +22,7 @@ export const getSingleModels = async () => {
 
 export  const getSingleBridge = async (bridgeId) => {
     try {
-      const response  = await axios.get(`http://localhost:7072/api/v1/config/getbridges/${bridgeId}`)
+      const response  = await axios.get(`${URL}/v1/config/getbridges/${bridgeId}`)
       return response
     } catch (error) {
       console.error(error)
@@ -81,6 +83,58 @@ export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) 
     try {
         const dryRun = await axios.post(`${URL}/api/v1/model/playground/chat/completion` , dataToSend) 
         return dryRun
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+
+
+
+
+
+  // api keys api 
+
+  export const userdetails = async() => {
+    try{
+      const details = await axios.get(`${PROXY_URL}/api/c/getCompanies`)
+      return details
+    }
+    catch(error)
+    {
+      console.error(error)
+    }
+  }
+
+  export const logout = async()=> {
+    try{
+ await axois.delete(`${PROXY_URL}/{featureId}/deleteCCompany/{cCompanyId}`)
+
+    }catch{
+      console.error("problem in logout ")
+    }
+  }
+
+  export const allAuthKey = async()=> {
+    try {
+      
+      const response = await axios(`${PROXY_URL}/api/c/authkey`)
+      return response?.data?.data
+    } catch (error) {
+      console.error(error)
+    }
+  } 
+
+ export const logoutUserFromMsg91 = async (headers) => {
+    const User = await axios.delete(`${PROXY_URL}/api/c/logout`, headers)
+    return User
+  }
+
+  export const createAuthKey = async (dataToSend) => {
+    console.log(dataToSend)
+    try {
+      await axios.post(`${PROXY_URL}/api/c/authkey` , dataToSend)
+
     } catch (error) {
       console.error(error)
     }

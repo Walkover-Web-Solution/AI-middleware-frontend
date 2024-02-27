@@ -7,7 +7,7 @@ const Protected = (WrappedComponent) => {
   return (props) => {
     const router  = useRouter()
 
-    if (!localStorage.getItem("proxy_auth_token")) {
+    if (!localStorage?.getItem("proxy_auth_token")) {
       router.replace('/');
       return null; 
     }

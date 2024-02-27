@@ -52,7 +52,7 @@ function page ({params}) {
 //   }
 // }
   return (
-    <div>
+    <div style={{width : "100vw" , height : "100vh"}} className=' flex justify-center items-center'>
        <div id='870623l170791725365ccbfc587143' />
    </div>
   )

@@ -5,7 +5,7 @@ import axios from "@/utils/interceptor";
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   try {
     const data = await axios.get(`http://localhost:7072/api/v1/config/getbridges/${id}`);
-    dispatch(fetchSingleBridgeReducer(data.data.bridges));
+    dispatch(fetchSingleBridgeReducer(data.data));
   } catch (error) {
     console.error(error);
   }
@@ -35,7 +35,7 @@ export const getAllBridgesAction = () => async (dispatch, getState) => {
   try {
     const response = await axios.get(`http://localhost:7072/api/v1/config/getbridges/all` ,   );
     // const response = await getAllBridges();
-    console.log(response, "response")
+    // console.log(response, "response")
     dispatch(fetchAllBridgeReducer(response.data.bridges));
   } catch (error) {
     console.error(error);
