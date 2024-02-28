@@ -33,7 +33,7 @@ export  const getSingleBridge = async (bridgeId) => {
 
   export  const createBridge = async (dataToSend) => {
     try {
-         await axios.post(`${URL}/api/v1/config/createbridges` , dataToSend) 
+        return await axios.post(`${URL}/api/v1/config/createbridges` , dataToSend) 
     } catch (error) {
       console.error(error)
     }

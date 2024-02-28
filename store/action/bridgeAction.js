@@ -1,6 +1,7 @@
-import { getAllBridges, getSingleBridge } from "@/api";
+import { createBridge, getAllBridges, getSingleBridge } from "@/api";
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer } from "../reducer/bridgeReducer";
 import axios from "@/utils/interceptor";
+import { useRouter } from "next/navigation";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
@@ -12,21 +13,13 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   }
 };
 
-export const createBridgeAction = () => async (dispatch, getState) => {
+export const createBridgeAction = (dataToSend , onSuccess) => async (dispatch, getState) => {
+  
   try {
-    const dataToSend = {
-      "configuration": {
-        "model": "gpt-3.5-turbo",
-        "name": "bridg12",
-        "service": "Openai",
-        "temperature": 1,
-        "prompt": { "system": "hey" },
-        "type": "chat"
-      },
-      "org_id": "124dfgh67ghj"
-    }
-    const data = await axios.post(`http://localhost:7072/api/v1/config/createbridges`, dataToSend);
-    dispatch(createBridgeReducer(data.data.bridges));
+    const data = await createBridge(dataToSend);
+    onSuccess(data)
+    console.log(data , "data")
+    dispatch(createBridgeReducer(data));
   } catch (error) {
     console.error(error);
   }

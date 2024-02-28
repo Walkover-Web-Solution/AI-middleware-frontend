@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { useRouter } from "next/navigation";
 
 const initialState = {
  allBridgesMap : {} ,
@@ -7,6 +8,7 @@ const initialState = {
 };
 
 export const bridgeReducer = createSlice({
+  
   name: "Bridge",
   initialState,
   reducers: {
@@ -27,6 +29,7 @@ export const bridgeReducer = createSlice({
     } ,
 
   createBridgeReducer : (state, action) => {
+    return action.payload._id
       // state.allBridges = [...state.allBridges , action.payload] 
       // state.singleBridgeData = action.payload
     },
