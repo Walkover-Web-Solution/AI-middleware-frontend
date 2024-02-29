@@ -1,6 +1,7 @@
 "use client"
 
 import axios from "@/utils/interceptor"
+import { toast } from "react-toastify";
 
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -54,6 +55,7 @@ export  const getSingleBridge = async (bridgeId) => {
 export  const updateBridge = async ( {bridgeId , dataToSend}) => {
     try {
          await axios.post(`${URL}/api/v1/config/updatebridges/${bridgeId}` , dataToSend) 
+         toast.success("bridge updated successfully")
     } catch (error) {
       console.error(error)
     }

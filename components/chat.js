@@ -119,7 +119,7 @@ function Chat({ dataToSend , params}) {
 
   const UpdateBridge = async()=> {
 
-      await updateBridge( {bridgeId :  params.id , dataToSend :  localDataToSend.configuration} )
+      await updateBridge( {bridgeId :  params.id , dataToSend :  localDataToSend.configuration})
   }
 
   return (
