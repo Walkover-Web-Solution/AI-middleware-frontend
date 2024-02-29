@@ -80,10 +80,15 @@ export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) 
     }
   }
 
-  export const dryRun = async ( {dataToSend}) => {
+  export const dryRun = async (localDataToSend) => {
+
     try {
-        const dryRun = await axios.post(`${URL}/api/v1/model/playground/chat/completion` , dataToSend) 
-        return dryRun
+      let dryRun
+      if(localDataToSend.configuration.type === "chat") dryRun = await axios.post(`${URL}/api/v1/model/playground/chat/completion` , localDataToSend) 
+      if(localDataToSend.configuration.type === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion` , localDataToSend) 
+      if(localDataToSend.configuration.type === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings` , localDataToSend) 
+      
+        return dryRun.data
     } catch (error) {
       console.error(error)
     }

@@ -62,8 +62,8 @@ function Home() {
         <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
         <ul className="menu p-4 w-50   min-h-full bg-base-200 text-base-content">
           {/* Sidebar content here */}
-          <li><button className={path === "/bridges" ? "btn-active" : ""} onClick={()=> router.replace("/bridges")} >Bridges </button></li>
-          <li><button className={path === "/apikey" ? "btn-active" : ""} onClick={()=> router.replace("/apikey")} >Api key</button></li>
+          <li><button className={path === "/bridges" ? "btn-active" : ""} onClick={()=> router.push("/bridges")} >Bridges </button></li>
+          <li><button className={path === "/apikey" ? "btn-active" : ""} onClick={()=> router.push("/apikey")} >Api key</button></li>
         </ul>
 
       </div>

@@ -18,7 +18,6 @@ export const createBridgeAction = (dataToSend , onSuccess) => async (dispatch, g
   try {
     const data = await createBridge(dataToSend);
     onSuccess(data)
-    console.log(data , "data")
     dispatch(createBridgeReducer(data));
   } catch (error) {
     console.error(error);

@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 function CreateNewBridge() {
     const [selectedService, setSelectedService] = useState('');
     const [selectedModel, setSelectedModel] = useState("");
+    const [seletedType , setSelectedType] = useState("");
     const dispatch = useDispatch()
     const route = useRouter()
 
@@ -17,21 +18,20 @@ function CreateNewBridge() {
 
     const handleModel = (e) => {
         setSelectedModel(e.target.value)
+        setSelectedType(e.target.selectedOptions[0].parentNode.label)
     }
 
     const createBridgeHandler = (name) => {
-        if (name.length > 0 && selectedModel && selectedModel) {
+        if (name.length > 0 && selectedModel && selectedModel && seletedType) {
             const dataToSend = {
                 "configuration": {
                     "model": selectedModel,
-                    "temperature": 1,
                     "service": selectedService,
                     "name": name,
-                    "type": "embedding"
+                    "type": seletedType
                 }
             }
             dispatch(createBridgeAction(dataToSend, (data) => {
-                console.log(data)
                 route.replace(`/configure/${data.data.bridge._id}`);
             }));
             document.getElementById('my_modal_1').close()

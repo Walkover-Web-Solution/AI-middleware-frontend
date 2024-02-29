@@ -2,7 +2,7 @@ export const modelInfo = {
     openai: {
         "gpt-3.5-turbo": {
             configuration: {
-                "model": { field: "drop", default: "gpt-3.5-turbo", "level": 1 },
+                "model": { field: "dropdown", default: "gpt-3.5-turbo", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
@@ -17,7 +17,7 @@ export const modelInfo = {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
-                asiistant:"choices[0].message",
+                assistant: "choices[0].message",
                 id: "id"
             },
 
@@ -57,25 +57,29 @@ export const modelInfo = {
                 }
             }
         },
-        "gpt_3_5_turbo_0613": {
+
+        "gpt-3.5-turbo-0613": {
             configuration: {
-                "model": { field: "drop", default: "gpt-3.5-turbo-0613", "level": 1 },
+                "model": { field: "dropdown", default: "gpt-3.5-turbo-0613", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
-                "logprobs": { field: "boolean", default: false, level: 0},
+                "logprobs": { field: "boolean", default: false, level: 0 },
                 "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
-                "stream": { field: "boolean", default: false, level: 0}
+                "stream": { field: "boolean", default: false, level: 0 }
             },
+
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
+
             inputConfig: {
                 system: {
                     "default": {
@@ -113,9 +117,10 @@ export const modelInfo = {
                 }
             }
         },
+
         "gpt-3.5-turbo-0125": {
-            configuration : {
-                "model": { field: "drop", default: "gpt-3.5-turbo-0125", "level": 1 },
+            configuration: {
+                "model": { field: "dropdown", default: "gpt-3.5-turbo-0125", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
@@ -125,17 +130,19 @@ export const modelInfo = {
                 "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0 },
-                "tools": { field: "array", level: 0, default: []},
+                "tools": { field: "array", level: 0, default: [] },
                 "tool_choice": { field: "text", default: "auto", level: 0 },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
-            
+
             inputConfig: {
                 system: {
                     "default": {
@@ -173,9 +180,10 @@ export const modelInfo = {
                 }
             }
         },
+
         "gpt-3.5-turbo-0301": {
-            configuration : {
-                "model": { field: "drop", default: "gpt-3.5-turbo-0301", "level": 1 },
+            configuration: {
+                "model": { field: "dropdown", default: "gpt-3.5-turbo-0301", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
@@ -184,18 +192,21 @@ export const modelInfo = {
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
-                "stream": { field: "boolean", default: false, level: 0},
-                "tools": { field: "array", level: 0, default: [],  },
-                "tool_choice": { field: "text", default: "auto", level: 0,  },
+                "stream": { field: "boolean", default: false, level: 0 },
+                "tools": { field: "array", level: 0, default: [], },
+                "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
-            inputConfig : {
+
+            inputConfig: {
                 system: {
                     "default": {
                         "role": "system",
@@ -203,9 +214,9 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
+
                 user: {
                     "default": {
                         "role": "user",
@@ -214,7 +225,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -233,51 +244,53 @@ export const modelInfo = {
             }
         },
         "gpt-3.5-turbo-1106": {
-            configuration : {
-                "model": { field: "drop", default: "gpt-3.5-turbo-1106", "level": 1 },
+            configuration: {
+                "model": { field: "dropdown", default: "gpt-3.5-turbo-1106", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
                 "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                "n": { field: "number", default: 1,  level: 0 },
+                "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0, },
-                "tools": { field: "array", level: 0, default: [],  },
-                "tool_choice": { field: "string", default: "auto", level: 0,  },
+                "tools": { field: "array", level: 0, default: [], },
+                "tool_choice": { field: "string", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-    
-            outputConfig : {
+
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
 
-            inputConfig : {
-            system: {
-                "default": {
-                    "role": "system",
-                    "content": ""
+            inputConfig: {
+                system: {
+                    "default": {
+                        "role": "system",
+                        "content": ""
+                    },
+                    "contentKey": "content",
+                    "type": "json",
+
                 },
-                "contentKey": "content",
-                "type": "json",
 
-            },
-
-            user: {
-                "default": {
-                    "role": "user",
-                    "content": ""
+                user: {
+                    "default": {
+                        "role": "user",
+                        "content": ""
+                    },
+                    "contentKey": "content",
+                    "type": "json",
                 },
-                "contentKey": "content",
-                "type": "json",
-            },
 
-            rawData: {
-                "default": `
+                rawData: {
+                    "default": `
                 {
                     "role": "system",
                     "content": "You are a helpful assistant."
@@ -290,34 +303,37 @@ export const modelInfo = {
                     "role": "assistant",
                     "content": "Hello! How can I assist you today?"
                 }`
-            }
+                }
             }
         },
+
         "gpt-3.5-turbo-16k": {
-            configuration : {
-                "model": { field: "drop", default: "gpt-3.5-turbo-16k", "level": 1 },
+            configuration: {
+                "model": { field: "dropdown", default: "gpt-3.5-turbo-16k", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
                 "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                "n": { field: "number", default: 1,  level: 0 },
+                "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0, },
-                "tools": { field: "array", level: 0, default: [],  },
-                "tool_choice": { field: "text", default: "auto", level: 0,  },
+                "tools": { field: "array", level: 0, default: [], },
+                "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-    
-            outputConfig : {
+
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
-    
-            inputConfig : {
+
+            inputConfig: {
                 system: {
                     "default": {
                         "role": "system",
@@ -325,9 +341,9 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
+
                 user: {
                     "default": {
                         "role": "user",
@@ -336,7 +352,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -354,31 +370,34 @@ export const modelInfo = {
                 }
             }
         },
+
         "gpt-3.5-turbo-16k-0613": {
-            configuration : {
-                "model": { field: "drop", default: "gpt-3.5-turbo-16k-0613", "level": 1 },
+            configuration: {
+                "model": { field: "dropdown", default: "gpt-3.5-turbo-16k-0613", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
                 "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                "n": { field: "number", default: 1,  level: 0 },
+                "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0, },
-                "tools": { field: "array", level: 0, default: [],  },
-                "tool_choice": { field: "text", default: "auto", level: 0,  },
+                "tools": { field: "array", level: 0, default: [], },
+                "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-    
-            outputConfig : {
+
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
-    
-            inputConfig : {
+
+            inputConfig: {
                 system: {
                     "default": {
                         "role": "system",
@@ -386,9 +405,9 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
+
                 user: {
                     "default": {
                         "role": "user",
@@ -397,7 +416,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -416,28 +435,30 @@ export const modelInfo = {
             }
         },
         "gpt-4": {
-            configuration : {
-                "model": { field: "drop", default: "gpt-4", "level": 1 },
+            configuration: {
+                "model": { field: "dropdown", default: "gpt-4", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
                 "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                "n": { field: "number", default: 1,  level: 0 },
+                "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0, },
-                "tools": { field: "array", level: 0, default: [],  },
-                "tool_choice": { field: "text", default: "auto", level: 0,  },
+                "tools": { field: "array", level: 0, default: [], },
+                "tool_choice": { field: "text", default: "auto", level: 0, },
             },
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
-    
-            inputConfig : {
+
+            inputConfig: {
                 system: {
                     "default": {
                         "role": "system",
@@ -445,9 +466,9 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
+
                 user: {
                     "default": {
                         "role": "user",
@@ -456,7 +477,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -475,28 +496,30 @@ export const modelInfo = {
             }
         },
         "gpt-4-0613": {
-            configuration : {
-                "model": { field: "drop", default: "gpt-4-0613", "level": 1 },
+            configuration: {
+                "model": { field: "dropdown", default: "gpt-4-0613", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
                 "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                "n": { field: "number", default: 1,  level: 0 },
+                "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0, },
-                "tools": { field: "array", level: 0, default: [],  },
-                "tool_choice": { field: "text", default: "auto", level: 0,  },
+                "tools": { field: "array", level: 0, default: [], },
+                "tool_choice": { field: "text", default: "auto", level: 0, },
             },
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
-    
-            inputConfig : {
+
+            inputConfig: {
                 system: {
                     "default": {
                         "role": "system",
@@ -504,9 +527,9 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
+
                 user: {
                     "default": {
                         "role": "user",
@@ -515,7 +538,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -534,31 +557,33 @@ export const modelInfo = {
             }
         },
         "gpt-4-1106-preview": {
-            configuration : {
-                "model": { field: "drop", default: "gpt-4-1106-preview", "level": 1 },
+            configuration: {
+                "model": { field: "dropdown", default: "gpt-4-1106-preview", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
                 "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                "n": { field: "number", default: 1,  level: 0 },
+                "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0, },
-                "tools": { field: "array", level: 0, default: [],  },
-                "tool_choice": { field: "text", default: "auto", level: 0,  },
+                "tools": { field: "array", level: 0, default: [], },
+                "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
 
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
-    
-    
-             inputConfig : {
+
+
+            inputConfig: {
                 system: {
                     "default": {
                         "role": "system",
@@ -566,9 +591,9 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
+
                 user: {
                     "default": {
                         "role": "user",
@@ -577,7 +602,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -593,33 +618,35 @@ export const modelInfo = {
                         "content": "Hello! How can I assist you today?"
                     }`
                 }
-             }
+            }
         },
         "gpt-4-turbo-preview": {
-            configuration : {
-                "model": { field: "drop", default: "gpt-4-turbo-preview", "level": 1 },
+            configuration: {
+                "model": { field: "dropdown", default: "gpt-4-turbo-preview", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
                 "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                "n": { field: "number", default: 1,  level: 0 },
+                "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0, },
-                "tools": { field: "array", level: 0, default: [],  },
-                "tool_choice": { field: "text", default: "auto", level: 0,  },
+                "tools": { field: "array", level: 0, default: [], },
+                "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
-    
 
-            inputConfig : {
+
+            inputConfig: {
                 system: {
                     "default": {
                         "role": "system",
@@ -627,9 +654,9 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
+
                 user: {
                     "default": {
                         "role": "user",
@@ -638,7 +665,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -657,30 +684,31 @@ export const modelInfo = {
             }
         },
         "gpt-4-0125-preview": {
-            configuration : {
-                "model": { field: "drop", default: "gpt-4-0125-preview", "level": 1 },
+            configuration: {
+                "model": { field: "dropdown", default: "gpt-4-0125-preview", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
                 "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                "n": { field: "number", default: 1,  level: 0 },
+                "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0, },
-                "tools": { field: "array", level: 0, default: [],  },
-                "tool_choice": { field: "text", default: "auto", level: 0,  },
+                "tools": { field: "array", level: 0, default: [], },
+                "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "text": "json_object" }, level: 0 }
             },
-    
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
-    
-            inputConfig : {
+
+            inputConfig: {
                 system: {
                     "default": {
                         "role": "system",
@@ -688,10 +716,10 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
-                user:{
+
+                user: {
                     "default": {
                         "role": "user",
                         "content": ""
@@ -699,7 +727,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -717,19 +745,20 @@ export const modelInfo = {
                 }
             }
         },
+
         "text-embedding-3-large": {
-            configuration : {
-                "model": ["text-embedding-3-large", 1],
-                "encoding_format": ["float", 2],
-                "dimensions": [null, 0],
+            configuration: {
+                "model": { field: "dropdown", default: "text-embedding-3-large", "level": 1 },
+                "encoding_format": { field: "dropdown", values: ['float', 'base64'], default: "float", level: 2 },
+                "dimensions": {field: "number" ,level: 0}
             },
-    
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", total_tokens: "usage.total_tokens" }],
                 message: "data[0].embedding"
             },
-    
-            inputConfig : {
+
+            inputConfig: {
                 input: {
                     "input": "",
                     "contentKey": "input",
@@ -738,18 +767,18 @@ export const modelInfo = {
             }
         },
         "text-embedding-3-small": {
-            configuration : {
-                "model": ["text-embedding-3-small", 1],
-                "encoding_format": ["float", 2],
-                "dimensions": [null, 0],
+            configuration: {
+                "model": { field: "dropdown", default: "text-embedding-3-large", "level": 1 },
+                "encoding_format": { field: "dropdown", values: ['float', 'base64'], default: "float", level: 2 },
+                "dimensions": {field: "number" ,level: 0}
             },
-    
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", total_tokens: "usage.total_tokens" }],
                 message: "data[0].embedding"
             },
-    
-            inputConfig : {
+
+            inputConfig: {
                 input: {
                     "input": "",
                     "contentKey": "input",
@@ -758,18 +787,18 @@ export const modelInfo = {
             }
         },
         "text-embedding-ada-002": {
-            configuration : {
-                "model": ["text-embedding-ada-002", 1],
-                "encoding_format": ["float", 2]
+            configuration: {
+                "model": { field: "dropdown", default: "text-embedding-3-large", "level": 1 },
+                "encoding_format": { field: "dropdown", values: ['float', 'base64'], default: "float", level: 2 },
                 // dimensions is fixed here, 1536 will be the size of the vector
             },
-    
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", total_tokens: "usage.total_tokens" }],
                 message: "data[0].embedding"
             },
-            
-            inputConfig : {
+
+            inputConfig: {
                 input: {
                     "input": "",
                     "contentKey": "input",
@@ -778,31 +807,25 @@ export const modelInfo = {
             }
         },
         "gpt-3.5-turbo-instruct": {
-            configuration : {
-                "model": ["gpt-3.5-turbo-instruct", 1],
-                "best_of": [1, 2],
-                "echo": [false, 2],
-                "frequency_penalty":[0, 2],
-                "logit_bias": [null, 0],
-                "logprobs": [null, 0],
-                "max_tokens": [16, 2],
-                "n": [1, 2],
-                "presence_penalty": [0, 2],
-                "seed": [null, 0],
-                "stop": [null, 2],
-                "stream": [null, 2],
-                "suffix": [null, 2],
-                "temperature": [1, 2],
-                "top_p": [1, 2],
+            configuration: {
+                "model": {field:"dropdown", default: "gpt-3.5-turbo-instruct", level: 1},
+                "temperature": {field: "slider", default: 1, min: 0, max: 2, step: 0.01, level: 2},
+                "max_tokens": {field: "slider", default: 256, min: 1, max: 4096, step: 1, level: 2},
+                "stop": {field: "array", default: "", level: 0 },
+                "top_p": {field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 2},
+                "frequency_penalty": {field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2},
+                "presence_penalty": {field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2},
+                "best_of": {field: "slider", min: 1, max: 20, step: 1, default: 1, level: 2}
             },
-    
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].text",
+                assistant:"choices",
                 id: "id"
             },
-    
-            inputConfig : {
+
+            inputConfig: {
                 prompt: {
                     "prompt": "",
                     "contentKey": "prompt",
@@ -813,102 +836,111 @@ export const modelInfo = {
     },
     google:
     {
-        "gemini-1.0-pro": {
-            configuration : {
-                "model": { field: "drop", default: "gemini-1.0-pro", "level": 1 },
-                "temperature": [0, 9, 2],
-                "topK": ["none", 0],
-                "topP": [1.0, 2],
-                "maxOutputTokens": [8192, 2],
-                "stopSequences": ["none", 0]
+        "gemini-pro": {
+            configuration: {
+                "model": { field: "dropdown", default: "gemini-pro", level: 1 },
+                "temperature": {field: "number", default: 0, level: 2},
+                "topK": {field: "slider", min: 1, max: 40, step: 1, default: "none", level: 0},
+                "topP": {field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 0},
+                "maxOutputTokens": {field: "slider", min: 1, max: 8192, default: 8192, step: 1, level: 2},
+                "stopSequences": {field: "array", default:"", level: 0}
             },
-    
-            outputConfig : {
+
+            outputConfig: {
                 usage: [],
                 message: "candidates[0].content.parts[0].text",
+                assistant: "candidates[0].content",
                 role: "model"
             },
-    
-            inputConfig : {
-                user: {
-                    "default": {
-                        "role": "user",
-                        "parts": [
-                            {
-                                "text": ""
-                            }
-                        ]
-                    },
-                    "contentKey": "parts[0].text",
-                    "type": "json"
-                },
-    
-                model: {
-                    "default": {
-                        "role": "model",
-                        "parts": [
-                            {
-                                "text": ""
-                            }
-                        ]
-                    },
-                    "contentKey": "parts[0].text",
-                    "type": "json"
-    
-                },
-    
-                rawData: {
-                    "default": `
-                    {
-                        "role": "user",
-                        "parts": [
-                          {
-                            "text": "Hello"
-                          }
-                        ]
-                      },
-                      {
-                        "role": "model",
-                        "parts": [
-                          {
-                            "text": "Greetings! How may I assist you today?"
-                          }
-                        ]
-                    }`
+
+            // inputConfig: {
+                // user: {
+                //     "default": {
+                //         "role": "user",
+                //         "parts": [
+                //             {
+                //                 "text": ""
+                //             }
+                //         ]
+                //     },
+                //     "contentKey": "parts[0].text",
+                //     "type": "json"
+                // },
+
+                // model: {
+                //     "default": {
+                //         "role": "model",
+                //         "parts": [
+                //             {
+                //                 "text": ""
+                //             }
+                //         ]
+                //     },
+                //     "contentKey": "parts[0].text",
+                //     "type": "json"
+
+                // },
+
+                // rawData: {
+                //     "default": `
+                //     {
+                //         "role": "user",
+                //         "parts": [
+                //           {
+                //             "text": "Hello"
+                //           }
+                //         ]
+                //       },
+                //       {
+                //         "role": "model",
+                //         "parts": [
+                //           {
+                //             "text": "Greetings! How may I assist you today?"
+                //           }
+                //         ]
+                //     }`
+                // }
+            // }
+            inputConfig: {
+                prompt: {
+                    "prompt": "",
+                    "contentKey": "prompt",
+                    "type": "text",
                 }
-            }
+            }   
         }
     },
     mistral:
     {
         "mistral-tiny": {
-            configuration : {
+            configuration: {
                 "model": { field: "dropdown", default: "mistral-tiny", level: 1 },
                 "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.7, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
-                "max_tokens": { field: "number",  default: null, level: 2 },
+                "max_tokens": { field: "number", default: null, level: 2 },
                 "stream": { field: "dropdown", value: ["true", "false", "null"], default: false, level: 2 },
-                "safe_prompt": { field: "boolean",  default: false, level: 2 },
-                "random_seed": { field: "number",  default: null, level: 2 },
+                "safe_prompt": { field: "boolean", default: false, level: 2 },
+                "random_seed": { field: "number", default: null, level: 2 },
             },
-    
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
+                assistant: "choices",
                 id: "id"
             },
-    
-            inputConfig : {
-                system : {
+
+            inputConfig: {
+                system: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
+
                 user: {
                     "default": {
                         "role": "user",
@@ -917,7 +949,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -937,23 +969,24 @@ export const modelInfo = {
         },
 
         "mistral-small": {
-            configuration : {
+            configuration: {
                 "model": { field: "dropdown", default: "mistral-small", level: 1 },
                 "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.7, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
-                "max_tokens": { field: "number",  default: "null", level: 2 },
+                "max_tokens": { field: "number", default: "null", level: 2 },
                 "stream": { field: "dropdown", value: ["true", "false", "null"], default: false, level: 2 },
-                "safe_prompt": { field: "boolean",  default: false, level: 2 },
-                "random_seed": { field: "number",  default: null, level: 2 },
+                "safe_prompt": { field: "boolean", default: false, level: 2 },
+                "random_seed": { field: "number", default: null, level: 2 },
             },
-    
-            outputConfig : {
+
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
+                assistant: "choices",
                 id: "id"
             },
-    
-            inputConfig : {
+
+            inputConfig: {
                 system: {
                     "default": {
                         "role": "system",
@@ -961,9 +994,9 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
+
                 user: {
                     "default": {
                         "role": "user",
@@ -972,7 +1005,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -992,7 +1025,7 @@ export const modelInfo = {
         },
 
         "mistral-medium": {
-            configuration : {
+            configuration: {
                 "model": { field: "dropdown", default: "mistral-medium", level: 1 },
                 "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.3, level: 2 },
                 "prompt_truncation": { field: "dropdown", values: ['AUTO', 'OFF'], default: "AUTO", level: 2 },
@@ -1000,14 +1033,15 @@ export const modelInfo = {
                 "connectors": { field: "array", default: [{ "id": "web-search" }], level: 0 },
                 "documents": { field: "array", default: [], level: 0 }
             },
-    
-            outputConfig : {
+            
+            outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
+                assistant: "choices",
                 id: "id"
             },
-    
-            inputConfig : {
+
+            inputConfig: {
                 system: {
                     "default": {
                         "role": "system",
@@ -1015,9 +1049,9 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-    
+
                 },
-    
+
                 user: {
                     "default": {
                         "role": "user",
@@ -1026,7 +1060,7 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
                 },
-    
+
                 rawData: {
                     "default": `
                     {
@@ -1049,7 +1083,7 @@ export const modelInfo = {
     {
         Generate: {
             "c4ai-aya": {
-                configuration : {
+                configuration: {
                     "model": { field: "dropdown", default: "c4ai-aya", level: 1 },
                     "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.9, level: 2 },
                     "max_tokens": { field: "slider", min: 0, max: 4096, step: 1, default: 300, level: 2 },
@@ -1057,14 +1091,15 @@ export const modelInfo = {
                     "stop_sequences": { field: "array", default: [], level: 0 },
                     "return_likelihoods": { field: "dropdown", values: ['GENERATION', 'NONE'], default: "NONE", level: 2 }
                 },
-        
-                outputConfig : {
+
+                outputConfig: {
                     usage: [{ input_tokens: "meta.billed_units.input_tokens", output_tokens: "meta.billed_units.output_tokens" }],
                     message: "generations[0].text",
+                    assistant: "generations",
                     id: "id"
                 },
-        
-                inputConfig : {
+
+                inputConfig: {
                     prompt: {
                         "prompt": "",
                         "contentKey": "prompt",
@@ -1074,7 +1109,7 @@ export const modelInfo = {
             },
 
             "command": {
-                configuration : {
+                configuration: {
                     "model": { field: "dropdown", default: "command", level: 1 },
                     "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.9, level: 2 },
                     "max_tokens": { field: "slider", min: 0, max: 4096, step: 1, default: 300, level: 2 },
@@ -1082,14 +1117,15 @@ export const modelInfo = {
                     "stop_sequences": { field: "array", default: [], level: 0 },
                     "return_likelihoods": { field: "dropdown", values: ['GENERATION', 'NONE'], default: "NONE", level: 2 }
                 },
-        
-                outputConfig : {
+
+                outputConfig: {
                     usage: [{ input_tokens: "meta.billed_units.input_tokens", output_tokens: "meta.billed_units.output_tokens" }],
                     message: "generations[0].text",
+                    assistant: "generations",
                     id: "id"
                 },
 
-                inputConfig : {
+                inputConfig: {
                     prompt: {
                         "prompt": "",
                         "contentKey": "prompt",
@@ -1098,7 +1134,7 @@ export const modelInfo = {
                 }
             },
             "command-light": {
-                configuration : {
+                configuration: {
                     "model": { field: "dropdown", default: "command-light", level: 1 },
                     "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.9, level: 2 },
                     "max_tokens": { field: "slider", min: 0, max: 4096, step: 1, default: 300, level: 2 },
@@ -1106,14 +1142,15 @@ export const modelInfo = {
                     "stop_sequences": { field: "array", default: [], level: 0 },
                     "return_likelihoods": { field: "dropdown", values: ['GENERATION', 'NONE'], default: "NONE", level: 2 }
                 },
-        
-                outputConfig : {
+
+                outputConfig: {
                     usage: [{ input_tokens: "meta.billed_units.input_tokens", output_tokens: "meta.billed_units.output_tokens" }],
                     message: "generations[0].text",
+                    assistant: "generations",
                     id: "id"
                 },
-                
-                inputConfig : {
+
+                inputConfig: {
                     prompt: {
                         "prompt": "",
                         "contentKey": "prompt",
@@ -1122,7 +1159,7 @@ export const modelInfo = {
                 }
             },
             "command-light-nightly": {
-                configuration : {
+                configuration: {
                     "model": { field: "dropdown", default: "command-light-nightly", level: 1 },
                     "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.9, level: 2 },
                     "max_tokens": { field: "slider", min: 0, max: 1365, step: 1, default: 100, level: 2 },
@@ -1130,14 +1167,15 @@ export const modelInfo = {
                     "stop_sequences": { field: "array", default: [], level: 0 },
                     "return_likelihoods": { field: "checkbox", default: "NONE", level: 2 }
                 },
-        
-                outputConfig : {
+
+                outputConfig: {
                     usage: [{ prompt_tokens: "token_count.prompt_tokens", completion_tokens: "token_count.response_tokens", total_tokens: "token_count.total_tokens" }],
                     message: "generations[0].text",
+                    assistant: "generations",
                     id: "id"
                 },
-                
-                inputConfig : {
+
+                inputConfig: {
                     prompt: {
                         "prompt": "",
                         "contentKey": "prompt",
@@ -1146,7 +1184,7 @@ export const modelInfo = {
                 }
             },
             "command-nightly": {
-                configuration : {
+                configuration: {
                     "model": { field: "dropdown", default: "command-nightly", level: 1 },
                     "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.9, level: 2 },
                     "max_tokens": { field: "slider", min: 0, max: 1365, step: 1, default: 100, level: 2 },
@@ -1154,14 +1192,15 @@ export const modelInfo = {
                     "stop_sequences": { field: "array", default: [], level: 0 },
                     "return_likelihoods": { field: "checkbox", default: "NONE", level: 2 }
                 },
-        
-                outputConfig : {
+
+                outputConfig: {
                     usage: [{ prompt_tokens: "token_count.prompt_tokens", completion_tokens: "token_count.response_tokens", total_tokens: "token_count.total_tokens" }],
                     message: "generations[0].text",
+                    assistant: "generations",
                     id: "id"
                 },
-                
-                inputConfig : {
+
+                inputConfig: {
                     prompt: {
                         "prompt": "",
                         "contentKey": "prompt",
@@ -1172,7 +1211,7 @@ export const modelInfo = {
         },
         "Chat BETA": {
             "command": {
-                configuration : {
+                configuration: {
                     "model": { field: "dropdown", default: "command", level: 1 },
                     "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.3, level: 2 },
                     "prompt_truncation": { field: "dropdown", values: ['AUTO', 'OFF'], default: "AUTO", level: 2 },
@@ -1180,14 +1219,14 @@ export const modelInfo = {
                     "connectors": { field: "array", default: [{ "id": "web-search" }], level: 0 },
                     "documents": { field: "array", default: [], level: 0 }
                 },
-        
-                outputConfig : {
+
+                outputConfig: {
                     usage: [{ prompt_tokens: "token_count.prompt_tokens", completion_tokens: "token_count.response_tokens", total_tokens: "token_count.total_tokens", billed_tokens: "token_count.billed_tokens" }],
                     message: "text",
                     id: "response_id"
                 },
-        
-                inputConfig : {
+
+                inputConfig: {
                     User: {
                         "default": {
                             "role": "User",
@@ -1195,18 +1234,18 @@ export const modelInfo = {
                         },
                         "contentKey": "message",
                         "type": "json",
-        
+
                     },
-        
+
                     Chatbot: {
                         "default": {
-                            "role": "Chatbot", 
+                            "role": "Chatbot",
                             "message": ""
                         },
                         "contentKey": "message",
                         "type": "json",
                     },
-        
+
                     rawData: {
                         "default": `
                         {   
@@ -1221,7 +1260,7 @@ export const modelInfo = {
                 }
             },
             "command-light": {
-                configuration : {
+                configuration: {
                     "model": { field: "dropdown", default: "command-light", level: 1 },
                     "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.3, level: 2 },
                     "prompt_truncation": { field: "dropdown", values: ['AUTO', 'OFF'], default: "AUTO", level: 2 },
@@ -1229,14 +1268,14 @@ export const modelInfo = {
                     "connectors": { field: "array", default: [{ "id": "web-search" }], level: 0 },
                     "documents": { field: "array", default: [], level: 0 }
                 },
-        
-                outputConfig : {
+
+                outputConfig: {
                     usage: [{ prompt_tokens: "token_count.prompt_tokens", completion_tokens: "token_count.response_tokens", total_tokens: "token_count.total_tokens", billed_tokens: "token_count.billed_tokens" }],
                     message: "text",
                     id: "response_id"
                 },
 
-                inputConfig : {
+                inputConfig: {
                     User: {
                         "default": {
                             "role": "User",
@@ -1244,18 +1283,18 @@ export const modelInfo = {
                         },
                         "contentKey": "message",
                         "type": "json",
-        
+
                     },
-        
+
                     Chatbot: {
                         "default": {
-                            "role": "Chatbot", 
+                            "role": "Chatbot",
                             "message": ""
                         },
                         "contentKey": "message",
                         "type": "json",
                     },
-        
+
                     rawData: {
                         "default": `
                         {   
@@ -1270,7 +1309,7 @@ export const modelInfo = {
                 }
             },
             "command-light-nightly": {
-                configuration : {
+                configuration: {
                     "model": { field: "dropdown", default: "command-light-nightly", level: 1 },
                     "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.3, level: 2 },
                     "prompt_truncation": { field: "dropdown", values: ['AUTO', 'OFF'], default: "AUTO", level: 2 },
@@ -1278,13 +1317,13 @@ export const modelInfo = {
                     "connectors": { field: "array", default: [{ "id": "web-search" }], level: 0 },
                     "documents": { field: "array", default: [], level: 0 }
                 },
-        
-                outputConfig : {
+
+                outputConfig: {
                     usage: [{ prompt_tokens: "token_count.prompt_tokens", completion_tokens: "token_count.response_tokens", total_tokens: "token_count.total_tokens", billed_tokens: "token_count.billed_tokens" }],
                     message: "text",
                     id: "response_id"
                 },
-                inputConfig : {
+                inputConfig: {
                     User: {
                         "default": {
                             "role": "User",
@@ -1292,18 +1331,18 @@ export const modelInfo = {
                         },
                         "contentKey": "message",
                         "type": "json",
-        
+
                     },
-        
+
                     Chatbot: {
                         "default": {
-                            "role": "Chatbot", 
+                            "role": "Chatbot",
                             "message": ""
                         },
                         "contentKey": "message",
                         "type": "json",
                     },
-        
+
                     rawData: {
                         "default": `
                         {   
@@ -1318,7 +1357,7 @@ export const modelInfo = {
                 }
             },
             "command-nightly": {
-                configuration : {
+                configuration: {
                     "model": { field: "dropdown", default: "command-nightly", level: 1 },
                     "temperature": { field: "slider", min: 0, max: 1, step: 0.1, default: 0.3, level: 2 },
                     "prompt_truncation": { field: "dropdown", values: ['AUTO', 'OFF'], default: "AUTO", level: 2 },
@@ -1326,14 +1365,14 @@ export const modelInfo = {
                     "connectors": { field: "array", default: [{ "id": "web-search" }], level: 0 },
                     "documents": { field: "array", default: [], level: 0 }
                 },
-        
-                outputConfig : {
+
+                outputConfig: {
                     usage: [{ prompt_tokens: "token_count.prompt_tokens", completion_tokens: "token_count.response_tokens", total_tokens: "token_count.total_tokens", billed_tokens: "token_count.billed_tokens" }],
                     message: "text",
                     id: "response_id"
                 },
 
-                inputConfig : {
+                inputConfig: {
                     User: {
                         "default": {
                             "role": "User",
@@ -1341,18 +1380,18 @@ export const modelInfo = {
                         },
                         "contentKey": "message",
                         "type": "json",
-        
+
                     },
-        
+
                     Chatbot: {
                         "default": {
-                            "role": "Chatbot", 
+                            "role": "Chatbot",
                             "message": ""
                         },
                         "contentKey": "message",
                         "type": "json",
                     },
-        
+
                     rawData: {
                         "default": `
                         {   
