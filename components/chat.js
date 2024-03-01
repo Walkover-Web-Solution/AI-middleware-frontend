@@ -56,7 +56,7 @@ function Chat({ dataToSend , params}) {
           ...localDataToSend,
           configuration: {
             ...localDataToSend.configuration,
-            user: [data],
+            user: data,
           },
         });
       }
@@ -118,8 +118,8 @@ function Chat({ dataToSend , params}) {
 
 
   const UpdateBridge = async()=> {
+      await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : localDataToSend.configuration , service : localDataToSend.service}})
 
-      await updateBridge( {bridgeId :  params.id , dataToSend :  localDataToSend.configuration} )
   }
 
   return (

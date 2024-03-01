@@ -13,11 +13,10 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   }
 };
 
-export const createBridgeAction = (dataToSend , onSuccess) => async (dispatch, getState) => {
-  
+export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, getState) => {
   try {
     const data = await createBridge(dataToSend);
-    onSuccess(data)
+    onSuccess(data);
     dispatch(createBridgeReducer(data));
   } catch (error) {
     console.error(error);

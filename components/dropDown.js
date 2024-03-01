@@ -178,7 +178,6 @@ const DropdownMenu = ({ params, data }) => {
         setToggle(!toggle)
     }
 
-    console.log(dataToSend, "data to send ")
     const handleInputConfigChanges = (value, key) => {
         // Update the inputConfig state with the new value
         setInputConfig(prevInputConfig => ({
@@ -399,20 +398,6 @@ return (
                                                 className="checkbox"
                                                 name={key} // Add name attribute
                                             />
-                                            // :
-                                            // value.field === "array" ?
-                                            //     <>{value.default.map((element) => {
-                                            //         <input
-                                            //             type="text"
-                                            //             required={value?.level === 1 ? true : false}
-                                            //             value={element}
-                                            //             onChange={(e) => handleInputChange(e, key)}
-                                            //             className="input w-full input-bordered"
-                                            //             name={key} // Add name attribute
-                                            //         />
-                                            //     })
-                                            //     }
-                                            //     </>
                                             :
                                             "this field is under development "}
 

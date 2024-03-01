@@ -16,7 +16,7 @@ module.exports = {
   },
   plugins: [require("daisyui")],
   daisyui: {
-    themes: ["light", "dark", "cupcake" , "corporate" , "wireframe" , "coffee" ],
+    themes: [ "wireframe"],
   },
   // daisyui: {
   //   themes: ["light", "dark", "cupcake" , "corporate" , "wireframe" , "coffee" ], // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]

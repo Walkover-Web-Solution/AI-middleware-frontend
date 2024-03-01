@@ -1,16 +1,23 @@
-"use client"
+// Protected.js
+"use-client"
 
-import { useRouter } from "next/navigation"
-import React from 'react';
- 
+import { useRouter } from "next/navigation";
+import React, { useEffect } from 'react';
+
 const Protected = (WrappedComponent) => {
   return (props) => {
-    const router  = useRouter()
+    const router = useRouter();
 
-    if (!localStorage?.getItem("proxy_auth_token")) {
-      router.replace('/');
-      return null; 
-    }
+    useEffect(() => {
+localStorageGet()
+    }, []);
+
+const localStorageGet = () =>{
+  if (typeof window !== 'undefined' && !localStorage.getItem("proxy_auth_token")) {
+    router.replace('/');
+    return null;
+  }
+}
     return <WrappedComponent {...props} />;
   };
 };
