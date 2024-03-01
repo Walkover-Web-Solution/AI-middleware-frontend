@@ -15,7 +15,7 @@ function page () {
       return ;
     }
       const configuration = {
-        referenceId: '870623l170791725365ccbfc587143',
+        referenceId: '1258584j170929103665e1b61c32c86',
         success: (data) => {
           // get verified token in response
           console.log('success response', data)
