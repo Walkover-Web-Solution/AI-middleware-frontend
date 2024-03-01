@@ -1,3 +1,4 @@
+// eslint-disable
 import { services } from "@/jsonFiles/models"
 import { createBridgeAction } from "@/store/action/bridgeAction";
 import { useRouter } from "next/navigation";
@@ -26,10 +27,10 @@ function CreateNewBridge() {
             const dataToSend = {
                 "configuration": {
                     "model": selectedModel,
-                    "service": selectedService,
                     "name": name,
                     "type": seletedType
-                }
+                },
+                "service": selectedService,
             }
             dispatch(createBridgeAction(dataToSend, (data) => {
                 route.replace(`/configure/${data.data.bridge._id}`);

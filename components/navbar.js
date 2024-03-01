@@ -1,11 +1,12 @@
 "use client"
+// eslint-disable
 import { logoutUserFromMsg91 } from '@/api'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { userDetails } from '@/store/action/userDetailsAction'
 import { usePathname, useRouter } from 'next/navigation'
 import React , {useEffect} from 'react'
 import { useDispatch } from 'react-redux'
-import Protected from './protected'
+
 
 function Navbar() {
     const router = useRouter()

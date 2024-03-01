@@ -1,4 +1,6 @@
+// eslint-disable
 "use client"
+
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'

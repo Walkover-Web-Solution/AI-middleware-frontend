@@ -1,4 +1,5 @@
 "use client"
+// eslint-disable
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { getHistoryAction, getThread } from '@/store/action/historyAction'

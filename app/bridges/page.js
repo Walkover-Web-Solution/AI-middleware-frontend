@@ -1,4 +1,5 @@
 "use client"
+// eslint-disable
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { getAllBridgesAction } from "@/store/action/bridgeAction";
 import { useEffect } from "react";

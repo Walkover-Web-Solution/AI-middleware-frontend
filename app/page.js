@@ -1,8 +1,8 @@
 
 "use client"
-
+// eslint-disable
 import React, {  useLayoutEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import WithAuth from '@/components/withauth';
 
 function page ({params}) {

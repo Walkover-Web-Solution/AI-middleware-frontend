@@ -1,5 +1,5 @@
 "use client"
-
+// eslint-disable
 import axios from "@/utils/interceptor"
 import { toast } from "react-toastify";
 

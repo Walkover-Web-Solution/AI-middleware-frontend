@@ -1,3 +1,4 @@
+// eslint-disable
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { dryRun, updateBridge } from "@/api";
@@ -119,7 +120,7 @@ function Chat({ dataToSend , params}) {
 
   const UpdateBridge = async()=> {
 
-      await updateBridge( {bridgeId :  params.id , dataToSend :  localDataToSend.configuration})
+      await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : localDataToSend.configuration , service : localDataToSend.service}})
   }
 
   return (

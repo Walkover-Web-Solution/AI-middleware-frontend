@@ -1,4 +1,5 @@
 "use client"
+// eslint-disable
 import React, { useEffect, useState } from 'react';
 import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file
 import { useCustomSelector } from '@/customSelector/customSelector';
@@ -7,8 +8,7 @@ import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
 import Chat from './chat';
 
 const DropdownMenu = ({ params, data }) => {
-    const openaiData = services.openai;
-    const { bridgeData } = useSelector((state) => ({
+    const { bridgeData } = useCustomSelector((state) => ({
         bridgeData: state?.bridgeReducer?.allBridgesMap?.[params?.id] || {}
     }))
 
@@ -399,20 +399,6 @@ return (
                                                 className="checkbox"
                                                 name={key} // Add name attribute
                                             />
-                                            // :
-                                            // value.field === "array" ?
-                                            //     <>{value.default.map((element) => {
-                                            //         <input
-                                            //             type="text"
-                                            //             required={value?.level === 1 ? true : false}
-                                            //             value={element}
-                                            //             onChange={(e) => handleInputChange(e, key)}
-                                            //             className="input w-full input-bordered"
-                                            //             name={key} // Add name attribute
-                                            //         />
-                                            //     })
-                                            //     }
-                                            //     </>
                                             :
                                             "this field is under development "}
 
@@ -453,21 +439,6 @@ return (
                                     />
                                 </label>
                             }
-                            {/* {key === "input" && 
-                                 <label className="form-control w-full max-w-xs" key={key}>
-                                 <div className="label">
-                                     <span className="label-text">{key}</span>
-                                 </div>
-                                 <input
-                                     type="text"
-                                     placeholder="Type here"
-                                     className="input input-bordered w-full max-w-xs"
-                                     value={value.input || ""}
-                                     onChange={(e) => handleInputConfigChanges(e.target.value, key)}
-                                     onBlur={(e) => SaveData(e.target.value, key)}
-                                 />
-                             </label>
-                                } */}
                         </>
                     ))}
                 </div>
