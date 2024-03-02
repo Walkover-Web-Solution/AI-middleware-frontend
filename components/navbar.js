@@ -15,7 +15,7 @@ function Navbar() {
 
     useEffect(() => {
         dispatch(userDetails())
-    }, [])
+    }, [path])
     
     const logoutHandler = async () => {
         try {
