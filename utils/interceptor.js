@@ -1,7 +1,7 @@
 import axios from "axios";
 
 axios.interceptors.request.use(
-    async (config) => {
+    async (config) => { 
          if (NEXT_PUBLIC_ENV !== "local")
          {
             config.headers['Proxy_auth_token'] = localStorage.getItem("proxy_auth_token")

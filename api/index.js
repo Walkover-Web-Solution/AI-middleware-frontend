@@ -104,6 +104,7 @@ export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) 
 
   export const userdetails = async() => {
     try{
+      console.log(`${PROXY_URL}/api/c/getCompanies`)
       const details = await axios.get(`${PROXY_URL}/api/c/getCompanies`)
       return details
     }
