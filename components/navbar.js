@@ -15,7 +15,7 @@ function Navbar() {
 
     useEffect(() => {
         dispatch(userDetails())
-    }, [path])
+    }, [])
     
     const logoutHandler = async () => {
         try {
@@ -43,7 +43,7 @@ function Navbar() {
             <button className="btn btn-ghost text-xl">{path.split("/")[1].toUpperCase()}</button>
             <div className="justify-end">
                 <button className="btn">Api Docs</button>
-                {/* <button className="btn" onClick={() => router.replace("/apikey")}>Api Keys</button> */}
+                <button className="btn" onClick={() => router.replace("/apikey")}>Api Keys</button>
                 <button className="dropdown dropdown-bottom dropdown-end">
                     <div tabIndex={0} role="button" className="btn m-1 rounded-full  ">{userdetails?.name?.substring(0,2).toUpperCase()}</div>
                     <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">

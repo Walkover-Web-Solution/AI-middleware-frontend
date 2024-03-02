@@ -15,7 +15,7 @@ function page () {
       return ;
     }
       const configuration = {
-        referenceId: '1258584j170929103665e1b61c32c86',
+        referenceId: process.env.NEXT_PUBLIC_REFERENCEID ,
         success: (data) => {
           // get verified token in response
           console.log('success response', data)
@@ -44,7 +44,7 @@ function page () {
 
   return (
     <div style={{width : "100vw" , height : "100vh"}} className=' flex justify-center items-center'>
-       <div id='870623l170791725365ccbfc587143' />
+       <div id={process.env.NEXT_PUBLIC_REFERENCEID} />
    </div>
   )
 }
