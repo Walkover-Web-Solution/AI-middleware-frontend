@@ -37,9 +37,9 @@ function Page() {
     if (name.length > 0) {
       dispatch(createNewAuthData({
         "name": name,
-        "throttle_limit": "60:10",
-        "temporary_throttle_limit": "60:05",
-        "temporary_throttle_time": "10"
+        "throttle_limit": "60:800",
+        "temporary_throttle_limit": "60:600",
+        "temporary_throttle_time": "30"
       }))
       document.getElementById('my_modal_5').close()
     }
