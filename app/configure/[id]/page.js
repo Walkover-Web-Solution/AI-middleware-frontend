@@ -40,7 +40,13 @@ function Page({ params }) {
     if (bridgeConfigration && configrationData && configrationData.configuration) {
       Object.keys(bridgeConfigration).forEach(key => {
         if (configrationData.configuration.hasOwnProperty(key)) {
+          
           configrationData.configuration[key].default = bridgeConfigration[key]?.default;
+        }
+        if(key==="prompt"){
+          bridgeConfigration.prompt.forEach(obj => {
+            configrationData.inputConfig[obj["role"]].default[configrationData.inputConfig[obj["role"]].contentKey]=obj[configrationData.inputConfig[obj["role"]].contentKey] ?? "";
+          });
         }
       });
     }

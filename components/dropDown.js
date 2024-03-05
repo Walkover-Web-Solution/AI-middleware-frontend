@@ -18,14 +18,15 @@ const DropdownMenu = ({ params, data }) => {
     const [dataToSend, setDataToSend] = useState({})
     const [apiKey, setApiKey] = useState('')
     const [modelInfoData, setModelInfoData] = useState({})
-    const [inputConfig, setInputConfig] = useState(modelInfo?.data?.configuration?.model?.default?.inputConfig)
+    const [inputConfig, setInputConfig] = useState(data?.inputConfig ?? modelInfo?.data?.configuration?.model?.default?.inputConfig)
 
     useEffect(() => {
         setSelectedService(bridgeData?.bridges?.service?.toLowerCase());
         setSelectedModel(bridgeData?.bridges?.configuration?.model?.default)
         setModelInfoData(data?.configuration)
         // setInputConfig(modelInfo?.bridgeData?.bridges?.configuration?.model?.default?.inputConfig); // Default to an empty object if data?.inputConfig is undefined
-        setInputConfig(modelInfo?.[selectedService]?.[selectedModel]?.inputConfig || {});
+        setInputConfig(data?.inputConfig || {});
+        
         // Find the key associated with the targetValue
         let foundKey = null;
         for (const key in services[bridgeData?.bridges?.service?.toLowerCase()]) {
@@ -77,7 +78,6 @@ const DropdownMenu = ({ params, data }) => {
         }
 
     }, [bridgeData, data]);
-
 
 
 
