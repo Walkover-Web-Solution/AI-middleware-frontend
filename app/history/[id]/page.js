@@ -17,7 +17,6 @@ function page({ params }) {
 
   useEffect(() => {
     dispatch(getHistoryAction(params.id))
-
   },[historyData])
   
 
@@ -58,8 +57,9 @@ function page({ params }) {
           <div className="w-full min-h-screen bg-base-200">
             <div className=" w-full text-start">
               <div className="w-full">
-                {thread.map((item, index) => (
-                  <div>
+              {thread.map((item, index) => (
+                
+                 item && (<div>
                     <div className={`chat ${item.role === 'user' ? "chat-start " : "chat-end"}`}>
                       <div className="chat-header flex gap-2">
                         {item.role.replaceAll("_", " ")}
@@ -69,7 +69,7 @@ function page({ params }) {
 
                     </div>
                   
-                  </div>
+                  </div>)
                 ))}
               </div>
             </div>
