@@ -63,7 +63,7 @@ function CreateNewBridge() {
               )}
             <dialog id="my_modal_1" className="modal">
                 <div className="modal-box">
-                    <h3 className="font-bold text-lg">Hello!</h3>
+                    <h3 className="font-bold text-lg">Create Bridge !</h3>
                     <div >
                         <label className="form-control w-full mb-2">
                             <div className="label">
