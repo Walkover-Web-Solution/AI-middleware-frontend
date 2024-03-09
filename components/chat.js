@@ -33,6 +33,7 @@ function Chat({ dataToSend , params}) {
   // Handle sending message
   const handleSendMessage = useCallback(async () => {
     if(dataToSend.configuration.type === "chat")  if (newMessage.trim() === "") return;
+    setErrorMessage(""); 
     setNewMessage("");
     setLoading(true);
     try {
