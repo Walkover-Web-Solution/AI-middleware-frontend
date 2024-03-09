@@ -2,6 +2,7 @@
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { getHistoryAction, getThread } from '@/store/action/historyAction'
+import { clearThreadData } from '@/store/reducer/historyReducer'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
@@ -10,16 +11,18 @@ function page({ params }) {
   const { historyData, thread } = useCustomSelector(
     (state) => ({
       historyData: state.historyReducer.history,
-      thread: state?.historyReducer.thread
+      thread: state?.historyReducer?.thread
     })
   )
   const [selectedThread, setSelectedThread] = useState("")
 
   useEffect(() => {
     dispatch(getHistoryAction(params.id))
-
   },[historyData])
   
+  useEffect(() => {
+    dispatch(clearThreadData())
+  },[params.id])
 
   const threadHandler = (thread_id) => {
     setSelectedThread(thread_id)
@@ -58,8 +61,9 @@ function page({ params }) {
           <div className="w-full min-h-screen bg-base-200">
             <div className=" w-full text-start">
               <div className="w-full">
-                {thread.map((item, index) => (
-                  <div>
+              {thread && thread.map((item, index) => (
+                
+                 item && (<div>
                     <div className={`chat ${item.role === 'user' ? "chat-start " : "chat-end"}`}>
                       <div className="chat-header flex gap-2">
                         {item.role.replaceAll("_", " ")}
@@ -69,7 +73,7 @@ function page({ params }) {
 
                     </div>
                   
-                  </div>
+                  </div>)
                 ))}
               </div>
             </div>

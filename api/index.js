@@ -62,9 +62,9 @@ export  const updateBridge = async ( {bridgeId , dataToSend}) => {
 
 
 
-export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) => {
+export  const getSingleThreadData = async ( threadId , bridgeId) => {
     try {
-        const getSingleThreadData = await axios.post(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}` , dataToSend) 
+        const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}`) 
         return getSingleThreadData
     } catch (error) {
       console.error(error)
@@ -72,9 +72,9 @@ export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) 
   }
 
 
-  export const getHistory = async ( { bridgeId , dataToSend}) => {
+  export const getHistory = async ( bridgeId) => {
     try {
-        const getSingleThreadData = await axios.post(`${URL}/api/v1/config/history/${bridgeId}` , dataToSend) 
+        const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`) 
         return getSingleThreadData
     } catch (error) {
       console.error(error)
