@@ -10,6 +10,7 @@ import Playground from "@/components/playground"
 import Chat from "@/components/chat"
 import { usePathname, useRouter } from "next/navigation"
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)"
+import Sidebar from "@/components/Sidebar"
 
 
 
@@ -68,15 +69,9 @@ function Page({ params }) {
         </div>
 
       </div>
-      <div className="drawer-side">
-        <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
-        <ul className="menu p-4 w-50   min-h-full bg-base-200 text-base-content">
-          {/* Sidebar content here */}
-          <li><button className={path === "/bridges" ? "btn-active" : ""} onClick={() => route.push("/bridges")} >Bridges </button></li>
-          <li><button className={path === "/apikey" ? "btn-active" : ""} onClick={() => route.push("/apikey")}>Api key</button></li>
-        </ul>
+     
+       <Sidebar/>
 
-      </div>
     </div>
   )
 }

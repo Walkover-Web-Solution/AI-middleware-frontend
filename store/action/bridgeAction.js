@@ -1,7 +1,8 @@
-import { createBridge, getAllBridges, getSingleBridge } from "@/api";
+import { createBridge, getAllBridges, getSingleBridge,deleteBridge } from "@/api";
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer } from "../reducer/bridgeReducer";
 import axios from "@/utils/interceptor";
 import { useRouter } from "next/navigation";
+
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
@@ -50,5 +51,20 @@ export const updateBridgeAction = () => async (dispatch, getState) => {
     dispatch(updateBridgeReducer(data.data.bridges));
   } catch (error) {
     console.error(error);
+  }
+};
+
+
+export const deleteBridgeAction = (bridgeId) => async (dispatch) => {
+  try {
+      await deleteBridge(bridgeId);
+      dispatch({
+          type: 'deleteBridgeReducer',
+          payload: bridgeId,
+      });
+      // toast.success('Bridge deleted successfully');
+  } catch (error) {
+      console.error('Failed to delete bridge:', error);
+      // toast.error('Failed to delete bridge');
   }
 };

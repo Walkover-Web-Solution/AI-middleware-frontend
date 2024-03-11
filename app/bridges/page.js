@@ -1,12 +1,13 @@
 "use client"
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { getAllBridgesAction } from "@/store/action/bridgeAction";
+import { deleteBridgeAction, getAllBridgesAction } from "@/store/action/bridgeAction";
 import { useEffect , useState} from "react";
 import { useDispatch } from "react-redux";
 
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import Protected from "@/components/protected";
 import CreateNewBridge from "@/components/createNewBridge";
+import Sidebar from "@/components/Sidebar";
 
 
 function Home() {
@@ -17,11 +18,35 @@ function Home() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false);
 
+const [currentPage, setCurrentPage] = useState(1);
+const [bridgesPerPage] = useState(10); // Adjust this number based on your needs
+
+const indexOfLastBridge = currentPage * bridgesPerPage;
+const indexOfFirstBridge = indexOfLastBridge - bridgesPerPage;
+const currentBridges = allBridges.slice(indexOfFirstBridge, indexOfLastBridge);
+
+const totalBridges = allBridges.length;
+const totalPages = Math.ceil(totalBridges / bridgesPerPage);
+
+const paginate = pageNumber => setCurrentPage(pageNumber);
+
+// Next and Previous Page Handlers
+const nextPage = () => setCurrentPage(prev => (prev < totalPages ? prev + 1 : prev));
+const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
+
+
   useEffect(() => {
     dispatch(getAllBridgesAction())
 
   }, [])
   const columns = ["name", "_id", "service"];
+
+  const handleDeleteBridge = (bridgeId) => {
+    if (window.confirm('Are you sure you want to delete this bridge?')) {
+      dispatch(deleteBridgeAction(bridgeId));
+    }
+  };
+  
 
   return (
 
@@ -56,33 +81,72 @@ function Home() {
                 </tr>
               </thead>
               <tbody>
-                {allBridges.map((item) => (
+              {currentBridges.map((item) => (
                   <tr key={item._id} className="hover-row hover">
+                       {/* Table row content */}
+                       
                     {columns.map(column => (
                       <td key={`${item._id}-${column}`}>{item[column]}</td>
                     ))}
-                    <td className="button-container gap-3 flex justify-center align-center">
+                    <td key={item._id} className="button-container gap-3 flex justify-center align-center">
                     <button onClick={() => { setIsLoading(true); router.push(`/history/${item._id}`); }} className="btn btn-sm">History</button>
                     <button onClick={() => { setIsLoading(true); router.push(`/configure/${item._id}`); }} className="btn btn-sm">Configure</button>
-
+                    {/* <a onClick={() => handleDeleteBridge(item._id)} >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
+                              <g clip-path="url(#clip0_117_1501)" >
+                                <path d="M7 4V2H17V4H22V6H20V21C20 21.2652 19.8946 21.5196 19.7071 21.7071C19.5196 21.8946 19.2652 22 19 22H5C4.73478 22 4.48043 21.8946 4.29289 21.7071C4.10536 21.5196 4 21.2652 4 21V6H2V4H7ZM6 6V20H18V6H6ZM9 9H11V17H9V9ZM13 9H15V17H13V9Z" fill="#03053D" />
+                              </g>
+                              <defs>
+                                <clipPath id={item._id} >
+                                  <rect width="24 " height="24" fill="white" />
+                                </clipPath>
+                              </defs>
+                            </svg>
+                          </a> */}
                     </td>
                   </tr>
                 ))}
+
+                
               </tbody>
             </table>
+
+
+           {totalPages > 1 && (
+                <div className="flex justify-center items-center mt-4">
+                <div className="flex items-center space-x-1">
+                 <button 
+                  onClick={prevPage} 
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 text-sm font-medium text-gray-700 bg-white rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Prev
+                 </button>
+                  {[...Array(totalPages).keys()].map(number => (
+                   <button 
+                     key={number + 1} 
+                    onClick={() => paginate(number + 1)} 
+                    disabled={currentPage === number + 1}
+                    className={`px-3 py-1 text-sm font-medium rounded-md ${currentPage === number + 1 ? 'bg-gray-800 text-white' : 'text-gray-700 bg-white'} hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed`}>
+                    {number + 1}
+                  </button>
+                  ))}
+                  <button 
+                   onClick={nextPage} 
+                   disabled={currentPage === totalPages}
+                   className="px-3 py-1 text-sm font-medium text-gray-700 bg-white rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                   Next
+                  </button>
+                </div>
+               </div>
+           )}
+
           </div>
+                       
         </div>
 
       </div>
-      <div className="drawer-side">
-        <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
-        <ul className="menu p-4 w-50   min-h-full bg-base-200 text-base-content">
-          {/* Sidebar content here */}
-          <li><button className={path === "/bridges" ? "btn-active" : ""} onClick={()=> router.push("/bridges")} >Bridges </button></li>
-          <li><button className={path === "/apikey" ? "btn-active" : ""} onClick={()=> router.push("/apikey")} >Api key</button></li>
-        </ul>
-
-      </div>
+     
+      <Sidebar/>
       <CreateNewBridge />
     </div>
 

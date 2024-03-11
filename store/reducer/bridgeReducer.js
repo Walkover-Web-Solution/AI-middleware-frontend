@@ -35,7 +35,16 @@ export const bridgeReducer = createSlice({
     },
     updateBridgeReducer : (state, action) => {
       
-    }
+    },
+    deleteBridgeReducer: (state, action) => {
+      const bridgeId = action.payload;
+      const updatedBridges = state.allBridges.filter(bridge => bridge._id !== bridgeId);
+      const updatedBridgesMap = { ...state.allBridgesMap };
+      delete updatedBridgesMap[bridgeId];
+      state.allBridges = updatedBridges;
+      state.allBridgesMap = updatedBridgesMap;
+    },
+    
   },
 });
 
