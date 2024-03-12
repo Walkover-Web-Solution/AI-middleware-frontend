@@ -1,4 +1,5 @@
 "use client"
+import Sidebar from '@/components/Sidebar'
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { getHistoryAction, getThread } from '@/store/action/historyAction'
@@ -23,6 +24,7 @@ function page({ params }) {
   useEffect(() => {
     dispatch(clearThreadData())
   },[params.id])
+
 
   const threadHandler = (thread_id) => {
     setSelectedThread(thread_id)
@@ -54,8 +56,12 @@ function page({ params }) {
 
   const dispatch = useDispatch()
   return (
-    <div >
-      <div className="drawer lg:drawer-open">
+  
+     <div className='flex'>
+      {/* <Sidebar threads={historyData} onThreadSelect={threadHandler} selectedThread={selectedThread}/>  */}
+      {/* <Sidebar/> */}
+     <div className='flex'>
+     <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center justify-center">
           <div className="w-full min-h-screen bg-base-200">
@@ -78,20 +84,23 @@ function page({ params }) {
               </div>
             </div>
           </div>
-
         </div>
         <div className="drawer-side border-r-4 ">
           <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
-          <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
+          <ul className="menu p-4 w-40 min-h-full bg-base-200 text-base-content">
             {historyData.map((item, index) => (
               <li key={item.id} onClick={() => threadHandler(item.thread_id)}><a className={selectedThread === item.thread_id ? "active" : ""} >Thread {index + 1}</a></li>
             ))}
           </ul>
-
+          
         </div>
+         
       </div>
-
+     </div>
+      
     </div>
+    
+   
   )
 }
 
