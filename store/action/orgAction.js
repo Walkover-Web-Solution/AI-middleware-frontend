@@ -21,6 +21,11 @@ export const getAllOrgAction = () => async (dispatch, getState) => {
     }
   };
 
-// export const switchOrgAction = () => async (dispatch) => {
 
-// }
+  export const setCurrentOrgIdAction = (orgId) => {
+    console.log(orgId)
+    return {
+      type: 'organization/setCurrentOrgId',
+      payload: orgId,
+    };
+  };

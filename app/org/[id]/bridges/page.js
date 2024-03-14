@@ -8,7 +8,6 @@ import { useParams, usePathname, useRouter } from 'next/navigation'
 import Protected from "@/components/protected";
 import CreateNewBridge from "@/components/createNewBridge";
 import Sidebar from "@/components/Sidebar";
-import { switchOrg } from "@/api";
 
 
 function Home() {
@@ -38,7 +37,6 @@ const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
 
   useEffect(() => {
     dispatch(getAllBridgesAction())
-
   }, [])
   const columns = ["name", "_id", "service"];
 

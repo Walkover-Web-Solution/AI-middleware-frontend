@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { getAllOrgAction } from '@/store/action/orgAction';
+import { getAllOrgAction, setCurrentOrgIdAction } from '@/store/action/orgAction';
 import CreateOrg from '@/components/createNewOrg';
 import { useRouter } from 'next/navigation';
 import { switchOrg } from '@/api';
@@ -21,8 +21,10 @@ function Page() {
   const handleSwitchOrg = async (id) => {
     try {
       const response = await switchOrg(id);
+      dispatch(setCurrentOrgIdAction(id))
       if (response.status === 200) {
         console.log("Organization switched successfully", response.data);
+        
         // dispatch(getAllOrgAction());
         // route.push("/somepath"); // If you need to navigate
       } else {

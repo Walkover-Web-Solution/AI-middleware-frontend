@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  organizations: [], 
+  organizations: [],
+  currentOrgId: null, 
   loading: false,
   error: null,
 };
@@ -27,10 +28,16 @@ const orgReducer = createSlice({
       });
       state.allOrgMap = allOrgMap ;
       },
+      setCurrentOrgId: (state, action) => {
+        state.currentOrgId = action.payload;
+      },
+      clearCurrentOrgId: (state) => {
+        state.currentOrgId = null;
+      },
   },
 });
 
 
-export const { organizationCreated, organizationsFetched} = orgReducer.actions;
+export const { organizationCreated, organizationsFetched ,setCurrentOrgId, clearCurrentOrgId} = orgReducer.actions;
 
 export default orgReducer.reducer;
