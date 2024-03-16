@@ -12,10 +12,7 @@ function Sidebar() {
   const handleBridgeClick = () => {
       if (currentOrgId) {
           route.push(`/org/${currentOrgId}/bridges`);
-      } else {
-        
-          console.log("No current organization ID available.");
-      }
+      } 
   };
 
   return (
