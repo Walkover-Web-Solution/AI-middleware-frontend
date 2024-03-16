@@ -10,12 +10,12 @@ return (props) => {
 
     if (proxy_auth_token) {
       localStorage?.setItem('proxy_auth_token', proxy_auth_token);
-      router.replace("/bridges");
+      router.replace("/org");
       return;
     }
 
     if (localStorage?.getItem('proxy_auth_token')) {
-      router.replace("/bridges");
+      router.replace("/org");
       return;
     }
     return <Children /> ;

@@ -29,36 +29,11 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
 
-        "gpt-3.5-turbo-0613": {
+        "gpt_3_5_turbo_0613": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-3.5-turbo-0613", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
@@ -89,31 +64,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -152,31 +102,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -215,31 +140,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -278,31 +178,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant."
-                },
-                {
-                    "role": "user",
-                    "content": "Hello"
-                },
-                {
-                    "role": "assistant",
-                    "content": "Hello! How can I assist you today?"
-                }`
                 }
             }
         },
@@ -342,31 +217,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -406,31 +256,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -467,31 +292,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -528,31 +328,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -592,31 +367,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -655,31 +405,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -717,31 +442,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -766,6 +466,7 @@ export const modelInfo = {
                 }
             }
         },
+        
         "text-embedding-3-small": {
             configuration: {
                 "model": { field: "dropdown", default: "text-embedding-3-large", "level": 1 },
@@ -836,9 +537,9 @@ export const modelInfo = {
     },
     google:
     {
-        "gemini-pro": {
+        "gemini-1.0-pro": {
             configuration: {
-                "model": { field: "dropdown", default: "gemini-pro", level: 1 },
+                "model": { field: "dropdown", default: "gemini-1.0-pro", "level": 1 },
                 "temperature": {field: "number", default: 0, level: 2},
                 "topK": {field: "slider", min: 1, max: 40, step: 1, default: "none", level: 0},
                 "topP": {field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 0},
@@ -853,61 +554,21 @@ export const modelInfo = {
                 role: "model"
             },
 
-            // inputConfig: {
-                // user: {
-                //     "default": {
-                //         "role": "user",
-                //         "parts": [
-                //             {
-                //                 "text": ""
-                //             }
-                //         ]
-                //     },
-                //     "contentKey": "parts[0].text",
-                //     "type": "json"
-                // },
-
-                // model: {
-                //     "default": {
-                //         "role": "model",
-                //         "parts": [
-                //             {
-                //                 "text": ""
-                //             }
-                //         ]
-                //     },
-                //     "contentKey": "parts[0].text",
-                //     "type": "json"
-
-                // },
-
-                // rawData: {
-                //     "default": `
-                //     {
-                //         "role": "user",
-                //         "parts": [
-                //           {
-                //             "text": "Hello"
-                //           }
-                //         ]
-                //       },
-                //       {
-                //         "role": "model",
-                //         "parts": [
-                //           {
-                //             "text": "Greetings! How may I assist you today?"
-                //           }
-                //         ]
-                //     }`
-                // }
-            // }
             inputConfig: {
-                prompt: {
-                    "prompt": "",
-                    "contentKey": "prompt",
-                    "type": "text",
+                model: {
+                    "default": {
+                        "role": "model",
+                        "parts": [
+                            {
+                                "text": ""
+                            }
+                        ]
+                    },
+                    "contentKey": "parts[0].text",
+                    "type": "json"
+
                 }
-            }   
+            }
         }
     },
     mistral:
@@ -939,31 +600,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -995,31 +631,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         },
@@ -1050,31 +661,6 @@ export const modelInfo = {
                     "contentKey": "content",
                     "type": "json",
 
-                },
-
-                user: {
-                    "default": {
-                        "role": "user",
-                        "content": ""
-                    },
-                    "contentKey": "content",
-                    "type": "json",
-                },
-
-                rawData: {
-                    "default": `
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant."
-                    },
-                    {
-                        "role": "user",
-                        "content": "Hello"
-                    },
-                    {
-                        "role": "assistant",
-                        "content": "Hello! How can I assist you today?"
-                    }`
                 }
             }
         }
@@ -1227,16 +813,6 @@ export const modelInfo = {
                 },
 
                 inputConfig: {
-                    User: {
-                        "default": {
-                            "role": "User",
-                            "message": ""
-                        },
-                        "contentKey": "message",
-                        "type": "json",
-
-                    },
-
                     Chatbot: {
                         "default": {
                             "role": "Chatbot",
@@ -1244,18 +820,6 @@ export const modelInfo = {
                         },
                         "contentKey": "message",
                         "type": "json",
-                    },
-
-                    rawData: {
-                        "default": `
-                        {   
-                            "role": "User",
-                            "message": "Hello"
-                        }, 
-                        {
-                            "role": "Chatbot", 
-                            "message": "Hello! I\'m happy to help you with any questions you may have!"
-                        }`
                     }
                 }
             },
@@ -1276,16 +840,6 @@ export const modelInfo = {
                 },
 
                 inputConfig: {
-                    User: {
-                        "default": {
-                            "role": "User",
-                            "message": ""
-                        },
-                        "contentKey": "message",
-                        "type": "json",
-
-                    },
-
                     Chatbot: {
                         "default": {
                             "role": "Chatbot",
@@ -1293,18 +847,6 @@ export const modelInfo = {
                         },
                         "contentKey": "message",
                         "type": "json",
-                    },
-
-                    rawData: {
-                        "default": `
-                        {   
-                            "role": "User",
-                            "message": "Hello"
-                        }, 
-                        {
-                            "role": "Chatbot", 
-                            "message": "Hello! I\'m happy to help you with any questions you may have!"
-                        }`
                     }
                 }
             },
@@ -1324,16 +866,6 @@ export const modelInfo = {
                     id: "response_id"
                 },
                 inputConfig: {
-                    User: {
-                        "default": {
-                            "role": "User",
-                            "message": ""
-                        },
-                        "contentKey": "message",
-                        "type": "json",
-
-                    },
-
                     Chatbot: {
                         "default": {
                             "role": "Chatbot",
@@ -1341,18 +873,6 @@ export const modelInfo = {
                         },
                         "contentKey": "message",
                         "type": "json",
-                    },
-
-                    rawData: {
-                        "default": `
-                        {   
-                            "role": "User",
-                            "message": "Hello"
-                        }, 
-                        {
-                            "role": "Chatbot", 
-                            "message": "Hello! I\'m happy to help you with any questions you may have!"
-                        }`
                     }
                 }
             },
@@ -1373,16 +893,6 @@ export const modelInfo = {
                 },
 
                 inputConfig: {
-                    User: {
-                        "default": {
-                            "role": "User",
-                            "message": ""
-                        },
-                        "contentKey": "message",
-                        "type": "json",
-
-                    },
-
                     Chatbot: {
                         "default": {
                             "role": "Chatbot",
@@ -1390,18 +900,6 @@ export const modelInfo = {
                         },
                         "contentKey": "message",
                         "type": "json",
-                    },
-
-                    rawData: {
-                        "default": `
-                        {   
-                            "role": "User",
-                            "message": "Hello"
-                        }, 
-                        {
-                            "role": "Chatbot", 
-                            "message": "Hello! I\'m happy to help you with any questions you may have!"
-                        }`
                     }
                 }
             }

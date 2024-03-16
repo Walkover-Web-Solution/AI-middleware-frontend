@@ -56,7 +56,8 @@ export  const getSingleBridge = async (bridgeId) => {
 
   export  const getAllBridges = async () => {
     try {
-        return  await axios.get(`${URL}/api/v1/config/getbridges/all`)
+        const data = await axios.get(`${URL}/api/v1/config/getbridges/all`)
+        return data;
     } catch (error) {
       console.error(error)
       throw new Error(error)
@@ -118,7 +119,7 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
   export const userdetails = async() => {
     try{
       console.log(`${PROXY_URL}/api/c/getCompanies`)
-      const details = await axios.get(`${PROXY_URL}/api/c/getCompanies`)
+      const details = await axios.get(`${PROXY_URL}/api/c/getUsers`)
       return details
     }
     catch(error)
@@ -168,3 +169,37 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
       console.error(error)
     }
   }
+
+  export  const createOrg = async (dataToSend) => {
+    try {
+        // console.log(dataToSend)
+        const data = await axios.post(`${PROXY_URL}/api/c/createCompany` ,dataToSend) 
+        return data;  
+    } catch (error) {
+      toast.error(error.response.data.error)
+    }
+  }
+
+
+  export  const getAllOrg = async () => {
+    try {
+        const data = await axios.get(`${PROXY_URL}/api/c/getCompanies`)
+        return data;
+    } catch (error) {
+      console.error(error)
+      throw new Error(error)
+    }
+  }
+
+
+  export const switchOrg = async (company_ref_id) => {
+    try {
+      const data = await axios.post(`${PROXY_URL}/api/c/switchCompany`, { company_ref_id }); 
+      // console.log(data);
+      return data;
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  };
+  
