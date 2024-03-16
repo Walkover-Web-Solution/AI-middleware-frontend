@@ -6,6 +6,7 @@ import CreateOrg from '@/components/createNewOrg';
 import { useRouter } from 'next/navigation';
 import { switchOrg } from '@/api';
 import { getAllBridgesAction } from '@/store/action/bridgeAction';
+import Protected from '@/components/protected';
 
 function Page() {
   const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
@@ -43,16 +44,16 @@ function Page() {
   const handleCloseCreateOrgModal = () => {
     setShowCreateOrgModal(false);
   };
-  console.log(organizations)
+  // console.log(organizations)
   return (
     <div className="flex flex-col justify-center items-center min-h-50vh bg-gray-100 px-2 md:px-0">
     <div className="w-full max-w-4xl mt-4">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">Existing Organizations</h2>
       <div className="grid grid-rows-1 md:grid-rows-2 lg:grid-rows-3 gap-4 mb-8 cursor-pointer">
         {organizations.map((org, index) => (
-          <div key={index} className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div key={index} onClick={() => {handleSwitchOrg(org.id); route.push(`org/${org.id}/bridges`)}} className="bg-white shadow-lg rounded-lg overflow-hidden">
             <div className="px-6 py-4">
-              <div onClick={() => {handleSwitchOrg(org.id); route.push(`org/${org.id}/bridges`)}} className="font-bold text-xl mb-2">{org?.name}</div>
+              <div  className="font-bold text-xl mb-2">{org?.name}</div>
               <p className="text-gray-700 text-base">
               </p>
             </div>
@@ -75,6 +76,6 @@ function Page() {
   );
 }
 
-export default Page;
+export default Protected(Page);
 
 
