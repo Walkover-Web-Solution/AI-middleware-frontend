@@ -37,7 +37,6 @@ const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
 
   useEffect(() => {
     dispatch(getAllBridgesAction())
-
   }, [])
   const columns = ["name", "_id", "service"];
 

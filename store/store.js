@@ -5,6 +5,7 @@ import  historyReducer  from "./reducer/historyReducer";
 import  dryRunReducer  from "./reducer/dryRunReducer";
 import userDetailsReducer from "./reducer/userDetailsReducer"
 import authDataReducer from "./reducer/authkeyReducer"
+import orgReducer from "./reducer/orgReducer";
 
 
 
@@ -16,6 +17,7 @@ export const store = configureStore({
         historyReducer, 
         dryRunReducer ,
         userDetailsReducer ,
-        authDataReducer
+        authDataReducer,
+        orgReducer
     },
 })
