@@ -2,7 +2,6 @@ import { createOrg,getAllOrg } from "@/api";
 import { organizationCreated, organizationsFetched } from "../reducer/orgReducer";
 
 export const createOrgAction = (dataToSend,onSuccess) => async(dispatch) => {
-     console.log(dataToSend)
     try {
         const data = await createOrg(dataToSend);
         onSuccess(data);
@@ -23,7 +22,6 @@ export const getAllOrgAction = () => async (dispatch, getState) => {
 
 
   export const setCurrentOrgIdAction = (orgId) => {
-    console.log(orgId)
     return {
       type: 'organization/setCurrentOrgId',
       payload: orgId,
