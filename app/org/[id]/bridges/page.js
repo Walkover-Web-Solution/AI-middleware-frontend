@@ -19,7 +19,7 @@ function Home() {
   const [isLoading, setIsLoading] = useState(false);
 
 const [currentPage, setCurrentPage] = useState(1);
-const [bridgesPerPage] = useState(10); // Adjust this number based on your needs
+const [bridgesPerPage] = useState(10); 
 
 const indexOfLastBridge = currentPage * bridgesPerPage;
 const indexOfFirstBridge = indexOfLastBridge - bridgesPerPage;

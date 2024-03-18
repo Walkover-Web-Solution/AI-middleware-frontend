@@ -1,14 +1,21 @@
 // Sidebar.jsx
 "use client"
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation'; 
-import { useSelector } from 'react-redux';
+import { useSelector,useDispatch } from 'react-redux';
+import { setCurrentOrgId } from '@/store/reducer/orgReducer';
+import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 
 function Sidebar() {
   const path = usePathname();
   const route = useRouter();
-  const currentOrgId = useSelector(state => state.orgReducer.currentOrgId);
+  const currentOrgId = useSelector(state => state.orgReducer.currentOrgId) || 1374;
+  const dispatch = useDispatch()
 
+// useEffect(()=> {
+  //  dispatch(setCurrentOrgIdAction(currentOrgId));
+// },[])
+console.log("currentOrgId",currentOrgId)
   const handleBridgeClick = () => {
       if (currentOrgId) {
           route.push(`/org/${currentOrgId}/bridges`);
@@ -29,10 +36,18 @@ function Sidebar() {
         </li>
         <li>
           <button
-            className={path === "/apikey" ? "btn-active" : ""}
-            onClick={() => route.push("/apikey")}
+            className={path === `/org/${currentOrgId}/apikey` ? "btn-active" : ""}
+            onClick={() => route.push(`/org/${currentOrgId}/apikey`)}
           >
             Api key
+          </button>
+        </li>
+        <li>
+          <button
+            className={path === `/org/${currentOrgId}/invite` ? "btn-active" : ""}
+            onClick={() => route.push(`/org/${currentOrgId}/invite`)}
+          >
+            Invite
           </button>
         </li>
       </ul>
