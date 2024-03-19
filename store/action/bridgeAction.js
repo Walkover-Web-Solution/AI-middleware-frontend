@@ -62,9 +62,8 @@ export const deleteBridgeAction = (bridgeId) => async (dispatch) => {
           type: 'deleteBridgeReducer',
           payload: bridgeId,
       });
-      // toast.success('Bridge deleted successfully');
+      console.log('Bridge deleted successfully');
   } catch (error) {
       console.error('Failed to delete bridge:', error);
-      // toast.error('Failed to delete bridge');
   }
 };

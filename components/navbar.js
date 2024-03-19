@@ -35,24 +35,38 @@ function Navbar() {
       }
     
 
+      const formatNavbarTitle = (path) => {
+        // Split the path into segments
+        const segments = path.split("/").filter(Boolean); // filter(Boolean) removes any empty strings from the array
+        
+        // Determine the title based on the number of segments and their values
+        if (segments.length === 3) {
+          return segments[2].toUpperCase();
+        } else if (segments.length === 1 || segments.length === 2) {
+          const pageName = segments[0]; 
+          return pageName ? pageName.toUpperCase() : "ORG"; 
+        }
+      
+        return "ORG";
+      };
 
     return (
-        <div className={` ${path === "/" ? "hidden"  : "flex items-center justify-between"} navbar bg-base-300 `}>
-            <label htmlFor="my-drawer-2" className="btn btn-primary drawer-button lg:hidden"><svg className="swap-off fill-current" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" /></svg></label>
+      <div className={` ${path === "/" ? "hidden"  : "flex items-center justify-between"} navbar bg-base-300 `}>
+      <label htmlFor="my-drawer-2" className="btn btn-primary drawer-button lg:hidden"><svg className="swap-off fill-current" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" /></svg></label>
 
-            <button className="btn btn-ghost text-xl">{path.split("/")[1].toUpperCase()}</button>
-            <div className="justify-end">
-                <button className="btn">Api Docs</button>
-                <button className="dropdown dropdown-bottom dropdown-end">
-                    <div tabIndex={0} role="button" className="btn m-1 rounded-full  ">{userdetails?.name?.substring(0,2).toUpperCase()}</div>
-                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                        <li><a>{userdetails.name}</a></li>
-                        <li><a>{userdetails.email}</a></li>
-                        <li onClick={logoutHandler}><a>logout</a></li>
-                    </ul>
-                </button>
-            </div>
-        </div>
+      <button className="btn btn-ghost text-xl">{formatNavbarTitle(path)}</button>
+      <div className="justify-end">
+          <button className="btn">Api Docs</button>
+          <button className="dropdown dropdown-bottom dropdown-end">
+              <div tabIndex={0} role="button" className="btn m-1 rounded-full">{userdetails?.name?.substring(0,2).toUpperCase()}</div>
+              <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                  <li><a>{userdetails.name}</a></li>
+                  <li><a>{userdetails.email}</a></li>
+                  <li onClick={logoutHandler}><a>logout</a></li>
+              </ul>
+          </button>
+      </div>
+    </div>
     )
 }
 

@@ -52,6 +52,7 @@ export const {
     fetchAllBridgeReducer, 
     fetchSingleBridgeReducer,
     createBridgeReducer,
-    updateBridgeReducer
+    updateBridgeReducer,
+    deleteBridgeReducer
 } = bridgeReducer.actions;
 export default bridgeReducer.reducer;
