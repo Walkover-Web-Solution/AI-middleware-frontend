@@ -11,7 +11,7 @@ export const userDetailsReducer = createSlice({
   initialState,
   reducers: {
     fetchUserDetails : (state, action) => {
-      state.userDetails = action.payload.data[0] 
+      state.userDetails = action.payload 
       state.success = action.payload.success
     } 
   },
