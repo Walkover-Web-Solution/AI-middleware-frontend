@@ -3,7 +3,7 @@ import { useCustomSelector } from "@/customSelector/customSelector";
 import { deleteBridgeAction, getAllBridgesAction } from "@/store/action/bridgeAction";
 import { useEffect , useState} from "react";
 import { useDispatch } from "react-redux";
-
+import { toast } from 'react-toastify'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import Protected from "@/components/protected";
 import CreateNewBridge from "@/components/createNewBridge";
@@ -35,16 +35,26 @@ const nextPage = () => setCurrentPage(prev => (prev < totalPages ? prev + 1 : pr
 const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
 
 
+const handleDeleteBridge = async (bridgeId) => {
+  const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
+  if (confirmDelete) {
+    try {
+       dispatch(deleteBridgeAction(bridgeId));
+      dispatch(getAllBridgesAction()); 
+      toast.success('Bridge deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete bridge:', error);
+      toast.error('Error deleting bridge');
+    }
+  }
+};
+
+
   useEffect(() => {
     dispatch(getAllBridgesAction())
   }, [])
   const columns = ["name", "_id", "service"];
 
-  const handleDeleteBridge = (bridgeId) => {
-    if (window.confirm('Are you sure you want to delete this bridge?')) {
-      dispatch(deleteBridgeAction(bridgeId));
-    }
-  };
   
 
   return (
@@ -90,7 +100,7 @@ const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
                     <td key={item._id} className="button-container gap-3 flex justify-center align-center">
                     <button onClick={() => { setIsLoading(true); router.push(`/history/${item._id}`); }} className="btn btn-sm">History</button>
                     <button onClick={() => { setIsLoading(true); router.push(`/configure/${item._id}`); }} className="btn btn-sm">Configure</button>
-                    {/* <a onClick={() => handleDeleteBridge(item._id)} >
+                    <a onClick={() => handleDeleteBridge(item._id)} >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
                               <g clip-path="url(#clip0_117_1501)" >
                                 <path d="M7 4V2H17V4H22V6H20V21C20 21.2652 19.8946 21.5196 19.7071 21.7071C19.5196 21.8946 19.2652 22 19 22H5C4.73478 22 4.48043 21.8946 4.29289 21.7071C4.10536 21.5196 4 21.2652 4 21V6H2V4H7ZM6 6V20H18V6H6ZM9 9H11V17H9V9ZM13 9H15V17H13V9Z" fill="#03053D" />
@@ -101,7 +111,7 @@ const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
                                 </clipPath>
                               </defs>
                             </svg>
-                          </a> */}
+                          </a>
                     </td>
                   </tr>
                 ))}

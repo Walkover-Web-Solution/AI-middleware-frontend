@@ -12,10 +12,6 @@ function Sidebar() {
   const currentOrgId = useSelector(state => state.orgReducer.currentOrgId) || 1374;
   const dispatch = useDispatch()
 
-// useEffect(()=> {
-  //  dispatch(setCurrentOrgIdAction(currentOrgId));
-// },[])
-console.log("currentOrgId",currentOrgId)
   const handleBridgeClick = () => {
       if (currentOrgId) {
           route.push(`/org/${currentOrgId}/bridges`);

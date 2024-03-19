@@ -35,6 +35,7 @@ export  const getSingleBridge = async (bridgeId) => {
   export const deleteBridge = async (bridgeId) => {
     try {
         const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`);
+        // console.log(response)
         return response;
     } catch (error) {
         console.error(error);
