@@ -5,17 +5,13 @@ import { inviteUser, getInvitedUsers } from '@/api';
 import Sidebar from '@/components/Sidebar'
 import Protected from '@/components/protected';
 import { useSelector,useDispatch } from 'react-redux';
-import { setCurrentOrgId } from '@/store/reducer/orgReducer';
-import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { useCustomSelector } from '@/customSelector/customSelector';
-import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/router';
+
 
 
 
 function InvitePage() {
    
-//   const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [invitedMembers, setInvitedMembers] = useState([]);
 
@@ -23,9 +19,7 @@ function InvitePage() {
   const currentOrgId = useSelector(state => state.orgReducer.currentOrgId);
   const dispatch = useDispatch()
 
-// useEffect(()=> {
-//     dispatch(setCurrentOrgIdAction(currentOrgId))
-// },[])
+
 
   useEffect(() => {
     fetchInvitedMembers();
