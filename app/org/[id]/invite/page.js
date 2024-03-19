@@ -86,7 +86,7 @@ function InvitePage() {
   <div className="flex w-full justify-start gap-16 items-start">
   <div className="flex-1 flex flex-col items-center justify-start pt-6">
      <button onClick={handleInviteClick} className="btn btn-primary mb-8">
-       Invite Member
+      + Invite Member
      </button>
    {isModalOpen && (
       <>
