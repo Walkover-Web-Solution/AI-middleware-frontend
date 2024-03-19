@@ -57,9 +57,7 @@ function page({ params }) {
   const dispatch = useDispatch()
   return (
   
-     <div className='flex'>
-      {/* <Sidebar threads={historyData} onThreadSelect={threadHandler} selectedThread={selectedThread}/>  */}
-      {/* <Sidebar/> */}
+     
      <div className='flex'>
      <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
@@ -98,7 +96,6 @@ function page({ params }) {
       </div>
      </div>
       
-    </div>
     
    
   )

@@ -1,5 +1,5 @@
 import { createBridge, getAllBridges, getSingleBridge,deleteBridge } from "@/api";
-import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer } from "../reducer/bridgeReducer";
+import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer,deleteBridgeReducer } from "../reducer/bridgeReducer";
 import axios from "@/utils/interceptor";
 import { useRouter } from "next/navigation";
 
@@ -58,10 +58,7 @@ export const updateBridgeAction = () => async (dispatch, getState) => {
 export const deleteBridgeAction = (bridgeId) => async (dispatch) => {
   try {
       await deleteBridge(bridgeId);
-      dispatch({
-          type: 'deleteBridgeReducer',
-          payload: bridgeId,
-      });
+      dispatch(deleteBridgeReducer(bridgeId));
       console.log('Bridge deleted successfully');
   } catch (error) {
       console.error('Failed to delete bridge:', error);
