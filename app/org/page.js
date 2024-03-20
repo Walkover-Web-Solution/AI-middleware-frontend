@@ -22,12 +22,11 @@ function Page() {
   const handleSwitchOrg = async (id) => {
     try {
       const response = await switchOrg(id);
+      route.push(`/org/${id}/bridges`);
       dispatch(setCurrentOrgIdAction(id))
       if (response.status === 200) {
         console.log("Organization switched successfully", response.data);
         
-        // dispatch(getAllOrgAction());
-        // route.push("/somepath"); // If you need to navigate
       } else {
         console.error("Failed to switch organization", response.data);
       }
@@ -52,7 +51,7 @@ function Page() {
       onClick={handleOpenCreateOrgModal} 
       className="px-6 py-3 my-5 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
     >
-      Create New Organization
+     + Create New Organization
     </button>
 
     <div className="w-full max-w-4xl mt-4">
