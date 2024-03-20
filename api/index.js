@@ -232,7 +232,7 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
   export const getMetricsData = async(org_id) => {
       try{
           const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`);
-          // console.log(response.data);
+          console.log(response.data);
           return response.data;
       }catch(error){
         console.log(error);
