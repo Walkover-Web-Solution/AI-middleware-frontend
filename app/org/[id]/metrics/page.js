@@ -24,7 +24,7 @@ function Page() {
         console.error('Failed to fetch metrics data:', error);
       });
     // }
-  }, [currentOrgId]);
+  }, []);
 
   return (
     <div className="drawer lg:drawer-open">
