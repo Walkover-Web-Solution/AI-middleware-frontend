@@ -41,10 +41,10 @@ function Navbar() {
         
         // Determine the title based on the number of segments and their values
         if (segments.length === 3) {
-          return segments[2].toUpperCase();
+          return segments[2];
         } else if (segments.length === 1 || segments.length === 2) {
           const pageName = segments[0]; 
-          return pageName ? pageName.toUpperCase() : "ORG"; 
+          return pageName ? pageName : "ORG"; 
         }
       
         return "ORG";

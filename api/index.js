@@ -119,7 +119,7 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
 
   export const userdetails = async() => {
     try{
-      console.log(`${PROXY_URL}/api/c/getCompanies`)
+      // console.log(`${PROXY_URL}/api/c/getCompanies`)
       const details = await axios.get(`${PROXY_URL}/api/c/getDetails`)
       return details
     }
@@ -226,5 +226,17 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
       console.log(error);
       return error;
     }
+  }
+
+
+  export const getMetricsData = async(org_id) => {
+      try{
+          const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`);
+          // console.log(response.data);
+          return response.data;
+      }catch(error){
+        console.log(error);
+        return error;
+      }
   }
   
