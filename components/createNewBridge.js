@@ -34,7 +34,7 @@ function CreateNewBridge() {
                 "service": selectedService,
             }
             dispatch(createBridgeAction(dataToSend, (data) => {
-                route.replace(`/configure/${data.data.bridge._id}`);
+                route.push(`/configure/${data.data.bridge._id}`);
                 // <Link href = {`/configure/${data.data.bridge._id}`}/>
                 // setIsLoading(false);
             })).catch(() => {

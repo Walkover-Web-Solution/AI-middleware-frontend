@@ -1,5 +1,5 @@
 import { createOrg,getAllOrg } from "@/api";
-import { organizationCreated, organizationsFetched } from "../reducer/orgReducer";
+import { organizationCreated, organizationsFetched, setCurrentOrgId } from "../reducer/orgReducer";
 
 export const createOrgAction = (dataToSend,onSuccess) => async(dispatch) => {
     try {
@@ -21,9 +21,11 @@ export const getAllOrgAction = () => async (dispatch, getState) => {
   };
 
 
-  export const setCurrentOrgIdAction = (orgId) => {
-    return {
-      type: 'organization/setCurrentOrgId',
-      payload: orgId,
-    };
+  export const setCurrentOrgIdAction = (orgId) => (dispatch) => {
+     try{
+      dispatch(setCurrentOrgId(orgId));
+     }catch(error){
+      console.log(error);
+      
+     }
   };
