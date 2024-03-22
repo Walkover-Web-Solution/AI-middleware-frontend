@@ -11,7 +11,7 @@ import Chat from "@/components/chat"
 import { usePathname, useRouter } from "next/navigation"
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)"
 import Sidebar from "@/components/Sidebar"
-
+import _ from "lodash";
 
 
 function Page({ params }) {
@@ -19,35 +19,48 @@ function Page({ params }) {
   const route = useRouter()
   const dispatch = useDispatch()
 
-  const { bridge, bridgeService, bridgeConfigration } = useCustomSelector((state) => ({
+  const { bridge, bridgeService, bridgeConfigration, bridgeModel } = useCustomSelector((state) => ({
     bridgeService: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridges?.service,
     bridgeConfigration: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridges?.configuration,
-    bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id]
+    bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+    bridgeModel: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridges?.configuration?.model?.default
   }))
 
   const [modelInfoClone, setModelInfoClone] = useState(modelInfo)
 
-
+  console.log(bridgeModel,"fff");
   useEffect(() => {
+    console.log(bridgeService);
+    console.log(params.id);
     dispatch(getSingleBridgesAction(params.id));
     setModelInfoClone(modelInfo[bridgeService])
+    console.log("modelinfoclone",modelInfoClone)
   }, [params.id, bridgeService, bridgeConfigration, modelInfoClone]);
 
   let configrationData
   if (modelInfoClone) {
-    configrationData = Object.values(modelInfoClone)[0]
-
+    // bridgeConfigration.model.default
+    configrationData = modelInfoClone[bridgeModel];
+    console.log(modelInfoClone)
+     console.log("pagejs=>",configrationData)
+     console.log("bridgeConfigration=>",bridgeConfigration)
     // Check if bridgeConfigration is not null before iterating over its keys
     if (bridgeConfigration && configrationData && configrationData.configuration) {
       Object.keys(bridgeConfigration).forEach(key => {
+        if(key==="prompt"){
+          console.log(bridgeConfigration.prompt)
+          configrationData.inputConfig["prompt"].default=bridgeConfigration.prompt;
+          _.set(configrationData.inputConfig["prompt"].default,configrationData.inputConfig.contentKey,_.get(bridgeConfigration.prompt,configrationData.inputConfig.contentKey,""));
+          // bridgeConfigration.prompt.forEach(obj => {
+          //   configrationData.inputConfig[obj["role"]].default[configrationData.inputConfig[obj["role"]].contentKey]=obj[configrationData.inputConfig[obj["role"]].contentKey] ?? "";
+          // });
+        }
+        // else if(key==="prompt" && typeof bridgeConfigration.prompt !="object"){
+        //   configrationData.inputConfig["user"].default["content"]=bridgeConfigration.prompt;
+        // }
         if (configrationData.configuration.hasOwnProperty(key)) {
           
           configrationData.configuration[key].default = bridgeConfigration[key]?.default;
-        }
-        if(key==="prompt"){
-          bridgeConfigration.prompt.forEach(obj => {
-            configrationData.inputConfig[obj["role"]].default[configrationData.inputConfig[obj["role"]].contentKey]=obj[configrationData.inputConfig[obj["role"]].contentKey] ?? "";
-          });
         }
       });
     }

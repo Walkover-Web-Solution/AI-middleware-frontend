@@ -19,7 +19,7 @@ const DropdownMenu = ({ params, data }) => {
     const [apiKey, setApiKey] = useState('')
     const [modelInfoData, setModelInfoData] = useState({})
     const [inputConfig, setInputConfig] = useState(data?.inputConfig ?? modelInfo?.data?.configuration?.model?.default?.inputConfig)
-
+    console.log(inputConfig, "inputConfig");
     useEffect(() => {
         setSelectedService(bridgeData?.bridges?.service?.toLowerCase());
         setSelectedModel(bridgeData?.bridges?.configuration?.model?.default)
@@ -39,10 +39,10 @@ const DropdownMenu = ({ params, data }) => {
             setDataToSend({
                 "configuration": {
                     "model": selectedModel,
-                    "prompt": [],
+                    "prompt": {},
                     "type": foundKey,
-                    "user": [],
-                    "conversation": []
+                    // "user": [],
+                    // "conversation": []
                 },
                 "service": selectedService,
                 // "org_id":"124dfgh67ghj",
@@ -108,10 +108,10 @@ const DropdownMenu = ({ params, data }) => {
                 setDataToSend({
                     "configuration": {
                         "model": e.target.value,
-                        "prompt": [],
+                        "prompt": {},
                         "type": e.target.selectedOptions[0].parentNode.label,
-                        "user": [],
-                        "conversation": []
+                        // "user": [],
+                        // "conversation": []
                     },
                     "service": selectedService,
                     // "org_id":"124dfgh67ghj",
@@ -239,7 +239,7 @@ const DropdownMenu = ({ params, data }) => {
             ...prevDataToSend,
             configuration: {
                 ...prevDataToSend.configuration,
-                prompt: [...prevDataToSend.configuration.prompt, promptString]
+                prompt:  promptString
             }
         }));
     }
@@ -421,23 +421,22 @@ return (
         <div className="hero h-full w-full ">
             <div className="hero-content justify-between items-start max-w-full flex-col lg:flex-row">
                 <div>
-                    {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
-                        <>
-                            {key !== "rawData" &&
-                                <label className="form-control w-full max-w-xs" key={key}>
+                <>
+                            
+                                <label className="form-control w-full max-w-xs" key={inputConfig.role}>
                                     <div className="label">
-                                        <span className="label-text">{key}</span>
+                                        <span className="label-text">{inputConfig.role}</span>
                                     </div>
                                     <input
                                         type="text"
                                         placeholder="Type here"
                                         className="input input-bordered w-full max-w-xs"
-                                        value={value?.default?.content || value?.prompt || value?.input || ""}
+                                        value={_.get(inputConfig.prompt.default, inputConfig.contentKey,"")||""}
                                         onChange={(e) => handleInputConfigChanges(e.target.value, key)}
                                         onBlur={(e) => SaveData(e.target.value, key)}
                                     />
                                 </label>
-                            }
+                            
                             {/* {key === "input" && 
                                  <label className="form-control w-full max-w-xs" key={key}>
                                  <div className="label">
@@ -453,8 +452,7 @@ return (
                                  />
                              </label>
                                 } */}
-                        </>
-                    ))}
+                                </>
                 </div>
                 <div className='w-full'>
                     <Chat dataToSend={dataToSend} params={params} />

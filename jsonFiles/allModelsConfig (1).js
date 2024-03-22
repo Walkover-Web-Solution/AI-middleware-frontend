@@ -22,18 +22,19 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
 
-        "gpt_3_5_turbo_0613": {
+        "gpt-3.5-turbo-0613": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-3.5-turbo-0613", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
@@ -56,15 +57,15 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
 
@@ -94,15 +95,15 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
 
@@ -132,15 +133,15 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
         "gpt-3.5-turbo-1106": {
@@ -170,15 +171,15 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
 
@@ -209,15 +210,15 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
 
@@ -248,15 +249,15 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
         "gpt-4": {
@@ -284,15 +285,15 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
         "gpt-4-0613": {
@@ -320,15 +321,15 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
         "gpt-4-1106-preview": {
@@ -359,15 +360,15 @@ export const modelInfo = {
 
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
         "gpt-4-turbo-preview": {
@@ -397,15 +398,15 @@ export const modelInfo = {
 
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
         },
         "gpt-4-0125-preview": {
@@ -434,16 +435,17 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                system: {
+                prompt: {
                     "default": {
                         "role": "system",
                         "content": ""
                     },
-                    "contentKey": "content",
-                    "type": "json",
-
-                }
+                },
+                "role":"system",
+                "contentKey": "content",
+                "type": "json",
             }
+            
         },
 
         "text-embedding-3-large": {
@@ -459,11 +461,12 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                input: {
+                prompt: {
                     "input": "",
-                    "contentKey": "input",
-                    "type": "text",
-                }
+                },
+                role:"input",
+                "contentKey": "input",
+                "type": "text",
             }
         },
         
@@ -480,11 +483,12 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                input: {
+                prompt: {
                     "input": "",
-                    "contentKey": "input",
-                    "type": "text",
-                }
+                },
+                role:"input",
+                "contentKey": "input",
+                "type": "text",
             }
         },
         "text-embedding-ada-002": {
@@ -500,11 +504,12 @@ export const modelInfo = {
             },
 
             inputConfig: {
-                input: {
+                prompt: {
                     "input": "",
-                    "contentKey": "input",
-                    "type": "text",
-                }
+                },
+                role:"input",
+                "contentKey": "input",
+                "type": "text",
             }
         },
         "gpt-3.5-turbo-instruct": {
@@ -529,9 +534,10 @@ export const modelInfo = {
             inputConfig: {
                 prompt: {
                     "prompt": "",
-                    "contentKey": "prompt",
-                    "type": "text",
-                }
+                },
+                role:"prompt",
+                "contentKey": "prompt",
+                "type": "text",
             }
         },
         chatmessage:{chat:{
