@@ -533,7 +533,11 @@ export const modelInfo = {
                     "type": "text",
                 }
             }
-        }
+        },
+        chatmessage:{chat:{
+            role: "user",
+            content:""
+        }, chatpath:"content"}
     },
     google:
     {
