@@ -98,7 +98,6 @@ function Chat({ dataToSend , params}) {
       if(dataToSend.configuration.type === "chat"){
         setConversation(prevConversation => [...prevConversation,_.cloneDeep(data),assistConversation].slice(-6));
     }
-    console.log(assistConversation,dataToSend.configuration);
 
       // Create assistant chat
       const newChatAssist = {
