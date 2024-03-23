@@ -14,6 +14,7 @@ function Chat({ dataToSend , params}) {
   const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [conversation,setConversation]=useState([]);
 
   // Update localDataToSend when dataToSend changes
   useEffect(() => {
@@ -47,25 +48,38 @@ function Chat({ dataToSend , params}) {
         }),
         content: newMessage,
       };
-      let response ;
+      let response, responseData;
+      let data;
       if(dataToSend.configuration.type === "chat")
       {
-        const data = { role: "user", content: newMessage };
-        updateLocalDataToSend(prevConfig => ({
-          user: [...prevConfig.user, data],  
-        }));
+        data=modelInfo[localDataToSend.service].chatmessage.chat;
+        const chatPath=modelInfo[localDataToSend.service].chatmessage.chatpath;
+        _.set(data, chatPath, newMessage); 
+        // updateLocalDataToSend(prevConfig => ({
+        //   user: [...prevConfig.user, data],  
+        // }));
         setMessages(prevMessages => [...prevMessages, newChat]);
-         response = await dryRun({
+          responseData = await dryRun({
           ...localDataToSend,
           configuration: {
             ...localDataToSend.configuration,
+            conversation:conversation,
             user: data,
           },
         });
       }
       else{
-        response = await dryRun(localDataToSend);
+         responseData = await dryRun(localDataToSend);
       }
+      if(!responseData.success){
+        if(dataToSend.configuration.type === "chat"){
+          setConversation(prevConversation => [...prevConversation,_.cloneDeep(data)].slice(-6));
+      }
+        setErrorMessage(responseData.error);
+        setLoading(false);
+        return;
+      }
+      response = responseData.data;
       // Update localDataToSend with user data
 
       // Add user chat to messages
@@ -81,9 +95,7 @@ function Chat({ dataToSend , params}) {
 
       // Update localDataToSend with assistant conversation
       if(dataToSend.configuration.type === "chat"){
-      updateLocalDataToSend(prevConfig => ({
-        conversation: [...prevConfig.conversation, assistConversation],
-      }));
+        setConversation(prevConversation => [...prevConversation,_.cloneDeep(data),assistConversation].slice(-6));
     }
 
       // Create assistant chat
