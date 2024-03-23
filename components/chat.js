@@ -75,7 +75,8 @@ function Chat({ dataToSend , params}) {
         if(dataToSend.configuration.type === "chat"){
           setConversation(prevConversation => [...prevConversation,_.cloneDeep(data)].slice(-6));
       }
-        setErrorMessage(responseData.error);
+        // setErrorMessage(responseData.error);
+        toast.error(responseData.error);
         setLoading(false);
         return;
       }
