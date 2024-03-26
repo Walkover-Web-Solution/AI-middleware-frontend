@@ -1,32 +1,47 @@
 import React from 'react';
 
-function table({ data }) {
+function Table({ data }) {
   if (!data || data.length === 0) {
-    return <p>No data</p>;
+    return <div className="text-center my-5 text-lg font-semibold text-gray-600">No data available.</div>;
   }
 
-  // Extract column names from the first item's keys
   const columnNames = Object.keys(data[0]);
-//   console.log(data[0])
+
+  // Function to format the date
+  const formatDate = (dateString) => {
+    if (isNaN(Date.parse(dateString))) {
+      return dateString; // Return original string if it's not a valid date
+    }
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Asia/Kolkata' // Explicitly set the timezone to IST
+    }).format(date);
+  };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="overflow-x-auto relative shadow-lg sm:rounded-lg m-2">
+      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-300 shadow-sm">
           <tr>
             {columnNames.map((columnName, index) => (
-              <th key={index} scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {columnName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} {/* Beautify the column name */}
+              <th key={index} scope="col" className="py-3 px-6 text-gray-900 font-semibold">
+                {columnName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody>
           {data.map((item, index) => (
-            <tr key={index}>
+            <tr key={index} className="bg-white text-gray-500 border-b transition duration-300 ease-in-out hover:bg-gray-50">
               {columnNames.map((columnName) => (
-                <td key={columnName} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {item[columnName]}
+                <td key={columnName} className="py-4 px-6">
+                  {columnName === 'created_at' ? formatDate(item[columnName]) : item[columnName]}
                 </td>
               ))}
             </tr>
@@ -37,4 +52,15 @@ function table({ data }) {
   );
 }
 
-export default table;
+export default Table;
+
+
+
+
+
+
+
+
+
+
+
