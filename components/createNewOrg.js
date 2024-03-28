@@ -26,10 +26,9 @@ function CreateOrg({onClose}) {
 
     const createOrgHandler = async () => {
         const { name, email, mobile, timezone } = orgDetails;
-        if (!name.trim()) {
-            toast.error("Organization name is required");
-            return;
-        }
+        if (!name.trim() || name.trim().length < 3) {
+            toast.error("Organization name is required and must be at least 3 characters long");
+        }   
     
         setIsLoading(true);
         try {
