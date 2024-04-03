@@ -36,7 +36,6 @@ function Page({ params }) {
   let configrationData
   if (modelInfoClone) {
     configrationData = Object.values(modelInfoClone)[0]
-
     // Check if bridgeConfigration is not null before iterating over its keys
     if (bridgeConfigration && configrationData && configrationData.configuration) {
       Object.keys(bridgeConfigration).forEach(key => {
@@ -44,7 +43,7 @@ function Page({ params }) {
           
           configrationData.configuration[key].default = bridgeConfigration[key]?.default;
         }
-        if(key==="prompt"){
+        if(key==="prompt" && bridgeService === 'openai'){
           bridgeConfigration.prompt.forEach(obj => {
             configrationData.inputConfig[obj["role"]].default[configrationData.inputConfig[obj["role"]].contentKey]=obj[configrationData.inputConfig[obj["role"]].contentKey] ?? "";
           });
