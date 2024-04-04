@@ -141,10 +141,10 @@ function Chat({ dataToSend , params}) {
   return (
     <>
     <button className="btn float-end btn-sm" onClick={UpdateBridge}>Update Bridge</button>
-    <div className=" p:2 sm:p-6 justify-between flex flex-col h-[80vh] lg:w-[50vw] border w-full">
+    <div className=" p:2 sm:p-6 justify-between flex flex-col h-[80vh] lg:w-[50vw] border w-full z-10">
       <div
         id="messages"
-        className="flex flex-col w-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch"
+        className="flex flex-col w-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch z-10"
       >
         {messages.map(message => (
           <div
@@ -163,7 +163,7 @@ function Chat({ dataToSend , params}) {
         ))}
       </div>
 
-      <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full">
+      <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-10">
         <div className="relative flex justify-start items-center w-full ">
           <div className="form-control w-full">
             <div className="input-group flex gap-2 w-full">
