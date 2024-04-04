@@ -19,6 +19,9 @@
         const [apiKey, setApiKey] = useState('')
         const [modelInfoData, setModelInfoData] = useState({})
         const [inputConfig, setInputConfig] = useState(data?.inputConfig ?? modelInfo?.data?.configuration?.model?.default?.inputConfig)
+        const [isPopupVisible, setPopupVisible] = useState(false);
+        const [tempInput, setTempInput] = useState('');
+        const [activeKey, setActiveKey] = useState('');
         // console.log(inputConfig)
 
         useEffect(() => {
@@ -253,6 +256,24 @@
     }
         };
 
+        const openPopup = (key, currentValue) => {
+            setTempInput(currentValue);
+            setActiveKey(key);
+            setPopupVisible(true);
+          };
+        
+          // Function to handle popup input changes
+          const handlePopupInputChange = (e) => {
+            setTempInput(e.target.value);
+          };
+        
+          // Function to close the popup and save the data
+          const closePopup = () => {
+            handleInputConfigChanges(tempInput, activeKey);
+            SaveData(tempInput, activeKey);
+            setPopupVisible(false);
+          };
+
 
     return (
         <div className='flex items-start h-full justify-start'>
@@ -427,42 +448,47 @@
 
             <div className="hero h-full w-full ">
                 <div className="hero-content justify-between items-start max-w-full flex-col lg:flex-row">
-                    <div>
-                        {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
-                            <>
-                                {key !== "rawData" &&
-                                    <label className="form-control w-full max-w-xs" key={key}>
-                                        <div className="label">
-                                            <span className="label-text">{key}</span>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            placeholder="Type here"
-                                            className="input input-bordered w-full max-w-xs"
-                                            value={value?.default?.content || value?.prompt || value?.input || ""}
-                                            onChange={(e) => handleInputConfigChanges(e.target.value, key)}
-                                            onBlur={(e) => SaveData(e.target.value, key)}
-                                        />
-                                    </label>
-                                }
-                                {/* {key === "input" && 
-                                    <label className="form-control w-full max-w-xs" key={key}>
-                                    <div className="label">
-                                        <span className="label-text">{key}</span>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Type here"
-                                        className="input input-bordered w-full max-w-xs"
-                                        value={value.input || ""}
-                                        onChange={(e) => handleInputConfigChanges(e.target.value, key)}
-                                        onBlur={(e) => SaveData(e.target.value, key)}
-                                    />
-                                </label>
-                                    } */}
-                            </>
-                        ))}
-                    </div>
+                <div>
+      {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
+        <>
+          {key !== "rawData" && (
+            <div className="form-control w-full max-w-xs" key={key}>
+              <div className="label">
+                <span className="label-text">{key}</span>
+              </div>
+              <input
+                readOnly // Make this readOnly or replace with a div/span as needed
+                className="input input-bordered w-full max-w-xs"
+                value={value?.default?.content || value?.prompt || value?.input || ""}
+                onClick={() => openPopup(key, value?.default?.content || value?.prompt || value?.input || "")}
+              />
+            </div>
+          )}
+        </>
+      ))}
+
+{isPopupVisible && (
+  <div className="fixed inset-0 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center p-4 z-50">
+    <div className="relative bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-2xl">
+      <div className="flex justify-end p-2">
+        <button onClick={closePopup} className="text-gray-600 hover:text-gray-800 transition-colors duration-150">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div className="px-4 pb-4 pt-2">
+        <textarea
+          autoFocus
+          className="textarea textarea-bordered w-full h-60 resize-none"
+          value={tempInput}
+          onChange={handlePopupInputChange}
+        ></textarea>
+      </div>
+    </div>
+  </div>
+)}
+
+
+    </div>
                     <div className='w-full'>
                         <Chat dataToSend={dataToSend} params={params} />
                     </div>
