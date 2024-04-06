@@ -22,6 +22,11 @@
         const [isPopupVisible, setPopupVisible] = useState(false);
         const [tempInput, setTempInput] = useState('');
         const [activeKey, setActiveKey] = useState('');
+        const [jsonString, setJsonString] = useState('');
+        const [isValid, setIsValid] = useState(true);
+        const [modalOpen, setModalOpen] = useState(false);
+        const [tempJsonString, setTempJsonString] = useState('');
+      
         // console.log(inputConfig)
 
         useEffect(() => {
@@ -115,6 +120,10 @@
             else {
 
                 if (e.target.selectedOptions[0].parentNode.label === 'chat') {
+
+                    setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
+                    setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
+
                     setDataToSend({
                         "configuration": {
                             "model": e.target.value,
@@ -129,6 +138,10 @@
                     })
                 }
                 else if (e.target.selectedOptions[0].parentNode.label === "embedding") {
+
+                    setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
+                    setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
+
                     setDataToSend({
                         "configuration": {
                             "model": e.target.value,
@@ -141,7 +154,11 @@
                         "apikey": apiKey
                     })
                 }
-                else {
+                else if (e.target.selectedOptions[0].parentNode.label === "completion"){
+
+                    setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
+                    setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
+
                     setDataToSend(
                         {
                             "configuration": {
@@ -274,6 +291,32 @@
             setPopupVisible(false);
           };
 
+
+          const handleInputClick = () => {
+            setModalOpen(true);
+            setTempJsonString(jsonString);
+          };
+        
+          const handleModalClose = () => {
+            setModalOpen(false);
+          };
+        
+          const handleTextAreaChange = (event) => {
+            const newJsonString = event.target.value;
+            setTempJsonString(newJsonString);
+            try {
+              JSON.parse(newJsonString);
+              setIsValid(true);
+            } catch (error) {
+              setIsValid(false);
+            }
+          };
+        
+          const handleCrossClick = () => {
+            setJsonString(tempJsonString);
+            setModalOpen(false);
+          };
+        
 
     return (
         <div className='flex items-start h-full justify-start'>
@@ -487,6 +530,43 @@
   </div>
 )}
 
+<div>
+      <div className="form-control w-full max-w-xs">
+        <div className="label">
+          <span className="label-text">function call</span>
+        </div>
+        <input
+          className={`input input-bordered w-full max-w-xs `}
+          value={jsonString}
+          onClick={handleInputClick}
+          readOnly
+        />
+      </div>
+      
+
+      {modalOpen && (
+  <div className="fixed inset-0 bg-opacity-50 overflow-y-auto flex justify-center items-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-2xl">
+      <div className="flex justify-end p-2">
+        <button onClick={handleModalClose} className="text-gray-600 hover:text-gray-800 transition-colors duration-150">
+          <svg onClick={handleCrossClick} className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div className="px-4 pb-4 pt-2">
+        <textarea
+          autoFocus
+          placeholder='{ "key" : "value" }'
+          className="textarea textarea-bordered w-full h-80 md:h-96 resize-none"
+          value={tempJsonString}
+          onChange={handleTextAreaChange}
+        ></textarea>
+        {!isValid && <p className="text-red-500">Invalid JSON</p>}
+      </div>
+    </div>
+  </div>
+)}
+
+    </div>
 
     </div>
                     <div className='w-full'>
