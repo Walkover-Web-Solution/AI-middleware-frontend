@@ -31,7 +31,7 @@ function Page({ params }) {
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
     setModelInfoClone(modelInfo[bridgeService])
-  }, [params.id, bridgeService, bridgeConfigration, modelInfoClone]);
+  }, [params.id, bridgeService, bridgeConfigration]);
 
   let configrationData
   if (modelInfoClone) {

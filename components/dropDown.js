@@ -26,6 +26,31 @@
         const [isValid, setIsValid] = useState(true);
         const [modalOpen, setModalOpen] = useState(false);
         const [tempJsonString, setTempJsonString] = useState('');
+
+          const jsonTemplate = [{
+            "type": "function",
+            "function": {
+                "name": "get_current_weather",
+                "description": "Get the current weather",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state, e.g. San Francisco, CA",
+                        },
+                        "format": {
+                            "type": "string",
+                            "enum": ["celsius", "fahrenheit"],
+                            "description": "The temperature unit to use. Infer this from the users location.",
+                        },
+                    },
+                    "required": ["location", "format"],
+                },
+            }
+        }];
+          const formattedJsonTemplate = JSON.stringify(jsonTemplate, null, 2);
+
       
         // console.log(inputConfig)
 
@@ -291,32 +316,33 @@
             setPopupVisible(false);
           };
 
-
-          const handleInputClick = () => {
-            setModalOpen(true);
-            setTempJsonString(jsonString);
-          };
         
           const handleModalClose = () => {
             setModalOpen(false);
           };
         
           const handleTextAreaChange = (event) => {
-            const newJsonString = event.target.value;
-            setTempJsonString(newJsonString);
+            const input = event.target.value;
+            setTempJsonString(input);
             try {
-              JSON.parse(newJsonString);
+              JSON.parse(input);
               setIsValid(true);
             } catch (error) {
               setIsValid(false);
             }
           };
         
+          const handleInputClick = () => {
+            setModalOpen(true);
+            setTempJsonString(jsonString || formattedJsonTemplate);
+            setIsValid(true);
+          };
+        
           const handleCrossClick = () => {
             setJsonString(tempJsonString);
             setModalOpen(false);
           };
-        
+
 
     return (
         <div className='flex items-start h-full justify-start'>
@@ -533,39 +559,37 @@
 <div>
       <div className="form-control w-full max-w-xs">
         <div className="label">
-          <span className="label-text">function call</span>
+          <span className="label-text">Function Call</span>
         </div>
         <input
-          className={`input input-bordered w-full max-w-xs `}
+          className="input input-bordered w-full max-w-xs"
           value={jsonString}
           onClick={handleInputClick}
           readOnly
         />
       </div>
-      
 
       {modalOpen && (
-  <div className="fixed inset-0 bg-opacity-50 overflow-y-auto flex justify-center items-center p-4 z-50">
-    <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-2xl">
-      <div className="flex justify-end p-2">
-        <button onClick={handleModalClose} className="text-gray-600 hover:text-gray-800 transition-colors duration-150">
-          <svg onClick={handleCrossClick} className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-      </div>
-      <div className="px-4 pb-4 pt-2">
-        <textarea
-          autoFocus
-          placeholder='{ "key" : "value" }'
-          className="textarea textarea-bordered w-full h-80 md:h-96 resize-none"
-          value={tempJsonString}
-          onChange={handleTextAreaChange}
-        ></textarea>
-        {!isValid && <p className="text-red-500">Invalid JSON</p>}
-      </div>
-    </div>
-  </div>
-)}
-
+        <div className="fixed inset-0 bg-opacity-50 overflow-y-auto flex justify-center items-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-2xl">
+            <div className="flex justify-end p-2">
+              <button onClick={handleCrossClick} className="text-gray-600 hover:text-gray-800 transition-colors duration-150">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div className="px-4 pb-4 pt-2">
+              <textarea
+                autoFocus
+                placeholder='Enter or paste JSON here'
+                className="textarea textarea-bordered w-full h-80 md:h-96 resize-none"
+                value={tempJsonString}
+                onChange={handleTextAreaChange}
+              ></textarea>
+              {!isValid && <p className="text-red-500">Invalid JSON</p>}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
 
     </div>
