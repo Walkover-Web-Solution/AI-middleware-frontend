@@ -1,13 +1,12 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file
-import { useCustomSelector } from '@/customSelector/customSelector';
 import { useSelector } from 'react-redux';
 import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
 import Chat from './chat';
 
 const DropdownMenu = ({ params, data }) => {
-    const openaiData = services.openai;
+    // const openaiData = services.openai;
     const { bridgeData } = useSelector((state) => ({
         bridgeData: state?.bridgeReducer?.allBridgesMap?.[params?.id] || {}
     }))
@@ -27,10 +26,10 @@ const DropdownMenu = ({ params, data }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [tempJsonString, setTempJsonString] = useState('');
 
-    // console.log(inputConfig)
 
     useEffect(() => {
         setSelectedService(bridgeData?.bridges?.service?.toLowerCase());
+        setJsonString(JSON.stringify(data?.configuration?.tools) || "")
         setSelectedModel(bridgeData?.bridges?.configuration?.model?.default)
         setModelInfoData(data?.configuration)
         // setInputConfig(modelInfo?.bridgeData?.bridges?.configuration?.model?.default?.inputConfig); // Default to an empty object if data?.inputConfig is undefined
@@ -90,33 +89,55 @@ const DropdownMenu = ({ params, data }) => {
 
 
 
+    /**
+     * Handle the service dropdown change event
+     * 
+     * @param {Object} e event object
+     */
     const handleService = (e) => {
         const newSelectedService = e.target.value;
 
+        // Update modelInfoData and inputConfig states based on the new selected service and selected model
         setModelInfoData(modelInfo[selectedService][selectedModel]?.configuration || {});
         setInputConfig(modelInfo[selectedService][selectedModel]?.inputConfig || {});
         // setInputConfig(defaultdata);
+
+        // Update the selected service state
         setSelectedService(newSelectedService);
-        // setSelectedModel("")
+
+        // Reset the selected model state to empty string
+        setSelectedModel("");
     }
 
+
+    /**
+     * Handle the model dropdown change event
+     * 
+     * @param {Object} e event object
+     */
     const handleModel = (e) => {
         const newSelectedModel = e.target.value;
-        // setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
-        // setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
-        setSelectedModel(newSelectedModel); // Update selectedModel state with the newly selected model
+
+        // Update selectedModel state with the newly selected model
+        setSelectedModel(newSelectedModel);
+
+        // Check if the newly selected model is of the same type as the current type
+        // If it is, update the existing dataToSend object with the new model
         if (dataToSend.configuration.type === e.target.selectedOptions[0].parentNode.label) {
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
                     model: e.target.value, // Update the model in the configuration
-                    type: e.target.selectedOptions[0].parentNode.label
+                    type: e.target.selectedOptions[0].parentNode.label // Keep the same type
                 },
-                service: selectedService,
-                apiKey: apiKey
+                service: selectedService, // Keep the same service
+                apiKey: apiKey // Keep the same apiKey
             }));
         }
+        // If the newly selected model is not of the same type as the current type, we need to create a new dataToSend object
+        // Depending on the type of the newly selected model, we set the inputConfig and modelInfoData states accordingly
+        // Then we set the new dataToSend object
         else {
 
             if (e.target.selectedOptions[0].parentNode.label === 'chat') {
@@ -176,15 +197,24 @@ const DropdownMenu = ({ params, data }) => {
 
         }
     }
+
+    /**
+     * Handle changes to the input fields in the configuration section of the dropdown menu
+     * 
+     * @param {Object} e event object
+     * @param {string} key key of the modelInfoData object to update
+     */
     const handleInputChange = (e, key) => {
         let newValue;
+        // If the field is a checkbox or a boolean, use the checked property of the event target
         if (modelInfoData[key]?.field === "checkbox" || modelInfoData[key]?.field === "boolean") {
-
             newValue = e.target.checked; // Use checked for checkboxes
-
-        } else {
+        }
+        // Otherwise, use the value property
+        else {
             newValue = e.target.value;
         }
+        // Create a new modelInfoData object with the updated value
         const updatedModelInfo = {
             ...modelInfoData,
             [key]: {
@@ -192,6 +222,7 @@ const DropdownMenu = ({ params, data }) => {
                 default: newValue,
             },
         };
+        // Update the dataToSend object with the new value
         setDataToSend(prevDataToSend => ({
             ...prevDataToSend,
             configuration: {
@@ -199,49 +230,71 @@ const DropdownMenu = ({ params, data }) => {
                 [key]: modelInfoData[key]?.field === "number" || modelInfoData[key]?.field === "slider" ? Number(newValue) : newValue
             }
         }));
+        // Update the modelInfoData state with the new object
         setModelInfoData(updatedModelInfo);
     };
+
     const toggleAccordion = () => {
         setToggle(!toggle)
     }
 
+    /**
+     * Handle changes to the input fields in the configuration section of the dropdown menu
+     * 
+     * @param {string} value The value of the input field
+     * @param {string} key The key of the modelInfoData object to update
+     */
     const handleInputConfigChanges = (value, key) => {
         // Update the inputConfig state with the new value
         setInputConfig(prevInputConfig => ({
             ...prevInputConfig,
             [key]: {
+                /**
+                 * The default value for the input field
+                 */
                 default: {
-                    content: value
+                    /**
+                     * The content of the prompt string
+                     */
+                    content: value,
                 }
             }
         }));
 
         // Update the dataToSend state with the new prompt string
-
     };
 
-    const SaveData = (value, key) => {        
-        const promptString = { "role": key, "content": value };
-        if (key === "input" || key === "prompt") {
+
+    /**
+     * Save the data to the dataToSend state
+     * 
+     * @param {string} value The value of the input field
+     * @param {string} key The key of the dataToSend object to update
+     */
+    const SaveData = (value, key) => {
+        const promptString = { "role": key, "content": value }; // The prompt string to add or update
+
+        if (key === "input" || key === "prompt") { // If the key is input or prompt, update the configuration.input or configuration.prompt field
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
-                    [key]: value
+                    [key]: value // Update the field with the new value
                 }
             }));
         }
-        else if (key === "apikey") {
+        else if (key === "apikey") { // If the key is apikey, update the apikey field
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
-                [key]: value
+                [key]: value // Update the field with the new value
             }));
         }
-        else {
+        else { // If the key is not input, prompt, or apikey, update the prompt array
+
             // Check if the key already exists in the prompt array
             const keyIndex = dataToSend?.configuration?.prompt?.findIndex(item => (item).role === key);
-            if (keyIndex !== -1) {
-                // Key already exists, update the value
+
+            if (keyIndex !== -1) { // If the key already exists, update the value
                 setDataToSend(prevDataToSend => ({
                     ...prevDataToSend,
                     configuration: {
@@ -249,8 +302,7 @@ const DropdownMenu = ({ params, data }) => {
                         prompt: prevDataToSend.configuration.prompt.map((item, index) => index === keyIndex ? promptString : item)
                     }
                 }));
-            } else {
-                // Key does not exist, add it to the prompt array
+            } else { // If the key does not exist, add it to the prompt array
                 setDataToSend(prevDataToSend => ({
                     ...prevDataToSend,
                     configuration: {
@@ -262,16 +314,30 @@ const DropdownMenu = ({ params, data }) => {
         }
     };
 
-    const openPopup = (key, currentValue) => {
-        setTempInput(currentValue);
-        setActiveKey(key);
-        setPopupVisible(true);
-    };
 
-    // Function to handle popup input changes
+    /**
+     * Open the popup to edit the configuration data
+     * 
+     * @param {string} key The key of the dataToSend object to update
+     * @param {string} currentValue The current value of the input field
+     */
+    const openPopup = (key, currentValue) => {
+        setTempInput(currentValue); // Set the current value of the input field in state
+        setActiveKey(key); // Set the key of the dataToSend object to update in state
+        setPopupVisible(true); // Open the popup
+    };
+    // };
+
+    /**
+     * Handle popup input changes
+     * 
+     * @param {Object} e event object
+     */
     const handlePopupInputChange = (e) => {
+        // Set the current value of the input field in state
         setTempInput(e.target.value);
     };
+    // };
 
     // Function to close the popup and save the data
     const closePopup = () => {
@@ -285,39 +351,48 @@ const DropdownMenu = ({ params, data }) => {
         setModalOpen(true);
         setTempJsonString(jsonString);
     };
-    
+
+    /**
+     * Handle the closing of the modal
+     * Parses the JSON string and updates the dataToSend state
+     */
     const handleModalClose = () => {
-        setJsonString(tempJsonString);
-        setModalOpen(false);
-    
+        setJsonString(tempJsonString); // Save the JSON string in state
+        setModalOpen(false); // Close the modal
+
         try {
-            const parsedJson = JSON.parse(tempJsonString);
-            setDataToSend(prevDataToSend => ({
-                ...prevDataToSend,
-                configuration: {
-                    ...prevDataToSend.configuration,
-                    "tools": parsedJson
-                }
+            const parsedJson = JSON.parse(tempJsonString); // Parse the JSON string
+            setDataToSend(prevDataToSend => ({ // Update the dataToSend state
+                ...prevDataToSend, // Keep the previous data
+                configuration: { // Add the new data
+                    ...prevDataToSend.configuration, // Keep the previous configuration
+                    "tools": parsedJson, // Set the "tools" property to the parsed JSON
+                },
             }));
         } catch (error) {
-            // Handle JSON parsing error
-        setJsonString("");
-
-            console.error("Error parsing JSON:", error);
+            setJsonString(""); // Set the JSON string to an empty string
+            console.error("Error parsing JSON:", error); // Log the error
         }
     };
-    
+    // };
 
+
+    /**
+     * Handle changes to the JSON text area
+     * @param {React.ChangeEvent<HTMLTextAreaElement>} event The change event
+     */
     const handleTextAreaChange = (event) => {
-        const newJsonString = event.target.value;
-        setTempJsonString(newJsonString);
+        const newJsonString = event.target.value; // Get the new JSON string
+        setTempJsonString(newJsonString); // Save it to state
+
         try {
-            JSON.parse(newJsonString);
-            setIsValid(true);
+            JSON.parse(newJsonString); // Try to parse the new JSON string
+            setIsValid(true); // If it parses correctly, set isValid to true
         } catch (error) {
-            setIsValid(false);
+            setIsValid(false); // If it doesn't parse correctly, set isValid to false
         }
     };
+
 
 
 
@@ -561,7 +636,7 @@ const DropdownMenu = ({ params, data }) => {
                                                 className="textarea textarea-bordered w-full h-80 md:h-96 resize-none"
                                                 value={tempJsonString}
                                                 onChange={handleTextAreaChange}
-                                                // onBlur={(e)=> }
+                                            // onBlur={(e)=> }
                                             ></textarea>
                                             {!isValid && <p className="text-red-500">Invalid JSON</p>}
                                         </div>
@@ -576,7 +651,6 @@ const DropdownMenu = ({ params, data }) => {
                         <div className="label">
                             <span className="label-text">Playground</span>
                         </div>
-                        {/* <p>playground</p> */}
                         <Chat dataToSend={dataToSend} params={params} />
                     </div>
                 </div>

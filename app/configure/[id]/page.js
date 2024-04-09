@@ -6,17 +6,11 @@ import DropdownMenu from "@/components/dropDown"
 import { useEffect, useState } from "react"
 import { getSingleBridgesAction } from "@/store/action/bridgeAction"
 import { useDispatch } from "react-redux"
-import Playground from "@/components/playground"
-import Chat from "@/components/chat"
-import { usePathname, useRouter } from "next/navigation"
+// import { usePathname, useRouter } from "next/navigation"
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)"
 import Sidebar from "@/components/Sidebar"
 
-
-
-function Page({ params }) {
-  const path = usePathname()
-  const route = useRouter()
+const  Page = ({ params }) => {
   const dispatch = useDispatch()
 
   const { bridge, bridgeService, bridgeConfigration } = useCustomSelector((state) => ({
@@ -31,7 +25,7 @@ function Page({ params }) {
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
   }, [])
-  
+
   useEffect(() => {
     setModelInfoClone(modelInfo[bridgeService])
   }, [params.id, bridgeService, bridgeConfigration, modelInfoClone]);
@@ -43,12 +37,12 @@ function Page({ params }) {
     if (bridgeConfigration && configrationData && configrationData.configuration) {
       Object.keys(bridgeConfigration).forEach(key => {
         if (configrationData.configuration.hasOwnProperty(key)) {
-          
+
           configrationData.configuration[key].default = bridgeConfigration[key]?.default;
         }
-        if(key==="prompt" && bridgeService === 'openai'){
+        if (key === "prompt" && bridgeService === 'openai') {
           bridgeConfigration.prompt.forEach(obj => {
-            configrationData.inputConfig[obj["role"]].default[configrationData.inputConfig[obj["role"]].contentKey]=obj[configrationData.inputConfig[obj["role"]].contentKey] ?? "";
+            configrationData.inputConfig[obj["role"]].default[configrationData.inputConfig[obj["role"]].contentKey] = obj[configrationData.inputConfig[obj["role"]].contentKey] ?? "";
           });
         }
       });
@@ -71,8 +65,8 @@ function Page({ params }) {
         </div>
 
       </div>
-     
-       <Sidebar/>
+
+      <Sidebar />
 
     </div>
   )
