@@ -10,7 +10,7 @@ function page () {
   const router = useRouter();
 
   async function runEffect() {
-    if (localStorage.getItem('proxy_auth_token')){
+    if (localStorage.getItem('proxy_token')){
       router.replace("/bridges");
       return ;
     }

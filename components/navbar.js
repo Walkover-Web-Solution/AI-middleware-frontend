@@ -21,7 +21,7 @@ function Navbar() {
         try {
           await logoutUserFromMsg91({
             headers: {
-              proxy_auth_token: localStorage.getItem('proxy_auth_token')
+              proxy_auth_token: localStorage.getItem('proxy_token')
             }
           })
         //   removeCookie(getSubdomain())

@@ -9,12 +9,12 @@ return (props) => {
     const  proxy_auth_token =searchParams.get('proxy_auth_token') 
 
     if (proxy_auth_token) {
-      localStorage?.setItem('proxy_auth_token', proxy_auth_token);
+      localStorage?.setItem('proxy_token', proxy_auth_token);
       router.replace("/org");
       return;
     }
 
-    if (localStorage?.getItem('proxy_auth_token')) {
+    if (localStorage?.getItem('proxy_token')) {
       router.replace("/org");
       return;
     }
