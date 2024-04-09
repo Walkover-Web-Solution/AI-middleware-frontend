@@ -30,6 +30,9 @@ function Page({ params }) {
 
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
+  }, [])
+  
+  useEffect(() => {
     setModelInfoClone(modelInfo[bridgeService])
   }, [params.id, bridgeService, bridgeConfigration, modelInfoClone]);
 
