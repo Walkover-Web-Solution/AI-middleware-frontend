@@ -293,7 +293,7 @@ const DropdownMenu = ({ params, data }) => {
             ...prevDataToSend,
             configuration: {
                 ...prevDataToSend.configuration,
-                "tools": JSON.parse(tempJsonString)
+                "tools": JSON.parse(tempJsonString) ? JSON.parse(tempJsonString) : "" 
             }
         }));
     };
