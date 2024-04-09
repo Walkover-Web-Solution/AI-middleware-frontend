@@ -289,14 +289,24 @@ const DropdownMenu = ({ params, data }) => {
     const handleModalClose = () => {
         setJsonString(tempJsonString);
         setModalOpen(false);
-        setDataToSend(prevDataToSend => ({
-            ...prevDataToSend,
-            configuration: {
-                ...prevDataToSend.configuration,
-                "tools": JSON.parse(tempJsonString) ? JSON.parse(tempJsonString) : "" 
-            }
-        }));
+    
+        try {
+            const parsedJson = JSON.parse(tempJsonString);
+            setDataToSend(prevDataToSend => ({
+                ...prevDataToSend,
+                configuration: {
+                    ...prevDataToSend.configuration,
+                    "tools": parsedJson
+                }
+            }));
+        } catch (error) {
+            // Handle JSON parsing error
+        setJsonString("");
+
+            console.error("Error parsing JSON:", error);
+        }
     };
+    
 
     const handleTextAreaChange = (event) => {
         const newJsonString = event.target.value;
