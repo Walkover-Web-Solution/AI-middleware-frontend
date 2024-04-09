@@ -3,7 +3,7 @@ import axios from "axios";
 axios.interceptors.request.use(
     async (config) => {
         let token
-        if(config.url.includes("routes.msg91.com")) token = localStorage.getItem("proxy_auth_token")
+        if(config.url.includes("routes.msg91.com")) token = localStorage.getItem("proxy_token")
         else token =  process.env.NEXT_PUBLIC_AUTHORIZATION_CODE
         if (token && config.url.includes("routes.msg91.com")) {
             config.headers['proxy_auth_token'] = token
