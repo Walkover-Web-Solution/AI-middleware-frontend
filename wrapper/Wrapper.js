@@ -8,14 +8,24 @@ import 'react-toastify/dist/ReactToastify.css';
 export const metadata = {
   title: "Login | Student",
 };
+/**
+ * The Wrapper component is the top level component of our application
+ * It provides the Redux store to all the child components
+ * It also has a ToastContainer for the react-toastify notifications
+ */
 const Wrapper = ({ children }) => {
+  // Return a Provider component that wraps all the child components
+  // with the Redux store
+  // It also has a div that wraps all the child components
+  // And adds a ToastContainer for the notifications
   return (
     <>
       <Provider store={store}>
         <div className="w-full h-svh relative overflow-hidden">
+          {/* All the child components */}
           {children}
+          {/* Notification toast container */}
           <ToastContainer position="bottom-left" />
-
         </div>
       </Provider>
     </>

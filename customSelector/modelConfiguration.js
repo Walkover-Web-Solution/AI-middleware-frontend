@@ -302,6 +302,6 @@ class ModelsConfig {  //params:[vlaue,enum(0,1,2) 0->optional, 1->required, 2->o
         }
         return { configuration, outputConfig }
     }
-}
+}``
 
 module.exports = ModelsConfig
