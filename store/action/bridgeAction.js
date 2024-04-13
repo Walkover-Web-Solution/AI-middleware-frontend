@@ -1,7 +1,6 @@
 import { createBridge, getAllBridges, getSingleBridge,deleteBridge } from "@/api";
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer,deleteBridgeReducer } from "../reducer/bridgeReducer";
 import axios from "@/utils/interceptor";
-import { useRouter } from "next/navigation";
 
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //

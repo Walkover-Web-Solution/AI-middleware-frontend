@@ -23,10 +23,14 @@ function Page() {
 
   const columns = ["name", "authkey", "created_at"];
 
+  /**
+   * Copies given content to clipboard
+   * @param {string} content Content to be copied
+   */
   const copyToClipboard = (content) => {
     navigator.clipboard.writeText(content)
       .then(() => {
-        toast.success("Content copied to clipboard")
+        toast.success("Content copied to clipboard");
         // Optionally, you can show a success message to the user
       })
       .catch((error) => {
@@ -35,27 +39,33 @@ function Page() {
       });
   };
 
+  /**
+   * Handler for creating a new auth key
+   * @param {Event} e Event object
+   * @param {string} name Name of the new auth key
+   */
   const createAuthKeyHandler = async (e, name) => {
     if (name.length > 0) {
-        setIsCreating(true); // Start loading
-        try {
-            await dispatch(createNewAuthData({
-                "name": name,
-                "throttle_limit": "60:800",
-                "temporary_throttle_limit": "60:600",
-                "temporary_throttle_time": "30"
-            }));
-            toast.success("Auth key created successfully");
-            document.getElementById('my_modal_5').close();
-        } catch (error) {
-            toast.error("Failed to create auth key");
-            console.error(error);
-        } finally {
-            setIsCreating(false); // End loading
-        }
+      setIsCreating(true); // Start loading
+      try {
+        await dispatch(createNewAuthData({
+          name,
+          throttle_limit: "60:800",
+          temporary_throttle_limit: "60:600",
+          temporary_throttle_time: "30",
+        }));
+        toast.success("Auth key created successfully");
+        document.getElementById('my_modal_5').close();
+      } catch (error) {
+        toast.error("Failed to create auth key");
+        console.error(error);
+      } finally {
+        setIsCreating(false); // End loading
+      }
+    } else {
+      toast.error("Input field cannot be empty");
     }
-    else toast.error("Input field cannot be empty");
-}
+  };
 
   const deleteModel = (authname, authid, index) => {
     setSingleAuthData({ name: authname, id: authid, index })

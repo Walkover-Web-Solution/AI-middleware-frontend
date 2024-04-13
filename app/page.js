@@ -5,48 +5,63 @@ import React, {  useLayoutEffect } from 'react'
 import { useRouter } from 'next/navigation';
 import WithAuth from '@/components/withauth';
 
-function page () {
-
+/**
+ * This page is the entry point for the user to start the login process.
+ * The page checks if the user has already logged in or not.
+ * If the user has not logged in, it will redirect the user to the login page.
+ * If the user has already logged in, it will redirect the user to the bridges page.
+ */
+function page() {
+  // Get the Next.js router instance
   const router = useRouter();
 
+  // This effect is called only once when the component is mounted
+  // It checks if the user has already logged in or not
+  // If the user has logged in, it will redirect the user to the bridges page
+  // If the user has not logged in, it will redirect the user to the login page
   async function runEffect() {
-    if (localStorage.getItem('proxy_token')){
+    if (localStorage.getItem('proxy_token')) {
+      // If the user has already logged in, redirect the user to the bridges page
       router.replace("/bridges");
-      return ;
+      return;
     }
-      const configuration = {
-        referenceId: process.env.NEXT_PUBLIC_REFERENCEID ,
-        success: (data) => {
-          // get verified token in response
-          console.log('success response', data)
-        },
-        failure: (error) => {
-          // handle error
-          console.log('failure reason', error)
+
+    // If the user has not logged in, redirect the user to the login page
+    const configuration = {
+      referenceId: process.env.NEXT_PUBLIC_REFERENCEID, // The unique id of the app
+      success: (data) => { // Called when the user is successfully authenticated
+        // Get the verified token in response
+        console.log('success response', data);
+      },
+      failure: (error) => { // Called when there is an error
+        // Handle the error
+        console.log('failure reason', error);
+      }
+    };
+
+    // Load the login script from msg91
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.onload = () => {
+      const checkInitVerification = setInterval(() => {
+        if (typeof initVerification === 'function') {
+          clearInterval(checkInitVerification);
+          initVerification(configuration); // Initialize the login process
         }
-      }
-      const script = document.createElement('script')
-      script.type = 'text/javascript'
-      script.onload = () => {
-        const checkInitVerification = setInterval(() => {
-          if (typeof initVerification === 'function') {
-            clearInterval(checkInitVerification)
-            initVerification(configuration)
-          }
-        }, 100)
-      }
-      script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js'
-      document.body.appendChild(script)
+      }, 100);
+    };
+    script.src = 'https://proxy.msg91.com/assets/proxy-auth/proxy-auth.js';
+    document.body.appendChild(script); // Add the script to the page
   }
   useLayoutEffect(() => {
-    runEffect()
-  },[])
+    runEffect();
+  }, []);
 
   return (
-    <div style={{width : "100vw" , height : "100vh"}} className=' flex justify-center items-center'>
-       <div id={process.env.NEXT_PUBLIC_REFERENCEID} />
-   </div>
-  )
+    <div style={{ width: "100vw", height: "100vh" }} className=' flex justify-center items-center'>
+      <div id={process.env.NEXT_PUBLIC_REFERENCEID} /> {/* The div is required for the login script to work */}
+    </div>
+  );
 }
 
 export default WithAuth(page)

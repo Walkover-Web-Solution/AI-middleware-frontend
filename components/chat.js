@@ -132,16 +132,15 @@ function Chat({ dataToSend , params}) {
     [handleSendMessage]
   );
 
-
+console.log(localDataToSend , "localDataToSend")
   const UpdateBridge = async()=> {
-      await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : localDataToSend.configuration , service : localDataToSend.service}})
+      await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : localDataToSend.configuration , service : localDataToSend.service , apikey : localDataToSend.apikey}})
       toast.success("Bridge is updated");
   }
 
   return (
     <>
-    <button className="btn float-end btn-sm" onClick={UpdateBridge}>Update Bridge</button>
-    <div className=" p:2 sm:p-6 justify-between flex flex-col h-[80vh] lg:w-[50vw] border w-full z-10">
+    <div className=" p:2 sm:p-6 justify-between flex flex-col h-[80vh] lg:w-[50vw] border rounded-xl w-full z-10">
       <div
         id="messages"
         className="flex flex-col w-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch z-10"
@@ -203,6 +202,8 @@ function Chat({ dataToSend , params}) {
         )}
       </div>
     </div>
+    <button className="btn float-end  m-5" onClick={UpdateBridge}>Update Bridge</button>
+
     </>
   );
 }

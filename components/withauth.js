@@ -23,4 +23,3 @@ return (props) => {
 }
 export default WithAuth;
 
-
