@@ -132,9 +132,9 @@ function Chat({ dataToSend , params}) {
     [handleSendMessage]
   );
 
-
+console.log(localDataToSend , "localDataToSend")
   const UpdateBridge = async()=> {
-      await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : localDataToSend.configuration , service : localDataToSend.service}})
+      await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : localDataToSend.configuration , service : localDataToSend.service , apikey : localDataToSend.apikey}})
       toast.success("Bridge is updated");
   }
 

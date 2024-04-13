@@ -35,33 +35,39 @@ const nextPage = () => setCurrentPage(prev => (prev < totalPages ? prev + 1 : pr
 const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
 
 
+/**
+ * Handle Delete Bridge Action
+ *
+ * @param {string} bridgeId Bridge Id
+ *
+ * @returns {Promise<void>}
+ */
 const handleDeleteBridge = async (bridgeId) => {
+  // Confirm delete action
   const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
+
+  // If confirmed
   if (confirmDelete) {
     try {
-       dispatch(deleteBridgeAction(bridgeId));
-       toast.success('Bridge deleted successfully');
-      dispatch(getAllBridgesAction()); 
+      // Dispatch delete bridge action and get all bridges
+      dispatch(deleteBridgeAction(bridgeId));
+      toast.success('Bridge deleted successfully');
+      await dispatch(getAllBridgesAction());
     } catch (error) {
+      // Log error
       console.error('Failed to delete bridge:', error);
+      // Show toast error
       toast.error('Error deleting bridge');
     }
   }
 };
 
-
-  useEffect(() => {
+useEffect(() => {
     dispatch(getAllBridgesAction())
   }, [])
   const columns = ["name", "_id", "service"];
 
-  
-
-  return (
-
-
-
-    <div className="drawer lg:drawer-open overflow-hidden">
+  return ( <div className="drawer lg:drawer-open overflow-hidden">
       {isLoading &&  
                 (<div className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-filter backdrop-blur-lg flex justify-center items-center z-50">
                 <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-xl">
