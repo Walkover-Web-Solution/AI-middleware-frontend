@@ -26,7 +26,7 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
 export const getAllBridgesAction = () => async (dispatch, getState) => {
   try {
     const response = await getAllBridges();
-    dispatch(fetchAllBridgeReducer(response.data.bridges));
+    dispatch(fetchAllBridgeReducer(response.data.result.bridges));
   } catch (error) {
     console.error(error);
   }
