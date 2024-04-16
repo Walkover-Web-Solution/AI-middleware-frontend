@@ -12,6 +12,7 @@ export const modelInfo = {
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0 }
             },
+            "apikey" : "" ,
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -29,7 +30,7 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-                }
+                }   
             }
         },
 
@@ -46,6 +47,8 @@ export const modelInfo = {
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0 }
             },
+            "apikey" : "" ,
+
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -84,6 +87,8 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0 },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
+            "apikey" : "" ,
+
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -122,6 +127,8 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
+            "apikey" : "" ,
+
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -159,6 +166,8 @@ export const modelInfo = {
                 "tool_choice": { field: "string", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
+
+            "apikey" : "" ,
 
 
             outputConfig: {
@@ -198,6 +207,7 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
+            "apikey" : "" ,
 
 
             outputConfig: {
@@ -238,6 +248,7 @@ export const modelInfo = {
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
 
+            "apikey" : "" ,
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -274,6 +285,8 @@ export const modelInfo = {
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
             },
+            "apikey" : "" ,
+
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -311,6 +324,8 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
             },
 
+            "apikey" : "" ,
+
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
@@ -347,6 +362,7 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
+            "apikey" : "" ,
 
 
             outputConfig: {
@@ -386,6 +402,8 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
+            "apikey" : "" ,
+
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -424,6 +442,8 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "json_object", default: { "text": "json_object" }, level: 0 }
             },
+            "apikey" : "" ,
+
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -452,6 +472,8 @@ export const modelInfo = {
                 "encoding_format": { field: "dropdown", values: ['float', 'base64'], default: "float", level: 2 },
                 "dimensions": {field: "number" ,level: 0}
             },
+            "apikey" : "" ,
+
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", total_tokens: "usage.total_tokens" }],
@@ -474,6 +496,8 @@ export const modelInfo = {
                 "dimensions": {field: "number" ,level: 0}
             },
 
+            "apikey" : "" ,
+
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", total_tokens: "usage.total_tokens" }],
                 message: "data[0].embedding"
@@ -493,6 +517,8 @@ export const modelInfo = {
                 "encoding_format": { field: "dropdown", values: ['float', 'base64'], default: "float", level: 2 },
                 // dimensions is fixed here, 1536 will be the size of the vector
             },
+            "apikey" : "" ,
+
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", total_tokens: "usage.total_tokens" }],
@@ -518,6 +544,8 @@ export const modelInfo = {
                 "presence_penalty": {field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2},
                 "best_of": {field: "slider", min: 1, max: 20, step: 1, default: 1, level: 2}
             },
+            "apikey" : "" ,
+
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -550,6 +578,8 @@ export const modelInfo = {
                 "maxOutputTokens": {field: "slider", min: 1, max: 8192, default: 8192, step: 1, level: 2},
                 "stopSequences": {field: "array", default:"", level: 0}
             },
+
+            "apikey" : "" ,
 
             outputConfig: {
                 usage: [],

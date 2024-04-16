@@ -15,7 +15,7 @@ const DropdownMenu = ({ params, data }) => {
     const [selectedService, setSelectedService] = useState('');
     const [selectedModel, setSelectedModel] = useState(bridgeData?.bridges?.configuration?.model?.default);
     const [dataToSend, setDataToSend] = useState({})
-    const [apiKey, setApiKey] = useState('')
+    const [apiKey, setApiKey] = useState(data?.apikey)
     const [modelInfoData, setModelInfoData] = useState({})
     const [inputConfig, setInputConfig] = useState(data?.inputConfig ?? modelInfo?.data?.configuration?.model?.default?.inputConfig)
     const [isPopupVisible, setPopupVisible] = useState(false);
@@ -29,6 +29,7 @@ const DropdownMenu = ({ params, data }) => {
 
     useEffect(() => {
         setSelectedService(bridgeData?.bridges?.service?.toLowerCase());
+        setApiKey(bridgeData?.bridges?.apikey || "");
         setJsonString(JSON.stringify(data?.configuration?.tools) || "")
         setSelectedModel(bridgeData?.bridges?.configuration?.model?.default)
         setModelInfoData(data?.configuration)
@@ -47,7 +48,7 @@ const DropdownMenu = ({ params, data }) => {
             setDataToSend({
                 "configuration": {
                     "model": selectedModel,
-                    "prompt": [],
+                    "prompt": [...bridgeData?.bridges?.configuration?.prompt || ""],
                     "type": foundKey,
                     "user": [],
                     "conversation": []
@@ -60,7 +61,7 @@ const DropdownMenu = ({ params, data }) => {
             setDataToSend({
                 "configuration": {
                     "model": selectedModel,
-                    "input": "",
+                    "input":  bridgeData?.bridges?.configuration?.input,
                     "type": foundKey
 
                 },
@@ -74,7 +75,7 @@ const DropdownMenu = ({ params, data }) => {
                 {
                     "configuration": {
                         "model": selectedModel,
-                        "prompt": "",
+                        "prompt":  bridgeData?.bridges?.configuration?.prompt ,
                         "type": foundKey
 
                     },
@@ -85,7 +86,7 @@ const DropdownMenu = ({ params, data }) => {
             )
         }
 
-    }, [bridgeData, data]);
+    }, [bridgeData, data, params]);
 
 
 
@@ -397,10 +398,13 @@ const DropdownMenu = ({ params, data }) => {
 
 
     return (
-        <div className='flex items-start h-full justify-start'>
-
-            <div className='w-1/4 h-full pr-2'>
-                <label className="form-control w-full ">
+        <>
+        <div className=" " style={{height : "90vh"}}>
+        <div className=" flex flex-col overflow-hidden  border border-gray-300 md:flex-row">
+          <div className="w-full border-r border-gray-300 bg-gray-100 md:max-w-xs">
+            <div className="p-4 overflow-auto" style={{height : "90vh"}}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-5 md:grid-cols-1">
+              <label className="form-control w-full ">
                     <div className="label">
                         <span className="label-text">Service</span>
                     </div>
@@ -563,13 +567,14 @@ const DropdownMenu = ({ params, data }) => {
                     onBlur={(e) => SaveData(e.target.value, "apikey")}
                 />
 
-
+              </div>
             </div>
-
-            <div className="hero place-items-stretch h-full w-full ">
-                <div className="hero-content justify-between items-start max-w-full p-0 flex-col lg:flex-row">
-                    <div className='w-full'>
-                        {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
+            
+          </div>
+          <div className="w-full border-r border-gray-300 bg-gray-100 md:max-w-xs">
+            <div className="p-4 overflow-auto h-" style={{height : "90vh"}}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-5 md:grid-cols-1">
+              {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
                             <>
                                 {key !== "rawData" && (
                                     <div className="form-control w-full " key={key}>
@@ -645,18 +650,19 @@ const DropdownMenu = ({ params, data }) => {
                             )}
 
                         </div>
-
-                    </div>
-                    <div className='w-full pr-3'>
-                        <div className="label">
-                            <span className="label-text">Playground</span>
-                        </div>
-                        <Chat dataToSend={dataToSend} params={params} />
-                    </div>
-                </div>
+              </div>
             </div>
-
+            
+          </div>
+          <div className="flex-1">
+            <div className="pl-4 pr-4 pb-4">
+         
+                        <Chat dataToSend={dataToSend} params={params} />
+            </div>
+          </div>
         </div>
+      </div>
+        </>
     );
 };
 

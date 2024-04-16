@@ -22,7 +22,7 @@ function Sidebar() {
   ];
 
   return (
-    <div className="drawer-side shadow-xl">
+    <div className="drawer-side shadow-xl h-full">
       <label htmlFor="my-drawer-2" className="drawer-overlay"></label>
       <ul className="menu p-4 min-h-full bg-white rounded-lg">
         {menuItems.map((item) => (
