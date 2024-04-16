@@ -84,6 +84,7 @@ function Navbar() {
                   <li><a>{userdetails.name}</a></li>
                   <li><a>{userdetails.email}</a></li>
                   <li onClick={logoutHandler}><a>logout</a></li>
+                  <li><a href='/org'>Switch Org</a></li>
               </ul>
           </button>
       </div>

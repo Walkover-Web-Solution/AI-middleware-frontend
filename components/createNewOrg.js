@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { createOrgAction, getAllOrgAction } from '@/store/action/orgAction';
+import { userDetails } from '@/store/action/userDetailsAction';
 
 function CreateOrg({onClose}) {
     const [orgDetails, setOrgDetails] = useState({
@@ -41,7 +42,7 @@ function CreateOrg({onClose}) {
             dispatch(createOrgAction(dataToSend, () => {
                 toast.success('Organization created successfully');
                 onClose(); 
-                dispatch(getAllOrgAction());
+                dispatch(userDetails());
                 route.push('/org'); 
             }));
         } catch (error) {
