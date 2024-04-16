@@ -18,7 +18,6 @@ import Sidebar from "@/components/Sidebar"
 const Page = ({ params }) => {
   // Get the redux store's dispatch function
   const dispatch = useDispatch()
-
   // Get the data for the selected bridge from the store
   const { bridge, bridgeService, bridgeConfigration } = useCustomSelector((state) => ({
     bridgeService: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridges?.service,
@@ -34,7 +33,7 @@ const Page = ({ params }) => {
   // Fetch the data for the selected bridge from the server on mount
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
-  }, [])
+  }, [params.id])
 
   // Update the modelInfoClone on mount and when the bridgeService or 
   // bridgeConfigration changes, this ensures that the correct data
@@ -73,7 +72,7 @@ const Page = ({ params }) => {
   return (
     <div className="drawer lg:drawer-open">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex pl-2 flex-col items-start justify-start">
+      <div className="drawer-content flex flex-col items-start justify-start">
         {/* Page content here */}
         {/* <label htmlFor="my-drawer-2" className="btn btn-primary drawer-button lg:hidden">Open drawer</label> */}
         {/* <h1 className="text-2xl font-bold capitalize pb-2">{bridgeData?.bridges?.name}</h1> */}
