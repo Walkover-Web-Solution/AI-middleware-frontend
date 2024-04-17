@@ -34,7 +34,7 @@ export const modelInfo = {
             }
         },
 
-        "gpt_3_5_turbo_0613": {
+        "gpt-3.5-turbo-0613": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-3.5-turbo-0613", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
