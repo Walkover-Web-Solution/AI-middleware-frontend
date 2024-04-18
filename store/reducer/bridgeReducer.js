@@ -15,6 +15,7 @@ export const bridgeReducer = createSlice({
     fetchSingleBridgeReducer : (state, action) => {
       state.allBridgesMap[ action.payload?.bridges?._id] = action.payload ; 
     } ,
+
     fetchAllBridgeReducer : (state, action) => {
       state.allBridges = action.payload;
       const allBridgesMap = {}
