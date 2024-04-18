@@ -22,8 +22,8 @@ const Page = ({ params }) => {
   useEffect(() => {
     const fetchData = async () => {
       const script = document.createElement("script");
-      script.id = "viasocket-embed-main-script";
-      script.src = "https://embed.viasocket.com/test-embedcomponent.js";
+      script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
+      script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC
       script.setAttribute("embedToken", bridge?.embed_token);
       document.body.appendChild(script);
     };
