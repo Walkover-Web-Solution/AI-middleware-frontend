@@ -1,7 +1,6 @@
 "use client"
 
 import axios from "@/utils/interceptor"
-import { Asul } from "next/font/google";
 import { toast } from "react-toastify";
 
 
