@@ -35,7 +35,7 @@ function page() {
       },
       failure: (error) => { // Called when there is an error
         // Handle the error
-        console.log('failure reason', error);
+        console.error('failure reason', error);
       }
     };
 

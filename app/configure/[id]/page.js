@@ -2,13 +2,10 @@
 import Protected from "@/components/protected"
 import { useCustomSelector } from "@/customSelector/customSelector"
 import DropdownMenu from "@/components/dropDown"
-import { useEffect, useState } from "react"
-import { getSingleBridgesAction } from "@/store/action/bridgeAction"
+import { useEffect, useLayoutEffect, useState } from "react"
+import { getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction"
 import { useDispatch } from "react-redux"
-import { modelInfo } from "@/jsonFiles/allModelsConfig (1)"
 import Sidebar from "@/components/Sidebar"
-import axios from "axios"
-import { method } from "lodash"
 
 const Page = ({ params }) => {
   const dispatch = useDispatch()
@@ -16,41 +13,34 @@ const Page = ({ params }) => {
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridges
   }))
 
-  const [modelInfoClone, setModelInfoClone] = useState(modelInfo)
-  const [intregrationData, setIntregationData] = useState("")
+
+  useLayoutEffect(() => {
+    dispatch(getSingleBridgesAction(params.id)); 
+  }, [params.id])
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        dispatch(getSingleBridgesAction(params.id));
         const script = document.createElement("script");
         script.id = "viasocket-embed-main-script";
         script.src = "https://embed.viasocket.com/test-embedcomponent.js";
         script.setAttribute("embedToken", bridge?.embed_token);
         document.body.appendChild(script);
-
-        const response = await axios({url:"https://dev-api.viasocket.com/projects/projXzlaXL3n/integrations", 
-          headers: {
-            authorization: bridge?.embed_token 
-          },
-          method:"get"
-        });
-        setIntregationData(response.data);
-      } catch (error) {
-        console.error("Error fetching integration data:", error);
-      }
     };
+
+    dispatch(integrationAction(bridge?.embed_token , params.id))
 
     fetchData();
 
     return () => {
       document.body.removeChild(document.getElementById("viasocket-embed-main-script"));
     };
-  }, [params.id, dispatch, bridge]);
+  }, [params.id, dispatch, bridge ,  bridge?.embed_token]);
 
   window.addEventListener("message", (e) => {
     console.log(e);
   });
+
+
 
   return (
     <div className="drawer lg:drawer-open">

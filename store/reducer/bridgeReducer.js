@@ -5,6 +5,7 @@ const initialState = {
  allBridgesMap : {} ,
  allBridges : [],
   loading: false,
+
 };
 
 export const bridgeReducer = createSlice({
@@ -45,6 +46,12 @@ export const bridgeReducer = createSlice({
       state.allBridges = updatedBridges;
       state.allBridgesMap = updatedBridgesMap;
     },
+    integrationReducer: (state, action) => {
+      const { intregration, id } = action.payload;
+      console.log(id)
+      const newdata = {...state.allBridgesMap[id] , integrationData : intregration}
+      state.allBridgesMap[id] = newdata;
+    }
     
   },
 });
@@ -54,6 +61,7 @@ export const {
     fetchSingleBridgeReducer,
     createBridgeReducer,
     updateBridgeReducer,
-    deleteBridgeReducer
+    deleteBridgeReducer,
+    integrationReducer
 } = bridgeReducer.actions;
 export default bridgeReducer.reducer;
