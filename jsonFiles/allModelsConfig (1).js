@@ -85,7 +85,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0 },
                 "tools": { field: "array", level: 0, default: [] },
                 "tool_choice": { field: "text", default: "auto", level: 0 },
-                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
+                "response_format": { field: "boolean", default: false, level: 0 }
             },
             "apikey" : "" ,
 
@@ -125,7 +125,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0 },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
+                "response_format": { field: "boolean", default: false, level: 0 }
             },
             "apikey" : "" ,
 
@@ -164,7 +164,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "string", default: "auto", level: 0, },
-                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
+                "response_format": { field: "boolean", default: false, level: 0 }
             },
 
             "apikey" : "" ,
@@ -205,7 +205,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
+                "response_format": { field: "boolean", default: false, level: 0 }
             },
             "apikey" : "" ,
 
@@ -245,7 +245,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
+                "response_format": { field: "boolean", default: false, level: 0 }
             },
 
             "apikey" : "" ,
@@ -360,7 +360,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
+                "response_format": { field: "boolean", default: false, level: 0 }
             },
             "apikey" : "" ,
 
@@ -400,7 +400,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
+                "response_format": { field: "boolean", default: false, level: 0 }
             },
             "apikey" : "" ,
 
@@ -440,7 +440,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "json_object", default: { "text": "json_object" }, level: 0 }
+                "response_format": { field: "boolean", default: { "text": "boolean" }, level: 0 }
             },
             "apikey" : "" ,
 

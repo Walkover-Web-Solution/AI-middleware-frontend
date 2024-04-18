@@ -112,7 +112,10 @@ const DropdownMenu = ({ params, data, embed }) => {
      * @param {Object} e event object
      */
     const handleModel = (e) => {
+
         const newSelectedModel = e.target.value;
+        setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
+        setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
 
         // Update selectedModel state with the newly selected model
         setSelectedModel(newSelectedModel);
@@ -128,7 +131,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                     type: e.target.selectedOptions[0].parentNode.label // Keep the same type
                 },
                 service: selectedService, // Keep the same service
-                apiKey: apiKey // Keep the same apiKey
+                apikey: apiKey // Keep the same apiKey
             }));
         }
         // If the newly selected model is not of the same type as the current type, we need to create a new dataToSend object
@@ -138,8 +141,8 @@ const DropdownMenu = ({ params, data, embed }) => {
 
             if (e.target.selectedOptions[0].parentNode.label === 'chat') {
 
-                setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
-                setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
+                // setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
+                // setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
 
                 setDataToSend({
                     "configuration": {
@@ -156,8 +159,8 @@ const DropdownMenu = ({ params, data, embed }) => {
             }
             else if (e.target.selectedOptions[0].parentNode.label === "embedding") {
 
-                setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
-                setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
+                // setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
+                // setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
 
                 setDataToSend({
                     "configuration": {
@@ -173,8 +176,8 @@ const DropdownMenu = ({ params, data, embed }) => {
             }
             else if (e.target.selectedOptions[0].parentNode.label === "completion") {
 
-                setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
-                setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
+                // setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
+                // setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
 
                 setDataToSend(
                     {
@@ -203,9 +206,20 @@ const DropdownMenu = ({ params, data, embed }) => {
     const handleInputChange = (e, key) => {
         let newValue;
         // If the field is a checkbox or a boolean, use the checked property of the event target
-        if (modelInfoData[key]?.field === "checkbox" || modelInfoData[key]?.field === "boolean" || modelInfoData[key]?.field === "json_object") {
-            newValue = e.target.checked; // Use checked for checkboxes
+        if (modelInfoData[key]?.field === "checkbox" || modelInfoData[key]?.field === "boolean") {
+            if (key === "response_format") {
+
+                if (e.target.checked) { newValue = { "type": "json_object" } }
+                else {
+                    const data = { ...modelInfoData };
+                    delete data.response_format;
+                    setModelInfoData(data);
+                }  // Adjust value accordingly
+            } else {
+                newValue = e.target.checked; // Use checked for checkboxes
+            }
         }
+
         // Otherwise, use the value property
         else {
             newValue = e.target.value;
@@ -223,7 +237,7 @@ const DropdownMenu = ({ params, data, embed }) => {
             ...prevDataToSend,
             configuration: {
                 ...prevDataToSend.configuration,
-                [key]: modelInfoData[key]?.field === "number" || modelInfoData[key]?.field === "slider" ? Number(newValue) : newValue
+                [key]: modelInfoData[key]?.field === "number" || modelInfoData[key]?.field === "slider" ? Number(newValue) : modelInfoData[key]?.field === "json_object" ? "" : newValue
             }
         }));
         // Update the modelInfoData state with the new object
@@ -397,6 +411,22 @@ const DropdownMenu = ({ params, data, embed }) => {
                     <div className="w-full border-r border-gray-300 bg-gray-100 md:max-w-xs">
                         <div className="p-4 overflow-auto" style={{ height: "90vh" }}>
                             <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-5 md:grid-cols-1">
+
+                                <label className="form-control w-full max-w-xs">
+                                    <div className="label">
+                                        <span className="label-text">Provide Your ApiKey</span>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={apiKey}
+                                        onChange={(e) => setApiKey(e.target.value)}
+                                        className="input w-full input-bordered"
+                                        onBlur={(e) => SaveData(e.target.value, "apikey")}
+                                    />
+                                  
+                                </label>
+
                                 <label className="form-control w-full ">
                                     <div className="label">
                                         <span className="label-text">Service</span>
@@ -415,7 +445,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                         <span className="label-text">Model</span>
                                     </div>
                                     <select value={selectedModel} onChange={handleModel} className="select select-bordered">
-                                        <option selected>Select a Model</option>
+                                        <option disabled selected>Select a Model</option>
 
                                         {Object.entries(services?.[selectedService] || {}).map(([group, options]) => (
                                             group !== 'models' && // Exclude the 'models' group
@@ -428,7 +458,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                     </select>
                                 </label>
                                 {modelInfoData && Object.entries(modelInfoData || {}).map(([key, value]) => (
-                                    key !== 'model' && key !== 'prompt' && key !== 'conversation' && key !== 'user' && key !== 'service' && value.level !== 0 &&
+                                    key !== 'model' && value.level !== 0 &&
                                     <div className={`mb-2 ${value.field === "boolean" ? "flex justify-between item-center" : ""} `}>
 
                                         <div className='flex justify-between items-center w-full'>
@@ -545,29 +575,20 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                                     name={key} // Add name attribute
                                                                 />
                                                                 :
-                                                                value.field === "json_object" ?
+                                                                value.field === 'json_object' ?
                                                                     <input
                                                                         type="checkbox"
                                                                         required={value?.level === 1 ? true : false}
-                                                                        checked={value.default} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
+                                                                        checked={!value.default} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
                                                                         onChange={(e) => handleInputChange(e, key)}
                                                                         className="checkbox"
-                                                                        name="hello" // Add name attribute
+                                                                        name={key} // Add name attribute
                                                                     /> :
                                                                     "this field is under development "}
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                <p>Provide Your ApiKey</p>
-                                <input
-                                    type="text"
-                                    required
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
-                                    className="input w-full input-bordered"
-                                    onBlur={(e) => SaveData(e.target.value, "apikey")}
-                                />
 
                             </div>
                         </div>
