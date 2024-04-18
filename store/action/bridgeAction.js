@@ -1,4 +1,4 @@
-import { createBridge, getAllBridges, getSingleBridge,deleteBridge, integration } from "@/api";
+import { createBridge, getAllBridges, getSingleBridge,deleteBridge, integration, createapi } from "@/api";
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer,deleteBridgeReducer, integrationReducer } from "../reducer/bridgeReducer";
 import axios from "@/utils/interceptor";
 
@@ -58,7 +58,6 @@ export const deleteBridgeAction = (bridgeId) => async (dispatch) => {
   try {
       await deleteBridge(bridgeId);
       dispatch(deleteBridgeReducer(bridgeId));
-      console.log('Bridge deleted successfully');
   } catch (error) {
       console.error('Failed to delete bridge:', error);
   }
@@ -68,8 +67,17 @@ export const deleteBridgeAction = (bridgeId) => async (dispatch) => {
 export const integrationAction = (embed_token , bridge_id) => async (dispatch) => {
   try {
     const intregrationData = await integration(embed_token);
-    console.log(intregrationData , "intregration data object")
     dispatch(integrationReducer({intregration : intregrationData , id :  bridge_id} ))
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+
+export const createApiAction = (bridge_id , dataFromEmbed) => async () => {
+  try {    
+     await createapi(bridge_id , dataFromEmbed);
+    
   } catch (error) {
     console.error(error)
   }

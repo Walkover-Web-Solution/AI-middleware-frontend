@@ -31,7 +31,7 @@ function page() {
       referenceId: process.env.NEXT_PUBLIC_REFERENCEID, // The unique id of the app
       success: (data) => { // Called when the user is successfully authenticated
         // Get the verified token in response
-        console.log('success response', data);
+        console.dir('success response', data);
       },
       failure: (error) => { // Called when there is an error
         // Handle the error

@@ -252,3 +252,13 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
       return error;
     }
   }
+
+
+  export const createapi = async(bridge_id , dataFromEmbed ) => {
+    try{
+         await axios.post(`${URL}/api/v1/config/createapi/${bridge_id}` , dataFromEmbed);
+    }catch(error){
+      console.error(error);
+      return error;
+    }
+}

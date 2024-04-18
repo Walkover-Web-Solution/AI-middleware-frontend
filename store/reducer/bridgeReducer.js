@@ -48,7 +48,6 @@ export const bridgeReducer = createSlice({
     },
     integrationReducer: (state, action) => {
       const { intregration, id } = action.payload;
-      console.log(id)
       const newdata = {...state.allBridgesMap[id] , integrationData : intregration}
       state.allBridgesMap[id] = newdata;
     }
