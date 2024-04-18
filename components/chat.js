@@ -144,7 +144,7 @@ const removeUndefinedOrNull = (obj) => {
 
 
   const UpdateBridge = async()=> {
-    const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)1
+    const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
       await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : updatedConfigration, service : localDataToSend.service , apikey : localDataToSend.apikey}})
       toast.success("Bridge is updated");
   }
