@@ -133,7 +133,6 @@ function Chat({ dataToSend , params}) {
     [handleSendMessage]
   );
 
-console.log(localDataToSend , "localDataToSend")
 
 const removeUndefinedOrNull = (obj) => {
   // Filter out key-value pairs where value is not undefined or null
@@ -145,8 +144,7 @@ const removeUndefinedOrNull = (obj) => {
 
 
   const UpdateBridge = async()=> {
-    const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
-    console.log(updatedConfigration)
+    const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)1
       await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : updatedConfigration, service : localDataToSend.service , apikey : localDataToSend.apikey}})
       toast.success("Bridge is updated");
   }

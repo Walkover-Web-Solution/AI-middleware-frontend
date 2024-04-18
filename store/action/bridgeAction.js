@@ -58,7 +58,6 @@ export const deleteBridgeAction = (bridgeId) => async (dispatch) => {
   try {
       await deleteBridge(bridgeId);
       dispatch(deleteBridgeReducer(bridgeId));
-      console.log('Bridge deleted successfully');
   } catch (error) {
       console.error('Failed to delete bridge:', error);
   }

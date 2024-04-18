@@ -218,7 +218,6 @@ const DropdownMenu = ({ params, data }) => {
                 else {
                     const data = { ...modelInfoData };
                     delete data.response_format;
-                    console.log(data, "data")
                     setModelInfoData(data);
                 }  // Adjust value accordingly
             } else {
