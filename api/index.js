@@ -237,7 +237,7 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
 
   export const integration = async(embed_token) => {
     try{
-      const response = await fetch("https://dev-api.viasocket.com/projects/projXzlaXL3n/integrations", {
+      const response = await fetch("https://flow-api.viasocket.com/projects/projXzlaXL3n/integrations", {
         method: "GET",
         headers: {
           Authorization: embed_token
