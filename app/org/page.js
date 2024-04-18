@@ -44,7 +44,7 @@ function Page() {
       dispatch(setCurrentOrgIdAction(id));
       if (response.status === 200) {
         // Log a success message if the API call is successful
-        console.log("Organization switched successfully", response.data);
+        console.dir("Organization switched successfully", response.data);
       } else {
         // Log an error message if the API call is not successful
         console.error("Failed to switch organization", response.data);

@@ -1,19 +1,14 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file
-import { useSelector } from 'react-redux';
+import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file  
 import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
 import Chat from './chat';
 
-const DropdownMenu = ({ params, data }) => {
-    // const openaiData = services.openai;
-    const { bridgeData } = useSelector((state) => ({
-        bridgeData: state?.bridgeReducer?.allBridgesMap?.[params?.id] || {}
-    }))
+const DropdownMenu = ({ params, data, embed }) => {
 
     const [toggle, setToggle] = useState(false)
     const [selectedService, setSelectedService] = useState('');
-    const [selectedModel, setSelectedModel] = useState(bridgeData?.bridges?.configuration?.model?.default);
+    const [selectedModel, setSelectedModel] = useState(data?.configuration?.model?.default);
     const [dataToSend, setDataToSend] = useState({})
     const [apiKey, setApiKey] = useState(data?.apikey)
     const [modelInfoData, setModelInfoData] = useState({})
@@ -28,18 +23,18 @@ const DropdownMenu = ({ params, data }) => {
 
 
     useEffect(() => {
-        setSelectedService(bridgeData?.bridges?.service?.toLowerCase());
-        setApiKey(bridgeData?.bridges?.apikey || "");
-        setJsonString(JSON.stringify(data?.configuration?.tools) || "")
-        setSelectedModel(bridgeData?.bridges?.configuration?.model?.default)
-        setModelInfoData(data?.configuration)
-        // setInputConfig(modelInfo?.bridgeData?.bridges?.configuration?.model?.default?.inputConfig); // Default to an empty object if data?.inputConfig is undefined
-        setInputConfig(data?.inputConfig || {});
+        setSelectedService(data?.service?.toLowerCase());
+        setApiKey(data?.apikey || "");
+        setJsonString(JSON.stringify(data?.configuration?.tools?.default) || "")
+        setSelectedModel(data?.configuration?.model?.default)
+        setModelInfoData(data?.configuration || modelInfo?.data?.configuration?.model?.default?.inputConfig)
+        // setInputConfig(modelInfo?.data?.configuration?.model?.default?.inputConfig); // Default to an empty object if data?.inputConfig is undefined
+        setInputConfig(data?.inputConfig || modelInfo?.[data?.service?.toLowerCase()]?.[data?.configuration?.model?.default]?.inputConfig);
 
         // Find the key associated with the targetValue
         let foundKey = null;
-        for (const key in services[bridgeData?.bridges?.service?.toLowerCase()]) {
-            if (services[bridgeData?.bridges?.service?.toLowerCase()][key].has(bridgeData?.bridges?.configuration?.model?.default)) {
+        for (const key in services[data?.service?.toLowerCase()]) {
+            if (services[data?.service?.toLowerCase()][key].has(data?.configuration?.model?.default)) {
                 foundKey = key;
                 break;
             }
@@ -48,7 +43,7 @@ const DropdownMenu = ({ params, data }) => {
             setDataToSend({
                 "configuration": {
                     "model": selectedModel,
-                    "prompt": [...bridgeData?.bridges?.configuration?.prompt || ""],
+                    "prompt": [...data?.configuration?.prompt || ""],
                     "type": foundKey,
                     "user": [],
                     "conversation": []
@@ -61,7 +56,7 @@ const DropdownMenu = ({ params, data }) => {
             setDataToSend({
                 "configuration": {
                     "model": selectedModel,
-                    "input": bridgeData?.bridges?.configuration?.input,
+                    "input": data?.configuration?.input,
                     "type": foundKey
 
                 },
@@ -75,7 +70,7 @@ const DropdownMenu = ({ params, data }) => {
                 {
                     "configuration": {
                         "model": selectedModel,
-                        "prompt": bridgeData?.bridges?.configuration?.prompt,
+                        "prompt": data?.configuration?.prompt,
                         "type": foundKey
 
                     },
@@ -86,7 +81,7 @@ const DropdownMenu = ({ params, data }) => {
             )
         }
 
-    }, [bridgeData, data, params]);
+    }, [data, params]);
 
 
 
@@ -409,8 +404,6 @@ const DropdownMenu = ({ params, data }) => {
     };
 
 
-
-
     return (
         <>
             <div className=" " style={{ height: "90vh" }}>
@@ -678,8 +671,33 @@ const DropdownMenu = ({ params, data }) => {
                                             </div>
                                         </div>
                                     )}
-
                                 </div>
+                                {embed && embed?.length > 0  ? 
+                                <ul className="menu bg-base-200 w-full rounded-box">
+                                    <li>
+                                    <h2 className="menu-title flex justify-between items-center">Embeded viasocket     <span onClick={() => openViasocket()} className='text-2xl cursor-pointer flex justify-center items-center'>+</span> </h2>
+
+                                        {embed && embed?.map((value) => (
+                                            <ul>
+                                                <li className='' id={value?.id} onClick={() => openViasocket(value?.id)} >
+                                                    <div className='w-full flex justify-between items-center'>
+                                                        <div > <div>{value.title}  </div><div className={`badge badge-sm ${value.status === "active" ?  "bg-green-300" : value.status === "drafted" ? "bg-orange-300" : value.status === "deleted" ? "bg-red-300" : value.status === "paused" ? "bg-grey-300" : "" }`}>{value.status}</div></div>
+                                                        <svg className='float-right' width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M27.1421 17.1213C27.5327 16.7308 28.1658 16.7308 28.5563 17.1213L31.3848 19.9497C31.7753 20.3403 31.7753 20.9734 31.3848 21.364L22.6084 30.1403L16.598 31.9081L18.3658 25.8977L27.1421 17.1213Z" stroke="#222222" stroke-width="2" />
+                                                        </svg>
+                                                    </div>
+
+
+
+                                                </li>
+                                            </ul>
+                                        ))}
+                                    </li>
+                                </ul>
+                            :
+                            <button onClick={() => openViasocket()} className="btn">Add new embed</button>    
+                            }
+                                
                             </div>
                         </div>
 

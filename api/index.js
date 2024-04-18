@@ -35,7 +35,6 @@ export  const getSingleBridge = async (bridgeId) => {
   export const deleteBridge = async (bridgeId) => {
     try {
         const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`);
-        // console.log(response)
         return response;
     } catch (error) {
         console.error(error);
@@ -106,7 +105,7 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
       
         return {success : true,data : dryRun.data}
     } catch (error) {
-      console.log("dry run error",error,error.response.data.error);
+      console.error("dry run error",error,error.response.data.error);
       return {success : false,error:error.response.data.error}
     }
   }
@@ -120,7 +119,6 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
 
   export const userdetails = async() => {
     try{
-      // console.log(`${PROXY_URL}/api/c/getCompanies`)
       const details = await axios.get(`${PROXY_URL}/api/c/getDetails`)
       return details
     }
@@ -174,7 +172,6 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
 
   export  const createOrg = async (dataToSend) => {
     try {
-        // console.log(dataToSend)
         const data = await axios.post(`${PROXY_URL}/api/c/createCompany` ,dataToSend) 
         return data;  
     } catch (error) {
@@ -197,23 +194,21 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
   export const switchOrg = async (company_ref_id) => {
     try {
       const data = await axios.post(`${PROXY_URL}/api/c/switchCompany`, { company_ref_id }); 
-      // console.log(data);
+
       return data;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return error;
     }
   };
 
 
   export const inviteUser = async (email) => {
-    console.log(email)
     try{
        const response = await axios.post(`${PROXY_URL}/api/c/addUser`,email)
-       console.log(response.data);
        return response.data;
     }catch(error){
-      console.log(error);
+      console.error(error);
       return error;
     }
   }
@@ -221,10 +216,9 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
   export const getInvitedUsers = async() => {
     try{
          const data = await axios.get(`${PROXY_URL}/api/c/getUsers`);
-         console.log(data)
          return data;
     }catch(error){
-      console.log(error);
+      console.error(error);
       return error;
     }
   }
@@ -233,11 +227,37 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
   export const getMetricsData = async(org_id) => {
       try{
           const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`);
-          console.log(response.data);
           return response.data;
       }catch(error){
-        console.log(error);
+        console.error(error);
         return error;
       }
   }
   
+
+  export const integration = async(embed_token) => {
+    try{
+      const response = await fetch("https://dev-api.viasocket.com/projects/projXzlaXL3n/integrations", {
+        method: "GET",
+        headers: {
+          Authorization: embed_token
+        }
+      });
+      const data = await response.json();
+      return data.data;
+  
+    }catch(error){
+      console.error(error)
+      return error;
+    }
+  }
+
+
+  export const createapi = async(bridge_id , dataFromEmbed ) => {
+    try{
+         await axios.post(`${URL}/api/v1/config/createapi/${bridge_id}` , dataFromEmbed);
+    }catch(error){
+      console.error(error);
+      return error;
+    }
+}
