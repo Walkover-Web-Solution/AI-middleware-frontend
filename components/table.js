@@ -25,9 +25,9 @@ function Table({ data }) {
   };
 
   return (
-    <div className="overflow-x-auto relative shadow-lg sm:rounded-lg m-2">
-      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-300 shadow-sm">
+    
+      <table className="table">
+        <thead>
           <tr>
             {columnNames.map((columnName, index) => (
               <th key={index} scope="col" className="py-3 px-6 text-gray-900 font-semibold">
@@ -38,7 +38,7 @@ function Table({ data }) {
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <tr key={index} className="bg-white text-gray-500 border-b transition duration-300 ease-in-out hover:bg-gray-50">
+            <tr key={index} className="hover-row hover">
               {columnNames.map((columnName) => (
                 <td key={columnName} className="py-4 px-6">
                   {columnName === 'created_at' ? formatDate(item[columnName]) : item[columnName]}
@@ -48,7 +48,7 @@ function Table({ data }) {
           ))}
         </tbody>
       </table>
-    </div>
+    
   );
 }
 
