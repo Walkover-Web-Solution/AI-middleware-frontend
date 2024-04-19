@@ -25,7 +25,7 @@ export const getAllOrgAction = () => async (dispatch, getState) => {
      try{
       dispatch(setCurrentOrgId(orgId));
      }catch(error){
-      console.log(error);
+      console.error(error);
       
      }
   };

@@ -32,7 +32,7 @@ function Chat({ dataToSend , params}) {
     }));
   }, []);
   // Handle sending message
-  const handleSendMessage = useCallback(async () => {
+  const   handleSendMessage = useCallback(async () => {
     if(dataToSend.configuration.type === "chat")  if (newMessage.trim() === "") return;
     setErrorMessage(""); 
     setNewMessage("");
@@ -69,7 +69,8 @@ function Chat({ dataToSend , params}) {
         });
       }
       else{
-         responseData = await dryRun(localDataToSend);
+        const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
+         responseData = await dryRun({...localDataToSend , configuration : updatedConfigration});
       }
       if(!responseData.success){
         if(dataToSend.configuration.type === "chat"){
@@ -132,9 +133,19 @@ function Chat({ dataToSend , params}) {
     [handleSendMessage]
   );
 
-console.log(localDataToSend , "localDataToSend")
+
+const removeUndefinedOrNull = (obj) => {
+  // Filter out key-value pairs where value is not undefined or null
+  const filteredEntries = Object.entries(obj).filter(([_, value]) => value !== undefined && value !== null);
+  
+  // Convert filtered entries back to object
+  return Object.fromEntries(filteredEntries);
+};
+
+
   const UpdateBridge = async()=> {
-      await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : localDataToSend.configuration , service : localDataToSend.service , apikey : localDataToSend.apikey}})
+    const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
+      await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : updatedConfigration, service : localDataToSend.service , apikey : localDataToSend.apikey}})
       toast.success("Bridge is updated");
   }
 

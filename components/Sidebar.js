@@ -3,10 +3,10 @@ import React from 'react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 
-function Sidebar() {
+function Sidebar({ orgid }) {
   const path = usePathname();
   const route = useRouter();
-  const params = useParams();
+  // const params = useParams();
   const currentOrgId = useSelector(state => state?.orgReducer?.currentOrgId) || 1374;
 
   // Function to generate button classes based on active state
@@ -15,10 +15,10 @@ function Sidebar() {
 
   // Menu items mapping
   const menuItems = [
-    { name: 'Bridges', path: `/org/${params.id}/bridges` },
-    { name: 'Api key', path: `/org/${params.id}/apikey` },
-    { name: 'Invite', path: `/org/${params.id}/invite` },
-    { name: 'Metrics', path: `/org/${params.id}/metrics` },
+    { name: 'Bridges', path: `/org/${orgid}/bridges` },
+    { name: 'Api key', path: `/org/${orgid}/apikey` },
+    { name: 'Invite', path: `/org/${orgid}/invite` },
+    { name: 'Metrics', path: `/org/${orgid}/metrics` },
   ];
 
   return (
@@ -41,4 +41,4 @@ function Sidebar() {
 }
 
 export default Sidebar;
-  
+
