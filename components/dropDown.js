@@ -424,7 +424,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                         className="input w-full input-bordered"
                                         onBlur={(e) => SaveData(e.target.value, "apikey")}
                                     />
-                                  
+
                                 </label>
 
                                 <label className="form-control w-full ">
@@ -672,39 +672,39 @@ const DropdownMenu = ({ params, data, embed }) => {
                                         </div>
                                     )}
                                 </div>
-                                {embed && embed?.length > 0  ? 
-                                <ul className="menu bg-base-200 w-full rounded-box">
-                                    <li>
-                                    <h2 className="menu-title flex justify-between items-center">Embeded viasocket     <span onClick={() => openViasocket()} className='text-2xl cursor-pointer flex justify-center items-center'>+</span> </h2>
+                                {embed && embed?.length > 0 ?
+                                    <ul className="menu bg-base-200 w-full rounded-box">
+                                        <li>
+                                            <h2 className="menu-title flex justify-between items-center">Embeded viasocket     <span onClick={() => openViasocket()} className='text-2xl cursor-pointer flex justify-center items-center'>+</span> </h2>
 
-                                        {embed && embed?.map((value) => (
-                                            <ul>
-                                                <li className='' id={value?.id} onClick={() => openViasocket(value?.id)} >
-                                                    <div className='w-full flex justify-between items-center'>
-                                                        <div > <div>{value.title}  </div><div className={`badge badge-sm ${value.status === "active" ?  "bg-green-300" : value.status === "drafted" ? "bg-orange-300" : value.status === "deleted" ? "bg-red-300" : value.status === "paused" ? "bg-grey-300" : "" }`}>{value.status}</div></div>
-                                                        <svg className='float-right' width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M27.1421 17.1213C27.5327 16.7308 28.1658 16.7308 28.5563 17.1213L31.3848 19.9497C31.7753 20.3403 31.7753 20.9734 31.3848 21.364L22.6084 30.1403L16.598 31.9081L18.3658 25.8977L27.1421 17.1213Z" stroke="#222222" stroke-width="2" />
-                                                        </svg>
-                                                    </div>
+                                            {embed && embed?.map((value) => (
+                                                <ul>
+                                                    <li className='' id={value?.id} onClick={() => openViasocket(value?.id)} >
+                                                        <div className='w-full flex justify-between items-center'>
+                                                            <div > <div>{value.title}  </div><div className={`badge badge-sm ${value.status === "active" ? "bg-green-300" : value.status === "drafted" ? "bg-orange-300" : value.status === "deleted" ? "bg-red-300" : value.status === "paused" ? "bg-grey-300" : ""}`}>{value.status}</div></div>
+                                                            <svg className='float-right' width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M27.1421 17.1213C27.5327 16.7308 28.1658 16.7308 28.5563 17.1213L31.3848 19.9497C31.7753 20.3403 31.7753 20.9734 31.3848 21.364L22.6084 30.1403L16.598 31.9081L18.3658 25.8977L27.1421 17.1213Z" stroke="#222222" stroke-width="2" />
+                                                            </svg>
+                                                        </div>
 
 
 
-                                                </li>
-                                            </ul>
-                                        ))}
-                                    </li>
-                                </ul>
-                            :
-                            <button onClick={() => openViasocket()} className="btn">Add new embed</button>    
-                            }
-                                
+                                                    </li>
+                                                </ul>
+                                            ))}
+                                        </li>
+                                    </ul>
+                                    :
+                                    <button onClick={() => openViasocket()} className="btn">Add new embed</button>
+                                }
+
                             </div>
                         </div>
 
                     </div>
                     <div className="flex-1">
                         <div className="pl-4 pr-4 pb-4">
-
+                            {console.log(dataToSend, "data to send ")}
                             <Chat dataToSend={dataToSend} params={params} />
                         </div>
                     </div>

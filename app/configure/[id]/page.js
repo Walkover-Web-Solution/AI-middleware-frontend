@@ -38,10 +38,8 @@ const Page = ({ params }) => {
   }, [params.id, dispatch, bridge, bridge?.embed_token]);
 
   window.addEventListener("message", (e) => {
-    console.log(e.data, " data from embed");
     if (e.data.webhookurl) {
       dispatch(integrationAction(bridge?.embed_token, params.id))
-      console.log("helllo bhai", e)
       if (e.data.action === "published" || e.data.action === "created" && e.data.description.length > 0) {
         const dataFromEmbed = {
           "url": e.data.webhookurl,
@@ -51,7 +49,7 @@ const Page = ({ params }) => {
           "status": e.data.action
         }
 
-        dispatch(createApiAction(params.id , dataFromEmbed))
+        dispatch(createApiAction(params.id, dataFromEmbed))
       }
     }
 
