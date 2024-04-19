@@ -42,25 +42,25 @@ const DropdownMenu = ({ params, data, embed }) => {
         if (foundKey === 'chat')
             setDataToSend({
                 "configuration": {
-                    "model": selectedModel,
+                    "model": data?.configuration?.model?.default,
                     "prompt": [...data?.configuration?.prompt || ""],
                     "type": foundKey,
                     "user": [],
                     "conversation": []
                 },
-                "service": selectedService,
+                "service": data?.service?.toLowerCase(),
                 // "org_id":"124dfgh67ghj",
                 "apikey": apiKey
             })
         else if (foundKey === "embedding")
             setDataToSend({
                 "configuration": {
-                    "model": selectedModel,
+                    "model": data?.configuration?.model?.default,
                     "input": data?.configuration?.input,
                     "type": foundKey
 
                 },
-                "service": selectedService,
+                "service": data?.service?.toLowerCase(),
                 // "org_id":"124dfgh67ghj",
                 "apikey": apiKey
             })
@@ -69,12 +69,12 @@ const DropdownMenu = ({ params, data, embed }) => {
             setDataToSend(
                 {
                     "configuration": {
-                        "model": selectedModel,
+                        "model": data?.configuration?.model?.default,
                         "prompt": data?.configuration?.prompt,
                         "type": foundKey
 
                     },
-                    'service': selectedService,
+                    'service': data?.service?.toLowerCase(),
                     // "org_id":"124dfgh67ghj",
                     "apikey": apiKey
                 }
