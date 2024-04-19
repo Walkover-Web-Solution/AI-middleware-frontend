@@ -34,14 +34,13 @@ function CreateNewBridge({ orgid }) {
                 "service": selectedService,
             }
             dispatch(createBridgeAction(dataToSend, (data) => {
-                setIsLoading(false);
+
                 route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
-                // <Link href = {`/configure/${data.data.bridge._id}`}/>
-                // setIsLoading(false);
-            })).catch(() => {
+                setIsLoading(false);
+                document.getElementById('my_modal_1').close()
+            })).catch( 
                 setIsLoading(false)
-            });
-            document.getElementById('my_modal_1').close()
+            );
         }
         else toast.error("All fields are Required ")
     }

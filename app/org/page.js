@@ -1,11 +1,10 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { getAllOrgAction, setCurrentOrgIdAction } from '@/store/action/orgAction';
+import {  setCurrentOrgIdAction } from '@/store/action/orgAction';
 import CreateOrg from '@/components/createNewOrg';
 import { useRouter } from 'next/navigation';
 import { switchOrg } from '@/api';
-import { getAllBridgesAction } from '@/store/action/bridgeAction';
 import Protected from '@/components/protected';
 
 /**
@@ -20,13 +19,10 @@ function Page() {
   // Next.js router instance
   const route = useRouter()
   // Use useSelector to get organizations from the Redux store
-  const organizations = useSelector(state => state.orgReducer.organizations);
+  const organizations = useSelector(state => state.userDetailsReducer.organizations);
 
-  useEffect(() => {
-    // Use the dispatch function to make the API call to get all organizations
-    // when the component is mounted.
-    dispatch(getAllOrgAction());
-  }, []);
+
+
 
   /**
    * Handle switch organization
@@ -78,27 +74,24 @@ function Page() {
         + Create New Organization
       </button>
 
-      <div className="w-full max-w-4xl mt-4">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Existing Organizations</h2>
-        <div className="grid grid-rows-1 md:grid-rows-2 lg:grid-rows-3 gap-4 mb-8 cursor-pointer">
-          {organizations.map((org, index) => (
-            <div
-              key={index}
-              onClick={() => {handleSwitchOrg(org.id); route.push(`org/${org.id}/bridges`)}}
-              className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
-            >
-              <div className="px-6 py-4">
-                <div  className="font-bold text-xl mb-2">{org?.name}</div>
-                <p className="text-gray-700 text-base">
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+    <div className="w-full max-w-4xl mt-4">
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Existing Organizations</h2>
+      <div className="grid grid-rows-1 md:grid-rows-2 lg:grid-rows-3 gap-4 mb-8 cursor-pointer">
+      {organizations.slice().reverse().map((org, index) => (
+  <div key={index} onClick={() => {handleSwitchOrg(org.id); route.push(`org/${org.id}/bridges`)}} className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
+    <div className="px-6 py-4">
+      <div className="font-bold text-xl mb-2">{org?.name}</div>
+      <p className="text-gray-700 text-base">
+      </p>
+    </div>
+  </div>
+))}
       </div>
 
 
       {showCreateOrgModal && <CreateOrg onClose={handleCloseCreateOrgModal} />}
+    </div>
+
     </div>
 
 

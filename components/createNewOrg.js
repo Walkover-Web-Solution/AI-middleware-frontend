@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { createOrgAction, getAllOrgAction } from '@/store/action/orgAction';
+import { userDetails } from '@/store/action/userDetailsAction';
 
 function CreateOrg({onClose}) {
     const [orgDetails, setOrgDetails] = useState({
@@ -28,6 +29,8 @@ function CreateOrg({onClose}) {
         const { name, email, mobile, timezone } = orgDetails;
         if (!name.trim() || name.trim().length < 3) {
             toast.error("Organization name is required and must be at least 3 characters long");
+            
+            return;
         }   
     
         setIsLoading(true);
@@ -38,11 +41,12 @@ function CreateOrg({onClose}) {
                 }
             };
     
-            dispatch(createOrgAction(dataToSend, () => {
-                toast.success('Organization created successfully');
+           await dispatch(createOrgAction(dataToSend, () => {
+                
                 onClose(); 
-                dispatch(getAllOrgAction());
+                dispatch(userDetails());
                 route.push('/org'); 
+                toast.success('Organization created successfully');
             }));
         } catch (error) {
             toast.error('Failed to create organization');
