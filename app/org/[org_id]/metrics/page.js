@@ -1,8 +1,8 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import Table from '@/components/table'; 
+import Table from '@/components/table';
 import Sidebar from '@/components/Sidebar';
-import { getMetricsData } from '@/api'; 
+import { getMetricsData } from '@/api';
 import { useSelector } from 'react-redux';
 import Protected from '@/components/protected';
 import { useParams } from 'next/navigation';
@@ -11,19 +11,19 @@ import { useParams } from 'next/navigation';
  * The page component for the metrics page.
  * @returns {ReactElement} The metrics page component.
  */
-function Page() {
+function Page({ params }) {
   // State to store the metric data.
   const [metricsData, setMetricsData] = useState([]);
   // Get the current org id from the redux store.
   const currentOrgId = useSelector((state) => state.orgReducer.currentOrgId);
   // Get the id from the url using next/navigation.
-  const params = useParams();
+  // const params = useParams();
 
   // Use effect to call the api and update the state if orgId is available
   useEffect(() => {
     // If orgId is available, fetch the data and update the state
     if (currentOrgId) {
-      getMetricsData(params.id)
+      getMetricsData(params.org_id)
         .then((data) => {
           if (data && data.statusCode === 200) {
             // Update the state with the actual data
@@ -44,7 +44,7 @@ function Page() {
       <div className="drawer-content flex pl-2 flex-col items-start justify-start">
         <Table data={metricsData} />
       </div>
-      <Sidebar />
+      <Sidebar orgid={params.org_id} />
     </div>
   );
 }
