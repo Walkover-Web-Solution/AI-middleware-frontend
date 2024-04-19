@@ -67,7 +67,7 @@ const Page = ({ params }) => {
           </div>
         </div>
       </div>
-      <Sidebar />
+      <Sidebar orgid={params.org_id} />
     </div>
   );
 }

@@ -1,5 +1,4 @@
 "use client"
-import Sidebar from '@/components/Sidebar'
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { getHistoryAction, getThread } from '@/store/action/historyAction'
@@ -145,4 +144,4 @@ function page({ params }) {
   )
 }
 
-export default  Protected(page)
+export default Protected(page)

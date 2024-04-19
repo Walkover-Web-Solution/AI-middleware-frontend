@@ -5,10 +5,10 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
-function CreateNewBridge() {
+function CreateNewBridge({ orgid }) {
     const [selectedService, setSelectedService] = useState('');
     const [selectedModel, setSelectedModel] = useState("");
-    const [seletedType , setSelectedType] = useState("");
+    const [seletedType, setSelectedType] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch()
     const route = useRouter()
@@ -35,7 +35,7 @@ function CreateNewBridge() {
             }
             dispatch(createBridgeAction(dataToSend, (data) => {
                 setIsLoading(false);
-                route.push(`/configure/${data.data.bridge._id}`);
+                route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
                 // <Link href = {`/configure/${data.data.bridge._id}`}/>
                 // setIsLoading(false);
             })).catch(() => {
@@ -48,20 +48,20 @@ function CreateNewBridge() {
 
     return (
         <div>
-            {isLoading &&  
+            {isLoading &&
                 (<div className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-filter backdrop-blur-lg flex justify-center items-center z-50">
-                <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-xl">
-                  <div className="flex items-center justify-center space-x-2">
-                    {/* Tailwind CSS Spinner */}
-                    <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span className="text-xl font-medium text-gray-700">Loading...</span>
-                  </div>
+                    <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-xl">
+                        <div className="flex items-center justify-center space-x-2">
+                            {/* Tailwind CSS Spinner */}
+                            <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span className="text-xl font-medium text-gray-700">Loading...</span>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              )}
+                )}
             <dialog id="my_modal_1" className="modal">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Create Bridge !</h3>
@@ -110,7 +110,7 @@ function CreateNewBridge() {
                     </div>
                 </div>
             </dialog>
-            
+
         </div>
     )
 }
