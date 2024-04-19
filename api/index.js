@@ -224,14 +224,19 @@ export  const getSingleThreadData = async ( threadId , bridgeId) => {
   }
 
 
-  export const getMetricsData = async(org_id) => {
-      try{
-          const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`);
-          return response.data;
-      }catch(error){
-        console.error(error);
-        return error;
-      }
+  export const getMetricsData = async (org_id, startDate, endDate) => {
+    try {
+      const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`, {
+        params: {
+          startTime: startDate,
+          endTime: endDate
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
   }
   
 
