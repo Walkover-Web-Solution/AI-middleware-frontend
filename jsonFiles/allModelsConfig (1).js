@@ -12,7 +12,6 @@ export const modelInfo = {
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0 }
             },
-            "apikey": "",
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -47,8 +46,6 @@ export const modelInfo = {
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0 }
             },
-            "apikey": "",
-
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -85,10 +82,8 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0 },
                 "tools": { field: "array", level: 0, default: [] },
                 "tool_choice": { field: "text", default: "auto", level: 0 },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-            "apikey": "",
-
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -125,10 +120,8 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0 },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-            "apikey": "",
-
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -164,10 +157,8 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "string", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-
-            "apikey": "",
 
 
             outputConfig: {
@@ -205,9 +196,8 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-            "apikey": "",
 
 
             outputConfig: {
@@ -245,10 +235,9 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
 
-            "apikey": "",
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -285,8 +274,6 @@ export const modelInfo = {
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
             },
-            "apikey": "",
-
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -324,8 +311,6 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
             },
 
-            "apikey": "",
-
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
@@ -360,9 +345,8 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-            "apikey": "",
 
 
             outputConfig: {
@@ -400,10 +384,8 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
             },
-            "apikey": "",
-
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -440,10 +422,8 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: { "text": "boolean" }, level: 0 }
+                "response_format": { field: "json_object", default: { "text": "json_object" }, level: 0 }
             },
-            "apikey": "",
-
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -465,6 +445,75 @@ export const modelInfo = {
                 }
             }
         },
+        "gpt-4-turbo-2024-04-09": {
+            configuration: {
+                "model": { field: "drop", default: "gpt-4-turbo-2024-04-09", "level": 1 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
+                "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
+                "logprobs": { field: "boolean", default: false, level: 0, typeOf: "boolean" },
+                "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
+                "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
+                "n": { field: "number", default: 1, typeOf: "number", level: 0 },
+                "stop": { field: "text", default: null, level: 0 },
+                "stream": { field: "boolean", default: false, level: 0, typeOf: "boolean" },
+                "tools": { field: "array", level: 0, default: [], typeOf: "array" },
+                "tool_choice": { field: "text", default: "auto", level: 0, typeOf: "string" },
+                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
+            },
+            outputConfig: {
+                usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens", total_cost: { input_cost: 0.01, output_cost: 0.03 } }],
+                message: "choices[0].message.content",
+                tools: "choices[0].message.tool_calls",
+                id: "id"
+            },
+
+            inputConfig: {
+                system: {
+                    "default": {
+                        "role": "system",
+                        "content": ""
+                    },
+                    "contentKey": "content",
+                    "type": "json",
+
+                }
+            }
+        },
+        "gpt-4-turbo": {
+            configuration: {
+                "model": { field: "drop", default: "gpt-4-turbo", "level": 1 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
+                "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
+                "logprobs": { field: "boolean", default: false, level: 0, typeOf: "boolean" },
+                "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
+                "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
+                "n": { field: "number", default: 1, typeOf: "number", level: 0 },
+                "stop": { field: "text", default: null, level: 0 },
+                "stream": { field: "boolean", default: false, level: 0, typeOf: "boolean" },
+                "tools": { field: "array", level: 0, default: [], typeOf: "array" },
+                "tool_choice": { field: "text", default: "auto", level: 0, typeOf: "string" },
+                "response_format": { field: "json_object", default: { "type": "json_object" }, level: 0 }
+            },
+            outputConfig: {
+                usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens", total_cost: { input_cost: 0.01, output_cost: 0.03 } }],
+                message: "choices[0].message.content",
+                tools: "choices[0].message.tool_calls",
+                id: "id"
+            },
+            inputConfig: {
+                system: {
+                    "default": {
+                        "role": "system",
+                        "content": ""
+                    },
+                    "contentKey": "content",
+                    "type": "json",
+
+                }
+            }
+        },
 
         "text-embedding-3-large": {
             configuration: {
@@ -472,8 +521,6 @@ export const modelInfo = {
                 "encoding_format": { field: "dropdown", values: ['float', 'base64'], default: "float", level: 2 },
                 "dimensions": { field: "number", level: 0 }
             },
-            "apikey": "",
-
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", total_tokens: "usage.total_tokens" }],
@@ -496,8 +543,6 @@ export const modelInfo = {
                 "dimensions": { field: "number", level: 0 }
             },
 
-            "apikey": "",
-
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", total_tokens: "usage.total_tokens" }],
                 message: "data[0].embedding"
@@ -517,8 +562,6 @@ export const modelInfo = {
                 "encoding_format": { field: "dropdown", values: ['float', 'base64'], default: "float", level: 2 },
                 // dimensions is fixed here, 1536 will be the size of the vector
             },
-            "apikey": "",
-
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", total_tokens: "usage.total_tokens" }],
@@ -544,8 +587,6 @@ export const modelInfo = {
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "best_of": { field: "slider", min: 1, max: 20, step: 1, default: 1, level: 2 }
             },
-            "apikey": "",
-
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -569,44 +610,42 @@ export const modelInfo = {
             }, chatpath: "content"
         }
     },
-    // google:
-    // {
-    //     "gemini-1.0-pro": {
-    //         configuration: {
-    //             "model": { field: "dropdown", default: "gemini-1.0-pro", "level": 1 },
-    //             "temperature": {field: "number", default: 0, level: 2},
-    //             "topK": {field: "slider", min: 1, max: 40, step: 1, default: "none", level: 0},
-    //             "topP": {field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 0},
-    //             "maxOutputTokens": {field: "slider", min: 1, max: 8192, default: 8192, step: 1, level: 2},
-    //             "stopSequences": {field: "array", default:"", level: 0}
-    //         },
+    google:
+    {
+        "gemini-1.0-pro": {
+            configuration: {
+                "model": { field: "dropdown", default: "gemini-1.0-pro", "level": 1 },
+                "temperature": { field: "number", default: 0, level: 2 },
+                "topK": { field: "slider", min: 1, max: 40, step: 1, default: "none", level: 0 },
+                "topP": { field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 0 },
+                "maxOutputTokens": { field: "slider", min: 1, max: 8192, default: 8192, step: 1, level: 2 },
+                "stopSequences": { field: "array", default: "", level: 0 }
+            },
 
-    //         "apikey" : "" ,
+            outputConfig: {
+                usage: [],
+                message: "candidates[0].content.parts[0].text",
+                assistant: "candidates[0].content",
+                role: "model"
+            },
 
-    //         outputConfig: {
-    //             usage: [],
-    //             message: "candidates[0].content.parts[0].text",
-    //             assistant: "candidates[0].content",
-    //             role: "model"
-    //         },
+            inputConfig: {
+                model: {
+                    "default": {
+                        "role": "model",
+                        "parts": [
+                            {
+                                "text": ""
+                            }
+                        ]
+                    },
+                    "contentKey": "parts[0].text",
+                    "type": "json"
 
-    //         inputConfig: {
-    //             model: {
-    //                 "default": {
-    //                     "role": "model",
-    //                     "parts": [
-    //                         {
-    //                             "text": ""
-    //                         }
-    //                     ]
-    //                 },
-    //                 "contentKey": "parts[0].text",
-    //                 "type": "json"
-
-    //             }
-    //         }
-    //     }
-    // },
+                }
+            }
+        }
+    },
     mistral:
     {
         "mistral-tiny": {
