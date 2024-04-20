@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Table from '@/components/table';
 import Sidebar from '@/components/Sidebar';
-import { getMetricsData, getTodayMetricsData } from '@/api'; // Assuming separate functions based on the description
+import { getMetricsData } from '@/api'; 
 import { useSelector } from 'react-redux';
 import Protected from '@/components/protected';
 import { useParams } from 'next/navigation';
