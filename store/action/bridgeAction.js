@@ -1,5 +1,5 @@
-import { createBridge, getAllBridges, getSingleBridge,deleteBridge, integration, createapi } from "@/api";
-import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer,deleteBridgeReducer, integrationReducer } from "../reducer/bridgeReducer";
+import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi } from "@/api";
+import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer } from "../reducer/bridgeReducer";
 import axios from "@/utils/interceptor";
 
 
@@ -56,28 +56,28 @@ export const updateBridgeAction = () => async (dispatch, getState) => {
 
 export const deleteBridgeAction = (bridgeId) => async (dispatch) => {
   try {
-      await deleteBridge(bridgeId);
-      dispatch(deleteBridgeReducer(bridgeId));
+    await deleteBridge(bridgeId);
+    dispatch(deleteBridgeReducer(bridgeId));
   } catch (error) {
-      console.error('Failed to delete bridge:', error);
+    console.error('Failed to delete bridge:', error);
   }
 };
 
 
-export const integrationAction = (embed_token , bridge_id) => async (dispatch) => {
+export const integrationAction = (embed_token, bridge_id) => async (dispatch) => {
   try {
     const intregrationData = await integration(embed_token);
-    dispatch(integrationReducer({intregration : intregrationData , id :  bridge_id} ))
+    dispatch(integrationReducer({ intregration: intregrationData, id: bridge_id }))
   } catch (error) {
     console.error(error)
   }
 }
 
 
-export const createApiAction = (bridge_id , dataFromEmbed) => async () => {
-  try {    
-     await createapi(bridge_id , dataFromEmbed);
-    
+export const createApiAction = (bridge_id, dataFromEmbed) => async () => {
+  try {
+    await createapi(bridge_id, dataFromEmbed);
+
   } catch (error) {
     console.error(error)
   }

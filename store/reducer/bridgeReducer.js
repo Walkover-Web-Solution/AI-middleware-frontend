@@ -1,42 +1,42 @@
+import ModelsConfig from "@/customSelector/modelConfiguration";
+import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
+import { updatedData } from "@/utils/utility";
 import { createSlice } from "@reduxjs/toolkit";
 import { useRouter } from "next/navigation";
 
 const initialState = {
- allBridgesMap : {} ,
- allBridges : [],
+  allBridgesMap: {},
+  allBridges: [],
   loading: false,
 
 };
 
 export const bridgeReducer = createSlice({
-  
+
   name: "Bridge",
   initialState,
   reducers: {
-    fetchSingleBridgeReducer : (state, action) => {
-      state.allBridgesMap[ action.payload?.bridges?._id] = action.payload ; 
-    } ,
+    fetchSingleBridgeReducer: (state, action) => {
+      const obj1 = action.payload.bridges  // obj1
+      const model = action.payload.bridges.configuration.model.default
+      const service = action.payload.bridges.service
+      const obj2 = modelInfo[service][model]  // obj2
+      const response = updatedData(obj1, obj2, action.payload.bridges.type)
+      console.log(response, "response")
+      state.allBridgesMap = { ...state.allBridgesMap, [action.payload.bridges._id]: response }
+    },
 
-    fetchAllBridgeReducer : (state, action) => {
+    fetchAllBridgeReducer: (state, action) => {
       state.allBridges = action.payload;
-      const allBridgesMap = {}
-      // action.payload?.map((singleBridge)=>{
-      //   allBridgesMap[ singleBridge?._id ] = singleBridge ; 
-      // });
-      action.payload?.map((singleBridge)=>{
-        allBridgesMap[ singleBridge?._id ] = singleBridge ; 
-      });
-      state.allBridgesMap = allBridgesMap ;
+    },
 
-    } ,
-
-  createBridgeReducer : (state, action) => {
-    return action.payload._id
+    createBridgeReducer: (state, action) => {
+      return action.payload._id
       // state.allBridges = [...state.allBridges , action.payload] 
       // state.singleBridgeData = action.payload
     },
-    updateBridgeReducer : (state, action) => {
-      
+    updateBridgeReducer: (state, action) => {
+
     },
     deleteBridgeReducer: (state, action) => {
       const bridgeId = action.payload;
@@ -48,19 +48,19 @@ export const bridgeReducer = createSlice({
     },
     integrationReducer: (state, action) => {
       const { intregration, id } = action.payload;
-      const newdata = {...state.allBridgesMap[id] , integrationData : intregration}
+      const newdata = { ...state.allBridgesMap[id], integrationData: intregration }
       state.allBridgesMap[id] = newdata;
     }
-    
+
   },
 });
 
 export const {
-    fetchAllBridgeReducer, 
-    fetchSingleBridgeReducer,
-    createBridgeReducer,
-    updateBridgeReducer,
-    deleteBridgeReducer,
-    integrationReducer
+  fetchAllBridgeReducer,
+  fetchSingleBridgeReducer,
+  createBridgeReducer,
+  updateBridgeReducer,
+  deleteBridgeReducer,
+  integrationReducer
 } = bridgeReducer.actions;
 export default bridgeReducer.reducer;
