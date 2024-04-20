@@ -31,6 +31,8 @@ export const bridgeReducer = createSlice({
     },
 
     createBridgeReducer: (state, action) => {
+      debugger
+      state.allBridges.push(action.payload.data.bridge)
       return action.payload._id
       // state.allBridges = [...state.allBridges , action.payload] 
       // state.singleBridgeData = action.payload
