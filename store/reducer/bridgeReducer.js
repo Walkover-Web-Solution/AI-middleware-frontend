@@ -22,8 +22,11 @@ export const bridgeReducer = createSlice({
       const service = action.payload.bridges.service
       const obj2 = modelInfo[service][model]  // obj2
       const response = updatedData(obj1, obj2, action.payload.bridges.type)
+
+
+
       console.log(response, "response")
-      state.allBridgesMap = { ...state.allBridgesMap, [action.payload.bridges._id]: response }
+      state.allBridgesMap = { ...state.allBridgesMap, [action.payload.bridges._id]: { ...response, integrationData: action.payload.integrationData } }
     },
 
     fetchAllBridgeReducer: (state, action) => {
