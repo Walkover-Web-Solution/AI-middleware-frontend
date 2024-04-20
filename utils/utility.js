@@ -11,34 +11,36 @@ export const updatedData = (obj1, obj2, type) => {
         }
 
     }
-    if (Object.keys(updatedObj1.configuration).length > 0) {
-        if (type === 'chat') {
-            const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
-            obj1.inputConfig = inputconfig;
-        }
-        if (type === 'completion' && updatedObj1.configuration.prompt) {
-            // const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
 
-            obj1.inputConfig = {
-                prompt: {
-                    "prompt": updatedObj1.configuration.prompt || "",
-                    "contentKey": "prompt",
-                    "type": "text",
-                }
+    // if (Object.keys(updatedObj1.configuration).length > 0) {
+    if (type === 'chat') {
+        const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
+        obj1.inputConfig = inputconfig;
+    }
+    if (type === 'completion' && updatedObj1.configuration.prompt) {
+        // const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
+
+        obj1.inputConfig = {
+            prompt: {
+                "prompt": updatedObj1.configuration.prompt || "",
+                "contentKey": "prompt",
+                "type": "text",
             }
         }
-        if (type === 'embedding') {
-            obj1.inputConfig = {
-                input: {
-                    "input": updatedObj1.configuration.input || "",
-                    "contentKey": "input",
-                    "type": "text"
-                }
+    }
+    if (type === 'embedding') {
+        obj1.inputConfig = {
+            input: {
+                "input": updatedObj1.configuration.input || "",
+                "contentKey": "input",
+                "type": "text"
             }
-
         }
 
     }
+
+    // }
+
 
     const newObj1 = removeDuplicateFields(obj1.configuration, updatedObj1.configuration);
     obj1.configuration = newObj1;
