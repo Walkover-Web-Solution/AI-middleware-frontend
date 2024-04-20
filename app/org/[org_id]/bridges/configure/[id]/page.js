@@ -2,11 +2,10 @@
 import Protected from "@/components/protected"
 import { useCustomSelector } from "@/customSelector/customSelector"
 import DropdownMenu from "@/components/dropDown"
-import { useEffect, useLayoutEffect, useState } from "react"
+import { useEffect, useLayoutEffect } from "react"
 import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction"
 import { useDispatch } from "react-redux"
 import Sidebar from "@/components/Sidebar"
-import { modelInfo } from "@/jsonFiles/allModelsConfig (1)"
 
 const Page = ({ params }) => {
   const dispatch = useDispatch()
@@ -28,7 +27,6 @@ const Page = ({ params }) => {
       document.body.appendChild(script);
     };
 
-    dispatch(integrationAction(bridge?.embed_token, params.id))
 
     fetchData();
 

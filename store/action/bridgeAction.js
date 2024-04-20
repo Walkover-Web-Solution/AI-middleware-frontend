@@ -7,7 +7,8 @@ import axios from "@/utils/interceptor";
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   try {
     const data = await getSingleBridge(id);
-    dispatch(fetchSingleBridgeReducer(data.data));
+    const integrationData = await integration(data.data.bridges.embed_token)
+    dispatch(fetchSingleBridgeReducer({ bridges: data.data.bridges, integrationData }));
   } catch (error) {
     console.error(error);
   }
