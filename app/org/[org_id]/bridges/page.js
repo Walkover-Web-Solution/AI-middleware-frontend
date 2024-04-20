@@ -1,6 +1,6 @@
 "use client"
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { deleteBridgeAction, getAllBridgesAction } from "@/store/action/bridgeAction";
+import { deleteBridgeAction, getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify'
@@ -62,9 +62,14 @@ function Home({ params }) {
   };
 
   useEffect(() => {
-    dispatch(getAllBridgesAction())
+    if (allBridges.length === 0) dispatch(getAllBridgesAction())
   }, [])
   const columns = ["name", "_id", "service"];
+
+  const onClickConfigure = (id) => {
+    // dispatch(getSingleBridgesAction(id))
+    router.push(`/org/${params.org_id}/bridges/configure/${id}`);
+  }
 
   return (<div className="drawer lg:drawer-open overflow-hidden">
     {isLoading &&
@@ -104,7 +109,8 @@ function Home({ params }) {
                   ))}
                   <td key={item._id} className="button-container gap-3 flex justify-center align-center">
                     <button onClick={() => { setIsLoading(true); router.push(`/org/${params.org_id}/bridges/history/${item._id}`); }} className="btn btn-sm">History</button>
-                    <button onClick={() => { setIsLoading(true); router.push(`/org/${params.org_id}/bridges/configure/${item._id}`); }} className="btn btn-sm">Configure</button>
+                    <button onClick={() => onClickConfigure(item._id)} className="btn btn-sm">Configure</button>
+                    {/* <button onClick={() => {  setIsLoading(true); router.push(`/org/${params.org_id}/bridges/configure/${item._id}`); dispatch(getSingleBridgesAction(item._id)); }} className="btn btn-sm">Configure</button> */}
                     <a onClick={() => handleDeleteBridge(item._id)} className="tooltip tooltip-primary" data-tip="delete">
                       <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
                         <g clip-path="url(#clip0_117_1501)" >

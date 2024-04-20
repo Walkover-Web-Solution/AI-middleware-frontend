@@ -12,7 +12,7 @@ export const modelInfo = {
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0 }
             },
-            "apikey" : "" ,
+            "apikey": "",
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -30,7 +30,7 @@ export const modelInfo = {
                     },
                     "contentKey": "content",
                     "type": "json",
-                }   
+                }
             }
         },
 
@@ -47,7 +47,7 @@ export const modelInfo = {
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0 }
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -87,7 +87,7 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0 },
                 "response_format": { field: "boolean", default: false, level: 0 }
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -127,7 +127,7 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "boolean", default: false, level: 0 }
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -167,7 +167,7 @@ export const modelInfo = {
                 "response_format": { field: "boolean", default: false, level: 0 }
             },
 
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -207,7 +207,7 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "boolean", default: false, level: 0 }
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -248,7 +248,7 @@ export const modelInfo = {
                 "response_format": { field: "boolean", default: false, level: 0 }
             },
 
-            "apikey" : "" ,
+            "apikey": "",
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -285,7 +285,7 @@ export const modelInfo = {
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -324,7 +324,7 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
             },
 
-            "apikey" : "" ,
+            "apikey": "",
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
@@ -362,7 +362,7 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "boolean", default: false, level: 0 }
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -402,7 +402,7 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "boolean", default: false, level: 0 }
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -442,7 +442,7 @@ export const modelInfo = {
                 "tool_choice": { field: "text", default: "auto", level: 0, },
                 "response_format": { field: "boolean", default: { "text": "boolean" }, level: 0 }
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -470,9 +470,9 @@ export const modelInfo = {
             configuration: {
                 "model": { field: "dropdown", default: "text-embedding-3-large", "level": 1 },
                 "encoding_format": { field: "dropdown", values: ['float', 'base64'], default: "float", level: 2 },
-                "dimensions": {field: "number" ,level: 0}
+                "dimensions": { field: "number", level: 0 }
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -488,15 +488,15 @@ export const modelInfo = {
                 }
             }
         },
-        
+
         "text-embedding-3-small": {
             configuration: {
                 "model": { field: "dropdown", default: "text-embedding-3-large", "level": 1 },
                 "encoding_format": { field: "dropdown", values: ['float', 'base64'], default: "float", level: 2 },
-                "dimensions": {field: "number" ,level: 0}
+                "dimensions": { field: "number", level: 0 }
             },
 
-            "apikey" : "" ,
+            "apikey": "",
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", total_tokens: "usage.total_tokens" }],
@@ -517,7 +517,7 @@ export const modelInfo = {
                 "encoding_format": { field: "dropdown", values: ['float', 'base64'], default: "float", level: 2 },
                 // dimensions is fixed here, 1536 will be the size of the vector
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
@@ -535,22 +535,22 @@ export const modelInfo = {
         },
         "gpt-3.5-turbo-instruct": {
             configuration: {
-                "model": {field:"dropdown", default: "gpt-3.5-turbo-instruct", level: 1},
-                "temperature": {field: "slider", default: 1, min: 0, max: 2, step: 0.01, level: 2},
-                "max_tokens": {field: "slider", default: 256, min: 1, max: 4096, step: 1, level: 2},
-                "stop": {field: "array", default: "", level: 0 },
-                "top_p": {field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 2},
-                "frequency_penalty": {field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2},
-                "presence_penalty": {field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2},
-                "best_of": {field: "slider", min: 1, max: 20, step: 1, default: 1, level: 2}
+                "model": { field: "dropdown", default: "gpt-3.5-turbo-instruct", level: 1 },
+                "temperature": { field: "slider", default: 1, min: 0, max: 2, step: 0.01, level: 2 },
+                "max_tokens": { field: "slider", default: 256, min: 1, max: 4096, step: 1, level: 2 },
+                "stop": { field: "array", default: "", level: 0 },
+                "top_p": { field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 2 },
+                "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
+                "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
+                "best_of": { field: "slider", min: 1, max: 20, step: 1, default: 1, level: 2 }
             },
-            "apikey" : "" ,
+            "apikey": "",
 
 
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].text",
-                assistant:"choices",
+                assistant: "choices",
                 id: "id"
             },
 
@@ -562,49 +562,51 @@ export const modelInfo = {
                 }
             }
         },
-        chatmessage:{chat:{
-            role: "user",
-            content:""
-        }, chatpath:"content"}
-    },
-    google:
-    {
-        "gemini-1.0-pro": {
-            configuration: {
-                "model": { field: "dropdown", default: "gemini-1.0-pro", "level": 1 },
-                "temperature": {field: "number", default: 0, level: 2},
-                "topK": {field: "slider", min: 1, max: 40, step: 1, default: "none", level: 0},
-                "topP": {field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 0},
-                "maxOutputTokens": {field: "slider", min: 1, max: 8192, default: 8192, step: 1, level: 2},
-                "stopSequences": {field: "array", default:"", level: 0}
-            },
-
-            "apikey" : "" ,
-
-            outputConfig: {
-                usage: [],
-                message: "candidates[0].content.parts[0].text",
-                assistant: "candidates[0].content",
-                role: "model"
-            },
-
-            inputConfig: {
-                model: {
-                    "default": {
-                        "role": "model",
-                        "parts": [
-                            {
-                                "text": ""
-                            }
-                        ]
-                    },
-                    "contentKey": "parts[0].text",
-                    "type": "json"
-
-                }
-            }
+        chatmessage: {
+            chat: {
+                role: "user",
+                content: ""
+            }, chatpath: "content"
         }
     },
+    // google:
+    // {
+    //     "gemini-1.0-pro": {
+    //         configuration: {
+    //             "model": { field: "dropdown", default: "gemini-1.0-pro", "level": 1 },
+    //             "temperature": {field: "number", default: 0, level: 2},
+    //             "topK": {field: "slider", min: 1, max: 40, step: 1, default: "none", level: 0},
+    //             "topP": {field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 0},
+    //             "maxOutputTokens": {field: "slider", min: 1, max: 8192, default: 8192, step: 1, level: 2},
+    //             "stopSequences": {field: "array", default:"", level: 0}
+    //         },
+
+    //         "apikey" : "" ,
+
+    //         outputConfig: {
+    //             usage: [],
+    //             message: "candidates[0].content.parts[0].text",
+    //             assistant: "candidates[0].content",
+    //             role: "model"
+    //         },
+
+    //         inputConfig: {
+    //             model: {
+    //                 "default": {
+    //                     "role": "model",
+    //                     "parts": [
+    //                         {
+    //                             "text": ""
+    //                         }
+    //                     ]
+    //                 },
+    //                 "contentKey": "parts[0].text",
+    //                 "type": "json"
+
+    //             }
+    //         }
+    //     }
+    // },
     mistral:
     {
         "mistral-tiny": {
@@ -678,7 +680,7 @@ export const modelInfo = {
                 "connectors": { field: "array", default: [{ "id": "web-search" }], level: 0 },
                 "documents": { field: "array", default: [], level: 0 }
             },
-            
+
             outputConfig: {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens" }],
                 message: "choices[0].message.content",
