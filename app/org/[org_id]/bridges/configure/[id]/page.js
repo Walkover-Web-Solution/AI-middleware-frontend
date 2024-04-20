@@ -6,14 +6,14 @@ import { useEffect, useLayoutEffect, useState } from "react"
 import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction"
 import { useDispatch } from "react-redux"
 import Sidebar from "@/components/Sidebar"
+import { modelInfo } from "@/jsonFiles/allModelsConfig (1)"
 
 const Page = ({ params }) => {
   const dispatch = useDispatch()
   const { bridge, integrationData } = useCustomSelector((state) => ({
-    bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridges,
+    bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
     integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData?.flows
   }))
-
 
   useLayoutEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
@@ -35,7 +35,7 @@ const Page = ({ params }) => {
     return () => {
       document.body.removeChild(document.getElementById("viasocket-embed-main-script"));
     };
-  }, [params.id, dispatch, bridge, bridge?.embed_token]);
+  }, [params.id, dispatch, bridge?.embed_token]);
 
   window.addEventListener("message", (e) => {
     if (e.data.webhookurl) {
@@ -55,6 +55,32 @@ const Page = ({ params }) => {
 
   });
 
+  // console.log(bridge, "bridge")
+  // const dummyjson = modelInfo?.[bridge?.service]?.[bridge?.configuration?.model?.default]
+  // console.log(dummyjson, "dummyjson")
+
+
+  // const updatedObj1 = bridge
+
+  // // Iterate over the keys of dummyjson.configuration
+  // for (const key in dummyjson?.configuration) {
+  //   if (dummyjson?.configuration.hasOwnProperty(key)) {
+  //     // Check if the key exists in bridge.configuration
+  //     if (updatedObj1.configuration.hasOwnProperty(key)) {
+  //       // If the key exists, delete it from bridge.configuration
+  //       delete updatedObj1.configuration[key];
+  //     }
+  //   }
+  // }
+  // console.log(updatedObj1, "updatedObj1")
+  // // Remove the configuration fields present in updatedObj1 from bridge
+  // for (const key in updatedObj1?.configuration) {
+  //   if (updatedObj1.configuration.hasOwnProperty(key)) {
+  //     delete bridge.configuration[key];
+  //   }
+  // }
+
+  // console.log(bridge, "new Data to send ");
 
 
   return (

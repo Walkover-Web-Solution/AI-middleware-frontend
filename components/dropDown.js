@@ -29,7 +29,7 @@ const DropdownMenu = ({ params, data, embed }) => {
         setSelectedModel(data?.configuration?.model?.default)
         setModelInfoData(data?.configuration || modelInfo?.data?.configuration?.model?.default?.inputConfig)
         // setInputConfig(modelInfo?.data?.configuration?.model?.default?.inputConfig); // Default to an empty object if data?.inputConfig is undefined
-        setInputConfig(data?.inputConfig || modelInfo?.[data?.service?.toLowerCase()]?.[data?.configuration?.model?.default]?.inputConfig);
+        setInputConfig(data?.inputConfig);
 
         // Find the key associated with the targetValue
         let foundKey = null;
@@ -433,7 +433,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                     </div>
                                     <select value={selectedService} onChange={handleService} className="select select-bordered">
                                         <option disabled selected>Select a Service</option>
-                                        <option value="google">google</option>
+                                        {/* <option value="google">google</option> */}
                                         {/* <option value="mistral">mistral</option> */}
                                         {/* <option value="cohere">cohere</option> */}
                                         <option value="openai">openai</option>
