@@ -12,7 +12,7 @@ export const services = {
     //     // models:new Set(["gemini-pro"]),
     //     // chat:new Set(["gemini-pro"]),
     //     completion:new Set(["gemini-pro"]),
-    // embedding:new Set(["embedding-001"])//
+    // embedding:new Set(["embedding-001"])//-m ""
     // }
 }
 
