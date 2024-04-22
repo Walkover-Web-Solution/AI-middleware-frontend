@@ -1,11 +1,13 @@
 "use client";
 import React from 'react';
-import { useParams, usePathname, useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
+import { usePathname, useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllBridgesAction } from '@/store/action/bridgeAction';
 
 function Sidebar({ orgid }) {
   const path = usePathname();
   const route = useRouter();
+  const dispatch = useDispatch()
   // const params = useParams();
   const currentOrgId = useSelector(state => state?.orgReducer?.currentOrgId) || 1374;
 
@@ -28,7 +30,7 @@ function Sidebar({ orgid }) {
         {menuItems.map((item) => (
           <li key={item.name}>
             <button
-              onClick={() => route.push(item.path)}
+              onClick={() => { route.push(item.path); if (item.name === "Bridges") dispatch(getAllBridgesAction()) }}
               className={buttonClasses(path === item.path)}
             >
               {item.name}
