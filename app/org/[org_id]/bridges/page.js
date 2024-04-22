@@ -64,6 +64,7 @@ function Home({ params }) {
   useEffect(() => {
       dispatch(getAllBridgesAction())
   }, [])
+
   const columns = ["name", "_id", "service"];
 
   const onClickConfigure = (id) => {
