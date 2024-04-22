@@ -17,7 +17,7 @@ export const updatedData = (obj1, obj2, type) => {
         const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
         obj1.inputConfig = inputconfig;
     }
-    if (type === 'completion' && updatedObj1.configuration.prompt) {
+    if (type === 'completion') {
         // const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
 
         obj1.inputConfig = {

@@ -56,7 +56,6 @@ const DropdownMenu = ({ params, data, embed }) => {
         setJsonString(JSON.stringify(data?.configuration?.tools?.default) || "")
         setSelectedModel(data?.configuration?.model?.default)
         setModelInfoData(data?.configuration || modelInfo?.data?.configuration?.model?.default?.inputConfig)
-        // setInputConfig(modelInfo?.data?.configuration?.model?.default?.inputConfig); // Default to an empty object if data?.inputConfig is undefined
         setInputConfig(data?.inputConfig);
 
         // Find the key associated with the targetValue
@@ -71,25 +70,23 @@ const DropdownMenu = ({ params, data, embed }) => {
             setDataToSend({
                 "configuration": {
                     "model": data?.configuration?.model?.default,
-                    "prompt": [...data?.configuration?.prompt || ""],
+                    "prompt": [data.inputConfig.system.default || {}],
                     "type": foundKey,
                     "user": [],
                     "conversation": []
                 },
                 "service": data?.service?.toLowerCase(),
-                // "org_id":"124dfgh67ghj",
                 "apikey": apiKey
             })
         else if (foundKey === "embedding")
             setDataToSend({
                 "configuration": {
                     "model": data?.configuration?.model?.default,
-                    "input": data?.configuration?.input,
+                    "input": data?.input?.input,
                     "type": foundKey
 
                 },
                 "service": data?.service?.toLowerCase(),
-                // "org_id":"124dfgh67ghj",
                 "apikey": apiKey
             })
 
@@ -98,12 +95,11 @@ const DropdownMenu = ({ params, data, embed }) => {
                 {
                     "configuration": {
                         "model": data?.configuration?.model?.default,
-                        "prompt": data?.configuration?.prompt,
+                        "prompt": data?.input?.prompt?.prompt,
                         "type": foundKey
 
                     },
                     'service': data?.service?.toLowerCase(),
-                    // "org_id":"124dfgh67ghj",
                     "apikey": apiKey
                 }
             )
@@ -181,7 +177,6 @@ const DropdownMenu = ({ params, data, embed }) => {
                         "conversation": []
                     },
                     "service": selectedService,
-                    // "org_id":"124dfgh67ghj",
                     "apikey": apiKey
                 })
             }
@@ -198,7 +193,6 @@ const DropdownMenu = ({ params, data, embed }) => {
 
                     },
                     "service": selectedService,
-                    // "org_id":"124dfgh67ghj",
                     "apikey": apiKey
                 })
             }
@@ -216,7 +210,6 @@ const DropdownMenu = ({ params, data, embed }) => {
 
                         },
                         "service": selectedService,
-                        // "org_id":"124dfgh67ghj",
                         "apikey": apiKey
                     }
                 )
@@ -236,13 +229,8 @@ const DropdownMenu = ({ params, data, embed }) => {
         // If the field is a checkbox or a boolean, use the checked property of the event target
         if (modelInfoData[key]?.field === "checkbox" || modelInfoData[key]?.field === "boolean") {
             if (key === "response_format") {
-
                 if (e.target.checked) { newValue = { "type": "json_object" } }
-                else {
-                    const data = { ...modelInfoData };
-                    delete data.response_format;
-                    setModelInfoData(data);
-                }  // Adjust value accordingly
+                else { newValue = { "type": "text" } }  // Adjust value accordingly
             } else {
                 newValue = e.target.checked; // Use checked for checkboxes
             }
@@ -493,7 +481,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                     </select>
                                 </label>
                                 {modelInfoData && Object.entries(modelInfoData || {}).map(([key, value]) => (
-                                    key !== 'model' && value.level !== 0 &&
+                                    key !== 'model' && value.level !== 0 && key !== "stream" &&
                                     <div className={`mb-2 ${value.field === "boolean" ? "flex justify-between item-center" : ""} `}>
 
                                         <div className='flex justify-between items-center w-full'>
@@ -534,7 +522,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                         <input
                                                             type="checkbox"
                                                             required={value?.level === 1 ? true : false}
-                                                            checked={!!value.default} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
+                                                            checked={value.default.type === "json_object" ? true : value.default.type === "text" ? false : value.default} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
                                                             onChange={(e) => handleInputChange(e, key)}
                                                             className="checkbox"
                                                             name={key} // Add name attribute
@@ -563,7 +551,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                     </div>
                                     <div className="collapse-content">
                                         {modelInfoData && Object.entries(modelInfoData || {}).map(([key, value]) => (
-                                            key !== 'model' && key !== 'tools' && key !== 'tool_choice' && value.level === 0 &&
+                                            key !== 'model' && key !== 'tools' && key !== 'tool_choice' && key !== "stream" && value.level === 0 &&
                                             <div className={`mb-2 ${value.field === "boolean" ? "flex justify-between item-center" : ""} w-full`}>
 
                                                 <div className='flex justify-between items-center w-full'>
@@ -604,7 +592,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                                 <input
                                                                     type="checkbox"
                                                                     required={value?.level === 1 ? true : false}
-                                                                    checked={!!value.default} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
+                                                                    checked={value.default.type === "text" ? false : value.default.type === "json_object" ? true : !!value} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
                                                                     onChange={(e) => handleInputChange(e, key)}
                                                                     className="checkbox"
                                                                     name={key} // Add name attribute
@@ -634,7 +622,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-5 md:grid-cols-1">
                                 {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
                                     <>
-                                        {key !== "rawData" && (
+                                        {key !== "rawData" && key !== "stream" && (
                                             <div className="form-control w-full " key={key}>
                                                 <div className="label">
                                                     <span className="label-text capitalize">{key}</span>
