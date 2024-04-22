@@ -280,7 +280,7 @@ class ModelsConfig {  //params:[vlaue,enum(0,1,2) 0->optional, 1->required, 2->o
             "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
             "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
             "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
-            "maxOutputTokens": { field: "slider", min: 1, max: 30720, step: 1, default: 2048, level: 0},
+            "maxOutputTokens": { field: "slider", min: 1, max: 30720, step: 1, default: 2048, level: 0 },
             "stopSequences": { field: "text", default: null, level: 0 },
         }
 
@@ -291,7 +291,7 @@ class ModelsConfig {  //params:[vlaue,enum(0,1,2) 0->optional, 1->required, 2->o
         }
         return { configuration, outputConfig }
     }
-    static embedding_001=()=>{
+    static embedding_001 = () => {
         const configuration = {
             "model": { field: "drop", default: "embedding-001", "level": 1 }
         }
@@ -302,6 +302,6 @@ class ModelsConfig {  //params:[vlaue,enum(0,1,2) 0->optional, 1->required, 2->o
         }
         return { configuration, outputConfig }
     }
-}``
+} ``
 
 module.exports = ModelsConfig

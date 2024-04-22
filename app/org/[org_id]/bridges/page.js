@@ -62,8 +62,8 @@ function Home({ params }) {
   };
 
   useEffect(() => {
-    if (allBridges.length === 0) dispatch(getAllBridgesAction())
-  }, [])
+    dispatch(getAllBridgesAction())
+  }, [params.org_id])
   const columns = ["name", "_id", "service"];
 
   const onClickConfigure = (id) => {
