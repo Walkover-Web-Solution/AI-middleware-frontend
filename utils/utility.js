@@ -17,7 +17,7 @@ export const updatedData = (obj1, obj2, type) => {
         const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
         obj1.inputConfig = inputconfig;
     }
-    if (type === 'completion') {
+    if (type === 'completion' && updatedObj1.configuration.prompt) {
         // const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
 
         obj1.inputConfig = {
@@ -49,16 +49,70 @@ export const updatedData = (obj1, obj2, type) => {
 };
 
 
+// function updateContent(obj2, updatedObj1) {
+//     try {
+//         if (updatedObj1.prompt === undefined) return obj2
+//         updatedObj1.prompt.forEach(item => {
+//             const role = item.role;
+//             const content = item.content;
+//             if (obj2[role] && obj2[role].default)
+//                 obj2[role].default.content += " " + content;
+//         });
+//         return obj2
+//     } catch (error) {
+//         console.error(error)
+//     }
+// }
+
+// function updateContent(obj2, updatedObj1) {
+//     try {
+//         if (updatedObj1.prompt === undefined) return obj2;
+
+//         updatedObj1.prompt.forEach(item => {
+//             const role = item.role;
+//             const content = item.content;
+
+//             // Check if obj2[role].default exists and create a mutable copy
+//             if (obj2[role] && obj2[role].default) {
+//                 const mutableDefault = { ...obj2[role].default };
+//                 mutableDefault.content += " " + content;
+//                 obj2[role].default = mutableDefault; // Update obj2[role].default
+//             }
+//         });
+
+//         return obj2;
+//     } catch (error) {
+//         console.log(error)
+//         console.error(error);
+//     }
+// }
+
+
 function updateContent(obj2, updatedObj1) {
-    if (updatedObj1.prompt === undefined) return obj2
-    updatedObj1.prompt.forEach(item => {
-        const role = item.role;
-        const content = item.content;
-        if (obj2[role] && obj2[role].default)
-            obj2[role].default.content += " " + content;
-    });
-    return obj2
+    debugger
+    try {
+        const obj3 = { ...obj2 }
+        if (updatedObj1.prompt === undefined) return obj2;
+
+        updatedObj1.prompt.forEach(item => {
+            const role = item.role;
+            const content = item.content;
+
+            // Check if obj2[role].default exists and create a mutable copy
+            if (obj3[role] && obj3[role].default) {
+                const mutableDefault = { ...obj3[role].default };
+                mutableDefault.content += " " + content;
+                obj3[role].default = mutableDefault; // Update obj3[role].default
+            }
+        });
+
+        return obj3;
+    } catch (error) {
+        console.error(error);
+    }
 }
+
+
 
 function removeDuplicateFields(obj1, updatedObj1) {
     const updatedObj1Keys = Object.keys(updatedObj1);
