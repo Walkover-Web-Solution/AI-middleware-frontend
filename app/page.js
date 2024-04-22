@@ -2,16 +2,16 @@
 "use client"
 // eslint-disable
 import React, {  useLayoutEffect } from 'react'
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import WithAuth from '@/components/withauth';
 
 function page ({params}) {
 
-  const router = useRouter();
+  // const router = useRouter();
 
   async function runEffect() {
     if (localStorage.getItem('proxy_auth_token')){
-      router.replace("/bridges");
+      // router.replace("/bridges");
       return ;
     }
       const configuration = {
