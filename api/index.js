@@ -32,18 +32,32 @@ export  const getSingleBridge = async (bridgeId) => {
     }
   }
 
+  export const deleteBridge = async (bridgeId) => {
+    try {
+        const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`);
+        return response;
+    } catch (error) {
+        console.error(error);
+        toast.error("Failed to delete the bridge");
+        throw new Error(error);
+    }
+};
+
+
+
   export  const createBridge = async (dataToSend) => {
     try {
         return await axios.post(`${URL}/api/v1/config/createbridges` , dataToSend) 
     } catch (error) {
-      console.error(error)
+      toast.error(error.response.data.error)
     }
   }
 
 
   export  const getAllBridges = async () => {
     try {
-        return  await axios.get(`${URL}/api/v1/config/getbridges/all`)
+        const data = await axios.get(`${URL}/api/v1/config/getbridges/all`)
+        return data;
     } catch (error) {
       console.error(error)
       throw new Error(error)
@@ -63,9 +77,9 @@ export  const updateBridge = async ( {bridgeId , dataToSend}) => {
 
 
 
-export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) => {
+export  const getSingleThreadData = async ( threadId , bridgeId) => {
     try {
-        const getSingleThreadData = await axios.post(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}` , dataToSend) 
+        const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}`) 
         return getSingleThreadData
     } catch (error) {
       console.error(error)
@@ -73,9 +87,9 @@ export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) 
   }
 
 
-  export const getHistory = async ( { bridgeId , dataToSend}) => {
+  export const getHistory = async ( bridgeId) => {
     try {
-        const getSingleThreadData = await axios.post(`${URL}/api/v1/config/history/${bridgeId}` , dataToSend) 
+        const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`) 
         return getSingleThreadData
     } catch (error) {
       console.error(error)
@@ -90,9 +104,10 @@ export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) 
       if(localDataToSend.configuration.type === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion` , localDataToSend) 
       if(localDataToSend.configuration.type === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings` , localDataToSend) 
       
-        return dryRun.data
+        return {success : true,data : dryRun.data}
     } catch (error) {
-      console.error(error)
+      console.error("dry run error",error,error.response.data.error);
+      return {success : false,error:error.response.data.error}
     }
   }
 
@@ -105,7 +120,7 @@ export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) 
 
   export const userdetails = async() => {
     try{
-      const details = await axios.get(`${PROXY_URL}/api/c/getCompanies`)
+      const details = await axios.get(`${PROXY_URL}/api/c/getDetails`)
       return details
     }
     catch(error)
@@ -155,3 +170,100 @@ export  const getSingleThreadData = async ( {threadId , bridgeId , dataToSend}) 
       console.error(error)
     }
   }
+
+  export  const createOrg = async (dataToSend) => {
+    try {
+        const data = await axios.post(`${PROXY_URL}/api/c/createCompany` ,dataToSend) 
+        return data;  
+    } catch (error) {
+      toast.error(error.response.data.error)
+    }
+  }
+
+
+  export  const getAllOrg = async () => {
+    try {
+        const data = await axios.get(`${PROXY_URL}/api/c/getCompanies`)
+        return data;
+    } catch (error) {
+      console.error(error)
+      throw new Error(error)
+    }
+  }
+
+
+  export const switchOrg = async (company_ref_id) => {
+    try {
+      const data = await axios.post(`${PROXY_URL}/api/c/switchCompany`, { company_ref_id }); 
+
+      return data;
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+  };
+
+
+  export const inviteUser = async (email) => {
+    try{
+       const response = await axios.post(`${PROXY_URL}/api/c/addUser`,email)
+       return response.data;
+    }catch(error){
+      console.error(error);
+      return error;
+    }
+  }
+
+  export const getInvitedUsers = async() => {
+    try{
+         const data = await axios.get(`${PROXY_URL}/api/c/getUsers`);
+         return data;
+    }catch(error){
+      console.error(error);
+      return error;
+    }
+  }
+
+
+  export const getMetricsData = async (org_id, startDate, endDate) => {
+    try {
+      const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`, {
+        params: {
+          startTime: startDate,
+          endTime: endDate
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+  }
+  
+
+  export const integration = async(embed_token) => {
+    try{
+      const response = await fetch("https://flow-api.viasocket.com/projects/projXzlaXL3n/integrations", {
+        method: "GET",
+        headers: {
+          Authorization: embed_token
+        }
+      });
+      const data = await response.json();
+      return data.data;
+  
+    }catch(error){
+      console.error(error)
+      return error;
+    }
+  }
+
+
+  export const createapi = async(bridge_id , dataFromEmbed ) => {
+    try{
+         await axios.post(`${URL}/api/v1/config/createapi/${bridge_id}` , dataFromEmbed);
+    }catch(error){
+      console.error(error);
+      return error;
+    }
+}

@@ -1,35 +1,40 @@
 "use client"
 // eslint-disable
 import React, { useEffect, useState } from 'react';
-import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file
-import { useCustomSelector } from '@/customSelector/customSelector';
-import { useSelector } from 'react-redux';
+import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file  
 import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
 import Chat from './chat';
 
-const DropdownMenu = ({ params, data }) => {
-    const { bridgeData } = useCustomSelector((state) => ({
-        bridgeData: state?.bridgeReducer?.allBridgesMap?.[params?.id] || {}
-    }))
+const DropdownMenu = ({ params, data, embed }) => {
 
     const [toggle, setToggle] = useState(false)
     const [selectedService, setSelectedService] = useState('');
-    const [selectedModel, setSelectedModel] = useState(bridgeData?.bridges?.configuration?.model?.default);
+    const [selectedModel, setSelectedModel] = useState(data?.configuration?.model?.default);
     const [dataToSend, setDataToSend] = useState({})
-    const [apiKey, setApiKey] = useState('')
+    const [apiKey, setApiKey] = useState(data?.apikey)
     const [modelInfoData, setModelInfoData] = useState({})
-    const [inputConfig, setInputConfig] = useState(modelInfo?.data?.configuration?.model?.default?.inputConfig)
+    const [inputConfig, setInputConfig] = useState(data?.inputConfig ?? modelInfo?.data?.configuration?.model?.default?.inputConfig)
+    const [isPopupVisible, setPopupVisible] = useState(false);
+    const [tempInput, setTempInput] = useState('');
+    const [activeKey, setActiveKey] = useState('');
+    const [jsonString, setJsonString] = useState('');
+    const [isValid, setIsValid] = useState(true);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [tempJsonString, setTempJsonString] = useState('');
+
 
     useEffect(() => {
-        setSelectedService(bridgeData?.bridges?.service?.toLowerCase());
-        setSelectedModel(bridgeData?.bridges?.configuration?.model?.default)
-        setModelInfoData(data?.configuration)
-        // setInputConfig(modelInfo?.bridgeData?.bridges?.configuration?.model?.default?.inputConfig); // Default to an empty object if data?.inputConfig is undefined
-        setInputConfig(modelInfo?.[selectedService]?.[selectedModel]?.inputConfig || {});
+        setSelectedService(data?.service?.toLowerCase());
+        setApiKey(data?.apikey || "");
+        setJsonString(JSON.stringify(data?.configuration?.tools?.default) || "")
+        setSelectedModel(data?.configuration?.model?.default)
+        setModelInfoData(data?.configuration || modelInfo?.data?.configuration?.model?.default?.inputConfig)
+        setInputConfig(data?.inputConfig);
+
         // Find the key associated with the targetValue
         let foundKey = null;
-        for (const key in services[bridgeData?.bridges?.service?.toLowerCase()]) {
-            if (services[bridgeData?.bridges?.service?.toLowerCase()][key].has(bridgeData?.bridges?.configuration?.model?.default)) {
+        for (const key in services[data?.service?.toLowerCase()]) {
+            if (services[data?.service?.toLowerCase()][key].has(data?.configuration?.model?.default)) {
                 foundKey = key;
                 break;
             }
@@ -37,26 +42,24 @@ const DropdownMenu = ({ params, data }) => {
         if (foundKey === 'chat')
             setDataToSend({
                 "configuration": {
-                    "model": selectedModel,
-                    "prompt": [],
+                    "model": data?.configuration?.model?.default,
+                    "prompt": [data.inputConfig.system.default || {}],
                     "type": foundKey,
                     "user": [],
                     "conversation": []
                 },
-                "service": selectedService,
-                // "org_id":"124dfgh67ghj",
+                "service": data?.service?.toLowerCase(),
                 "apikey": apiKey
             })
         else if (foundKey === "embedding")
             setDataToSend({
                 "configuration": {
-                    "model": selectedModel,
-                    "input": "",
+                    "model": data?.configuration?.model?.default,
+                    "input": data?.input?.input,
                     "type": foundKey
 
                 },
-                "service": selectedService,
-                // "org_id":"124dfgh67ghj",
+                "service": data?.service?.toLowerCase(),
                 "apikey": apiKey
             })
 
@@ -64,47 +67,80 @@ const DropdownMenu = ({ params, data }) => {
             setDataToSend(
                 {
                     "configuration": {
-                        "model": selectedModel,
-                        "prompt": "",
+                        "model": data?.configuration?.model?.default,
+                        "prompt": data?.input?.prompt?.prompt,
                         "type": foundKey
 
                     },
-                    'service': selectedService,
-                    // "org_id":"124dfgh67ghj",
+                    'service': data?.service?.toLowerCase(),
                     "apikey": apiKey
                 }
             )
         }
 
-    }, [bridgeData, data]);
+    }, [data, params]);
 
 
 
-
+    /**
+     * Handle the service dropdown change event
+     * 
+     * @param {Object} e event object
+     */
     const handleService = (e) => {
-        setSelectedService(e.target.value)
-        setSelectedModel("")
+        const newSelectedService = e.target.value;
+
+        // Update modelInfoData and inputConfig states based on the new selected service and selected model
+        setModelInfoData(modelInfo[selectedService][selectedModel]?.configuration || {});
+        setInputConfig(modelInfo[selectedService][selectedModel]?.inputConfig || {});
+        // setInputConfig(defaultdata);
+
+        // Update the selected service state
+        setSelectedService(newSelectedService);
+
+        // Reset the selected model state to empty string
+        setSelectedModel("");
     }
+
+
+    /**
+     * Handle the model dropdown change event
+     * 
+     * @param {Object} e event object
+     */
     const handleModel = (e) => {
+
         const newSelectedModel = e.target.value;
         setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
         setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
-        setSelectedModel(newSelectedModel); // Update selectedModel state with the newly selected model
+
+        // Update selectedModel state with the newly selected model
+        setSelectedModel(newSelectedModel);
+
+        // Check if the newly selected model is of the same type as the current type
+        // If it is, update the existing dataToSend object with the new model
         if (dataToSend.configuration.type === e.target.selectedOptions[0].parentNode.label) {
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
                     model: e.target.value, // Update the model in the configuration
-                    type: e.target.selectedOptions[0].parentNode.label
+                    type: e.target.selectedOptions[0].parentNode.label // Keep the same type
                 },
-                service: selectedService,
-                apiKey: apiKey
+                service: selectedService, // Keep the same service
+                apikey: apiKey // Keep the same apiKey
             }));
         }
+        // If the newly selected model is not of the same type as the current type, we need to create a new dataToSend object
+        // Depending on the type of the newly selected model, we set the inputConfig and modelInfoData states accordingly
+        // Then we set the new dataToSend object
         else {
 
             if (e.target.selectedOptions[0].parentNode.label === 'chat') {
+
+                // setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
+                // setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
+
                 setDataToSend({
                     "configuration": {
                         "model": e.target.value,
@@ -114,11 +150,14 @@ const DropdownMenu = ({ params, data }) => {
                         "conversation": []
                     },
                     "service": selectedService,
-                    // "org_id":"124dfgh67ghj",
                     "apikey": apiKey
                 })
             }
             else if (e.target.selectedOptions[0].parentNode.label === "embedding") {
+
+                // setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
+                // setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
+
                 setDataToSend({
                     "configuration": {
                         "model": e.target.value,
@@ -127,11 +166,14 @@ const DropdownMenu = ({ params, data }) => {
 
                     },
                     "service": selectedService,
-                    // "org_id":"124dfgh67ghj",
                     "apikey": apiKey
                 })
             }
-            else {
+            else if (e.target.selectedOptions[0].parentNode.label === "completion") {
+
+                // setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
+                // setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
+
                 setDataToSend(
                     {
                         "configuration": {
@@ -141,7 +183,6 @@ const DropdownMenu = ({ params, data }) => {
 
                         },
                         "service": selectedService,
-                        // "org_id":"124dfgh67ghj",
                         "apikey": apiKey
                     }
                 )
@@ -149,15 +190,30 @@ const DropdownMenu = ({ params, data }) => {
 
         }
     }
+
+    /**
+     * Handle changes to the input fields in the configuration section of the dropdown menu
+     * 
+     * @param {Object} e event object
+     * @param {string} key key of the modelInfoData object to update
+     */
     const handleInputChange = (e, key) => {
         let newValue;
+        // If the field is a checkbox or a boolean, use the checked property of the event target
         if (modelInfoData[key]?.field === "checkbox" || modelInfoData[key]?.field === "boolean") {
+            if (key === "response_format") {
+                if (e.target.checked) { newValue = { "type": "json_object" } }
+                else { newValue = { "type": "text" } }  // Adjust value accordingly
+            } else {
+                newValue = e.target.checked; // Use checked for checkboxes
+            }
+        }
 
-            newValue = e.target.checked; // Use checked for checkboxes
-
-        } else {
+        // Otherwise, use the value property
+        else {
             newValue = e.target.value;
         }
+        // Create a new modelInfoData object with the updated value
         const updatedModelInfo = {
             ...modelInfoData,
             [key]: {
@@ -165,291 +221,486 @@ const DropdownMenu = ({ params, data }) => {
                 default: newValue,
             },
         };
+        // Update the dataToSend object with the new value
         setDataToSend(prevDataToSend => ({
             ...prevDataToSend,
             configuration: {
                 ...prevDataToSend.configuration,
-                [key]: modelInfoData[key]?.field === "number" || modelInfoData[key]?.field === "slider" ? Number(newValue) : newValue
+                [key]: modelInfoData[key]?.field === "number" || modelInfoData[key]?.field === "slider" ? Number(newValue) : modelInfoData[key]?.field === "json_object" ? "" : newValue
             }
         }));
+        // Update the modelInfoData state with the new object
         setModelInfoData(updatedModelInfo);
     };
+
     const toggleAccordion = () => {
         setToggle(!toggle)
     }
 
-    console.log(dataToSend, "data to send ")
+    /**
+     * Handle changes to the input fields in the configuration section of the dropdown menu
+     * 
+     * @param {string} value The value of the input field
+     * @param {string} key The key of the modelInfoData object to update
+     */
     const handleInputConfigChanges = (value, key) => {
         // Update the inputConfig state with the new value
         setInputConfig(prevInputConfig => ({
             ...prevInputConfig,
             [key]: {
+                /**
+                 * The default value for the input field
+                 */
                 default: {
-                    content: value
+                    /**
+                     * The content of the prompt string
+                     */
+                    content: value,
                 }
             }
         }));
 
         // Update the dataToSend state with the new prompt string
-
     };
 
+
+    /**
+     * Save the data to the dataToSend state
+     * 
+     * @param {string} value The value of the input field
+     * @param {string} key The key of the dataToSend object to update
+     */
     const SaveData = (value, key) => {
-        const promptString = { "role": key, "content": value };
-        if (key === "input") {
+        const promptString = { "role": key, "content": value }; // The prompt string to add or update
+
+        if (key === "input" || key === "prompt") { // If the key is input or prompt, update the configuration.input or configuration.prompt field
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
-                    [key]: value
-                }
-            }));
-
-
-        }
-        else if (key === "prompt") {
-            setDataToSend(prevDataToSend => ({
-                ...prevDataToSend,
-                configuration: {
-                    ...prevDataToSend.configuration,
-                    [key]: value
+                    [key]: value // Update the field with the new value
                 }
             }));
         }
-        else if (key === "apikey") {
+        else if (key === "apikey") { // If the key is apikey, update the apikey field
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
-                [key]: value
+                [key]: value // Update the field with the new value
             }));
         }
-        else {
-    // Check if the key already exists in the prompt array
-    const keyIndex = dataToSend?.configuration?.prompt?.findIndex(item => (item).role === key);
-    if (keyIndex !== -1) {
-        // Key already exists, update the value
-        setDataToSend(prevDataToSend => ({
-            ...prevDataToSend,
-            configuration: {
-                ...prevDataToSend.configuration,
-                prompt: prevDataToSend.configuration.prompt.map((item, index) => index === keyIndex ? promptString : item)
+        else { // If the key is not input, prompt, or apikey, update the prompt array
+
+            // Check if the key already exists in the prompt array
+            const keyIndex = dataToSend?.configuration?.prompt?.findIndex(item => (item).role === key);
+
+            if (keyIndex !== -1) { // If the key already exists, update the value
+                setDataToSend(prevDataToSend => ({
+                    ...prevDataToSend,
+                    configuration: {
+                        ...prevDataToSend.configuration,
+                        prompt: prevDataToSend.configuration.prompt.map((item, index) => index === keyIndex ? promptString : item)
+                    }
+                }));
+            } else { // If the key does not exist, add it to the prompt array
+                setDataToSend(prevDataToSend => ({
+                    ...prevDataToSend,
+                    configuration: {
+                        ...prevDataToSend.configuration,
+                        prompt: [...prevDataToSend.configuration.prompt, promptString]
+                    }
+                }));
             }
-        }));
-    } else {
-        // Key does not exist, add it to the prompt array
-        setDataToSend(prevDataToSend => ({
-            ...prevDataToSend,
-            configuration: {
-                ...prevDataToSend.configuration,
-                prompt: [...prevDataToSend.configuration.prompt, promptString]
-            }
-        }));
-    }
-}
+        }
     };
 
 
-return (
-    <div className='flex items-start h-full justify-start'>
+    /**
+     * Open the popup to edit the configuration data
+     * 
+     * @param {string} key The key of the dataToSend object to update
+     * @param {string} currentValue The current value of the input field
+     */
+    const openPopup = (key, currentValue) => {
+        setTempInput(currentValue); // Set the current value of the input field in state
+        setActiveKey(key); // Set the key of the dataToSend object to update in state
+        setPopupVisible(true); // Open the popup
+    };
+    // };
 
-        <div className='    w-1/5 h-full pr-2'>
-            <label className="form-control w-full max-w-xs">
-                <div className="label">
-                    <span className="label-text">Service</span>
-                </div>
-                <select value={selectedService} onChange={handleService} className="select select-bordered">
-                    <option disabled selected>Select a Service</option>
-                    <option value="google">google</option>
-                    {/* <option value="mistral">mistral</option> */}
-                    {/* <option value="cohere">cohere</option> */}
-                    <option value="openai">openai</option>
-                </select>
-            </label>
+    /**
+     * Handle popup input changes
+     * 
+     * @param {Object} e event object
+     */
+    const handlePopupInputChange = (e) => {
+        // Set the current value of the input field in state
+        setTempInput(e.target.value);
+    };
+    // };
 
-            <label className="form-control w-full mb-2 max-w-xs">
-                <div className="label">
-                    <span className="label-text">Model</span>
-                </div>
-                <select value={selectedModel} onChange={handleModel} className="select select-bordered">
-                    <option disabled selected>Select a Model</option>
-
-                    {Object.entries(services?.[selectedService] || {}).map(([group, options]) => (
-                        group !== 'models' && // Exclude the 'models' group
-                        <optgroup label={group}>
-                            {[...options].map(option => (
-                                <option key={option}>{option}</option>
-                            ))}
-                        </optgroup>
-                    ))}
-                </select>
-            </label>
-            {modelInfoData && Object.entries(modelInfoData || {}).map(([key, value]) => (
-                key !== 'model' && value.level !== 0 &&
-                <div className={`mb-2 ${value.field === "boolean" ? "flex justify-between item-center" : ""} `}>
-
-                    <div className='flex justify-between items-center w-full'>
-                        <p className='capitalize'> {key.replaceAll("_", " ")}</p>
-                        {value.field === 'slider' && <p>{typeof value.default === 'object' ? JSON.stringify(value) : value.default}</p>}
-                    </div>
-                    {value.field === "slider" ?
-                        <input
-                            id={key} // Add this id attribute
-                            type="range"
-                            min={value?.min}
-                            max={value?.max}
-                            step={value?.step}
-                            value={value?.default}
-                            onChange={(e) => handleInputChange(e, key)}
-                            className="range range-xs w-full"
-                            name={key} // Add name attribute
-                        />
-                        : value.field === 'text' ?
-                            <input
-                                type="text"
-                                required={value?.level === 1 ? true : false}
-                                value={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
-                                onChange={(e) => handleInputChange(e, key)}
-                                className="input w-full input-bordered"
-                                name={key} // Add name attribute
-                            />
-                            : value.field === 'number' ?
-                                <input
-                                    type="number"
-                                    required={value?.level === 1 ? true : false}
-                                    value={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
-                                    onChange={(e) => handleInputChange(e, key)}
-                                    className="input w-full input-bordered"
-                                    name={key} // Add name attribute
-                                /> :
-                                value.field === 'boolean' ?
-                                    <input
-                                        type="checkbox"
-                                        required={value?.level === 1 ? true : false}
-                                        checked={!!value.default} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
-                                        onChange={(e) => handleInputChange(e, key)}
-                                        className="checkbox"
-                                        name={key} // Add name attribute
-                                    /> :
-                                    value.field === "dropdown" ? (
-                                        <select
-                                            onChange={(e) => handleInputChange(e, key)}
-                                            className="select w-full max-w-xs"
-                                            name={key}
-                                        >
-                                            <option disabled selected>Select a {key.replaceAll("_", " ")}</option>
-                                            {value.values.map((element, index) => (
-                                                <option key={index}>{element}</option>
-                                            ))}
-                                        </select>
-                                    )
-                                        :
-                                        "this field is under development"}
-
-                </div>
-            ))}
-            <div className="collapse collapse-arrow bg-base-200">
-                <input type="radio" name="my-accordion-2" checked={toggle} onClick={toggleAccordion} />
-                <div className="collapse-title text-xl font-medium">
-                    Advanced Parameters
-                </div>
-                <div className="collapse-content">
-                    {modelInfoData && Object.entries(modelInfoData || {}).map(([key, value]) => (
-                        key !== 'model' && key !== 'tool' && key !== "response_format" && key !== 'tool_choice' && value.level === 0 &&
-                        <div className={`mb-2 ${value.field === "boolean" ? "flex justify-between item-center" : ""} w-full`}>
-
-                            <div className='flex justify-between items-center w-full'>
-                                <p className='capitalize'> {key.replaceAll("_", " ")}</p>
-                                {value.field === 'slider' && <p>{typeof value.default === 'object' ? JSON.stringify(value) : value.default}</p>}
-                            </div>
-                            {value.field === "slider" ?
-                                <input
-                                    id={key} // Add this id attribute
-                                    type="range"
-                                    min={value?.min}
-                                    max={value?.max}
-                                    step={value?.step}
-                                    value={value?.default}
-                                    onChange={(e) => handleInputChange(e, key)}
-                                    className="range range-xs w-full"
-                                    name={key} // Add name attribute
-                                />
-                                : value.field === 'text' ?
-                                    <input
-                                        type="text"
-                                        required={value?.level === 1 ? true : false}
-                                        value={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
-                                        onChange={(e) => handleInputChange(e, key)}
-                                        className="input w-full input-bordered"
-                                        name={key} // Add name attribute
-                                    />
-                                    : value.field === 'number' ?
-                                        <input
-                                            type="number"
-                                            required={value?.level === 1 ? true : false}
-                                            value={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
-                                            onChange={(e) => handleInputChange(e, key)}
-                                            className="input w-full input-bordered"
-                                            name={key} // Add name attribute
-                                        /> :
-                                        value.field === 'boolean' ?
-                                            <input
-                                                type="checkbox"
-                                                required={value?.level === 1 ? true : false}
-                                                checked={!!value.default} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
-                                                onChange={(e) => handleInputChange(e, key)}
-                                                className="checkbox"
-                                                name={key} // Add name attribute
-                                            />
-                                            :
-                                            "this field is under development "}
-
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <p>Provide Your ApiKey</p>
-            <input
-                type="text"
-                required
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="input w-full input-bordered"
-                onBlur={(e) => SaveData(e.target.value, "apikey")}
-            />
+    // Function to close the popup and save the data
+    const closePopup = () => {
+        handleInputConfigChanges(tempInput, activeKey);
+        SaveData(tempInput, activeKey);
+        setPopupVisible(false);
+    };
 
 
-        </div>
+    const handleInputClick = () => {
+        setModalOpen(true);
+        setTempJsonString(jsonString);
+    };
 
-        <div className="hero h-full w-full ">
-            <div className="hero-content justify-between items-start max-w-full flex-col lg:flex-row">
-                <div>
-                    {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
-                        <>
-                            {key !== "rawData" &&
-                                <label className="form-control w-full max-w-xs" key={key}>
+    /**
+     * Handle the closing of the modal
+     * Parses the JSON string and updates the dataToSend state
+     */
+    const handleModalClose = () => {
+        setJsonString(tempJsonString); // Save the JSON string in state
+        setModalOpen(false); // Close the modal
+
+        try {
+            const parsedJson = JSON.parse(tempJsonString); // Parse the JSON string
+            setDataToSend(prevDataToSend => ({ // Update the dataToSend state
+                ...prevDataToSend, // Keep the previous data
+                configuration: { // Add the new data
+                    ...prevDataToSend.configuration, // Keep the previous configuration
+                    "tools": parsedJson, // Set the "tools" property to the parsed JSON
+                },
+            }));
+        } catch (error) {
+            setJsonString(""); // Set the JSON string to an empty string
+            console.error("Error parsing JSON:", error); // Log the error
+        }
+    };
+    // };
+
+
+    /**
+     * Handle changes to the JSON text area
+     * @param {React.ChangeEvent<HTMLTextAreaElement>} event The change event
+     */
+    const handleTextAreaChange = (event) => {
+        const newJsonString = event.target.value; // Get the new JSON string
+        setTempJsonString(newJsonString); // Save it to state
+
+        try {
+            JSON.parse(newJsonString); // Try to parse the new JSON string
+            setIsValid(true); // If it parses correctly, set isValid to true
+        } catch (error) {
+            setIsValid(false); // If it doesn't parse correctly, set isValid to false
+        }
+    };
+
+
+    return (
+        <>
+            <div className=" " style={{ height: "90vh" }}>
+                <div className=" flex flex-col overflow-hidden  border border-gray-300 md:flex-row">
+                    <div className="w-full border-r border-gray-300 bg-gray-100 md:max-w-xs">
+                        <div className="p-4 overflow-auto" style={{ height: "90vh" }}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-5 md:grid-cols-1">
+
+                                <label className="form-control w-full max-w-xs">
                                     <div className="label">
-                                        <span className="label-text">{key}</span>
+                                        <span className="label-text">Provide Your ApiKey</span>
                                     </div>
                                     <input
                                         type="text"
-                                        placeholder="Type here"
-                                        className="input input-bordered w-full max-w-xs"
-                                        value={value?.default?.content || value?.prompt || value?.input || ""}
-                                        onChange={(e) => handleInputConfigChanges(e.target.value, key)}
-                                        onBlur={(e) => SaveData(e.target.value, key)}
+                                        required
+                                        value={apiKey}
+                                        onChange={(e) => setApiKey(e.target.value)}
+                                        className="input w-full input-bordered"
+                                        onBlur={(e) => SaveData(e.target.value, "apikey")}
                                     />
+
                                 </label>
-                            }
-                        </>
-                    ))}
-                </div>
-                <div className='w-full'>
-                    <Chat dataToSend={dataToSend} params={params} />
+
+                                <label className="form-control w-full ">
+                                    <div className="label">
+                                        <span className="label-text">Service</span>
+                                    </div>
+                                    <select value={selectedService} onChange={handleService} className="select select-bordered">
+                                        <option disabled selected>Select a Service</option>
+                                        {/* <option value="google">google</option> */}
+                                        {/* <option value="mistral">mistral</option> */}
+                                        {/* <option value="cohere">cohere</option> */}
+                                        <option value="openai">openai</option>
+                                    </select>
+                                </label>
+
+                                <label className="form-control w-full mb-2 ">
+                                    <div className="label">
+                                        <span className="label-text">Model</span>
+                                    </div>
+                                    <select value={selectedModel} onChange={handleModel} className="select select-bordered">
+                                        <option disabled selected>Select a Model</option>
+
+                                        {Object.entries(services?.[selectedService] || {}).map(([group, options]) => (
+                                            group !== 'models' && // Exclude the 'models' group
+                                            <optgroup label={group}>
+                                                {[...options].map(option => (
+                                                    <option key={option}>{option}</option>
+                                                ))}
+                                            </optgroup>
+                                        ))}
+                                    </select>
+                                </label>
+                                {modelInfoData && Object.entries(modelInfoData || {}).map(([key, value]) => (
+                                    key !== 'model' && value.level !== 0 && key !== "stream" &&
+                                    <div className={`mb-2 ${value.field === "boolean" ? "flex justify-between item-center" : ""} `}>
+
+                                        <div className='flex justify-between items-center w-full'>
+                                            <p className='capitalize'> {key.replaceAll("_", " ")}</p>
+                                            {value.field === 'slider' && <p>{typeof value.default === 'object' ? JSON.stringify(value) : value.default}</p>}
+                                        </div>
+                                        {value.field === "slider" ?
+                                            <input
+                                                id={key} // Add this id attribute
+                                                type="range"
+                                                min={value?.min}
+                                                max={value?.max}
+                                                step={value?.step}
+                                                value={value?.default}
+                                                onChange={(e) => handleInputChange(e, key)}
+                                                className="range range-xs w-full"
+                                                name={key} // Add name attribute
+                                            />
+                                            : value.field === 'text' ?
+                                                <input
+                                                    type="text"
+                                                    required={value?.level === 1 ? true : false}
+                                                    value={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
+                                                    onChange={(e) => handleInputChange(e, key)}
+                                                    className="input w-full input-bordered"
+                                                    name={key} // Add name attribute
+                                                />
+                                                : value.field === 'number' ?
+                                                    <input
+                                                        type="number"
+                                                        required={value?.level === 1 ? true : false}
+                                                        value={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
+                                                        onChange={(e) => handleInputChange(e, key)}
+                                                        className="input w-full input-bordered"
+                                                        name={key} // Add name attribute
+                                                    /> :
+                                                    value.field === 'boolean' ?
+                                                        <input
+                                                            type="checkbox"
+                                                            required={value?.level === 1 ? true : false}
+                                                            checked={value.default.type === "json_object" ? true : value.default.type === "text" ? false : value.default} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
+                                                            onChange={(e) => handleInputChange(e, key)}
+                                                            className="checkbox"
+                                                            name={key} // Add name attribute
+                                                        /> :
+                                                        value.field === "dropdown" ? (
+                                                            <select
+                                                                onChange={(e) => handleInputChange(e, key)}
+                                                                className="select w-full "
+                                                                name={key}
+                                                            >
+                                                                <option disabled selected>Select a {key.replaceAll("_", " ")}</option>
+                                                                {value.values.map((element, index) => (
+                                                                    <option key={index}>{element}</option>
+                                                                ))}
+                                                            </select>
+                                                        )
+                                                            :
+                                                            "this field is under development"}
+
+                                    </div>
+                                ))}
+                                <div className="collapse collapse-arrow bg-base-200">
+                                    <input type="radio" name="my-accordion-2" checked={toggle} onClick={toggleAccordion} />
+                                    <div className="collapse-title text-xl font-medium">
+                                        Advanced Parameters
+                                    </div>
+                                    <div className="collapse-content">
+                                        {modelInfoData && Object.entries(modelInfoData || {}).map(([key, value]) => (
+                                            key !== 'model' && key !== 'tools' && key !== 'tool_choice' && key !== "stream" && value.level === 0 &&
+                                            <div className={`mb-2 ${value.field === "boolean" ? "flex justify-between item-center" : ""} w-full`}>
+
+                                                <div className='flex justify-between items-center w-full'>
+                                                    <p className='capitalize'> {key.replaceAll("_", " ")}</p>
+                                                    {value.field === 'slider' && <p>{typeof value.default === 'object' ? JSON.stringify(value) : value.default}</p>}
+                                                </div>
+                                                {value.field === "slider" ?
+                                                    <input
+                                                        id={key} // Add this id attribute
+                                                        type="range"
+                                                        min={value?.min}
+                                                        max={value?.max}
+                                                        step={value?.step}
+                                                        value={value?.default}
+                                                        onChange={(e) => handleInputChange(e, key)}
+                                                        className="range range-xs w-full"
+                                                        name={key} // Add name attribute
+                                                    />
+                                                    : value.field === 'text' ?
+                                                        <input
+                                                            type="text"
+                                                            required={value?.level === 1 ? true : false}
+                                                            value={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
+                                                            onChange={(e) => handleInputChange(e, key)}
+                                                            className="input w-full input-bordered"
+                                                            name={key} // Add name attribute
+                                                        />
+                                                        : value.field === 'number' ?
+                                                            <input
+                                                                type="number"
+                                                                required={value?.level === 1 ? true : false}
+                                                                value={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
+                                                                onChange={(e) => handleInputChange(e, key)}
+                                                                className="input w-full input-bordered"
+                                                                name={key} // Add name attribute
+                                                            /> :
+                                                            value.field === 'boolean' ?
+                                                                <input
+                                                                    type="checkbox"
+                                                                    required={value?.level === 1 ? true : false}
+                                                                    checked={value.default.type === "text" ? false : value.default.type === "json_object" ? true : !!value} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
+                                                                    onChange={(e) => handleInputChange(e, key)}
+                                                                    className="checkbox"
+                                                                    name={key} // Add name attribute
+                                                                />
+                                                                :
+                                                                value.field === 'json_object' ?
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        required={value?.level === 1 ? true : false}
+                                                                        checked={!value.default} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
+                                                                        onChange={(e) => handleInputChange(e, key)}
+                                                                        className="checkbox"
+                                                                        name={key} // Add name attribute
+                                                                    /> :
+                                                                    "this field is under development "}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <div className="w-full border-r border-gray-300 bg-gray-100 md:max-w-xs">
+                        <div className="p-4 overflow-auto h-" style={{ height: "90vh" }}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-5 md:grid-cols-1">
+                                {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
+                                    <>
+                                        {key !== "rawData" && key !== "stream" && (
+                                            <div className="form-control w-full " key={key}>
+                                                <div className="label">
+                                                    <span className="label-text capitalize">{key}</span>
+                                                </div>
+                                                <input
+                                                    readOnly // Make this readOnly or replace with a div/span as needed
+                                                    className="input input-bordered w-full"
+                                                    value={value?.default?.content || value?.prompt || value?.input || ""}
+                                                    onClick={() => openPopup(key, value?.default?.content || value?.prompt || value?.input || "")}
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                ))}
+
+                                {isPopupVisible && (
+                                    <div className="fixed inset-0 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center p-4 z-50">
+                                        <div className="relative bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-2xl">
+                                            <div className="flex justify-end p-2">
+                                                <button onClick={closePopup} className="text-gray-600 hover:text-gray-800 transition-colors duration-150">
+                                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                </button>
+                                            </div>
+                                            <div className="px-4 pb-4 pt-2">
+                                                <textarea
+                                                    autoFocus
+                                                    className="textarea textarea-bordered w-full h-60 resize-none"
+                                                    value={tempInput}
+                                                    onChange={handlePopupInputChange}
+                                                ></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <div className="form-control w-full ">
+                                        <div className="label">
+                                            <span className="label-text">Function call</span>
+                                        </div>
+                                        <input
+                                            className={`input input-bordered w-full `}
+                                            value={jsonString}
+                                            onClick={handleInputClick}
+                                            readOnly
+                                        />
+                                    </div>
+
+
+                                    {modalOpen && (
+                                        <div className="fixed inset-0 bg-opacity-50 overflow-y-auto flex justify-center items-center p-4 z-50">
+                                            <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-2xl">
+                                                <div className="flex justify-end p-2">
+                                                    <button onClick={handleModalClose} className="text-gray-600 hover:text-gray-800 transition-colors duration-150">
+                                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                    </button>
+                                                </div>
+                                                <div className="px-4 pb-4 pt-2">
+                                                    <textarea
+                                                        autoFocus
+                                                        placeholder='{ "key" : "value" }'
+                                                        className="textarea textarea-bordered w-full h-80 md:h-96 resize-none"
+                                                        value={tempJsonString}
+                                                        onChange={handleTextAreaChange}
+                                                    // onBlur={(e)=> }
+                                                    ></textarea>
+                                                    {!isValid && <p className="text-red-500">Invalid JSON</p>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                {embed && embed?.length > 0 ?
+                                    <ul className="menu bg-base-200 w-full rounded-box">
+                                        <li>
+                                            <h2 className="menu-title flex justify-between items-center">Embeded viasocket     <span onClick={() => openViasocket()} className='text-2xl cursor-pointer flex justify-center items-center'>+</span> </h2>
+
+                                            {embed && embed?.map((value) => (
+                                                <ul>
+                                                    <li className='' id={value?.id} onClick={() => openViasocket(value?.id)} >
+                                                        <div className='w-full flex justify-between items-center'>
+                                                            <div > <div>{value.title}  </div><div className={`badge badge-sm ${value.status === "active" ? "bg-green-300" : value.status === "drafted" ? "bg-orange-300" : value.status === "deleted" ? "bg-red-300" : value.status === "paused" ? "bg-grey-300" : ""}`}>{value.status}</div></div>
+                                                            <svg className='float-right' width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M27.1421 17.1213C27.5327 16.7308 28.1658 16.7308 28.5563 17.1213L31.3848 19.9497C31.7753 20.3403 31.7753 20.9734 31.3848 21.364L22.6084 30.1403L16.598 31.9081L18.3658 25.8977L27.1421 17.1213Z" stroke="#222222" stroke-width="2" />
+                                                            </svg>
+                                                        </div>
+
+
+
+                                                    </li>
+                                                </ul>
+                                            ))}
+                                        </li>
+                                    </ul>
+                                    :
+                                    <button onClick={() => openViasocket()} className="btn">Add new embed</button>
+                                }
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <div className="flex-1">
+                        <div className="pl-4 pr-4 pb-4">
+                            {console.log(dataToSend, "data to send ")}
+                            <Chat dataToSend={dataToSend} params={params} />
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-
-    </div>
-);
+        </>
+    );
 };
 
 export default DropdownMenu;

@@ -17,12 +17,16 @@ export const historyReducer = createSlice({
     } ,
     fetchThreadReducer : (state, action) => {
         state.thread = action.payload.data 
-      } 
+      } ,
+      clearThreadData: (state) => {
+        state.thread = [];
+      },
   },
 });
 
 export const {
     fetchAllHistoryReducer ,
-    fetchThreadReducer
+    fetchThreadReducer,
+    clearThreadData
 } = historyReducer.actions;
 export default historyReducer.reducer;

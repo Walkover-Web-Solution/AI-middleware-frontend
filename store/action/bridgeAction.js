@@ -1,14 +1,14 @@
-import { createBridge, getAllBridges, getSingleBridge } from "@/api";
-import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer } from "../reducer/bridgeReducer";
+import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi } from "@/api";
+import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer } from "../reducer/bridgeReducer";
 import axios from "@/utils/interceptor";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   try {
     const data = await getSingleBridge(id);
-    dispatch(fetchSingleBridgeReducer(data.data));
+    const integrationData = await integration(data.data.bridges.embed_token)
+    dispatch(fetchSingleBridgeReducer({ bridges: data.data.bridges, integrationData }));
   } catch (error) {
     console.error(error);
   }
@@ -62,3 +62,33 @@ export const updateBridgeAction = () => async (dispatch, getState) => {
     console.error(error);
   }
 };
+
+
+export const deleteBridgeAction = (bridgeId) => async (dispatch) => {
+  try {
+    await deleteBridge(bridgeId);
+    dispatch(deleteBridgeReducer(bridgeId));
+  } catch (error) {
+    console.error('Failed to delete bridge:', error);
+  }
+};
+
+
+export const integrationAction = (embed_token, bridge_id) => async (dispatch) => {
+  try {
+    const intregrationData = await integration(embed_token);
+    dispatch(integrationReducer({ intregration: intregrationData, id: bridge_id }))
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+
+export const createApiAction = (bridge_id, dataFromEmbed) => async () => {
+  try {
+    await createapi(bridge_id, dataFromEmbed);
+
+  } catch (error) {
+    console.error(error)
+  }
+}
