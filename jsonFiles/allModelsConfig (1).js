@@ -86,7 +86,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0 },
                 "tools": { field: "array", level: 0, default: [] },
                 "tool_choice": { field: "text", default: "auto", level: 0 },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "boolean", default: { type: "text" }, level: 0 }
             },
 
 
@@ -126,7 +126,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0 },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "boolean", default: { type: "text" }, level: 0 }
             },
 
 
@@ -165,7 +165,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "string", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "boolean", default: { type: "text" }, level: 0 }
             },
 
 
@@ -206,7 +206,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "boolean", default: { type: "text" }, level: 0 }
             },
 
 
@@ -247,7 +247,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "boolean", default: { type: "text" }, level: 0 }
             },
 
 
@@ -363,7 +363,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "boolean", default: { type: "text" }, level: 0 }
             },
 
 
@@ -404,7 +404,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, },
                 "tools": { field: "array", level: 0, default: [], },
                 "tool_choice": { field: "text", default: "auto", level: 0, },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "boolean", default: { type: "text" }, level: 0 }
             },
 
 
@@ -483,7 +483,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, typeOf: "boolean" },
                 "tools": { field: "array", level: 0, default: [], typeOf: "array" },
                 "tool_choice": { field: "text", default: "auto", level: 0, typeOf: "string" },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "boolean", default: { type: "text" }, level: 0 }
 
             },
             "apikey": "",
@@ -520,7 +520,7 @@ export const modelInfo = {
                 "stream": { field: "boolean", default: false, level: 0, typeOf: "boolean" },
                 "tools": { field: "array", level: 0, default: [], typeOf: "array" },
                 "tool_choice": { field: "text", default: "auto", level: 0, typeOf: "string" },
-                "response_format": { field: "boolean", default: false, level: 0 }
+                "response_format": { field: "boolean", default: { type: "text" }, level: 0 }
 
             },
             "apikey": "",
