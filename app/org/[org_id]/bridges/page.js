@@ -64,10 +64,12 @@ function Home({ params }) {
   useEffect(() => {
     dispatch(getAllBridgesAction())
   }, [params.org_id])
+
   const columns = ["name", "_id", "service"];
 
   const onClickConfigure = (id) => {
     // dispatch(getSingleBridgesAction(id))
+    setIsLoading(true);
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
   }
 
@@ -90,47 +92,63 @@ function Home({ params }) {
     <div className="drawer-content flex pl-2 flex-col items-start justify-start">
       <div className="flex w-full justify-start gap-16 items-start">
         <div className="w-full">
-          <button className="btn float-end mt-2 btn-sm mr-3 btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>+ create new bridge</button>
-          <table className="table">
-            <thead>
-              <tr>
-                {columns.map(column => (
-                  <th key={column}>{column.replace(/_/g, ' ').charAt(0).toUpperCase() + column.replace(/_/g, ' ').slice(1)}</th> // Beautify the column headers
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {currentBridges.map((item) => (
-                <tr key={item._id} className="hover-row hover">
-                  {/* Table row content */}
+          {allBridges.length === 0 ? (
+            <div className="text-center  w-full h-screen flex justify-center items-center py-10">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="w-16 h-16 text-blue-500">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <p className="text-lg font-semibold text-gray-800">Create Your First Bridge</p>
+                <button className="btn  mt-2  mr-3 btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>+ create new bridge</button>
 
-                  {columns.map(column => (
-                    <td key={`${item._id}-${column}`}>{item[column]}</td>
-                  ))}
-                  <td key={item._id} className="button-container gap-3 flex justify-center align-center">
-                    <button onClick={() => { setIsLoading(true); router.push(`/org/${params.org_id}/bridges/history/${item._id}`); }} className="btn btn-sm">History</button>
-                    <button onClick={() => onClickConfigure(item._id)} className="btn btn-sm">Configure</button>
-                    {/* <button onClick={() => {  setIsLoading(true); router.push(`/org/${params.org_id}/bridges/configure/${item._id}`); dispatch(getSingleBridgesAction(item._id)); }} className="btn btn-sm">Configure</button> */}
-                    <a onClick={() => handleDeleteBridge(item._id)} className="tooltip tooltip-primary" data-tip="delete">
-                      <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
-                        <g clip-path="url(#clip0_117_1501)" >
-                          <path d="M7 4V2H17V4H22V6H20V21C20 21.2652 19.8946 21.5196 19.7071 21.7071C19.5196 21.8946 19.2652 22 19 22H5C4.73478 22 4.48043 21.8946 4.29289 21.7071C4.10536 21.5196 4 21.2652 4 21V6H2V4H7ZM6 6V20H18V6H6ZM9 9H11V17H9V9ZM13 9H15V17H13V9Z" fill="#03053D" />
-                        </g>
-                        {/* <defs>
+              </div>
+            </div>
+
+          ) : (
+            <>
+              <button className="btn float-end mt-2 btn-sm mr-3 btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>+ create new bridge</button>
+              <table className="table">
+                <thead>
+                  <tr>
+                    {columns.map(column => (
+                      <th key={column}>{column.replace(/_/g, ' ').charAt(0).toUpperCase() + column.replace(/_/g, ' ').slice(1)}</th> // Beautify the column headers
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentBridges.map((item) => (
+                    <tr key={item._id} className="hover-row hover">
+                      {/* Table row content */}
+
+                      {columns.map(column => (
+                        <td key={`${item._id}-${column}`}>{item[column]}</td>
+                      ))}
+                      <td key={item._id} className="button-container gap-3 flex justify-center align-center">
+                        <button onClick={() => { setIsLoading(true); router.push(`/org/${params.org_id}/bridges/history/${item._id}`); }} className="btn btn-sm">History</button>
+                        <button onClick={() => onClickConfigure(item._id)} className="btn btn-sm">Configure</button>
+                        {/* <button onClick={() => {  setIsLoading(true); router.push(`/org/${params.org_id}/bridges/configure/${item._id}`); dispatch(getSingleBridgesAction(item._id)); }} className="btn btn-sm">Configure</button> */}
+                        <a onClick={() => handleDeleteBridge(item._id)} className="tooltip tooltip-primary" data-tip="delete">
+                          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" >
+                            <g clip-path="url(#clip0_117_1501)" >
+                              <path d="M7 4V2H17V4H22V6H20V21C20 21.2652 19.8946 21.5196 19.7071 21.7071C19.5196 21.8946 19.2652 22 19 22H5C4.73478 22 4.48043 21.8946 4.29289 21.7071C4.10536 21.5196 4 21.2652 4 21V6H2V4H7ZM6 6V20H18V6H6ZM9 9H11V17H9V9ZM13 9H15V17H13V9Z" fill="#03053D" />
+                            </g>
+                            {/* <defs>
                                 <clipPath id={item._id} >
                                   <rect width="24 " height="24" fill="white" />
                                 </clipPath>
                               </defs> */}
-                      </svg>
-                    </a>
+                          </svg>
+                        </a>
 
-                  </td>
-                </tr>
-              ))}
+                      </td>
+                    </tr>
+                  ))}
 
 
-            </tbody>
-          </table>
+                </tbody>
+              </table>
+            </>
+          )}
 
 
           {totalPages > 1 && (

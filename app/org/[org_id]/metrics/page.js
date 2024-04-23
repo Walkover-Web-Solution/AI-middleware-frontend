@@ -2,41 +2,74 @@
 import React, { useEffect, useState } from 'react';
 import Table from '@/components/table';
 import Sidebar from '@/components/Sidebar';
-import { getMetricsData } from '@/api';
+import { getMetricsData } from '@/api'; 
 import { useSelector } from 'react-redux';
 import Protected from '@/components/protected';
 import { useParams } from 'next/navigation';
 
 function Page({ params }) {
-  // Get today's date in the required format
   const today = new Date().toISOString().split('T')[0];
-
   const [metricsData, setMetricsData] = useState([]);
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
   const currentOrgId = useSelector((state) => state.orgReducer.currentOrgId);
 
-  // Function to handle data fetching
+  const adjustTimeForUTC = (date, includeEndTime) => {
+    const localDate = new Date(date);
+    if (includeEndTime) {
+        localDate.setHours(23, 59, 59, 999);
+    }
+
+    // Calculate timezone offset in milliseconds (local time minus UTC)
+    const timezoneOffset = localDate.getTimezoneOffset() * 60000;
+
+    // Subtract timezone offset to get the exact UTC equivalent for the local end of day
+    const adjustedDate = new Date(localDate.getTime() - timezoneOffset);
+
+    return adjustedDate.toISOString();
+};
+
+// Usage
+let startTime = adjustTimeForUTC(startDate, false); // Start of day is not that critical unless needed
+let endTime = adjustTimeForUTC(endDate, true); // Adjust end time to reflect local end of day
+
+
+  // Update fetch logic to call the correct API based on the date being today
   const fetchData = () => {
-    if (params.org_id) {
-      getMetricsData(params.org_id, startDate, endDate)
-        .then((data) => {
-          if (data && data.statusCode === 200) {
-            setMetricsData(data.data);
-          } else {
-            console.error("Received non-200 status code:", data.statusCode);
-          }
-        })
-        .catch((error) => {
-          console.error("Failed to fetch metrics data:", error);
-        });
+    if (!params.org_id) return;
+
+    const isToday = startDate === today && endDate === today;
+
+    if (isToday) {
+        getMetricsData(params.org_id)
+            .then(handleResponse)
+            .catch(handleError);
+    } else {
+        let startTime = adjustTimeForUTC(startDate, false);
+        let endTime = adjustTimeForUTC(endDate, true);
+
+        getMetricsData(params.org_id, startTime, endTime)
+            .then(handleResponse)
+            .catch(handleError);
+    }
+};
+
+
+  const handleResponse = (data) => {
+    if (data && data.statusCode === 200) {
+      setMetricsData(data.data);
+    } else {
+      console.error("Received non-200 status code:", data.statusCode);
     }
   };
 
+  const handleError = (error) => {
+    console.error("Failed to fetch metrics data:", error);
+  };
 
-  useEffect(()=> {
-    fetchData();
-  },[]) 
+  useEffect(() => {
+    fetchData(); // Fetch data on initial load and subsequent data changes
+  }, []); // React to changes in dates or organization ID
 
   return (
     <div className="drawer lg:drawer-open">
@@ -51,7 +84,7 @@ function Page({ params }) {
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               className="input input-bordered input-sm"
-              max={today}  // Ensure start date is not in the future
+              max={endDate}
             />
           </div>
           <div className="flex items-center">
@@ -62,7 +95,8 @@ function Page({ params }) {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               className="input input-bordered input-sm"
-              max={today}  // Prevent selection of a future date
+              min={startDate}
+              max={today}
             />
           </div>
           <button onClick={fetchData} className="btn btn-primary btn-sm my-2">Filter</button>
