@@ -24,10 +24,10 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
   }
 };
 
-export const getAllBridgesAction = () => async (dispatch, getState) => {
+export const getAllBridgesAction = (orgId) => async (dispatch, getState) => {
   try {
     const response = await getAllBridges();
-    dispatch(fetchAllBridgeReducer(response.data.bridges));
+    dispatch(fetchAllBridgeReducer({ bridges: response.data.bridges, orgId }));
   } catch (error) {
     console.error(error);
   }
