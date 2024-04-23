@@ -63,7 +63,7 @@ function Home({ params }) {
 
   useEffect(() => {
     dispatch(getAllBridgesAction())
-  }, [])
+  }, [params.org_id])
 
   const columns = ["name", "_id", "service"];
 
