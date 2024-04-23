@@ -1,3 +1,5 @@
+import { cloneDeep } from "lodash";
+
 export const updatedData = (obj1, obj2, type) => {
     // Deep clone obj1 to avoid mutating the original object
 
@@ -88,29 +90,31 @@ export const updatedData = (obj1, obj2, type) => {
 // }
 
 
-function updateContent(obj2, updatedObj1) {
-    debugger
+const updateContent = (obj2, updatedObj1) => {
     try {
-        const obj3 = { ...obj2 }
+        // Deep clone obj2
+        const obj3 = cloneDeep(obj2);
+
+        // If prompt is not defined in updatedObj1, return obj2
         if (updatedObj1.prompt === undefined) return obj2;
 
+        // Iterate through each item in updatedObj1.prompt
         updatedObj1.prompt.forEach(item => {
-            const role = item.role;
-            const content = item.content;
+            const { role, content } = item;
 
-            // Check if obj2[role].default exists and create a mutable copy
-            if (obj3[role] && obj3[role].default) {
-                const mutableDefault = { ...obj3[role].default };
-                mutableDefault.content += " " + content;
-                obj3[role].default = mutableDefault; // Update obj3[role].default
+            // Check if obj3[role].default exists and update its content
+            if (obj3[role]?.default) {
+                obj3[role].default.content += ` ${content}`;
             }
         });
 
         return obj3;
     } catch (error) {
         console.error(error);
+        return obj2; // Return original object in case of error
     }
-}
+};
+
 
 
 

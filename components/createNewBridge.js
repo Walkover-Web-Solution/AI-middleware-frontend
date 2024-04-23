@@ -38,7 +38,7 @@ function CreateNewBridge({ orgid }) {
                 route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
                 setIsLoading(false);
                 document.getElementById('my_modal_1').close()
-            })).catch( 
+            })).catch(
                 setIsLoading(false)
             );
         }
