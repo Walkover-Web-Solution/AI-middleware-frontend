@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 const initialState = {
   allBridgesMap: {},
   org: {},
-  allBridges: [],
+  // allBridges: [],
   loading: false,
 
 };
@@ -31,14 +31,10 @@ export const bridgeReducer = createSlice({
 
     fetchAllBridgeReducer: (state, action) => {
       state.org = { ...state.org, [action.payload.orgId]: [...action.payload.bridges] }
-      state.allBridges = action.payload.bridges;
     },
 
     createBridgeReducer: (state, action) => {
-      state.allBridges.push(action.payload.data.bridge)
-      return action.payload._id
-      // state.allBridges = [...state.allBridges , action.payload] 
-      // state.singleBridgeData = action.payload
+      state.org[action.payload.orgId].push(action.payload.data.data.bridge)
     },
     updateBridgeReducer: (state, action) => {
       const obj1 = action.payload.bridges  // obj1
