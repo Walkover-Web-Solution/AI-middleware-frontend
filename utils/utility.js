@@ -13,13 +13,12 @@ export const updatedData = (obj1, obj2, type) => {
         }
 
     }
-
     // if (Object.keys(updatedObj1.configuration).length > 0) {
     if (type === 'chat') {
         const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
         obj1.inputConfig = inputconfig;
     }
-    if (type === 'completion' && updatedObj1.configuration.prompt) {
+    if (type === 'completion') {
         // const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
 
         obj1.inputConfig = {

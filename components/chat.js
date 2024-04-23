@@ -144,10 +144,7 @@ function Chat({ dataToSend, params }) {
 
 
   const UpdateBridge = async () => {
-    // const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
     dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: localDataToSend.configuration, service: localDataToSend.service, apikey: localDataToSend.apikey } }))
-    // await updateBridge({ bridgeId: params.id, dataToSend: { configuration: localDataToSend.configuration, service: localDataToSend.service, apikey: localDataToSend.apikey } })
-    // toast.success("Bridge is updated");
   }
 
   return (
