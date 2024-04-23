@@ -1,4 +1,4 @@
-import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi } from "@/api";
+import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge } from "@/api";
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer } from "../reducer/bridgeReducer";
 import axios from "@/utils/interceptor";
 
@@ -33,22 +33,10 @@ export const getAllBridgesAction = () => async (dispatch, getState) => {
   }
 };
 
-export const updateBridgeAction = () => async (dispatch, getState) => {
+export const updateBridgeAction = (dataToSend) => async (dispatch, getState) => {
   try {
-    const dataToSend =
-    {
-      "configuration": {
-        "model": "gpt-3.5-turbo",
-        "name": "bridge1",
-        "service": "OpenAI",
-        "temperature": 1,
-        "prompt": [],
-        "type": "chat"
-      },
-      "org_id": "124dfgh67ghj"
-    }
-    const data = await axios.post(`http://localhost:7072/api/v1/config/updatebridges/6ae25830-c74a-11ee-afda-7b5d9670126d`, dataToSend);
-    dispatch(updateBridgeReducer(data.data.bridges));
+    const data = await updateBridge(dataToSend)
+    dispatch(updateBridgeReducer(data.data));
   } catch (error) {
     console.error(error);
   }

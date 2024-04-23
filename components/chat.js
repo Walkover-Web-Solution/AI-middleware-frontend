@@ -4,6 +4,7 @@ import { dryRun, updateBridge } from "@/api";
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
 import _ from "lodash";
 import { toast } from "react-toastify";
+import { updateBridgeAction } from "@/store/action/bridgeAction";
 
 function Chat({ dataToSend, params }) {
   const dispatch = useDispatch();
@@ -144,8 +145,9 @@ function Chat({ dataToSend, params }) {
 
   const UpdateBridge = async () => {
     // const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
-    await updateBridge({ bridgeId: params.id, dataToSend: { configuration: localDataToSend.configuration, service: localDataToSend.service, apikey: localDataToSend.apikey } })
-    toast.success("Bridge is updated");
+    dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: localDataToSend.configuration, service: localDataToSend.service, apikey: localDataToSend.apikey } }))
+    // await updateBridge({ bridgeId: params.id, dataToSend: { configuration: localDataToSend.configuration, service: localDataToSend.service, apikey: localDataToSend.apikey } })
+    // toast.success("Bridge is updated");
   }
 
   return (
