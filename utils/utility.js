@@ -104,7 +104,7 @@ const updateContent = (obj2, updatedObj1) => {
 
             // Check if obj3[role].default exists and update its content
             if (obj3[role]?.default) {
-                obj3[role].default.content += ` ${content}`;
+                obj3[role].default.content += `${content}`;
             }
         });
 

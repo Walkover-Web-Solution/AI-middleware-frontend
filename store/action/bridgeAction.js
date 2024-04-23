@@ -16,7 +16,6 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
 
 export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, getState) => {
   try {
-    debugger
     const data = await createBridge(dataToSend.dataToSend);
     onSuccess(data);
     dispatch(createBridgeReducer({ data, orgId: dataToSend.orgid }));
@@ -44,10 +43,10 @@ export const updateBridgeAction = (dataToSend) => async (dispatch, getState) => 
 };
 
 
-export const deleteBridgeAction = (bridgeId) => async (dispatch) => {
+export const deleteBridgeAction = ({ bridgeId, orgId }) => async (dispatch) => {
   try {
     await deleteBridge(bridgeId);
-    dispatch(deleteBridgeReducer(bridgeId));
+    dispatch(deleteBridgeReducer({ bridgeId, orgId }));
   } catch (error) {
     console.error('Failed to delete bridge:', error);
   }
