@@ -52,7 +52,7 @@ const DropdownMenu = ({ params, data, embed }) => {
 
     useEffect(() => {
         setSelectedService(data?.service?.toLowerCase());
-        setApiKey(data?.apikey || "");
+        setApiKey(data?.apikey);
         setJsonString(JSON.stringify(data?.configuration?.tools?.default) || "")
         setSelectedModel(data?.configuration?.model?.default)
         setModelInfoData(data?.configuration || modelInfo?.data?.configuration?.model?.default?.inputConfig)
@@ -76,7 +76,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                     "conversation": []
                 },
                 "service": data?.service?.toLowerCase(),
-                "apikey": apiKey
+                "apikey": data?.apikey
             })
         else if (foundKey === "embedding")
             setDataToSend({
@@ -87,7 +87,7 @@ const DropdownMenu = ({ params, data, embed }) => {
 
                 },
                 "service": data?.service?.toLowerCase(),
-                "apikey": apiKey
+                "apikey": data?.apikey
             })
 
         else {
@@ -100,7 +100,7 @@ const DropdownMenu = ({ params, data, embed }) => {
 
                     },
                     'service': data?.service?.toLowerCase(),
-                    "apikey": apiKey
+                    "apikey": data?.apikey
                 }
             )
         }
