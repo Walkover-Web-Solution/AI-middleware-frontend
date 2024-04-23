@@ -1,7 +1,7 @@
 "use client"
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { deleteBridgeAction, getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify'
 import { usePathname, useRouter } from 'next/navigation'
@@ -12,7 +12,7 @@ import Sidebar from "@/components/Sidebar";
 
 function Home({ params }) {
 
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.allBridges.slice().reverse()) || []
+  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id] || []).slice().reverse();
   const dispatch = useDispatch()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +49,7 @@ function Home({ params }) {
     if (confirmDelete) {
       try {
         // Dispatch delete bridge action and get all bridges
-        dispatch(deleteBridgeAction(bridgeId));
+        dispatch(deleteBridgeAction({ bridgeId, orgId: params.org_id }));
         toast.success('Bridge deleted successfully');
         await dispatch(getAllBridgesAction());
       } catch (error) {
@@ -61,10 +61,10 @@ function Home({ params }) {
     }
   };
 
-  useEffect(() => {
-    dispatch(getAllBridgesAction())
-  }, [params.org_id])
 
+  useLayoutEffect(() => {
+    dispatch(getAllBridgesAction(params.org_id))
+  }, [params.org_id]);
   const columns = ["name", "_id", "service"];
 
   const onClickConfigure = (id) => {
