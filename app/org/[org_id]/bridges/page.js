@@ -62,12 +62,14 @@ function Home({ params }) {
   };
 
   useEffect(() => {
-    dispatch(getAllBridgesAction())
-  }, [params.org_id])
+      dispatch(getAllBridgesAction())
+  }, [])
+
   const columns = ["name", "_id", "service"];
 
   const onClickConfigure = (id) => {
     // dispatch(getSingleBridgesAction(id))
+    setIsLoading(true); 
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
   }
 
@@ -91,7 +93,18 @@ function Home({ params }) {
       <div className="flex w-full justify-start gap-16 items-start">
         <div className="w-full">
           <button className="btn float-end mt-2 btn-sm mr-3 btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>+ create new bridge</button>
-          <table className="table">
+          {allBridges.length === 0 ? (
+             <div className="text-center py-10">
+             <div className="flex flex-col items-center justify-center space-y-4">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="w-16 h-16 text-blue-500">
+                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                 </svg>
+                 <p className="text-lg font-semibold text-gray-800">Create Your First Bridge</p>
+             </div>
+         </div>
+         
+            ) : (
+              <table className="table">
             <thead>
               <tr>
                 {columns.map(column => (
@@ -131,6 +144,7 @@ function Home({ params }) {
 
             </tbody>
           </table>
+            )}
 
 
           {totalPages > 1 && (
