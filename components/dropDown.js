@@ -70,7 +70,7 @@ const DropdownMenu = ({ params, data, embed }) => {
             setDataToSend({
                 "configuration": {
                     "model": data?.configuration?.model?.default,
-                    "prompt": [data.inputConfig.system.default || {}],
+                    "prompt": [data?.inputConfig?.system?.default || {}],
                     "type": foundKey,
                     "user": [],
                     "conversation": []

@@ -12,7 +12,7 @@ import Sidebar from "@/components/Sidebar";
 
 function Home({ params }) {
 
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.allBridges) || []
+  const allBridges = useCustomSelector((state) => state.bridgeReducer.allBridges.slice().reverse()) || []
   const dispatch = useDispatch()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false);
