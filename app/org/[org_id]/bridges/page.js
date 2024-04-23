@@ -12,7 +12,7 @@ import Sidebar from "@/components/Sidebar";
 
 function Home({ params }) {
 
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.allBridges) || []
+  const allBridges = useCustomSelector((state) => state.bridgeReducer.allBridges.slice().reverse()) || []
   const dispatch = useDispatch()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false);
@@ -62,8 +62,8 @@ function Home({ params }) {
   };
 
   useEffect(() => {
-    if (allBridges.length === 0) dispatch(getAllBridgesAction())
-  }, [])
+    dispatch(getAllBridgesAction())
+  }, [params.org_id])
   const columns = ["name", "_id", "service"];
 
   const onClickConfigure = (id) => {

@@ -4,17 +4,18 @@ import { dryRun, updateBridge } from "@/api";
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
 import _ from "lodash";
 import { toast } from "react-toastify";
+import { updateBridgeAction } from "@/store/action/bridgeAction";
 
-function Chat({ dataToSend , params}) {
+function Chat({ dataToSend, params }) {
   const dispatch = useDispatch();
-  
+
   // State variables
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [conversation,setConversation]=useState([]);
+  const [conversation, setConversation] = useState([]);
 
   // Update localDataToSend when dataToSend changes
   useEffect(() => {
@@ -32,9 +33,9 @@ function Chat({ dataToSend , params}) {
     }));
   }, []);
   // Handle sending message
-  const   handleSendMessage = useCallback(async () => {
-    if(dataToSend.configuration.type === "chat")  if (newMessage.trim() === "") return;
-    setErrorMessage(""); 
+  const handleSendMessage = useCallback(async () => {
+    if (dataToSend.configuration.type === "chat") if (newMessage.trim() === "") return;
+    setErrorMessage("");
     setNewMessage("");
     setLoading(true);
     try {
@@ -50,32 +51,31 @@ function Chat({ dataToSend , params}) {
       };
       let response, responseData;
       let data;
-      if(dataToSend.configuration.type === "chat")
-      {
-        data=modelInfo[localDataToSend.service].chatmessage.chat;
-        const chatPath=modelInfo[localDataToSend.service].chatmessage.chatpath;
-        _.set(data, chatPath, newMessage); 
+      if (dataToSend.configuration.type === "chat") {
+        data = modelInfo[localDataToSend.service].chatmessage.chat;
+        const chatPath = modelInfo[localDataToSend.service].chatmessage.chatpath;
+        _.set(data, chatPath, newMessage);
         // updateLocalDataToSend(prevConfig => ({
         //   user: [...prevConfig.user, data],  
         // }));
         setMessages(prevMessages => [...prevMessages, newChat]);
-          responseData = await dryRun({
+        responseData = await dryRun({
           ...localDataToSend,
           configuration: {
             ...localDataToSend.configuration,
-            conversation:conversation,
+            conversation: conversation,
             user: data,
           },
         });
       }
-      else{
+      else {
         const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
-         responseData = await dryRun({...localDataToSend , configuration : updatedConfigration});
+        responseData = await dryRun({ ...localDataToSend, configuration: updatedConfigration });
       }
-      if(!responseData.success){
-        if(dataToSend.configuration.type === "chat"){
-          setConversation(prevConversation => [...prevConversation,_.cloneDeep(data)].slice(-6));
-      }
+      if (!responseData.success) {
+        if (dataToSend.configuration.type === "chat") {
+          setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
+        }
         // setErrorMessage(responseData.error);
         toast.error(responseData.error);
         setLoading(false);
@@ -96,9 +96,9 @@ function Chat({ dataToSend , params}) {
       const assistConversation = _.get(response.response, assistPath, "");
 
       // Update localDataToSend with assistant conversation
-      if(dataToSend.configuration.type === "chat"){
-        setConversation(prevConversation => [...prevConversation,_.cloneDeep(data),assistConversation].slice(-6));
-    }
+      if (dataToSend.configuration.type === "chat") {
+        setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
+      }
 
       // Create assistant chat
       const newChatAssist = {
@@ -134,26 +134,25 @@ function Chat({ dataToSend , params}) {
   );
 
 
-const removeUndefinedOrNull = (obj) => {
-  // Filter out key-value pairs where value is not undefined or null
-  const filteredEntries = Object.entries(obj).filter(([_, value]) => value !== undefined && value !== null);
-  
-  // Convert filtered entries back to object
-  return Object.fromEntries(filteredEntries);
-};
+  // const removeUndefinedOrNull = (obj) => {
+  //   // Filter out key-value pairs where value is not undefined or null
+  //   const filteredEntries = Object.entries(obj).filter(([_, value]) => value !== undefined && value !== null);
+
+  //   // Convert filtered entries back to object
+  //   return Object.fromEntries(filteredEntries);
+  // };
 
 
-  const UpdateBridge = async()=> {
-    const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
-      await updateBridge( {bridgeId :  params.id , dataToSend :  {configuration : updatedConfigration, service : localDataToSend.service , apikey : localDataToSend.apikey}})
+  const UpdateBridge = async () => {
+    dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: localDataToSend.configuration, service: localDataToSend.service, apikey: localDataToSend.apikey } }))
   }
 
   return (
     <>
       <div className="w-full flex justify-between items-center">
         {/* <div className="label"> */}
-          <span className="label-text">Playground</span>
-          <button className="btn btn-sm m-5" onClick={UpdateBridge}>Update Bridge</button>
+        <span className="label-text">Playground</span>
+        <button className="btn btn-sm m-5" onClick={UpdateBridge}>Update Bridge</button>
         {/* </div> */}
       </div>
 
