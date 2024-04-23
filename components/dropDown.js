@@ -21,33 +21,33 @@ const DropdownMenu = ({ params, data, embed }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [tempJsonString, setTempJsonString] = useState('');
 
-              // Default JSON structure as a placeholder
-              const jsonPlaceholder = JSON.stringify({
-                "type": "function",
-                "function": {
-                    "name": "get_current_weather",
-                    "description": "Get the current weather",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "location": {
-                                "type": "string",
-                                "description": "The city and state, e.g. San Francisco, CA",
-                            },
-                            "format": {
-                                "type": "string",
-                                "enum": ["celsius", "fahrenheit"],
-                                "description": "The temperature unit to use.",
-                            },
-                        },
-                        "required": ["location", "format"],
+    // Default JSON structure as a placeholder
+    const jsonPlaceholder = JSON.stringify({
+        "type": "function",
+        "function": {
+            "name": "get_current_weather",
+            "description": "Get the current weather",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string",
+                        "description": "The city and state, e.g. San Francisco, CA",
                     },
-                }
-            }, null, 2);
-        
-            useEffect(() => {
-                setJsonString(jsonPlaceholder);
-            }, []);
+                    "format": {
+                        "type": "string",
+                        "enum": ["celsius", "fahrenheit"],
+                        "description": "The temperature unit to use.",
+                    },
+                },
+                "required": ["location", "format"],
+            },
+        }
+    }, null, 2);
+
+    useEffect(() => {
+        setJsonString(jsonPlaceholder);
+    }, []);
 
 
     useEffect(() => {
@@ -139,8 +139,8 @@ const DropdownMenu = ({ params, data, embed }) => {
 
         const newSelectedModel = e.target.value;
         setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
-        setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
-
+        if (dataToSend.configuration.type !== e.target.selectedOptions[0].parentNode.label) setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
+        if (data.type === e.target.selectedOptions[0].parentNode.label) setInputConfig(data.inputConfig)
         // Update selectedModel state with the newly selected model
         setSelectedModel(newSelectedModel);
 
@@ -673,26 +673,26 @@ const DropdownMenu = ({ params, data, embed }) => {
 
 
                                     {modalOpen && (
-                <div className="fixed inset-0 bg-opacity-50 overflow-y-auto flex justify-center items-center p-4 z-50">
-                    <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-2xl">
-                        <div className="flex justify-end p-2">
-                            <button onClick={handleModalClose} className="text-gray-600 hover:text-gray-800 transition-colors duration-150">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
-                        </div>
-                        <div className="px-4 pb-4 pt-2">
-                            <textarea
-                                autoFocus
-                                placeholder={jsonPlaceholder}
-                                className="textarea textarea-bordered w-full h-80 md:h-96 resize-none"
-                                value={tempJsonString}
-                                onChange={handleTextAreaChange}
-                            ></textarea>
-                            {!isValid && <p className="text-red-500">Invalid JSON</p>}
-                        </div>
-                    </div>
-                </div>
-            )}
+                                        <div className="fixed inset-0 bg-opacity-50 overflow-y-auto flex justify-center items-center p-4 z-50">
+                                            <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full max-w-2xl">
+                                                <div className="flex justify-end p-2">
+                                                    <button onClick={handleModalClose} className="text-gray-600 hover:text-gray-800 transition-colors duration-150">
+                                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                    </button>
+                                                </div>
+                                                <div className="px-4 pb-4 pt-2">
+                                                    <textarea
+                                                        autoFocus
+                                                        placeholder={jsonPlaceholder}
+                                                        className="textarea textarea-bordered w-full h-80 md:h-96 resize-none"
+                                                        value={tempJsonString}
+                                                        onChange={handleTextAreaChange}
+                                                    ></textarea>
+                                                    {!isValid && <p className="text-red-500">Invalid JSON</p>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 {embed && embed?.length > 0 ?
                                     <ul className="menu bg-base-200 w-full rounded-box">
@@ -708,9 +708,6 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                                 <path d="M27.1421 17.1213C27.5327 16.7308 28.1658 16.7308 28.5563 17.1213L31.3848 19.9497C31.7753 20.3403 31.7753 20.9734 31.3848 21.364L22.6084 30.1403L16.598 31.9081L18.3658 25.8977L27.1421 17.1213Z" stroke="#222222" stroke-width="2" />
                                                             </svg>
                                                         </div>
-
-
-
                                                     </li>
                                                 </ul>
                                             ))}
