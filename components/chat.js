@@ -8,6 +8,7 @@ import { updateBridgeAction } from "@/store/action/bridgeAction";
 
 function Chat({ dataToSend, params }) {
   const dispatch = useDispatch();
+  console.log(dataToSend, "datatosend")
 
   // State variables
   const [messages, setMessages] = useState([]);
@@ -72,8 +73,10 @@ function Chat({ dataToSend, params }) {
         const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
         responseData = await dryRun({ ...localDataToSend, configuration: updatedConfigration });
       }
+      console.log(data, "data", conversation)
       if (!responseData.success) {
         if (dataToSend.configuration.type === "chat") {
+          // if (conversation.length === 0) setConversation([_.cloneDeep(data)])
           setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
         }
         // setErrorMessage(responseData.error);

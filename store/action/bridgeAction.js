@@ -1,15 +1,16 @@
 import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge } from "@/api";
-import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer } from "../reducer/bridgeReducer";
-import axios from "@/utils/interceptor";
+import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer, isPending, isError } from "../reducer/bridgeReducer";
 
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   try {
+    dispatch(isPending())
     const data = await getSingleBridge(id);
     const integrationData = await integration(data.data.bridges.embed_token)
     dispatch(fetchSingleBridgeReducer({ bridges: data.data.bridges, integrationData }));
   } catch (error) {
+    dispatch(isError())
     console.error(error);
   }
 };
@@ -26,9 +27,11 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
 
 export const getAllBridgesAction = (orgId) => async (dispatch, getState) => {
   try {
+    dispatch(isPending())
     const response = await getAllBridges();
     dispatch(fetchAllBridgeReducer({ bridges: response.data.bridges, orgId }));
   } catch (error) {
+    dispatch(isError())
     console.error(error);
   }
 };
