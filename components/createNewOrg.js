@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { createOrgAction, getAllOrgAction } from '@/store/action/orgAction';
+import { createOrgAction, addOrganization } from '@/store/action/userDetailsAction';
 import { userDetails } from '@/store/action/userDetailsAction';
 
 function CreateOrg({onClose}) {
@@ -23,7 +23,6 @@ function CreateOrg({onClose}) {
         });
     };
 
-    
 
     const createOrgHandler = async () => {
         const { name, email, mobile, timezone } = orgDetails;
@@ -32,7 +31,7 @@ function CreateOrg({onClose}) {
             
             return;
         }   
-    
+        
         setIsLoading(true);
         try {
             const dataToSend = {
@@ -41,15 +40,13 @@ function CreateOrg({onClose}) {
                 }
             };
     
-           await dispatch(createOrgAction(dataToSend, () => {
-                
+            dispatch(createOrgAction(dataToSend))
                 onClose(); 
-                dispatch(userDetails());
                 route.push('/org'); 
-                toast.success('Organization created successfully');
-            }));
+               
+            
         } catch (error) {
-            toast.error('Failed to create organization');
+            toast.error(error.message);
             console.error(error);
         } finally {
             setIsLoading(false);

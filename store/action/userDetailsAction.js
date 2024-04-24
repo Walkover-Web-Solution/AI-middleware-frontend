@@ -1,6 +1,6 @@
 
-import { userdetails } from "@/api";
-import { fetchUserDetails } from "../reducer/userDetailsReducer";
+import { createOrg, userdetails } from "@/api";
+import { fetchUserDetails ,addOrganization} from "../reducer/userDetailsReducer";
 
 
 
@@ -12,3 +12,15 @@ export const userDetails = () => async (dispatch, getState) => {
       console.error(error);
     }
   };
+
+export const createOrgAction = (dataToSend) => async (dispatch) => {
+  try {
+    const response = await createOrg(dataToSend);
+    console.log(response)
+    dispatch(addOrganization({ name: response.data.data.name }));
+  } catch (error) {
+    console.error('Create Org Error:', error);
+    throw error; 
+  }
+};
+
