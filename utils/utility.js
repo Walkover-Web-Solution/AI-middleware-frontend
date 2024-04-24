@@ -13,13 +13,11 @@ export const updatedData = (obj1, obj2, type) => {
         }
 
     }
-    // if (Object.keys(updatedObj1.configuration).length > 0) {
     if (type === 'chat') {
         const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
         obj1.inputConfig = inputconfig;
     }
     if (type === 'completion') {
-        // const inputconfig = updateContent(obj2.inputConfig, updatedObj1.configuration)
 
         obj1.inputConfig = {
             prompt: {
@@ -40,53 +38,12 @@ export const updatedData = (obj1, obj2, type) => {
 
     }
 
-    // }
-
-
     const newObj1 = removeDuplicateFields(obj1.configuration, updatedObj1.configuration);
     obj1.configuration = newObj1;
 
     return obj1;
 };
 
-
-// function updateContent(obj2, updatedObj1) {
-//     try {
-//         if (updatedObj1.prompt === undefined) return obj2
-//         updatedObj1.prompt.forEach(item => {
-//             const role = item.role;
-//             const content = item.content;
-//             if (obj2[role] && obj2[role].default)
-//                 obj2[role].default.content += " " + content;
-//         });
-//         return obj2
-//     } catch (error) {
-//         console.error(error)
-//     }
-// }
-
-// function updateContent(obj2, updatedObj1) {
-//     try {
-//         if (updatedObj1.prompt === undefined) return obj2;
-
-//         updatedObj1.prompt.forEach(item => {
-//             const role = item.role;
-//             const content = item.content;
-
-//             // Check if obj2[role].default exists and create a mutable copy
-//             if (obj2[role] && obj2[role].default) {
-//                 const mutableDefault = { ...obj2[role].default };
-//                 mutableDefault.content += " " + content;
-//                 obj2[role].default = mutableDefault; // Update obj2[role].default
-//             }
-//         });
-
-//         return obj2;
-//     } catch (error) {
-//         console.log(error)
-//         console.error(error);
-//     }
-// }
 
 
 const updateContent = (obj2, updatedObj1) => {
@@ -129,3 +86,23 @@ function removeDuplicateFields(obj1, updatedObj1) {
     return obj1;
 }
 
+
+
+export const handleResponseFormat = (obj1) => {
+    let responseObj = {}
+    if (obj1.configuration.rtlayer === true) {
+        responseObj = {
+            rtlayer: obj1.configuration.rtlayer
+        }
+        return responseObj;
+    }
+    if (obj1.configuration.webhook || obj1.configuration.headers) {
+        responseObj = {
+            webhook: obj1.configuration.webhook,
+            headers: obj1.configuration.headers
+        }
+        return responseObj;
+    }
+    return responseObj;
+
+}
