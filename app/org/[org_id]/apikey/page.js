@@ -155,7 +155,23 @@ function Page({ params }) {
                 <h3 className="font-bold text-lg">Create New Auth</h3>
                 <label className="input input-bordered flex items-center gap-2">
                   Name
-                  <input type="text" className="grow" id='authNameInput' placeholder="Insert Auth Name" />
+                  <input
+                    type="text"
+                    className="grow"
+                    id="authNameInput"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const authName = e.target.value.trim();
+                        if (authName) {
+                          createAuthKeyHandler(e, authName);
+                        } else {
+                          toast.error("Input field cannot be empty");
+                        }
+                      }
+                    }}
+                    placeholder="Insert Auth Name"
+                    required
+                  />
                 </label>
                 <div className="modal-action">
                   <form method="dialog">
@@ -179,7 +195,7 @@ function Page({ params }) {
                     {/* if there is a button in form, it will close the modal */}
                     <button className="btn">Cancel</button>
                   </form>
-                  <button className="btn " onClick={DeleteAuth}>Delete</button>
+                  <button className="btn" onClick={DeleteAuth}>Delete</button>
 
                 </div>
               </div>

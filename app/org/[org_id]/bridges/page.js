@@ -13,9 +13,9 @@ import Sidebar from "@/components/Sidebar";
 function Home({ params }) {
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id] || []).slice().reverse();
+  const isLoading = useCustomSelector((state) => state.bridgeReducer.loading);
   const dispatch = useDispatch()
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgesPerPage] = useState(10);
@@ -65,11 +65,12 @@ function Home({ params }) {
   useLayoutEffect(() => {
     dispatch(getAllBridgesAction(params.org_id))
   }, [params.org_id]);
+
   const columns = ["name", "_id", "service"];
 
   const onClickConfigure = (id) => {
     // dispatch(getSingleBridgesAction(id))
-    setIsLoading(true);
+    // setIsLoading(true);
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
   }
 
@@ -124,7 +125,8 @@ function Home({ params }) {
                         <td key={`${item._id}-${column}`}>{item[column]}</td>
                       ))}
                       <td key={item._id} className="button-container gap-3 flex justify-center align-center">
-                        <button onClick={() => { setIsLoading(true); router.push(`/org/${params.org_id}/bridges/history/${item._id}`); }} className="btn btn-sm">History</button>
+                        {/* <button onClick={() => { setIsLoading(true); router.push(`/org/${params.org_id}/bridges/history/${item._id}`); }} className="btn btn-sm">History</button> */}
+                        <button onClick={() => { router.push(`/org/${params.org_id}/bridges/history/${item._id}`); }} className="btn btn-sm">History</button>
                         <button onClick={() => onClickConfigure(item._id)} className="btn btn-sm">Configure</button>
                         {/* <button onClick={() => {  setIsLoading(true); router.push(`/org/${params.org_id}/bridges/configure/${item._id}`); dispatch(getSingleBridgesAction(item._id)); }} className="btn btn-sm">Configure</button> */}
                         <a onClick={() => handleDeleteBridge(item._id)} className="tooltip tooltip-primary" data-tip="delete">
