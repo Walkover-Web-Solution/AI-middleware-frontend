@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file  
 import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
+import { isValidJson , validateWebhook } from '@/utils/utility';
 import Chat from './chat';
 
 const DropdownMenu = ({ params, data, embed }) => {
@@ -21,6 +22,9 @@ const DropdownMenu = ({ params, data, embed }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [tempJsonString, setTempJsonString] = useState('');
     const [selectedOption, setSelectedOption] = useState('default');
+    const [webhook, setWebhook] = useState(data?.responseFormat?.webhook || "");
+    const [headers, setHeaders] = useState(data?.responseFormat?.headers || "");
+    const [errors, setErrors] = useState({ webhook: "", headers: "" });
 
     // Check conditions and set the selected option accordingly
     if (data?.configuration) {
@@ -272,10 +276,28 @@ const DropdownMenu = ({ params, data, embed }) => {
     //     }
     // }
 
+      const handleChangeWebhook = (value) => {
+        if (value.trim() === "") {
+            setErrors(prevErrors => ({ ...prevErrors, webhook: '' }));
+            return;
+        }
+        const isValid = validateWebhook(value);
+        setErrors(prevErrors => ({ ...prevErrors, webhook: isValid ? '' : 'Invalid URL' }));
+    };
+
+    const handleChangeHeaders = (value) => {
+        // setHeaders(value);
+        if (value.trim() === "") {
+            setErrors(prevErrors => ({ ...prevErrors, headers: '' }));
+            return;
+        }
+        const isValid = isValidJson(value);
+        setErrors(prevErrors => ({ ...prevErrors, headers: isValid ? '' : 'Invalid JSON' }));
+    };
+
 
     const handleResponseChange = (key, webhook, headers) => {
         if (key === "default") {
-
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
@@ -294,23 +316,33 @@ const DropdownMenu = ({ params, data, embed }) => {
                     rtlayer: true,
                     webhook: "", // Set webhook to an empty string for RTLayer option
                     headers: {}
-
                 }
             }));
         }
         if (key === 'custom') {
+            // // Perform validation only when the key is 'custom'
+            // const webhookValid = validateWebhook(webhook);
+            // const headersValid = validateHeaders(headers);
+    
+            // if (!webhookValid || !headersValid) {
+            //     console.error({
+            //         webhookError: webhookValid ? "" : "Invalid URL provided.",
+            //         headersError: headersValid ? "" : "Invalid JSON provided."
+            //     });
+            //     return; // Stop the function if validation fails
+            // }
+    
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
                     rtlayer: false,
-                    webhook: webhook,// Set webhook to "hello world" for Custom option
-                    headers: {}
+                    webhook: webhook, // Set webhook to the valid input
+                    headers: JSON.parse(headers) // Set headers to the parsed JSON
                 }
             }));
         }
-    }
-
+    };
 
 
     const handleInputChange = (e, key) => {
@@ -499,21 +531,18 @@ const DropdownMenu = ({ params, data, embed }) => {
      * Handle changes to the JSON text area
      * @param {React.ChangeEvent<HTMLTextAreaElement>} event The change event
      */
-    const handleTextAreaChange = (event) => {
-        const newJsonString = event.target.value; // Get the new JSON string
-        setTempJsonString(newJsonString); // Save it to state
+    const handleFunctionCall = (event) => {
+        const newJsonString = event.target.value;
+        setTempJsonString(newJsonString);
 
         if (newJsonString.trim() === "") {
             setIsValid(true); // Consider empty string as valid or neutral
             return; // Exit the function early
         }
 
-        try {
-            JSON.parse(newJsonString); // Try to parse the new JSON string
-            setIsValid(true); // If it parses correctly, set isValid to true
-        } catch (error) {
-            setIsValid(false); // If it doesn't parse correctly, set isValid to false
-        }
+        // Use the utility function to validate JSON
+        const validJson = isValidJson(newJsonString);
+        setIsValid(validJson);
     };
 
 
@@ -790,7 +819,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                         placeholder={jsonPlaceholder}
                                                         className="textarea textarea-bordered w-full h-80 md:h-96 resize-none"
                                                         value={tempJsonString}
-                                                        onChange={handleTextAreaChange}
+                                                        onChange={handleFunctionCall}
                                                     ></textarea>
                                                     {!isValid && <p className="text-red-500">Invalid JSON</p>}
                                                 </div>
@@ -865,21 +894,44 @@ const DropdownMenu = ({ params, data, embed }) => {
                                 </div>
 
                                 {selectedOption === 'custom' &&
-                                    <div className='border-t p-4'>
-                                        <label className="form-control w-full">
-                                            <div className="label">
-                                                <span className="label-text">Webhook</span>
-                                            </div>
-                                            <input type="text" placeholder="Url" id='webhook' className="input input-bordered w-full " defaultValue={data?.responseFormat?.webhook || ""} />
-                                        </label>
-                                        <label className="form-control">
-                                            <div className="label">
-                                                <span className="label-text">Header</span>
-                                            </div>
-                                            <textarea defaultValue={data?.responseFormat?.headers || ""} className="textarea textarea-bordered h-24 w-full" id='headers' placeholder="Type here"></textarea>
-                                        </label>
-                                        <button className="btn btn-primary btn-sm my-5 float-right" onClick={() => handleResponseChange("custom", document.getElementById('webhook').value, document.getElementById('headers').value)}>Apply</button>
-                                    </div>
+                                      <div className='border-t p-4'>
+                                      <label className="form-control w-full">
+                                          <div className="label">
+                                              <span className="label-text">Webhook</span>
+                                          </div>
+                                          <input
+                                              type="text"
+                                              placeholder="Url"
+                                              className="input input-bordered w-full"
+                                              id="webhook"
+                                              value={webhook}
+                                              onChange={e => {
+                                                  setWebhook(e.target.value);
+                                                  handleChangeWebhook(e.target.value);
+                                              }}
+                                          />
+                                          {errors.webhook && <p className="text-red-500">{errors.webhook}</p>}
+                                      </label>
+                                      <label className="form-control">
+                                          <div className="label">
+                                              <span className="label-text">Header</span>
+                                          </div>
+                                          <textarea
+                                              className="textarea textarea-bordered h-24 w-full"
+                                              id="headers"
+                                              value={headers}
+                                              onChange={e => {
+                                                  setHeaders(e.target.value);
+                                                  handleChangeHeaders(e.target.value);
+                                              }}
+                                              placeholder="Type here"
+                                          ></textarea>
+                                          {errors.headers && <p className="text-red-500">{errors.headers}</p>}
+                                      </label>
+                                      <button className="btn btn-primary btn-sm my-5 float-right" onClick={() => handleResponseChange("custom", document.getElementById('webhook').value, document.getElementById('headers').value) } disabled={errors.webhook !== '' || errors.headers !== ''}>
+                                          Apply
+                                      </button>
+                                  </div>
                                 }
                             </div>
                         </ul>
