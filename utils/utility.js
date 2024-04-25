@@ -90,9 +90,9 @@ function removeDuplicateFields(obj1, updatedObj1) {
 
 export const handleResponseFormat = (obj1) => {
     let responseObj = {}
-    if (obj1.configuration.rtlayer === true) {
+    if (obj1.configuration.RTLayer === true) {
         responseObj = {
-            rtlayer: obj1.configuration.rtlayer
+            RTLayer: obj1.configuration.RTLayer
         }
         return responseObj;
     }
@@ -106,3 +106,27 @@ export const handleResponseFormat = (obj1) => {
     return responseObj;
 
 }
+
+
+// Function to validate webhook URLs
+export const validateWebhook = (url) => {
+    const pattern = new RegExp('^https?:\\/\\/' + // Protocol is mandatory
+        '(localhost|' + // Allows "localhost" as a valid domain
+        '((\\d{1,3}\\.){3}\\d{1,3})|' + // Allows IPv4 addresses
+        '(([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.?)+' + // Subdomains
+        '[a-zA-Z]{2,})' + // TLD is mandatory except for localhost or IP
+        '(\\:\\d{1,5})?' + // Optional port (restricting port number between 1 and 65535)
+        '(\\/[\\w\\d%_.~+\\-]*)*' + // Optional path corrected to allow a more accurate set of characters
+        '(\\?[;&a-zA-Z\\d%_.~+=\\-]*)?' + // Optional query (more accurate character set)
+        '(\\#[\\w\\d\\-]*)?$', 'i'); // Optional fragment
+    return !!pattern.test(url);
+};
+
+export const isValidJson = (jsonString) => {
+    try {
+        JSON.parse(jsonString);
+        return true; // Return true if JSON parses without error
+    } catch (e) {
+        return false; // Return false if an error is thrown
+    }
+};
