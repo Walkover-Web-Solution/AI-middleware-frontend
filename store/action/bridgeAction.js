@@ -1,34 +1,37 @@
 import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge } from "@/api";
-import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer } from "../reducer/bridgeReducer";
-import axios from "@/utils/interceptor";
+import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer, isPending, isError } from "../reducer/bridgeReducer";
 
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   try {
+    dispatch(isPending())
     const data = await getSingleBridge(id);
     const integrationData = await integration(data.data.bridges.embed_token)
     dispatch(fetchSingleBridgeReducer({ bridges: data.data.bridges, integrationData }));
   } catch (error) {
+    dispatch(isError())
     console.error(error);
   }
 };
 
 export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, getState) => {
   try {
-    const data = await createBridge(dataToSend);
+    const data = await createBridge(dataToSend.dataToSend);
     onSuccess(data);
-    dispatch(createBridgeReducer(data));
+    dispatch(createBridgeReducer({ data, orgId: dataToSend.orgid }));
   } catch (error) {
     console.error(error);
   }
 };
 
-export const getAllBridgesAction = () => async (dispatch, getState) => {
+export const getAllBridgesAction = (orgId) => async (dispatch, getState) => {
   try {
+    dispatch(isPending())
     const response = await getAllBridges();
-    dispatch(fetchAllBridgeReducer(response.data.bridges));
+    dispatch(fetchAllBridgeReducer({ bridges: response.data.bridges, orgId }));
   } catch (error) {
+    dispatch(isError())
     console.error(error);
   }
 };
@@ -43,10 +46,10 @@ export const updateBridgeAction = (dataToSend) => async (dispatch, getState) => 
 };
 
 
-export const deleteBridgeAction = (bridgeId) => async (dispatch) => {
+export const deleteBridgeAction = ({ bridgeId, orgId }) => async (dispatch) => {
   try {
     await deleteBridge(bridgeId);
-    dispatch(deleteBridgeReducer(bridgeId));
+    dispatch(deleteBridgeReducer({ bridgeId, orgId }));
   } catch (error) {
     console.error('Failed to delete bridge:', error);
   }
