@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file  
 import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
-import { isValidJson , validateWebhook } from '@/utils/utility';
+import { isValidJson, validateWebhook } from '@/utils/utility';
 import Chat from './chat';
 
 const DropdownMenu = ({ params, data, embed }) => {
@@ -28,8 +28,8 @@ const DropdownMenu = ({ params, data, embed }) => {
 
     // Check conditions and set the selected option accordingly
     if (data?.configuration) {
-        if (data?.configuration?.rtlayer === true) {
-            setSelectedOption('rtlayer');
+        if (data?.configuration?.RTLayer === true) {
+            setSelectedOption('RTLayer');
         } else if (data?.configuration?.webhook) {
             setSelectedOption('custom');
         }
@@ -73,7 +73,9 @@ const DropdownMenu = ({ params, data, embed }) => {
         setSelectedModel(data?.configuration?.model?.default)
         setModelInfoData(data?.configuration || modelInfo?.data?.configuration?.model?.default?.inputConfig)
         setInputConfig(data?.inputConfig);
-        if (data?.responseFormat?.rtlayer) setSelectedOption("rtlayer");
+        setWebhook(data?.responseFormat?.webhook)
+        setHeaders(data?.responseFormat?.headers)
+        if (data?.responseFormat?.RTLayer) setSelectedOption("RTLayer");
         if (data?.responseFormat?.webhook) setSelectedOption("custom");
 
         // Find the key associated with the targetValue
@@ -249,17 +251,17 @@ const DropdownMenu = ({ params, data, embed }) => {
     //             ...prevDataToSend,
     //             configuration: {
     //                 ...prevDataToSend.configuration,
-    //                 rtlayer: false,
+    //                 RTLayer: false,
     //                 webhook: ""
     //             }
     //         }));
     //     }
-    //     if (key === 'rtlayer') {
+    //     if (key === 'RTLayer') {
     //         setDataToSend(prevDataToSend => ({
     //             ...prevDataToSend,
     //             configuration: {
     //                 ...prevDataToSend.configuration,
-    //                 rtlayer: true,
+    //                 RTLayer: true,
     //                 webhook: ""
     //             }
     //         }));
@@ -269,14 +271,14 @@ const DropdownMenu = ({ params, data, embed }) => {
     //             ...prevDataToSend,
     //             configuration: {
     //                 ...prevDataToSend.configuration,
-    //                 rtlayer: false,
+    //                 RTLayer: false,
     //                 webhook: "hello world"
     //             }
     //         }));
     //     }
     // }
 
-      const handleChangeWebhook = (value) => {
+    const handleChangeWebhook = (value) => {
         if (value.trim() === "") {
             setErrors(prevErrors => ({ ...prevErrors, webhook: '' }));
             return;
@@ -302,43 +304,31 @@ const DropdownMenu = ({ params, data, embed }) => {
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
-                    rtlayer: false,
+                    RTLayer: false,
                     webhook: "", // Set webhook to an empty string for default option
                     headers: {}
                 }
             }));
         }
-        if (key === 'rtlayer') {
+        if (key === 'RTLayer') {
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
-                    rtlayer: true,
+                    RTLayer: true,
                     webhook: "", // Set webhook to an empty string for RTLayer option
                     headers: {}
                 }
             }));
         }
         if (key === 'custom') {
-            // // Perform validation only when the key is 'custom'
-            // const webhookValid = validateWebhook(webhook);
-            // const headersValid = validateHeaders(headers);
-    
-            // if (!webhookValid || !headersValid) {
-            //     console.error({
-            //         webhookError: webhookValid ? "" : "Invalid URL provided.",
-            //         headersError: headersValid ? "" : "Invalid JSON provided."
-            //     });
-            //     return; // Stop the function if validation fails
-            // }
-    
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
-                    rtlayer: false,
+                    RTLayer: false,
                     webhook: webhook, // Set webhook to the valid input
-                    headers: JSON.parse(headers) // Set headers to the parsed JSON
+                    headers: headers // Set headers to the parsed JSON
                 }
             }));
         }
@@ -882,7 +872,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                             <div className="form-control">
                                 <label className="label cursor-pointer">
                                     <span className="label-text">RTLayer</span>
-                                    <input type="radio" name="radio-10" className="radio checked:bg-blue-500" checked={selectedOption === 'rtlayer'} onChange={() => { setSelectedOption('rtlayer'); handleResponseChange("rtlayer") }} />
+                                    <input type="radio" name="radio-10" className="radio checked:bg-blue-500" checked={selectedOption === 'RTLayer'} onChange={() => { setSelectedOption('RTLayer'); handleResponseChange("RTLayer") }} />
                                 </label>
                             </div>
                             <div className={selectedOption === 'custom' ? "border rounded" : ""}>
@@ -894,44 +884,44 @@ const DropdownMenu = ({ params, data, embed }) => {
                                 </div>
 
                                 {selectedOption === 'custom' &&
-                                      <div className='border-t p-4'>
-                                      <label className="form-control w-full">
-                                          <div className="label">
-                                              <span className="label-text">Webhook</span>
-                                          </div>
-                                          <input
-                                              type="text"
-                                              placeholder="Url"
-                                              className="input input-bordered w-full"
-                                              id="webhook"
-                                              value={webhook}
-                                              onChange={e => {
-                                                  setWebhook(e.target.value);
-                                                  handleChangeWebhook(e.target.value);
-                                              }}
-                                          />
-                                          {errors.webhook && <p className="text-red-500">{errors.webhook}</p>}
-                                      </label>
-                                      <label className="form-control">
-                                          <div className="label">
-                                              <span className="label-text">Header</span>
-                                          </div>
-                                          <textarea
-                                              className="textarea textarea-bordered h-24 w-full"
-                                              id="headers"
-                                              value={headers}
-                                              onChange={e => {
-                                                  setHeaders(e.target.value);
-                                                  handleChangeHeaders(e.target.value);
-                                              }}
-                                              placeholder="Type here"
-                                          ></textarea>
-                                          {errors.headers && <p className="text-red-500">{errors.headers}</p>}
-                                      </label>
-                                      <button className="btn btn-primary btn-sm my-5 float-right" onClick={() => handleResponseChange("custom", document.getElementById('webhook').value, document.getElementById('headers').value) } disabled={errors.webhook !== '' || errors.headers !== ''}>
-                                          Apply
-                                      </button>
-                                  </div>
+                                    <div className='border-t p-4'>
+                                        <label className="form-control w-full">
+                                            <div className="label">
+                                                <span className="label-text">Webhook</span>
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Url"
+                                                className="input input-bordered w-full"
+                                                id="webhook"
+                                                value={webhook}
+                                                onChange={e => {
+                                                    setWebhook(e.target.value);
+                                                    handleChangeWebhook(e.target.value);
+                                                }}
+                                            />
+                                            {errors.webhook && <p className="text-red-500">{errors.webhook}</p>}
+                                        </label>
+                                        <label className="form-control">
+                                            <div className="label">
+                                                <span className="label-text">Header</span>
+                                            </div>
+                                            <textarea
+                                                className="textarea textarea-bordered h-24 w-full"
+                                                id="headers"
+                                                value={(headers)}
+                                                onChange={e => {
+                                                    setHeaders(e.target.value);
+                                                    handleChangeHeaders(e.target.value);
+                                                }}
+                                                placeholder="Type here"
+                                            ></textarea>
+                                            {errors.headers && <p className="text-red-500">{errors.headers}</p>}
+                                        </label>
+                                        <button className="btn btn-primary btn-sm my-5 float-right" onClick={() => handleResponseChange("custom", document.getElementById('webhook').value, document.getElementById('headers').value)} disabled={errors.webhook !== '' || errors.headers !== ''}>
+                                            Apply
+                                        </button>
+                                    </div>
                                 }
                             </div>
                         </ul>
