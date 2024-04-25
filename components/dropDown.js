@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file  
 import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
+import { isValidJson , validateWebhook } from '@/utils/utility';
 import Chat from './chat';
 
 const DropdownMenu = ({ params, data, embed }) => {
@@ -275,35 +276,23 @@ const DropdownMenu = ({ params, data, embed }) => {
     //     }
     // }
 
-    const validateWebhook = (url) => {
-        if (url.trim() === "") {
+      const handleChangeWebhook = (value) => {
+        if (value.trim() === "") {
             setErrors(prevErrors => ({ ...prevErrors, webhook: '' }));
-            return; // Exit early if the input is empty
+            return;
         }
-        const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|'+ // domain name
-            '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-            '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-            '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-        if (!pattern.test(url)) {
-            setErrors(prevErrors => ({ ...prevErrors, webhook: "Invalid URL" }));
-        } else {
-            setErrors(prevErrors => ({ ...prevErrors, webhook: '' }));
-        }
+        const isValid = validateWebhook(value);
+        setErrors(prevErrors => ({ ...prevErrors, webhook: isValid ? '' : 'Invalid URL' }));
     };
 
-    const validateHeaders = (jsonString) => {
-        if (jsonString.trim() === "") {
+    const handleChangeHeaders = (value) => {
+        // setHeaders(value);
+        if (value.trim() === "") {
             setErrors(prevErrors => ({ ...prevErrors, headers: '' }));
-            return; // Exit early if the input is empty
+            return;
         }
-        try {
-            JSON.parse(jsonString);
-            setErrors(prevErrors => ({ ...prevErrors, headers: '' }));
-        } catch (e) {
-            setErrors(prevErrors => ({ ...prevErrors, headers: "Invalid JSON" }));
-        }
+        const isValid = isValidJson(value);
+        setErrors(prevErrors => ({ ...prevErrors, headers: isValid ? '' : 'Invalid JSON' }));
     };
 
 
@@ -542,21 +531,18 @@ const DropdownMenu = ({ params, data, embed }) => {
      * Handle changes to the JSON text area
      * @param {React.ChangeEvent<HTMLTextAreaElement>} event The change event
      */
-    const handleTextAreaChange = (event) => {
-        const newJsonString = event.target.value; // Get the new JSON string
-        setTempJsonString(newJsonString); // Save it to state
+    const handleFunctionCall = (event) => {
+        const newJsonString = event.target.value;
+        setTempJsonString(newJsonString);
 
         if (newJsonString.trim() === "") {
             setIsValid(true); // Consider empty string as valid or neutral
             return; // Exit the function early
         }
 
-        try {
-            JSON.parse(newJsonString); // Try to parse the new JSON string
-            setIsValid(true); // If it parses correctly, set isValid to true
-        } catch (error) {
-            setIsValid(false); // If it doesn't parse correctly, set isValid to false
-        }
+        // Use the utility function to validate JSON
+        const validJson = isValidJson(newJsonString);
+        setIsValid(validJson);
     };
 
 
@@ -833,7 +819,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                         placeholder={jsonPlaceholder}
                                                         className="textarea textarea-bordered w-full h-80 md:h-96 resize-none"
                                                         value={tempJsonString}
-                                                        onChange={handleTextAreaChange}
+                                                        onChange={handleFunctionCall}
                                                     ></textarea>
                                                     {!isValid && <p className="text-red-500">Invalid JSON</p>}
                                                 </div>
@@ -920,7 +906,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                               value={webhook}
                                               onChange={e => {
                                                   setWebhook(e.target.value);
-                                                  validateWebhook(e.target.value);
+                                                  handleChangeWebhook(e.target.value);
                                               }}
                                           />
                                           {errors.webhook && <p className="text-red-500">{errors.webhook}</p>}
@@ -934,7 +920,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                               value={headers}
                                               onChange={e => {
                                                   setHeaders(e.target.value);
-                                                  validateHeaders(e.target.value);
+                                                  handleChangeHeaders(e.target.value);
                                               }}
                                               placeholder="Type here"
                                           ></textarea>
