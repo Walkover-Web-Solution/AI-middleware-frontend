@@ -90,9 +90,9 @@ function removeDuplicateFields(obj1, updatedObj1) {
 
 export const handleResponseFormat = (obj1) => {
     let responseObj = {}
-    if (obj1.configuration.rtlayer === true) {
+    if (obj1.configuration.RTLayer === true) {
         responseObj = {
-            rtlayer: obj1.configuration.rtlayer
+            RTLayer: obj1.configuration.RTLayer
         }
         return responseObj;
     }
