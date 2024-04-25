@@ -926,7 +926,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                           ></textarea>
                                           {errors.headers && <p className="text-red-500">{errors.headers}</p>}
                                       </label>
-                                      <button className="btn btn-primary btn-sm my-5 float-right" onClick={() => handleResponseChange("custom", document.getElementById('webhook').value, document.getElementById('headers').value)}>
+                                      <button className="btn btn-primary btn-sm my-5 float-right" onClick={() => handleResponseChange("custom", document.getElementById('webhook').value, document.getElementById('headers').value) } disabled={errors.webhook !== '' || errors.headers !== ''}>
                                           Apply
                                       </button>
                                   </div>
