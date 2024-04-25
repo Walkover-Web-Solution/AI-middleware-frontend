@@ -33,7 +33,7 @@ function CreateNewBridge({ orgid }) {
                 },
                 "service": selectedService,
             }
-            dispatch(createBridgeAction(dataToSend, (data) => {
+            dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
 
                 route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
                 setIsLoading(false);

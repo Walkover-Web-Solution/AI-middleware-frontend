@@ -1,3 +1,4 @@
+
 export const modelInfo = {
     openai: {
         "gpt-3.5-turbo": {
@@ -10,7 +11,8 @@ export const modelInfo = {
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "n": { field: "number", default: 1, level: 0 },
                 "stop": { field: "text", default: null, level: 0 },
-                "stream": { field: "boolean", default: false, level: 0 }
+                "stream": { field: "boolean", default: false, level: 0 },
+
             },
 
 
@@ -491,6 +493,7 @@ export const modelInfo = {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens", total_cost: { input_cost: 0.01, output_cost: 0.03 } }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
 
@@ -528,6 +531,7 @@ export const modelInfo = {
                 usage: [{ prompt_tokens: "usage.prompt_tokens", completion_tokens: "usage.completion_tokens", total_tokens: "usage.total_tokens", total_cost: { input_cost: 0.01, output_cost: 0.03 } }],
                 message: "choices[0].message.content",
                 tools: "choices[0].message.tool_calls",
+                assistant: "choices[0].message",
                 id: "id"
             },
             inputConfig: {
