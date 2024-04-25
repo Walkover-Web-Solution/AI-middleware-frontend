@@ -320,17 +320,17 @@ const DropdownMenu = ({ params, data, embed }) => {
             }));
         }
         if (key === 'custom') {
-            // Perform validation only when the key is 'custom'
-            const webhookValid = validateWebhook(webhook);
-            const headersValid = validateHeaders(headers);
+            // // Perform validation only when the key is 'custom'
+            // const webhookValid = validateWebhook(webhook);
+            // const headersValid = validateHeaders(headers);
     
-            if (!webhookValid || !headersValid) {
-                console.error({
-                    webhookError: webhookValid ? "" : "Invalid URL provided.",
-                    headersError: headersValid ? "" : "Invalid JSON provided."
-                });
-                return; // Stop the function if validation fails
-            }
+            // if (!webhookValid || !headersValid) {
+            //     console.error({
+            //         webhookError: webhookValid ? "" : "Invalid URL provided.",
+            //         headersError: headersValid ? "" : "Invalid JSON provided."
+            //     });
+            //     return; // Stop the function if validation fails
+            // }
     
             setDataToSend(prevDataToSend => ({
                 ...prevDataToSend,
@@ -903,6 +903,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                               type="text"
                                               placeholder="Url"
                                               className="input input-bordered w-full"
+                                              id="webhook"
                                               value={webhook}
                                               onChange={e => {
                                                   setWebhook(e.target.value);
@@ -917,6 +918,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                           </div>
                                           <textarea
                                               className="textarea textarea-bordered h-24 w-full"
+                                              id="headers"
                                               value={headers}
                                               onChange={e => {
                                                   setHeaders(e.target.value);
