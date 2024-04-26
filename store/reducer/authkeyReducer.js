@@ -10,8 +10,16 @@ export const authDataReducer = createSlice({
   name: "authData",
   initialState,
   reducers: {
+
+    isPending: (state) => {
+      state.loading = true;
+    },
+    isError: (state) => {
+      state.loading = false;
+    },
     fetchAllAuthData : (state, action) => {
       state.authData = action.payload
+      state.loading = false;
     //   state.modelInfo = action.payload.modelInfo
     } ,
     addAuthData : (state, action) => {
@@ -26,6 +34,8 @@ export const authDataReducer = createSlice({
 });
 
 export const {
+    isError,
+    isPending,
     fetchAllAuthData , 
     addAuthData  , 
     removeAuthData

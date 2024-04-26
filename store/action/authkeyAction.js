@@ -1,5 +1,5 @@
     import { allAuthKey, createAuthKey, deleteAuthkey } from "@/api";
-import { fetchAllAuthData , addAuthData, removeAuthData } from "../reducer/authkeyReducer";
+import { fetchAllAuthData , addAuthData, removeAuthData , isPending, isError } from "../reducer/authkeyReducer";
 
 
 /**
@@ -10,11 +10,13 @@ import { fetchAllAuthData , addAuthData, removeAuthData } from "../reducer/authk
 export const getAllAuthData = () => async (dispatch, getState) => {
   // Fetch all auth keys from the server
   try {
+    dispatch(isPending())
     const { data } = await allAuthKey();
     // Update the authkey reducer with the fetched data
     dispatch(fetchAllAuthData(data));
   } catch (error) {
     // Log the error if any
+    dispatch(isError());
     console.error(error);
   }
 };
@@ -29,12 +31,14 @@ export const getAllAuthData = () => async (dispatch, getState) => {
   export const createNewAuthData = (dataToSend) => async (dispatch, getState) => {
     try {
       // Make a request to the server to create a new auth key
+      dispatch(isPending())
       const { data } = await createAuthKey(dataToSend);
 
       // Update the authkey reducer with the new auth key data
       dispatch(addAuthData(data));
     } catch (error) {
       // Log the error if any
+      dispatch(isError())
       console.error(error);
     }
   };

@@ -81,9 +81,9 @@ function Home({ params }) {
     <div className="drawer-content flex pl-2 flex-col items-start justify-start">
       <div className="flex w-full justify-start gap-16 items-start">
         <div className="w-full">
-        {isLoading ? (
+        {  isLoading ? (
         <TableSkeleton />  // Show skeleton loader when data is loading
-      ) : allBridges.length === 0 ? (
+      ) : allBridges.length === 0 ?   (
         // Show "Create Your First Bridge" if not loading and no bridges
         <div className="text-center w-full h-screen flex justify-center items-center py-10">
           <div className="flex flex-col items-center justify-center space-y-4">

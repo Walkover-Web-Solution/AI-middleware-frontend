@@ -1,6 +1,7 @@
 "use client"
 import Sidebar from '@/components/Sidebar'
 import Protected from '@/components/protected'
+import TableSkeleton from '@/components/skeleton/TableSkeleton'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
 import { usePathname, useRouter } from 'next/navigation'
@@ -12,7 +13,7 @@ function Page({ params }) {
   const dispatch = useDispatch();
   const authData = useCustomSelector((state) => state?.authDataReducer?.authData || [])
   const [singleAuthData, setSingleAuthData] = useState({})
-  const [isCreating, setIsCreating] = useState(false);
+  const isCreating = useCustomSelector((state) => state.authDataReducer.loading)
   const path = usePathname()
   const route = useRouter()
   // const [authData, setAuthData] = useState([])
@@ -46,7 +47,7 @@ function Page({ params }) {
    */
   const createAuthKeyHandler = async (e, name) => {
     if (name.length > 0) {
-      setIsCreating(true); // Start loading
+      // setIsCreating(true); // Start loading
       try {
         await dispatch(createNewAuthData({
           name,
@@ -60,7 +61,7 @@ function Page({ params }) {
         toast.error("Failed to create auth key");
         console.error(error);
       } finally {
-        setIsCreating(false); // End loading
+        // setIsCreating(false); // End loading
       }
     } else {
       toast.error("Input field cannot be empty");
@@ -81,27 +82,18 @@ function Page({ params }) {
   }
   return (
     <div className="drawer lg:drawer-open">
-      {isCreating &&
-        (<div className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-filter backdrop-blur-lg flex justify-center items-center z-50">
-          <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-xl">
-            <div className="flex items-center justify-center space-x-2">
-              {/* Tailwind CSS Spinner */}
-              <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span className="text-xl font-medium text-gray-700">Creating...</span>
-            </div>
-          </div>
-        </div>
-        )}
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex pl-2 flex-col items-start justify-start">
-        <div className="flex w-full justify-start gap-16 items-start">
-          <div className="w-full">
-            <button className="btn float-end mt-2 btn-sm mr-3 btn-primary" onClick={() => document.getElementById('my_modal_5').showModal()}>+ create new key</button>
-
-            <table className="table">
+    <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+    <div className="drawer-content flex pl-2 flex-col items-start justify-start">
+      <div className="flex w-full justify-start gap-16 items-start">
+        <div className="w-full">
+          {isCreating ? (
+            <TableSkeleton />  // Display the TableSkeleton when isCreating is true
+          ) : (
+            <>
+              <button className="btn float-end mt-2 btn-sm mr-3 btn-primary" onClick={() => document.getElementById('my_modal_5').showModal()}>
+                + Create New Key
+              </button>
+              <table className="table">
               <thead>
                 <tr>
                   {columns.map(column => (
@@ -150,62 +142,26 @@ function Page({ params }) {
                 ))}
               </tbody>
             </table>
-            <dialog id="my_modal_5" className="modal modal-bottom sm:modal-middle">
-              <div className="modal-box">
-                <h3 className="font-bold text-lg">Create New Auth</h3>
-                <label className="input input-bordered flex items-center gap-2">
-                  Name
-                  <input
-                    type="text"
-                    className="grow"
-                    id="authNameInput"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        const authName = e.target.value.trim();
-                        if (authName) {
-                          createAuthKeyHandler(e, authName);
-                        } else {
-                          toast.error("Input field cannot be empty");
-                        }
-                      }
-                    }}
-                    placeholder="Insert Auth Name"
-                    required
-                  />
-                </label>
-                <div className="modal-action">
-                  <form method="dialog">
-                    {/* if there is a button in form, it will close the modal */}
-
-                    <div className='flex gap-2'>
-                      <button className="btn">Cancel</button>
-                    </div>
-                  </form>
-                  <button className="btn" onClick={(e) => createAuthKeyHandler(e, document.getElementById('authNameInput').value)}>+ Create</button>
-                </div>
+            </>
+          )}
+  
+          <dialog id="my_modal_5" className="modal modal-bottom sm:modal-middle">
+            <div className="modal-box">
+              <h3 className="font-bold text-lg">Create New Auth Key</h3>
+              <input type="text" placeholder="Insert Auth Name" className="input input-bordered w-full" />
+              <div className="modal-action">
+                <button className="btn" onClick={() => document.getElementById('my_modal_5').close()}>Cancel</button>
+                <button className="btn btn-primary" onClick={createAuthKeyHandler}>Create</button>
               </div>
-            </dialog>
-
-            <dialog id="my_modal_1" className="modal">
-              <div className="modal-box">
-                <h3 className="font-bold text-lg">Do you want to delete {singleAuthData.name} ?</h3>
-                {/* <p className="py-4">Do you want to delete {singleAuthData.name } ?</p> */}
-                <div className="modal-action">
-                  <form method="dialog">
-                    {/* if there is a button in form, it will close the modal */}
-                    <button className="btn">Cancel</button>
-                  </form>
-                  <button className="btn" onClick={DeleteAuth}>Delete</button>
-
-                </div>
-              </div>
-            </dialog>
-          </div>
+            </div>
+          </dialog>
         </div>
-
       </div>
-      <Sidebar orgid={params.org_id} />
     </div>
+    <Sidebar orgid={params.org_id} />
+  </div>
+  
+  
 
   )
 }
