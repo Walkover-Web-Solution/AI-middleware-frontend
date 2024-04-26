@@ -3,13 +3,15 @@ import React from 'react';
 
 const ConfigSkeleton = () => {
     return (
-        <div className="animate-pulse p-4 space-y-4 w-full mx-auto">
+        <div className="animate-pulse p-4 space-y-4 w-100vh h-100vh mx-auto">
         {/* Container for the three columns */}
         <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
             {/* First Column: Slim - for smaller dropdowns/inputs */}
             <div className="flex-1 md:flex-initial md:w-1/6 space-y-6">
                 <div className="h-10 bg-gray-300 rounded-md"></div>  {/* Dropdown/Input placeholder */}
                 <div className="h-10 bg-gray-300 rounded-md"></div>  {/* Dropdown/Input placeholder */}
+                <div className="h-10 bg-gray-300 rounded-md"></div>
+                <div className="h-10 bg-gray-300 rounded-md"></div>
                 <div className="h-10 bg-gray-300 rounded-md"></div>
                 <div className="h-10 bg-gray-300 rounded-md"></div>
                 <div className="h-10 bg-gray-300 rounded-md"></div>
@@ -21,7 +23,7 @@ const ConfigSkeleton = () => {
                 <div className="h-10 bg-gray-300 rounded-md"></div>  {/* Info placeholder */}
             </div>
 
-            <div className="flex flex-col h-full w-full  mx-auto">
+            <div className="flex flex-col h-100vh w-full  mx-auto">
     {/* Chat area skeleton */}
     <div className="flex-1 bg-gray-100 p-4 rounded-t-lg shadow overflow-hidden">
         <div className="flex items-start space-x-4 p-2">
