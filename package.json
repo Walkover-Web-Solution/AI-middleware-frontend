@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",    
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -11,6 +11,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.0",
     "axios": "^1.6.7",
+    "interface-chatbot": "^1.0.14",
     "lodash": "^4.17.21",
     "lodash-next": "^2.0.1",
     "lodash.clonedeep": "^4.5.0",
