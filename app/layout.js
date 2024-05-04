@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
     
       <body suppressHydrationWarning>
         <Wrapper>
-          <Navbar />
+          {/* <Navbar /> */}
           {children}
         </Wrapper>
         

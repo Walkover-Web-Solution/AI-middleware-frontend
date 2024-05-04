@@ -846,7 +846,6 @@ const DropdownMenu = ({ params, data, embed }) => {
                     </div>
                     <div className="flex-1">
                         <div className="pl-4 pr-4 pb-4">
-                            {console.log(dataToSend, "data to send ")}
                             <Chat dataToSend={dataToSend} params={params} />
                         </div>
                     </div>
