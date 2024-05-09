@@ -4,9 +4,10 @@ export const modelInfo = {
         "gpt-3.5-turbo": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-3.5-turbo", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
+                "logprobs": { field: "boolean", default: false, level: 0 },
                 "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
                 "n": { field: "number", default: 1, level: 0 },
@@ -40,7 +41,7 @@ export const modelInfo = {
         "gpt-3.5-turbo-0613": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-3.5-turbo-0613", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0 },
@@ -77,7 +78,7 @@ export const modelInfo = {
         "gpt-3.5-turbo-0125": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-3.5-turbo-0125", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0 },
@@ -117,7 +118,7 @@ export const modelInfo = {
         "gpt-3.5-turbo-0301": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-3.5-turbo-0301", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0 },
@@ -156,7 +157,7 @@ export const modelInfo = {
         "gpt-3.5-turbo-1106": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-3.5-turbo-1106", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
@@ -197,7 +198,7 @@ export const modelInfo = {
         "gpt-3.5-turbo-16k": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-3.5-turbo-16k", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
@@ -238,7 +239,7 @@ export const modelInfo = {
         "gpt-3.5-turbo-16k-0613": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-3.5-turbo-16k-0613", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
@@ -278,7 +279,7 @@ export const modelInfo = {
         "gpt-4": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-4", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
@@ -316,7 +317,7 @@ export const modelInfo = {
         "gpt-4-0613": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-4-0613", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
@@ -354,7 +355,7 @@ export const modelInfo = {
         "gpt-4-1106-preview": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-4-1106-preview", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
@@ -395,7 +396,7 @@ export const modelInfo = {
         "gpt-4-turbo-preview": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-4-turbo-preview", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
@@ -435,7 +436,7 @@ export const modelInfo = {
         "gpt-4-0125-preview": {
             configuration: {
                 "model": { field: "dropdown", default: "gpt-4-0125-preview", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, },
@@ -474,7 +475,7 @@ export const modelInfo = {
         "gpt-4-turbo-2024-04-09": {
             configuration: {
                 "model": { field: "drop", default: "gpt-4-turbo-2024-04-09", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, typeOf: "boolean" },
@@ -512,7 +513,7 @@ export const modelInfo = {
         "gpt-4-turbo": {
             configuration: {
                 "model": { field: "drop", default: "gpt-4-turbo", "level": 1 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "max_tokens": { field: "slider", min: 0, max: 1024, step: 1, default: 256, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
                 "logprobs": { field: "boolean", default: false, level: 0, typeOf: "boolean" },
@@ -616,14 +617,7 @@ export const modelInfo = {
         },
         "gpt-3.5-turbo-instruct": {
             configuration: {
-                // "model": { field: "dropdown", default: "gpt-3.5-turbo-instruct", level: 1 },
-                // "temperature": { field: "slider", default: 1, min: 0, max: 2, step: 0.01, level: 2 },
-                // "max_tokens": { field: "slider", default: 256, min: 1, max: 4096, step: 1, level: 2 },
-                // "stop": { field: "array", default: "", level: 0 },
-                // "top_p": { field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 2 },
-                // "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                // "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                // "best_of": { field: "slider", min: 1, max: 20, step: 1, default: 1, level: 2 }
+
                 "model": { field: "drop", default: "gpt-3.5-turbo-instruct", "level": 1 },
                 "best_of": { field: "slider", min: 1, max: 20, default: 1, level: 2, step: 1 },
                 "echo": { field: "text", default: false, typeOf: "boolean", level: 2 },
@@ -637,7 +631,7 @@ export const modelInfo = {
                 "stop": { field: "text", default: null, level: 0 },
                 "stream": { field: "boolean", default: false, level: 0 },
                 "suffix": { field: "text", default: null, level: 2 },
-                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 0, level: 2 },
                 "top_p": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
             },
 
