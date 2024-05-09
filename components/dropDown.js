@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file  
 import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
 import { isValidJson, validateWebhook } from '@/utils/utility';
@@ -436,15 +436,17 @@ const DropdownMenu = ({ params, data, embed }) => {
             resizer.removeEventListener('mousedown', mouseDownHandler);
         };
     }, []);
-    const UpdateBridge = async () => {
-        // const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: dataToSend.configuration, service: dataToSend.service, apikey: dataToSend.apikey } }))
-    }
+    const UpdateBridge = useCallback(async () => {
+        // Assuming UpdateBridge uses params.id, dataToSend, and apiKey from state or props
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: dataToSend.configuration, service: dataToSend.service, apikey: apiKey } }));
+    }, [params.id, dataToSend, apiKey, dispatch]); // Add all dependencies here
 
 
     useEffect(() => {
-        if (dataToSend?.length > 0 || apiKey?.length > 0)
+        // Check if dataToSend is not an empty object and apiKey is not an empty string
+        if (Object.keys(dataToSend).length > 0 && apiKey) {
             UpdateBridge();
+        }
     }, [dataToSend, apiKey]);
 
 
