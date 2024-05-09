@@ -7,7 +7,7 @@ import { userDetails } from '@/store/action/userDetailsAction';
 import { logoutUserFromMsg91, switchOrg } from '@/api';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { Box, Building2, FileSliders, History, KeyRound, LogOut, Mail, Rss, Settings2 } from 'lucide-react';
+import { Box, Building2, ChevronDown, FileSliders, History, KeyRound, LogOut, Mail, Rss, Settings2 } from 'lucide-react';
 import { getAllBridgesAction, getSingleBridgesAction } from '@/store/action/bridgeAction';
 
 
@@ -124,7 +124,7 @@ function Navbar() {
           <Building2 size={16} /> {organizations[path[2]]?.name}
         </button>
         <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn capitalize m-1">{path[3] === 'apikey' ? 'API Key' : path[3]}</div>
+          <div tabIndex={0} role="button" className="btn capitalize m-1">{path[3] === 'apikey' ? 'API Key' : path[3]} <ChevronDown size={16} /></div>
           <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
             {['bridges', 'apikey', 'metrics'].map((item) => (
               <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
