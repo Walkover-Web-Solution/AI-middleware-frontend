@@ -103,7 +103,7 @@ let endTime = adjustTimeForUTC(endDate, true); // Adjust end time to reflect loc
         </div>
         <Table data={metricsData} />
       </div>
-      <Sidebar orgid={params.org_id} />
+      {/* <Sidebar orgid={params.org_id} /> */}
     </div>
   );
 }

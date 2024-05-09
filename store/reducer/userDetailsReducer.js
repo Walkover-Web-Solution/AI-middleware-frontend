@@ -13,7 +13,11 @@ export const userDetailsReducer = createSlice({
   reducers: {
     fetchUserDetails : (state, action) => {
       state.userDetails = action.payload 
-      state.organizations = action.payload.c_companies;
+      const org = {}
+      action.payload.c_companies.forEach(element => {
+        org[element.id] = element
+      });
+      state.organizations = org
       state.success = action.payload.success
     } 
   },

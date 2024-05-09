@@ -3,7 +3,6 @@ import { Syne } from "next/font/google";
 
 import "./globals.css";
 import Wrapper from "@/wrapper/Wrapper";
-import Navbar from "@/components/navbar";
 
 const inter = Syne({ subsets: ["latin"] });
 
@@ -19,10 +18,14 @@ export default function RootLayout({ children }) {
 
       <body suppressHydrationWarning>
         <Wrapper>
-          <Navbar />
           {children}
         </Wrapper>
 
+        {/* <script
+        id="interface-main-script"
+        interface_id="6630f4a201851c1d8df95184"
+        src="https://interface-embed.viasocket.com/interface-dev.js"
+      ></script> */}
       </body>
     </html>
   );

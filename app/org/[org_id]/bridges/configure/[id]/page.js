@@ -5,7 +5,6 @@ import DropdownMenu from "@/components/dropDown"
 import { useEffect, useLayoutEffect } from "react"
 import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction"
 import { useDispatch } from "react-redux"
-import Sidebar from "@/components/Sidebar"
 
 const Page = ({ params }) => {
   const dispatch = useDispatch()
@@ -66,17 +65,16 @@ const Page = ({ params }) => {
         </div>
       </div>
       }
-
       <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-start justify-start">
           <div className="flex w-full justify-start gap-16 items-start">
-            <div className="w-full m-4 ">
+            <div className="w-full ">
               <DropdownMenu data={bridge} params={params} embed={integrationData} />
             </div>
           </div>
         </div>
-        <Sidebar orgid={params.org_id} />
+        {/* <Sidebar orgid={params.org_id} /> */}
       </div>
     </>
   );

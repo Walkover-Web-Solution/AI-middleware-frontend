@@ -23,7 +23,7 @@ function page({ params }) {
    */
   const { historyData, thread, } = useCustomSelector(
     (state) => ({
-      historyData: state.historyReducer.history,
+      historyData: state?.historyReducer?.history || [],
       thread: state?.historyReducer?.thread,
     })
   )
@@ -100,47 +100,52 @@ function page({ params }) {
      * - the sidebar
      * - the content of the selected thread
      */
-    <div className='flex'>
-      <div className="drawer lg:drawer-open">
-        <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex flex-col items-center justify-center">
-          <div className="w-full min-h-screen bg-base-200">
-            <div className=" w-full text-start">
-              <div className="w-full">
-                {/* render the messages of the selected thread */}
-                {thread && thread.map((item, index) => (
-                  <div key={item.id}>
-                    <div className={`chat ${item.role === 'user' ? "chat-start " : "chat-end"}`}>
-                      <div className="chat-header flex gap-2">
-                        {/* render the role of the user */}
-                        {item.role.replaceAll("_", " ")}
-                        {/* render the timestamp of the message */}
-                        <time className="text-xs opacity-50">{dateAndTimeHandler(item.createdAt)}</time>
+
+    historyData.length > 0 ?
+      <div className='flex'>
+        <div className="drawer lg:drawer-open">
+          <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+          <div className="drawer-content flex flex-col items-center justify-center">
+            <div className="w-full min-h-screen bg-base-200">
+              <div className=" w-full text-start">
+                <div className="w-full">
+                  {/* render the messages of the selected thread */}
+                  {thread && thread.map((item, index) => (
+                    <div key={item.id}>
+                      <div className={`chat ${item.role === 'user' ? "chat-start " : "chat-end"}`}>
+                        <div className="chat-header flex gap-2">
+                          {/* render the role of the user */}
+                          {item.role.replaceAll("_", " ")}
+                          {/* render the timestamp of the message */}
+                          <time className="text-xs opacity-50">{dateAndTimeHandler(item.createdAt)}</time>
+                        </div>
+                        <div className="chat-bubble">{item.content}</div>
                       </div>
-                      <div className="chat-bubble">{item.content}</div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+          <div className="drawer-side border-r-4 ">
+            <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
+            <ul className="menu p-4 w-40 min-h-full bg-base-200 text-base-content">
+              {/* render the list of thread_id of the chatbot */}
+              {historyData.map((item, index) => (
+                <li key={item.id} onClick={() => threadHandler(item.thread_id)}>
+                  {/* render the selected thread with class "active" */}
+                  <a className={selectedThread === item.thread_id ? "active" : ""} >
+                    {item.thread_id}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <div className="drawer-side border-r-4 ">
-          <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
-          <ul className="menu p-4 w-40 min-h-full bg-base-200 text-base-content">
-            {/* render the list of thread_id of the chatbot */}
-            {historyData.map((item, index) => (
-              <li key={item.id} onClick={() => threadHandler(item.thread_id)}>
-                {/* render the selected thread with class "active" */}
-                <a className={selectedThread === item.thread_id ? "active" : ""} >
-                  Thread {index + 1}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+      </div> :
+      <div className='flex items-center justify-center h-screen'>
+        <p className='text-xl'> No History Present </p>
       </div>
-    </div>
   )
 }
 
