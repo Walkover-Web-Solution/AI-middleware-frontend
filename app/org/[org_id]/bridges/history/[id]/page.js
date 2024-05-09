@@ -129,12 +129,12 @@ function page({ params }) {
           </div>
           <div className="drawer-side border-r-4 ">
             <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
-            <ul className="menu p-4 w-40 min-h-full bg-base-200 text-base-content">
+            <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
               {/* render the list of thread_id of the chatbot */}
               {historyData.map((item, index) => (
                 <li key={item.id} onClick={() => threadHandler(item.thread_id)}>
-                  {/* render the selected thread with class "active" */}
-                  <a className={selectedThread === item.thread_id ? "active" : ""} >
+                  {/* render the selected thread with class "active" and apply Tailwind CSS for text ellipsis */}
+                  <a className={`${selectedThread === item.thread_id ? "active" : ""} block overflow-hidden whitespace-nowrap text-ellipsis`}>
                     {item.thread_id}
                   </a>
                 </li>
