@@ -69,7 +69,7 @@ export const getAllBridges = async () => {
 export const updateBridge = async ({ bridgeId, dataToSend }) => {
   try {
     const response = await axios.post(`${URL}/api/v1/config/updatebridges/${bridgeId}`, dataToSend)
-    toast.success("Bridge is updated");
+    // toast.success("Bridge is updated");
     return response
   } catch (error) {
     toast.error(error.message);
