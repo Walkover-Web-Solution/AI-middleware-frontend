@@ -527,7 +527,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                     </div>
                                     <select value={selectedService} onChange={handleService} className="select select-sm max-w-xs  select-bordered">
                                         <option disabled selected>Select a Service</option>
-                                        <option value="google">google</option>
+                                        {/* <option value="google">google</option> */}
                                         {/* <option value="mistral">mistral</option> */}
                                         {/* <option value="cohere">cohere</option> */}
                                         <option value="openai">openai</option>
