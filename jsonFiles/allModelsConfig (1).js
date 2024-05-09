@@ -616,14 +616,7 @@ export const modelInfo = {
         },
         "gpt-3.5-turbo-instruct": {
             configuration: {
-                // "model": { field: "dropdown", default: "gpt-3.5-turbo-instruct", level: 1 },
-                // "temperature": { field: "slider", default: 1, min: 0, max: 2, step: 0.01, level: 2 },
-                // "max_tokens": { field: "slider", default: 256, min: 1, max: 4096, step: 1, level: 2 },
-                // "stop": { field: "array", default: "", level: 0 },
-                // "top_p": { field: "slider", min: 0, max: 1, step: 0.01, default: 1, level: 2 },
-                // "frequency_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                // "presence_penalty": { field: "slider", min: 0, max: 2, step: 0.01, default: 0, level: 2 },
-                // "best_of": { field: "slider", min: 1, max: 20, step: 1, default: 1, level: 2 }
+
                 "model": { field: "drop", default: "gpt-3.5-turbo-instruct", "level": 1 },
                 "best_of": { field: "slider", min: 1, max: 20, default: 1, level: 2, step: 1 },
                 "echo": { field: "text", default: false, typeOf: "boolean", level: 2 },

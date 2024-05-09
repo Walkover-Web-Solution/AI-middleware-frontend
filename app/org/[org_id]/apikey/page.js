@@ -99,7 +99,6 @@ function Page({ params }) {
       <div className="drawer-content flex pl-2 flex-col items-start justify-start">
         <div className="flex w-full justify-start gap-16 items-start">
           <div className="w-full">
-            <button className="btn float-end mt-2 btn-sm mr-3 btn-primary" onClick={() => document.getElementById('my_modal_5').showModal()}>+ create new key</button>
 
             <table className="table">
               <thead>
@@ -204,7 +203,6 @@ function Page({ params }) {
         </div>
 
       </div>
-      <Sidebar orgid={params.org_id} />
     </div>
 
   )

@@ -2,7 +2,7 @@
 import { store } from "@/store/store";
 import React from "react";
 import { Provider } from "react-redux";
-import { ToastContainer} from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export const metadata = {
@@ -21,7 +21,7 @@ const Wrapper = ({ children }) => {
   return (
     <>
       <Provider store={store}>
-        <div className="w-full h-svh relative overflow-hidden">
+        <div className="w-full h-svh relative ">
           {/* All the child components */}
           {children}
           {/* Notification toast container */}

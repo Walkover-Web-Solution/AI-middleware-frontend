@@ -6,8 +6,7 @@ import _ from "lodash";
 import { toast } from "react-toastify";
 import { updateBridgeAction } from "@/store/action/bridgeAction";
 
-function Chat({ dataToSend, params }) {
-  const dispatch = useDispatch();
+function Chat({ dataToSend }) {
 
   // State variables
   const [messages, setMessages] = useState([]);
@@ -144,21 +143,16 @@ function Chat({ dataToSend, params }) {
   // };
 
 
-  const UpdateBridge = async () => {
-    // const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
-    dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: localDataToSend.configuration, service: localDataToSend.service, apikey: localDataToSend.apikey } }))
-  }
 
   return (
     <>
       <div className="w-full flex justify-between items-center">
         {/* <div className="label"> */}
         <span className="label-text">Playground</span>
-        <button className="btn btn-sm m-5" onClick={UpdateBridge}>Update Bridge</button>
         {/* </div> */}
       </div>
 
-      <div className=" p:2 sm:p-6 justify-between flex flex-col h-[80vh] lg:w-[50vw] border rounded-xl w-full z-10">
+      <div className=" p:2 sm:p-6 justify-between flex flex-col h-[82vh] border rounded-xl w-full z-10">
         <div
           id="messages"
           className="flex flex-col w-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch z-10"

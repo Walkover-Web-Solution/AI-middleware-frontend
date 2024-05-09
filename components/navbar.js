@@ -7,34 +7,48 @@ import { userDetails } from '@/store/action/userDetailsAction';
 import { logoutUserFromMsg91, switchOrg } from '@/api';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { Box, Building2, CircleUser, FileSliders, History, LogOut, Mail, Rss } from 'lucide-react';
-import { getAllBridgesAction } from '@/store/action/bridgeAction';
+import { Box, Building2, FileSliders, History, KeyRound, LogOut, Mail, Rss, Settings2 } from 'lucide-react';
+import { getAllBridgesAction, getSingleBridgesAction } from '@/store/action/bridgeAction';
 
 
 
-function Navbar({ orgId, configurationPage = false, isBridgePage = false, historyPage = false, metricsPage = false, params }) {
+function Navbar() {
   const router = useRouter();
   const dispatch = useDispatch();
   const pathName = usePathname()
   const path = pathName.split('?')[0].split('/')
   const userdetails = useCustomSelector((state) => state?.userDetailsReducer?.userDetails);
   const organizations = useCustomSelector((state) => state.userDetailsReducer.organizations);
-  const bridgesList = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]) || [];
+  const bridgesList = useCustomSelector((state) => state.bridgeReducer.org[path[2]]) || [];
   const bridgeData = useCustomSelector((state) => state.bridgeReducer.allBridgesMap[path[5]]);
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenBridge, setIsOpenBridge] = useState(false)
   const [searchQuery, setSearchQuery] = useState('');
+  const [bridgeSearchQuery, setBridgeSearchQuery] = useState('');
+
   const sidebarRef = useRef(null);
   const sideBridgeRef = useRef(null);
-  console.log(path)
+
+
+
+  // Event handler for bridge search query change
+  const handleBridgeSearchChange = (e) => {
+    setBridgeSearchQuery(e.target.value);
+  };
+
+  // Filtered bridge list based on search query
+  const filteredBridgesList = bridgesList.filter(
+    (item) => item.name.toLowerCase().includes(bridgeSearchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     dispatch(userDetails());
+    dispatch(getSingleBridgesAction(path[5]))
   }, []);
 
   useLayoutEffect(() => {
-    dispatch(getAllBridgesAction(params.org_id))
-  }, [params.org_id]);
+    dispatch(getAllBridgesAction(path[2]))
+  }, [path[2]]);
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
@@ -50,6 +64,8 @@ function Navbar({ orgId, configurationPage = false, isBridgePage = false, histor
       if (e.key === 'Escape') {
         setIsOpen(false);
         setIsOpenBridge(false);
+        setSearchQuery("");
+        setBridgeSearchQuery("");
       }
     };
 
@@ -89,9 +105,7 @@ function Navbar({ orgId, configurationPage = false, isBridgePage = false, histor
       const response = await switchOrg(id);
       router.push(`/org/${id}/bridges`);
       dispatch(setCurrentOrgIdAction(id));
-      if (response.status === 200) {
-        // console.log('Organization switched successfully', response.data);
-      } else {
+      if (response.status !== 200) {
         console.error('Failed to switch organization', response.data);
       }
     } catch (error) {
@@ -104,45 +118,41 @@ function Navbar({ orgId, configurationPage = false, isBridgePage = false, histor
   );
 
   return (
-    <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between'} navbar bg-white `}>
-      <div>
+    <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} navbar bg-white border `}>
+      <div className='flex items-center justify-center gap-2'>
         <button className="btn m-1" onClick={toggleSidebar}>
-        <Building2 size={16} /> {organizations[path[2]]?.name}
+          <Building2 size={16} /> {organizations[path[2]]?.name}
         </button>
-        {path.length === 6 && <button className="btn m-1" onClick={toggleBridgeSidebar}>  <Rss size={16} /> {bridgeData?.name} </button>
-        }
+        <div className="dropdown">
+          <div tabIndex={0} role="button" className="btn capitalize m-1">{path[3] === 'apikey' ? 'API Key' : path[3]}</div>
+          <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+            {['bridges', 'apikey', 'metrics'].map((item) => (
+              <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
+                <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {path.length === 6 && <button className="btn m-1" onClick={toggleBridgeSidebar}>  <Rss size={16} /> {bridgeData?.name} </button>}
+
       </div>
 
 
       <div className="justify-end">
         {path.length === 6 ? (
-          // <div class="inline-flex rounded-lg border border-gray-100 bg-gray-100 p-1">
-          //   <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${path[5]}`)} class={`inline-flex items-center gap-2 rounded-md px-4 py-2  text-sm ${path[4] === 'configure' ? "bg-white text-blue-500 shadow-sm " : " text-gray-500 hover:text-gray-700"}   focus:relative`}>  Configure</button>
-          //   <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${path[5]}`)} class={`inline-flex items-center gap-2 rounded-md px-4 py-2  text-sm ${path[4] === 'history' ? "bg-white text-blue-500 shadow-sm " : " text-gray-500 hover:text-gray-700"}   focus:relative`}> History </button>
-          //   <button class={`inline-flex items-center gap-2 rounded-md px-4 py-2  text-sm ${path[4] === 'metrics' ? "bg-white text-blue-500 shadow-sm " : " text-gray-500 hover:text-gray-700"}   focus:relative`}> Metrics  </button>
-            <div className="join">
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${path[5]}`)}  className={` ${path[4] === 'configure' ? "btn-primary" : "" }   btn join-item `}> <FileSliders size={16} /> Configure</button>
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${path[5]}`)} className={` ${path[4] === 'history' ? "btn-primary" : "" }   btn join-item `}><History size={16} /> History</button>
-              <button className={` ${path[4] === 'metrics' ? "btn-primary" : "" }   btn join-item `}> <Box size={16} /> Metrics</button>
-            </div>
-          // </div>
-        ) : (
-          <>
-
-          
-          <div className='join'>
-          <button className={` ${path[3] === 'bridges' ? "btn-primary" : "" }   btn join-item `} onClick={() => router.push(`/org/${path[2]}/bridges`)}>
-            Bridges
-          </button>
-          <button className={` ${path[3] === 'apikey' ? "btn-primary" : "" }   btn join-item `} onClick={() => router.push(`/org/${path[2]}/apikey`)}>
-            Api key
-          </button>
-
-          <button className={` ${path[3] === 'metrics' ? "btn-primary" : "" }   btn join-item `} onClick={() => router.push(`/org/${path[2]}/metrics`)}>
-           Metrics
-          </button>
+          <div className="join">
+            <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${path[5]}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>
+            <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${path[5]}`)} className={` ${path[4] === 'history' ? "btn-primary" : ""}   btn join-item `}><History size={16} /> History</button>
+            {/* <button className={` ${path[4] === 'metrics' ? "btn-primary" : ""}   btn join-item `}> <Box size={16} /> Metrics</button> */}
           </div>
-          </>
+        ) : (
+          path[3] === 'apikey' ?
+            <button className="btn  btn-primary" onClick={() => document.getElementById('my_modal_5').showModal()}>+ create new key</button>
+            :
+            path[3] === 'bridges' ?
+              <button className="btn btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>
+                + create new bridge
+              </button> : ""
         )}
       </div>
 
@@ -150,11 +160,12 @@ function Navbar({ orgId, configurationPage = false, isBridgePage = false, histor
 
       <div
         ref={sidebarRef}
-        className={`fixed inset-y-0 left-0 ${isOpen ? 'w-full md:w-1/3 lg:w-1/5 opacity-100' : 'w-0'
+        className={`fixed inset-y-0 left-0 border-r-2 ${isOpen ? 'w-full md:w-1/3 lg:w-1/6 opacity-100' : 'w-0'
           } overflow-y-auto border-l bg-base-200 transition-all duration-300 z-50`}
       >
         <aside className="flex w-full  flex-col h-screen overflow-y-auto">
-          <div className="p-4">
+          <div className="p-4 flex flex-col gap-4">
+            <p className='text-xl'> Organization </p>
             <input
               type="text"
               placeholder="Search..."
@@ -162,9 +173,9 @@ function Navbar({ orgId, configurationPage = false, isBridgePage = false, histor
               onChange={(e) => setSearchQuery(e.target.value)}
               className="border border-gray-300 rounded p-2 w-full"
             />
-            <ul className="menu p-0 pt-4 w-full   text-base-content">
+            <ul className="menu p-0 w-full   text-base-content">
               {filteredOrganizations.map((item) => (
-                <li key={item.id}><a className={`${item.id == params.org_id ? "active" : `${item.id}`} py-2 px-2 rounded-md`} key={item.id} onClick={() => { handleSwitchOrg(item.id); router.push(`/org/${item.id}/${path[3]}`) }}  > <Building2 size={16} /> {item.name}</a></li>
+                <li key={item.id}><a className={`${item.id == path[2] ? "active" : `${item.id}`} py-2 px-2 rounded-md`} key={item.id} onClick={() => { handleSwitchOrg(item.id); router.push(`/org/${item.id}/${path[3]}`) }}  > <Building2 size={16} /> {item.name}</a></li>
               ))}
             </ul>
           </div>
@@ -175,7 +186,7 @@ function Navbar({ orgId, configurationPage = false, isBridgePage = false, histor
               <summary
                 class="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition"
               >
-                <span class="text-sm font-medium"> Setting </span>
+                <span class="text-sm font-medium flex justify-center items-center gap-2"> <Settings2 size={16} /> Setting </span>
 
                 <span class="transition group-open:-rotate-180">
                   <svg
@@ -193,11 +204,10 @@ function Navbar({ orgId, configurationPage = false, isBridgePage = false, histor
 
               <div class="border-t border-gray-200 bg-white">
                 <ul className="menu w-full   text-base-content">
-                  <li> <a className='py-2 px-2 rounded-md'> <CircleUser size={16} /> {userdetails.name}</a> </li>
                   <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
+                  <li> <a className={`py-2 px-2  ${path[3] === 'apikey' ? "active" : ""}  rounded-md`} onClick={() => { router.push(`/org/${path[2]}/apikey`); setIsOpen(false); }}> <KeyRound size={16} />API key</a> </li>
                   <li onClick={logoutHandler}><a className='py-2 px-2 rounded-md'> <LogOut size={16} />  logout</a></li>
                 </ul>
-
               </div>
 
             </details>
@@ -208,25 +218,34 @@ function Navbar({ orgId, configurationPage = false, isBridgePage = false, histor
       {/* bridge slider */}
       <div
         ref={sideBridgeRef}
-        className={`fixed inset-y-0 left-0 ${isOpenBridge ? 'w-full md:w-1/3 lg:w-1/5 opacity-100' : 'w-0'
+        className={`fixed inset-y-0 left-0 border-r-2 ${isOpenBridge ? 'w-full md:w-1/3 lg:w-1/6 opacity-100' : 'w-0'
           } overflow-y-auto border-l bg-base-200 transition-all duration-300 z-50`}
       >
         <aside className="flex w-full  flex-col h-screen overflow-y-auto">
-          <div className="p-4">
+          <div className="p-4 flex flex-col gap-4">
+            <p className='text-xl'> Bridges </p>
+            {/* Input field for bridge search */}
             <input
               type="text"
               placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={bridgeSearchQuery}
+              onChange={handleBridgeSearchChange}
               className="border border-gray-300 rounded p-2 w-full"
             />
-            <ul className="menu p-0 pt-4 w-full   text-base-content">
-              {bridgesList.map((item) => (
-                <li key={item._id}><a className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md`} onClick={() => router.push(`/org/${path[2]}/bridges/configure/${item._id}`)}  > <Building2 size={16} /> {item.name}</a></li>
+            {/* Render filtered bridge list */}
+            <ul className="menu p-0 w-full   text-base-content">
+              {filteredBridgesList.map((item) => (
+                <li key={item._id}>
+                  <a
+                    className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md`}
+                    onClick={() => router.push(`/org/${path[2]}/bridges/configure/${item._id}`)}
+                  >
+                    <Building2 size={16} /> {item.name}
+                  </a>
+                </li>
               ))}
             </ul>
           </div>
-
         </aside>
       </div>
     </div>

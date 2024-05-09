@@ -1,7 +1,7 @@
 "use client"
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { deleteBridgeAction, getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify'
 import { usePathname, useRouter } from 'next/navigation'
@@ -9,6 +9,7 @@ import Protected from "@/components/protected";
 import CreateNewBridge from "@/components/createNewBridge";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/navbar";
+import { Box } from "lucide-react";
 
 
 function Home({ params }) {
@@ -34,7 +35,13 @@ function Home({ params }) {
   const nextPage = () => setCurrentPage(prev => (prev < totalPages ? prev + 1 : prev));
   const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
 
+  const [searchTerm, setSearchTerm] = useState('');
 
+  const filteredBridges = allBridges.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
   /**
    * Handle Delete Bridge Action
    *
@@ -63,17 +70,29 @@ function Home({ params }) {
   };
 
 
-  // useLayoutEffect(() => {
-  //   dispatch(getAllBridgesAction(params.org_id))
-  // }, [params.org_id]);
+  useEffect(() => {
+    dispatch(getAllBridgesAction(params.org_id))
+  }, [params.org_id]);
 
-  const columns = ["name", "_id", "service"];
+  // const copyBridgeIdToClipboard = (e, id) => {
+  //   e.stopPropagation();
+  //   navigator.clipboard.writeText(id)
+  //     .then(() => {
+  //       toast.success('Bridge ID copied to clipboard');
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error copying to clipboard:', error);
+  //       toast.error('Failed to copy bridge ID');
+  //     });
+  // };
+
+  // const columns = ["name", "_id", "service"];
 
   const onClickConfigure = (id) => {
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
   }
 
-  return (<div className="drawer lg:drawer-open overflow-hidden">
+  return (<div className="drawer lg:drawer-open ">
     {isLoading &&
       (<div className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-filter backdrop-blur-lg flex justify-center items-center z-50">
         <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-xl">
@@ -104,26 +123,49 @@ function Home({ params }) {
             </div>
 
           ) : (
-            <div className="flex flex-col gap-5">
-              {/* <Navbar orgId={params.org_id} isBridgePage /> */}
-              <button className="btn  w-fit mt-2 mr-3  float-end btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>
-                + create new bridge
-              </button>
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5 lg:grid-cols-4 p-4">
+            <div className="flex flex-col">
+              <div className="relative flex items-center justify-between mx-4 ">
 
-                {allBridges.map((item) => (
-                  <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center rounded-md border cursor-pointer hover:shadow-lg">
+                <input
+                  type="text"
+                  placeholder="Search for bridges"
+                  className="input input-bordered max-w-sm  input-md w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button className="btn  w-fit float-start m-4 btn-primary" onClick={() => router.push(`/org/${params.org_id}/metrics`)}>
+                  <Box size={16} />  Metrics
+                </button>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5 lg:grid-cols-4 p-4">
+                {filteredBridges.map((item) => (
+                  <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center gap-7 rounded-md border cursor-pointer hover:shadow-lg ">
                     <div className="w-full">
-                      <div className="p-4">
-                        <h1 className="inline-flex items-center text-lg font-semibold">
-                          {item['name']}
-                        </h1>
-                        <p className="mt-3 text-sm text-gray-600">
-                          {item['_id']}
-                        </p>
-                        <div className="mt-4">
+                      <div className="p-4 flex flex-col justify-between h-[200px] items-start">
+                        <div className="">
+                          <h1 className="inline-flex items-center text-lg font-semibold">
+                            {item['name']}
+                          </h1>
+                          <p className="text-xs  flex items-center gap-2 text-gray-600 line-clamp-5 " >
+                            {item?.['configuration']?.['prompt'] && <>
+                              {Array.isArray(item['configuration']['prompt']) ? item['configuration']['prompt'].map((promptItem, index) => (
+                                <div key={index}>
+                                  <p>Role: {promptItem.role}</p>
+                                  <p>Content: {promptItem.content}</p>
+                                </div>
+                              ))
+                                : <p>Prompt : {item['configuration']['prompt']}</p>
+                              }
+                            </>}
+                            {item?.['configuration']?.['input'] && <p className="text-xs">Input : {item['configuration']['input']}</p>}
+                          </p>
+                        </div>
+                        <div className="  mt-auto">
                           <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-900">
                             {item['service']}
+                          </span>
+                          <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-900">
+                            {item?.['configuration']?.['model'] || ""}
                           </span>
                         </div>
                       </div>
