@@ -230,9 +230,9 @@ const DropdownMenu = ({ params, data, embed }) => {
     };
 
 
-    // Adjusted handleInputChange to update state on change but not call UpdateBridge for sliders
     const handleInputChange = (e, key, isSlider = false) => {
         let newValue = e.target.value;
+        let newCheckedValue = e.target.checked
         // Update the state immediately for all inputs, including sliders
         const updatedModelInfo = {
             ...modelInfoData,
@@ -243,14 +243,31 @@ const DropdownMenu = ({ params, data, embed }) => {
         };
         setModelInfoData(updatedModelInfo);
 
-        // Prepare the updated dataToSend object without calling UpdateBridge for sliders
-        const updatedDataToSend = {
+        // Prepare the updated dataToSend object
+        let updatedDataToSend = {
             ...dataToSend,
             configuration: {
                 ...dataToSend.configuration,
                 [key]: isSlider ? Number(newValue) : newValue,
             }
         };
+        // If the key is 'responseFormat', check the value and add the appropriate type
+        if (key === 'response_format') {
+            const typeValue = newCheckedValue === true ? 'json_object' : newCheckedValue === false ? 'text' : null;
+            if (typeValue) {
+                updatedDataToSend = {
+                    ...updatedDataToSend,
+                    configuration: {
+                        ...updatedDataToSend.configuration,
+                        [key]: {
+                            // ...updatedDataToSend.configuration[key],
+                            type: typeValue,
+                        },
+                    },
+                };
+            }
+        }
+
         setDataToSend(updatedDataToSend);
 
         // For non-slider inputs, call UpdateBridge immediately
@@ -386,9 +403,9 @@ const DropdownMenu = ({ params, data, embed }) => {
 
     return (
         <>
-            <div className="h-[90vh]">
+            <div className="h-full">
                 <div className=" w-screen flex flex-col   border border-gray-300 md:flex-row">
-                    <div className="w-1/3 overflow-auto border-r border-gray-300 bg-gray-100 min-w-[350px] configurationPage">
+                    <div className="w-[350px] overflow-auto border-r border-gray-300 bg-gray-100 min-w-[350px] configurationPage">
                         <div className="drawer-content float-right ">
                             {/* Page content here */}
                             <label htmlFor="my-drawer-4" className="drawer-button cursor-pointer ">
@@ -397,7 +414,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                 </svg>
                             </label>
                         </div>
-                        <div className="p-4 " style={{ height: "90vh" }}>
+                        <div className="p-4 h-[93vh]" >
                             <div className="">
                                 <div className="">
                                     {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
@@ -500,7 +517,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                     />
 
                                 </label>
-                                <div className="collapse bg-base-200">
+                                <div className="collapse ">
                                     <input type="radio" name="my-accordion-1" checked={toggle} onClick={toggleAccordion} />
                                     <div className="collapse-title p-0 flex items-center justify-start gap-4 text-xl font-medium">
                                         Advanced Parameters  {toggle ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -530,8 +547,8 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                         <input
                                                             type="text"
                                                             required={value?.level === 1 ? true : false}
-                                                            value={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
-                                                            onChange={(e) => handleInputChange(e, key)}
+                                                            defaultValue={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
+                                                            onBlur={(e) => handleInputChange(e, key)}
                                                             className="input w-full input-bordered max-w-xs  input-sm"
                                                             name={key} // Add name attribute
                                                         />
@@ -539,8 +556,8 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                             <input
                                                                 type="number"
                                                                 required={value?.level === 1 ? true : false}
-                                                                value={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
-                                                                onChange={(e) => handleInputChange(e, key)}
+                                                                defaultValue={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
+                                                                onBlur={(e) => handleInputChange(e, key)}
                                                                 className="input w-full input-bordered max-w-xs  input-sm"
                                                                 name={key} // Add name attribute
                                                             />
@@ -549,31 +566,21 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                                 <input
                                                                     type="checkbox"
                                                                     required={value?.level === 1 ? true : false}
-                                                                    checked={value.default.type === "text" ? false : value.default.type === "json_object" ? true : !!value} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
+                                                                    defaultChecked={value.default.type === "text" ? false : value.default.type === "json_object" ? true : value} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
                                                                     onChange={(e) => handleInputChange(e, key)}
                                                                     className="checkbox"
                                                                     name={key} // Add name attribute
                                                                 />
                                                                 :
-                                                                value.field === 'json_object' ?
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        required={value?.level === 1 ? true : false}
-                                                                        checked={!value.default} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
-                                                                        onChange={(e) => handleInputChange(e, key)}
-                                                                        className="checkbox"
-                                                                        name={key} // Add name attribute
-                                                                    />
-                                                                    :
-                                                                    "this field is under development "}
+                                                                "this field is under development "}
                                             </div>
                                         ))}
                                     </div>
                                 </div>
+                                <div className='h-[70px]' />
 
                             </div>
                         </div>
-
                     </div>
                     <div className="resizer w-1 bg-base-500 cursor-col-resize hover:bg-primary" ></div>
                     <div className="w-2/3 flex-1 chatPage min-w-[450px]">
@@ -584,76 +591,6 @@ const DropdownMenu = ({ params, data, embed }) => {
                 </div>
 
                 {/* response slider */}
-                {/* <div className="drawer drawer-end">
-                    <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
-                    <div className="drawer-side z-10">
-                        <label htmlFor="my-drawer-4" aria-label="close sidebar" className="drawer-overlay"></label>
-                        <ul className="menu p-4 w-1/2 min-h-full bg-base-200 text-base-content">
-                            Ways to get response using ai middleware
-                            <div className="form-control">
-                                <label className="label cursor-pointer">
-                                    <span className="label-text">Default </span>
-                                    <input type="radio" name="radio-10" className="radio checked:bg-blue-500" checked={selectedOption === 'default'} onChange={() => { setSelectedOption('default'); handleResponseChange("default") }} />
-                                </label>
-                            </div>
-                            <div className="form-control">
-                                <label className="label cursor-pointer">
-                                    <span className="label-text">RTLayer</span>
-                                    <input type="radio" name="radio-10" className="radio checked:bg-blue-500" checked={selectedOption === 'RTLayer'} onChange={() => { setSelectedOption('RTLayer'); handleResponseChange("RTLayer") }} />
-                                </label>
-                            </div>
-                            <div className={selectedOption === 'custom' ? "border rounded" : ""}>
-                                <div className="form-control">
-                                    <label className="label cursor-pointer">
-                                        <span className="label-text">Custom</span>
-                                        <input type="radio" name="radio-10" className="radio checked:bg-blue-500" checked={selectedOption === 'custom'} onChange={() => { setSelectedOption('custom'); }} />
-                                    </label>
-                                </div>
-
-                                {selectedOption === 'custom' &&
-                                    <div className='border-t p-4'>
-                                        <label className="form-control w-full">
-                                            <div className="label">
-                                                <span className="label-text">Webhook</span>
-                                            </div>
-                                            <input
-                                                type="text"
-                                                placeholder="Url"
-                                                className="input input-bordered max-w-xs  input-sm  w-full"
-                                                id="webhook"
-                                                value={webhook}
-                                                onChange={e => {
-                                                    setWebhook(e.target.value);
-                                                    handleChangeWebhook(e.target.value);
-                                                }}
-                                            />
-                                            {errors.webhook && <p className="text-red-500">{errors.webhook}</p>}
-                                        </label>
-                                        <label className="form-control">
-                                            <div className="label">
-                                                <span className="label-text">Header</span>
-                                            </div>
-                                            <textarea
-                                                className="textarea textarea-bordered h-24 w-full"
-                                                id="headers"
-                                                value={(headers)}
-                                                onChange={e => {
-                                                    setHeaders(e.target.value);
-                                                    handleChangeHeaders(e.target.value);
-                                                }}
-                                                placeholder="Type here"
-                                            ></textarea>
-                                            {errors.headers && <p className="text-red-500">{errors.headers}</p>}
-                                        </label>
-                                        <button className="btn btn-primary btn-sm my-5 float-right" onClick={() => handleResponseChange("custom", document.getElementById('webhook').value, document.getElementById('headers').value)} disabled={errors.webhook !== '' || errors.headers !== ''}>
-                                            Apply
-                                        </button>
-                                    </div>
-                                }
-                            </div>
-                        </ul>
-                    </div>
-                </div> */}
                 <div className="drawer drawer-end">
                     <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
                     <div className="drawer-side z-10">
