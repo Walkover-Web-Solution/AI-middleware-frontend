@@ -142,11 +142,11 @@ function Home({ params }) {
                   <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center gap-7 rounded-md border cursor-pointer hover:shadow-lg ">
                     <div className="w-full">
                       <div className="p-4 flex flex-col justify-between h-[200px] items-start">
-                        <div className="">
+                        <div className="w-full">
                           <h1 className="inline-flex items-center text-lg font-semibold">
                             {item['name']}
                           </h1>
-                          <p className="text-xs  flex items-center gap-2 text-gray-600 line-clamp-5 " >
+                          <p className="text-xs w-full flex items-center gap-2 text-gray-600 line-clamp-5 " >
                             {item?.['configuration']?.['prompt'] && <>
                               {Array.isArray(item['configuration']['prompt']) ? item['configuration']['prompt'].map((promptItem, index) => (
                                 <div key={index}>
