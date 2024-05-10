@@ -131,7 +131,7 @@ function InvitePage({ params }) {
       </div>
 
     </div>
-    <Sidebar orgid={params.org_id} />
+    {/* <Sidebar orgid={params.org_id} /> */}
   </div>
   );
 }
