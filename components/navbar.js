@@ -7,7 +7,7 @@ import { userDetails } from '@/store/action/userDetailsAction';
 import { logoutUserFromMsg91, switchOrg } from '@/api';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { Box, Building2, ChevronDown, FileSliders, History, KeyRound, LogOut, Mail, Rss, Settings2 } from 'lucide-react';
+import { Box, Building2, ChevronDown, FileSliders, History, Home, KeyRound, LogOut, Mail, Rss, Settings2 } from 'lucide-react';
 import { getAllBridgesAction, getSingleBridgesAction } from '@/store/action/bridgeAction';
 
 
@@ -120,6 +120,9 @@ function Navbar() {
   return (
     <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} navbar bg-white border `}>
       <div className='flex items-center justify-center gap-2'>
+        <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/bridges`)}>
+          <Home size={16} />
+        </button>
         <button className="btn m-1" onClick={toggleSidebar}>
           <Building2 size={16} /> {organizations[path[2]]?.name}
         </button>
