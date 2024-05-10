@@ -3,24 +3,18 @@ import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { getHistoryAction, getThread } from '@/store/action/historyAction'
 import { clearThreadData } from '@/store/reducer/historyReducer'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 
-/**
- * History Page
- * 
- * This page shows the conversations of a particular chatbot
- * This page is protected and can only be accessed with a valid session
- * 
- * @author Thanh Tuan <thanhtuan@sc.edu>
- */
 function page({ params }) {
-  /**
-   * state:
-   * - historyData: the array of thread_id of the chatbot
-   * - thread: the messages of the selected thread
-   * - selectedThread: the id of the selected thread
-   */
+
+  const search = useSearchParams()
+  const router = useRouter()
+  const pathName = usePathname()
+  const dispatch = useDispatch()
+
   const { historyData, thread, } = useCustomSelector(
     (state) => ({
       historyData: state?.historyReducer?.history || [],
@@ -28,44 +22,38 @@ function page({ params }) {
     })
   )
 
-  /**
-   * state:
-   * - selectedThread: the id of the selected thread
-   */
   const [selectedThread, setSelectedThread] = useState("")
 
-  /**
-   * Effect:
-   * - get the history of the chatbot when the component mounts
-   */
+  useEffect(() => {
+    // Extract thread_id from the URL query parameters
+    const thread_id = search.get('thread_id');
+    if (thread_id) {
+      setSelectedThread(thread_id);
+      dispatch(getThread(thread_id, params.id));
+    } else if (historyData.length > 0) {
+      // Automatically select the first history id if no query params are present
+      const firstThreadId = historyData[0].thread_id;
+      setSelectedThread(firstThreadId);
+      dispatch(getThread(firstThreadId, params.id));
+      // Optionally, update the URL with the first thread_id
+      router.push(`${pathName}?thread_id=${firstThreadId}`, undefined, { shallow: true });
+    }
+  }, [search, historyData]); // Add historyData as a dependency
+
   useEffect(() => {
     dispatch(getHistoryAction(params.id))
   }, [historyData])
 
-  /**
-   * Effect:
-   * - clear the selected thread when the chatbot changes
-   */
   useEffect(() => {
     dispatch(clearThreadData())
   }, [params.id])
 
-  /**
-   * Handler:
-   * - handle the click event to select a thread
-   * @param {string} thread_id the id of the thread to select
-   */
   const threadHandler = (thread_id) => {
-    setSelectedThread(thread_id)
-    dispatch(getThread(thread_id, params.id))
-  }
+    setSelectedThread(thread_id);
+    // Update the URL without navigating away from the page
+    router.push(`${pathName}?thread_id=${thread_id}`, undefined, { shallow: true });
+  };
 
-  /**
-   * Handler:
-   * - format the date to a human readable format
-   * @param {string} created_at the date to format
-   * @returns {string} the formatted date
-   */
   const dateAndTimeHandler = (created_at) => {
     const date = new Date(created_at);
 
@@ -86,20 +74,8 @@ function page({ params }) {
     return date.toLocaleDateString("en-US", options);
   }
 
-  /**
-   * Dispatch:
-   * - get the history of the chatbot
-   * - clear the selected thread
-   * - get the selected thread
-   */
-  const dispatch = useDispatch()
-
   return (
-    /**
-     * Render:
-     * - the sidebar
-     * - the content of the selected thread
-     */
+
 
     historyData.length > 0 ?
       <div className='flex'>
