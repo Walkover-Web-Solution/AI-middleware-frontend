@@ -1,5 +1,5 @@
 "use client"
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file  
 import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
 import { isValidJson, validateWebhook } from '@/utils/utility';
@@ -17,9 +17,6 @@ const DropdownMenu = ({ params, data, embed }) => {
     const [apiKey, setApiKey] = useState(data?.apikey)
     const [modelInfoData, setModelInfoData] = useState({})
     const [inputConfig, setInputConfig] = useState(data?.inputConfig ?? modelInfo?.data?.configuration?.model?.default?.inputConfig)
-    const [isValid, setIsValid] = useState(true);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [tempJsonString, setTempJsonString] = useState('');
     const [selectedOption, setSelectedOption] = useState('default');
     const [webhook, setWebhook] = useState(data?.responseFormat?.webhook || "");
     const [headers, setHeaders] = useState(data?.responseFormat?.headers || "");
@@ -119,92 +116,54 @@ const DropdownMenu = ({ params, data, embed }) => {
     }
 
 
-    /**
-     * Handle the model dropdown change event
-     * 
-     * @param {Object} e event object
-     */
     const handleModel = (e) => {
-
         const newSelectedModel = e.target.value;
+        let updatedDataToSend = {}; // Temporary object to hold the updated dataToSend
+
         setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
         if (dataToSend.configuration.type !== e.target.selectedOptions[0].parentNode.label) setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
-        if (data.type === e.target.selectedOptions[0].parentNode.label) setInputConfig(data.inputConfig)
-        // Update selectedModel state with the newly selected model
+        if (data.type === e.target.selectedOptions[0].parentNode.label) setInputConfig(data.inputConfig);
         setSelectedModel(newSelectedModel);
 
-        // Check if the newly selected model is of the same type as the current type
-        // If it is, update the existing dataToSend object with the new model
         if (dataToSend.configuration.type === e.target.selectedOptions[0].parentNode.label) {
-            setDataToSend(prevDataToSend => ({
-                ...prevDataToSend,
+            updatedDataToSend = {
+                ...dataToSend,
                 configuration: {
-                    ...prevDataToSend.configuration,
+                    ...dataToSend.configuration,
                     model: e.target.value, // Update the model in the configuration
                     type: e.target.selectedOptions[0].parentNode.label // Keep the same type
                 },
                 service: selectedService, // Keep the same service
                 apikey: apiKey // Keep the same apiKey
-            }));
-        }
-        // If the newly selected model is not of the same type as the current type, we need to create a new dataToSend object
-        // Depending on the type of the newly selected model, we set the inputConfig and modelInfoData states accordingly
-        // Then we set the new dataToSend object
-        else {
+            };
+        } else {
+            // Define the new dataToSend based on the selected model type
+            const newConfiguration = {
+                model: e.target.value,
+                type: e.target.selectedOptions[0].parentNode.label
+            };
 
             if (e.target.selectedOptions[0].parentNode.label === 'chat') {
-
-
-                setDataToSend({
-                    "configuration": {
-                        "model": e.target.value,
-                        "prompt": [],
-                        "type": e.target.selectedOptions[0].parentNode.label,
-                        // "user": [],
-                        // "conversation": [] 
-                    },
-                    "service": selectedService,
-                    "apikey": apiKey
-                })
-            }
-            else if (e.target.selectedOptions[0].parentNode.label === "embedding") {
-
-                // setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
-                // setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
-
-                setDataToSend({
-                    "configuration": {
-                        "model": e.target.value,
-                        "input": "",
-                        "type": e.target.selectedOptions[0].parentNode.label
-
-                    },
-                    "service": selectedService,
-                    "apikey": apiKey
-                })
-            }
-            else if (e.target.selectedOptions[0].parentNode.label === "completion") {
-
-                // setModelInfoData(modelInfo[selectedService][newSelectedModel]?.configuration || {});
-                // setInputConfig(modelInfo[selectedService][newSelectedModel]?.inputConfig || {});
-
-                setDataToSend(
-                    {
-                        "configuration": {
-                            "model": e.target.value,
-                            "prompt": "",
-                            "type": e.target.selectedOptions[0].parentNode.label
-
-                        },
-                        "service": selectedService,
-                        "apikey": apiKey
-                    }
-                )
+                newConfiguration.prompt = [];
+            } else if (e.target.selectedOptions[0].parentNode.label === "embedding") {
+                newConfiguration.input = "";
+            } else if (e.target.selectedOptions[0].parentNode.label === "completion") {
+                newConfiguration.prompt = "";
             }
 
+            updatedDataToSend = {
+                configuration: newConfiguration,
+                service: selectedService,
+                apikey: apiKey
+            };
         }
-    }
 
+        // Update the state with the new dataToSend
+        setDataToSend(updatedDataToSend);
+
+        // Call UpdateBridge with the updated dataToSend
+        UpdateBridge(updatedDataToSend);
+    }
 
 
     const handleChangeWebhook = (value) => {
@@ -228,8 +187,10 @@ const DropdownMenu = ({ params, data, embed }) => {
 
 
     const handleResponseChange = (key, webhook, headers) => {
+        let updatedDataToSend = {}; // Temporary object to hold the updated dataToSend
+
         if (key === "default") {
-            setDataToSend(prevDataToSend => ({
+            updatedDataToSend = prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
@@ -237,10 +198,9 @@ const DropdownMenu = ({ params, data, embed }) => {
                     webhook: "", // Set webhook to an empty string for default option
                     headers: {}
                 }
-            }));
-        }
-        if (key === 'RTLayer') {
-            setDataToSend(prevDataToSend => ({
+            });
+        } else if (key === 'RTLayer') {
+            updatedDataToSend = prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
@@ -248,10 +208,9 @@ const DropdownMenu = ({ params, data, embed }) => {
                     webhook: "", // Set webhook to an empty string for RTLayer option
                     headers: {}
                 }
-            }));
-        }
-        if (key === 'custom') {
-            setDataToSend(prevDataToSend => ({
+            });
+        } else if (key === 'custom') {
+            updatedDataToSend = prevDataToSend => ({
                 ...prevDataToSend,
                 configuration: {
                     ...prevDataToSend.configuration,
@@ -259,53 +218,57 @@ const DropdownMenu = ({ params, data, embed }) => {
                     webhook: webhook, // Set webhook to the valid input
                     headers: headers // Set headers to the parsed JSON
                 }
-            }));
+            });
         }
+
+        // Update dataToSend state
+        setDataToSend(updatedDataToSend);
+
+        // Call UpdateBridge with the updated dataToSend
+        // Since updatedDataToSend is a function, we need to pass the current state to get the updated state
+        UpdateBridge(updatedDataToSend(dataToSend));
     };
 
 
-    const handleInputChange = (e, key) => {
-
-        let newValue;
-        // If the field is a checkbox or a boolean, use the checked property of the event target
-        if (modelInfoData[key]?.field === "checkbox" || modelInfoData[key]?.field === "boolean") {
-            if (key === "response_format") {
-                if (e.target.checked) { newValue = { "type": "json_object" } }
-                else { newValue = { "type": "text" } }  // Adjust value accordingly
-            } else {
-                newValue = e.target.checked; // Use checked for checkboxes
-            }
-        }
-
-        // Otherwise, use the value property
-        else {
-            newValue = e.target.value;
-        }
-        // Create a new modelInfoData object with the updated value
+    // Adjusted handleInputChange to update state on change but not call UpdateBridge for sliders
+    const handleInputChange = (e, key, isSlider = false) => {
+        let newValue = e.target.value;
+        // Update the state immediately for all inputs, including sliders
         const updatedModelInfo = {
             ...modelInfoData,
             [key]: {
                 ...modelInfoData[key],
-                default: newValue,
+                default: isSlider ? Number(newValue) : newValue, // Ensure numbers are handled correctly for sliders
             },
         };
-        // Update the dataToSend object with the new value
-        setDataToSend(prevDataToSend => ({
-            ...prevDataToSend,
-            configuration: {
-                ...prevDataToSend.configuration,
-                [key]: modelInfoData[key]?.field === "number" || modelInfoData[key]?.field === "slider" ? Number(newValue) : modelInfoData[key]?.field === "json_object" ? "" : newValue
-            }
-        }));
-        // Update the modelInfoData state with the new object
         setModelInfoData(updatedModelInfo);
 
+        // Prepare the updated dataToSend object without calling UpdateBridge for sliders
+        const updatedDataToSend = {
+            ...dataToSend,
+            configuration: {
+                ...dataToSend.configuration,
+                [key]: isSlider ? Number(newValue) : newValue,
+            }
+        };
+        setDataToSend(updatedDataToSend);
+
+        // For non-slider inputs, call UpdateBridge immediately
+        if (!isSlider) {
+            UpdateBridge(updatedDataToSend);
+        }
     };
+
+    // New method to handle onBlur for sliders, calling UpdateBridge
+    const handleSliderStop = (key) => {
+        // Call UpdateBridge with the current dataToSend state
+        UpdateBridge(dataToSend);
+    };
+
 
     const toggleAccordion = () => {
         setToggle(!toggle)
     }
-
     /**
      * Handle changes to the input fields in the configuration section of the dropdown menu
      * 
@@ -332,77 +295,55 @@ const DropdownMenu = ({ params, data, embed }) => {
         // Update the dataToSend state with the new prompt string
     };
 
-    /**
-     * Save the data to the dataToSend state
-     * 
-     * @param {string} value The value of the input field
-     * @param {string} key The key of the dataToSend object to update
-     */
+
     const SaveData = (value, key) => {
         const promptString = { "role": key, "content": value }; // The prompt string to add or update
 
         if (key === "input" || key === "prompt") { // If the key is input or prompt, update the configuration.input or configuration.prompt field
-            setDataToSend(prevDataToSend => ({
-                ...prevDataToSend,
+            const updatedDataToSend = {
+                ...dataToSend,
                 configuration: {
-                    ...prevDataToSend.configuration,
+                    ...dataToSend.configuration,
                     [key]: value // Update the field with the new value
                 }
-            }));
+            };
+            setDataToSend(updatedDataToSend);
+            UpdateBridge(updatedDataToSend); // Send the updated dataToSend to UpdateBridge
         }
         else if (key === "apikey") { // If the key is apikey, update the apikey field
-            setDataToSend(prevDataToSend => ({
-                ...prevDataToSend,
+            const updatedDataToSend = {
+                ...dataToSend,
                 [key]: value // Update the field with the new value
-            }));
+            };
+            setDataToSend(updatedDataToSend);
+            UpdateBridge(updatedDataToSend); // Send the updated dataToSend to UpdateBridge
         }
         else { // If the key is not input, prompt, or apikey, update the prompt array
-
             // Check if the key already exists in the prompt array
-            const keyIndex = dataToSend?.configuration?.prompt?.findIndex(item => (item).role === key);
+            const keyIndex = dataToSend?.configuration?.prompt?.findIndex(item => item.role === key);
 
+            let updatedDataToSend;
             if (keyIndex !== -1) { // If the key already exists, update the value
-                setDataToSend(prevDataToSend => ({
-                    ...prevDataToSend,
+                updatedDataToSend = {
+                    ...dataToSend,
                     configuration: {
-                        ...prevDataToSend.configuration,
-                        prompt: prevDataToSend.configuration.prompt.map((item, index) => index === keyIndex ? promptString : item)
+                        ...dataToSend.configuration,
+                        prompt: dataToSend.configuration.prompt.map((item, index) => index === keyIndex ? promptString : item)
                     }
-                }));
+                };
             } else { // If the key does not exist, add it to the prompt array
-                setDataToSend(prevDataToSend => ({
-                    ...prevDataToSend,
+                updatedDataToSend = {
+                    ...dataToSend,
                     configuration: {
-                        ...prevDataToSend.configuration,
-                        prompt: [...prevDataToSend.configuration.prompt, promptString]
+                        ...dataToSend.configuration,
+                        prompt: [...dataToSend.configuration.prompt, promptString]
                     }
-                }));
+                };
             }
+            setDataToSend(updatedDataToSend);
+            UpdateBridge(updatedDataToSend); // Send the updated dataToSend to UpdateBridge
         }
     };
-
-
-
-
-    const handleModalClose = () => {
-        setModalOpen(false); // Close the modal
-
-        try {
-            const parsedJson = JSON.parse(tempJsonString); // Parse the JSON string
-            setDataToSend(prevDataToSend => ({ // Update the dataToSend state
-                ...prevDataToSend, // Keep the previous data
-                configuration: { // Add the new data
-                    ...prevDataToSend.configuration, // Keep the previous configuration
-                    "tools": parsedJson, // Set the "tools" property to the parsed JSON
-                },
-            }));
-        } catch (error) {
-            console.error("Error parsing JSON:", error); // Log the error
-        }
-    };
-    // };
-
-
 
 
     useEffect(() => {
@@ -436,25 +377,18 @@ const DropdownMenu = ({ params, data, embed }) => {
             resizer.removeEventListener('mousedown', mouseDownHandler);
         };
     }, []);
-    const UpdateBridge = useCallback(async () => {
-        // Assuming UpdateBridge uses params.id, dataToSend, and apiKey from state or props
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: dataToSend.configuration, service: dataToSend.service, apikey: apiKey } }));
-    }, [params.id, dataToSend, apiKey, dispatch]); // Add all dependencies here
+    const UpdateBridge = (currentDataToSend) => {
+        // Use currentDataToSend instead of the state directly
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: currentDataToSend.configuration, service: currentDataToSend.service, apikey: currentDataToSend.apikey } }));
+    }
 
-
-    useEffect(() => {
-        // Check if dataToSend is not an empty object and apiKey is not an empty string
-        if (Object.keys(dataToSend).length > 0 && apiKey) {
-            UpdateBridge();
-        }
-    }, [dataToSend, apiKey]);
 
 
     return (
         <>
             <div className="h-[90vh]">
                 <div className=" w-screen flex flex-col   border border-gray-300 md:flex-row">
-                    <div className="w-1/3 overflow-auto border-r border-gray-300 bg-gray-100  configurationPage">
+                    <div className="w-1/3 overflow-auto border-r border-gray-300 bg-gray-100 min-w-[350px] configurationPage">
                         <div className="drawer-content float-right ">
                             {/* Page content here */}
                             <label htmlFor="my-drawer-4" className="drawer-button cursor-pointer ">
@@ -582,15 +516,15 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                 </div>
                                                 {value.field === "slider" ?
                                                     <input
-                                                        id={key} // Add this id attribute
                                                         type="range"
                                                         min={value?.min}
                                                         max={value?.max}
                                                         step={value?.step}
                                                         value={value?.default}
-                                                        onChange={(e) => handleInputChange(e, key)}
-                                                        className="range range-xs  w-full"
-                                                        name={key} // Add name attribute
+                                                        onChange={(e) => handleInputChange(e, key, true)} // Pass true to indicate it's a slider
+                                                        onBlur={() => handleSliderStop(key)} // Call UpdateBridge on blur
+                                                        className="range range-xs w-full"
+                                                        name={key}
                                                     />
                                                     : value.field === 'text' ?
                                                         <input
@@ -642,7 +576,7 @@ const DropdownMenu = ({ params, data, embed }) => {
 
                     </div>
                     <div className="resizer w-1 bg-base-500 cursor-col-resize hover:bg-primary" ></div>
-                    <div className="w-2/3 flex-1 chatPage">
+                    <div className="w-2/3 flex-1 chatPage min-w-[450px]">
                         <div className="p-4">
                             <Chat dataToSend={dataToSend} params={params} />
                         </div>
