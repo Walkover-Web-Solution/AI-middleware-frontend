@@ -416,7 +416,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                         </div>
                         <div className="p-4 h-[93vh]" >
                             <div className="">
-                                <div className="">
+                                <div className="pb-5">
                                     {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
                                         <>
                                             {key !== "rawData" && key !== "stream" && (
@@ -435,7 +435,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                         </>
                                     ))}
 
-                                    <div>
+                                    {modelInfoData?.tools && <div>
                                         <div className="form-control w-full">
                                             <div className="label flex-col mt-2 items-start">
                                                 <div className="flex flex-wrap gap-4">
@@ -465,7 +465,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                                 <button onClick={() => openViasocket()} className="btn btn-outline btn-sm mt-4"><Plus size={16} /> Add new Function</button>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div>}
 
 
 
