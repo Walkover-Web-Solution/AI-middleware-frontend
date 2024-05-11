@@ -15,34 +15,31 @@ function page({ params }) {
   const pathName = usePathname()
   const dispatch = useDispatch()
 
-  const { historyData, thread, } = useCustomSelector(
-    (state) => ({
-      historyData: state?.historyReducer?.history || [],
-      thread: state?.historyReducer?.thread,
-    })
-  )
+  const { historyData, thread } = useCustomSelector(state => ({
+    historyData: state?.historyReducer?.history || [],
+    thread: state?.historyReducer?.thread,
+  }))
 
   const [selectedThread, setSelectedThread] = useState("")
 
+  // Fetch history data only once or when params.id changes
   useEffect(() => {
-    // Extract thread_id from the URL query parameters
+    dispatch(getHistoryAction(params.id))
+  }, [params.id])
+
+  // Fetch thread data only when thread_id changes
+  useEffect(() => {
     const thread_id = search.get('thread_id');
     if (thread_id) {
       setSelectedThread(thread_id);
       dispatch(getThread(thread_id, params.id));
     } else if (historyData.length > 0) {
-      // Automatically select the first history id if no query params are present
       const firstThreadId = historyData[0].thread_id;
       setSelectedThread(firstThreadId);
       dispatch(getThread(firstThreadId, params.id));
-      // Optionally, update the URL with the first thread_id
       router.push(`${pathName}?thread_id=${firstThreadId}`, undefined, { shallow: true });
     }
-  }, [search, historyData]); // Add historyData as a dependency
-
-  useEffect(() => {
-    dispatch(getHistoryAction(params.id))
-  }, [historyData])
+  }, [search.get('thread_id'), params.id])
 
   useEffect(() => {
     dispatch(clearThreadData())
@@ -50,13 +47,11 @@ function page({ params }) {
 
   const threadHandler = (thread_id) => {
     setSelectedThread(thread_id);
-    // Update the URL without navigating away from the page
     router.push(`${pathName}?thread_id=${thread_id}`, undefined, { shallow: true });
   };
 
   const dateAndTimeHandler = (created_at) => {
     const date = new Date(created_at);
-
     const options = {
       year: "numeric",
       month: "numeric",
@@ -65,12 +60,9 @@ function page({ params }) {
       minute: "2-digit",
       second: "2-digit",
     };
-
-    // Check if the date is valid
     if (isNaN(date.getTime())) {
       return "Invalid Date";
     }
-
     return date.toLocaleDateString("en-US", options);
   }
 
