@@ -41,9 +41,6 @@ function Chat({ dataToSend, params }) {
     }, {}) : {};
   }, [bridge]);
 
-  console.log(defaultsMap);
-
-console.log(defaultsMap)
   // Update localDataToSend configuration
   const updateLocalDataToSend = useCallback(updateFn => {
     setLocalDataToSend(prevDataToSend => ({
@@ -185,8 +182,6 @@ console.log(defaultsMap)
                 <time className="text-xs opacity-50 pl-2">{message.time}</time>
               </div>
               <div className="chat-bubble"> <ReactMarkdown>{message.content}</ReactMarkdown></div>
-             
-
             </div>
           ))}
         </div>
