@@ -45,6 +45,7 @@ function Chat({ dataToSend, params }) {
   const updateLocalDataToSend = useCallback(updateFn => {
     setLocalDataToSend(prevDataToSend => ({
       ...prevDataToSend,
+      bridge_id: params?.id,
       configuration: {
         ...prevDataToSend.configuration,
         ...updateFn(prevDataToSend.configuration),
