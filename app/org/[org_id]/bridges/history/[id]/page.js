@@ -7,6 +7,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import ReactMarkdown from 'react-markdown';
 
 function page({ params }) {
 
@@ -87,7 +88,9 @@ function page({ params }) {
                           {/* render the timestamp of the message */}
                           <time className="text-xs opacity-50">{dateAndTimeHandler(item.createdAt)}</time>
                         </div>
-                        <div className="chat-bubble">{item.content}</div>
+                        <div className="chat-bubble">
+                        <ReactMarkdown>{item.content}</ReactMarkdown>
+                          </div>
                       </div>
                     </div>
                   ))}

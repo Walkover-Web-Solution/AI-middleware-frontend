@@ -1,12 +1,15 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { dryRun, updateBridge } from "@/api";
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
 import _ from "lodash";
 import { toast } from "react-toastify";
 import { updateBridgeAction } from "@/store/action/bridgeAction";
+import ReactMarkdown from 'react-markdown';
+import { useCustomSelector } from "@/customSelector/customSelector";
 
-function Chat({ dataToSend }) {
+
+function Chat({ dataToSend, params }) {
 
   // State variables
   const [messages, setMessages] = useState([]);
@@ -15,11 +18,28 @@ function Chat({ dataToSend }) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [conversation, setConversation] = useState([]);
-
   // Update localDataToSend when dataToSend changes
   useEffect(() => {
     setLocalDataToSend(dataToSend);
   }, [dataToSend]);
+
+  const { bridge } = useCustomSelector((state) => ({
+    bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+  }))
+
+
+  const defaultsMap = useMemo(() => {
+    return bridge ? Object.entries(bridge?.configuration).reduce((acc, [key, value]) => {
+      const isToolsEmptyArray = key === 'tools' && Array.isArray(value.default) && value.default.length === 0;
+      if (!isToolsEmptyArray && value.default !== undefined) {
+        acc[key] = value.default;
+      }
+      if (!acc.hasOwnProperty('tools') || acc?.tools?.length === 0) {
+        delete acc['tool_choice'];
+      }
+      return acc;
+    }, {}) : {};
+  }, [bridge]);
 
   // Update localDataToSend configuration
   const updateLocalDataToSend = useCallback(updateFn => {
@@ -63,6 +83,7 @@ function Chat({ dataToSend }) {
           configuration: {
             ...localDataToSend.configuration,
             conversation: conversation,
+            ...defaultsMap,
             user: data,
           },
         });
@@ -160,7 +181,7 @@ function Chat({ dataToSend }) {
                 {message.sender}
                 <time className="text-xs opacity-50 pl-2">{message.time}</time>
               </div>
-              <div className="chat-bubble">{message.content}</div>
+              <div className="chat-bubble"> <ReactMarkdown>{message.content}</ReactMarkdown></div>
             </div>
           ))}
         </div>
