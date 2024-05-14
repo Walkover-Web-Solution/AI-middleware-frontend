@@ -20,7 +20,15 @@ export const getSingleModels = async () => {
   }
 }
 
-
+export const getSingleMessage = async ({bridge_id, message_id}) => {
+  try {
+    const messageData = await axios.get(`${URL}/api/v1/config/systemprompt/gethistory/${bridge_id}/${message_id}`)
+    return messageData.data.message
+  } catch (error) {
+    console.error(error)
+    throw new Error(error)
+  }
+}
 
 export const getSingleBridge = async (bridgeId) => {
   try {
