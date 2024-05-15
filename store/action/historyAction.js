@@ -6,7 +6,7 @@ import { getHistory, getSingleThreadData } from "@/api";
 
 export const getHistoryAction = (id) => async (dispatch, getState) => {
     try {
-      const data = await getHistory(id);
+      const data = await getHistory(id, 1 , 10);
       dispatch(fetchAllHistoryReducer(data.data));
     } catch (error) {
       console.error(error);

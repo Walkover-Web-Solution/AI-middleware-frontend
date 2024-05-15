@@ -150,16 +150,22 @@ function Home({ params }) {
                             {item['name']}
                           </h1>
                           <p className="text-xs w-full flex items-center gap-2 text-gray-600 line-clamp-5 " >
-                            {item?.['configuration']?.['prompt'] && <>
-                              {Array.isArray(item['configuration']['prompt']) ? item['configuration']['prompt'].map((promptItem, index) => (
-                                <div key={index}>
-                                  <p>Role: {promptItem.role}</p>
-                                  <p>Content: {promptItem.content}</p>
-                                </div>
-                              ))
-                                : <p>Prompt : {item['configuration']['prompt']}</p>
-                              }
-                            </>}
+                            {item?.['configuration']?.['prompt'] && (
+                              <>
+                                {Array.isArray(item['configuration']['prompt']) ? (
+                                  item['configuration']['prompt'].map((promptItem, index) => (
+                                    <div key={index}>
+                                      <p>Role: {promptItem.role}</p>
+                                      <p>Content: {promptItem.content}</p>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <>
+                                    <p>{item['configuration']['prompt'] || item['configuration']['input']}</p>
+                                  </>
+                                )}
+                              </>
+                            )}
                             {item?.['configuration']?.['input'] && <p className="text-xs">Input : {item['configuration']['input']}</p>}
                           </p>
                         </div>

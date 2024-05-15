@@ -64,7 +64,7 @@ export const createBridge = async (dataToSend) => {
 
 export const getAllBridges = async () => {
   try {
-    const data = await axios.get(`${URL}/api/v1/config/getbridges/all`)
+        const data = await axios.get(`${URL}/api/v1/config/getbridges/all`)
     return data;
   } catch (error) {
     console.error(error)
@@ -87,7 +87,16 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
 
 
 
-export const getSingleThreadData = async (threadId, bridgeId) => {
+// export const getSingleThreadData = async (threadId, bridgeId) => {
+//   try {
+//     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}`)
+//     return getSingleThreadData
+//   } catch (error) {
+//     console.error(error)
+//   }
+// }
+
+export const getSingleThreadData = async (threadId, bridgeId, pageNo, limit) => {
   try {
     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}`)
     return getSingleThreadData
@@ -97,9 +106,9 @@ export const getSingleThreadData = async (threadId, bridgeId) => {
 }
 
 
-export const getHistory = async (bridgeId) => {
+export const getHistory = async (bridgeId, pageNo, limit) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`)
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}?pageNo=${pageNo}&limit=${limit}`)
     return getSingleThreadData
   } catch (error) {
     console.error(error)

@@ -24,7 +24,7 @@ export const bridgeReducer = createSlice({
       const responseFormat = handleResponseFormat(action.payload.bridges)
       const obj1 = action.payload.bridges  // obj1
       const model = action.payload.bridges.configuration.model.default
-      const service = action.payload.bridges.service
+      const service = action.payload.bridges.service.toLowerCase()
       const obj2 = modelInfo[service][model]  // obj2
       const response = updatedData(obj1, obj2, action.payload.bridges.type)
       state.allBridgesMap = { ...state.allBridgesMap, [action.payload.bridges._id]: { ...response, integrationData: action.payload.integrationData, responseFormat: responseFormat } }
@@ -32,7 +32,7 @@ export const bridgeReducer = createSlice({
     },
 
     fetchAllBridgeReducer: (state, action) => {
-      state.org = { ...state.org, [action.payload.orgId]: [...action.payload.bridges] }
+          state.org = { ...state.org, [action.payload.orgId]: [...action.payload.bridges] }
       state.loading = false;
     },
 
