@@ -9,9 +9,10 @@ function CreateNewBridge({ orgid }) {
     const [selectedService, setSelectedService] = useState('');
     const [selectedModel, setSelectedModel] = useState("");
     const [seletedType, setSelectedType] = useState("");
+    const [bridgeType, setBridgeType] = useState("api");
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch()
-    const route = useRouter()
+    const route = useRouter();
 
     const handleService = (e) => {
         setSelectedService(e.target.value)
@@ -32,6 +33,7 @@ function CreateNewBridge({ orgid }) {
                     "type": seletedType
                 },
                 "service": selectedService,
+                "bridgeType": bridgeType,
             }
             dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
 
@@ -99,6 +101,22 @@ function CreateNewBridge({ orgid }) {
                                 {!services?.[selectedService] && <option disabled key="0">Please select a service first !</option>}
                             </select>
                         </label>
+                        <div className="items-center justify-start mt-2">
+                            <div className="label">
+                                <span className="label-text">Used as</span>
+                            </div>
+                            <div className="flex items-center gap-6">
+                                <label className="flex items-center justify-center gap-2">
+                                    <input type="radio" name="radio-1" className="radio" value="api" checked={bridgeType === "api"} onChange={() => setBridgeType('api')} />
+                                    API
+                                </label>
+                                <label className="flex items-center justify-center gap-2">
+                                    <input type="radio" name="radio-1" className="radio" value="chatbot" checked={bridgeType === "chatbot"} onChange={() => setBridgeType('chatbot')} />
+                                    ChatBot
+                                </label>
+                            </div>
+                        </div>
+
                     </div>
                     <div className="modal-action">
                         <form method="dialog">
