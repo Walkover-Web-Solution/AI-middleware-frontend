@@ -1,9 +1,10 @@
 "use client";
-import { store } from "@/store/store";
+import { persistor, store } from "@/store/store";
 import React from "react";
 import { Provider } from "react-redux";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { PersistGate } from "redux-persist/integration/react";
 
 export const metadata = {
   title: "Login | Student",
@@ -21,12 +22,14 @@ const Wrapper = ({ children }) => {
   return (
     <>
       <Provider store={store}>
-        <div className="w-full h-svh relative ">
-          {/* All the child components */}
-          {children}
-          {/* Notification toast container */}
-          <ToastContainer position="bottom-left" />
-        </div>
+        <PersistGate loading={null} persistor={persistor}>
+          <div className="w-full h-svh relative ">
+            {/* All the child components */}
+            {children}
+            {/* Notification toast container */}
+            <ToastContainer position="bottom-left" />
+          </div>
+        </PersistGate>
       </Provider>
     </>
   );

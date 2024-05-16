@@ -21,13 +21,11 @@ export const bridgeReducer = createSlice({
       state.loading = false;
     },
     fetchSingleBridgeReducer: (state, action) => {
-      const responseFormat = handleResponseFormat(action.payload.bridges)
-      const obj1 = action.payload.bridges  // obj1
-      const model = action.payload.bridges.configuration.model.default
-      const service = action.payload.bridges.service
-      const obj2 = modelInfo[service][model]  // obj2
-      const response = updatedData(obj1, obj2, action.payload.bridges.type)
-      state.allBridgesMap = { ...state.allBridgesMap, [action.payload.bridges._id]: { ...response, integrationData: action.payload.integrationData, responseFormat: responseFormat } }
+      const { bridges, integrationData } = action.payload;
+      const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;
+      const obj2 = modelInfo[service][modelDefault];
+      const response = updatedData(bridges, obj2, type);
+      state.allBridgesMap[_id] = { ...state.allBridgesMap[_id], ...response, integrationData, responseFormat: handleResponseFormat(bridges) };
       state.loading = false;
     },
 
@@ -40,22 +38,21 @@ export const bridgeReducer = createSlice({
       state.org[action.payload.orgId].push(action.payload.data.data.bridge)
     },
     updateBridgeReducer: (state, action) => {
-      const responseFormat = handleResponseFormat(action.payload.bridges)
-      const obj1 = action.payload.bridges  // obj1
-      const model = action.payload.bridges.configuration.model.default
-      const service = action.payload.bridges.service
-      const obj2 = modelInfo[service][model]  // obj2
-      const response = updatedData(obj1, obj2, action.payload.bridges.type)
-      state.allBridgesMap = { ...state.allBridgesMap, [action.payload.bridges._id]: { ...response, integrationData: state.allBridgesMap[action.payload.bridges._id].integrationData, responseFormat: responseFormat } }
+      const { bridges } = action.payload;
+      const { _id, configuration, service, type } = bridges;
+      const modelDefault = configuration.model.default;
+      const obj2 = modelInfo[service][modelDefault];
+      const response = updatedData(bridges, obj2, type);
+      state.allBridgesMap[_id] = {
+        ...state.allBridgesMap[_id],
+        ...response,
+        responseFormat: handleResponseFormat(bridges)
+      };
     },
     deleteBridgeReducer: (state, action) => {
-      const bridgeId = action.payload.bridgeId;
-      const orgId = action.payload.orgId;
-      const BridgeClone = cloneDeep(state.allBridgesMap);
-      if (BridgeClone[bridgeId]) delete BridgeClone[bridgeId]
-      const updatedBridges = state.org[orgId].filter(bridge => bridge._id !== bridgeId);
-      state.org[orgId] = updatedBridges
-      state.allBridgesMap = BridgeClone;
+      const { bridgeId, orgId } = action.payload;
+      delete state.allBridgesMap[bridgeId];
+      state.org[orgId] = state.org[orgId].filter(bridge => bridge._id !== bridgeId);
     },
     integrationReducer: (state, action) => {
       const { intregration, id } = action.payload;

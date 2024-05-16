@@ -34,24 +34,29 @@ const Page = ({ params }) => {
     }
   }, [params.id, embedToken]);
 
-  window.addEventListener("message", (e) => {
-    if (e.data.webhookurl) {
-      dispatch(integrationAction(embedToken, params.id))
-      if (e.data.action === "published" || e.data.action === "created" && e.data.description.length > 0) {
-        const dataFromEmbed = {
-          "url": e.data.webhookurl,
-          "payload": e.data.payload,
-          "desc": e.data.description,
-          "id": e.data.id,
-          "status": e.data.action
-        }
+  useEffect(() => {
+    function handleMessage(e) {
+      if (e.data.webhookurl) {
+        dispatch(integrationAction(embedToken, params.id))
+        if (e.data.action === "published" || e.data.action === "created" && e.data.description.length > 0) {
+          const dataFromEmbed = {
+            "url": e.data.webhookurl,
+            "payload": e.data.payload,
+            "desc": e.data.description,
+            "id": e.data.id,
+            "status": e.data.action
+          }
 
-        dispatch(createApiAction(params.id, dataFromEmbed))
+          dispatch(createApiAction(params.id, dataFromEmbed))
+        }
       }
     }
+    window.addEventListener("message", handleMessage);
 
-  });
-
+    return () => {
+      window.removeEventListener("message", handleMessage)
+    }
+  }, []);
 
   return (
 

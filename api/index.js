@@ -20,7 +20,7 @@ export const getSingleModels = async () => {
   }
 }
 
-export const getSingleMessage = async ({bridge_id, message_id}) => {
+export const getSingleMessage = async ({ bridge_id, message_id }) => {
   try {
     const messageData = await axios.get(`${URL}/api/v1/config/systemprompt/gethistory/${bridge_id}/${message_id}`)
     return messageData.data.message
@@ -271,6 +271,17 @@ export const integration = async (embed_token) => {
 export const createapi = async (bridge_id, dataFromEmbed) => {
   try {
     await axios.post(`${URL}/api/v1/config/createapi/${bridge_id}`, dataFromEmbed);
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+
+
+export const getChatBotOfBridge = async (bridge_id, orgId) => {
+  try {
+    await axios.get(`${URL}/chatbot/${orgId}/${bridge_id}`);
   } catch (error) {
     console.error(error);
     return error;

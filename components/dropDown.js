@@ -61,7 +61,9 @@ const DropdownMenu = ({ params, data, embed }) => {
                     // "conversation": []
                 },
                 "service": data?.service?.toLowerCase(),
-                "apikey": data?.apikey
+                "apikey": data?.apikey,
+                "bridgeType": data?.bridgeType,
+                "slugName": data?.slugName
             })
         else if (foundKey === "embedding")
             setDataToSend({
@@ -72,7 +74,9 @@ const DropdownMenu = ({ params, data, embed }) => {
 
                 },
                 "service": data?.service?.toLowerCase(),
-                "apikey": data?.apikey
+                "apikey": data?.apikey,
+                "bridgeType": data?.bridgeType,
+                "slugName": data?.slugName
             })
 
         else {
@@ -85,7 +89,9 @@ const DropdownMenu = ({ params, data, embed }) => {
 
                     },
                     'service': data?.service?.toLowerCase(),
-                    "apikey": data?.apikey
+                    "apikey": data?.apikey,
+                    "bridgeType": data?.bridgeType,
+                    "slugName": data?.slugName
                 }
             )
         }
@@ -260,6 +266,12 @@ const DropdownMenu = ({ params, data, embed }) => {
                 [key]: newCheckedValue ? 'chatbot' : 'api'
             };
         }
+        if (key === "slugName") {
+            updatedDataToSend = {
+                ...dataToSend,
+                [key]: newValue
+            };
+        }
         // If the key is 'responseFormat', check the value and add the appropriate type
         if (key === 'response_format') {
             const typeValue = newCheckedValue === true ? 'json_object' : newCheckedValue === false ? 'text' : null;
@@ -423,7 +435,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                     <span className="label-text">API</span>
 
                                 </div>
-                                <input type="checkbox" key={data?.bridgeType} className="toggle toggle-info" defaultChecked={data?.bridgeType === "chatbot" ? true : false} onChange={(e) => handleInputChange(e, "bridgeType")} />
+                                <input type="checkbox" key={data?.bridgeType} className="toggle " defaultChecked={data?.bridgeType === "chatbot" ? true : false} onChange={(e) => handleInputChange(e, "bridgeType")} />
                                 <div className="label">
                                     <span className="label-text">ChatBot</span>
 
@@ -434,7 +446,9 @@ const DropdownMenu = ({ params, data, embed }) => {
                                     <span className="label-text">Enter Slugname</span>
 
                                 </div>
-                                <input type="text" placeholder="Type here" className="input input-bordered w-full  max-w-xs  input-sm" />
+                                <input type="text" key={data?.slugName} placeholder="Type here" className="input input-bordered w-full  max-w-xs  input-sm" defaultValue={data?.slugName} onBlur={(e) => {
+                                    handleInputChange(e, "slugName")
+                                }} />
                                 <div className="label">
                                     <span className="label-text-alt text-gray-500">Slugname must be unique</span>
                                     {/* <span className="label-text-alt">It can only contain letters, numbers, and hyphens</span> */}

@@ -1,16 +1,13 @@
 "use client"
 
-import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useDispatch } from 'react-redux';
-import { userDetails } from '@/store/action/userDetailsAction';
+import { useEffect, useRef, useState } from 'react';
+
 import { logoutUserFromMsg91, switchOrg } from '@/api';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { Box, Building2, ChevronDown, FileSliders, History, Home, KeyRound, LogOut, Mail, Rss, Settings2 } from 'lucide-react';
-import { getAllBridgesAction, getSingleBridgesAction } from '@/store/action/bridgeAction';
-
-
+import { Building2, ChevronDown, FileSliders, History, Home, KeyRound, LogOut, Mail, Rss, Settings2 } from 'lucide-react';
+import { useDispatch } from 'react-redux';
 
 function Navbar() {
   const router = useRouter();
@@ -41,14 +38,7 @@ function Navbar() {
     (item) => item.name.toLowerCase().includes(bridgeSearchQuery.toLowerCase())
   );
 
-  useEffect(() => {
-    dispatch(userDetails());
-    dispatch(getSingleBridgesAction(path[5]))
-  }, []);
 
-  useLayoutEffect(() => {
-    dispatch(getAllBridgesAction(path[2]))
-  }, [path[2]]);
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
