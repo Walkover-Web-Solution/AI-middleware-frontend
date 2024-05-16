@@ -1,5 +1,6 @@
-import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge } from "@/api";
+import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge, getAllResponseTypesApi } from "@/api";
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer, isPending, isError } from "../reducer/bridgeReducer";
+import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
@@ -30,6 +31,17 @@ export const getAllBridgesAction = (orgId) => async (dispatch, getState) => {
     dispatch(isPending())
     const response = await getAllBridges();
     dispatch(fetchAllBridgeReducer({ bridges: response.data.bridges, orgId }));
+  } catch (error) {
+    dispatch(isError())
+    console.error(error);
+  }
+};
+
+export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) => {
+  try {
+    dispatch(isPending())
+    const response = await getAllResponseTypesApi(orgId);
+    dispatch(getAllResponseTypeSuccess({ responseTypes: response.data.chatBot?.responseTypes, orgId: response.data?.chatBot?.orgId }));
   } catch (error) {
     dispatch(isError())
     console.error(error);

@@ -72,6 +72,16 @@ export const getAllBridges = async () => {
   }
 }
 
+export const getAllResponseTypesApi = async (orgId) => {
+  try {
+    const data = await axios.get(`${URL}/chatbot/${orgId}/getAllResponse`)
+    return data;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error)
+  }
+}
+
 
 
 export const updateBridge = async ({ bridgeId, dataToSend }) => {

@@ -10,6 +10,7 @@ import orgReducer from "./reducer/orgReducer";
 import storage from 'redux-persist/lib/storage'
 import persistReducer from "redux-persist/es/persistReducer";
 import persistStore from "redux-persist/es/persistStore";
+import responseTypeReducer from "./reducer/responseTypeReducer";
 
 
 const persistConfig = { key: 'root', storage }
@@ -20,7 +21,8 @@ const rootReducer = combineReducers({
     dryRunReducer,
     userDetailsReducer,
     authDataReducer,
-    orgReducer
+    orgReducer,
+    responseTypeReducer
 })
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 

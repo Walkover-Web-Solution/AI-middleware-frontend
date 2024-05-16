@@ -1,6 +1,6 @@
 "use client"
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { deleteBridgeAction, getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
+import { deleteBridgeAction, getAllBridgesAction, getAllResponseTypesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify'
@@ -71,7 +71,8 @@ function Home({ params }) {
 
 
   useEffect(() => {
-    dispatch(getAllBridgesAction(params.org_id))
+    dispatch(getAllBridgesAction(params.org_id));
+    dispatch(getAllResponseTypesAction(params.org_id));
   }, [params.org_id]);
 
   // const copyBridgeIdToClipboard = (e, id) => {
