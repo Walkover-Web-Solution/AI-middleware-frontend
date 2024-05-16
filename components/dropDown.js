@@ -7,6 +7,7 @@ import Chat from './chat';
 import { ChevronDown, ChevronUp, CircleAlert, Plus } from 'lucide-react';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
+import { useCustomSelector } from '@/customSelector/customSelector';
 
 const DropdownMenu = ({ params, data, embed }) => {
 
@@ -21,7 +22,10 @@ const DropdownMenu = ({ params, data, embed }) => {
     const [webhook, setWebhook] = useState(data?.responseFormat?.webhook || "");
     const [headers, setHeaders] = useState(data?.responseFormat?.headers || {});
     const [errors, setErrors] = useState({ webhook: "", headers: "" });
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
+    const { allResponseTypes } = useCustomSelector((state) => ({
+        allResponseTypes: state.responseTypeReducer?.responses?.[params.org_id]
+    }));
 
     if (data?.configuration) {
         if (data?.configuration?.RTLayer === true) {
@@ -505,6 +509,20 @@ const DropdownMenu = ({ params, data, embed }) => {
                                         </div>
                                     </div>}
                                 </div>
+                                <div>
+                                    <div className="form-control">
+                                        <label className='label-text'>Choose Response Type</label>
+                                        {Object.keys(allResponseTypes || {})?.map((responseKey) => {
+                                            return (
+                                                <label className="label cursor-pointer" key={responseKey}>
+                                                    <span className="label-text">{allResponseTypes?.[responseKey]?.description}</span>
+                                                    <input type="checkbox" defaultChecked className="checkbox checkbox-primary" />
+                                                </label>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                                <div className="divider"></div>
                                 <label className="form-control w-full ">
                                     <div className="label">
                                         <span className="label-text">Service</span>
