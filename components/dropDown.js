@@ -235,6 +235,7 @@ const DropdownMenu = ({ params, data, embed }) => {
         if (e.target.type === 'number') {
             newValue = newValue.includes('.') ? parseFloat(newValue) : parseInt(newValue, 10);
         }
+
         // Update the state immediately for all inputs, including sliders
         const updatedModelInfo = {
             ...modelInfoData,
@@ -253,6 +254,12 @@ const DropdownMenu = ({ params, data, embed }) => {
                 [key]: isSlider ? Number(newValue) : newValue,
             }
         };
+        if (key === "bridgeType") {
+            updatedDataToSend = {
+                ...dataToSend,
+                [key]: newCheckedValue ? 'chatbot' : 'api'
+            };
+        }
         // If the key is 'responseFormat', check the value and add the appropriate type
         if (key === 'response_format') {
             const typeValue = newCheckedValue === true ? 'json_object' : newCheckedValue === false ? 'text' : null;
@@ -271,7 +278,6 @@ const DropdownMenu = ({ params, data, embed }) => {
         }
 
         setDataToSend(updatedDataToSend);
-
         // For non-slider inputs, call UpdateBridge immediately
         if (!isSlider) {
             UpdateBridge(updatedDataToSend);
@@ -397,7 +403,7 @@ const DropdownMenu = ({ params, data, embed }) => {
     }, []);
     const UpdateBridge = (currentDataToSend) => {
         // Use currentDataToSend instead of the state directly
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: currentDataToSend.configuration, service: currentDataToSend.service, apikey: currentDataToSend.apikey } }));
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
     }
 
     const responseOptions = [
@@ -412,6 +418,28 @@ const DropdownMenu = ({ params, data, embed }) => {
                 <div className=" w-screen flex flex-col   border border-gray-300 md:flex-row">
                     <div className="w-2/3 overflow-auto border-r border-gray-300 bg-gray-100 min-w-[350px] configurationPage">
                         <div className="p-4 h-[93vh]" >
+                            <label className='flex items-center justify-start gap-4'>
+                                <div className="label">
+                                    <span className="label-text">API</span>
+
+                                </div>
+                                <input type="checkbox" key={data?.bridgeType} className="toggle toggle-info" defaultChecked={data?.bridgeType === "chatbot" ? true : false} onChange={(e) => handleInputChange(e, "bridgeType")} />
+                                <div className="label">
+                                    <span className="label-text">ChatBot</span>
+
+                                </div>
+                            </label>
+                            <label className="form-control w-full max-w-xs">
+                                <div className="label">
+                                    <span className="label-text">Enter Slugname</span>
+
+                                </div>
+                                <input type="text" placeholder="Type here" className="input input-bordered w-full  max-w-xs  input-sm" />
+                                <div className="label">
+                                    <span className="label-text-alt text-gray-500">Slugname must be unique</span>
+                                    {/* <span className="label-text-alt">It can only contain letters, numbers, and hyphens</span> */}
+                                </div>
+                            </label>
                             <div className="">
                                 <div className="pb-5">
                                     {inputConfig && Object.entries(inputConfig).map(([key, value]) => (

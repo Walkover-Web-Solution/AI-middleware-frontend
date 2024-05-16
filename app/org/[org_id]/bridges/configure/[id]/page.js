@@ -8,8 +8,9 @@ import { useDispatch } from "react-redux"
 
 const Page = ({ params }) => {
   const dispatch = useDispatch()
-  const { bridge, integrationData } = useCustomSelector((state) => ({
+  const { bridge, integrationData, embedToken } = useCustomSelector((state) => ({
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+    embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
     integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData?.flows,
   }))
   useEffect(() => {
@@ -17,22 +18,25 @@ const Page = ({ params }) => {
   }, [params.id])
 
   useEffect(() => {
-    const fetchData = async () => {
-      const script = document.createElement("script");
-      script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
-      script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC
-      script.setAttribute("embedToken", bridge?.embed_token);
-      document.body.appendChild(script);
-    };
-    fetchData();
-    return () => {
-      document.body.removeChild(document.getElementById("viasocket-embed-main-script"));
-    };
-  }, [params.id, dispatch, bridge?.embed_token]);
+    if (embedToken) {
+      const fetchData = async () => {
+        const script = document.createElement("script");
+        script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
+        script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC
+        script.setAttribute("embedToken", embedToken);
+        document.body.appendChild(script);
+      };
+      fetchData();
+      // embedToken && fetchData();
+      return () => {
+        document.body.removeChild(document.getElementById("viasocket-embed-main-script"));
+      };
+    }
+  }, [params.id, embedToken]);
 
   window.addEventListener("message", (e) => {
     if (e.data.webhookurl) {
-      dispatch(integrationAction(bridge?.embed_token, params.id))
+      dispatch(integrationAction(embedToken, params.id))
       if (e.data.action === "published" || e.data.action === "created" && e.data.description.length > 0) {
         const dataFromEmbed = {
           "url": e.data.webhookurl,
