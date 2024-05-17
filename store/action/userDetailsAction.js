@@ -1,5 +1,5 @@
 
-import { userdetails } from "@/api";
+import { userdetails } from "@/config";
 import { fetchUserDetails } from "../reducer/userDetailsReducer";
 
 

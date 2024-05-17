@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {  setCurrentOrgIdAction } from '@/store/action/orgAction';
 import CreateOrg from '@/components/createNewOrg';
 import { useRouter } from 'next/navigation';
-import { switchOrg } from '@/api';
+import { switchOrg } from '@/config';
 import Protected from '@/components/protected';
 
 /**

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { fetchAllHistoryReducer, fetchThreadReducer } from "../reducer/historyReducer";
-import { getHistory, getSingleThreadData } from "@/api";
+import { getHistory, getSingleThreadData } from "@/config";
 
 
 

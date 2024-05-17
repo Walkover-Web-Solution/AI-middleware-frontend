@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { inviteUser, getInvitedUsers } from '@/api';
+import { inviteUser, getInvitedUsers } from '@/config';
 import Sidebar from '@/components/Sidebar'
 import Protected from '@/components/protected';
 

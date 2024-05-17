@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Table from '@/components/table';
 import Sidebar from '@/components/Sidebar';
-import { getMetricsData } from '@/api';
+import { getMetricsData } from '@/config';
 import Protected from '@/components/protected';
 
 export const runtime = 'edge';

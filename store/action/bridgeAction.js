@@ -1,4 +1,4 @@
-import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi } from "@/api";
+import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi } from "@/config";
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer } from "../reducer/bridgeReducer";
 import axios from "@/utils/interceptor";
 import { toast } from "react-toastify";

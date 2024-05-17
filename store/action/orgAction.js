@@ -1,4 +1,4 @@
-import { createOrg,getAllOrg } from "@/api";
+import { createOrg,getAllOrg } from "@/config";
 import { organizationCreated, organizationsFetched, setCurrentOrgId } from "../reducer/orgReducer";
 
 export const createOrgAction = (dataToSend,onSuccess) => async(dispatch) => {

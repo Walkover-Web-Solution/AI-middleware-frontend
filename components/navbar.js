@@ -1,6 +1,6 @@
 "use client"
 // eslint-disable
-import { logoutUserFromMsg91 } from '@/api'
+import { logoutUserFromMsg91 } from '@/config'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { userDetails } from '@/store/action/userDetailsAction'
 import { usePathname, useRouter } from 'next/navigation'
