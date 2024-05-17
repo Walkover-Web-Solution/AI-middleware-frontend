@@ -4,11 +4,10 @@ import { toast } from 'react-toastify';
 import { inviteUser, getInvitedUsers } from '@/api';
 import Sidebar from '@/components/Sidebar'
 import Protected from '@/components/protected';
-import { useSelector, useDispatch } from 'react-redux';
 
 
 
-
+export const runtime = 'edge';
 function InvitePage({ params }) {
 
   const [email, setEmail] = useState('');

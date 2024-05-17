@@ -1,8 +1,6 @@
-import ModelsConfig from "@/customSelector/modelConfiguration";
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
 import { updatedData } from "@/utils/utility";
 import { createSlice } from "@reduxjs/toolkit";
-import { useRouter } from "next/navigation";
 
 const initialState = {
   allBridgesMap: {},

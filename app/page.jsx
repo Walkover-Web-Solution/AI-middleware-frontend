@@ -5,6 +5,8 @@ import React, {  useLayoutEffect } from 'react'
 // import { useRouter } from 'next/navigation';
 import WithAuth from '@/components/withauth';
 
+export const runtime = 'edge';
+
 function page ({params}) {
 
   // const router = useRouter();

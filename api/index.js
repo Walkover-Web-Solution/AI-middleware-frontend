@@ -8,7 +8,7 @@ const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
 
 
-
+export const runtime = 'edge';
 
 export const getSingleModels = async () => {
     try {

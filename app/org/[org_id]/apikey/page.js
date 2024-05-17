@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
-
+export const runtime = 'edge';
 function Page({ params }) {
   const dispatch = useDispatch();
   const authData = useCustomSelector((state) => state?.authDataReducer?.authData || [])

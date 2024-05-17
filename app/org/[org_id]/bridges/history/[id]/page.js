@@ -14,6 +14,8 @@ import { useDispatch } from 'react-redux'
  * 
  * @author Thanh Tuan <thanhtuan@sc.edu>
  */
+
+export const runtime = 'edge';
 function page({ params }) {
   /**
    * state:

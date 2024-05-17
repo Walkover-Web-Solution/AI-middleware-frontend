@@ -7,6 +7,7 @@ import { createApiAction, getSingleBridgesAction, integrationAction } from "@/st
 import { useDispatch } from "react-redux"
 import Sidebar from "@/components/Sidebar"
 
+export const runtime = 'edge';
 const Page = ({ params }) => {
   const dispatch = useDispatch()
   const { bridge, integrationData } = useCustomSelector((state) => ({

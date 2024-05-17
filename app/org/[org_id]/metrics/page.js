@@ -3,10 +3,9 @@ import React, { useEffect, useState } from 'react';
 import Table from '@/components/table';
 import Sidebar from '@/components/Sidebar';
 import { getMetricsData } from '@/api';
-import { useSelector } from 'react-redux';
 import Protected from '@/components/protected';
-import { useParams } from 'next/navigation';
 
+export const runtime = 'edge';
 function Page({ params }) {
   // Get today's date in the required format
   const today = new Date().toISOString().split('T')[0];
@@ -14,7 +13,6 @@ function Page({ params }) {
   const [metricsData, setMetricsData] = useState([]);
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
-  const currentOrgId = useSelector((state) => state.orgReducer.currentOrgId);
 
   // Function to handle data fetching
   const fetchData = () => {

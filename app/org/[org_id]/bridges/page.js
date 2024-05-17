@@ -4,12 +4,12 @@ import { deleteBridgeAction, getAllBridgesAction, getSingleBridgesAction } from 
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Protected from "@/components/protected";
 import CreateNewBridge from "@/components/createNewBridge";
 import Sidebar from "@/components/Sidebar";
 
-
+export const runtime = 'edge';
 function Home({ params }) {
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.allBridges) || []
