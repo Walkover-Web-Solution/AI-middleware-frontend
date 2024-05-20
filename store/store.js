@@ -11,6 +11,7 @@ import storage from 'redux-persist/lib/storage'
 import persistReducer from "redux-persist/es/persistReducer";
 import persistStore from "redux-persist/es/persistStore";
 import responseTypeReducer from "./reducer/responseTypeReducer";
+import ChatBot from "./reducer/ChatBotReducer";
 
 
 const persistConfig = { key: 'root', storage }
@@ -22,7 +23,8 @@ const rootReducer = combineReducers({
     userDetailsReducer,
     authDataReducer,
     orgReducer,
-    responseTypeReducer
+    responseTypeReducer,
+    ChatBot
 })
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 

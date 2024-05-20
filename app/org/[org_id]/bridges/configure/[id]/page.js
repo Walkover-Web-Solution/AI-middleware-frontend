@@ -3,18 +3,20 @@ import Protected from "@/components/protected"
 import { useCustomSelector } from "@/customSelector/customSelector"
 import DropdownMenu from "@/components/dropDown"
 import { useEffect, useLayoutEffect } from "react"
-import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction"
+import { createApiAction, getChatBotOfBridgeAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction"
 import { useDispatch } from "react-redux"
 
 const Page = ({ params }) => {
   const dispatch = useDispatch()
-  const { bridge, integrationData, embedToken } = useCustomSelector((state) => ({
+  const { bridge, integrationData, embedToken, chatBotData } = useCustomSelector((state) => ({
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
     embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
     integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData?.flows,
+    chatBotData: state?.ChatBot?.org?.[params?.org_id] || []
   }))
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
+    // dispatch(getChatBotOfBridgeAction(params.org_id, params.id))
   }, [params.id])
 
   useEffect(() => {
@@ -79,7 +81,7 @@ const Page = ({ params }) => {
         <div className="drawer-content flex flex-col items-start justify-start">
           <div className="flex w-full justify-start gap-16 items-start">
             <div className="w-full ">
-              <DropdownMenu data={bridge} params={params} embed={integrationData} />
+              <DropdownMenu data={bridge} params={params} embed={integrationData} chatBotData={chatBotData} />
             </div>
           </div>
         </div>

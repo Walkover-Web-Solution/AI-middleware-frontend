@@ -119,7 +119,7 @@ function Navbar() {
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn capitalize m-1">{path[3] === 'apikey' ? 'API Key' : path[3]} <ChevronDown size={16} /></div>
           <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-            {['bridges', 'apikey', 'metrics', 'invite'].map((item) => (
+            {['bridges', "chatbot", 'apikey', 'metrics', 'invite'].map((item) => (
               <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
                 <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
               </li>
@@ -147,7 +147,10 @@ function Navbar() {
             path[3] === 'bridges' ?
               <button className="btn btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>
                 + create new bridge
-              </button> : ""
+              </button> : path[3] === 'chatbot' ?
+                <button className="btn btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>
+                  + create new chatbot
+                </button> : ""
         )}
       </div>
 

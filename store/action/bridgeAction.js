@@ -1,6 +1,7 @@
-import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge, getAllResponseTypesApi } from "@/api";
+import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge, getAllResponseTypesApi, addorRemoveResponseIdInBridge, getChatBotOfBridge } from "@/api";
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer, isPending, isError } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
+
 
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
@@ -86,3 +87,25 @@ export const createApiAction = (bridge_id, dataFromEmbed) => async () => {
     console.error(error)
   }
 }
+
+
+export const addorRemoveResponseIdInBridgeAction = (bridge_id, org_id, responseObj) => async (dispatch) => {
+  try {
+
+    const response = await addorRemoveResponseIdInBridge(bridge_id, org_id, responseObj);
+    dispatch(updateBridgeReducer(response.data))
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export const getChatBotOfBridgeAction = (orgId, bridgeId) => async (dispatch) => {
+  try {
+    const response = await getChatBotOfBridge(orgId, bridgeId);
+    dispatch(updateBridgeReducer(response.data))
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+

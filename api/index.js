@@ -288,12 +288,73 @@ export const createapi = async (bridge_id, dataFromEmbed) => {
 }
 
 
-
-export const getChatBotOfBridge = async (bridge_id, orgId) => {
+export const addorRemoveResponseIdInBridge = async (bridge_id, orgId, responseObj) => {
   try {
-    await axios.get(`${URL}/chatbot/${orgId}/${bridge_id}`);
+
+    const response = await axios.post(`${URL}/chatbot/${orgId}/addresponseid/bridge/${bridge_id}`, { ...responseObj });
+    return response;
   } catch (error) {
     console.error(error);
     return error;
   }
 }
+
+
+export const getAllChatBot = async (orgId) => {
+  try {
+    const response = await axios.get(`${URL}/chatbot/${orgId}/all`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+
+export const createChatBot = async (dataToSend) => {
+  try {
+
+    const response = await axios.post(`${URL}/chatbot/`, dataToSend);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+
+export const getChatBotDetails = async (botId) => {
+  try {
+    const response = await axios.get(`${URL}/chatbot/${botId}`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+
+export const getChatBotOfBridge = async (orgId, bridgeId) => {
+  try {
+    const response = await axios.get(`${URL}/chatbot/${orgId}/${bridgeId}`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+
+// routes.route('/:orgId/:botId/bridge/:bridgeId').put(addorRemoveBridgeInChatBot); // update chatbot actions
+
+export const addorRemoveBridgeInChatBot = async (orgId, botId, bridgeId, type) => {
+  try {
+    const response = await axios.put(`${URL}/chatbot/${orgId}/${botId}/bridge/${bridgeId}?type=${type}`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+

@@ -1,15 +1,13 @@
 "use client"
+import CreateNewBridge from "@/components/createNewBridge";
+import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { deleteBridgeAction, getAllBridgesAction, getAllResponseTypesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
+import { deleteBridgeAction, getAllBridgesAction, getAllResponseTypesAction } from "@/store/action/bridgeAction";
+import { Box } from "lucide-react";
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { toast } from 'react-toastify'
-import { usePathname, useRouter } from 'next/navigation'
-import Protected from "@/components/protected";
-import CreateNewBridge from "@/components/createNewBridge";
-import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/navbar";
-import { Box } from "lucide-react";
+import { toast } from 'react-toastify';
 
 
 function Home({ params }) {
@@ -185,7 +183,7 @@ function Home({ params }) {
 
       </div>
     </div>
-    <CreateNewBridge orgid={params.org_id} />
+    <CreateNewBridge orgid={params.org_id} Heading="Create New Bridge" />
   </div>
 
 

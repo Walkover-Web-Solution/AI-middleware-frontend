@@ -20,6 +20,10 @@ export const bridgeReducer = createSlice({
     isError: (state) => {
       state.loading = false;
     },
+    addorRemoveResponseIdInBridgeReducer: (state, action) => {
+      const { response } = action.payload;
+      state.allBridgesMap[response.bridge_id] = { ...state.allBridgesMap[response.bridge_id], ...response }
+    },
     fetchSingleBridgeReducer: (state, action) => {
       const { bridges, integrationData } = action.payload;
       const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;

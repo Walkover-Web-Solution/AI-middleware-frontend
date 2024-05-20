@@ -4,13 +4,15 @@ import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the
 import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
 import { isValidJson, validateWebhook } from '@/utils/utility';
 import Chat from './chat';
-import { ChevronDown, ChevronUp, CircleAlert, Plus } from 'lucide-react';
-import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { ArrowUpRight, BarChart, BellRing, Bot, Brush, ChevronDown, ChevronUp, CircleAlert, CircleMinus, Newspaper, Paperclip, Plus, Wallet, Wrench } from 'lucide-react';
+import { addorRemoveResponseIdInBridgeAction, updateBridgeAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customSelector/customSelector';
+import { addorRemoveBridgeInChatBotAction } from '@/store/action/chatBotAction';
 
-const DropdownMenu = ({ params, data, embed }) => {
+const DropdownMenu = ({ params, data, embed, chatBotData }) => {
 
+    const [isSliderOpen, setIsSliderOpen] = useState(false);
     const [toggle, setToggle] = useState(false)
     const [selectedService, setSelectedService] = useState('');
     const [selectedModel, setSelectedModel] = useState(data?.configuration?.model?.default);
@@ -35,6 +37,12 @@ const DropdownMenu = ({ params, data, embed }) => {
         }
 
     }
+
+    // Step 2: Update the button click handler to toggle the slider visibility
+    // const handleAddChatbotClick = () => {
+    //     setIsSliderOpen(!isSliderOpen);
+    // };
+
 
     useEffect(() => {
         setSelectedService(data?.service?.toLowerCase());
@@ -310,12 +318,7 @@ const DropdownMenu = ({ params, data, embed }) => {
     const toggleAccordion = () => {
         setToggle(!toggle)
     }
-    /**
-     * Handle changes to the input fields in the configuration section of the dropdown menu
-     * 
-     * @param {string} value The value of the input field
-     * @param {string} key The key of the modelInfoData object to update
-     */
+
     const handleInputConfigChanges = (value, key) => {
         // Update the inputConfig state with the new value
         setInputConfig(prevInputConfig => ({
@@ -385,6 +388,9 @@ const DropdownMenu = ({ params, data, embed }) => {
         }
     };
 
+    const handleChatbotSelect = (chatBotId, type) => {
+        dispatch(addorRemoveBridgeInChatBotAction(params.org_id, chatBotId, params.id, type))
+    }
 
     useEffect(() => {
         const resizer = document.querySelector('.resizer');
@@ -417,9 +423,13 @@ const DropdownMenu = ({ params, data, embed }) => {
             resizer.removeEventListener('mousedown', mouseDownHandler);
         };
     }, []);
+
     const UpdateBridge = (currentDataToSend) => {
-        // Use currentDataToSend instead of the state directly
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
+    }
+
+    const handleBotResponseChange = (responseKey, responseObj, action) => {
+        dispatch(addorRemoveResponseIdInBridgeAction(params.id, params.org_id, { responseId: responseKey, status: action, responseJson: responseObj }))
     }
 
     const responseOptions = [
@@ -427,6 +437,10 @@ const DropdownMenu = ({ params, data, embed }) => {
         { value: 'RTLayer', label: 'RTLayer' },
         { value: 'custom', label: 'Custom' },
     ];
+    const handleAddChatbotClick = () => {
+        setIsSliderOpen(!isSliderOpen);
+        console.log("Slider state after click:", !isSliderOpen); // Add this line for debugging
+    };
 
     return (
         <>
@@ -458,7 +472,7 @@ const DropdownMenu = ({ params, data, embed }) => {
                                     {/* <span className="label-text-alt">It can only contain letters, numbers, and hyphens</span> */}
                                 </div>
                             </label>
-                            <div className="">
+                            <div className="flex flex-col gap-4">
                                 <div className="pb-5">
                                     {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
                                         <>
@@ -509,20 +523,6 @@ const DropdownMenu = ({ params, data, embed }) => {
                                         </div>
                                     </div>}
                                 </div>
-                                <div>
-                                    <div className="form-control">
-                                        <label className='label-text'>Choose Response Type</label>
-                                        {Object.keys(allResponseTypes || {})?.map((responseKey) => {
-                                            return (
-                                                <label className="label cursor-pointer" key={responseKey}>
-                                                    <span className="label-text">{allResponseTypes?.[responseKey]?.description}</span>
-                                                    <input type="checkbox" defaultChecked className="checkbox checkbox-primary" />
-                                                </label>
-                                            )
-                                        })}
-                                    </div>
-                                </div>
-                                <div className="divider"></div>
                                 <label className="form-control w-full ">
                                     <div className="label">
                                         <span className="label-text">Service</span>
@@ -629,6 +629,65 @@ const DropdownMenu = ({ params, data, embed }) => {
                                     </div>
                                 </div>
                                 <div>
+                                    {data?.bridgeType === "chatbot" && <div className="form-control">
+                                        <p className='text-xl font-medium'>ChatBot</p>
+                                        <div className='flex flex-wrap gap-4'>
+                                            {data.chatbotData?.map((chatBot, index) => {
+                                                return (
+                                                    <div key={index} className="flex max-w-xs flex-col items-center rounded-md border md:flex-row">
+                                                        <div>
+                                                            <div className="p-4">
+                                                                <h1 className="inline-flex items-center text-lg font-semibold">
+                                                                    {chatBot.title}<ArrowUpRight className="ml-2 h-4 w-4" />
+                                                                </h1>
+                                                                <p className="mt-3 text-sm text-gray-600">
+                                                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi, debitis?
+                                                                </p>
+                                                                <div className="mt-4">
+                                                                    <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-900">
+                                                                        #Macbook
+                                                                    </span>
+                                                                    <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-900">
+                                                                        #Apple
+                                                                    </span>
+                                                                    <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-900">
+                                                                        #Laptop
+                                                                    </span>
+                                                                </div>
+                                                                <div className="mt-3 flex items-center space-x-2">
+                                                                    <img
+                                                                        className="inline-block h-8 w-8 rounded-full"
+                                                                        src="https://overreacted.io/static/profile-pic-c715447ce38098828758e525a1128b87.jpg"
+                                                                        alt="Dan_Abromov"
+                                                                    />
+                                                                    <span className="flex flex-col">
+                                                                        <span className="text-[10px] font-medium text-gray-900">Dan Abromov</span>
+                                                                        <span className="text-[8px] font-medium text-gray-500">@dan_abromov</span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                        <button className="btn btn-outline btn-sm mt-4 w-fit" onClick={handleAddChatbotClick}><Plus size={16} /> Add ChatBot</button>
+                                    </div>}
+                                </div>
+                                <div>
+                                    {data?.bridgeType === "chatbot" && <div className="form-control">
+                                        <p className='text-xl font-medium'>Choose Response Type</p>
+                                        {Object.keys(allResponseTypes || {})?.map((responseKey, index) => {
+                                            return (
+                                                <label className="label cursor-pointer" key={responseKey}>
+                                                    <span className="label-text">{allResponseTypes?.[responseKey]?.description}</span>
+                                                    <input type="checkbox" key={responseKey + index} defaultChecked={data?.responseIds?.includes(responseKey)} onChange={(e) => handleBotResponseChange(responseKey, allResponseTypes?.[responseKey], e.target.checked ? "add" : "remove")} className="checkbox checkbox-primary" />
+                                                </label>
+                                            )
+                                        })}
+                                    </div>}
+                                </div>
+                                <div>
                                     <p className='text-xl font-medium'>Select Response Format</p>
                                     {responseOptions.map(({ value, label }) => (
                                         <div className="form-control w-fit" key={value}>
@@ -697,7 +756,45 @@ const DropdownMenu = ({ params, data, embed }) => {
                 </div>
 
                 {/* response slider */}
-
+                {isSliderOpen && <aside className="absolute  right-0 top-0 flex h-full w-1/3 flex-col overflow-y-auto bg-white px-5 py-8 shadow-lg z-10">
+                    <h1 className='text-xl font-medium flex items-center gap-2'><Bot /> Chat Bot list</h1>
+                    <div className="mt-6 flex flex-1 flex-col justify-between">
+                        <nav className="-mx-3 space-y-6 ">
+                            <div className="space-y-3 ">
+                                {chatBotData?.map((chatBot, index) => (
+                                    <a
+                                        onClick={(e) => {
+                                            e.preventDefault(); // Prevent the default anchor action
+                                            // Toggle the checkbox's checked status programmatically
+                                            const checkbox = document.getElementById(`chatbot-${chatBot._id}`);
+                                            checkbox.click(); // Programmatically click the checkbox
+                                            // No need to manually call handleChatbotSelect here since clicking the checkbox will trigger its onClick event
+                                        }}
+                                        key={index} // Keep the key for list rendering
+                                        className="flex transform items-center justify-between rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700"
+                                        href="#"
+                                        style={{ overflow: 'hidden' }}
+                                    >
+                                        <div className='flex items-center w-full gap-2'>
+                                            <BarChart className="h-5 w-5" aria-hidden="true" />
+                                            <span className="mx-2 text-sm font-medium truncate">{chatBot?.title}</span>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            id={`chatbot-${chatBot._id}`} // Use a unique ID for each checkbox
+                                            defaultChecked={data.chatbotData.some(e => e._id === chatBot._id)}
+                                            className="checkbox"
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent the checkbox click from bubbling up to the link's onClick
+                                                handleChatbotSelect(chatBot._id, e.target.checked ? "add" : "remove");
+                                            }}
+                                        />
+                                    </a>
+                                ))}
+                            </div>
+                        </nav>
+                    </div>
+                </aside>}
             </div >
         </>
     );
