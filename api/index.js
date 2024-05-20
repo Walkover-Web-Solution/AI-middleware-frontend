@@ -358,3 +358,14 @@ export const addorRemoveBridgeInChatBot = async (orgId, botId, bridgeId, type) =
 }
 
 
+// routes.route('/:botId').put(updateChatBot); // update chatbot
+
+export const updateChatBot = async (botId, dataToSend) => {
+  try {
+    const response = await axios.put(`${URL}/chatbot/${botId}`, dataToSend);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
