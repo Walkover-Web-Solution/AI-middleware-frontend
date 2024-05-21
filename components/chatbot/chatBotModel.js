@@ -9,40 +9,51 @@ function ChatBotModel({ orgid }) {
     const dispatch = useDispatch()
     console.log(orgid)
 
+    // const createChatBotHandler = (name) => {
+    //     const datatosend = {
+    //         "config": {},
+    //         "orgId": 6095,
+    //         "title": "viasocket",
+    //         "bridge": []
+    //     }
+    //     console.log(name)
+    //     dispatch(createNewChatbot({ ...datatosend, title: name, orgId: orgid }))
+    //         .then((response) => {
+    //             // Assuming the action resolves with the response data upon success
+    //             console.log(response); // Log or handle the response data as needed
+    //             if (response && response.data && response.data.botId) {
+    //                 // Navigate to the next page if the response contains the botId
+    //                 route.push(`/org/${orgid}/chatbot/${response.data.botId}`);
+    //                 document.getElementById('my_modal_1').close();
+    //             } else {
+    //                 // Handle the case where response does not contain the expected data
+    //                 console.error('API call was successful but did not return the expected data.');
+    //             }
+    //         })
+    //         .catch((error) => {
+    //             // Handle the case where the API call was not successful
+    //             console.error('API call failed:', error);
+    //         });
+    //     // dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
+
+    //     //     route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
+    //     //     setIsLoading(false);
+    //     //     document.getElementById('my_modal_1').close()
+    //     // })).catch(
+    //     //     setIsLoading(false)
+    //     // );
+
+    // }
     const createChatBotHandler = (name) => {
         const datatosend = {
-            "config": {},
-            "orgId": 6095,
+            "orgId": orgid,
             "title": "viasocket",
-            "bridge": []
         }
         console.log(name)
-        dispatch(createNewChatbot({ ...datatosend, title: name, orgId: orgid }))
-            .then((response) => {
-                // Assuming the action resolves with the response data upon success
-                console.log(response); // Log or handle the response data as needed
-                if (response && response.data && response.data.botId) {
-                    // Navigate to the next page if the response contains the botId
-                    route.push(`/org/${orgid}/chatbot/${response.data.botId}`);
-                    document.getElementById('my_modal_1').close();
-                } else {
-                    // Handle the case where response does not contain the expected data
-                    console.error('API call was successful but did not return the expected data.');
-                }
-            })
-            .catch((error) => {
-                // Handle the case where the API call was not successful
-                console.error('API call failed:', error);
-            });
-        // dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
-
-        //     route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
-        //     setIsLoading(false);
-        //     document.getElementById('my_modal_1').close()
-        // })).catch(
-        //     setIsLoading(false)
-        // );
-
+        dispatch(createNewChatbot({ ...datatosend, title: name, orgId: orgid }, (data) => {
+            route.push(`/org/${orgid}/chatbot/${data.data.chatBot._id}`);
+            document.getElementById('my_modal_1').close()
+        }))
     }
 
     return (

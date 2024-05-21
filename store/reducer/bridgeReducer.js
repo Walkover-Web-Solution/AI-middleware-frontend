@@ -48,7 +48,6 @@ export const bridgeReducer = createSlice({
       const obj2 = modelInfo[service][modelDefault];
       const response = updatedData(bridges, obj2, type);
       state.allBridgesMap[_id] = {
-        ...state.allBridgesMap[_id],
         ...response,
         responseFormat: handleResponseFormat(bridges)
       };

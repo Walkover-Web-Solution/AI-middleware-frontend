@@ -1,9 +1,9 @@
 "use client"
+import DropdownMenu from "@/components/dropDown"
 import Protected from "@/components/protected"
 import { useCustomSelector } from "@/customSelector/customSelector"
-import DropdownMenu from "@/components/dropDown"
-import { useEffect, useLayoutEffect } from "react"
-import { createApiAction, getChatBotOfBridgeAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction"
+import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction"
+import { useEffect } from "react"
 import { useDispatch } from "react-redux"
 
 const Page = ({ params }) => {

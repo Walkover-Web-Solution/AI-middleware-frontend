@@ -16,9 +16,10 @@ export const getAllChatBotAction = (orgId) => async (dispatch, getState) => {
 
 
 
-export const createNewChatbot = (dataToSend) => async (dispatch, getState) => {
+export const createNewChatbot = (dataToSend, onSuccess) => async (dispatch, getState) => {
     try {
         const response = await createChatBot(dataToSend);
+        onSuccess(response);
         dispatch(createNewBotReducer({ chatbot: response.data.chatBot, orgId: dataToSend.orgId }));
     } catch (error) {
         console.error(error);
@@ -26,15 +27,15 @@ export const createNewChatbot = (dataToSend) => async (dispatch, getState) => {
 };
 
 
-export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, getState) => {
-    try {
-        const data = await createBridge(dataToSend.dataToSend);
-        onSuccess(data);
-        dispatch(createBridgeReducer({ data, orgId: dataToSend.orgid }));
-    } catch (error) {
-        console.error(error);
-    }
-};
+// export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, getState) => {
+//     try {
+//         const data = await createBridge(dataToSend.dataToSend);
+//         onSuccess(data);
+//         dispatch(createBridgeReducer({ data, orgId: dataToSend.orgid }));
+//     } catch (error) {
+//         console.error(error);
+//     }
+// };
 
 export const getChatBotDetailsAction = (botId) => async (dispatch, getState) => {
     try {

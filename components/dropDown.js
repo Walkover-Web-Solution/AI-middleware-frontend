@@ -1,19 +1,21 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { services } from "@/jsonFiles/models"; // Update 'yourFilePath' with the correct path to your file  
 import { modelInfo } from '@/jsonFiles/allModelsConfig (1)';
 import { isValidJson, validateWebhook } from '@/utils/utility';
 import Chat from './chat';
-import { ArrowUpRight, BarChart, BellRing, Bot, Brush, ChevronDown, ChevronUp, CircleAlert, CircleMinus, Newspaper, Paperclip, Plus, Wallet, Wrench } from 'lucide-react';
+import { ArrowUpRight, BarChart, BellRing, Bot, Brush, ChevronDown, ChevronUp, CircleAlert, CircleMinus, Newspaper, Paperclip, Plus, Wallet, Wrench, X } from 'lucide-react';
 import { addorRemoveResponseIdInBridgeAction, updateBridgeAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { addorRemoveBridgeInChatBotAction } from '@/store/action/chatBotAction';
+import { useRouter } from 'next/navigation';
+import AdvancedParameters from './configuration.js/advancedParamenter';
+import ChatBotList from './configuration.js/chatBotList';
 
 const DropdownMenu = ({ params, data, embed, chatBotData }) => {
 
-    const [isSliderOpen, setIsSliderOpen] = useState(false);
-    const [toggle, setToggle] = useState(false)
+    const router = useRouter()
     const [selectedService, setSelectedService] = useState('');
     const [selectedModel, setSelectedModel] = useState(data?.configuration?.model?.default);
     const [dataToSend, setDataToSend] = useState({})
@@ -315,9 +317,6 @@ const DropdownMenu = ({ params, data, embed, chatBotData }) => {
     };
 
 
-    const toggleAccordion = () => {
-        setToggle(!toggle)
-    }
 
     const handleInputConfigChanges = (value, key) => {
         // Update the inputConfig state with the new value
@@ -371,7 +370,7 @@ const DropdownMenu = ({ params, data, embed, chatBotData }) => {
                     ...dataToSend,
                     configuration: {
                         ...dataToSend.configuration,
-                        prompt: dataToSend.configuration.prompt.map((item, index) => index === keyIndex ? promptString : item)
+                        prompt: dataToSend?.configuration?.prompt?.map((item, index) => index === keyIndex ? promptString : item)
                     }
                 };
             } else { // If the key does not exist, add it to the prompt array
@@ -388,9 +387,7 @@ const DropdownMenu = ({ params, data, embed, chatBotData }) => {
         }
     };
 
-    const handleChatbotSelect = (chatBotId, type) => {
-        dispatch(addorRemoveBridgeInChatBotAction(params.org_id, chatBotId, params.id, type))
-    }
+
 
     useEffect(() => {
         const resizer = document.querySelector('.resizer');
@@ -437,10 +434,48 @@ const DropdownMenu = ({ params, data, embed, chatBotData }) => {
         { value: 'RTLayer', label: 'RTLayer' },
         { value: 'custom', label: 'Custom' },
     ];
-    const handleAddChatbotClick = () => {
-        setIsSliderOpen(!isSliderOpen);
-        console.log("Slider state after click:", !isSliderOpen); // Add this line for debugging
-    };
+
+    const renderInputConfig = useMemo(() => (
+        inputConfig && Object.entries(inputConfig).filter(([key]) => key !== "rawData").map(([key, value]) => (
+            <div className="form-control w-full " key={key}>
+                <div className="label">
+                    <span className="label-text capitalize">{key}</span>
+                </div>
+                <textarea
+                    autoFocus
+                    className="textarea textarea-bordered w-full min-h-96 resize-y"
+                    defaultValue={value?.default?.content || value?.prompt || value?.input || ""}
+                    onBlur={(e) => { handleInputConfigChanges(e.target.value, key); SaveData(e.target.value, key) }}
+                ></textarea>
+            </div>
+        ))
+    ), [inputConfig]);
+
+
+    const renderEmbed = useMemo(() => (
+        embed && embed.map((value) => (
+            <div key={value?.id} className='w-[250px] cursor-pointer' onClick={() => openViasocket(value?.id)}>
+                <div className={`rounded-md border ${value.description.trim() === "" ? "border-red-600" : ""}`}>
+                    <div className="p-4">
+                        <div className="flex justify-between items-center">
+                            <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full">
+                                {value.title}
+                            </h1>
+                            {value.description.trim() === "" && <CircleAlert color='red' size={16} />}
+                        </div>
+                        <p className="mt-3 text-xs sm:text-sm text-gray-600 line-clamp-3">
+                            {value.description ? value.description : "A description is required for proper functionality."}
+                        </p>
+                        <div className="mt-4">
+                            <span className="mr-2 inline-block rounded-full capitalize bg-white px-3 py-1 text-[10px] sm:text-xs font-semibold text-gray-900">
+                                {value.description.trim() === "" ? "Description Required" : value.status}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        ))
+    ), [embed]);
 
     return (
         <>
@@ -459,64 +494,27 @@ const DropdownMenu = ({ params, data, embed, chatBotData }) => {
 
                                 </div>
                             </label>
-                            <label className="form-control w-full max-w-xs">
+                            {data?.bridgeType === "chatbot" && <label className="form-control w-full max-w-xs">
                                 <div className="label">
                                     <span className="label-text">Enter Slugname</span>
 
                                 </div>
-                                <input type="text" key={data?.slugName} placeholder="Type here" className="input input-bordered w-full  max-w-xs  input-sm" defaultValue={data?.slugName} onBlur={(e) => {
-                                    handleInputChange(e, "slugName")
+                                <input type="text" key={data?.slugName} placeholder="Type here" disabled={data?.slugName?.length > 0} className="input input-bordered w-full  max-w-xs  input-sm" defaultValue={data?.slugName} onBlur={(e) => {
+                                    if (e.target.value.trim()) handleInputChange(e, "slugName")
                                 }} />
                                 <div className="label">
                                     <span className="label-text-alt text-gray-500">Slugname must be unique</span>
                                     {/* <span className="label-text-alt">It can only contain letters, numbers, and hyphens</span> */}
                                 </div>
-                            </label>
+                            </label>}
                             <div className="flex flex-col gap-4">
                                 <div className="pb-5">
-                                    {inputConfig && Object.entries(inputConfig).map(([key, value]) => (
-                                        <>
-                                            {key !== "rawData" && (
-                                                <div className="form-control w-full " key={key}>
-                                                    <div className="label">
-                                                        <span className="label-text capitalize">{key}</span>
-                                                    </div>
-                                                    <textarea
-                                                        autoFocus
-                                                        className="textarea textarea-bordered w-full min-h-96 resize-y"
-                                                        defaultValue={value?.default?.content || value?.prompt || value?.input || ""}
-                                                        onBlur={(e) => { handleInputConfigChanges(e.target.value, key); SaveData(e.target.value, key) }}
-                                                    ></textarea>
-                                                </div>
-                                            )}
-                                        </>
-                                    ))}
+                                    {renderInputConfig}
                                     {modelInfoData?.tools && <div>
                                         <div className="form-control w-full">
                                             <div className="label flex-col mt-2 items-start">
                                                 <div className="flex flex-wrap gap-4">
-                                                    {embed && embed.map((value) => (
-                                                        <div key={value?.id} className='w-[250px]  cursor-pointer' onClick={() => openViasocket(value?.id)}>
-                                                            <div className={`rounded-md border ${value.description.trim() === "" ? "border-red-600" : ""}`}>
-                                                                <div className="p-4">
-                                                                    <div className="flex justify-between items-center">
-                                                                        <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full">
-                                                                            {value.title}
-                                                                        </h1>
-                                                                        {value.description.trim() === "" && <CircleAlert color='red' size={16} />}
-                                                                    </div>
-                                                                    <p className="mt-3 text-xs sm:text-sm text-gray-600  line-clamp-3">
-                                                                        {value.description ? value.description : "A description is required for proper functionality."}
-                                                                    </p>
-                                                                    <div className="mt-4">
-                                                                        <span className="mr-2 inline-block rounded-full capitalize bg-white px-3 py-1 text-[10px] sm:text-xs font-semibold text-gray-900">
-                                                                            {value.description.trim() === "" ? "Description Required" : value.status}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
+                                                    {renderEmbed}
                                                 </div>
                                                 <button onClick={() => openViasocket()} className="btn btn-outline btn-sm mt-4"><Plus size={16} /> Add new Function</button>
                                             </div>
@@ -568,125 +566,30 @@ const DropdownMenu = ({ params, data, embed, chatBotData }) => {
                                     />
 
                                 </label>
-                                <div className="collapse ">
-                                    <input type="radio" name="my-accordion-1" checked={toggle} onClick={toggleAccordion} />
-                                    <div className="collapse-title p-0 flex items-center justify-start gap-4 text-xl font-medium">
-                                        Advanced Parameters  {toggle ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                    </div>
-                                    <div className="collapse-content gap-3 flex flex-col p-0">
-                                        {modelInfoData && Object.entries(modelInfoData || {}).map(([key, value]) => (
-                                            key !== 'model' && key !== 'tools' && key !== 'tool_choice' && key !== "stream" &&
-                                            <div className={` ${value.field === "boolean" ? "flex justify-between item-center" : ""} w-full`}>
+                                <AdvancedParameters params={params} dataToSend={dataToSend} handleSliderStop={handleSliderStop} />
+                                <ChatBotList params={params} />
 
-                                                <div className='flex justify-between items-center w-full'>
-                                                    <p className='capitalize'> {key.replaceAll("_", " ")}</p>
-                                                    {value.field === 'slider' && <p>{typeof value.default === 'object' ? JSON.stringify(value) : value.default}</p>}
-                                                </div>
-                                                {value.field === "slider" ?
-                                                    <input
-                                                        type="range"
-                                                        min={value?.min}
-                                                        max={value?.max}
-                                                        step={value?.step}
-                                                        value={value?.default}
-                                                        onChange={(e) => handleInputChange(e, key, true)} // Pass true to indicate it's a slider
-                                                        onBlur={() => handleSliderStop(key)} // Call UpdateBridge on blur
-                                                        className="range range-xs w-full"
-                                                        name={key}
-                                                    />
-                                                    : value.field === 'text' ?
-                                                        <input
-                                                            type="text"
-                                                            required={value?.level === 1 ? true : false}
-                                                            defaultValue={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
-                                                            onBlur={(e) => handleInputChange(e, key)}
-                                                            className="input w-full input-bordered max-w-xs  input-sm"
-                                                            name={key} // Add name attribute
-                                                        />
-                                                        : value.field === 'number' ?
-                                                            <input
-                                                                type="number"
-                                                                required={value?.level === 1 ? true : false}
-                                                                defaultValue={value?.default}
-                                                                onBlur={(e) => handleInputChange(e, key)}
-                                                                className="input w-full input-bordered max-w-xs  input-sm"
-                                                                name={key} // Add name attribute
-                                                            />
-                                                            :
-                                                            value.field === 'boolean' ?
-                                                                <input
-                                                                    type="checkbox"
-                                                                    required={value?.level === 1 ? true : false}
-                                                                    defaultChecked={value.default.type === "text" ? false : value.default.type === "json_object" ? true : value} // Ensure this is a boolean value. Use `!!` to coerce to boolean if necessary.
-                                                                    onChange={(e) => handleInputChange(e, key)}
-                                                                    className="checkbox"
-                                                                    name={key} // Add name attribute
-                                                                />
-                                                                :
-                                                                "this field is under development "}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div>
-                                    {data?.bridgeType === "chatbot" && <div className="form-control">
-                                        <p className='text-xl font-medium'>ChatBot</p>
-                                        <div className='flex flex-wrap gap-4'>
-                                            {data.chatbotData?.map((chatBot, index) => {
-                                                return (
-                                                    <div key={index} className="flex max-w-xs flex-col items-center rounded-md border md:flex-row">
-                                                        <div>
-                                                            <div className="p-4">
-                                                                <h1 className="inline-flex items-center text-lg font-semibold">
-                                                                    {chatBot.title}<ArrowUpRight className="ml-2 h-4 w-4" />
-                                                                </h1>
-                                                                <p className="mt-3 text-sm text-gray-600">
-                                                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi, debitis?
-                                                                </p>
-                                                                <div className="mt-4">
-                                                                    <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-900">
-                                                                        #Macbook
-                                                                    </span>
-                                                                    <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-900">
-                                                                        #Apple
-                                                                    </span>
-                                                                    <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-900">
-                                                                        #Laptop
-                                                                    </span>
-                                                                </div>
-                                                                <div className="mt-3 flex items-center space-x-2">
-                                                                    <img
-                                                                        className="inline-block h-8 w-8 rounded-full"
-                                                                        src="https://overreacted.io/static/profile-pic-c715447ce38098828758e525a1128b87.jpg"
-                                                                        alt="Dan_Abromov"
-                                                                    />
-                                                                    <span className="flex flex-col">
-                                                                        <span className="text-[10px] font-medium text-gray-900">Dan Abromov</span>
-                                                                        <span className="text-[8px] font-medium text-gray-500">@dan_abromov</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                        <button className="btn btn-outline btn-sm mt-4 w-fit" onClick={handleAddChatbotClick}><Plus size={16} /> Add ChatBot</button>
-                                    </div>}
-                                </div>
-                                <div>
-                                    {data?.bridgeType === "chatbot" && <div className="form-control">
-                                        <p className='text-xl font-medium'>Choose Response Type</p>
-                                        {Object.keys(allResponseTypes || {})?.map((responseKey, index) => {
-                                            return (
-                                                <label className="label cursor-pointer" key={responseKey}>
-                                                    <span className="label-text">{allResponseTypes?.[responseKey]?.description}</span>
-                                                    <input type="checkbox" key={responseKey + index} defaultChecked={data?.responseIds?.includes(responseKey)} onChange={(e) => handleBotResponseChange(responseKey, allResponseTypes?.[responseKey], e.target.checked ? "add" : "remove")} className="checkbox checkbox-primary" />
-                                                </label>
-                                            )
-                                        })}
-                                    </div>}
-                                </div>
+                                {data?.bridgeType === "chatbot" && <div className="form-control">
+                                    <p className='text-xl font-medium'>Choose Response Type</p>
+                                    {Object.keys(allResponseTypes || {}).map((responseKey) => {
+                                        // Determine if the checkbox should be checked
+                                        const isChecked = data?.responseIds?.includes(responseKey);
+                                        // Use a combination of responseKey and isChecked to form a unique key
+                                        const dynamicKey = `${responseKey}-${isChecked}`;
+                                        return (
+                                            <label className="label cursor-pointer" key={dynamicKey}>
+                                                <span className="label-text">{allResponseTypes?.[responseKey]?.description}</span>
+                                                <input
+                                                    key={dynamicKey} // Use dynamicKey here to force re-render
+                                                    type="checkbox"
+                                                    defaultChecked={isChecked} // Initial checked state
+                                                    onChange={(e) => handleBotResponseChange(responseKey, allResponseTypes?.[responseKey], e.target.checked ? "add" : "remove")}
+                                                    className="checkbox checkbox-primary"
+                                                />
+                                            </label>
+                                        )
+                                    })}
+                                </div>}
                                 <div>
                                     <p className='text-xl font-medium'>Select Response Format</p>
                                     {responseOptions.map(({ value, label }) => (
@@ -756,45 +659,7 @@ const DropdownMenu = ({ params, data, embed, chatBotData }) => {
                 </div>
 
                 {/* response slider */}
-                {isSliderOpen && <aside className="absolute  right-0 top-0 flex h-full w-1/3 flex-col overflow-y-auto bg-white px-5 py-8 shadow-lg z-10">
-                    <h1 className='text-xl font-medium flex items-center gap-2'><Bot /> Chat Bot list</h1>
-                    <div className="mt-6 flex flex-1 flex-col justify-between">
-                        <nav className="-mx-3 space-y-6 ">
-                            <div className="space-y-3 ">
-                                {chatBotData?.map((chatBot, index) => (
-                                    <a
-                                        onClick={(e) => {
-                                            e.preventDefault(); // Prevent the default anchor action
-                                            // Toggle the checkbox's checked status programmatically
-                                            const checkbox = document.getElementById(`chatbot-${chatBot._id}`);
-                                            checkbox.click(); // Programmatically click the checkbox
-                                            // No need to manually call handleChatbotSelect here since clicking the checkbox will trigger its onClick event
-                                        }}
-                                        key={index} // Keep the key for list rendering
-                                        className="flex transform items-center justify-between rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700"
-                                        href="#"
-                                        style={{ overflow: 'hidden' }}
-                                    >
-                                        <div className='flex items-center w-full gap-2'>
-                                            <BarChart className="h-5 w-5" aria-hidden="true" />
-                                            <span className="mx-2 text-sm font-medium truncate">{chatBot?.title}</span>
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            id={`chatbot-${chatBot._id}`} // Use a unique ID for each checkbox
-                                            defaultChecked={data.chatbotData.some(e => e._id === chatBot._id)}
-                                            className="checkbox"
-                                            onClick={(e) => {
-                                                e.stopPropagation(); // Prevent the checkbox click from bubbling up to the link's onClick
-                                                handleChatbotSelect(chatBot._id, e.target.checked ? "add" : "remove");
-                                            }}
-                                        />
-                                    </a>
-                                ))}
-                            </div>
-                        </nav>
-                    </div>
-                </aside>}
+
             </div >
         </>
     );
