@@ -48,7 +48,6 @@ function ChatBotModel({ orgid }) {
             "orgId": orgid,
             "title": "viasocket",
         }
-        console.log(name)
         dispatch(createNewChatbot({ ...datatosend, title: name, orgId: orgid }, (data) => {
             route.push(`/org/${orgid}/chatbot/${data.data.chatBot._id}`);
             document.getElementById('my_modal_1').close()
