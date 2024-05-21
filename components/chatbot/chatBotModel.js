@@ -7,7 +7,6 @@ function ChatBotModel({ orgid }) {
 
     const route = useRouter();
     const dispatch = useDispatch()
-    console.log(orgid)
 
     // const createChatBotHandler = (name) => {
     //     const datatosend = {

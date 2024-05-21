@@ -28,7 +28,6 @@ function Navbar() {
   const sidebarRef = useRef(null);
   const sideBridgeRef = useRef(null);
 
-  console.log(path)
   // Event handler for bridge search query change
   const handleBridgeSearchChange = (e) => {
     setBridgeSearchQuery(e.target.value);

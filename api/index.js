@@ -389,3 +389,17 @@ export const updateChatBot = async (botId, dataToSend) => {
     return error;
   }
 }
+
+
+// routes.route('/:botId/updateconfig').post(updateChatBotConfig)
+
+
+export const updateChatBotConfig = async (botId, dataToSend) => {
+  try {
+    const response = await axios.post(`${URL}/chatbot/${botId}/updateconfig`, dataToSend);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}

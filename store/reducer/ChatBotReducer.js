@@ -47,6 +47,9 @@ export const ChatBot = createSlice({
         updateChatBotReducer: (state, action) => {
             state.ChatBotMap[action.payload.botId] = action.payload.data
         },
+        updateChatBotConfigReducer: (state, action) => {
+            state.ChatBotMap[action.payload.botId].config = action.payload.data.config
+        }
 
         // createBridgeReducer: (state, action) => {
         //   state.org[action.payload.orgId].push(action.payload.data.data.bridge)
@@ -83,6 +86,7 @@ export const {
     getChatBotDetailsReducer,
     createNewBotReducer,
     addorRemoveBridgeInChatBotReducer,
-    updateChatBotReducer
+    updateChatBotReducer,
+    updateChatBotConfigReducer
 } = ChatBot.actions;
 export default ChatBot.reducer;

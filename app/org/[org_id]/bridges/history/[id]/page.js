@@ -60,7 +60,6 @@ function page({ params }) {
       router.push(`${pathName}?thread_id=${firstThreadId}`, undefined, { shallow: true });
     }
   }, [search.get('thread_id'), params.id])
-  console.log(selectedItem, "selectedItem")
   useEffect(() => {
     dispatch(clearThreadData())
   }, [params.id])

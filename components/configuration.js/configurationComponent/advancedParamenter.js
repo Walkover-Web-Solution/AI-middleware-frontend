@@ -48,7 +48,6 @@ const AdvancedParameters = ({ params, dataToSend: localdata }) => {
                 [key]: isSlider ? Number(newValue) : isBoolean ? newCheckedValue : newValue,
             }
         };
-        debugger
         // If the key is 'responseFormat', check the value and add the appropriate type
         if (key === 'response_format') {
             const typeValue = newCheckedValue === true ? 'json_object' : newCheckedValue === false ? 'text' : null;

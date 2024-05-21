@@ -1,13 +1,12 @@
-import { addorRemoveBridgeInChatBot, createChatBot, getAllChatBot, getChatBotDetails, updateChatBot } from "@/api";
+import { addorRemoveBridgeInChatBot, createChatBot, getAllChatBot, getChatBotDetails, updateChatBot, updateChatBotConfig } from "@/api";
 import { isError } from "lodash";
-import { addorRemoveBridgeInChatBotReducer, createNewBotReducer, getAllChatBotReducer, getChatBotDetailsReducer, updateChatBotReducer } from "../reducer/ChatBotReducer";
+import { addorRemoveBridgeInChatBotReducer, createNewBotReducer, getAllChatBotReducer, getChatBotDetailsReducer, updateChatBotConfigReducer, updateChatBotReducer } from "../reducer/ChatBotReducer";
 import { updateBridgeReducer } from "../reducer/bridgeReducer";
 
 
 export const getAllChatBotAction = (orgId) => async (dispatch, getState) => {
     try {
         const response = await getAllChatBot(orgId);
-        console.log(response)
         dispatch(getAllChatBotReducer({ chatbots: response.data.chatbots, orgId }));
     } catch (error) {
         console.error(error);
@@ -41,7 +40,6 @@ export const getChatBotDetailsAction = (botId) => async (dispatch, getState) => 
     try {
         const response = await getChatBotDetails(botId);
         dispatch(getChatBotDetailsReducer({ botId, data: response.data }))
-        console.log(response)
         // dispatch(getAllChatBotReducer({ bridges: response, orgId }));
     } catch (error) {
         console.error(error);
@@ -67,3 +65,20 @@ export const updateChatBotAction = (botId, dataToSend) => async (dispatch, getSt
         console.error(error);
     }
 }
+
+export const updateChatBotConfigAction = (botId, dataToSend) => async (dispatch, getState) => {
+    try {
+        const response = await updateChatBotConfig(botId, { config: dataToSend });
+        dispatch(updateChatBotConfigReducer({ botId, data: response.data }))
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// "config": {
+//     "type": "popup",
+//     "height": "100",
+//     "heightUnit": "%",
+//     "width": "30",
+//     "widthUnit": "vw"
+// },

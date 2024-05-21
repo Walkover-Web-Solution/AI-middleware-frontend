@@ -43,7 +43,7 @@ function Page({ params }) {
             <h1 className="text-2xl font-semibold">Chatbot Configuration</h1>
             <div className="flex flex-col gap-4">
                 <PrivateFormSection params={params} />
-                <FormSection />
+                <FormSection params={params} />
                 <SecondStep />
             </div>
         </div>
