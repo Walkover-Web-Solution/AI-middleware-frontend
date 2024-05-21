@@ -26,10 +26,11 @@ export const bridgeReducer = createSlice({
     },
     fetchSingleBridgeReducer: (state, action) => {
       const { bridges, integrationData } = action.payload;
+      const responseFormat = handleResponseFormat(bridges)
       const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;
       const obj2 = modelInfo[service][modelDefault];
       const response = updatedData(bridges, obj2, type);
-      state.allBridgesMap[_id] = { ...state.allBridgesMap[_id], ...response, integrationData, responseFormat: handleResponseFormat(bridges) };
+      state.allBridgesMap[_id] = { ...state.allBridgesMap[_id], ...response, integrationData, responseFormat: responseFormat };
       state.loading = false;
     },
 
@@ -43,13 +44,16 @@ export const bridgeReducer = createSlice({
     },
     updateBridgeReducer: (state, action) => {
       const { bridges } = action.payload;
+      const responseFormat = handleResponseFormat(bridges)
       const { _id, configuration, service, type } = bridges;
       const modelDefault = configuration.model.default;
       const obj2 = modelInfo[service][modelDefault];
       const response = updatedData(bridges, obj2, type);
       state.allBridgesMap[_id] = {
+        ...state.allBridgesMap[_id],
         ...response,
-        responseFormat: handleResponseFormat(bridges)
+        responseFormat: responseFormat,
+
       };
     },
     deleteBridgeReducer: (state, action) => {

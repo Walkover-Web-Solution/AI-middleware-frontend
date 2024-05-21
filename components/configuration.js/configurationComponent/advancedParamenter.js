@@ -33,31 +33,40 @@ const AdvancedParameters = ({ params, dataToSend: localdata }) => {
     };
 
     const handleInputChange = (e, key, isBoolean, isSlider = false) => {
-        const { value, checked, type } = e.target;
-        let newValue = type === 'number' ? (value.includes('.') ? parseFloat(value) : parseInt(value, 10)) : value;
-        let newCheckedValue = checked;
-
-        // Simplify the handling of different key cases
-        let updatedDataToSend = { ...dataToSend };
-        if (key === "bridgeType") {
-            updatedDataToSend[key] = newCheckedValue ? 'chatbot' : 'api';
-        } else if (key === "slugName") {
-            updatedDataToSend[key] = newValue;
-        } else if (key === 'response_format') {
-            const typeValue = newCheckedValue ? 'json_object' : 'text';
-            updatedDataToSend.configuration = {
-                ...updatedDataToSend.configuration,
-                [key]: { type: typeValue },
-            };
-        } else {
-            // Default case for other keys
-            updatedDataToSend.configuration = {
-                ...updatedDataToSend.configuration,
-                [key]: isSlider ? Number(newValue) : isBoolean ? newCheckedValue : newValue,
-            };
+        let newValue = e.target.value;
+        let newCheckedValue = e.target.checked
+        if (e.target.type === 'number') {
+            newValue = newValue.includes('.') ? parseFloat(newValue) : parseInt(newValue, 10);
         }
-        setDataToSend(updatedDataToSend)
 
+
+        // Prepare the updated dataToSend object
+        let updatedDataToSend = {
+            ...dataToSend,
+            configuration: {
+                ...dataToSend.configuration,
+                [key]: isSlider ? Number(newValue) : isBoolean ? newCheckedValue : newValue,
+            }
+        };
+        debugger
+        // If the key is 'responseFormat', check the value and add the appropriate type
+        if (key === 'response_format') {
+            const typeValue = newCheckedValue === true ? 'json_object' : newCheckedValue === false ? 'text' : null;
+            if (typeValue) {
+                updatedDataToSend = {
+                    ...updatedDataToSend,
+                    configuration: {
+                        ...updatedDataToSend.configuration,
+                        [key]: {
+                            // ...updatedDataToSend.configuration[key],
+                            type: typeValue,
+                        },
+                    },
+                };
+            }
+        }
+
+        setDataToSend(updatedDataToSend);
         // For non-slider inputs, call UpdateBridge immediately
         if (!isSlider) {
             UpdateBridge(updatedDataToSend);
@@ -127,7 +136,7 @@ const AdvancedParameters = ({ params, dataToSend: localdata }) => {
                                 <input
                                     type="checkbox"
                                     required={value.level === 1}
-                                    defaultChecked={value.default.type === "json_object" || value.default}
+                                    defaultChecked={value.default.type === "json_object" ? true : value.default.type === "text" ? false : value.default}
                                     onChange={(e) => handleInputChange(e, key, isBoolean)}
                                     className="checkbox"
                                     name={key}
