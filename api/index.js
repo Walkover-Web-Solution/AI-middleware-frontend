@@ -296,6 +296,18 @@ export const createReponseTypeInOrg = async (orgId) => {
 }
 
 
+export const createOrgToken = async (orgId) => {
+  try {
+    const data = await axios.post(`${URL}/chatbot/${orgId}/createtoken`)
+    return data;
+  } catch (error) {
+    toast.error(error.response.data.error)
+  }
+}
+
+
+
+
 export const addorRemoveResponseIdInBridge = async (bridge_id, orgId, responseObj) => {
   try {
 

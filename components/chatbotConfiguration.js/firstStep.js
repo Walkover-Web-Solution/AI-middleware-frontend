@@ -1,3 +1,4 @@
+import { createOrgToken } from "@/api";
 import { Copy } from "lucide-react";
 import { useState } from "react";
 
@@ -20,6 +21,11 @@ function InputWithCopyButton({ label, placeholder, value, disabled }) {
 
 export default function PrivateFormSection({ params }) {
     const [showInput, setShowInput] = useState(false); // State to control the visibility
+    const [accessKey, setAccessKey] = useState("");
+    const handleGetAccessKey = async () => {
+        const response = await createOrgToken(params?.org_id);
+        setShowInput(true)
+    }
     return (
         <div className="flex items-start justify-start flex-col gap-4 bg-white rounded-lg shadow p-4">
             <div>
@@ -27,7 +33,7 @@ export default function PrivateFormSection({ params }) {
                 <caption className="text-xs text-gray-600">AccessType</caption>
             </div>
             <div className="flex flex-col gap-2 ">
-                {showInput ? <InputWithCopyButton label="access key" placeholder="access key" /> : <button className="btn btn-primary w-fit btn-sm" onClick={() => setShowInput(true)}>Get Access Key</button>}
+                {showInput ? <InputWithCopyButton label="access key" placeholder="access key" /> : <button className="btn btn-primary w-fit btn-sm" onClick={handleGetAccessKey}>Get Access Key</button>}
                 <InputWithCopyButton label="org_id" placeholder="org_id" value={params?.org_id} disabled />
                 {/* <InputWithCopyButton label="project_id" placeholder="project_id" /> */}
                 <InputWithCopyButton label="chatbot_id" placeholder="chatbot_id" value={params?.chatbot_id} disabled />
