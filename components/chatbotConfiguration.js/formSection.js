@@ -54,6 +54,7 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
                 placeholder={placeholder}
                 value={value || ''}
                 onChange={onChange}
+                min={0}
                 name={name}
             />
             <select
