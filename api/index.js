@@ -199,7 +199,6 @@ export const createOrg = async (dataToSend) => {
   }
 }
 
-
 export const getAllOrg = async () => {
   try {
     const data = await axios.get(`${PROXY_URL}/api/c/getCompanies`)
@@ -284,6 +283,15 @@ export const createapi = async (bridge_id, dataFromEmbed) => {
   } catch (error) {
     console.error(error);
     return error;
+  }
+}
+
+export const createReponseTypeInOrg = async (orgId) => {
+  try {
+    const data = await axios.post(`${URL}/chatbot/${orgId}/createResponse`)
+    return data;
+  } catch (error) {
+    toast.error(error.response.data.error)
   }
 }
 
