@@ -24,6 +24,7 @@ export default function PrivateFormSection({ params }) {
     const [accessKey, setAccessKey] = useState("");
     const handleGetAccessKey = async () => {
         const response = await createOrgToken(params?.org_id);
+        setAccessKey(response?.data?.orgAcessToken);
         setShowInput(true)
     }
     return (
@@ -33,7 +34,7 @@ export default function PrivateFormSection({ params }) {
                 <caption className="text-xs text-gray-600">AccessType</caption>
             </div>
             <div className="flex flex-col gap-2 ">
-                {showInput ? <InputWithCopyButton label="access key" placeholder="access key" /> : <button className="btn btn-primary w-fit btn-sm" onClick={handleGetAccessKey}>Get Access Key</button>}
+                {showInput ? <InputWithCopyButton label="access key" placeholder="access key" value={accessKey} /> : <button className="btn btn-primary w-fit btn-sm" onClick={handleGetAccessKey}>Get Access Key</button>}
                 <InputWithCopyButton label="org_id" placeholder="org_id" value={params?.org_id} disabled />
                 {/* <InputWithCopyButton label="project_id" placeholder="project_id" /> */}
                 <InputWithCopyButton label="chatbot_id" placeholder="chatbot_id" value={params?.chatbot_id} disabled />
