@@ -2,11 +2,10 @@ import { Copy } from "lucide-react";
 
 export default function SecondStep() {
     const copyToClipboardProduct = () => {
-        const scriptText = `<script\n  id="interface-main-script"\n  interface_id="664aeb1b522256514270d836"\n  src="https://interface-embed.viasocket.com/interface-dev.js"\n></script>`;
+        const scriptText = `<script\n  id="chatbot-main-script"\n  embedToken=" <embed token here> "\n  src="https://chatbot-embed.viasocket.com/chatbot-prod.js"\n></script>`;
         navigator.clipboard.writeText(scriptText)
     };
     const copyToClipboardReceiveData = () => {
-        // const scriptText = `<script\n  id="interface-main-script"\n  interface_id="664aeb1b522256514270d836"\n  src="https://interface-embed.viasocket.com/interface-dev.js"\n></script>`;
         const scriptText = `
         <!-- Use this event listner to listen for the event, sent by iframe -->
            window.addEventListener('message', (event) => {
@@ -29,10 +28,10 @@ export default function SecondStep() {
 
             <div className="mockup-code">
                 <Copy className="absolute right-5 top-5 cursor-pointer text-white" size={'20px'} onClick={copyToClipboardProduct} />
-                <pre data-prefix=">" className="text-error" ><code>&lt; script </code></pre>
-                <pre data-prefix=">" className="text-error"><code className="text-error">id= </code><code className="text-warning">"interface-main-script"</code></pre>
-                <pre data-prefix=">" className="text-error"><code>interface_id=</code><code className="text-warning">"664aeb1b522256514270d836"</code></pre>
-                <pre data-prefix=">" className="text-error"><code>src=</code><code className="text-warning">"https://interface-embed.viasocket.com/interface-dev.js"</code></pre>
+                <pre data-prefix=">" className="text-error" ><code>&lt;script </code></pre>
+                <pre data-prefix=">" className="text-error"><code className="text-error">id= </code><code className="text-warning">"chatbot-main-script"</code></pre>
+                <pre data-prefix=">" className="text-error"><code>embedToken=</code><code className="text-warning">"Enter Embed Token here"</code></pre>
+                <pre data-prefix=">" className="text-error"><code>src=</code><code className="text-warning">"https://chatbot-embed.viasocket.com/chatbot-prod.js"</code></pre>
                 <pre data-prefix=">" className="text-error"><code>&lt;/script&gt;</code></pre>
             </div>
 
@@ -54,11 +53,12 @@ export default function SecondStep() {
                 <pre data-prefix=">" >
                     <code>{'}'});</code>
                 </pre>
+                <br />
                 <pre data-prefix=">" >
                     <code>&lt;!-- Use This method to send data when needed --&gt;</code>
                 </pre>
                 <pre data-prefix=">" >
-                    <code>window.SendDataToInterface({'{'}</code>
+                    <code>window.SendDataToChatbot({'{'}</code>
                 </pre>
                 <pre data-prefix=">" >
                     <code>  bridgeName: 'Hello World',</code>
