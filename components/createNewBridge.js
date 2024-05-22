@@ -104,7 +104,7 @@ function CreateNewBridge({ orgid }) {
                         </label>
                         <label className="form-control w-full mb-2">
                             <div className="label">
-                                <span className="label-text">Slugname Name</span>
+                                <span className="label-text">Slug Name</span>
                             </div>
                             <input type="text" id="slug-name" placeholder="Type here" className="input input-bordered w-full " />
 
