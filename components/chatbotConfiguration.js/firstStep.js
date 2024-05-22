@@ -1,5 +1,6 @@
 import { createOrgToken } from "@/api";
 import { Copy } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 function InputWithCopyButton({ label, placeholder, value, disabled }) {
@@ -21,6 +22,7 @@ function InputWithCopyButton({ label, placeholder, value, disabled }) {
 
 export default function PrivateFormSection({ params }) {
     const [showInput, setShowInput] = useState(false); // State to control the visibility
+    const router = useRouter();
     const [accessKey, setAccessKey] = useState("");
     const handleGetAccessKey = async () => {
         const response = await createOrgToken(params?.org_id);
@@ -39,6 +41,8 @@ export default function PrivateFormSection({ params }) {
                 {/* <InputWithCopyButton label="project_id" placeholder="project_id" /> */}
                 <InputWithCopyButton label="chatbot_id" placeholder="chatbot_id" value={params?.chatbot_id} disabled />
             </div>
+            <p className="text-sm">Generate a JWT token using project_id, org_id, interface_id, and user_id, then sign it with the access key.</p>
+            <a className="link link-hover text-sm" target="_blank" href="https://viasocket.com/faq/create-jwt-token">Learn, How to create JWT token?</a>
         </div >
     );
 }
