@@ -23,14 +23,15 @@ function CreateNewBridge({ orgid }) {
         setSelectedType(e.target.selectedOptions[0].parentNode.label)
     }
 
-    const createBridgeHandler = (name) => {
+    const createBridgeHandler = (name, slugname) => {
         if (name.length > 0 && selectedModel && selectedModel && seletedType) {
             setIsLoading(true);
             const dataToSend = {
                 "configuration": {
                     "model": selectedModel,
                     "name": name,
-                    "type": seletedType
+                    "type": seletedType,
+                    "slugName": slugname
                 },
                 "service": selectedService,
                 "bridgeType": bridgeType,
@@ -101,6 +102,13 @@ function CreateNewBridge({ orgid }) {
                                 {!services?.[selectedService] && <option disabled key="0">Please select a service first !</option>}
                             </select>
                         </label>
+                        <label className="form-control w-full mb-2">
+                            <div className="label">
+                                <span className="label-text">Slugname Name</span>
+                            </div>
+                            <input type="text" id="slug-name" placeholder="Type here" className="input input-bordered w-full " />
+
+                        </label>
                         <div className="items-center justify-start mt-2">
                             <div className="label">
                                 <span className="label-text">Used as</span>
@@ -123,7 +131,7 @@ function CreateNewBridge({ orgid }) {
                             {/* if there is a button in form, it will close the modal */}
                             <button className="btn">Close</button>
                         </form>
-                        <button className="btn" onClick={() => createBridgeHandler(document.getElementById("bridge-name").value)}>+ Create</button>
+                        <button className="btn" onClick={() => createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name").value)}>+ Create</button>
                     </div>
                 </div>
             </dialog>
