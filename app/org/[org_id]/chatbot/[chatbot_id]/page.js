@@ -14,9 +14,8 @@ import { useDispatch } from "react-redux";
 
 function Page({ params }) {
 
-    const { ChatbotDetails, responseData, bridgeData } = useCustomSelector((state) => ({
+    const { ChatbotDetails, bridgeData } = useCustomSelector((state) => ({
         ChatbotDetails: (state?.ChatBot?.ChatBotMap?.[params?.chatbot_id] || {}),
-        responseData: state?.responseTypeReducer?.responses?.[params?.org_id],
         bridgeData: state?.bridgeReducer?.org?.[params?.org_id]
     }))
 
@@ -37,7 +36,7 @@ function Page({ params }) {
                 <input type="text" placeholder="Enter Chatbot Name" defaultValue={ChatbotDetails?.title} className=" bg-transparent grow border-none p-0 outline-none focus:border-none flex justify-center items-center focus:outline-none  font-semibold" />
             </label>
             <ChatbotCard params={params} />
-            <ChatbotSlider params={params} />
+            {bridgeData && <ChatbotSlider params={params} />}
         </div>
         <div className="flex  flex-col w-1/2 overflow-auto p-4 gap-4 ">
             <h1 className="text-2xl font-semibold">Chatbot Configuration</h1>

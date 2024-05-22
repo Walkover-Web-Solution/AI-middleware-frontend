@@ -32,8 +32,9 @@ export default function ChatbotSlider({ params }) {
                 <div className="mt-6 flex flex-1 flex-col justify-between">
                     <nav className="-mx-3 space-y-6 ">
                         <div className="space-y-3 ">
-                            {bridgeData?.filter(Bridge => Bridge.bridgeType === "chatbot").map((Bridge, index) => (
+                            {bridgeData?.map((Bridge, index) => (
                                 <a
+
                                     onClick={(e) => {
                                         e.preventDefault(); // Prevent the default anchor action
                                         // Toggle the checkbox's checked status programmatically
@@ -42,7 +43,7 @@ export default function ChatbotSlider({ params }) {
                                         // No need to manually call handleBridgeSelect here since clicking the checkbox will trigger its onClick event
                                     }}
                                     key={index} // Keep the key for list rendering
-                                    className="flex transform items-center justify-between rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700"
+                                    className={`flex transform items-center justify-between rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700 ${Bridge.bridgeType === 'api' ? " opacity-50 cursor-not-allowed" : ""}`}
                                     href="#"
                                     style={{ overflow: 'hidden' }}
                                 >
@@ -52,6 +53,7 @@ export default function ChatbotSlider({ params }) {
                                     </div>
                                     <input
                                         type="checkbox"
+                                        disabled={Bridge.bridgeType === "api"}
                                         id={`Bridge-${Bridge._id}`} // Use a unique ID for each checkbox
                                         defaultChecked={ChatbotDetails.bridge.some(e => e._id === Bridge._id)}
                                         className="checkbox"
