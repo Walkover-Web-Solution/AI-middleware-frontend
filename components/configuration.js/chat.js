@@ -80,18 +80,21 @@ function Chat({ dataToSend, params }) {
         // }));
         setMessages(prevMessages => [...prevMessages, newChat]);
         responseData = await dryRun({
-          ...localDataToSend,
-          configuration: {
-            ...localDataToSend.configuration,
-            conversation: conversation,
-            ...defaultsMap,
-            user: data,
+          localDataToSend: {
+            ...localDataToSend,
+            configuration: {
+              ...localDataToSend.configuration,
+              conversation: conversation,
+              ...defaultsMap,
+              user: data,
+            }
           },
+          bridge_id: params?.id
         });
       }
       else {
         const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
-        responseData = await dryRun({ ...localDataToSend, configuration: updatedConfigration });
+        responseData = await dryRun({ localDataToSend: { ...localDataToSend, configuration: updatedConfigration }, bridge_id: params?.id });
       }
       if (!responseData.success) {
         if (dataToSend.configuration.type === "chat") {
