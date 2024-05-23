@@ -8,8 +8,6 @@ const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
 
 
-
-
 export const getSingleModels = async () => {
   try {
     const getSingleModels = await axios.get(`${URL}/api/v1/config/models`)
@@ -395,6 +393,26 @@ export const updateChatBotConfig = async (botId, dataToSend) => {
   try {
     const response = await axios.post(`${URL}/chatbot/${botId}/updateconfig`, dataToSend);
     return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const loginUser = async (dataToSend) => {
+  try {
+    const response = await axios.post(`${URL}/user/login`, dataToSend);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const switchUser = async (dataToSend) => {
+  try {
+    const response = await axios.post(`${URL}/user/switch`, dataToSend);
+    return response.data;
   } catch (error) {
     console.error(error);
     return error;

@@ -2,33 +2,38 @@ import axios from "axios";
 
 axios.interceptors.request.use(
     async (config) => {
-        let token
-        if(config.url.includes("routes.msg91.com")) token = localStorage.getItem("proxy_token")
-        // if("viasocket.com") 
-        else token =  process.env.NEXT_PUBLIC_AUTHORIZATION_CODE
+        let localToken = process.env.NEXT_PUBLIC_ENV === 'local' ? localStorage.getItem("local_token") : null;
+        let token = localStorage.getItem("proxy_token");
+
         if (token && config.url.includes("routes.msg91.com")) {
-            config.headers['proxy_auth_token'] = token
+            config.headers['proxy_auth_token'] = token;
+        } else {
+            config.headers['proxy_auth_token'] = token;
         }
-        else if (config.url.includes("dev-ai-middleware-h7duexlbuq-el" ) || config.url.includes("local")) {
-            config.headers['Authorization'] = token 
+
+        if (process.env.NEXT_PUBLIC_ENV === 'local') {
+            config.headers['Authorization'] = localToken;
+            config.headers['proxy-auth-token'] = token;
         }
-        return config
+
+        return config;
     },
     (error) => {
-        Promise.reject(error)
+        return Promise.reject(error);
     }
-) 
-// response interceptor
+);
+
+// Response interceptor
 axios.interceptors.response.use(
     (response) => {
-        return response
+        return response;
     },
     async function (error) {
         if (error?.response?.status === 401) {
-            localStorage.clear()
+            localStorage.clear();
         }
-        return Promise.reject(error)
+        return Promise.reject(error);
     }
-)
+);
 
-export default axios
+export default axios;

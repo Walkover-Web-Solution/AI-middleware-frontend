@@ -1,10 +1,10 @@
 "use client"
-import React, { useState ,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import CreateOrg from '@/components/createNewOrg';
 import { useRouter } from 'next/navigation';
-import { switchOrg } from '@/api';
+import { switchOrg, switchUser } from '@/api';
 import Protected from '@/components/protected';
 // import Chatbot from 'interface-chatbot';
 import { userDetails } from '@/store/action/userDetailsAction';
@@ -21,7 +21,7 @@ function Page() {
   // Next.js router instance
   const route = useRouter()
   // Use useSelector to get organizations from the Redux store
-  const organizations = useSelector(state => state.userDetailsReducer.organizations) ;
+  const organizations = useSelector(state => state.userDetailsReducer.organizations);
 
 
 
@@ -31,10 +31,18 @@ function Page() {
    * @param {String} id - The organization id
    * @returns {Promise<void>} 
    */
-  const handleSwitchOrg = async (id) => {
+  const handleSwitchOrg = async (id, name) => {
     try {
       // Make the API call to switch the current organization
       const response = await switchOrg(id);
+      debugger
+      if (process.env.NEXT_PUBLIC_ENV === 'local') {
+        const localToken = await switchUser({
+          orgId: id,
+          orgName: name
+        })
+        localStorage.setItem('local_token', localToken.token);
+      }
       // Redirect the user to the bridges page of the newly selected organization
       // after the switch organization API call is successful
       route.push(`/org/${id}/bridges`);
@@ -85,8 +93,8 @@ function Page() {
       <div className="w-full max-w-4xl mt-4">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Existing Organizations</h2>
         <div className="grid grid-rows-1 md:grid-rows-2 lg:grid-rows-3 gap-4 mb-8 cursor-pointer">
-          { Object.values(organizations)?.slice().reverse().map((org, index) => (
-            <div key={index} onClick={() => { handleSwitchOrg(org.id); route.push(`org/${org.id}/bridges`) }} className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
+          {Object.values(organizations)?.slice().reverse().map((org, index) => (
+            <div key={index} onClick={() => { handleSwitchOrg(org.id, org?.name); route.push(`org/${org.id}/bridges`) }} className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
               <div className="px-6 py-4">
                 <div className="font-bold text-xl mb-2">{org?.name}</div>
                 <p className="text-gray-700 text-base">
@@ -109,7 +117,7 @@ function Page() {
         // theme='light'
         variables={{ "your_variables": 7 }}
       /> */}
-      
+
     </div>
 
 
