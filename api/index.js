@@ -116,22 +116,6 @@ export const getHistory = async (bridgeId) => {
   }
 }
 
-// export const dryRun = async (localDataToSend) => {
-
-//   try {
-//     let dryRun
-//     if (localDataToSend.configuration.type === "chat") dryRun = await axios.post(`${URL}/api/v1/model/playground/chat/completion`, localDataToSend)
-//     if (localDataToSend.configuration.type === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion`, localDataToSend)
-//     if (localDataToSend.configuration.type === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings`, localDataToSend)
-
-//     return { success: true, data: dryRun.data }
-//   } catch (error) {
-//     console.error("dry run error", error, error.response.data.error);
-//     return { success: false, error: error.response.data.error }
-//   }
-// }
-
-
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
 
   try {
