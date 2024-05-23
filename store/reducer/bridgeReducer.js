@@ -63,6 +63,7 @@ export const bridgeReducer = createSlice({
     },
     integrationReducer: (state, action) => {
       const { dataToSend, id } = action.payload;
+<<<<<<< HEAD
       let flows = state.allBridgesMap[id].integrationData.flows;
       const index = flows.findIndex(flow => flow.id === dataToSend.id);
 
@@ -71,6 +72,9 @@ export const bridgeReducer = createSlice({
       } else {
         flows.push(dataToSend);
       }
+=======
+      state.allBridgesMap[id].integrationData.flows.push(dataToSend)
+>>>>>>> aa42108f322202c5017cdd4a222fe60a586e268a
     }
   },
 });
