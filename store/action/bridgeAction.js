@@ -69,10 +69,9 @@ export const deleteBridgeAction = ({ bridgeId, orgId }) => async (dispatch) => {
 };
 
 
-export const integrationAction = (embed_token, bridge_id) => async (dispatch) => {
+export const integrationAction = (dataToSend, bridge_id) => async (dispatch) => {
   try {
-    const intregrationData = await integration(embed_token);
-    dispatch(integrationReducer({ intregration: intregrationData, id: bridge_id }))
+    dispatch(integrationReducer({ dataToSend, id: bridge_id }))
   } catch (error) {
     console.error(error)
   }

@@ -18,7 +18,7 @@ const Page = ({ params }) => {
 
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
-  }, [params.id]);
+  }, []);
 
   const [dataToSend, setDataToSend] = useState(null);
 
@@ -26,13 +26,13 @@ const Page = ({ params }) => {
     if (bridge) {
       setDataToSend(prepareDataToSend(bridge));
     }
-  }, [params, bridge]);
+  }, [bridge]);
 
   useEffect(() => {
     if (embedToken) {
       appendEmbedScript(embedToken);
     }
-  }, [params.id, embedToken]);
+  }, [embedToken]);
 
   useEffect(() => {
     window.addEventListener("message", handleMessage);
@@ -45,6 +45,26 @@ const Page = ({ params }) => {
   useEffect(() => {
     handleResizer();
   }, []);
+
+  function handleMessage(e) {
+    if (e?.data?.webhookurl) {
+      if ((e?.data?.action === "published" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
+        const dataToSend = {
+          ...e.data,
+          status: e?.data?.action
+        }
+        dispatch(integrationAction(dataToSend, params?.id));
+        const dataFromEmbed = {
+          url: e?.data?.webhookurl,
+          payload: e?.data?.payload,
+          desc: e?.data?.description,
+          id: e?.data?.id,
+          status: e?.data?.action,
+        };
+        dispatch(createApiAction(params.id, dataFromEmbed));
+      }
+    }
+  }
 
   return (
     <>
@@ -104,25 +124,7 @@ function appendEmbedScript(embedToken) {
   };
 }
 
-function handleMessage(e) {
-  const { dispatch, params, embedToken } = e.data; // Assuming you can pass these through message
 
-  if (e.data.webhookurl) {
-    dispatch(integrationAction(embedToken, params.id));
-    if ((e.data.action === "published" || e.data.action === "created") && e.data.description.length > 0) {
-      const dataFromEmbed = {
-        data: {
-          url: e.data.webhookurl,
-          payload: e.data.payload,
-          desc: e.data.description,
-          id: e.data.id,
-          status: e.data.action,
-        },
-      };
-      dispatch(createApiAction(params.id, dataFromEmbed));
-    }
-  }
-}
 
 function handleResizer() {
   const resizer = document.querySelector(".resizer");
