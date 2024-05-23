@@ -401,7 +401,7 @@ export const updateChatBotConfig = async (botId, dataToSend) => {
 
 export const loginUser = async (dataToSend) => {
   try {
-    const response = await axios.post(`${URL}/user/login`, dataToSend);
+    const response = await axios.post(`${URL}/user/localToken`, dataToSend);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -411,7 +411,7 @@ export const loginUser = async (dataToSend) => {
 
 export const switchUser = async (dataToSend) => {
   try {
-    const response = await axios.post(`${URL}/user/switch`, dataToSend);
+    const response = await axios.post(`${URL}/user/switchOrg`, dataToSend);
     return response.data;
   } catch (error) {
     console.error(error);
