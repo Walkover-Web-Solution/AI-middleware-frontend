@@ -55,13 +55,11 @@ const Page = ({ params }) => {
         }
         dispatch(integrationAction(dataToSend, params.id));
         const dataFromEmbed = {
-          data: {
-            url: e.data.webhookurl,
-            payload: e.data.payload,
-            desc: e.data.description,
-            id: e.data.id,
-            status: e.data.action,
-          },
+          url: e.data.webhookurl,
+          payload: e.data.payload,
+          desc: e.data.description,
+          id: e.data.id,
+          status: e.data.action,
         };
         dispatch(createApiAction(params.id, dataFromEmbed));
       }
