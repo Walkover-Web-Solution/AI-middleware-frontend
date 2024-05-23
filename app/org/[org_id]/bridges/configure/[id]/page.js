@@ -51,17 +51,15 @@ const Page = ({ params }) => {
       if ((e?.data?.action === "published" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
         const dataToSend = {
           ...e.data,
-          status: e.data.action
+          status: e.data?.action
         }
-        dispatch(integrationAction(dataToSend, params.id));
+        dispatch(integrationAction(dataToSend, params?.id));
         const dataFromEmbed = {
-          data: {
-            url: e.data.webhookurl,
-            payload: e.data.payload,
-            desc: e.data.description,
-            id: e.data.id,
-            status: e.data.action,
-          },
+          url: e.data.webhookurl,
+          payload: e.data.payload,
+          desc: e.data.description,
+          id: e.data.id,
+          status: e.data.action,
         };
         dispatch(createApiAction(params.id, dataFromEmbed));
       }
