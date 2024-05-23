@@ -62,9 +62,8 @@ export const bridgeReducer = createSlice({
       state.org[orgId] = state.org[orgId].filter(bridge => bridge._id !== bridgeId);
     },
     integrationReducer: (state, action) => {
-      const { intregration, id } = action.payload;
-      const newdata = { ...state.allBridgesMap[id], integrationData: intregration }
-      state.allBridgesMap[id] = newdata;
+      const { dataToSend, id } = action.payload;
+      state.allBridgesMap[id].integrationData.flows.push(dataToSend)
     }
   },
 });

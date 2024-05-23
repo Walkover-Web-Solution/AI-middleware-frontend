@@ -13,12 +13,6 @@ import { useDispatch } from "react-redux";
 
 function ChatbotPage({ params }) {
 
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(getAllChatBotAction(params?.org_id));
-    }, [params.org_id]);
-
     return <div>
 
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />

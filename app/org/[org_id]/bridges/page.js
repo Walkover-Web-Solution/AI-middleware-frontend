@@ -17,22 +17,6 @@ function Home({ params }) {
   const dispatch = useDispatch()
   const router = useRouter()
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [bridgesPerPage] = useState(10);
-
-  const indexOfLastBridge = currentPage * bridgesPerPage;
-  const indexOfFirstBridge = indexOfLastBridge - bridgesPerPage;
-  const currentBridges = allBridges.slice(indexOfFirstBridge, indexOfLastBridge);
-
-  const totalBridges = allBridges.length;
-  const totalPages = Math.ceil(totalBridges / bridgesPerPage);
-
-  const paginate = pageNumber => setCurrentPage(pageNumber);
-
-  // Next and Previous Page Handlers
-  const nextPage = () => setCurrentPage(prev => (prev < totalPages ? prev + 1 : prev));
-  const prevPage = () => setCurrentPage(prev => (prev > 1 ? prev - 1 : prev));
-
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredBridges = allBridges.filter((item) =>
@@ -40,13 +24,7 @@ function Home({ params }) {
     item.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-  /**
-   * Handle Delete Bridge Action
-   *
-   * @param {string} bridgeId Bridge Id
-   *
-   * @returns {Promise<void>}
-   */
+
   const handleDeleteBridge = async (bridgeId) => {
     // Confirm delete action
     const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
@@ -67,25 +45,6 @@ function Home({ params }) {
     }
   };
 
-
-  useEffect(() => {
-    dispatch(getAllBridgesAction(params.org_id));
-    dispatch(getAllResponseTypesAction(params.org_id));
-  }, [params.org_id]);
-
-  // const copyBridgeIdToClipboard = (e, id) => {
-  //   e.stopPropagation();
-  //   navigator.clipboard.writeText(id)
-  //     .then(() => {
-  //       toast.success('Bridge ID copied to clipboard');
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error copying to clipboard:', error);
-  //       toast.error('Failed to copy bridge ID');
-  //     });
-  // };
-
-  // const columns = ["name", "_id", "service"];
 
   const onClickConfigure = (id) => {
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);

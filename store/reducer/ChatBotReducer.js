@@ -50,32 +50,6 @@ export const ChatBot = createSlice({
         updateChatBotConfigReducer: (state, action) => {
             state.ChatBotMap[action.payload.botId].config = action.payload.data.config
         }
-
-        // createBridgeReducer: (state, action) => {
-        //   state.org[action.payload.orgId].push(action.payload.data.data.bridge)
-        // },
-        // updateBridgeReducer: (state, action) => {
-        //   const { bridges } = action.payload;
-        //   const { _id, configuration, service, type } = bridges;
-        //   const modelDefault = configuration.model.default;
-        //   const obj2 = modelInfo[service][modelDefault];
-        //   const response = updatedData(bridges, obj2, type);
-        //   state.allBridgesMap[_id] = {
-        //     ...state.allBridgesMap[_id],
-        //     ...response,
-        //     responseFormat: handleResponseFormat(bridges)
-        //   };
-        // },
-        // deleteBridgeReducer: (state, action) => {
-        //   const { bridgeId, orgId } = action.payload;
-        //   delete state.allBridgesMap[bridgeId];
-        //   state.org[orgId] = state.org[orgId].filter(bridge => bridge._id !== bridgeId);
-        // },
-        // integrationReducer: (state, action) => {
-        //   const { intregration, id } = action.payload;
-        //   const newdata = { ...state.allBridgesMap[id], integrationData: intregration }
-        //   state.allBridgesMap[id] = newdata;
-        // }
     },
 });
 
