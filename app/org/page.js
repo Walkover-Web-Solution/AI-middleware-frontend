@@ -35,7 +35,6 @@ function Page() {
     try {
       // Make the API call to switch the current organization
       const response = await switchOrg(id);
-      debugger
       if (process.env.NEXT_PUBLIC_ENV === 'local') {
         const localToken = await switchUser({
           orgId: id,
