@@ -29,25 +29,16 @@ function Chat({ dataToSend, params }) {
 
 
   const defaultsMap = useMemo(() => {
-    if (!bridge || !bridge.configuration) {
-      return {};
-    }
-
-    return Object.entries(bridge.configuration).reduce((acc, [key, value]) => {
-      console.log("Key:", key, "Value:", value); // Log each key and value
-      const isToolsEmptyArray = key === 'tools';
-      console.log("isToolsEmptyArray:", isToolsEmptyArray); // Log the specific condition check
-
-      // if (!isToolsEmptyArray && value.default !== undefined) {
-      acc[key] = value.default;
-      // }
-
-      if (!acc.hasOwnProperty('tools') || acc.tools.length === 0) {
+    return bridge ? Object.entries(bridge?.configuration).reduce((acc, [key, value]) => {
+      const isToolsEmptyArray = key === 'tools' && Array.isArray(value.default) && value.default.length === 0;
+      if (!isToolsEmptyArray && value.default !== undefined) {
+        acc[key] = value.default;
+      }
+      if (!acc.hasOwnProperty('tools') || acc?.tools?.length === 0) {
         delete acc['tool_choice'];
       }
-
       return acc;
-    }, {});
+    }, {}) : {};
   }, [bridge]);
 
   // Update localDataToSend configuration
