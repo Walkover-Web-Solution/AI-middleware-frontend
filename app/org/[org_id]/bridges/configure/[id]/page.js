@@ -9,6 +9,7 @@ import { useCustomSelector } from "@/customSelector/customSelector";
 import { services } from "@/jsonFiles/models";
 import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction";
 
+export const runtime = 'edge';
 const Page = ({ params }) => {
   const dispatch = useDispatch();
   const { bridge, embedToken } = useCustomSelector((state) => ({

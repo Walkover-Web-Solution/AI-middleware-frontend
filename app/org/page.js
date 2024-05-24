@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import CreateOrg from '@/components/createNewOrg';
 import { useRouter } from 'next/navigation';
-import { switchOrg, switchUser } from '@/api';
+import { switchOrg, switchUser } from '@/config';
 import Protected from '@/components/protected';
 // import Chatbot from 'interface-chatbot';
 import { userDetails } from '@/store/action/userDetailsAction';

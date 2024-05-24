@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 
+export const runtime = 'edge';
 
 function Home({ params }) {
 
@@ -53,7 +54,7 @@ function Home({ params }) {
 
   return (<div className="drawer lg:drawer-open ">
     {isLoading &&
-     <Loader/>}
+      <Loader />}
     <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
     <div className="drawer-content flex  flex-col items-start justify-start">
       <div className="flex w-full justify-start gap-16 items-start">

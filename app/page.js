@@ -4,7 +4,7 @@
 import React, { useLayoutEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation';
 import WithAuth from '@/components/withauth';
-import { loginUser } from '@/api';
+import { loginUser } from '@/config';
 import Loader from '@/components/loader';
 
 /**
@@ -74,7 +74,7 @@ function page() {
 
   return (
     <div style={{ width: "100vw", height: "100vh" }} className=' flex justify-center items-center'>
-      {loading ? <Loader/>
+      {loading ? <Loader />
         : <div id={process.env.NEXT_PUBLIC_REFERENCEID} />}
       {/* The div is required for the login script to work */}
     </div>

@@ -1,11 +1,11 @@
 "use client"
-import React, { useEffect, useState } from 'react';
-import Table from '@/components/table';
-import Sidebar from '@/components/Sidebar';
-import { getMetricsData } from '@/api'; 
-import { useSelector } from 'react-redux';
+import { getMetricsData } from '@/config';
 import Protected from '@/components/protected';
-import { useParams } from 'next/navigation';
+import Table from '@/components/table';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+
+export const runtime = 'edge';
 
 function Page({ params }) {
   const today = new Date().toISOString().split('T')[0];
@@ -17,7 +17,7 @@ function Page({ params }) {
   const adjustTimeForUTC = (date, includeEndTime) => {
     const localDate = new Date(date);
     if (includeEndTime) {
-        localDate.setHours(23, 59, 59, 999);
+      localDate.setHours(23, 59, 59, 999);
     }
 
     // Calculate timezone offset in milliseconds (local time minus UTC)
@@ -27,11 +27,11 @@ function Page({ params }) {
     const adjustedDate = new Date(localDate.getTime() - timezoneOffset);
 
     return adjustedDate.toISOString();
-};
+  };
 
-// Usage
-let startTime = adjustTimeForUTC(startDate, false); // Start of day is not that critical unless needed
-let endTime = adjustTimeForUTC(endDate, true); // Adjust end time to reflect local end of day
+  // Usage
+  let startTime = adjustTimeForUTC(startDate, false); // Start of day is not that critical unless needed
+  let endTime = adjustTimeForUTC(endDate, true); // Adjust end time to reflect local end of day
 
 
   // Update fetch logic to call the correct API based on the date being today
@@ -41,18 +41,18 @@ let endTime = adjustTimeForUTC(endDate, true); // Adjust end time to reflect loc
     const isToday = startDate === today && endDate === today;
 
     if (isToday) {
-        getMetricsData(params.org_id)
-            .then(handleResponse)
-            .catch(handleError);
+      getMetricsData(params.org_id)
+        .then(handleResponse)
+        .catch(handleError);
     } else {
-        let startTime = adjustTimeForUTC(startDate, false);
-        let endTime = adjustTimeForUTC(endDate, true);
+      let startTime = adjustTimeForUTC(startDate, false);
+      let endTime = adjustTimeForUTC(endDate, true);
 
-        getMetricsData(params.org_id, startTime, endTime)
-            .then(handleResponse)
-            .catch(handleError);
+      getMetricsData(params.org_id, startTime, endTime)
+        .then(handleResponse)
+        .catch(handleError);
     }
-};
+  };
 
 
   const handleResponse = (data) => {

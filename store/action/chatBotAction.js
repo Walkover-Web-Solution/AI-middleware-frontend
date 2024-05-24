@@ -1,4 +1,4 @@
-import { addorRemoveBridgeInChatBot, createChatBot, getAllChatBot, getChatBotDetails, updateChatBot, updateChatBotConfig } from "@/api";
+import { addorRemoveBridgeInChatBot, createChatBot, getAllChatBot, getChatBotDetails, updateChatBot, updateChatBotConfig } from "@/config";
 import { isError } from "lodash";
 import { addorRemoveBridgeInChatBotReducer, createNewBotReducer, getAllChatBotReducer, getChatBotDetailsReducer, updateChatBotConfigReducer, updateChatBotReducer } from "../reducer/ChatBotReducer";
 import { updateBridgeReducer } from "../reducer/bridgeReducer";

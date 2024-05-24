@@ -3,13 +3,8 @@
 import ChatBotModel from "@/components/chatbot/chatBotModel";
 import ChatBotCardHome from "@/components/chatbotHome.js/chatbotCard";
 import Protected from "@/components/protected";
-import { getAllChatBotAction } from "@/store/action/chatBotAction";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 
-
-
-
+export const runtime = 'edge';
 
 function ChatbotPage({ params }) {
 
