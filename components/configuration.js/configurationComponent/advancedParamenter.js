@@ -66,6 +66,9 @@ const AdvancedParameters = ({ params, dataToSend: localdata }) => {
                 [key]: isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue,
             }
         };
+        if (key === 'response_format') {
+            updatedDataToSend.configuration.response_format = newCheckedValue ? { type: "json_object" } : { type: "text" };
+        }
 
         setDataToSend(updatedDataToSend);
         UpdateBridge(updatedDataToSend);
