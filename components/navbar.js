@@ -294,7 +294,7 @@ function Navbar() {
             />
             {/* Render filtered bridge list */}
             <ul className="menu p-0 w-full   text-base-content">
-              {`filteredBridgesList`.map((item) => (
+              {filteredBridgesList.map((item) => (
                 <li key={item._id}>
                   <a
                     className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md`}
