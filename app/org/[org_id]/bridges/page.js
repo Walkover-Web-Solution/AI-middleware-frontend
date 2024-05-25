@@ -133,7 +133,6 @@ function Home({ params }) {
 
       </div>
     </div>
-    <CreateNewBridge orgid={params.org_id} Heading="Create New Bridge" />
   </div>
 
 
