@@ -57,7 +57,7 @@ function ChatBotModel({ orgid }) {
     return (
         <div>
 
-            < dialog id="my_modal_1" className="modal" >
+            < dialog id="chatBot_model" className="modal" >
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Create a New ChatBot</h3>
                     <div >
