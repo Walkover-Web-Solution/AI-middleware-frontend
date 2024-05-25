@@ -1,9 +1,11 @@
 
 "use client"
 
-import React, {  useLayoutEffect } from 'react'
-import { useRouter } from 'next/navigation';
+import React, { useLayoutEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation';
 import WithAuth from '@/components/withauth';
+import { loginUser } from '@/config';
+import Loader from '@/components/loader';
 
 /**
  * This page is the entry point for the user to start the login process.
@@ -12,17 +14,30 @@ import WithAuth from '@/components/withauth';
  * If the user has already logged in, it will redirect the user to the bridges page.
  */
 function page() {
-  // Get the Next.js router instance
+  // Get the Next.js router instanc
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+  const searchParams = useSearchParams();
+  const proxy_auth_token = searchParams.get('proxy_auth_token');
   // This effect is called only once when the component is mounted
   // It checks if the user has already logged in or not
   // If the user has logged in, it will redirect the user to the bridges page
   // If the user has not logged in, it will redirect the user to the login page
   async function runEffect() {
-    if (localStorage.getItem('proxy_token')) {
+    if (localStorage.getItem('proxy_token') || proxy_auth_token) {
+      setLoading(true);
       // If the user has already logged in, redirect the user to the bridges page
-      router.replace("/bridges");
+      localStorage.setItem('proxy_token', proxy_auth_token);
+      if (process.env.NEXT_PUBLIC_ENV === 'local') {
+        const localToken = await loginUser({
+          userId: searchParams.get('user_ref_id'),
+          orgId: searchParams.get('company_ref_id'),
+          userName: '',
+          orgName: ''
+        })
+        localStorage.setItem('local_token', localToken.token);
+      }
+      router.replace("/org");
       return;
     }
 
@@ -59,7 +74,9 @@ function page() {
 
   return (
     <div style={{ width: "100vw", height: "100vh" }} className=' flex justify-center items-center'>
-      <div id={process.env.NEXT_PUBLIC_REFERENCEID} /> {/* The div is required for the login script to work */}
+      {loading ? <Loader />
+        : <div id={process.env.NEXT_PUBLIC_REFERENCEID} />}
+      {/* The div is required for the login script to work */}
     </div>
   );
 }

@@ -3,12 +3,10 @@
 import axios from "@/utils/interceptor"
 import { toast } from "react-toastify";
 
-
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
 
-
-
+export const runtime = 'edge';
 
 export const getSingleModels = async () => {
   try {
@@ -396,6 +394,26 @@ export const updateChatBotConfig = async (botId, dataToSend) => {
   try {
     const response = await axios.post(`${URL}/chatbot/${botId}/updateconfig`, dataToSend);
     return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const loginUser = async (dataToSend) => {
+  try {
+    const response = await axios.post(`${URL}/user/localToken`, dataToSend);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const switchUser = async (dataToSend) => {
+  try {
+    const response = await axios.post(`${URL}/user/switchOrg`, dataToSend);
+    return response.data;
   } catch (error) {
     console.error(error);
     return error;

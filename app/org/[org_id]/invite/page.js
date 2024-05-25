@@ -1,13 +1,10 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import { inviteUser, getInvitedUsers } from '@/api';
-import Sidebar from '@/components/Sidebar'
+import { getInvitedUsers, inviteUser } from '@/config';
 import Protected from '@/components/protected';
-import { useSelector, useDispatch } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
-
-
+export const runtime = 'edge';
 
 function InvitePage({ params }) {
 

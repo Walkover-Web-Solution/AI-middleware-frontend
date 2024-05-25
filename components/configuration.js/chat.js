@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
-import { dryRun, updateBridge } from "@/api";
+import { dryRun, updateBridge } from "@/config";
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
 import _ from "lodash";
 import { toast } from "react-toastify";

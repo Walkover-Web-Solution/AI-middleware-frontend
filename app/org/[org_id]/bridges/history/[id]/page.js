@@ -8,8 +8,10 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import ReactMarkdown from 'react-markdown';
-import { getSingleMessage } from '@/api'
+import { getSingleMessage } from '@/config'
 import { CircleX } from 'lucide-react'
+
+export const runtime = 'edge';
 
 function page({ params }) {
 

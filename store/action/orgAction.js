@@ -1,4 +1,4 @@
-import { createOrg, createReponseTypeInOrg, getAllOrg } from "@/api";
+import { createOrg, createReponseTypeInOrg, getAllOrg } from "@/config";
 import { organizationCreated, organizationsFetched, setCurrentOrgId } from "../reducer/orgReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 

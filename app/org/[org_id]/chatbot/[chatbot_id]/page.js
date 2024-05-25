@@ -12,6 +12,8 @@ import { Pencil } from "lucide-react";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
+export const runtime = 'edge';
+
 function Page({ params }) {
 
     const { ChatbotDetails, bridgeData } = useCustomSelector((state) => ({

@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-import { logoutUserFromMsg91, switchOrg } from '@/api';
+import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { Building2, ChevronDown, FileSliders, History, Home, KeyRound, LogOut, Mail, Rss, Settings2 } from 'lucide-react';
@@ -90,9 +90,16 @@ function Navbar() {
     }
   };
 
-  const handleSwitchOrg = async (id) => {
+  const handleSwitchOrg = async (id, name) => {
     try {
       const response = await switchOrg(id);
+      if (process.env.NEXT_PUBLIC_ENV === 'local') {
+        const localToken = await switchUser({
+          orgId: id,
+          orgName: name
+        })
+        localStorage.setItem('local_token', localToken.token);
+      }
       router.push(`/org/${id}/bridges`);
       dispatch(setCurrentOrgIdAction(id));
       if (response.status !== 200) {
@@ -173,7 +180,7 @@ function Navbar() {
             />
             <ul className="menu p-0 w-full   text-base-content">
               {filteredOrganizations.map((item) => (
-                <li key={item.id}><a className={`${item.id == path[2] ? "active" : `${item.id}`} py-2 px-2 rounded-md`} key={item.id} onClick={() => { handleSwitchOrg(item.id); router.push(`/org/${item.id}/${path[3]}`) }}  > <Building2 size={16} /> {item.name}</a></li>
+                <li key={item.id}><a className={`${item.id == path[2] ? "active" : `${item.id}`} py-2 px-2 rounded-md`} key={item.id} onClick={() => { handleSwitchOrg(item.id, item.name); router.push(`/org/${item.id}/${path[3]}`) }}  > <Building2 size={16} /> {item.name}</a></li>
               ))}
             </ul>
           </div>

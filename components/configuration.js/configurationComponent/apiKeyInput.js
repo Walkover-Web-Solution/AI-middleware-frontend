@@ -1,4 +1,4 @@
-import { updateBridge } from '@/api';
+import { updateBridge } from '@/config';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React from 'react';
