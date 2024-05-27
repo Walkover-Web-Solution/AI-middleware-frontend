@@ -43,7 +43,6 @@ const SlugNameInput = ({ dataToSend, params }) => {
                 type="text"
                 key={bridge?.slugName}
                 placeholder="Type here"
-                disabled={bridge?.slugName?.length > 0}
                 className="input input-bordered w-full max-w-xs input-sm"
                 defaultValue={bridge?.slugName}
                 onBlur={(e) => {
