@@ -49,7 +49,7 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
     return (
         <div className="join">
             <input
-                className="input input-bordered join-item input-sm"
+                className="input input-bordered join-item input-sm max-w-[90px]"
                 type="number"
                 placeholder={placeholder}
                 value={value || ''}
@@ -58,7 +58,7 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
                 name={name}
             />
             <select
-                className="select select-bordered join-item select-sm"
+                className="select select-bordered join-item select-sm max-w-[70px]"
                 value={unit || ''}
                 onChange={onChange}
                 name={`${name}Unit`}

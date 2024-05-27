@@ -90,7 +90,7 @@ function Home({ params }) {
                 {filteredBridges.map((item) => (
                   <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center gap-7 rounded-md border cursor-pointer hover:shadow-lg ">
                     <div className="w-full">
-                      <div className="p-4 flex flex-col justify-between h-[200px] items-start">
+                      <div className="p-4 flex flex-col justify-between items-start">
                         <div className="w-full">
                           <h1 className="inline-flex items-center gap-2 text-lg font-semibold">
                             <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">

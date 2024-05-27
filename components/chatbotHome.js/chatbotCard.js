@@ -15,7 +15,7 @@ function BridgeBadge({ bridge }) {
 function ChatBotCard({ item, onFetchDetails }) {
     return (
         <div onClick={() => onFetchDetails(item._id)} className="flex flex-col items-start gap-7 rounded-md border cursor-pointer hover:shadow-lg ">
-            <div className="p-4 flex flex-col justify-between h-[200px] items-start">
+            <div className="p-4 flex flex-col justify-between items-start">
                 <div className="w-full flex items-center gap-2 justify-start">
                     <Bot />
                     <h1 className="inline-flex w-full items-center truncate gap-2 text-lg font-semibold">
