@@ -79,7 +79,7 @@ function CreateNewBridge({ orgid }) {
                             <div className="label">
                                 <span className="label-text">Bridge Name</span>
                             </div>
-                            <input type="text" id="bridge-name" placeholder="Type here" className="input input-bordered w-full " />
+                            <input type="text" id="bridge-name" placeholder="Type here" className="input input-bordered w-full" maxLength="50" />
                         </label>
                         <label>
                             <div className="label">

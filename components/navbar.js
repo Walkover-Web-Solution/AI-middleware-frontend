@@ -195,7 +195,6 @@ function Navbar() {
           <div className="join">
             <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${path[5]}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>
             <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${path[5]}`)} className={` ${path[4] === 'history' ? "btn-primary" : ""}   btn join-item `}><History size={16} /> History</button>
-            {/* <button className={` ${path[4] === 'metrics' ? "btn-primary" : ""}   btn join-item `}> <Box size={16} /> Metrics</button> */}
           </div>
         ) : (
           path[3] === 'apikey' ?
@@ -347,11 +346,11 @@ function Navbar() {
                   </a>
                 </li>
               ))}
-              <li onClick={() => document.getElementById('chatbot_modal').showModal()}>
+              {/* <li onClick={() => document.getElementById('chatbot_modal').showModal()}>
                 <a>
                   + create new chatbot
                 </a>
-              </li>
+              </li> */}
             </ul>
           </div>
         </aside>

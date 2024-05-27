@@ -19,32 +19,34 @@ export default function ChatbotCard({ params }) {
             <div className="flex flex-wrap gap-2">
                 {
                     ChatbotDetails?.bridge?.map((data, index) => {
-                        return <div onClick={() => router.push(`/org/${params.org_id}/bridges/configure/${data._id}`)} className="w-[300px] flex max-w-xs flex-col items-start bg-white rounded-md border md:flex-row cursor-pointer hover:shadow-lg">
-                            <div className="p-4">
-                                <h1 className="inline-flex items-center capitalize text-lg font-semibold">
-                                    {data?.name}<ArrowUpRight className="ml-2 h-4 w-4" />
-                                </h1>
-                                <p className="mt-3 text-sm text-gray-600">
-                                    Service Used :  {data?.service}
-                                </p>
-                                <p className="mt-3 text-sm text-gray-600">
-                                    Model : {data?.configuration?.model}
-                                </p>
-                                <div className="mt-4">
-                                    {(data?.responseIds)?.map((responseKey, index) => {
-                                        return (
-                                            <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-900">
-                                                {responseData?.[responseKey]?.description}
-                                            </span>
-                                        )
-                                    })}
+                        return (
+                            <div
+                                key={index}  // Added key for list rendering
+                                onClick={() => router.push(`/org/${params.org_id}/bridges/configure/${data._id}`)}
+                                className="w-[300px] flex max-w-xs flex-col items-start bg-white rounded-md border md:flex-row cursor-pointer hover:shadow-lg"
+                            >
+                                <div className="p-4 w-full truncate">
+                                    <div className="flex items-center justify-between w-full">
+                                        <h1 className="inline-flex items-center w-full truncate  capitalize text-lg font-semibold">
+                                            {/* <span className="overflow-hidden text-ellipsis whitespace-nowrap"> */}truncate
+                                            {data?.name}
+                                            {/* </span> */}truncate
+                                        </h1>
+                                        <ArrowUpRight className="ml-2 h-4 w-4 flex-shrink-0" />
+                                    </div>
+                                    <p className="mt-3 text-sm text-gray-600">
+                                        Service Used: {data?.service}
+                                    </p>
+                                    <p className="mt-3 text-sm text-gray-600">
+                                        Model: {data?.configuration?.model}
+                                    </p>
                                 </div>
-
                             </div>
-                        </div>
+                        )
                     })
                 }
             </div>
+
 
         </>
     )
