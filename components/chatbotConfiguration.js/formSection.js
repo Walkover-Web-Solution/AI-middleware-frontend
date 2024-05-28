@@ -2,7 +2,6 @@ import { useCustomSelector } from "@/customSelector/customSelector";
 import { updateChatBotConfigAction } from "@/store/action/chatBotAction";
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import debounce from 'lodash.debounce';
 
 function RadioButton({ name, label, checked, onChange }) {
     return (
@@ -52,8 +51,8 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
                 className="input input-bordered join-item input-sm max-w-[90px]"
                 type="number"
                 placeholder={placeholder}
-                value={value || ''}
-                onChange={onChange}
+                defaultValue={value || ''}
+                onBlur={onChange}
                 min={0}
                 name={name}
             />
@@ -89,13 +88,6 @@ export default function FormSection({ params }) {
 
     const dispatch = useDispatch();
 
-    const debouncedUpdateConfig = useCallback(
-        debounce((updatedFormData) => {
-            dispatch(updateChatBotConfigAction(params?.chatbot_id, updatedFormData));
-        }, 300),
-        [dispatch, params?.chatbot_id]
-    );
-
     const handleInputChange = useCallback((event) => {
         const { name, value } = event.target;
         setFormData((prevFormData) => {
@@ -103,10 +95,10 @@ export default function FormSection({ params }) {
                 ...prevFormData,
                 [name]: value
             };
-            debouncedUpdateConfig(updatedFormData);
+            dispatch(updateChatBotConfigAction(params?.chatbot_id, updatedFormData));
             return updatedFormData;
         });
-    }, [debouncedUpdateConfig]);
+    }, [dispatch, params?.chatbot_id]);
 
     useEffect(() => {
         if (chatBotConfig) {
