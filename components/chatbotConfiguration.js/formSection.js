@@ -30,45 +30,58 @@ function RadioGroup({ onChange, name, value }) {
     ];
 
     return (
-        <div className="flex items-center justify-start gap-2">
-            {options.map((option, index) => (
-                <RadioButton
-                    key={index}
-                    name={name}
-                    label={option.label}
-                    checked={option.label.replaceAll(' ', '_').toLowerCase() === value}
-                    onChange={onChange}
-                />
-            ))}
+        <div>
+            <div className="label">
+                <span className="label-text">Position</span>
+            </div>
+            <div className="flex items-center justify-start gap-2">
+                {options.map((option, index) => (
+                    <RadioButton
+                        key={index}
+                        name={name}
+                        label={option.label}
+                        checked={option.label.replaceAll(' ', '_').toLowerCase() === value}
+                        onChange={onChange}
+                    />
+                ))}
+            </div>
         </div>
+
+
     );
 }
 
 function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
     return (
-        <div className="join">
-            <input
-                className="input input-bordered join-item input-sm max-w-[90px]"
-                type="number"
-                placeholder={placeholder}
-                defaultValue={value || ''}
-                onBlur={onChange}
-                min={0}
-                name={name}
-            />
-            <select
-                className="select select-bordered join-item select-sm max-w-[70px]"
-                value={unit || ''}
-                onChange={onChange}
-                name={`${name}Unit`}
-            >
-                {options.map((option, index) => (
-                    <option key={index} value={option.value} disabled={option.disabled}>
-                        {option.label}
-                    </option>
-                ))}
-            </select>
+        <div className="flex flex-col">
+            <div className="label">
+                <span className="label-text">{placeholder}</span>
+            </div>
+            <div className="join">
+                <input
+                    className="input input-bordered join-item input-sm max-w-[90px]"
+                    type="number"
+                    placeholder={placeholder}
+                    defaultValue={value || ''}
+                    onBlur={onChange}
+                    min={0}
+                    name={name}
+                />
+                <select
+                    className="select select-bordered join-item select-sm max-w-[70px]"
+                    value={unit || ''}
+                    onChange={onChange}
+                    name={`${name}Unit`}
+                >
+                    {options.map((option, index) => (
+                        <option key={index} value={option.value} disabled={option.disabled}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
+            </div>
         </div>
+
     );
 }
 
@@ -124,18 +137,8 @@ export default function FormSection({ params }) {
                 />
             </label>
             <div className="flex items-center justify-start gap-2">
-                <DimensionInput
-                    placeholder="Width"
-                    options={[
-                        { label: "Select unit", value: "", disabled: true },
-                        { label: "px", value: "px" },
-                        { label: "%", value: "%" }
-                    ]}
-                    onChange={handleInputChange}
-                    name="width"
-                    value={formData.width}
-                    unit={formData.widthUnit}
-                />
+
+
                 <DimensionInput
                     placeholder="Height"
                     options={[
@@ -147,6 +150,18 @@ export default function FormSection({ params }) {
                     name="height"
                     value={formData.height}
                     unit={formData.heightUnit}
+                />
+                <DimensionInput
+                    placeholder="Width"
+                    options={[
+                        { label: "Select unit", value: "", disabled: true },
+                        { label: "px", value: "px" },
+                        { label: "%", value: "%" }
+                    ]}
+                    onChange={handleInputChange}
+                    name="width"
+                    value={formData.width}
+                    unit={formData.widthUnit}
                 />
             </div>
             <div className="flex items-center justify-start gap-2">
