@@ -32,7 +32,7 @@ function Page({ params }) {
     return <div className=" relative flex w-screen h-[93vh]">
 
 
-        <div className="flex p-4 w-1/2 flex-col bg-gray-100 gap-4">
+        <div className="flex p-4 w-1/2 flex-col bg-gray-100 gap-4 overflow-y-scroll">
             <label className="input input-bordered flex items-center justify-center gap-2 border-none p-0 outline-0 focus-within:border-none bg-transparent text-3xl focus:outline-none ">
                 <Pencil size={16} />
                 <input type="text" placeholder="Enter Chatbot Name" defaultValue={ChatbotDetails?.title} className=" bg-transparent grow border-none p-0 outline-none focus:border-none flex justify-center items-center focus:outline-none  font-semibold" />

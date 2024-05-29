@@ -60,18 +60,19 @@ const ModelDropdown = ({ dataToSend, params }) => {
             <div className="label">
                 <span className="label-text">Model</span>
             </div>
-            <select defaultValue={bridge?.configuration?.model?.default} onChange={handleModel} className="select select-sm max-w-xs select-bordered">
-                <option disabled selected>Select a Model</option>
+            <select value={bridge?.configuration?.model?.default} onChange={handleModel} className="select select-sm max-w-xs select-bordered">
+                <option disabled>Select a Model</option>
                 {Object.entries(services?.[bridge?.service] || {}).map(([group, options]) => (
                     group !== 'models' && // Exclude the 'models' group
                     <optgroup label={group} key={group}>
-                        {Array.from(options).map(option => ( // Convert Set to Array
-                            <option key={option}>{option}</option>
+                        {Array.from(options).map(option => (
+                            <option key={option} value={option}>{option}</option>
                         ))}
                     </optgroup>
                 ))}
             </select>
         </label>
+
     );
 };
 

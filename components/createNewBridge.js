@@ -37,15 +37,22 @@ function CreateNewBridge({ orgid }) {
                 "bridgeType": bridgeType,
             }
             dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
-
                 route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
                 setIsLoading(false);
+                cleanState();
                 document.getElementById('my_modal_1').close()
             })).catch(
                 setIsLoading(false)
             );
         }
         else toast.error("All fields are Required ")
+    }
+    const cleanState = () => {
+        setSelectedService("");
+        setSelectedModel("");
+        setSelectedType("");
+        setBridgeType("api");
+        document.getElementById('bridge-name').value = "";
     }
 
     return (
@@ -72,8 +79,7 @@ function CreateNewBridge({ orgid }) {
                             <div className="label">
                                 <span className="label-text">Bridge Name</span>
                             </div>
-                            <input type="text" id="bridge-name" placeholder="Type here" className="input input-bordered w-full " />
-
+                            <input type="text" id="bridge-name" placeholder="Type here" className="input input-bordered w-full" maxLength="50" />
                         </label>
                         <label>
                             <div className="label">
@@ -115,11 +121,11 @@ function CreateNewBridge({ orgid }) {
                             </div>
                             <div className="flex items-center gap-6">
                                 <label className="flex items-center justify-center gap-2">
-                                    <input type="radio" name="radio-1" className="radio" value="api" checked={bridgeType === "api"} onChange={() => setBridgeType('api')} />
+                                    <input type="radio" name="radio-1" className="radio" value="api" defaultChecked={bridgeType === "api"} onChange={() => setBridgeType('api')} />
                                     API
                                 </label>
                                 <label className="flex items-center justify-center gap-2">
-                                    <input type="radio" name="radio-1" className="radio" value="chatbot" checked={bridgeType === "chatbot"} onChange={() => setBridgeType('chatbot')} />
+                                    <input type="radio" name="radio-1" className="radio" value="chatbot" defaultChecked={bridgeType === "chatbot"} onChange={() => setBridgeType('chatbot')} />
                                     ChatBot
                                 </label>
                             </div>
@@ -129,14 +135,15 @@ function CreateNewBridge({ orgid }) {
                     <div className="modal-action">
                         <form method="dialog">
                             {/* if there is a button in form, it will close the modal */}
-                            <button className="btn">Close</button>
+                            {/* <button className="btn" onClick={() => { cleanState(); document.getElementById('bridge-name').close() }}>Close</button> */}
+                            <button className="btn" onClick={cleanState}>Close</button>
                         </form>
                         <button className="btn" onClick={() => createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name").value)}>+ Create</button>
                     </div>
                 </div>
-            </dialog>
+            </dialog >
 
-        </div>
+        </div >
     )
 }
 
