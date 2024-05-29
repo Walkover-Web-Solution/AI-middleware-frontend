@@ -107,6 +107,9 @@ function prepareDataToSend(bridge) {
       ...(foundKey !== "chat" && foundKey !== "embedding" ? { prompt: bridge?.input?.prompt?.prompt } : {}),
     },
     service: bridge?.service?.toLowerCase(),
+    apikey: bridge?.apikey,
+    bridgeType: bridge?.bridgeType,
+    slugName: bridge?.slugName,
   };
 }
 
