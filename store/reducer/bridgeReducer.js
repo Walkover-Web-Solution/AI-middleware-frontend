@@ -43,7 +43,8 @@ export const bridgeReducer = createSlice({
       state.org[action.payload.orgId].push(action.payload.data.data.bridge)
     },
     updateBridgeReducer: (state, action) => {
-      const { bridges } = action.payload;
+      const { bridges } = action.payload.bridge;
+      const bridgeType = action.payload.bridgeType
       const responseFormat = handleResponseFormat(bridges)
       const { _id, configuration, service, type } = bridges;
       const modelDefault = configuration.model.default;
@@ -53,8 +54,16 @@ export const bridgeReducer = createSlice({
         ...state.allBridgesMap[_id],
         ...response,
         responseFormat: responseFormat,
-
       };
+
+      if (bridgeType) {
+        const allData = state.org[bridges.org_id]
+        const foundBridge = allData.find(bridge => bridge._id === _id);
+        if (foundBridge) {
+          foundBridge.bridgeType = bridges.bridgeType;
+        }
+      }
+
     },
     deleteBridgeReducer: (state, action) => {
       const { bridgeId, orgId } = action.payload;
