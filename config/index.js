@@ -88,8 +88,8 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
     // toast.success("Bridge is updated");
     return response
   } catch (error) {
-    toast.error(error.message);
-    console.error(error)
+    console.log(error)
+    toast.error(error?.response?.data?.error);
   }
 }
 

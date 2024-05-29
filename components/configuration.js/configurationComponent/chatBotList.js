@@ -8,10 +8,10 @@ import { useDispatch } from 'react-redux';
 const ChatBotList = ({ params }) => {
     const router = useRouter();
     const dispatch = useDispatch()
-    const { chatbotData, chatBotList } = useCustomSelector((state) => ({
+    const { bridgeType, chatbotData, chatBotList } = useCustomSelector((state) => ({
+        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         chatbotData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.chatbotData,
         chatBotList: state?.ChatBot?.org?.[params?.org_id] || []
-
     }));
     const handleAddChatbotClick = () => {
         setIsSliderOpen(!isSliderOpen);
@@ -21,7 +21,7 @@ const ChatBotList = ({ params }) => {
         dispatch(addorRemoveBridgeInChatBotAction(params.org_id, chatBotId, params.id, type))
     }
 
-    return (
+    return (bridgeType === 'chatbot' &&
         <div className="form-control">
             <p className='text-xl font-medium'>ChatBot</p>
             <div className='flex flex-wrap gap-4'>
