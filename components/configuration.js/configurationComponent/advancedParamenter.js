@@ -4,18 +4,16 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const AdvancedParameters = ({ params, dataToSend: localdata }) => {
-    const { modelInfoData } = useCustomSelector((state) => ({
+const AdvancedParameters = ({ params }) => {
+    const { modelInfoData, bridge } = useCustomSelector((state) => ({
         modelInfoData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration,
+        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+
     }));
 
-    const [dataToSend, setDataToSend] = useState(localdata);
     const [isAccordionOpen, setIsAccordionOpen] = useState(false);
     const [sliderValues, setSliderValues] = useState({}); // State to hold slider values
 
-    useEffect(() => {
-        setDataToSend(localdata);
-    }, [localdata]);
 
     useEffect(() => {
         if (modelInfoData) {
@@ -40,14 +38,13 @@ const AdvancedParameters = ({ params, dataToSend: localdata }) => {
         const newValue = Number(e.target.value);
 
         let updatedDataToSend = {
-            ...dataToSend,
             configuration: {
-                ...dataToSend.configuration,
+                model: bridge?.configuration?.model?.default,
                 [key]: newValue,
-            }
+            },
+            service: bridge?.service?.toLowerCase(),
         };
 
-        setDataToSend(updatedDataToSend);
         UpdateBridge(updatedDataToSend);
     };
 
@@ -60,9 +57,9 @@ const AdvancedParameters = ({ params, dataToSend: localdata }) => {
 
 
         let updatedDataToSend = {
-            ...dataToSend,
+            service: bridge?.service?.toLowerCase(),
             configuration: {
-                ...dataToSend.configuration,
+                model: bridge?.configuration?.model?.default,
                 [key]: isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue,
             }
         };
@@ -70,7 +67,6 @@ const AdvancedParameters = ({ params, dataToSend: localdata }) => {
             updatedDataToSend.configuration.response_format = newCheckedValue ? { type: "json_object" } : { type: "text" };
         }
 
-        setDataToSend(updatedDataToSend);
         UpdateBridge(updatedDataToSend);
     };
 
@@ -78,8 +74,9 @@ const AdvancedParameters = ({ params, dataToSend: localdata }) => {
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
     };
 
+
     const toggleAccordion = () => {
-        setIsAccordionOpen(!isAccordionOpen);
+        setIsAccordionOpen((prevState) => !prevState);
     };
 
     return (
@@ -89,7 +86,7 @@ const AdvancedParameters = ({ params, dataToSend: localdata }) => {
                 Advanced Parameters
                 {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
-            <div className="collapse-content gap-3 flex flex-col p-0">
+            {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-0">
                 {modelInfoData && Object.entries(modelInfoData).map(([key, value]) => (
                     key !== 'model' && key !== 'tools' && key !== 'tool_choice' && key !== "stream" &&
                     <div key={key} className={` ${value.field === "boolean" ? "flex justify-between item-center" : ""} w-full`}>
@@ -142,9 +139,10 @@ const AdvancedParameters = ({ params, dataToSend: localdata }) => {
                         )}
                     </div>
                 ))}
-            </div>
+            </div>}
         </div>
     );
 };
 
 export default AdvancedParameters;
+``
