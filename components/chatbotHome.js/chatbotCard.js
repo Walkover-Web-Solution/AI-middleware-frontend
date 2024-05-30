@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 
 function BridgeBadge({ bridge }) {
     return (
-        <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] truncate font-semibold text-gray-900">
+        <span className="mb-2 mr-2 inline-block rounded-full max-w-full bg-gray-100 px-3 py-1 text-[10px] truncate font-semibold text-gray-900">
             {bridge.name}
         </span>
     );
@@ -23,7 +23,7 @@ function ChatBotCard({ item, onFetchDetails }) {
                         <span className="truncate">{item.title}</span>
                     </h1>
                 </div>
-                <div className="mt-auto w-full">
+                <div className="mt-auto w-full truncate">
                     {item.bridge.map((bridge, index) => (
                         <BridgeBadge key={index} bridge={bridge} />
                     ))}
@@ -56,17 +56,10 @@ export default function ChatBotCardHome({ params }) {
 
     return (
         <div className="flex flex-col">
-            {/* <input
-                type="text"
-                placeholder="Search by bot name"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="mb-4 p-2 border rounded"
-            /> */}
             <div className='relative flex items-center justify-between m-4'>
                 <input
                     type="text"
-                    placeholder="Search for bot Name"
+                    placeholder="Search for Chatbot Name"
                     className="input input-bordered max-w-sm  input-md w-full"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -74,7 +67,7 @@ export default function ChatBotCardHome({ params }) {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5 lg:grid-cols-4 p-4">
-                {filteredChatBots.map((item) => (
+                {filteredChatBots.slice().sort((a, b) => a.title.localeCompare(b.title)).map((item) => (
                     <ChatBotCard key={item._id} item={item} onFetchDetails={fetchChatBotDetails} />
                 ))}
             </div>
