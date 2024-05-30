@@ -18,7 +18,7 @@ export default function ChatbotCard({ params }) {
 
             <div className="flex flex-wrap gap-2">
                 {
-                    ChatbotDetails?.bridge?.map((data, index) => {
+                    ChatbotDetails?.bridge?.slice().sort((a, b) => a.name.localeCompare(b.name)).map((data, index) => {
                         return (
                             <div
                                 key={index}  // Added key for list rendering
@@ -28,9 +28,7 @@ export default function ChatbotCard({ params }) {
                                 <div className="p-4 w-full truncate">
                                     <div className="flex items-center justify-between w-full">
                                         <h1 className="inline-flex items-center w-full truncate  capitalize text-lg font-semibold">
-                                            {/* <span className="overflow-hidden text-ellipsis whitespace-nowrap"> */}truncate
                                             {data?.name}
-                                            {/* </span> */}truncate
                                         </h1>
                                         <ArrowUpRight className="ml-2 h-4 w-4 flex-shrink-0" />
                                     </div>
