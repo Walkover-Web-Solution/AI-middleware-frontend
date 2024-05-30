@@ -4,7 +4,7 @@ import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-const ApiKeyInput = ({ dataToSend, params }) => {
+const ApiKeyInput = ({ params }) => {
 
     const dispatch = useDispatch()
 
@@ -15,10 +15,13 @@ const ApiKeyInput = ({ dataToSend, params }) => {
 
     const onSave = (value) => {
         const updatedDataToSend = {
-            ...dataToSend,
+            configuration: {
+                model: bridge?.configuration?.model?.default,
+            },
+            service: bridge?.service?.toLowerCase(),
             apikey: value // Update the field with the new value
         };
-        UpdateBridge(updatedDataToSend); // Send the updated dataToSend to UpdateBridge
+        UpdateBridge(updatedDataToSend);
     };
 
     const UpdateBridge = (currentDataToSend) => {

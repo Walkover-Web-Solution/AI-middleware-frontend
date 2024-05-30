@@ -6,7 +6,7 @@ import { isValidJson, validateWebhook } from '@/utils/utility';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const ResponseFormatSelector = ({ params, dataToSend }) => {
+const ResponseFormatSelector = ({ params }) => {
     const { bridge } = useCustomSelector((state) => ({
         bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
     }));
@@ -51,7 +51,12 @@ const ResponseFormatSelector = ({ params, dataToSend }) => {
     };
 
     const handleResponseChange = (key, webhook, headers) => {
-        let updatedDataToSend = { ...dataToSend };
+        let updatedDataToSend = {
+            configuration: {
+                model: bridge?.configuration?.model?.default,
+            },
+            service: bridge?.service?.toLowerCase(),
+        };
         if (key === "default") {
             updatedDataToSend.configuration = {
                 ...updatedDataToSend.configuration,
