@@ -21,13 +21,8 @@ const Page = ({ params }) => {
     dispatch(getSingleBridgesAction(params.id));
   }, []);
 
-  const [dataToSend, setDataToSend] = useState(null);
 
-  useEffect(() => {
-    if (bridge) {
-      setDataToSend(prepareDataToSend(bridge));
-    }
-  }, [bridge]);
+
 
   useEffect(() => {
     if (embedToken) {
@@ -76,13 +71,13 @@ const Page = ({ params }) => {
           <div className="flex w-full justify-start gap-16 items-start">
             <div className="w-full flex  ">
               <div className="w-2/3 overflow-auto p-4 h-[93vh] border-r border-gray-300 bg-gray-100 min-w-[350px] configurationPage">
-                <ConfigurationPage params={params} dataToSend={dataToSend} />
+                <ConfigurationPage params={params} />
                 <div className='h-[70px]' />
               </div>
               <div className="resizer w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
               <div className="w-1/3 flex-1 chatPage min-w-[450px]">
                 <div className="p-4">
-                  <Chat dataToSend={dataToSend} params={params} />
+                  <Chat params={params} />
                 </div>
               </div>
             </div>
@@ -94,24 +89,7 @@ const Page = ({ params }) => {
 };
 
 // Extracted functions for better readability
-function prepareDataToSend(bridge) {
-  let foundKey = Object.keys(services[bridge?.service?.toLowerCase()]).find(
-    (key) => services[bridge?.service?.toLowerCase()][key].has(bridge?.configuration?.model?.default)
-  );
-  return {
-    configuration: {
-      model: bridge?.configuration?.model?.default,
-      type: foundKey,
-      ...(foundKey === "chat" ? { prompt: [bridge?.inputConfig?.system?.default || {}] } : {}),
-      ...(foundKey === "embedding" ? { input: bridge?.input?.input } : {}),
-      ...(foundKey !== "chat" && foundKey !== "embedding" ? { prompt: bridge?.input?.prompt?.prompt } : {}),
-    },
-    service: bridge?.service?.toLowerCase(),
-    apikey: bridge?.apikey,
-    bridgeType: bridge?.bridgeType,
-    slugName: bridge?.slugName,
-  };
-}
+
 
 function appendEmbedScript(embedToken) {
   const script = document.createElement("script");

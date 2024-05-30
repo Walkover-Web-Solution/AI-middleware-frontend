@@ -9,8 +9,21 @@ import ReactMarkdown from 'react-markdown';
 import { useCustomSelector } from "@/customSelector/customSelector";
 
 
-function Chat({ dataToSend, params }) {
+function Chat({ params }) {
+  const { bridge } = useCustomSelector((state) => ({
+    bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+  }))
 
+  const dataToSend = {
+    configuration: {
+      model: bridge?.configuration?.model?.default,
+      type: bridge?.type
+    },
+    service: bridge?.service?.toLowerCase(),
+    apikey: bridge?.apikey,
+    bridgeType: bridge?.bridgeType,
+    slugName: bridge?.slugName
+  }
   // State variables
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -19,13 +32,9 @@ function Chat({ dataToSend, params }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [conversation, setConversation] = useState([]);
   // Update localDataToSend when dataToSend changes
-  useEffect(() => {
-    setLocalDataToSend(dataToSend);
-  }, [dataToSend]);
 
-  const { bridge } = useCustomSelector((state) => ({
-    bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
-  }))
+
+
 
 
   const defaultsMap = useMemo(() => {

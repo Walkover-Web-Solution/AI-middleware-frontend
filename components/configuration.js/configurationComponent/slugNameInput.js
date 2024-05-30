@@ -3,7 +3,7 @@ import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-const SlugNameInput = ({ dataToSend, params }) => {
+const SlugNameInput = ({ params }) => {
 
     const { bridge } = useCustomSelector((state) => ({
         bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
@@ -14,18 +14,13 @@ const SlugNameInput = ({ dataToSend, params }) => {
         let newValue = e.target.value;
 
         let updatedDataToSend = {
-            ...dataToSend,
+            service: bridge?.service?.toLowerCase(),
             configuration: {
-                ...dataToSend.configuration,
-                [key]: isSlider ? Number(newValue) : newValue,
-            }
+                model: bridge?.configuration?.model?.default,
+            },
+            slugName: isSlider ? Number(newValue) : newValue,
         };
-        if (key === "slugName") {
-            updatedDataToSend = {
-                ...dataToSend,
-                [key]: newValue
-            };
-        }
+
         UpdateBridge(updatedDataToSend);
     };
 
