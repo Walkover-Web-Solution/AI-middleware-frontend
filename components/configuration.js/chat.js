@@ -1,19 +1,17 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useDispatch } from "react-redux";
-import { dryRun, updateBridge } from "@/config";
+import { dryRun } from "@/config";
+import { useCustomSelector } from "@/customSelector/customSelector";
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
 import _ from "lodash";
-import { toast } from "react-toastify";
-import { updateBridgeAction } from "@/store/action/bridgeAction";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { toast } from "react-toastify";
 
 
 function Chat({ params }) {
   const { bridge } = useCustomSelector((state) => ({
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
   }))
-
+  const messagesEndRef = useRef(null);
   const dataToSend = {
     configuration: {
       model: bridge?.configuration?.model?.default,
@@ -31,12 +29,6 @@ function Chat({ params }) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [conversation, setConversation] = useState([]);
-  // Update localDataToSend when dataToSend changes
-
-
-
-
-
   const defaultsMap = useMemo(() => {
     return bridge ? Object.entries(bridge?.configuration).reduce((acc, [key, value]) => {
       const isToolsEmptyArray = key === 'tools' && Array.isArray(value.default) && value.default.length === 0;
@@ -84,9 +76,6 @@ function Chat({ params }) {
         data = modelInfo[localDataToSend.service].chatmessage.chat;
         const chatPath = modelInfo[localDataToSend.service].chatmessage.chatpath;
         _.set(data, chatPath, newMessage);
-        // updateLocalDataToSend(prevConfig => ({
-        //   user: [...prevConfig.user, data],  
-        // }));
         setMessages(prevMessages => [...prevMessages, newChat]);
         responseData = await dryRun({
           localDataToSend: {
@@ -102,8 +91,7 @@ function Chat({ params }) {
         });
       }
       else {
-        const updatedConfigration = removeUndefinedOrNull(localDataToSend.configuration)
-        responseData = await dryRun({ localDataToSend: { ...localDataToSend, configuration: updatedConfigration }, bridge_id: params?.id });
+        responseData = await dryRun({ localDataToSend: { ...localDataToSend }, bridge_id: params?.id });
       }
       if (!responseData.success) {
         if (dataToSend.configuration.type === "chat") {
@@ -116,13 +104,7 @@ function Chat({ params }) {
         return;
       }
       response = responseData.data;
-      // Update localDataToSend with user data
 
-      // Add user chat to messages
-
-      // Call API with user data
-
-      // Get output configuration paths
       const { outputConfig } = modelInfo[localDataToSend.service][localDataToSend.configuration.model];
       const outputPath = outputConfig.message;
       const assistPath = outputConfig.assistant;
@@ -133,8 +115,6 @@ function Chat({ params }) {
       if (dataToSend.configuration.type === "chat") {
         setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
       }
-
-      // Create assistant chat
       const newChatAssist = {
         id: messages.length + 2,
         sender: "Assist",
@@ -142,7 +122,7 @@ function Chat({ params }) {
           hour: "2-digit",
           minute: "2-digit",
         }),
-        content: content,
+        content: Array.isArray(content) ? content.join(", ") : content.toString(),
       };
 
       // Add assistant chat to messages
@@ -167,15 +147,20 @@ function Chat({ params }) {
     [handleSendMessage]
   );
 
+  useEffect(() => {
+    setLocalDataToSend(dataToSend)
+  }, [bridge])
 
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
 
   return (
     <>
       <div className="w-full flex justify-between items-center">
-        {/* <div className="label"> */}
         <span className="label-text">Playground</span>
-        {/* </div> */}
       </div>
 
       <div className=" p:2 sm:p-6 mt-4 justify-between flex flex-col h-[86vh] border rounded-md w-full z-10">
@@ -183,9 +168,10 @@ function Chat({ params }) {
           id="messages"
           className="flex flex-col w-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch z-10"
         >
-          {messages.map(message => (
+          {messages.map((message, index) => (
             <div
               key={message.id}
+              ref={index === messages.length - 1 ? messagesEndRef : null}
               className={`chat ${message.sender === "user" ? "chat-end" : "chat-start"
                 }`}
             >
@@ -194,7 +180,7 @@ function Chat({ params }) {
                 {message.sender}
                 <time className="text-xs opacity-50 pl-2">{message.time}</time>
               </div>
-              <div className="chat-bubble"> <ReactMarkdown>{message.content}</ReactMarkdown></div>
+              <div className="chat-bubble break-keep"> <ReactMarkdown>{message.content}</ReactMarkdown></div>
             </div>
           ))}
         </div>
