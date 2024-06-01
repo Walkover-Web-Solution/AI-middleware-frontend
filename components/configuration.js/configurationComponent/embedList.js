@@ -13,9 +13,9 @@ const EmbedList = ({ params }) => {
     const renderEmbed = useMemo(() => (
         integrationData && integrationData
             .slice() // Create a copy of the array to avoid mutating the original
-            .sort((a, b) => a.title.localeCompare(b.title)) // Sort alphabetically based on title
+            .sort((a, b) => a?.title?.localeCompare(b?.title)) // Sort alphabetically based on title
             .map((value) => (
-                <div key={value?.id} className='w-[250px] cursor-pointer' onClick={() => openViasocket(value?.id)}>
+                <div key={value?.id} id={value.id} className='w-[250px] cursor-pointer' onClick={() => openViasocket(value?.id)}>
                     <div className={`rounded-md border ${value.description.trim() === "" ? "border-red-600" : ""}`}>
                         <div className="p-4">
                             <div className="flex justify-between items-center">
@@ -40,7 +40,7 @@ const EmbedList = ({ params }) => {
 
     return (bridge?.configuration?.tools &&
         <div>
-            <div className="form-control w-full">
+            <div className="form-control ">
                 <div className="label flex-col mt-2 items-start">
                     <div className="flex flex-wrap gap-4">
                         {renderEmbed}
