@@ -58,7 +58,7 @@ const ActionModel = ({ params }) => {
                         <div className="label">
                             <span className="label-text text-lg">Action ID</span>
                         </div>
-                        <input type="text" placeholder="Enter Action ID" ref={actionIdRef} className="input input-bordered w-full" onChange={handleInputChange} />
+                        <input type="text" placeholder="Enter Action ID" ref={actionIdRef} className="input w-full input-bordered input-sm" onChange={handleInputChange} />
                         <div className="label">
                             <span className="label-text-alt">Unique identifier for the action</span>
                         </div>
@@ -69,7 +69,7 @@ const ActionModel = ({ params }) => {
                             <span className="label-text text-lg">Select an Action</span>
                         </div>
                         <select
-                            className="select select-bordered"
+                            className="select select-sm select-bordered"
                             ref={actionNameRef}
                             value={selectedAction}
                             onChange={(e) => {
@@ -78,8 +78,8 @@ const ActionModel = ({ params }) => {
                             }}
                         >
                             <option disabled>Pick one</option>
-                            <option>Frontend</option>
-                            <option>AI</option>
+                            <option>Send Data to Frontend</option>
+                            <option>Send Data to GPT</option>
                         </select>
                         <div className="label">
                             <span className="label-text-alt">Choose an action for the chatbot: send data to the Frontend or back to the AI. These options allow you to direct the flow of data accordingly.</span>
