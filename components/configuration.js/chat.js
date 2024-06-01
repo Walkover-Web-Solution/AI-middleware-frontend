@@ -6,11 +6,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import { toast } from "react-toastify";
 
-
 function Chat({ params }) {
   const { bridge } = useCustomSelector((state) => ({
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
-  }))
+  }));
   const messagesEndRef = useRef(null);
   const dataToSend = {
     configuration: {
@@ -21,7 +20,8 @@ function Chat({ params }) {
     apikey: bridge?.apikey,
     bridgeType: bridge?.bridgeType,
     slugName: bridge?.slugName
-  }
+  };
+
   // State variables
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -29,6 +29,9 @@ function Chat({ params }) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [conversation, setConversation] = useState([]);
+  const [isAccordionVisible, setIsAccordionVisible] = useState(false); // State for visibility of key-value fields
+  const [keyValuePairs, setKeyValuePairs] = useState([]); // State for key-value pairs
+
   const defaultsMap = useMemo(() => {
     return bridge ? Object.entries(bridge?.configuration).reduce((acc, [key, value]) => {
       const isToolsEmptyArray = key === 'tools' && Array.isArray(value.default) && value.default.length === 0;
@@ -53,6 +56,7 @@ function Chat({ params }) {
       },
     }));
   }, []);
+
   // Handle sending message
   const handleSendMessage = useCallback(async () => {
     if (dataToSend.configuration.type === "chat") if (newMessage.trim() === "") return;
@@ -60,6 +64,14 @@ function Chat({ params }) {
     setNewMessage("");
     setLoading(true);
     try {
+      // Create the variables object
+      const variables = keyValuePairs.reduce((acc, pair) => {
+        if (pair.key && pair.value) {
+          acc[pair.key] = pair.value;
+        }
+        return acc;
+      }, {});
+
       // Create user chat
       const newChat = {
         id: messages.length + 1,
@@ -85,20 +97,24 @@ function Chat({ params }) {
               conversation: conversation,
               ...defaultsMap,
               user: data,
-            }
+            },
+            variables // Include variables in the request data
+          },
+          bridge_id: params?.id
+        });
+      } else {
+        responseData = await dryRun({
+          localDataToSend: {
+            ...localDataToSend,
+            variables // Include variables in the request data
           },
           bridge_id: params?.id
         });
       }
-      else {
-        responseData = await dryRun({ localDataToSend: { ...localDataToSend }, bridge_id: params?.id });
-      }
       if (!responseData.success) {
         if (dataToSend.configuration.type === "chat") {
-          // if (conversation.length === 0) setConversation([_.cloneDeep(data)])
           setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
         }
-        // setErrorMessage(responseData.error);
         toast.error(responseData.error);
         setLoading(false);
         return;
@@ -135,7 +151,7 @@ function Chat({ params }) {
     } finally {
       setLoading(false);
     }
-  }, [newMessage, messages, localDataToSend, updateLocalDataToSend]);
+  }, [newMessage, messages, localDataToSend, updateLocalDataToSend, keyValuePairs, defaultsMap, conversation, dataToSend.configuration.type]);
 
   // Handle key press event
   const handleKeyPress = useCallback(
@@ -148,14 +164,31 @@ function Chat({ params }) {
   );
 
   useEffect(() => {
-    setLocalDataToSend(dataToSend)
-  }, [bridge])
-
+    setLocalDataToSend(dataToSend);
+  }, [bridge]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleAddKeyValuePair = () => {
+    setKeyValuePairs([...keyValuePairs, { key: "", value: "" }]);
+    setIsAccordionVisible(true);
+  };
+
+  const handleRemoveKeyValuePair = index => {
+    const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
+    setKeyValuePairs(updatedPairs);
+    if (updatedPairs.length === 0) {
+      setIsAccordionVisible(false);
+    }
+  };
+
+  const handleKeyValueChange = (index, field, value) => {
+    const updatedPairs = [...keyValuePairs];
+    updatedPairs[index][field] = value;
+    setKeyValuePairs(updatedPairs);
+  };
 
   return (
     <>
@@ -163,7 +196,7 @@ function Chat({ params }) {
         <span className="label-text">Playground</span>
       </div>
 
-      <div className=" p:2 sm:p-6 mt-4 justify-between flex flex-col h-[86vh] border rounded-md w-full z-10">
+      <div className="p-2 sm:p-6 mt-4 justify-between flex flex-col h-[86vh] border rounded-md w-full z-10">
         <div
           id="messages"
           className="flex flex-col w-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch z-10"
@@ -172,8 +205,7 @@ function Chat({ params }) {
             <div
               key={message.id}
               ref={index === messages.length - 1 ? messagesEndRef : null}
-              className={`chat ${message.sender === "user" ? "chat-end" : "chat-start"
-                }`}
+              className={`chat ${message.sender === "user" ? "chat-end" : "chat-start"}`}
             >
               <div className="chat-image avatar"></div>
               <div className="chat-header">
@@ -186,48 +218,106 @@ function Chat({ params }) {
         </div>
 
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-10">
-          <div className="relative flex justify-start items-center w-full ">
-            <div className="form-control w-full">
-              <div className="input-group flex gap-2 w-full">
-                {localDataToSend && (dataToSend?.configuration?.type !== "completion") && (dataToSend?.configuration?.type !== "embedding") && (
-                  <input
-                    type="text"
-                    placeholder="Type here"
-                    className="input input-bordered w-full"
-                    value={newMessage}
-                    onChange={e => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                  />
+          <div className="relative flex flex-col gap-4 w-full">
+            <div className="input-group flex gap-2 w-full">
+              {localDataToSend && (dataToSend?.configuration?.type !== "completion") && (dataToSend?.configuration?.type !== "embedding") && (
+                <input
+                  type="text"
+                  placeholder="Type here"
+                  className="input input-bordered w-full"
+                  value={newMessage}
+                  onChange={e => setNewMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                />
+              )}
+              <button
+                className="btn"
+                onClick={handleSendMessage}
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading loading-dots loading-lg"></span>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="h-6 w-6 ml-2 transform rotate-90"
+                  >
+                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+                  </svg>
                 )}
-                <button
-                  className="btn"
-                  onClick={handleSendMessage}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <span className="loading loading-dots loading-lg"></span>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="h-6 w-6 ml-2 transform rotate-90"
-                    >
-                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
-                    </svg>
-                  )}
-                </button>
-              </div>
+              </button>
+              <button
+                className="btn"
+                onClick={() => setIsAccordionVisible(!isAccordionVisible)}
+              >
+                +
+              </button>
             </div>
+            {isAccordionVisible && (
+              <div className="join join-vertical w-full mt-4">
+                <div className="collapse collapse-arrow join-item border border-base-300">
+                  <input type="checkbox" className="peer" />
+                  <div className="collapse-title text-xl font-medium peer-checked:bg-base-300 peer-checked:text-base-content">
+                    Add Variables
+                  </div>
+                  <div className="collapse-content">
+                    <div className="flex flex-col gap-4 max-h-56 overflow-y-auto">
+                      {keyValuePairs.map((pair, index) => (
+                        <div key={index} className="flex flex-row gap-4 items-center">
+                          <div className="form-control w-full sm:w-1/2">
+                            <label className="label">
+                              <span className="label-text">Key</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="input input-bordered input-sm w-full"
+                              placeholder="Enter key"
+                              value={pair.key}
+                              onChange={e => handleKeyValueChange(index, "key", e.target.value)}
+                            />
+                          </div>
+                          <div className="form-control w-full sm:w-1/2">
+                            <label className="label">
+                              <span className="label-text">Value</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="input input-bordered input-sm w-full"
+                              placeholder="Enter value"
+                              value={pair.value}
+                              onChange={e => handleKeyValueChange(index, "value", e.target.value)}
+                            />
+                          </div>
+                          <button
+                            className="btn btn-sm mt-7"
+                            onClick={() => handleRemoveKeyValuePair(index)}
+                          >
+                            -
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        className="btn self-center mt-4"
+                        onClick={handleAddKeyValuePair}
+                      >
+                        Add Variable
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           {errorMessage && (
             <div className="text-red-500 mt-2">{errorMessage}</div>
           )}
         </div>
       </div>
-
     </>
   );
 }
 
 export default Chat;
+
