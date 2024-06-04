@@ -3,7 +3,7 @@ import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-const BridgeTypeToggle = ({ dataToSend, params }) => {
+const BridgeTypeToggle = ({ params }) => {
 
     const { bridge } = useCustomSelector((state) => ({
         bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
@@ -11,11 +11,14 @@ const BridgeTypeToggle = ({ dataToSend, params }) => {
 
     const dispatch = useDispatch();
 
-    const handleInputChange = (e, key) => {
+    const handleInputChange = (e) => {
         let newCheckedValue = e.target.checked
         let updatedDataToSend = {
-            ...dataToSend,
-            [key]: newCheckedValue ? 'chatbot' : 'api'
+            configuration: {
+                model: bridge?.configuration?.model?.default,
+            },
+            service: bridge?.service?.toLowerCase(),
+            bridgeType: newCheckedValue ? 'chatbot' : 'api'
         };
         UpdateBridge(updatedDataToSend);
     };

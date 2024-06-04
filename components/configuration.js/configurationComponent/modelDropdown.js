@@ -5,56 +5,49 @@ import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 
 
-const ModelDropdown = ({ dataToSend, params }) => {
+const ModelDropdown = ({ params }) => {
     const { bridge } = useCustomSelector((state) => ({
         bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
     }));
 
     const dispatch = useDispatch()
+    const UpdateBridge = (currentDataToSend) => {
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
+    }
 
     const handleModel = (e) => {
         let updatedDataToSend = {};
 
-        if (dataToSend.configuration.type === e.target.selectedOptions[0].parentNode.label) {
+        if (bridge.configuration.type === e.target.selectedOptions[0].parentNode.label) {
             updatedDataToSend = {
-                ...dataToSend,
+                service: bridge?.service?.toLowerCase(),
                 configuration: {
-                    ...dataToSend.configuration,
                     model: e.target.value, // Update the model in the configuration
                     type: e.target.selectedOptions[0].parentNode.label // Keep the same type
                 },
-                service: bridge?.service, // Keep the same service
-                apikey: bridge?.apikey // Keep the same apiKey
             };
         } else {
-            // Define the new dataToSend based on the selected model type
+            // Define the new bridge based on the selected model type
             const newConfiguration = {
                 model: e.target.value,
                 type: e.target.selectedOptions[0].parentNode.label
             };
 
-            if (e.target.selectedOptions[0].parentNode.label === 'chat') {
-                newConfiguration.prompt = [];
-            } else if (e.target.selectedOptions[0].parentNode.label === "embedding") {
-                newConfiguration.input = "";
-            } else if (e.target.selectedOptions[0].parentNode.label === "completion") {
-                newConfiguration.prompt = "";
+            if (e.target.selectedOptions[0].parentNode.label !== bridge?.type) {
+                if (e.target.selectedOptions[0].parentNode.label === "chat") newConfiguration.prompt = [];
+                else if (e.target.selectedOptions[0].parentNode.label === "embedding") newConfiguration.input = "";
+                else if (e.target.selectedOptions[0].parentNode.label === "completion") newConfiguration.prompt = "";
             }
-
             updatedDataToSend = {
                 configuration: newConfiguration,
                 service: bridge?.service,
-                apikey: bridge?.apiKey
             };
+
+            UpdateBridge(updatedDataToSend);
         }
 
-        UpdateBridge(updatedDataToSend);
-    }
 
-    const UpdateBridge = (currentDataToSend) => {
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
     }
-
     return (
         <label className="form-control w-full">
             <div className="label">

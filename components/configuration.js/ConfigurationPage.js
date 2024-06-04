@@ -13,17 +13,17 @@ import SlugNameInput from "./configurationComponent/slugNameInput";
 export default function ConfigurationPage({ params, dataToSend }) {
     return (
         <div>
-            <BridgeTypeToggle dataToSend={dataToSend} params={params} />
-            <SlugNameInput dataToSend={dataToSend} params={params} />
-            <InputConfigComponent dataToSend={dataToSend} params={params} />
+            <BridgeTypeToggle params={params} />
+            <SlugNameInput params={params} />
+            <InputConfigComponent params={params} />
             <EmbedList params={params} />
             <ServiceDropdown params={params} />
-            <ModelDropdown dataToSend={dataToSend} params={params} />
-            <ApiKeyInput dataToSend={dataToSend} params={params} />
-            <AdvancedParameters params={params} dataToSend={dataToSend} />
+            <ModelDropdown params={params} />
+            <ApiKeyInput params={params} />
+            <AdvancedParameters params={params} />
             <ChatBotList params={params} />
             <ResponseTypesSelector params={params} />
-            <ResponseFormatSelector dataToSend={dataToSend} params={params} />
+            <ResponseFormatSelector params={params} />
         </div>
     )
 }
