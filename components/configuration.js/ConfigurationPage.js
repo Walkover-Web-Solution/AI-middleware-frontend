@@ -13,7 +13,7 @@ import ActionList from "./configurationComponent/actionList";
 
 export default function ConfigurationPage({ params, dataToSend }) {
     return (
-        <div>
+        <div className="flex flex-col gap-2">
             <BridgeTypeToggle params={params} />
             <SlugNameInput params={params} />
             <InputConfigComponent params={params} />
