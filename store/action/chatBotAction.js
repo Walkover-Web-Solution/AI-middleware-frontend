@@ -1,6 +1,5 @@
-import { addorRemoveBridgeInChatBot, createChatBot, getAllChatBot, getChatBotDetails, updateChatBot, updateChatBotConfig } from "@/config";
-import { isError } from "lodash";
-import { addorRemoveBridgeInChatBotReducer, createNewBotReducer, getAllChatBotReducer, getChatBotDetailsReducer, updateChatBotConfigReducer, updateChatBotReducer } from "../reducer/ChatBotReducer";
+import { addorRemoveBridgeInChatBot, createChatBot, createOrRemoveAction, getAllChatBot, getChatBotDetails, updateChatBot, updateChatBotConfig } from "@/config";
+import { createNewBotReducer, getAllChatBotReducer, getChatBotDetailsReducer, updateChatBotConfigReducer, updateChatBotReducer } from "../reducer/ChatBotReducer";
 import { updateBridgeReducer } from "../reducer/bridgeReducer";
 
 
@@ -25,16 +24,6 @@ export const createNewChatbot = (dataToSend, onSuccess) => async (dispatch, getS
     }
 };
 
-
-// export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, getState) => {
-//     try {
-//         const data = await createBridge(dataToSend.dataToSend);
-//         onSuccess(data);
-//         dispatch(createBridgeReducer({ data, orgId: dataToSend.orgid }));
-//     } catch (error) {
-//         console.error(error);
-//     }
-// };
 
 export const getChatBotDetailsAction = (botId) => async (dispatch, getState) => {
     try {
@@ -75,10 +64,12 @@ export const updateChatBotConfigAction = (botId, dataToSend) => async (dispatch,
     }
 }
 
-// "config": {
-//     "type": "popup",
-//     "height": "100",
-//     "heightUnit": "%",
-//     "width": "30",
-//     "widthUnit": "vw"
-// },
+
+export const createOrRemoveActionBridge = (dataToSend) => async (dispatch) => {
+    try {
+        const response = await createOrRemoveAction(dataToSend)
+        dispatch(updateBridgeReducer({ bridges: response.data }))
+    } catch (error) {
+        console.error(error)
+    }
+}
