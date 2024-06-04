@@ -19,7 +19,7 @@ const AdvancedParameters = ({ params }) => {
         if (modelInfoData) {
             const initialSliderValues = Object.entries(modelInfoData).reduce((acc, [key, value]) => {
                 if (value.field === 'slider') {
-                    acc[key] = value.default;
+                    acc[key] = value?.default;
                 }
                 return acc;
             }, {});
@@ -30,7 +30,7 @@ const AdvancedParameters = ({ params }) => {
     const dispatch = useDispatch();
 
     const handleSliderChange = (e, key) => {
-        const newValue = Number(e.target.value);
+        const newValue = Number(e?.target?.value);
         setSliderValues({ ...sliderValues, [key]: newValue });
     };
 
@@ -87,49 +87,49 @@ const AdvancedParameters = ({ params }) => {
                 {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
             {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-0">
-                {modelInfoData && Object.entries(modelInfoData).map(([key, value]) => (
+                {modelInfoData && Object.entries(modelInfoData)?.map(([key, value]) => (
                     key !== 'model' && key !== 'tools' && key !== 'tool_choice' && key !== "stream" &&
-                    <div key={key} className={` ${value.field === "boolean" ? "flex justify-between item-center" : ""} w-full`}>
+                    <div key={key} className={` ${value?.field === "boolean" ? "flex justify-between item-center" : ""}`}>
                         <div className='flex justify-between items-center w-full'>
-                            <p className='capitalize'>{key.replaceAll("_", " ")}</p>
-                            {value.field === 'slider' && <p>{sliderValues[key]}</p>}
+                            <p className='capitalize'>{key?.replaceAll("_", " ")}</p>
+                            {value?.field === 'slider' && <p>{sliderValues[key]}</p>}
                         </div>
-                        {value.field === "slider" ? (
+                        {value?.field === "slider" ? (
                             <input
                                 type="range"
-                                min={value.min}
-                                max={value.max}
-                                step={value.step}
-                                value={sliderValues[key] || value.default}
+                                min={value?.min}
+                                max={value?.max}
+                                step={value?.step}
+                                defaultValue={sliderValues[key] || value?.default}
                                 onChange={(e) => handleSliderChange(e, key)}
                                 onBlur={(e) => handleSliderBlur(e, key)}
                                 className="range range-xs w-full"
                                 name={key}
                                 id={key}
                             />
-                        ) : value.field === 'text' ? (
+                        ) : value?.field === 'text' ? (
                             <input
                                 type="text"
-                                required={value.level === 1}
-                                defaultValue={typeof value.default === 'object' ? JSON.stringify(value.default) : value.default}
+                                required={value?.level === 1}
+                                defaultValue={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
                                 onBlur={(e) => handleInputChange(e, key)}
                                 className="input w-full input-bordered max-w-xs input-sm"
                                 name={key}
                             />
-                        ) : value.field === 'number' ? (
+                        ) : value?.field === 'number' ? (
                             <input
                                 type="number"
-                                required={value.level === 1}
-                                defaultValue={value.default}
+                                required={value?.level === 1}
+                                defaultValue={value?.default}
                                 onBlur={(e) => handleInputChange(e, key)}
-                                className="input w-full input-bordered max-w-xs input-sm"
+                                className="input  input-bordered max-w-xs input-sm"
                                 name={key}
                             />
-                        ) : value.field === 'boolean' ? (
+                        ) : value?.field === 'boolean' ? (
                             <input
                                 type="checkbox"
-                                required={value.level === 1}
-                                defaultChecked={value.default.type === "text" ? false : value.default.type === "json_object" ? true : value.default}
+                                required={value?.level === 1}
+                                defaultChecked={value?.default?.type === "text" ? false : value?.default?.type === "json_object" ? true : value?.default}
                                 onChange={(e) => handleInputChange(e, key)}
                                 className="checkbox"
                                 name={key}
@@ -145,4 +145,3 @@ const AdvancedParameters = ({ params }) => {
 };
 
 export default AdvancedParameters;
-``

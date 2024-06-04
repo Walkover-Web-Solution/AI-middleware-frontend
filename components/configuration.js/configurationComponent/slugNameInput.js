@@ -30,7 +30,7 @@ const SlugNameInput = ({ params }) => {
 
     if (bridge?.bridgeType !== "chatbot") return null;
     return (
-        <label className="form-control w-full max-w-xs">
+        <label className="form-control max-w-xs">
             <div className="label">
                 <span className="label-text">Enter Slugname</span>
             </div>
