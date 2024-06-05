@@ -73,7 +73,6 @@ function Chat({ params }) {
       let response, responseData;
       let data;
       if (dataToSend.configuration.type === "chat") {
-        debugger
         data = modelInfo[localDataToSend.service].chatmessage.chat;
         const chatPath = modelInfo[localDataToSend.service].chatmessage.chatpath;
         _.set(data, chatPath, newMessage);
