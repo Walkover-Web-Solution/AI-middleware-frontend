@@ -73,6 +73,7 @@ function Chat({ params }) {
       let response, responseData;
       let data;
       if (dataToSend.configuration.type === "chat") {
+        debugger
         data = modelInfo[localDataToSend.service].chatmessage.chat;
         const chatPath = modelInfo[localDataToSend.service].chatmessage.chatpath;
         _.set(data, chatPath, newMessage);
@@ -82,6 +83,7 @@ function Chat({ params }) {
             ...localDataToSend,
             configuration: {
               ...localDataToSend.configuration,
+              prompt: bridge?.inputConfig?.system?.default,
               conversation: conversation,
               ...defaultsMap,
               user: data,
