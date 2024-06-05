@@ -83,6 +83,7 @@ function Chat({ params }) {
             configuration: {
               ...localDataToSend.configuration,
               conversation: conversation,
+              prompt: bridge?.inputConfig?.system?.default,
               ...defaultsMap,
               user: data,
             }
