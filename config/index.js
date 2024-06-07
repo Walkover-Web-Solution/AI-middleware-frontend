@@ -429,3 +429,14 @@ export const createOrRemoveAction = async ({ orgId, bridgeId, type, dataToSend }
     return error;
   }
 } 
+
+
+export const DeleteChatBot = async(botId) => {
+  try{
+    const response = await axios.delete(`${URL}/chatbot/${botId}`);
+    return response;
+  }catch(error){
+    console.log(error);
+    return error;
+  }
+}
