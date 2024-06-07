@@ -4,7 +4,7 @@ import Loader from "@/components/loader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { deleteBridgeAction, getAllBridgesAction, getAllResponseTypesAction } from "@/store/action/bridgeAction";
-import { Box } from "lucide-react";
+import { Box, Delete } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
