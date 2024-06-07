@@ -15,7 +15,10 @@ export const runtime = 'edge';
 function Home({ params }) {
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id] || []).slice().reverse();
-  const isLoading = useCustomSelector((state) => state.bridgeReducer.loading);
+  const { isLoading, chatbot_token } = useCustomSelector((state) => ({
+    isLoading: state.bridgeReducer.loading,
+    chatbot_token: state?.ChatBot?.chatbot_token || ''
+  }));
   const dispatch = useDispatch()
   const router = useRouter()
 
@@ -51,6 +54,8 @@ function Home({ params }) {
   const onClickConfigure = (id) => {
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
   }
+
+
 
   return (<div className="drawer lg:drawer-open ">
     {isLoading &&

@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     ChatBotMap: {},
     org: {},
+    chatbot_token: "",
     loading: false,
 };
 
@@ -32,6 +33,7 @@ export const ChatBot = createSlice({
 
         getAllChatBotReducer: (state, action) => {
             state.org = { ...state.org, [action.payload.orgId]: [...action.payload.chatbots] }
+            state.chatbot_token = action.payload.chatbot_token
             state.loading = false;
         },
         getChatBotDetailsReducer: (state, action) => {

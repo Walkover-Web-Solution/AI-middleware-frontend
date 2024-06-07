@@ -6,7 +6,7 @@ import { updateBridgeReducer } from "../reducer/bridgeReducer";
 export const getAllChatBotAction = (orgId) => async (dispatch, getState) => {
     try {
         const response = await getAllChatBot(orgId);
-        dispatch(getAllChatBotReducer({ chatbots: response.data.chatbots, orgId }));
+        dispatch(getAllChatBotReducer({ chatbots: response.data.result.chatbots, orgId, chatbot_token: response.data.chatbot_token }));
     } catch (error) {
         console.error(error);
     }
@@ -61,15 +61,5 @@ export const updateChatBotConfigAction = (botId, dataToSend) => async (dispatch,
         dispatch(updateChatBotConfigReducer({ botId, data: response.data }))
     } catch (error) {
         console.error(error);
-    }
-}
-
-
-export const createOrRemoveActionBridge = (dataToSend) => async (dispatch) => {
-    try {
-        const response = await createOrRemoveAction(dataToSend)
-        dispatch(updateBridgeReducer({ bridges: response.data }))
-    } catch (error) {
-        console.error(error)
     }
 }
