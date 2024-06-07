@@ -33,7 +33,7 @@ const InputConfigComponent = ({ params }) => {
 
   useEffect(() => {
     if (isMessageHistoryOpen) {
-      fetchMessageHistory(1);
+      fetchMessageHistory(1); // Fetch the first page when the sidebar opens
     }
   }, [isMessageHistoryOpen]);
 
@@ -50,19 +50,21 @@ const InputConfigComponent = ({ params }) => {
   }, [sidebarRef]);
 
   const fetchMessageHistory = async (pageNumber) => {
+    console.log('Fetching page:', pageNumber); 
     try {
       const response = await getSystemPromptHistory({
         bridge_id: params.id,
-        timestamp: Date.now(),
-        page: pageNumber, // Assuming your API supports pagination
+        pageNo: pageNumber,
+        limit: 10,
       });
       if (Array.isArray(response)) {
-        if (response.length === 0) {
+        if (response.length < 10) {
           setHasMore(false);
         } else {
-          setPrompt((prevPrompt) => (pageNumber === 1 ? response : [...prevPrompt, ...response]));
-          setPage(pageNumber + 1);
+          setHasMore(true);
         }
+        setPrompt((prevPrompt) => (pageNumber === 1 ? response : [...prevPrompt, ...response]));
+        setPage(pageNumber + 1);
       } else {
         setPrompt([]);
         setHasMore(false);
@@ -160,6 +162,7 @@ const InputConfigComponent = ({ params }) => {
         <aside
           ref={sidebarRef}
           className="fixed right-0 top-0 z-20 flex h-full w-1/3 flex-col overflow-y-auto bg-white px-5 py-8 shadow-lg transition-all duration-300"
+          id="scrollableDiv"
         >
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-medium flex items-center gap-2">
@@ -172,16 +175,16 @@ const InputConfigComponent = ({ params }) => {
               <X size={16} />
             </button>
           </div>
-          <div className="mt-6 flex flex-1 flex-col justify-between">
+          <div className="mt-6 flex flex-1 flex-col justify-between" >
             <InfiniteScroll
               dataLength={prompt.length}
               next={() => fetchMessageHistory(page)}
               hasMore={hasMore}
-              loader={<></>}
+              loader={<p>Loading...</p>}
               endMessage={<p>No more prompts</p>}
               scrollableTarget="scrollableDiv"
             >
-              <nav className="-mx-3 space-y-6" id="scrollableDiv">
+              <nav className="-mx-3 space-y-6">
                 <div className="space-y-3">
                   {prompt.length > 0 ? (
                     prompt.map((item, index) => (
@@ -210,4 +213,3 @@ const InputConfigComponent = ({ params }) => {
 };
 
 export default InputConfigComponent;
-

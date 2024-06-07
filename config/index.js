@@ -431,9 +431,9 @@ export const createOrRemoveAction = async ({ orgId, bridgeId, type, dataToSend }
 } 
 
 
-export const getSystemPromptHistory = async({bridge_id, timestamp}) => {
+export const getSystemPromptHistory = async({bridge_id, pageNo,limit}) => {
    try{
-     const response = await axios.get(`${URL}/api/v1/config/getallsystemprompts/${bridge_id}`)
+     const response = await axios.get(`${URL}/api/v1/config/getallsystemprompts/${bridge_id}?pageNo=${pageNo}&limit=${limit}`)
      return response.data.history;
    }catch(error){
      return error;
