@@ -91,8 +91,31 @@ function Chat({ params }) {
           bridge_id: params?.id
         });
       }
-      else {
-        responseData = await dryRun({ localDataToSend: { ...localDataToSend }, bridge_id: params?.id });
+      else if(dataToSend.configuration.type === "complition"){
+        debugger
+        responseData = await dryRun({
+          localDataToSend: {
+            ...localDataToSend,
+            configuration: {
+              ...localDataToSend.configuration
+            },
+            prompt: bridge?.inputConfig?.prompt?.prompt
+          },
+          bridge_id: params?.id
+        });
+      }
+      else if(dataToSend.configuration.type === "embedding"){
+        debugger
+        responseData = await dryRun({
+          localDataToSend: {
+            ...localDataToSend,
+            configuration: {
+              ...localDataToSend.configuration
+            },
+            prompt: bridge?.inputConfig?.input?.input
+          },
+          bridge_id: params?.id
+        });
       }
       if (!responseData.success) {
         if (dataToSend.configuration.type === "chat") {
