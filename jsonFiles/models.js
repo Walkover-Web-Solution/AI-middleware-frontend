@@ -8,10 +8,10 @@ export const services = {
     },
     google:
     {
-        models:new Set(["gemini-pro"]),
-        chat:new Set(["gemini-1.5-pro","gemini-1.5-Flash","gemini-1.0-pro","gemini-1.0-vision"]),
-        completion:new Set(["gemini-pro"]),
-    embedding:new Set(["embedding-001"])//-m ""
+        models: new Set(["gemini-pro","gemini-1.5-pro","gemini-1.0-pro-vision","gemini-1.0-pro","gemini-1.5-Flash"]),
+        chat: new Set(["gemini-pro","gemini-1.5-pro","gemini-1.0-pro-vision","gemini-1.0-pro","gemini-1.5-Flash"]),
+        completion: new Set(["gemini-pro","gemini-1.5-pro","gemini-1.0-pro-vision","gemini-1.0-pro","gemini-1.5-Flash"]),
+        embedding: new Set(["embedding-001"])
     }
 }
 

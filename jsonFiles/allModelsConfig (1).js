@@ -699,9 +699,44 @@ export const modelInfo = {
     },
     google:
     {
-        "gemini-1.5-pro": {
+        "gemini-pro": {
             configuration: {
                 "model": { field: "drop", default: "gemini-pro", "level": 1 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
+                "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
+                "maxOutputTokens": { field: "slider", min: 1, max: 8192, step: 1, default: 2048, level: 0 },
+                "stopSequences": { field: "text", default: "", level: 0 },
+            },
+
+
+            "apikey": "",
+            outputConfig: {
+                usage: [],
+                message: "candidates[0].content.parts[0].text",
+                assistant: "candidates[0].content",
+                role: "model"
+            },
+
+            inputConfig: {
+                model: {
+                    "default": {
+                        "role": "model",
+                        "parts": [
+                            {
+                                "text": ""
+                            }
+                        ]
+                    },
+                    "contentKey": "parts[0].text",
+                    "type": "json"
+
+                }
+            }
+        },
+        "gemini-1.5-pro": {
+            configuration: {
+                "model": { field: "drop", default: "gemini-1.5-pro", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
                 "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
@@ -736,7 +771,7 @@ export const modelInfo = {
         },
         "gemini-1.5-Flash": {
             configuration: {
-                "model": { field: "drop", default: "gemini-pro", "level": 1 },
+                "model": { field: "drop", default: "gemini-1.5-Flash", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
                 "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
@@ -771,7 +806,7 @@ export const modelInfo = {
         },
         "gemini-1.0-pro": {
             configuration: {
-                "model": { field: "drop", default: "gemini-pro", "level": 1 },
+                "model": { field: "drop", default: "gemini-1.0-pro", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
                 "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
@@ -806,7 +841,7 @@ export const modelInfo = {
         },
         "gemini-1.0-pro-vision": {
             configuration: {
-                "model": { field: "drop", default: "gemini-pro", "level": 1 },
+                "model": { field: "drop", default: "gemini-1.0-pro-vision", "level": 1 },
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
                 "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
