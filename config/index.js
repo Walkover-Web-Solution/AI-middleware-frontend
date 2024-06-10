@@ -117,7 +117,6 @@ export const getHistory = async (bridgeId) => {
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
 
   try {
-    debugger
     let dryRun
     if (localDataToSend.configuration.type === "chat") dryRun = await axios.post(`${URL}/api/v1/model/playground/chat/completion/${bridge_id}`, localDataToSend)
     if (localDataToSend.configuration.type === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
