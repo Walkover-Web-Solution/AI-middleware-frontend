@@ -21,12 +21,17 @@ const Page = ({ params }) => {
     dispatch(getSingleBridgesAction(params.id));
   }, []);
 
-
-
-
   useEffect(() => {
     if (embedToken) {
-      appendEmbedScript(embedToken);
+      const script = document.createElement("script");
+      script.setAttribute("embedToken", embedToken);
+      script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
+      script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC;
+      document.body.appendChild(script);
+
+      return () => {
+        document.body.removeChild(document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID));
+      };
     }
   }, [embedToken]);
 
@@ -36,7 +41,7 @@ const Page = ({ params }) => {
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, []);
+  }, [params.id]);
 
   useEffect(() => {
     handleResizer();
@@ -44,12 +49,12 @@ const Page = ({ params }) => {
 
   function handleMessage(e) {
     if (e?.data?.webhookurl) {
+      const dataToSend = {
+        ...e.data,
+        status: e?.data?.action
+      }
+      dispatch(integrationAction(dataToSend, params?.id));
       if ((e?.data?.action === "published" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
-        const dataToSend = {
-          ...e.data,
-          status: e?.data?.action
-        }
-        dispatch(integrationAction(dataToSend, params?.id));
         const dataFromEmbed = {
           url: e?.data?.webhookurl,
           payload: e?.data?.payload,
@@ -89,20 +94,6 @@ const Page = ({ params }) => {
 };
 
 // Extracted functions for better readability
-
-
-function appendEmbedScript(embedToken) {
-  const script = document.createElement("script");
-  script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
-  script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC;
-  script.setAttribute("embedToken", embedToken);
-  document.body.appendChild(script);
-
-  return () => {
-    document.body.removeChild(document.getElementById("viasocket-embed-main-script"));
-  };
-}
-
 
 
 function handleResizer() {

@@ -21,7 +21,7 @@ export default function ActionList({ params }) {
             actionJson: {
                 description,
                 type,
-                ...(type === 'Frontend' && { data })
+                ...(type === 'sendDataToFrontend' && { data })
             }
         };
 
@@ -52,19 +52,19 @@ export default function ActionList({ params }) {
                                     <h1 className="inline-flex items-center text-lg font-semibold">
                                         {key}
                                     </h1>
-                                    <div onClick={(e) => handleRemoveAction(key, value.type, value.description, value.data, e)} className='hover:scale-125 transition duration-100 ease-in-out'>
+                                    <div onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.data, e)} className='hover:scale-125 transition duration-100 ease-in-out'>
                                         <Trash size={16} className='cursor-pointer' />
                                     </div>
                                 </div>
                                 <p className="mt-3 text-xs sm:text-sm text-gray-600 line-clamp-3">
-                                    Description: {value.description}
+                                    Description: {value?.description}
                                 </p>
-                                {value.data && (
+                                {value?.data && (
                                     <p className="mt-3 text-xs sm:text-sm text-gray-600 line-clamp-3">
-                                        Structure: {value.data}
+                                        Structure: {value?.data}
                                     </p>
                                 )}
-                                {value.type && (
+                                {value?.type && (
                                     <div className="mt-4">
                                         <span className="mr-2 inline-block rounded-full capitalize bg-white px-3 py-1 text-[10px] sm:text-xs font-semibold text-gray-900">
                                             {value.type}
