@@ -92,7 +92,7 @@ const ResponseFormatSelector = ({ params }) => {
         { value: 'custom', label: 'Custom' },
     ];
 
-    return (
+    return (bridge?.bridgeType === "chatbot" &&
         <div>
             <p className='text-xl font-medium'>Select Response Format</p>
             {responseOptions.map(({ value, label }) => (
