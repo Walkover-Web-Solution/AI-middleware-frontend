@@ -38,7 +38,7 @@ const ApiKeyInput = ({ params }) => {
                 type="text"
                 required
                 defaultValue={bridge?.apikey}
-                className="input w-full input-bordered max-w-xs input-sm"
+                className="input input-bordered max-w-xs input-sm"
                 onBlur={(e) => onSave(e.target.value)}
             />
         </label>
