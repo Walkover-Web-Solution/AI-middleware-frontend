@@ -42,7 +42,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
             actionJson: {
                 description,
                 type,
-                ...(type === DEFAULT_ACTION && { data })
+                ...(type === DEFAULT_ACTION && { variable: data })
             },
             ...(actionId && { actionId })
         };
@@ -62,7 +62,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
     useEffect(() => {
         if (actionId && actions) {
             descriptionRef.current.value = actions.description;
-            dataRef.current.value = actions.data;
+            dataRef.current.value = actions.variable;
             setSelectedAction(actions.type);
         }
     }, [actionId, actions]);

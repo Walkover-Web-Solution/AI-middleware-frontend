@@ -21,7 +21,7 @@ export default function ActionList({ params }) {
             actionJson: {
                 description,
                 type,
-                ...(type === 'sendDataToFrontend' && { data })
+                ...(type === 'sendDataToFrontend' && { variable: data })
             }
         };
 
@@ -52,16 +52,16 @@ export default function ActionList({ params }) {
                                     <h1 className="inline-flex items-center text-lg font-semibold">
                                         {key}
                                     </h1>
-                                    <div onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.data, e)} className='hover:scale-125 transition duration-100 ease-in-out'>
+                                    <div onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.variable, e)} className='hover:scale-125 transition duration-100 ease-in-out'>
                                         <Trash size={16} className='cursor-pointer' />
                                     </div>
                                 </div>
                                 <p className="mt-3 text-xs sm:text-sm text-gray-600 line-clamp-3">
                                     Description: {value?.description}
                                 </p>
-                                {value?.data && (
+                                {value?.variable && (
                                     <p className="mt-3 text-xs sm:text-sm text-gray-600 line-clamp-3">
-                                        Structure: {value?.data}
+                                        Structure: {value?.variable}
                                     </p>
                                 )}
                                 {value?.type && (
