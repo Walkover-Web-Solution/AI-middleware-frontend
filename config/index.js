@@ -419,3 +419,13 @@ export const switchUser = async (dataToSend) => {
     return error;
   }
 }
+
+export const createOrRemoveAction = async ({ orgId, bridgeId, type, dataToSend }) => {
+  try {
+    const response = await axios.post(`${URL}/chatbot/${orgId}/bridge/${bridgeId}/action?type=${type}`, dataToSend);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+} 

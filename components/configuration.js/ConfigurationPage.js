@@ -9,10 +9,11 @@ import ResponseFormatSelector from "./configurationComponent/responseFormatSelec
 import ResponseTypesSelector from "./configurationComponent/responseTypeSelector";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
+import ActionList from "./configurationComponent/actionList";
 
 export default function ConfigurationPage({ params, dataToSend }) {
     return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
             <BridgeTypeToggle params={params} />
             <SlugNameInput params={params} />
             <InputConfigComponent params={params} />
@@ -22,6 +23,7 @@ export default function ConfigurationPage({ params, dataToSend }) {
             <ApiKeyInput params={params} />
             <AdvancedParameters params={params} />
             <ChatBotList params={params} />
+            <ActionList params={params} />
             <ResponseTypesSelector params={params} />
             <ResponseFormatSelector params={params} />
         </div>

@@ -21,7 +21,7 @@ export default function ServiceDropdown({ params }) {
 
     return (
         <div>
-            <label className="form-control  max-w-xs ">
+            <label className="form-control max-w-xs ">
                 <div className="label">
                     <span className="label-text">Service</span>
                 </div>

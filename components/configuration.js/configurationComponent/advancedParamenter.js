@@ -122,7 +122,7 @@ const AdvancedParameters = ({ params }) => {
                                 required={value?.level === 1}
                                 defaultValue={value?.default}
                                 onBlur={(e) => handleInputChange(e, key)}
-                                className="input  input-bordered max-w-xs input-sm"
+                                className="input input-bordered max-w-xs input-sm"
                                 name={key}
                             />
                         ) : value?.field === 'boolean' ? (

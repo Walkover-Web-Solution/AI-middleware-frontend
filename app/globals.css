@@ -2,19 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide the button container by default */
 .button-container {
   visibility: hidden;
   white-space: nowrap;
+  /* Ensure buttons don't wrap */
 }
 
+/* Show the button container when the row is hovered */
 .hover-row:hover .button-container {
   visibility: visible;
 }
 
+/* Style for the buttons (customize as needed) */
 .table-button {
   margin-left: 5px;
+  /* Space between buttons */
+  /* Add more styling here */
 }
 
+/* Ensure the row has a cursor pointer to indicate it's interactive */
 .hover-row {
   cursor: pointer;
 }

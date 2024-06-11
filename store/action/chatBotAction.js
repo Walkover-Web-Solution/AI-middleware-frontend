@@ -63,3 +63,13 @@ export const updateChatBotConfigAction = (botId, dataToSend) => async (dispatch,
         console.error(error);
     }
 }
+
+
+export const createOrRemoveActionBridge = (dataToSend) => async (dispatch) => {
+    try {
+        const response = await createOrRemoveAction(dataToSend)
+        dispatch(updateBridgeReducer({ bridges: response.data }))
+    } catch (error) {
+        console.error(error)
+    }
+}
