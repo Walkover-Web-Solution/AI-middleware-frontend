@@ -13,7 +13,11 @@ const EmbedList = ({ params }) => {
     const renderEmbed = useMemo(() => (
         integrationData && integrationData
             .slice() // Create a copy of the array to avoid mutating the original
-            .sort((a, b) => a?.title?.localeCompare(b?.title)) // Sort alphabetically based on title
+            .sort((a, b) => {
+                if (!a?.title) return 1;
+                if (!b?.title) return -1;
+                return a?.title?.localeCompare(b?.title); // Sort alphabetically based on title
+            })
             .map((value) => (
                 <div key={value?.id} id={value.id} className='w-[250px] cursor-pointer' onClick={() => openViasocket(value?.id)}>
                     <div className={`rounded-md border ${value.description.trim() === "" ? "border-red-600" : ""}`}>
