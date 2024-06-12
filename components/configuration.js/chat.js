@@ -104,14 +104,13 @@ function Chat({ params }) {
         });
       }
       else if (dataToSend.configuration.type === "embedding") {
-        debugger
         responseData = await dryRun({
           localDataToSend: {
             ...localDataToSend,
             configuration: {
               ...localDataToSend.configuration
             },
-            prompt: bridge?.inputConfig?.input?.input
+            input: bridge?.inputConfig?.input?.input
           },
           bridge_id: params?.id
         });
