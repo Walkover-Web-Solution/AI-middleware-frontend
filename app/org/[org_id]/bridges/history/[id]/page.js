@@ -181,15 +181,10 @@ function Page({ params }) {
             </div>
           ) : (
             <InfiniteScroll
-              dataLength={Array.isArray(historyData) ? historyData.length : 0}
+              dataLength={historyData.length}
               next={fetchMoreData}
               hasMore={hasMore}
               loader={<h4></h4>}
-              endMessage={
-                <p style={{ textAlign: "center" }}>
-                  <b>Yay! You have seen it all</b>
-                </p>
-              }
               scrollableTarget="sidebar"
             >
               <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
