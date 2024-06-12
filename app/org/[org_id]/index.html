@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete HTML Example</title>
+</head>
+
+<body>
+    <button id="firstButton" onclick="first()">first</button>
+    <button id="secondButton" onclick="second()">second</button>
+    <button id="thirdButton" onclick="third()">third</button>
+    <div id="container" style="display: flex; width: 100vw; height: 100vh;">
+        <div id="div1" style="width: 30%; background-color: red;"></div>
+        <div id="div2" style="width: 70%; background-color: rgb(141, 187, 227);"></div>
+    </div>
+    <script id="chatbot-main-script"
+        embedToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdfaWQiOiI3NDIyIiwiY2hhdGJvdF9pZCI6IjY2NjE5M2E5MWY3NDM2M2RiYjI1MTlkYiIsInVzZXJfaWQiOiI5NjEiLCJpYXQiOjE3MTgxMTI3Mzl9.rNfVrTRmmIrJ7VtZjCBBzlDuix1GblkF1iu9AWOzJ3Q"
+        src="https://chatbot-embed.viasocket.com/chatbot-local.js">
+        </script>
+    <script>
+        function first() {
+            window.SendDataToChatbot({
+                parentId: 'div1',
+                fullScreen: true,
+            });
+        }
+
+        function second() {
+            window.SendDataToChatbot({
+                parentId: 'div2',
+                fullScreen: true,
+            });
+        }
+
+        function third() {
+            window.SendDataToChatbot({
+                parentId: '',
+                fullScreen: false,
+            });
+        }
+    </script>
+</body>
+
+</html>

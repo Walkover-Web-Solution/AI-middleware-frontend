@@ -26,7 +26,7 @@ const Page = ({ params }) => {
   const [selectedThread, setSelectedThread] = useState("");
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  console.log(selectedItem, "selectedItem")
+
   useEffect(() => {
     const handleEscKey = (event) => {
       if (event.key === "Escape") {
@@ -61,7 +61,6 @@ const Page = ({ params }) => {
   const threadHandler = useCallback(
     async (thread_id, item) => {
       if (item?.role === "user" && !thread_id) {
-        console.log(item)
         try {
           const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
           setSelectedItem({ variables: item.variables, "System Prompt": systemPromptResponse, ...item });
