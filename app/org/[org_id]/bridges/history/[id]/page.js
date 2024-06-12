@@ -1,18 +1,20 @@
 "use client";
 import Protected from "@/components/protected";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { getHistoryAction, getThread } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import React, { useEffect, useState, useCallback } from "react";
-import { useDispatch } from "react-redux";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { getSingleMessage } from "@/config";
 import { CircleX } from "lucide-react";
 
 export const runtime = "edge";
 
-const Page = ({ params }) => {
+function Page({ params }) {
   const search = useSearchParams();
   const router = useRouter();
   const pathName = usePathname();
@@ -26,23 +28,41 @@ const Page = ({ params }) => {
   const [selectedThread, setSelectedThread] = useState("");
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [page, setPage] = useState(1); // Track the current page of data
+  const [hasMore, setHasMore] = useState(true); // Track if more data is available
+  const [loading, setLoading] = useState(false); // Track loading state
+  const sidebarRef = useRef(null);
 
   useEffect(() => {
-    const handleEscKey = (event) => {
+    const closeSliderOnEsc = (event) => {
       if (event.key === "Escape") {
         setIsSliderOpen(false);
       }
     };
 
-    document.addEventListener("keydown", handleEscKey);
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setIsSliderOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", closeSliderOnEsc);
+    document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
-      document.removeEventListener("keydown", handleEscKey);
+      document.removeEventListener("keydown", closeSliderOnEsc);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   useEffect(() => {
-    dispatch(getHistoryAction(params.id));
-    dispatch(clearThreadData());
+    const fetchInitialData = async () => {
+      setLoading(true);
+      await dispatch(getHistoryAction(params.id));
+      dispatch(clearThreadData());
+      setLoading(false);
+    };
+    fetchInitialData();
   }, [params.id, dispatch]);
 
   useEffect(() => {
@@ -54,7 +74,9 @@ const Page = ({ params }) => {
       const firstThreadId = historyData[0].thread_id;
       setSelectedThread(firstThreadId);
       dispatch(getThread(firstThreadId, params.id));
-      router.push(`${pathName}?thread_id=${firstThreadId}`, undefined, { shallow: true });
+      router.push(`${pathName}?thread_id=${firstThreadId}`, undefined, {
+        shallow: true,
+      });
     }
   }, [search, historyData, params.id, dispatch, router, pathName]);
 
@@ -63,18 +85,29 @@ const Page = ({ params }) => {
       if (item?.role === "user" && !thread_id) {
         try {
           const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
-          setSelectedItem({ "System Prompt": systemPromptResponse, ...item });
+          setSelectedItem({ variables: item.variables, "System Prompt": systemPromptResponse, ...item });
           setIsSliderOpen(true);
         } catch (error) {
           console.error("Failed to fetch single message:", error);
         }
-      } else if (item?.role !== "assistant") {
+      } else {
         setSelectedThread(thread_id);
-        router.push(`${pathName}?thread_id=${thread_id}`, undefined, { shallow: true });
+        router.push(`${pathName}?thread_id=${thread_id}`, undefined, {
+          shallow: true,
+        });
       }
     },
     [params.id, router, pathName]
   );
+
+  const fetchMoreData = async () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    const result = await dispatch(getHistoryAction(params.id, nextPage));
+    if (result.length < 40) {
+      setHasMore(false);
+    }
+  };
 
   const formatDateAndTime = (created_at) => {
     const date = new Date(created_at);
@@ -86,7 +119,9 @@ const Page = ({ params }) => {
       minute: "2-digit",
       second: "2-digit",
     };
-    return isNaN(date.getTime()) ? "Invalid Date" : date.toLocaleDateString("en-US", options);
+    return isNaN(date.getTime())
+      ? "Invalid Date"
+      : date.toLocaleDateString("en-US", options);
   };
 
   if (historyData.length === 0) {
@@ -108,10 +143,15 @@ const Page = ({ params }) => {
                 {thread &&
                   thread.map((item, index) => (
                     <div key={`item.id${index}`}>
-                      <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
+                      <div
+                        className={`chat ${item.role === "user" ? "chat-start" : "chat-end"
+                          }`}
+                      >
                         <div className="chat-header flex gap-2">
                           {item.role.replaceAll("_", " ")}
-                          <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
+                          <time className="text-xs opacity-50">
+                            {formatDateAndTime(item.createdAt)}
+                          </time>
                         </div>
                         <div
                           className={`chat-bubble ${item.role === "user" ? "chat-bubble-primary hover:shadow-lg hover:scale-105 transition-transform duration-300" : "bg-gray-300 text-black"}`} // Add hover effects for blue chat bubbles
@@ -126,38 +166,61 @@ const Page = ({ params }) => {
             </div>
           </div>
         </div>
-        <div className="drawer-side border-r-4">
-          <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay" onClick={() => setIsSliderOpen(false)}></label>
-          <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
-            {historyData.map((item) => (
-              <li key={item.id} onClick={() => threadHandler(item.thread_id)}>
-                <a
-                  className={`${selectedThread === item.thread_id ? "active" : ""
-                    } block overflow-hidden whitespace-nowrap text-ellipsis`}
-                >
-                  {item.thread_id}
-                </a>
-              </li>
-            ))}
-          </ul>
+        <div className="drawer-side  bg-base-200 border-r-4" id="sidebar">
+          <label
+            htmlFor="my-drawer-2"
+            aria-label="close sidebar"
+            className="drawer-overlay"
+          ></label>
+          {loading ? (
+            <div className="flex justify-center items-center  bg-base-200 h-full">
+              {/* Loading... */}
+            </div>
+          ) : (
+            <InfiniteScroll
+              dataLength={historyData.length}
+              next={fetchMoreData}
+              hasMore={hasMore}
+              loader={<h4></h4>}
+              scrollableTarget="sidebar"
+            >
+              <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
+                {historyData.map((item) => (
+                  <li
+                    key={item.id}
+                    onClick={() => threadHandler(item.thread_id)}
+                  >
+                    <a
+                      className={`${selectedThread === item.thread_id ? "active" : ""
+                        } block overflow-hidden whitespace-nowrap text-ellipsis`}
+                    >
+                      {item.thread_id}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </InfiniteScroll>
+          )}
         </div>
       </div>
       <div
-        className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/3 lg:w-1/6 opacity-100" : "w-0"
+        ref={sidebarRef}
+        className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/3 opacity-100" : "w-0"
           } overflow-y-auto bg-base-200 transition-all duration-300 z-50`}
       >
         {selectedItem && (
           <aside className="flex w-full flex-col h-screen overflow-y-auto">
             <div className="p-4">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-800">Chat Details</h2>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Chat Details
+                </h2>
                 <button onClick={() => setIsSliderOpen(false)} className="btn">
                   <CircleX size={16} />
                 </button>
               </div>
               <ul className="mt-4">
                 {Object.entries(selectedItem).map(([key, value]) => {
-                  if (!value || ["id", "org_id", "createdAt", "created_at", "chat_id"].includes(key)) return null;
                   return (
                     <li key={key} className="mb-2">
                       <strong className="font-medium text-gray-700 capitalize">{key}:</strong>
@@ -165,7 +228,7 @@ const Page = ({ params }) => {
                         {typeof value === "object" ? (
                           <pre className="bg-gray-200 p-2 rounded text-sm overflow-x-auto">{JSON.stringify(value, null, 2)}</pre>
                         ) : (
-                          value.toString()
+                          value?.toString()
                         )}
                       </span>
                     </li>
@@ -178,7 +241,7 @@ const Page = ({ params }) => {
       </div>
     </div>
   );
-};
+}
 
 export default Protected(Page);
 
