@@ -8,7 +8,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import ReactMarkdown from "react-markdown";
 import { getSingleMessage } from "@/config";
-import { CircleX, Menu } from "lucide-react";
+import { CircleX } from "lucide-react";
 
 export const runtime = "edge";
 
@@ -26,13 +26,11 @@ const Page = ({ params }) => {
   const [selectedThread, setSelectedThread] = useState("");
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const handleEscKey = (event) => {
       if (event.key === "Escape") {
         setIsSliderOpen(false);
-        setIsSidebarOpen(false); // Close the sidebar on escape key
       }
     };
 
@@ -73,7 +71,6 @@ const Page = ({ params }) => {
       } else if (item?.role !== "assistant") {
         setSelectedThread(thread_id);
         router.push(`${pathName}?thread_id=${thread_id}`, undefined, { shallow: true });
-        setIsSidebarOpen(false); // Close sidebar on thread selection for small screens
       }
     },
     [params.id, router, pathName]
@@ -102,13 +99,8 @@ const Page = ({ params }) => {
 
   return (
     <div className="flex">
-      <div className="lg:hidden fixed bottom-4 left-4 z-50">
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="btn btn-primary">
-          <Menu size={24} />
-        </button>
-      </div>
-      <div className={`drawer lg:drawer-open ${isSidebarOpen ? "drawer-open" : ""}`}>
-        <input id="my-drawer-2" type="checkbox" className="drawer-toggle" checked={isSidebarOpen} readOnly />
+      <div className="drawer drawer-open">
+        <input id="my-drawer-2" type="checkbox" className="drawer-toggle" readOnly />
         <div className="drawer-content flex flex-col items-center justify-center">
           <div className="w-full min-h-screen bg-base-200">
             <div className="w-full text-start">
@@ -122,7 +114,7 @@ const Page = ({ params }) => {
                           <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
                         </div>
                         <div
-                          className={`chat-bubble ${item.role === "user" ? "bg-blue-200 text-black" : "bg-gray-300 text-black"}`} // Add distinct background and text colors
+                          className={`chat-bubble ${item.role === "user" ? "chat-bubble-primary hover:shadow-lg hover:scale-105 transition-transform duration-300" : "bg-gray-300 text-black"}`} // Add hover effects for blue chat bubbles
                           onClick={() => threadHandler(item.thread_id, item)}
                         >
                           <ReactMarkdown>{item.content}</ReactMarkdown>
@@ -135,7 +127,7 @@ const Page = ({ params }) => {
           </div>
         </div>
         <div className="drawer-side border-r-4">
-          <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay" onClick={() => setIsSidebarOpen(false)}></label>
+          <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay" onClick={() => setIsSliderOpen(false)}></label>
           <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
             {historyData.map((item) => (
               <li key={item.id} onClick={() => threadHandler(item.thread_id)}>
@@ -189,4 +181,5 @@ const Page = ({ params }) => {
 };
 
 export default Protected(Page);
+
 
