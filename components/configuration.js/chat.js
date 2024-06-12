@@ -98,7 +98,7 @@ function Chat({ params }) {
             configuration: {
               ...localDataToSend.configuration
             },
-            prompt: bridge?.inputConfig?.input?.input
+            prompt: bridge?.inputConfig?.prompt?.prompt
           },
           bridge_id: params?.id
         });
