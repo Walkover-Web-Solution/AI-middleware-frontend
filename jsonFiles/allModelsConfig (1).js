@@ -873,6 +873,12 @@ export const modelInfo = {
 
                 }
             }
+        },
+        chatmessage: {
+            chat: {
+                role: "user",
+                content: ""
+            }, chatpath: "content"
         }
     },
     mistral:

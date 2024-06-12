@@ -1,6 +1,7 @@
 import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge, getAllResponseTypesApi, addorRemoveResponseIdInBridge, getChatBotOfBridge } from "@/config";
-import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer, isPending, isError } from "../reducer/bridgeReducer";
+import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer, isPending, isError,updateService } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
+import { defaultModels } from '@/config/defaultModels'; 
 
 
 
@@ -49,13 +50,20 @@ export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) =
   }
 };
 
-export const updateBridgeAction = (dataToSend) => async (dispatch, getState) => {
+export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch) => {
   try {
-    const data = await updateBridge(dataToSend)
-    dispatch(updateBridgeReducer({ bridges: data.data.bridges, bridgeType: dataToSend.dataToSend.bridgeType }));
+    dispatch(isPending());
+    const data = await updateBridge({bridgeId,dataToSend});
+    dispatch(updateBridgeReducer({ bridgeId, bridges: data.data.bridges, bridgeType: dataToSend.bridgeType }));
   } catch (error) {
     console.error(error);
+    dispatch(isError());
   }
+};
+
+export const updateServiceAction = ({ bridgeId, service }) => (dispatch) => {
+  const defaultModel = defaultModels[service];
+  dispatch(updateService({ bridgeId, service, defaultModel }));
 };
 
 

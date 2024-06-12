@@ -85,7 +85,7 @@ function Chat({ params }) {
               prompt: bridge?.inputConfig?.system?.default,
               conversation: conversation,
               ...defaultsMap,
-              user: data,
+              user: data.content,
             }
           },
           bridge_id: params?.id

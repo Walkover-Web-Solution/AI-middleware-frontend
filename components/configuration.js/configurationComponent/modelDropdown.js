@@ -4,33 +4,41 @@ import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 
-
 const ModelDropdown = ({ params }) => {
-    const { bridge } = useCustomSelector((state) => ({
+    const { bridge, service } = useCustomSelector((state) => ({
         bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+        service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
     }));
 
-    const dispatch = useDispatch()
-    const UpdateBridge = (currentDataToSend) => {
+    const dispatch = useDispatch();
+    const [availableModels, setAvailableModels] = useState([]);
+
+    useEffect(() => {
+        if (service) {
+            setAvailableModels(services[service] || []);
+        }
+    }, [service]);
+
+    const updateBridge = (currentDataToSend) => {
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
-    }
+    };
 
     const handleModel = (e) => {
-        let updatedDataToSend = {};
+        const selectedModel = e.target.value;
+        const modelType = e.target.selectedOptions[0].parentNode.label;
 
-        if (bridge.configuration.type === e.target.selectedOptions[0].parentNode.label) {
-            updatedDataToSend = {
-                service: bridge?.service?.toLowerCase(),
-                configuration: {
-                    model: e.target.value, // Update the model in the configuration
-                    type: e.target.selectedOptions[0].parentNode.label // Keep the same type
-                },
-            };
-        } else {
-            // Define the new bridge based on the selected model type
+        let updatedDataToSend = {
+            service: bridge?.service?.toLowerCase(),
+            configuration: {
+                model: selectedModel,
+                type: modelType,
+            },
+        };
+
+        if (modelType !== bridge?.configuration?.type) {
             const newConfiguration = {
-                model: e.target.value,
-                type: e.target.selectedOptions[0].parentNode.label
+                model: selectedModel,
+                type: modelType,
             };
 
             if (e.target.selectedOptions[0].parentNode.label !== bridge?.type) {
@@ -42,31 +50,41 @@ const ModelDropdown = ({ params }) => {
                 configuration: newConfiguration,
                 service: bridge?.service,
             };
-
-            UpdateBridge(updatedDataToSend);
         }
 
+        updateBridge(updatedDataToSend);
+    };
 
-    }
     return (
         <label className="form-control w-full">
             <div className="label">
                 <span className="label-text">Model</span>
             </div>
-            <select value={bridge?.configuration?.model?.default} onChange={handleModel} className="select select-sm max-w-xs select-bordered">
+            <select
+                value={bridge?.configuration?.model?.default}
+                onChange={handleModel}
+                className="select select-sm max-w-xs select-bordered"
+            >
                 <option disabled>Select a Model</option>
-                {Object.entries(services?.[bridge?.service] || {}).map(([group, options]) => (
-                    group !== 'models' && // Exclude the 'models' group
-                    <optgroup label={group} key={group}>
-                        {Array.from(options).map(option => (
-                            <option key={option} value={option}>{option}</option>
-                        ))}
-                    </optgroup>
+                {Object.entries(availableModels).map(([group, options]) => (
+                    group !== 'models' && (
+                        <optgroup label={group} key={group}>
+                            {Array.from(options).map((option) => (
+                                <option key={option} value={option}>
+                                    {option}
+                                </option>
+                            ))}
+                        </optgroup>
+                    )
                 ))}
             </select>
         </label>
-
     );
 };
 
 export default ModelDropdown;
+
+
+
+
+
