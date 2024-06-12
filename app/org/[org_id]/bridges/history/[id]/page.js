@@ -70,7 +70,7 @@ function Page({ params }) {
     if (thread_id) {
       setSelectedThread(thread_id);
       dispatch(getThread(thread_id, params.id));
-    } else if (Array.isArray(historyData) && historyData.length > 0) {
+    } else if (historyData.length > 0) {
       const firstThreadId = historyData[0].thread_id;
       setSelectedThread(firstThreadId);
       dispatch(getThread(firstThreadId, params.id));
@@ -186,20 +186,19 @@ function Page({ params }) {
               scrollableTarget="sidebar"
             >
               <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
-                {Array.isArray(historyData) &&
-                  historyData.map((item) => (
-                    <li
-                      key={item.id}
-                      onClick={() => threadHandler(item.thread_id)}
+                {historyData.map((item) => (
+                  <li
+                    key={item.id}
+                    onClick={() => threadHandler(item.thread_id)}
+                  >
+                    <a
+                      className={`${selectedThread === item.thread_id ? "active" : ""
+                        } block overflow-hidden whitespace-nowrap text-ellipsis`}
                     >
-                      <a
-                        className={`${selectedThread === item.thread_id ? "active" : ""
-                          } block overflow-hidden whitespace-nowrap text-ellipsis`}
-                      >
-                        {item.thread_id}
-                      </a>
-                    </li>
-                  ))}
+                      {item.thread_id}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </InfiniteScroll>
           )}
