@@ -21,7 +21,7 @@ export const getSingleModels = async () => {
 export const getSingleMessage = async ({ bridge_id, message_id }) => {
   try {
     const messageData = await axios.get(`${URL}/api/v1/config/systemprompt/gethistory/${bridge_id}/${message_id}`)
-    return messageData.data.message
+    return messageData.data.system_prompt
   } catch (error) {
     console.error(error)
     throw new Error(error)
