@@ -26,7 +26,7 @@ const Page = ({ params }) => {
   const [selectedThread, setSelectedThread] = useState("");
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-
+  console.log(selectedItem, "selectedItem")
   useEffect(() => {
     const handleEscKey = (event) => {
       if (event.key === "Escape") {
@@ -61,9 +61,10 @@ const Page = ({ params }) => {
   const threadHandler = useCallback(
     async (thread_id, item) => {
       if (item?.role === "user" && !thread_id) {
+        console.log(item)
         try {
           const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
-          setSelectedItem({ "System Prompt": systemPromptResponse, ...item });
+          setSelectedItem({ variables: item.variables, "System Prompt": systemPromptResponse, ...item });
           setIsSliderOpen(true);
         } catch (error) {
           console.error("Failed to fetch single message:", error);
@@ -157,7 +158,6 @@ const Page = ({ params }) => {
               </div>
               <ul className="mt-4">
                 {Object.entries(selectedItem).map(([key, value]) => {
-                  if (!value || ["id", "org_id", "createdAt", "created_at", "chat_id"].includes(key)) return null;
                   return (
                     <li key={key} className="mb-2">
                       <strong className="font-medium text-gray-700 capitalize">{key}:</strong>
@@ -165,7 +165,7 @@ const Page = ({ params }) => {
                         {typeof value === "object" ? (
                           <pre className="bg-gray-200 p-2 rounded text-sm overflow-x-auto">{JSON.stringify(value, null, 2)}</pre>
                         ) : (
-                          value.toString()
+                          value?.toString()
                         )}
                       </span>
                     </li>
