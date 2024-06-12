@@ -133,10 +133,10 @@ function Page({ params }) {
   }
 
   return (
-    <div className="flex h-full">
-      <div className="drawer h-full lg:drawer-open">
+    <div className="flex">
+      <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content h-full flex flex-col items-center justify-center">
+        <div className="drawer-content flex flex-col items-center justify-center">
           <div className="w-full min-h-screen bg-base-200">
             <div className="w-full text-start">
               <div className="w-full">
@@ -167,14 +167,14 @@ function Page({ params }) {
             </div>
           </div>
         </div>
-        <div className="drawer-side h-full border-r-4" id="sidebar">
+        <div className="drawer-side  bg-base-200 border-r-4" id="sidebar">
           <label
             htmlFor="my-drawer-2"
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
           {loading ? (
-            <div className="flex justify-center items-center   bg-base-200  h-full">
+            <div className="flex justify-center items-center  bg-base-200 h-full">
               {/* Loading... */}
             </div>
           ) : (
@@ -207,7 +207,7 @@ function Page({ params }) {
       </div>
       <div
         ref={sidebarRef}
-        className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full h-full md:w-1/2 lg:w-1/3 opacity-100" : "w-0"
+        className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/3 opacity-100" : "w-0"
           } overflow-y-auto bg-base-200 transition-all duration-300 z-50`}
       >
         {selectedItem && (

@@ -37,8 +37,3 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.infinite-scroll-component__outerdiv,
-.infinite-scroll-component {
-  height: 100% !important;
-}
