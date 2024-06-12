@@ -35,7 +35,9 @@ function ChatBotCard({ item, onFetchDetails }) {
 
 export default function ChatBotCardHome({ params }) {
     const { allChatBot } = useCustomSelector((state) => ({
-        allChatBot: (state?.ChatBot?.org?.[params?.org_id] || []),
+        // allChatBot: (state?.ChatBot?.org?.[params?.org_id] || []),
+        allChatBot: (state?.ChatBot?.org?.[params?.org_id] || []).filter(bot => bot?.type !== 'default'),
+
     }));
     const dispatch = useDispatch();
     const router = useRouter();

@@ -82,8 +82,8 @@ const Page = ({ params }) => {
               </div>
               <div className="resizer w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
               <div className="w-1/3 flex-1 chatPage min-w-[450px]">
-                <div className="p-4">
-                  {bridge?.bridgeType === 'chatbot' ? <div className="relative h-screen bg-red-800" id="parentChatbot"><Chatbot /></div> : <Chat params={params} />
+                <div className="p-4" id="parentChatbot">
+                  {bridge?.bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />
                   }
                 </div>
               </div>
