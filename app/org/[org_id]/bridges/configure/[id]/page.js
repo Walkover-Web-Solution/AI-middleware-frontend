@@ -54,7 +54,7 @@ const Page = ({ params }) => {
         status: e?.data?.action
       }
       dispatch(integrationAction(dataToSend, params?.id));
-      if ((e?.data?.action === "published" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
+      if ((e?.data?.action === "published" || e?.data?.action === "paused") && e?.data?.description?.length > 0) {
         const dataFromEmbed = {
           url: e?.data?.webhookurl,
           payload: e?.data?.payload,
