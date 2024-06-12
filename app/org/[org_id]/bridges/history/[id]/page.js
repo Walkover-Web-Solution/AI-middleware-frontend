@@ -104,7 +104,7 @@ function Page({ params }) {
     const nextPage = page + 1;
     setPage(nextPage);
     const result = await dispatch(getHistoryAction(params.id, nextPage));
-    if (result.length < 10) {
+    if (result.length < 40) {
       setHasMore(false);
     }
   };
