@@ -84,11 +84,8 @@ function Page({ params }) {
     async (thread_id, item) => {
       if (item?.role === "user" && !thread_id) {
         try {
-          const systemPromptResponse = await getSingleMessage({
-            bridge_id: params.id,
-            message_id: item.createdAt,
-          });
-          setSelectedItem({ "System Prompt": systemPromptResponse, ...item });
+          const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
+          setSelectedItem({ variables: item.variables, "System Prompt": systemPromptResponse, ...item });
           setIsSliderOpen(true);
         } catch (error) {
           console.error("Failed to fetch single message:", error);
@@ -234,114 +231,20 @@ function Page({ params }) {
                 </button>
               </div>
               <ul className="mt-4">
-                {
-                  Object.entries(selectedItem).reduce(
-                    (acc, [key, value]) => {
-                      if (
-                        !value ||
-                        [
-                          "id",
-                          "org_id",
-                          "createdAt",
-                          "created_at",
-                          "chat_id",
-                        ].includes(key)
-                      )
-                        return acc;
-                      if (key === "variables") {
-                        acc.variables = (
-                          <li key={key} className="mb-2">
-                            <strong className="font-medium text-gray-700 capitalize">
-                              {key}:
-                            </strong>
-                            <span className="ml-2 text-gray-600">
-                              {typeof value === "object" ? (
-                                <pre className="bg-gray-200 p-2 rounded text-sm overflow-x-auto">
-                                  {JSON.stringify(value, null, 2)}
-                                </pre>
-                              ) : (
-                                value.toString()
-                              )}
-                            </span>
-                          </li>
-                        );
-                      } else {
-                        acc.other.push(
-                          <li key={key} className="mb-2">
-                            <strong className="font-medium text-gray-700 capitalize">
-                              {key}:
-                            </strong>
-                            <span className="ml-2 text-gray-600">
-                              {typeof value === "object" ? (
-                                <pre className="bg-gray-200 p-2 rounded text-sm overflow-x-auto">
-                                  {JSON.stringify(value, null, 2)}
-                                </pre>
-                              ) : (
-                                value.toString()
-                              )}
-                            </span>
-                          </li>
-                        );
-                      }
-                      return acc;
-                    },
-                    { variables: null, other: [] }
-                  ).variables
-                }
-                {Object.entries(selectedItem)
-                  .reduce(
-                    (acc, [key, value]) => {
-                      if (
-                        !value ||
-                        [
-                          "id",
-                          "org_id",
-                          "createdAt",
-                          "created_at",
-                          "chat_id",
-                        ].includes(key)
-                      )
-                        return acc;
-                      if (key === "variables") {
-                        acc.variables = (
-                          <li key={key} className="mb-2">
-                            <strong className="font-medium text-gray-700 capitalize">
-                              {key}:
-                            </strong>
-                            <span className="ml-2 text-gray-600">
-                              {typeof value === "object" ? (
-                                <pre className="bg-gray-200 p-2 rounded text-sm overflow-x-auto">
-                                  {JSON.stringify(value, null, 2)}
-                                </pre>
-                              ) : (
-                                value.toString()
-                              )}
-                            </span>
-                          </li>
-                        );
-                      } else {
-                        acc.other.push(
-                          <li key={key} className="mb-2">
-                            <strong className="font-medium text-gray-700 capitalize">
-                              {key}:
-                            </strong>
-                            <span className="ml-2 text-gray-600">
-                              {typeof value === "object" ? (
-                                <pre className="bg-gray-200 p-2 rounded text-sm overflow-x-auto">
-                                  {JSON.stringify(value, null, 2)}
-                                </pre>
-                              ) : (
-                                value.toString()
-                              )}
-                            </span>
-                          </li>
-                        );
-                      }
-                      return acc;
-                    },
-                    { variables: null, other: [] }
-                  )
-                  .other.map((item) => item)}
+                {Object.entries(selectedItem).map(([key, value]) => {
+                  return (
+                    <li key={key} className="mb-2">
+                      <strong className="font-medium text-gray-700 capitalize">{key}:</strong>
+                      <span className="ml-2 text-gray-600">
+                        {typeof value === "object" ? (
+                          <pre className="bg-gray-200 p-2 rounded text-sm overflow-x-auto">{JSON.stringify(value, null, 2)}</pre>
+                        ) : (
+                          value?.toString()
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </aside>
