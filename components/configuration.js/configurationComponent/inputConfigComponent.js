@@ -66,7 +66,7 @@ const InputConfigComponent = ({ params }) => {
 
     const renderInputConfig = useMemo(() => (
         inputConfig && Object.entries(inputConfig).filter(([key]) => key !== "rawData").map(([key, value]) => (
-            <div className="form-control w-full " key={key}>
+            <div className="form-control" key={key}>
                 <div className="label">
                     <span className="label-text capitalize">{key}</span>
                 </div>
