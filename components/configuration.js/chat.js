@@ -91,20 +91,19 @@ function Chat({ params }) {
           bridge_id: params?.id
         });
       }
-      else if(dataToSend.configuration.type === "complition"){
-        debugger
+      else if (dataToSend.configuration.type === "completion") {
         responseData = await dryRun({
           localDataToSend: {
             ...localDataToSend,
             configuration: {
               ...localDataToSend.configuration
             },
-            prompt: bridge?.inputConfig?.prompt?.prompt
+            prompt: bridge?.inputConfig?.input?.input
           },
           bridge_id: params?.id
         });
       }
-      else if(dataToSend.configuration.type === "embedding"){
+      else if (dataToSend.configuration.type === "embedding") {
         debugger
         responseData = await dryRun({
           localDataToSend: {
