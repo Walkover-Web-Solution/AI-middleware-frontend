@@ -11,18 +11,24 @@ export const historyReducer = createSlice({
   name: "History",
   initialState,
   reducers: {
-    fetchAllHistoryReducer : (state, action) => {
-      state.history = action.payload.data 
-      state.success = action.payload.success
-    } ,
-    fetchThreadReducer : (state, action) => {
-        state.thread = action.payload.data 
-      } ,
-      clearThreadData: (state) => {
-        state.thread = [];
-      },
+    fetchAllHistoryReducer: (state, action) => {
+      // debugger
+      if (action.payload.page === 1) {
+        state.history = action.payload.data;
+      } else {
+        state.history = [...state.history, ...action.payload.data];
+      }
+      state.success = true;
+    },
+    fetchThreadReducer: (state, action) => {
+      state.thread = action.payload.data;
+    },
+    clearThreadData: (state) => {
+      state.thread = [];
+    },
   },
 });
+
 
 export const {
     fetchAllHistoryReducer ,
