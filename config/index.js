@@ -105,14 +105,17 @@ export const getSingleThreadData = async (threadId, bridgeId) => {
 }
 
 
-export const getHistory = async (bridgeId) => {
+export const getHistory = async (bridgeId, page = 1) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`)
-    return getSingleThreadData
+    // debugger
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}?pageNo=${page}&limit=40`);
+    return getSingleThreadData.data;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
+
+
 
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
 
@@ -439,3 +442,4 @@ export const getSystemPromptHistory = async({bridge_id, pageNo,limit}) => {
      return error;
    }
 }
+
