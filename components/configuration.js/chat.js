@@ -103,11 +103,27 @@ function Chat({ params }) {
           },
           bridge_id: params?.id
         });
-      } else {
+      }
+      else if (dataToSend.configuration.type === "completion") {
         responseData = await dryRun({
           localDataToSend: {
             ...localDataToSend,
-            variables // Include variables in the request data
+            configuration: {
+              ...localDataToSend.configuration
+            },
+            prompt: bridge?.inputConfig?.prompt?.prompt
+          },
+          bridge_id: params?.id
+        });
+      }
+      else if (dataToSend.configuration.type === "embedding") {
+        responseData = await dryRun({
+          localDataToSend: {
+            ...localDataToSend,
+            configuration: {
+              ...localDataToSend.configuration
+            },
+            input: bridge?.inputConfig?.input?.input
           },
           bridge_id: params?.id
         });
