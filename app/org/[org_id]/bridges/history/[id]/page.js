@@ -144,9 +144,8 @@ function Page({ params }) {
                   thread.map((item, index) => (
                     <div key={`item.id${index}`}>
                       <div
-                        className={`chat ${
-                          item.role === "user" ? "chat-start" : "chat-end"
-                        }`}
+                        className={`chat ${item.role === "user" ? "chat-start" : "chat-end"
+                          }`}
                       >
                         <div className="chat-header flex gap-2">
                           {item.role.replaceAll("_", " ")}
@@ -155,9 +154,8 @@ function Page({ params }) {
                           </time>
                         </div>
                         <div
-                          className={`${
-                            item.role === "user" && "cursor-pointer"
-                          } chat-bubble`}
+                          className={`${item.role === "user" && "cursor-pointer"
+                            } chat-bubble`}
                           onClick={() => threadHandler(item.thread_id, item)}
                         >
                           <ReactMarkdown>{item.content}</ReactMarkdown>
@@ -169,14 +167,14 @@ function Page({ params }) {
             </div>
           </div>
         </div>
-        <div className="drawer-side border-r-4" id="sidebar">
+        <div className="drawer-side  bg-base-200 border-r-4" id="sidebar">
           <label
             htmlFor="my-drawer-2"
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
           {loading ? (
-            <div className="flex justify-center items-center h-full">
+            <div className="flex justify-center items-center  bg-base-200 h-full">
               {/* Loading... */}
             </div>
           ) : (
@@ -195,9 +193,8 @@ function Page({ params }) {
                       onClick={() => threadHandler(item.thread_id)}
                     >
                       <a
-                        className={`${
-                          selectedThread === item.thread_id ? "active" : ""
-                        } block overflow-hidden whitespace-nowrap text-ellipsis`}
+                        className={`${selectedThread === item.thread_id ? "active" : ""
+                          } block overflow-hidden whitespace-nowrap text-ellipsis`}
                       >
                         {item.thread_id}
                       </a>
@@ -210,9 +207,8 @@ function Page({ params }) {
       </div>
       <div
         ref={sidebarRef}
-        className={`fixed inset-y-0 right-0 border-l-2 ${
-          isSliderOpen ? "w-full md:w-1/2 lg:w-1/3 opacity-100" : "w-0"
-        } overflow-y-auto bg-base-200 transition-all duration-300 z-50`}
+        className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/3 opacity-100" : "w-0"
+          } overflow-y-auto bg-base-200 transition-all duration-300 z-50`}
       >
         {selectedItem && (
           <aside className="flex w-full flex-col h-screen overflow-y-auto">
