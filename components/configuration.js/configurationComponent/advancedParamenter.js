@@ -89,7 +89,7 @@ const AdvancedParameters = ({ params }) => {
             {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-0">
                 {modelInfoData && Object.entries(modelInfoData)?.map(([key, value]) => (
                     key !== 'model' && key !== 'tools' && key !== 'tool_choice' && key !== "stream" &&
-                    <div key={key} className={` ${value?.field === "boolean" ? "flex justify-between item-center" : ""} w-full`}>
+                    <div key={key} className={` ${value?.field === "boolean" ? "flex justify-between item-center" : ""}`}>
                         <div className='flex justify-between items-center w-full'>
                             <p className='capitalize'>{key?.replaceAll("_", " ")}</p>
                             {value?.field === 'slider' && <p>{sliderValues[key]}</p>}
@@ -122,7 +122,7 @@ const AdvancedParameters = ({ params }) => {
                                 required={value?.level === 1}
                                 defaultValue={value?.default}
                                 onBlur={(e) => handleInputChange(e, key)}
-                                className="input w-full input-bordered max-w-xs input-sm"
+                                className="input input-bordered max-w-xs input-sm"
                                 name={key}
                             />
                         ) : value?.field === 'boolean' ? (
