@@ -18,7 +18,7 @@ const ModelDropdown = ({ params }) => {
     };
 
     const handleModel = (e) => {
-        const selectedModel = e.target.value;
+        const selectedModel = e.target.value.split('|')[1];
         const modelType = e.target.selectedOptions[0].parentNode.label;
 
         let updatedDataToSend = {
@@ -63,7 +63,7 @@ const ModelDropdown = ({ params }) => {
                     group !== 'models' && (
                         <optgroup label={group} key={`${group}_${options}_${Index}_${bridge?.type}`}>
                             {Array.from(options).map((option) => (
-                                <option key={`${group}_${options}_${Index}`} defaultValue={option}>
+                                <option key={`${group}_${options}_${Index}`} defaultValue={`${group+'|'+option}`}>
                                     {option}
                                 </option>
                             ))}
