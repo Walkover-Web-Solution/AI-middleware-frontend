@@ -49,6 +49,7 @@ const Page = ({ params }) => {
 
   function handleMessage(e) {
     if (e?.data?.webhookurl) {
+      console.log(e.data, "data form embed ")
       const dataToSend = {
         ...e.data,
         status: e?.data?.action
