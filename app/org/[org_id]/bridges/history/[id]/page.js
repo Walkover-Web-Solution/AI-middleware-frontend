@@ -199,7 +199,7 @@ function Page({ params }) {
                               <div>
                                 <h3 className="font-bold">Functions Executed</h3>
                                 <div key={index}>
-                                  <div className="text-xs">Function "{integrationData[funcName].title}" executed successfully. Inspect details?</div>
+                                  <div className="text-xs">Function "{integrationData[funcName].title || funcName}" executed successfully. Inspect details?</div>
                                 </div>
                               </div>
                             </div>
