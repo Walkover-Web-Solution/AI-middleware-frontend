@@ -547,7 +547,7 @@ export const modelInfo = {
                 }
             }
         },
-        
+
         "gpt-4o": {
             configuration: {
                 "model": { field: "drop", default: "gpt-4-turbo", "level": 1 },

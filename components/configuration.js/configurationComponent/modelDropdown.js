@@ -68,7 +68,7 @@ const ModelDropdown = ({ params }) => {
                 <option disabled>Select a Model</option>
                 {Object.entries(availableModels).map(([group, options]) => (
                     group !== 'models' && (
-                        <optgroup label={group} key={group}>
+                        <optgroup label={group} key={`${group}_${options}`}>
                             {Array.from(options).map((option) => (
                                 <option key={option} value={option}>
                                     {option}
