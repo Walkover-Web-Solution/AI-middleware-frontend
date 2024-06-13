@@ -66,11 +66,11 @@ const ModelDropdown = ({ params }) => {
                 className="select select-sm max-w-xs select-bordered"
             >
                 <option disabled>Select a Model</option>
-                {Object.entries(availableModels).map(([group, options]) => (
+                {Object.entries(availableModels).map(([group, options,Index]) => (
                     group !== 'models' && (
-                        <optgroup label={group} key={`${group}_${options}`}>
+                        <optgroup label={group} key={`${group}_${options}_${Index}_${bridge?.type}`}>
                             {Array.from(options).map((option) => (
-                                <option key={option} value={option}>
+                                <option key={`${group}_${options}_${Index}`} value={option}>
                                     {option}
                                 </option>
                             ))}

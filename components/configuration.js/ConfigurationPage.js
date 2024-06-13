@@ -12,12 +12,7 @@ import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import ActionList from "./configurationComponent/actionList";
 
-export default function ConfigurationPage({ params, dataToSend }) {
-    const [selectedService, setSelectedService] = useState('');
-
-    const handleServiceChange = (service) => {
-        setSelectedService(service);
-    };
+export default function ConfigurationPage({ params }) {
 
     return (
         <div className="flex flex-col gap-3">
@@ -25,7 +20,7 @@ export default function ConfigurationPage({ params, dataToSend }) {
             <SlugNameInput params={params} />
             <InputConfigComponent params={params} />
             <EmbedList params={params} />
-            <ServiceDropdown params={params} onServiceChange={handleServiceChange} />
+            <ServiceDropdown params={params} />
             <ModelDropdown params={params} />
             <ApiKeyInput params={params} />
             <AdvancedParameters params={params} />

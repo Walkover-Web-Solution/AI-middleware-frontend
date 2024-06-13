@@ -2,9 +2,9 @@ import { useCustomSelector } from "@/customSelector/customSelector";
 import { updateServiceAction, updateBridgeAction } from '@/store/action/bridgeAction';
 import { useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
-import { defaultModels } from '@/config/defaultModels'; // Adjust the path as needed
+import { services } from '@/jsonFiles/models'; // Adjust the path as needed
 
-export default function ServiceDropdown({ params, onServiceChange }) {
+export default function ServiceDropdown({ params }) {
     const [selectedService, setSelectedService] = useState('');
     const dispatch = useDispatch();
 
@@ -15,35 +15,23 @@ export default function ServiceDropdown({ params, onServiceChange }) {
     useEffect(() => {
         if (bridge) {
             setSelectedService(bridge?.service);
-            onServiceChange(bridge?.service); // Notify parent component on initial load
         }
     }, [bridge]);
 
     const handleServiceChange = (e) => {
         const service = e.target.value;
-        const defaultModel = defaultModels[service];
+        const defaultModel = services[service]?.completion?.values().next().value || null; // Get the default model for the selected service
 
         setSelectedService(service);
-        onServiceChange(service); // Notify parent component about the service change
-
         const updatedDataToSend = {
             service: service,
             configuration: {
-                type: bridge?.configuration?.type,
+                type: bridge?.type,
                 model: defaultModel,
             },
         };
 
-        // if (bridge.configuration.type !== bridge?.configuration?.type) {
-        //     const newConfiguration = {
-        //         model: defaultModel,
-        //         type: bridge.configuration.type,
-        //     };
-
-        //     updatedDataToSend.configuration = newConfiguration;
-        // }
-
-        dispatch(updateServiceAction({ bridgeId: params.id, service }));
+        // dispatch(updateServiceAction({ bridgeId: params.id, service }));
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: updatedDataToSend }));
     };
 
@@ -62,6 +50,7 @@ export default function ServiceDropdown({ params, onServiceChange }) {
         </div>
     );
 }
+
 
 
 
