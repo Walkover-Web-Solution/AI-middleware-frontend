@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { DeleteChatBot } from "@/config/index";
-import Modal from "@/components/Model"; // Import the Modal component
+import Modal from "@/components/Model"; // Ensure the correct path
 
 function BridgeBadge({ bridge }) {
   return (
@@ -140,5 +140,6 @@ export default function ChatBotCardHome({ params }) {
     </div>
   );
 }
+
 
 

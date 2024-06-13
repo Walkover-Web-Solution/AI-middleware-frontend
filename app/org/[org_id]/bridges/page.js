@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import Modal from "@/components/Model"; // Import the Modal component
+import Modal from "@/components/Model"; // Ensure the correct path
 
 export const runtime = "edge";
 
@@ -210,6 +210,7 @@ function Home({ params }) {
 }
 
 export default Protected(Home);
+
 
 
 
