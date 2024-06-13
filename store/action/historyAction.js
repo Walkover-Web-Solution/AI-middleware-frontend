@@ -4,14 +4,20 @@ import { getHistory, getSingleThreadData } from "@/config";
 
 
 
-export const getHistoryAction = (id) => async (dispatch, getState) => {
+export const getHistoryAction = (id, page=1) => async (dispatch, getState) => {
   try {
-    const data = await getHistory(id);
-    dispatch(fetchAllHistoryReducer(data.data));
+    // debugger
+    const data = await getHistory(id, page);
+    if (data && data.data) {
+      dispatch(fetchAllHistoryReducer({ data: data.data, page }));
+      return data.data; // Return the data for further checks
+    }
   } catch (error) {
     console.error(error);
   }
 };
+
+
 
 
 export const getThread = (thread_id, id) => async (dispatch, getState) => {
