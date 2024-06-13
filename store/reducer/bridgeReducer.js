@@ -75,13 +75,7 @@ export const bridgeReducer = createSlice({
         flows.push(dataToSend);
       }
     },
-    updateService: (state, action) => {
-      const { bridgeId, service, defaultModel } = action.payload;
-      if (state.allBridgesMap[bridgeId]) {
-        state.allBridgesMap[bridgeId].service = service;
-        state.allBridgesMap[bridgeId].configuration.model.default = defaultModel;
-      }
-    },
+    
   },
 });
 
@@ -94,7 +88,6 @@ export const {
   updateBridgeReducer,
   deleteBridgeReducer,
   integrationReducer,
-  updateService, // Export the new reducer action
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;

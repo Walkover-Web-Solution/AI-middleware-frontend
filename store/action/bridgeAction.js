@@ -1,7 +1,7 @@
 import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge, getAllResponseTypesApi, addorRemoveResponseIdInBridge, getChatBotOfBridge } from "@/config";
 import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer, isPending, isError,updateService } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
-import { defaultModels } from '@/config/defaultModels'; 
+
 
 
 
@@ -61,10 +61,6 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
   }
 };
 
-export const updateServiceAction = ({ bridgeId, service }) => (dispatch) => {
-  const defaultModel = defaultModels[service];
-  dispatch(updateService({ bridgeId, service, defaultModel }));
-};
 
 
 export const deleteBridgeAction = ({ bridgeId, orgId }) => async (dispatch) => {

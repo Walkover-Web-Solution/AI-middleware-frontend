@@ -78,7 +78,7 @@ const InputConfigComponent = ({ params }) => {
         ))
     ), [inputConfig, handleInputConfigChanges, SaveData]);
 
-    return <> {!(bridge?.service === "google" && (bridge?.type === "completion" || bridge?.type === "embedding")) && renderInputConfig}</>;
+    return <> {(bridge?.service === "google" && bridge?.type === "chat") || renderInputConfig}</>;
 };
 
 export default InputConfigComponent;
