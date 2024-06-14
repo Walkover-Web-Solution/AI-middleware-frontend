@@ -35,7 +35,7 @@ function ChatBotCard({ item, onFetchDetails, onOpenModal }) {
               e.stopPropagation();
               onOpenModal(item._id);
             }}
-            className="flex justify-center btn btn-sm tooltip"
+            className="flex justify-center  tooltip"
             data-tip="Delete"
           >
             <Trash size={16} />

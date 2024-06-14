@@ -1,15 +1,14 @@
 "use client";
-import CreateNewBridge from "@/components/createNewBridge";
+import Modal from "@/components/Model"; // Ensure the correct path
 import Loader from "@/components/loader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { deleteBridgeAction, getAllBridgesAction } from "@/store/action/bridgeAction";
 import { Box, Trash } from "lucide-react"; // Import Trash icon
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import Modal from "@/components/Model"; // Ensure the correct path
 
 export const runtime = "edge";
 
@@ -149,13 +148,13 @@ function Home({ params }) {
                                   <>
                                     {Array.isArray(item["configuration"]["prompt"])
                                       ? item["configuration"]["prompt"].map(
-                                          (promptItem, index) => (
-                                            <div key={index}>
-                                              <p>Role: {promptItem.role}</p>
-                                              <p>Content: {promptItem.content}</p>
-                                            </div>
-                                          )
+                                        (promptItem, index) => (
+                                          <div key={index}>
+                                            <p>Role: {promptItem.role}</p>
+                                            <p>Content: {promptItem.content}</p>
+                                          </div>
                                         )
+                                      )
                                       : (
                                         <p>Prompt: {item["configuration"]["prompt"]}</p>
                                       )}
@@ -168,7 +167,7 @@ function Home({ params }) {
                                 )}
                               </p>
                             </div>
-                            <div className="mt-auto flex justify-between w-full">
+                            <div className="mt-auto flex justify-between items-center align-bottom w-full">
                               <div>
                                 <span className="mb-2 mr-2 inline-block rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-900">
                                   {item["service"]}
@@ -182,7 +181,7 @@ function Home({ params }) {
                                   e.stopPropagation();
                                   handleOpenModal(item._id);
                                 }}
-                                className="flex justify-center btn btn-sm tooltip"
+                                className=" tooltip"
                                 data-tip="Delete"
                               >
                                 <Trash size={16} />
