@@ -15,9 +15,8 @@ export const runtime = 'edge';
 function Home({ params }) {
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id] || []).slice().reverse();
-  const { isLoading, chatbot_token } = useCustomSelector((state) => ({
+  const { isLoading } = useCustomSelector((state) => ({
     isLoading: state.bridgeReducer.loading,
-    chatbot_token: state?.ChatBot?.chatbot_token || ''
   }));
   const dispatch = useDispatch()
   const router = useRouter()
