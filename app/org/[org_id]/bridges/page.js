@@ -3,9 +3,9 @@ import Loader from "@/components/loader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { deleteBridgeAction, getAllBridgesAction, getAllResponseTypesAction } from "@/store/action/bridgeAction";
-import { Box,Rss } from "lucide-react";
+import { Box, Rss } from "lucide-react";
 import { useRouter } from 'next/navigation';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 
@@ -14,7 +14,9 @@ export const runtime = 'edge';
 function Home({ params }) {
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id] || []).slice().reverse();
-  const isLoading = useCustomSelector((state) => state.bridgeReducer.loading);
+  const { isLoading } = useCustomSelector((state) => ({
+    isLoading: state.bridgeReducer.loading,
+  }));
   const dispatch = useDispatch()
   const router = useRouter()
 
@@ -50,6 +52,12 @@ function Home({ params }) {
   const onClickConfigure = (id) => {
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
   }
+
+  useEffect(() => {
+    dispatch(getAllBridgesAction())
+  }, [])
+
+
 
   return (<div className="drawer lg:drawer-open ">
     {isLoading &&
