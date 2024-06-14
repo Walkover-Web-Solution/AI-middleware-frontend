@@ -92,7 +92,8 @@ export default function FormSection({ params }) {
         heightUnit: '',
         width: '',
         widthUnit: '',
-        type: ''
+        type: '',
+        themeColor: "#000000"
     });
 
     const { chatBotConfig } = useCustomSelector((state) => ({
@@ -170,6 +171,15 @@ export default function FormSection({ params }) {
                     onChange={handleInputChange}
                     name="type"
                 />
+            </div>
+            <div className="flex items-center justify-start gap-2">
+                <input
+                    type="color"
+                    value={formData.themeColor}
+                    onBlur={handleInputChange}
+                    name="themeColor"
+                />
+                <span>{formData.themeColor}</span>
             </div>
         </div>
     );
