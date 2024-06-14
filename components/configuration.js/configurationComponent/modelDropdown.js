@@ -18,9 +18,7 @@ const ModelDropdown = ({ params }) => {
     };
 
     const handleModel = (e) => {
-        // debugger
-        // const selectedModel = e.target.value.split('|')[1];
-        const selectedModel = e.target.value;
+        const selectedModel = e.target.value.split('|')[1];
         const modelType = e.target.selectedOptions[0].parentNode.label;
 
         let updatedDataToSend = {
@@ -56,7 +54,7 @@ const ModelDropdown = ({ params }) => {
                 <span className="label-text">Model</span>
             </div>
             <select
-                value={bridge?.configuration?.model?.default}
+                value={`${bridge.type}|${bridge?.configuration?.model?.default}`}
                 onChange={handleModel}
                 className="select select-sm max-w-xs select-bordered"
             >
@@ -65,7 +63,7 @@ const ModelDropdown = ({ params }) => {
                     group !== 'models' && (
                         <optgroup label={group} key={`${group}_${options}_${Index}_${bridge?.type}`}>
                             {Array.from(options).map((option) => (
-                                <option key={`${group}_${options}_${Index}`} defaultValue={`${group+'|'+option}`}>
+                                <option key={`${group}_${options}_${Index}`} value={`${group+'|'+option}`}>
                                     {option}
                                 </option>
                             ))}

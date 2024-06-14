@@ -24,7 +24,6 @@ function CreateNewBridge({ orgid }) {
     }
 
     const createBridgeHandler = (name, slugname) => {
-        debugger
         if (name.length > 0 && selectedModel && selectedModel && seletedType) {
             setIsLoading(true);
             const dataToSend = {
