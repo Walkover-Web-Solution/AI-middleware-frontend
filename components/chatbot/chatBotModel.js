@@ -18,7 +18,7 @@ function ChatBotModel({ orgid }) {
             return;
         }
         setIsLoading(true); // Set loading state to true
-        dispatch(createNewChatbot({ title: name, orgId: orgid, type: "chatbot" }, (data) => {
+        dispatch(createNewChatbot({ title: name, orgId: orgid }, (data) => {
             route.push(`/org/${orgid}/chatbot/${data.data.chatBot._id}`);
             document.getElementById('my_modal_1').close();
             setIsLoading(false); // Reset loading state after completion
