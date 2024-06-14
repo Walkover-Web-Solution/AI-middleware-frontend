@@ -10,29 +10,37 @@ const Chatbot = ({ params }) => {
     }));
 
     useEffect(() => {
-        if (window && typeof window.SendDataToChatbot === 'function') {
-            window?.SendDataToChatbot({
-                bridgeName: bridge?.slugName,
-                threadId: bridge?.name.replaceAll(" ", ""),
-                variables: {},
-                // parentId: 'parentChatbot',
-                // fullScreen: true
-            });
-            window.openChatbot()
-        }
+        const intervalId = setInterval(() => {
+            if (window.SendDataToChatbot) {
+                clearInterval(intervalId);
+                if (typeof window.SendDataToChatbot === 'function' && document.getElementById('parentChatbot')) {
+                    window.SendDataToChatbot({
+                        bridgeName: bridge?.slugName,
+                        threadId: bridge?.name.replaceAll(" ", ""),
+                        variables: {},
+                        parentId: 'parentChatbot',
+                        fullScreen: true,
+                        hideCloseButton: true
+                    });
+                    window.openChatbot();
+                }
+            }
+        }, 100); // Check every 100ms
+
         return () => {
-            if (window && typeof window.closeChatbot === "function") {
+            clearInterval(intervalId);
+            if (typeof window.closeChatbot === "function") {
                 window.SendDataToChatbot({
-                    // parentId: '',
+                    parentId: '',
                     fullScreen: false
                 });
-                window.closeChatbot()
+                window.closeChatbot();
             }
-        }
-    }, [bridge])
+        };
+    }, []);
 
     return (
-        <div >hello</div>
+        <p>Loading....</p>
     )
 };
 

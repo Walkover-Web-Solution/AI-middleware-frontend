@@ -17,20 +17,17 @@ export default function layoutOrgPage({ children, params }) {
     useEffect(() => {
         const scriptId = "chatbot-main-script";
         const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
-
-        console.log(chatbot_token, 'chatbot_token')
         if (chatbot_token && !document.getElementById(scriptId)) {
             const script = document.createElement("script");
             script.setAttribute("embedToken", chatbot_token);
+            script.setAttribute("hideIcon", true);
             script.id = scriptId;
             // script.src = scriptSrc;
             document.head.appendChild(script);
-            // script.src = require('../../../components/embed.js')
             script.src = scriptSrc
         }
         return () => {
             const existingScript = document.getElementById(scriptId);
-            console.log('hello')
             if (existingScript) {
                 document.head.removeChild(existingScript);
             }
