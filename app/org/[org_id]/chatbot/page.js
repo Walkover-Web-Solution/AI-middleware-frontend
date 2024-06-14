@@ -1,7 +1,7 @@
 "use client"
 
 import ChatBotModel from "@/components/chatbot/chatBotModel";
-import ChatBotCardHome from "@/components/chatbotHome.js/chatbotCard";
+import ChatBotCardHome from "@/components/chatbotHome/chatbotCard";
 import Protected from "@/components/protected";
 export const runtime = 'edge';
 import { useCustomSelector } from "@/customSelector/customSelector";
