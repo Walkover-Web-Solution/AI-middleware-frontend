@@ -63,7 +63,6 @@ const InputConfigComponent = ({ params }) => {
     const UpdateBridge = (currentDataToSend) => {
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
     }
-
     const renderInputConfig = useMemo(() => (
         inputConfig && Object.entries(inputConfig).filter(([key]) => key !== "rawData").map(([key, value]) => (
             <div className="form-control" key={key}>
@@ -79,7 +78,7 @@ const InputConfigComponent = ({ params }) => {
         ))
     ), [inputConfig, handleInputConfigChanges, SaveData]);
 
-    return <>{renderInputConfig}</>;
+    return <> {(bridge?.service === "google" && bridge?.type === "chat") || renderInputConfig}</>;
 };
 
 export default InputConfigComponent;

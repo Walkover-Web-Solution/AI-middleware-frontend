@@ -88,7 +88,7 @@ function CreateNewBridge({ orgid }) {
                             <select value={selectedService} onChange={handleService} className="select select-bordered w-full ">
                                 <option disabled selected></option>
                                 <option>openai</option>
-                                {/* <option>google</option> */}
+                                <option>google</option>
                             </select>
                         </label>
                         <label className="form-control w-full mb-2 ">

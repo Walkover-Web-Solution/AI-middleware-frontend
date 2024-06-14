@@ -97,7 +97,7 @@ function Chat({ params }) {
               prompt: bridge?.inputConfig?.system?.default,
               conversation: conversation,
               ...defaultsMap,
-              user: data,
+              user: data.content,
             },
             variables // Include variables in the request data
           },
@@ -137,7 +137,6 @@ function Chat({ params }) {
         return;
       }
       response = responseData.data;
-      debugger
       const { outputConfig } = modelInfo[localDataToSend.service][localDataToSend.configuration.model];
       const outputPath = outputConfig.message;
       const assistPath = outputConfig.assistant;
