@@ -20,10 +20,28 @@ function Page({ params }) {
   const pathName = usePathname();
   const dispatch = useDispatch();
 
-  const { historyData, thread } = useCustomSelector((state) => ({
+  const { historyData, thread, embedToken, integrationData
+
+  } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread,
+    embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
+    integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData
   }));
+
+  useEffect(() => {
+    if (embedToken) {
+      const script = document.createElement("script");
+      script.setAttribute("embedToken", embedToken);
+      script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
+      script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC;
+      document.body.appendChild(script);
+
+      return () => {
+        document.body.removeChild(document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID));
+      };
+    }
+  }, [embedToken]);
 
   const [selectedThread, setSelectedThread] = useState("");
   const [isSliderOpen, setIsSliderOpen] = useState(false);
@@ -82,7 +100,8 @@ function Page({ params }) {
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
-      if (item?.role === "user" && !thread_id) {
+      if (item?.role === "assistant") return ""
+      if (item?.role === "user" || item?.role === "tools_call" && !thread_id) {
         try {
           const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
           setSelectedItem({ variables: item.variables, "System Prompt": systemPromptResponse, ...item });
@@ -132,6 +151,35 @@ function Page({ params }) {
     );
   }
 
+  useEffect(() => {
+    const handleMouseDown = (e) => {
+      e.preventDefault();
+      const sidebar = sidebarRef.current;
+      const initialWidth = sidebar.getBoundingClientRect().width;
+      const initialX = e.pageX;
+
+      const handleMouseMove = (e) => {
+        const newWidth = initialWidth + (initialX - e.pageX);
+        sidebar.style.width = `${newWidth}px`;
+      };
+
+      const handleMouseUp = () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    };
+
+    const resizeHandle = document.getElementById('resize-handle');
+    resizeHandle.addEventListener('mousedown', handleMouseDown);
+
+    return () => {
+      resizeHandle.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, []);
+
   return (
     <div className="flex">
       <div className="drawer drawer-open">
@@ -143,37 +191,54 @@ function Page({ params }) {
                 {thread &&
                   thread.map((item, index) => (
                     <div key={`item.id${index}`}>
-                      <div
-                        className={`chat ${item.role === "user" ? "chat-start" : "chat-end"
-                          }`}
-                      >
-                        <div className="chat-header flex gap-2">
-                          {item.role.replaceAll("_", " ")}
-                          <time className="text-xs opacity-50">
-                            {formatDateAndTime(item.createdAt)}
-                          </time>
+                      {item.role === "tools_call" ?
+                        <div className="w-full flex align-center justify-center" >
+                          {Object.keys(item.function).map((funcName, index) => (
+                            <div role="alert" className="alert shadow-lg w-2/3 cursor-pointer hover:bg-base-300 transition-colors duration-200" onClick={() => openViasocket(funcName)}>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                              <div>
+                                <h3 className="font-bold">Functions Executed</h3>
+                                <div key={index}>
+                                  <div className="text-xs">Function "{integrationData[funcName].title || funcName}" executed successfully. Inspect details?</div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
+                        :
                         <div
                           className={`chat-bubble ${item.role === "user" ? "chat-bubble-primary hover:shadow-lg hover:scale-105 transition-transform duration-300" : "bg-gray-300 text-black"}`} // Add hover effects for blue chat bubbles
                           onClick={() => threadHandler(item.thread_id, item)}
                         >
-                          <ReactMarkdown>{item.content}</ReactMarkdown>
+                          <div className="chat-header flex gap-2">
+                            {item.role.replaceAll("_", " ")}
+                            <time className="text-xs opacity-50">
+                              {formatDateAndTime(item.createdAt)}
+                            </time>
+                          </div>
+                          <div
+                            className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary" : "bg-base-100 text-black"
+                              } chat-bubble`}
+                            onClick={() => threadHandler(item.thread_id, item)}
+                          >
+                            <ReactMarkdown>{item.content}</ReactMarkdown>
+                          </div>
                         </div>
-                      </div>
+                      }
                     </div>
                   ))}
               </div>
             </div>
           </div>
         </div>
-        <div className="drawer-side  bg-base-200 border-r-4" id="sidebar">
+        <div className="drawer-side bg-base-200 border-r-4" id="sidebar">
           <label
             htmlFor="my-drawer-2"
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
           {loading ? (
-            <div className="flex justify-center items-center  bg-base-200 h-full">
+            <div className="flex justify-center items-center bg-base-200 h-full">
               {/* Loading... */}
             </div>
           ) : (
@@ -191,7 +256,7 @@ function Page({ params }) {
                     onClick={() => threadHandler(item.thread_id)}
                   >
                     <a
-                      className={`${selectedThread === item.thread_id ? "active" : ""
+                      className={`${selectedThread === item.thread_id ? "text-white bg-primary hover:text-white hover:bg-primary" : ""
                         } block overflow-hidden whitespace-nowrap text-ellipsis`}
                     >
                       {item.thread_id}
@@ -205,9 +270,10 @@ function Page({ params }) {
       </div>
       <div
         ref={sidebarRef}
-        className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/3 opacity-100" : "w-0"
+        className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
           } overflow-y-auto bg-base-200 transition-all duration-300 z-50`}
       >
+        <div id="resize-handle" style={{ cursor: 'col-resize', width: '10px', position: 'absolute', left: '-10px', top: 0, bottom: 0 }}></div>
         {selectedItem && (
           <aside className="flex w-full flex-col h-screen overflow-y-auto">
             <div className="p-4">
@@ -244,5 +310,3 @@ function Page({ params }) {
 }
 
 export default Protected(Page);
-
-

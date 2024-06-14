@@ -5,13 +5,13 @@ import { useCustomSelector } from '@/customSelector/customSelector';
 const EmbedList = ({ params }) => {
 
     const { integrationData, bridge } = useCustomSelector((state) => ({
-        integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData?.flows,
+        integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData,
         bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
 
     }))
-
     const renderEmbed = useMemo(() => (
-        integrationData && integrationData
+
+        integrationData && (Object.values(integrationData))
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
                 if (!a?.title) return 1;
