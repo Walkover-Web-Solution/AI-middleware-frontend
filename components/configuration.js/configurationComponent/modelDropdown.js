@@ -18,7 +18,9 @@ const ModelDropdown = ({ params }) => {
     };
 
     const handleModel = (e) => {
-        const selectedModel = e.target.value.split('|')[1];
+        // debugger
+        // const selectedModel = e.target.value.split('|')[1];
+        const selectedModel = e.target.value;
         const modelType = e.target.selectedOptions[0].parentNode.label;
 
         let updatedDataToSend = {
@@ -59,7 +61,7 @@ const ModelDropdown = ({ params }) => {
                 className="select select-sm max-w-xs select-bordered"
             >
                 <option disabled>Select a Model</option>
-                {Object.entries(services[service]).map(([group, options,Index]) => (
+                {services && Object.entries(services?.[service] || {}).map(([group, options],Index) => (
                     group !== 'models' && (
                         <optgroup label={group} key={`${group}_${options}_${Index}_${bridge?.type}`}>
                             {Array.from(options).map((option) => (

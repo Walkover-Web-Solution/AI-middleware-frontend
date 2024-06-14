@@ -11,7 +11,13 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
     dispatch(isPending())
     const data = await getSingleBridge(id);
     const integrationData = await integration(data.data.bridges.embed_token)
-    dispatch(fetchSingleBridgeReducer({ bridges: data.data.bridges, integrationData }));
+
+    const flowObject = integrationData.flows.reduce((obj, item) => {
+      obj[item.id] = item;
+      return obj;
+    }, {});
+
+    dispatch(fetchSingleBridgeReducer({ bridges: data.data.bridges, integrationData: flowObject }));
   } catch (error) {
     dispatch(isError())
     console.error(error);

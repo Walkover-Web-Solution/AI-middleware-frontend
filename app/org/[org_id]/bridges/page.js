@@ -1,12 +1,11 @@
 "use client"
-import CreateNewBridge from "@/components/createNewBridge";
 import Loader from "@/components/loader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { deleteBridgeAction, getAllBridgesAction, getAllResponseTypesAction } from "@/store/action/bridgeAction";
 import { Box,Rss } from "lucide-react";
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 
