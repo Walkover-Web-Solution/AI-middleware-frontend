@@ -1,5 +1,4 @@
 "use client";
-import CreateNewBridge from "@/components/createNewBridge";
 import Loader from "@/components/loader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";

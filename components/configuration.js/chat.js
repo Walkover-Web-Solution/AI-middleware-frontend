@@ -137,7 +137,7 @@ function Chat({ params }) {
         return;
       }
       response = responseData.data;
-
+      debugger
       const { outputConfig } = modelInfo[localDataToSend.service][localDataToSend.configuration.model];
       const outputPath = outputConfig.message;
       const assistPath = outputConfig.assistant;
@@ -219,7 +219,7 @@ function Chat({ params }) {
           className="flex flex-col w-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch z-10"
         >
           {messages.map((message, index) => (
-            <div
+            < div
               key={message.id}
               ref={index === messages.length - 1 ? messagesEndRef : null}
               className={`chat ${message.sender === "user" ? "chat-end" : "chat-start"}`}
@@ -331,7 +331,7 @@ function Chat({ params }) {
             <div className="text-red-500 mt-2">{errorMessage}</div>
           )}
         </div>
-      </div>
+      </div >
     </>
   );
 }
