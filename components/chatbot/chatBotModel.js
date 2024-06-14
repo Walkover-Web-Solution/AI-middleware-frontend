@@ -17,9 +17,18 @@ function ChatBotModel({ orgid }) {
             toast.error('Please enter a name for the ChatBot');
             return;
         }
+        const config = {
+            buttonName: '',
+            height: '100',
+            heightUnit: '%',
+            width: '50',
+            widthUnit: '%',
+            type: 'popup',
+            themeColor: "#000000"
+        }
 
         setIsLoading(true); // Set loading state to true
-        dispatch(createNewChatbot({ title: name, orgId: orgid, type: "chatbot" }, (data) => {
+        dispatch(createNewChatbot({ title: name, orgId: orgid, type: "chatbot", config }, (data) => {
             route.push(`/org/${orgid}/chatbot/${data.data.chatBot._id}`);
             document.getElementById('my_modal_1').close();
             setIsLoading(false); // Reset loading state after completion
