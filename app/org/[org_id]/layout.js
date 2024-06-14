@@ -10,7 +10,6 @@ export default function layoutOrgPage({ children, params }) {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        dispatch(getAllBridgesAction())
         dispatch(getAllChatBotAction(params.org_id))
         dispatch(getAllResponseTypesAction(params.org_id));
     }, []);

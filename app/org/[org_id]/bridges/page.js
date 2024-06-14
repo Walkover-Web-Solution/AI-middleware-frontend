@@ -6,7 +6,7 @@ import { useCustomSelector } from "@/customSelector/customSelector";
 import { deleteBridgeAction, getAllBridgesAction } from "@/store/action/bridgeAction";
 import { Box, Trash } from "lucide-react"; // Import Trash icon
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -61,6 +61,11 @@ function Home({ params }) {
     handleDeleteBridge(selectedBridgeId);
     handleCloseModal();
   };
+
+  useEffect(() => {
+    dispatch(getAllBridgesAction())
+
+  }, [])
 
   return (
     <div className="drawer lg:drawer-open">
