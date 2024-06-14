@@ -6,9 +6,8 @@ import { useState } from "react";
 
 
 export default function ChatbotCard({ params }) {
-    const { ChatbotDetails, responseData } = useCustomSelector((state) => ({
+    const { ChatbotDetails } = useCustomSelector((state) => ({
         ChatbotDetails: (state?.ChatBot?.ChatBotMap?.[params?.chatbot_id] || {}),
-        responseData: state?.responseTypeReducer?.responses?.[params?.org_id],
     }))
     const [checkedCard, setCheckedCard] = useState(null);
     const router = useRouter()
