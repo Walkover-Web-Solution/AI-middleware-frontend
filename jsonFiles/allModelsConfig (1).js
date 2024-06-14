@@ -874,6 +874,41 @@ export const modelInfo = {
                 }
             }
         },
+        "embedding-001": {
+            configuration: {
+                "model": { field: "drop", default: "embedding-001", "level": 1 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
+                "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
+                "maxOutputTokens": { field: "slider", min: 1, max: 4096, step: 1, default: 2048, level: 0 },
+                "stopSequences": { field: "text", default: "", level: 0 },
+            },
+
+
+            "apikey": "",
+            outputConfig: {
+                usage: [],
+                message: "candidates[0].content.parts[0].text",
+                assistant: "candidates[0].content",
+                role: "model"
+            },
+
+            inputConfig: {
+                model: {
+                    "default": {
+                        "role": "model",
+                        "parts": [
+                            {
+                                "text": ""
+                            }
+                        ]
+                    },
+                    "contentKey": "parts[0].text",
+                    "type": "json"
+
+                }
+            }
+        },
         chatmessage: {
             chat: {
                 role: "user",
