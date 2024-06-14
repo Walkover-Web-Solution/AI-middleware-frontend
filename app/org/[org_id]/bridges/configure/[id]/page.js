@@ -1,8 +1,8 @@
 "use client"; // Correct import statement
 
-import ConfigurationPage from "@/components/configuration.js/ConfigurationPage";
-import Chat from "@/components/configuration.js/chat";
-import Chatbot from "@/components/configuration.js/chatbot";
+import ConfigurationPage from "@/components/configuration/ConfigurationPage";
+import Chat from "@/components/configuration/chat";
+import Chatbot from "@/components/configuration/chatbot";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction";
