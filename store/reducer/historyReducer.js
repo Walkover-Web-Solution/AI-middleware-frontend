@@ -12,7 +12,6 @@ export const historyReducer = createSlice({
   initialState,
   reducers: {
     fetchAllHistoryReducer: (state, action) => {
-      // debugger
       if (action.payload.page === 1) {
         state.history = action.payload.data;
       } else {

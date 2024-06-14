@@ -107,7 +107,6 @@ export const getSingleThreadData = async (threadId, bridgeId) => {
 
 export const getHistory = async (bridgeId, page = 1) => {
   try {
-    // debugger
     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}?pageNo=${page}&limit=40`);
     return getSingleThreadData.data;
   } catch (error) {
