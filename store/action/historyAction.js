@@ -6,7 +6,6 @@ import { getHistory, getSingleThreadData } from "@/config";
 
 export const getHistoryAction = (id, page=1) => async (dispatch, getState) => {
   try {
-    // debugger
     const data = await getHistory(id, page);
     if (data && data.data) {
       dispatch(fetchAllHistoryReducer({ data: data.data, page }));
