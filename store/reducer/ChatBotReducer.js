@@ -49,7 +49,17 @@ export const ChatBot = createSlice({
         },
         updateChatBotConfigReducer: (state, action) => {
             state.ChatBotMap[action.payload.botId].config = action.payload.data.config
-        }
+        },
+        deleteChatBotReducer: (state, action) => {
+            const { botId, orgId } = action.payload;
+            state.ChatBotMap = Object.keys(state.ChatBotMap).reduce((result, key) => {
+                if (key !== botId) {
+                    result[key] = state.ChatBotMap[key];
+                }
+                return result;
+            }, {});
+            state.org[orgId] = state.org[orgId].filter((bot) => bot._id !== botId);
+        },
     },
 });
 
@@ -61,6 +71,7 @@ export const {
     createNewBotReducer,
     addorRemoveBridgeInChatBotReducer,
     updateChatBotReducer,
-    updateChatBotConfigReducer
+    updateChatBotConfigReducer,
+    deleteChatBotReducer,
 } = ChatBot.actions;
 export default ChatBot.reducer;

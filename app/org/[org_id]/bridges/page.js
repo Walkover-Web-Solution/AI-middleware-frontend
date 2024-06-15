@@ -32,11 +32,11 @@ function Home({ params }) {
         item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleDeleteBridge = async (bridgeId) => {
+  const handleDeleteBridge =  (bridgeId) => {
     try {
-      await dispatch(deleteBridgeAction({ bridgeId, orgId: params.org_id }));
+      dispatch(deleteBridgeAction({ bridgeId, orgId: params.org_id }));
       toast.success("Bridge deleted successfully");
-      await dispatch(getAllBridgesAction());
+      dispatch(getAllBridgesAction());
     } catch (error) {
       console.error("Failed to delete bridge:", error);
       toast.error("Error deleting bridge");

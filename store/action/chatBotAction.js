@@ -1,4 +1,4 @@
-import { addorRemoveBridgeInChatBot, createChatBot, createOrRemoveAction, getAllChatBot, getChatBotDetails, updateChatBot, updateChatBotConfig } from "@/config";
+import { addorRemoveBridgeInChatBot, createChatBot, createOrRemoveAction, getAllChatBot, getChatBotDetails, updateChatBot, updateChatBotConfig,DeleteChatBot } from "@/config";
 import { createNewBotReducer, getAllChatBotReducer, getChatBotDetailsReducer, updateChatBotConfigReducer, updateChatBotReducer } from "../reducer/ChatBotReducer";
 import { updateBridgeReducer } from "../reducer/bridgeReducer";
 
@@ -73,3 +73,17 @@ export const createOrRemoveActionBridge = (dataToSend) => async (dispatch) => {
         console.error(error)
     }
 }
+
+export const deleteChatBotAction = (botId, orgId) => async (dispatch, getState) => {
+    try {
+        const response = await DeleteChatBot(botId);
+        if (response.status === 200) {
+            dispatch(deleteChatBotReducer({ botId, orgId }));
+            toast.success("Chatbot deleted successfully");
+        } else {
+            throw new Error("Failed to delete chatbot");
+        }
+    } catch (error) {
+        console.error(error);
+    }
+};

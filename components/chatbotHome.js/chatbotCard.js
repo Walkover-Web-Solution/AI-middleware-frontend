@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { getAllChatBotAction, getChatBotDetailsAction } from "@/store/action/chatBotAction";
+import { getAllChatBotAction, getChatBotDetailsAction, deleteChatBotAction } from "@/store/action/chatBotAction";
 import { Bot, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { DeleteChatBot } from "@/config/index";
 import Modal from "@/components/Model"; // Ensure the correct path
 
 function BridgeBadge({ bridge }) {
@@ -35,7 +34,7 @@ function ChatBotCard({ item, onFetchDetails, onOpenModal }) {
               e.stopPropagation();
               onOpenModal(item._id);
             }}
-            className="flex justify-center  tooltip"
+            className="flex justify-center tooltip"
             data-tip="Delete"
           >
             <Trash size={16} />
@@ -70,15 +69,11 @@ export default function ChatBotCardHome({ params }) {
     }
   };
 
-  const handleDeleteChatBot = async (botId) => {
+  const handleDeleteChatBot =  (botId) => {
     try {
-      const response = await DeleteChatBot(botId);
-      if (response.status === 200) {
-        toast.success("Chatbot deleted successfully");
-        dispatch(getAllChatBotAction(params.org_id));
-      } else {
-        throw new Error("Failed to delete chatbot");
-      }
+       dispatch(deleteChatBotAction(botId, params.org_id));
+       toast.success("ChatBot deleted successfully");
+       dispatch(getAllChatBotAction(params.org_id));
     } catch (error) {
       console.error("Failed to delete chatbot:", error);
       toast.error("Error deleting chatbot");
@@ -140,6 +135,7 @@ export default function ChatBotCardHome({ params }) {
     </div>
   );
 }
+
 
 
 
