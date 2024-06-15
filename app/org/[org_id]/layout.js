@@ -7,16 +7,15 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 export default function layoutOrgPage({ children, params }) {
-
     const dispatch = useDispatch()
-
     const { chatbot_token } = useCustomSelector((state) => ({
         chatbot_token: state?.ChatBot?.chatbot_token || ''
     }));
 
+    const scriptId = "chatbot-main-script";
+    const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
+
     useEffect(() => {
-        const scriptId = "chatbot-main-script";
-        const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
         if (chatbot_token && !document.getElementById(scriptId)) {
             const script = document.createElement("script");
             script.setAttribute("embedToken", chatbot_token);
@@ -38,6 +37,7 @@ export default function layoutOrgPage({ children, params }) {
         dispatch(getAllChatBotAction(params.org_id))
         dispatch(getAllResponseTypesAction(params.org_id));
     }, []);
+
     return (
         <>
             <Navbar />
