@@ -41,7 +41,7 @@ export default function PrivateFormSection({ params }) {
                 {/* <InputWithCopyButton label="project_id" placeholder="project_id" /> */}
                 <InputWithCopyButton label="chatbot_id" placeholder="chatbot_id" value={params?.chatbot_id} disabled />
             </div>
-            <p className="text-sm">Generate a JWT token using org_id, chatbot_id, and user_id, then sign it with the access key.</p>
+            <p className="text-sm">Generate a JWT token using org_id, chatbot_id, and user_id, variables, then sign it with the access key.</p>
             <a className="link link-hover text-sm" target="_blank" href="https://viasocket.com/faq/create-jwt-token">Learn, How to create JWT token?</a>
         </div >
     );
