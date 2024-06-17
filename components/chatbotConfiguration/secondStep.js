@@ -6,7 +6,7 @@ const DataObject = {
     event: `window.addEventListener('message', (event) => {
         const receivedData = event.data;
      });`,
-    sendData: `window.SendDataToInterface({ \n      bridgeName: 'Hello World',\n      threadId: projectId,\n      parentId: '<parent_container_id>', // When you want to open chatbot in a container, make sure fullScreen=true\n      fullScreen: 'true/false',\n      hideCloseButton: 'true/false',\n      hideIcon: 'true/false',\n      variables: {}\n    });`,
+    sendData: `window.SendDataToChatbot({ \n      bridgeName: '<slugName_of_bridge>',\n      threadId: <id>,   // chats store corresponding to this id\n      parentId: '<parent_container_id>', // When you want to open chatbot in a container, make sure fullScreen=true\n      fullScreen: 'true/false',\n      hideCloseButton: 'true/false',\n      hideIcon: 'true/false',\n      variables: {}\n    });`,
     open: `window.openChatbot()`,
     close: `window.closeChatbot()`,
 };
