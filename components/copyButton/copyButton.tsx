@@ -6,7 +6,7 @@ const CopyButton = ({data}) => {
 
   const copyToClipboardSendData = () => {
     // Your clipboard copy logic here
-    navigator.clipboard.writeText(data || 'Your data to be copied');
+    navigator.clipboard.writeText(data || '');
 
     // Show the copied message
     setCopied(true);
