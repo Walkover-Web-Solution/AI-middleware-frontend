@@ -1,3 +1,4 @@
+import { useState } from "react";
 import BridgeTypeToggle from "./configurationComponent/bridgeTypeToggle";
 import AdvancedParameters from "./configurationComponent/advancedParamenter";
 import ApiKeyInput from "./configurationComponent/apiKeyInput";
@@ -11,7 +12,8 @@ import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import ActionList from "./configurationComponent/actionList";
 
-export default function ConfigurationPage({ params, dataToSend }) {
+export default function ConfigurationPage({ params }) {
+
     return (
         <div className="flex flex-col gap-3">
             <BridgeTypeToggle params={params} />
@@ -27,6 +29,10 @@ export default function ConfigurationPage({ params, dataToSend }) {
             <ResponseTypesSelector params={params} />
             <ResponseFormatSelector params={params} />
         </div>
-    )
+    );
 }
+
+
+
+
 

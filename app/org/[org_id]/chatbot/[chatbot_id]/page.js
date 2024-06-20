@@ -2,9 +2,9 @@
 
 import ChatbotCard from "@/components/chatbot/chatbotCard";
 import ChatbotSlider from "@/components/chatbot/chatbotSlider";
-import PrivateFormSection from "@/components/chatbotConfiguration.js/firstStep";
-import FormSection from "@/components/chatbotConfiguration.js/formSection";
-import SecondStep from "@/components/chatbotConfiguration.js/secondStep";
+import PrivateFormSection from "@/components/chatbotConfiguration/firstStep";
+import FormSection from "@/components/chatbotConfiguration/formSection";
+import SecondStep from "@/components/chatbotConfiguration/secondStep";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { getChatBotDetailsAction } from "@/store/action/chatBotAction";

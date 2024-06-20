@@ -547,7 +547,7 @@ export const modelInfo = {
                 }
             }
         },
-        
+
         "gpt-4o": {
             configuration: {
                 "model": { field: "drop", default: "gpt-4-turbo", "level": 1 },
@@ -705,7 +705,7 @@ export const modelInfo = {
                 "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
                 "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
                 "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
-                "maxOutputTokens": { field: "slider", min: 1, max: 30720, step: 1, default: 2048, level: 0 },
+                "maxOutputTokens": { field: "slider", min: 1, max: 8192, step: 1, default: 2048, level: 0 },
                 "stopSequences": { field: "text", default: "", level: 0 },
             },
 
@@ -733,6 +733,187 @@ export const modelInfo = {
 
                 }
             }
+        },
+        "gemini-1.5-pro": {
+            configuration: {
+                "model": { field: "drop", default: "gemini-1.5-pro", "level": 1 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
+                "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
+                "maxOutputTokens": { field: "slider", min: 1, max: 8192, step: 1, default: 2048, level: 0 },
+                "stopSequences": { field: "text", default: "", level: 0 },
+            },
+
+
+            "apikey": "",
+            outputConfig: {
+                usage: [],
+                message: "candidates[0].content.parts[0].text",
+                assistant: "candidates[0].content",
+                role: "model"
+            },
+
+            inputConfig: {
+                model: {
+                    "default": {
+                        "role": "model",
+                        "parts": [
+                            {
+                                "text": ""
+                            }
+                        ]
+                    },
+                    "contentKey": "parts[0].text",
+                    "type": "json"
+
+                }
+            }
+        },
+        "gemini-1.5-Flash": {
+            configuration: {
+                "model": { field: "drop", default: "gemini-1.5-Flash", "level": 1 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
+                "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
+                "maxOutputTokens": { field: "slider", min: 1, max: 8192, step: 1, default: 2048, level: 0 },
+                "stopSequences": { field: "text", default: "", level: 0 },
+            },
+
+
+            "apikey": "",
+            outputConfig: {
+                usage: [],
+                message: "candidates[0].content.parts[0].text",
+                assistant: "candidates[0].content",
+                role: "model"
+            },
+
+            inputConfig: {
+                model: {
+                    "default": {
+                        "role": "model",
+                        "parts": [
+                            {
+                                "text": ""
+                            }
+                        ]
+                    },
+                    "contentKey": "parts[0].text",
+                    "type": "json"
+
+                }
+            }
+        },
+        "gemini-1.0-pro": {
+            configuration: {
+                "model": { field: "drop", default: "gemini-1.0-pro", "level": 1 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
+                "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
+                "maxOutputTokens": { field: "slider", min: 1, max: 8192, step: 1, default: 2048, level: 0 },
+                "stopSequences": { field: "text", default: "", level: 0 },
+            },
+
+
+            "apikey": "",
+            outputConfig: {
+                usage: [],
+                message: "candidates[0].content.parts[0].text",
+                assistant: "candidates[0].content",
+                role: "model"
+            },
+
+            inputConfig: {
+                model: {
+                    "default": {
+                        "role": "model",
+                        "parts": [
+                            {
+                                "text": ""
+                            }
+                        ]
+                    },
+                    "contentKey": "parts[0].text",
+                    "type": "json"
+
+                }
+            }
+        },
+        "gemini-1.0-pro-vision": {
+            configuration: {
+                "model": { field: "drop", default: "gemini-1.0-pro-vision", "level": 1 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
+                "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
+                "maxOutputTokens": { field: "slider", min: 1, max: 4096, step: 1, default: 2048, level: 0 },
+                "stopSequences": { field: "text", default: "", level: 0 },
+            },
+
+
+            "apikey": "",
+            outputConfig: {
+                usage: [],
+                message: "candidates[0].content.parts[0].text",
+                assistant: "candidates[0].content",
+                role: "model"
+            },
+
+            inputConfig: {
+                model: {
+                    "default": {
+                        "role": "model",
+                        "parts": [
+                            {
+                                "text": ""
+                            }
+                        ]
+                    },
+                    "contentKey": "parts[0].text",
+                    "type": "json"
+
+                }
+            }
+        },
+        "embedding-001": {
+            configuration: {
+                "model": { field: "drop", default: "embedding-001", "level": 1 },
+                "temperature": { field: "slider", min: 0, max: 2, step: 0.1, default: 1, level: 2 },
+                "topK": { field: "slider", min: 1, max: 40, step: 1, default: 40, level: 2 },
+                "topP": { field: "slider", min: 0, max: 1, step: 0.1, default: 1, level: 2 },
+                "maxOutputTokens": { field: "slider", min: 1, max: 4096, step: 1, default: 2048, level: 0 },
+                "stopSequences": { field: "text", default: "", level: 0 },
+            },
+
+
+            "apikey": "",
+            outputConfig: {
+                usage: [],
+                message: "candidates[0].content.parts[0].text",
+                assistant: "candidates[0].content",
+                role: "model"
+            },
+
+            inputConfig: {
+                model: {
+                    "default": {
+                        "role": "model",
+                        "parts": [
+                            {
+                                "text": ""
+                            }
+                        ]
+                    },
+                    "contentKey": "parts[0].text",
+                    "type": "json"
+
+                }
+            }
+        },
+        chatmessage: {
+            chat: {
+                role: "user",
+                content: ""
+            }, chatpath: "content"
         }
     },
     mistral:

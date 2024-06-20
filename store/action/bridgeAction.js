@@ -1,6 +1,7 @@
 import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge, getAllResponseTypesApi, addorRemoveResponseIdInBridge, getChatBotOfBridge } from "@/config";
-import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer, isPending, isError } from "../reducer/bridgeReducer";
+import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer, isPending, isError,updateService } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
+
 
 
 
@@ -10,7 +11,13 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
     dispatch(isPending())
     const data = await getSingleBridge(id);
     const integrationData = await integration(data.data.bridges.embed_token)
-    dispatch(fetchSingleBridgeReducer({ bridges: data.data.bridges, integrationData }));
+
+    const flowObject = integrationData.flows.reduce((obj, item) => {
+      obj[item.id] = item;
+      return obj;
+    }, {});
+
+    dispatch(fetchSingleBridgeReducer({ bridges: data.data.bridges, integrationData: flowObject }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -49,14 +56,17 @@ export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) =
   }
 };
 
-export const updateBridgeAction = (dataToSend) => async (dispatch, getState) => {
+export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch) => {
   try {
-    const data = await updateBridge(dataToSend)
-    dispatch(updateBridgeReducer({ bridges: data.data.bridges, bridgeType: dataToSend.dataToSend.bridgeType }));
+    dispatch(isPending());
+    const data = await updateBridge({bridgeId,dataToSend});
+    dispatch(updateBridgeReducer({ bridgeId, bridges: data.data.bridges, bridgeType: dataToSend.bridgeType }));
   } catch (error) {
     console.error(error);
+    dispatch(isError());
   }
 };
+
 
 
 export const deleteBridgeAction = ({ bridgeId, orgId }) => async (dispatch) => {

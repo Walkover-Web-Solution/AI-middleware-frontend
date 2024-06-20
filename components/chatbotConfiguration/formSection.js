@@ -92,7 +92,8 @@ export default function FormSection({ params }) {
         heightUnit: '',
         width: '',
         widthUnit: '',
-        type: ''
+        type: '',
+        themeColor: ""
     });
 
     const { chatBotConfig } = useCustomSelector((state) => ({
@@ -171,6 +172,21 @@ export default function FormSection({ params }) {
                     name="type"
                 />
             </div>
+            <label className="form-control w-full max-w-xs">
+                <div className="label">
+                    <span className="label-text">ChatBot Theme Color </span>
+                </div>
+                <div className="flex justify-start items-start gap-2">
+                    <input
+                        type="color"
+                        defaultValue={formData.themeColor}
+                        onBlur={handleInputChange}
+                        name="themeColor"
+                    />
+                    <span>{formData.themeColor}</span>
+                </div>
+
+            </label>
         </div>
     );
 }

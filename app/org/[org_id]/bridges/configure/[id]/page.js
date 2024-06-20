@@ -1,13 +1,13 @@
 "use client"; // Correct import statement
 
-import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import Chat from "@/components/configuration.js/chat";
-import ConfigurationPage from "@/components/configuration.js/ConfigurationPage";
+import ConfigurationPage from "@/components/configuration/ConfigurationPage";
+import Chat from "@/components/configuration/chat";
+import Chatbot from "@/components/configuration/chatbot";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { services } from "@/jsonFiles/models";
 import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
 const Page = ({ params }) => {
@@ -54,7 +54,7 @@ const Page = ({ params }) => {
         status: e?.data?.action
       }
       dispatch(integrationAction(dataToSend, params?.id));
-      if ((e?.data?.action === "published" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
+      if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
         const dataFromEmbed = {
           url: e?.data?.webhookurl,
           payload: e?.data?.payload,
@@ -66,6 +66,7 @@ const Page = ({ params }) => {
       }
     }
   }
+
 
   return (
     <>
@@ -81,8 +82,9 @@ const Page = ({ params }) => {
               </div>
               <div className="resizer w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
               <div className="w-1/3 flex-1 chatPage min-w-[450px]">
-                <div className="p-4">
-                  <Chat params={params} />
+                <div className="p-4 h-full" id="parentChatbot">
+                  {bridge?.bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />
+                  }
                 </div>
               </div>
             </div>
