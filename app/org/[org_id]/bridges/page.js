@@ -14,6 +14,11 @@ export const runtime = 'edge';
 function Home({ params }) {
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id] || []).slice().reverse();
+  useEffect(()=>{
+if(allBridges && allBridges.length === 0){
+  document.getElementById('my_modal_1').showModal()
+}
+  },[allBridges])
   const { isLoading } = useCustomSelector((state) => ({
     isLoading: state.bridgeReducer.loading,
   }));

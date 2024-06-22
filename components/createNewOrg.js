@@ -2,15 +2,13 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { createOrgAction, getAllOrgAction } from '@/store/action/orgAction';
+import { createOrgAction } from '@/store/action/orgAction';
 import { userDetails } from '@/store/action/userDetailsAction';
 
 function CreateOrg({ onClose }) {
     const [orgDetails, setOrgDetails] = useState({
         name: '',
-        email: '',
-        mobile: '',
-        timezone: ''
+        about: '',
     });
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
@@ -22,14 +20,21 @@ function CreateOrg({ onClose }) {
             [e.target.name]: e.target.value
         });
     };
-
-
+    const handleAboutCompanyChange = (e) => {
+        setOrgDetails({
+            ...orgDetails,
+            [e.target.name]: e.target.value
+        });
+    };
 
     const createOrgHandler = async () => {
-        const { name, email, mobile, timezone } = orgDetails;
-        if (!name.trim() || name.trim().length < 3) {
+        const { name, about } = orgDetails;
+        if (!name.trim() || name.trim().length < 3 ) {
             toast.error("Organization name is required and must be at least 3 characters long");
-
+            return;
+        }
+        if (!about.trim() || about.trim().length < 10 ) {
+            toast.error("About Organization is required and must be at least 10 characters long");
             return;
         }
 
@@ -37,15 +42,19 @@ function CreateOrg({ onClose }) {
         try {
             const dataToSend = {
                 "company": {
-                    "name": name
+                    "name": name,
+                    "meta": {
+                        about
+                    }
                 }
             };
 
-            await dispatch(createOrgAction(dataToSend, () => {
+            dispatch(createOrgAction(dataToSend, (data) => {
                 onClose();
                 dispatch(userDetails());
-                route.push('/org');
                 toast.success('Organization created successfully');
+                console.log(data);
+                route.push(`/org/${data.id}/bridges`);
             }));
         } catch (error) {
             toast.error('Failed to create organization');
@@ -80,7 +89,7 @@ function CreateOrg({ onClose }) {
                     <div className="modal-box relative p-5 bg-white rounded-lg shadow-xl mx-4">
                         <h3 className="font-bold text-lg">Create Organization</h3>
                         <input type="text" name="name" value={orgDetails.name} onChange={handleChange} placeholder="Organization Name" className="input input-bordered w-full mb-4" />
-
+                        <textarea id="message" name="about" rows="4" value={orgDetails.about} onChange={handleAboutCompanyChange} placeholder="About your Organization" className="p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500" />
                         <div className="modal-action">
                             <button onClick={onClose} className="btn">Close</button>
                             <button onClick={createOrgHandler} className="btn btn-primary">Create</button>
