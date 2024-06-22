@@ -1,23 +1,20 @@
+import { useCustomSelector } from "@/customSelector/customSelector";
 import { services } from "@/jsonFiles/models"
 import { createBridgeAction } from "@/store/action/bridgeAction";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
 function CreateNewBridge({ orgid }) {
-    const [formState, setFormState] = useState({
-        selectedService: 'openai',
-        selectedModel: "gpt-4o",
-        selectedType: "chat",
-        bridgeType: "api",
-        isLoading: false,
-        bridgeName: "assistant",
-        slugName: "root"
-    });
-
-    const dispatch = useDispatch();
+    const [selectedService, setSelectedService] = useState('openai');
+    const [selectedModel, setSelectedModel] = useState("gpt-3.5-turbo");
+    const [seletedType, setSelectedType] = useState("chat");
+    const [bridgeType, setBridgeType] = useState("api");
+    const [isLoading, setIsLoading] = useState(false);
+    const dispatch = useDispatch()
     const route = useRouter();
+    const allBridgeLength = useCustomSelector((state) => state.bridgeReducer.org[orgid] || []).length;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -45,6 +42,9 @@ function CreateNewBridge({ orgid }) {
                 isLoading: true
             }));
 
+    const createBridgeHandler = (name, slugname) => {
+        if (name.length > 0 && selectedModel && seletedType) {
+            setIsLoading(true);
             const dataToSend = {
                 "configuration": {
                     "model": selectedModel,
@@ -113,16 +113,7 @@ function CreateNewBridge({ orgid }) {
                             <div className="label">
                                 <span className="label-text">Bridge Name</span>
                             </div>
-                            <input
-                                type="text"
-                                id="bridge-name"
-                                name="bridgeName"
-                                value={formState.bridgeName}
-                                onChange={handleChange}
-                                placeholder="Type here"
-                                className="input input-bordered w-full"
-                                maxLength="50"
-                            />
+                            <input type="text" id="bridge-name" defaultValue={allBridgeLength === 0 ? "Assistant" : ""} placeholder="Type here" className="input input-bordered w-full" maxLength="50" />
                         </label>
                         <label>
                             <div className="label">
@@ -166,15 +157,8 @@ function CreateNewBridge({ orgid }) {
                             <div className="label">
                                 <span className="label-text">Slug Name</span>
                             </div>
-                            <input
-                                type="text"
-                                id="slug-name"
-                                name="slugName"
-                                value={formState.slugName}
-                                onChange={handleChange}
-                                placeholder="Type here"
-                                className="input input-bordered w-full"
-                            />
+                            <input type="text" id="slug-name" defaultValue={allBridgeLength === 0 ? "root" : ""} placeholder="Type here" className="input input-bordered w-full " />
+
                         </label>
                         <div className="items-center justify-start mt-2">
                             <div className="label">
@@ -207,8 +191,10 @@ function CreateNewBridge({ orgid }) {
                         </div>
                     </div>
                     <div className="modal-action">
-                        <button className="btn" onClick={cleanState}>Close</button>
-                        <button className="btn" onClick={createBridgeHandler}>+ Create</button>
+                        <form method="dialog">
+                            <button className="btn" disabled={allBridgeLength == '0'} onClick={cleanState}>Close</button>
+                        </form>
+                        <button className="btn" onClick={() => createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name").value)}>+ Create</button>
                     </div>
                 </div>
             </dialog>
