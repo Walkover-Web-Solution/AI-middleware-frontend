@@ -179,6 +179,7 @@ export default function FormSection({ params }) {
                 <div className="flex justify-start items-start gap-2">
                     <input
                         type="color"
+                        key={formData?.themeColor}
                         defaultValue={formData.themeColor}
                         onBlur={handleInputChange}
                         name="themeColor"
