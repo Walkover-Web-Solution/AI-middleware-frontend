@@ -71,7 +71,7 @@ function CreateNewBridge({ orgid }) {
     };
 
     const handleNext = () => {
-        document.getElementById('initial_modal').close();
+        document.getElementById('my_modal_1').close();
         setShowFileUploadModal(true);
     };
 
@@ -91,7 +91,7 @@ function CreateNewBridge({ orgid }) {
                     </div>
                 </div>
                 )}
-            <dialog id="initial_modal" className="modal">
+            <dialog id="my_modal_1" className="modal">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Create Bridge !</h3>
                     <div >
