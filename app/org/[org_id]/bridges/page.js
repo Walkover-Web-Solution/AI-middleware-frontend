@@ -27,12 +27,12 @@ if(allBridges && allBridges.length === 0){
 
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredBridges = allBridges.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
+const filteredBridges = allBridges.filter((item) =>
+  item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  item.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
+  item._id.toLowerCase().includes(searchTerm.toLowerCase()) // Add this line
+);
   const handleDeleteBridge = async (bridgeId) => {
     // Confirm delete action
     const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
