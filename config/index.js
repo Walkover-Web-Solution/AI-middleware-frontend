@@ -431,4 +431,19 @@ export const createOrRemoveAction = async ({ orgId, bridgeId, type, dataToSend }
     console.error(error);
     return error;
   }
-} 
+}
+
+
+export const postmanCollection = async ({ file }) => {
+  try {
+    const response = await axios.post(`${URL}/config`, file, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data; // Return the response data
+  } catch (error) {
+    console.error(error);
+    throw error; // Throw the error to be caught in the action
+  }
+};

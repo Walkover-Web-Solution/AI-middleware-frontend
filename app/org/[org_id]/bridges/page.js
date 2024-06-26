@@ -65,7 +65,7 @@ const filteredBridges = allBridges.filter((item) =>
 
   useEffect(()=> {
     if(allBridges?.length === 0 && document.getElementById('my_modal_1')) document.getElementById('my_modal_1').showModal()
-   }, [])
+   }, [allBridges])
    
   return (<div className="drawer lg:drawer-open ">
     {isLoading &&

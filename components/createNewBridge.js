@@ -6,13 +6,16 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { useDropzone } from 'react-dropzone';
+import { postmanCollectionAction } from "@/store/action/postmanCollectionAction";
 
 function CreateNewBridge({ orgid }) {
     const [selectedService, setSelectedService] = useState('openai');
     const [selectedModel, setSelectedModel] = useState("gpt-3.5-turbo");
-    const [seletedType, setSelectedType] = useState("chat");
+    const [selectedType, setSelectedType] = useState("chat");
     const [bridgeType, setBridgeType] = useState("api");
+    const [toolsCall, setToolsCall] = useState([]);
     const allBridgeLength = useCustomSelector((state) => state.bridgeReducer.org[orgid] || []).length;
+    const postmanCollection = useCustomSelector((state) => state.postmanCollectionReducer.postmanCollection || []);
     const [isLoading, setIsLoading] = useState(false);
     const [uploadedFile, setUploadedFile] = useState(null);
     const [showFileUploadModal, setShowFileUploadModal] = useState(false);
@@ -34,18 +37,26 @@ function CreateNewBridge({ orgid }) {
 
     const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
+    const handleCheckboxChange = (item, isChecked) => {
+        if (isChecked) {
+            setToolsCall(prevItems => [...prevItems, item]);
+        } else {
+            setToolsCall(prevItems => prevItems.filter(i => i.singleData.name !== item.singleData.name));
+        }
+    };
     const createBridgeHandler = (name, slugname) => {
-        if (name.length > 0 && selectedModel && seletedType) {
+        if (name.length > 0 && selectedModel && selectedType) {
             setIsLoading(true);
             const dataToSend = {
                 "configuration": {
                     "model": selectedModel,
                     "name": name,
-                    "type": seletedType,
-                    "slugName": slugname || name
+                    "type": selectedType,
+                    "slugName": slugname,
+                    "tools" : toolsCall
                 },
                 "service": selectedService,
-                "bridgeType": bridgeType // Added missing semicolon
+                "bridgeType": bridgeType
             };
             dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
                 // document.getElementById('file_upload_modal').close();
@@ -62,12 +73,34 @@ function CreateNewBridge({ orgid }) {
         }
     };
 
+    const uploadJsonFile = async (event) => {
+        debugger
+        event.preventDefault();
+        const formfile = new FormData();
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput.files.length > 0) {
+            const data = fileInput.files[0]
+            formfile.append('avatar', data);
+            try {
+                console.dir(formfile)
+                await dispatch(postmanCollectionAction({ file: formfile }));
+                console.log('File uploaded successfully');
+            } catch (error) {
+                console.error('Error uploading file:', error);
+            }
+        } else {
+            console.error('No file selected');
+        }
+    };
+
+
     const cleanState = () => {
         setSelectedService("openai");
         setSelectedModel("gpt-3.5-turbo");
         setSelectedType("chat");
         setBridgeType("api");
         setUploadedFile(null);
+        setToolsCall([]);
         document.getElementById('bridge-name').value = "";
         if(document.getElementById('slug-name')) document.getElementById('slug-name').value = "";
     };
@@ -166,17 +199,36 @@ function CreateNewBridge({ orgid }) {
                 <dialog id="file_upload_modal" className="modal" open>
                     <div className="modal-box">
                         <h3 className="font-bold text-lg">Upload Postman Collection</h3>
-                        <div {...getRootProps({ className: 'dropzone' })} className="border-dashed border-2 border-gray-300 p-4 text-center">
-                            <input {...getInputProps()} />
-                            <p>Drag 'n' drop a file here, or click to select a file</p>
-                            {uploadedFile && <p className="mt-2 text-green-600">{uploadedFile.name}</p>}
-                        </div>
-                        <div className="modal-action">
-                            <form method="dialog">
-                                <button className="btn" onClick={() => { setShowFileUploadModal(false); cleanState(); }}>Close</button>
-                            </form>
-                            <button className="btn" onClick={() => createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name").value)}>+ Create</button>
-                        </div>
+                        {/* <form onSubmit={uploadJsonFile} encType="multipart/form-data" method="post">
+                            <div {...getRootProps({ className: 'dropzone' })} className="border-dashed border-2 border-gray-300 p-4 text-center">
+                                <input {...getInputProps()} name="avatar" />
+                                <p>Drag 'n' drop a file here, or click to select a file</p>
+                                {uploadedFile && <p className="mt-2 text-green-600">{uploadedFile.name}</p>}
+                            </div>
+                            <div className="modal-action">
+                                <button type="button" className="btn" onClick={() => { setShowFileUploadModal(false); cleanState(); }}>Close</button>
+                                <button type="submit" className="btn">+ import</button>
+                                <button type="button" className="btn" onClick={() => createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name").value)}>+ Create</button>
+                            </div>
+                        </form> */}
+                        <form onSubmit={uploadJsonFile} encType="multipart/form-data" method="post">
+                            <input type="file" name="avatar" id="fileInput" />
+                            <div className="modal-action">
+                                <button type="button" className="btn" onClick={() => { setShowFileUploadModal(false); cleanState(); }}>Close</button>
+                                <button type="submit" className="btn">+ Extract</button>
+                                <button type="button" className="btn" onClick={() => createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name").value)}>+ Create</button>
+                            </div>
+                        </form>
+                        {/* Display postmanCollection data */}
+                        {postmanCollection && postmanCollection.length > 0 && postmanCollection.map((item) => (
+                            <div key={item?.singleData?.name} className="flex items-start space-x-2">
+                                <input type="checkbox" onChange={(e) => handleCheckboxChange(item, e.target.checked)} className="form-checkbox h-5 w-5 text-blue-600" />
+                                <div>
+                                    <h4>Name : {item?.name}</h4>
+                                    <p>Description : {item?.request?.description || "No description provided in the file. Please provide one for improved URL calls."} </p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </dialog>
             )}

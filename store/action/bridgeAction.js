@@ -118,4 +118,19 @@ export const getChatBotOfBridgeAction = (orgId, bridgeId) => async (dispatch) =>
   }
 }
 
+export const uploadFileAction = (file) => async (dispatch) => {
+  const formData = new FormData();
+  formData.append('file', file);
 
+  try {
+    const response = await axios.post('/upload-endpoint', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    dispatch({ type: 'FILE_UPLOAD_SUCCESS', payload: response.data });
+  } catch (error) {
+    dispatch({ type: 'FILE_UPLOAD_FAIL', payload: error });
+  }
+};
