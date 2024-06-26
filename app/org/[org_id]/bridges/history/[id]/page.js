@@ -151,34 +151,6 @@ function Page({ params }) {
     );
   }
 
-  useEffect(() => {
-    const handleMouseDown = (e) => {
-      e.preventDefault();
-      const sidebar = sidebarRef.current;
-      const initialWidth = sidebar.getBoundingClientRect().width;
-      const initialX = e.pageX;
-
-      const handleMouseMove = (e) => {
-        const newWidth = initialWidth + (initialX - e.pageX);
-        sidebar.style.width = `${newWidth}px`;
-      };
-
-      const handleMouseUp = () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    };
-
-    const resizeHandle = document.getElementById('resize-handle');
-    resizeHandle.addEventListener('mousedown', handleMouseDown);
-
-    return () => {
-      resizeHandle.removeEventListener('mousedown', handleMouseDown);
-    };
-  }, []);
 
   return (
     <div className="flex">
@@ -275,7 +247,6 @@ function Page({ params }) {
         className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
           } overflow-y-auto bg-base-200 transition-all duration-300 z-50`}
       >
-        <div id="resize-handle" style={{ cursor: 'col-resize', width: '10px', position: 'absolute', left: '-10px', top: 0, bottom: 0 }}></div>
         {selectedItem && (
           <aside className="flex w-full flex-col h-screen overflow-y-auto">
             <div className="p-4">
