@@ -56,6 +56,7 @@ export const createBridge = async (dataToSend) => {
     return await axios.post(`${URL}/api/v1/config/createbridges`, dataToSend)
   } catch (error) {
     toast.error(error.response.data.error)
+    throw error
   }
 }
 

@@ -26,7 +26,7 @@ const ChatBotList = ({ params }) => {
             <p className='text-xl font-medium'>ChatBot</p>
             <div className='flex flex-wrap gap-4'>
                 {chatbotData?.map((chatBot, index) => (
-                    <div key={index} onClick={() => router.push(`/org/${params.org_id}/chatbot/${chatBot._id}`)} className="flex max-w-xs flex-col items-center rounded-md border md:flex-row cursor-pointer transform transition duration-150 ease-in-out hover:bg-gray-200">
+                    <div key={index} onClick={() => router.push(`/org/${params.org_id}/chatbot/configure/${chatBot._id}`)} className="flex max-w-xs flex-col items-center rounded-md border md:flex-row cursor-pointer transform transition duration-150 ease-in-out hover:bg-gray-200">
                         <div>
                             <div className="p-4">
                                 <h1 className="inline-flex items-center text-lg font-semibold">

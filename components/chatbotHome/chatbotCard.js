@@ -44,7 +44,7 @@ export default function ChatBotCardHome({ params }) {
   const fetchChatBotDetails = async (id) => {
     try {
       await dispatch(getChatBotDetailsAction(id));
-      router.push(`/org/${params.org_id}/chatbot/${id}`);
+      router.push(`/org/${params.org_id}/chatbot/configure/${id}`);
     } catch (error) {
       console.error('Failed to fetch chatbot details:', error);
     }

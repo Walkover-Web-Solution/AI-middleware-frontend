@@ -31,6 +31,7 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
     dispatch(createBridgeReducer({ data, orgId: dataToSend.orgid }));
   } catch (error) {
     console.error(error);
+    throw error
   }
 };
 

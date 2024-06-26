@@ -42,16 +42,18 @@ function CreateNewBridge({ orgid }) {
                     "model": selectedModel,
                     "name": name,
                     "type": seletedType,
-                    "slugName": slugname
+                    "slugName": slugname || name
                 },
                 "service": selectedService,
                 "bridgeType": bridgeType // Added missing semicolon
             };
             dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
+                // document.getElementById('file_upload_modal').close();
+                setShowFileUploadModal(false);
                 route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
+                document.getElementById('my_modal_1').close();
                 setIsLoading(false);
                 cleanState();
-                document.getElementById('file_upload_modal').close();
             })).catch(() => {
                 setIsLoading(false);
             });
@@ -61,19 +63,19 @@ function CreateNewBridge({ orgid }) {
     };
 
     const cleanState = () => {
-        setSelectedService("");
-        setSelectedModel("");
-        setSelectedType("");
+        setSelectedService("openai");
+        setSelectedModel("gpt-3.5-turbo");
+        setSelectedType("chat");
         setBridgeType("api");
         setUploadedFile(null);
         document.getElementById('bridge-name').value = "";
-        document.getElementById('slug-name').value = "";
+        if(document.getElementById('slug-name')) document.getElementById('slug-name').value = "";
     };
 
-    const handleNext = () => {
-        document.getElementById('my_modal_1').close();
-        setShowFileUploadModal(true);
-    };
+    // const handleNext = () => {
+    //     document.getElementById('my_modal_1').close();
+    //     setShowFileUploadModal(true);
+    // };
 
     return (
         <div>
@@ -95,6 +97,21 @@ function CreateNewBridge({ orgid }) {
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Create Bridge !</h3>
                     <div >
+                    <div className="items-center justify-start mt-2">
+                            <div className="label">
+                                <span className="label-text">Used as</span>
+                            </div>
+                            <div className="flex items-center gap-6">
+                                <label className="flex items-center justify-center gap-2">
+                                    <input type="radio" name="radio-1" className="radio" value="api" defaultChecked={bridgeType === "api"} onChange={() => setBridgeType('api')} />
+                                    API
+                                </label>
+                                <label className="flex items-center justify-center gap-2">
+                                    <input type="radio" name="radio-1" className="radio" value="chatbot" defaultChecked={bridgeType === "chatbot"} onChange={() => setBridgeType('chatbot')} />
+                                    ChatBot
+                                </label>
+                            </div>
+                        </div>
                         <label className="form-control w-full mb-2">
                             <div className="label">
                                 <span className="label-text">Bridge Name</span>
@@ -128,33 +145,19 @@ function CreateNewBridge({ orgid }) {
                                 {!services?.[selectedService] && <option disabled key="0">Please select a service first !</option>}
                             </select>
                         </label>
-                        <label className="form-control w-full mb-2">
+                       { bridgeType === 'chatbot' ? <label className="form-control w-full mb-2">
                             <div className="label">
                                 <span className="label-text">Slug Name</span>
                             </div>
                             <input type="text" id="slug-name" defaultValue={allBridgeLength === 0 ? "root" : ""} placeholder="Type here" className="input input-bordered w-full " />
-                        </label>
-                        <div className="items-center justify-start mt-2">
-                            <div className="label">
-                                <span className="label-text">Used as</span>
-                            </div>
-                            <div className="flex items-center gap-6">
-                                <label className="flex items-center justify-center gap-2">
-                                    <input type="radio" name="radio-1" className="radio" value="api" defaultChecked={bridgeType === "api"} onChange={() => setBridgeType('api')} />
-                                    API
-                                </label>
-                                <label className="flex items-center justify-center gap-2">
-                                    <input type="radio" name="radio-1" className="radio" value="chatbot" defaultChecked={bridgeType === "chatbot"} onChange={() => setBridgeType('chatbot')} />
-                                    ChatBot
-                                </label>
-                            </div>
-                        </div>
+                        </label> : null}
                     </div>
                     <div className="modal-action">
                         <form method="dialog">
                             <button className="btn" onClick={cleanState}>Close</button>
                         </form>
-                        <button className="btn" onClick={handleNext}>Next</button>
+                        <button className="btn" onClick={() => createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name")?.value)}>+ Create</button>
+                        {/* <button className="btn" onClick={handleNext}>Next</button> */}
                     </div>
                 </div>
             </dialog>

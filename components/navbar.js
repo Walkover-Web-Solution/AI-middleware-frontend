@@ -9,7 +9,6 @@ import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { Building2, ChevronDown, FileSliders, History, Home, KeyRound, LogOut, Mail, Rss, Settings2 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import CreateNewBridge from './createNewBridge';
-import ChatBotModel from './chatbot/chatBotModel';
 
 function Navbar() {
   const router = useRouter();
@@ -340,7 +339,7 @@ function Navbar() {
                   <li key={item._id} className=' w-full'>
                     <a
                       className={`${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md`}
-                      onClick={() => router.push(`/org/${path[2]}/chatbot/${item._id}`)}
+                      onClick={() => router.push(`/org/${path[2]}/chatbot/configure/${item._id}`)}
                     >
                       {item?.title}
                     </a>
