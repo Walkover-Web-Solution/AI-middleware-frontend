@@ -75,7 +75,7 @@ export default function ConfigurationPage({ params }) {
                         <div className="flex  flex-col w-100 overflow-auto p-4 ">
                             <h1 className="text-2xl font-semibold">Chatbot Configuration</h1>
                             <div className="flex flex-col gap-4">
-                                <PrivateFormSection params={params} />
+                                <PrivateFormSection params={params} ChooseChatbot={true}/>
                                 <SecondStep />
                             </div>
                         </div>
