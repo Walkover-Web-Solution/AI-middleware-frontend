@@ -151,34 +151,6 @@ function Page({ params }) {
     );
   }
 
-  useEffect(() => {
-    const handleMouseDown = (e) => {
-      e.preventDefault();
-      const sidebar = sidebarRef.current;
-      const initialWidth = sidebar.getBoundingClientRect().width;
-      const initialX = e.pageX;
-
-      const handleMouseMove = (e) => {
-        const newWidth = initialWidth + (initialX - e.pageX);
-        sidebar.style.width = `${newWidth}px`;
-      };
-
-      const handleMouseUp = () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    };
-
-    const resizeHandle = document.getElementById('resize-handle');
-    resizeHandle.addEventListener('mousedown', handleMouseDown);
-
-    return () => {
-      resizeHandle.removeEventListener('mousedown', handleMouseDown);
-    };
-  }, []);
 
   return (
     <div className="flex">
@@ -194,12 +166,14 @@ function Page({ params }) {
                       {item.role === "tools_call" ?
                         <div className="w-full flex align-center justify-center" >
                           {Object.keys(item.function).map((funcName, index) => (
-                            <div role="alert" className="alert shadow-lg w-2/3 cursor-pointer hover:bg-base-300 transition-colors duration-200" onClick={() => openViasocket(funcName)}>
+                            // <div role="alert" className="alert shadow-lg w-2/3 cursor-pointer hover:bg-base-300 transition-colors duration-200" onClick={() => openViasocket(funcName)}>
+                            <div role="alert" className="alert shadow-lg w-1/3 transition-colors duration-200" >
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                               <div>
                                 <h3 className="font-bold">Functions Executed</h3>
                                 <div key={index}>
-                                  <div className="text-xs">Function "{integrationData[funcName].title || funcName}" executed successfully. Inspect details?</div>
+                                  {/* <div className="text-xs">Function "{integrationData[funcName].title || funcName}" executed successfully. Inspect details?</div> */}
+                                  <div className="text-xs">Function "{integrationData[funcName].title || funcName}" executed successfully.</div>
                                 </div>
                               </div>
                             </div>
@@ -273,7 +247,6 @@ function Page({ params }) {
         className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
           } overflow-y-auto bg-base-200 transition-all duration-300 z-50`}
       >
-        <div id="resize-handle" style={{ cursor: 'col-resize', width: '10px', position: 'absolute', left: '-10px', top: 0, bottom: 0 }}></div>
         {selectedItem && (
           <aside className="flex w-full flex-col h-screen overflow-y-auto">
             <div className="p-4">
