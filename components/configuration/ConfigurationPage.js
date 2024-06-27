@@ -1,5 +1,6 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Bot, Cog } from "lucide-react";
 import BridgeTypeToggle from "./configurationComponent/bridgeTypeToggle";
 import AdvancedParameters from "./configurationComponent/advancedParamenter";
 import ApiKeyInput from "./configurationComponent/apiKeyInput";
@@ -10,7 +11,6 @@ import ResponseFormatSelector from "./configurationComponent/responseFormatSelec
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import ActionList from "./configurationComponent/actionList";
-import { Bot, Cog } from "lucide-react";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import PrivateFormSection from '../chatbotConfiguration/firstStep';
 import SecondStep from '../chatbotConfiguration/secondStep';

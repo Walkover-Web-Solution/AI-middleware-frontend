@@ -24,40 +24,47 @@ function page() {
   // If the user has logged in, it will redirect the user to the bridges page
   // If the user has not logged in, it will redirect the user to the login page
   async function runEffect() {
-    if (localStorage.getItem('proxy_token') || proxy_auth_token) {
+    const proxyToken = localStorage.getItem('proxy_token');
+    const proxyAuthToken = proxy_auth_token;
+    
+    if (proxyToken) {
+      router.replace("/org");
+      return;
+    }
+  
+    if (proxyAuthToken) {
       setLoading(true);
-      // If the user has already logged in, redirect the user to the bridges page
-      localStorage.setItem('proxy_token', proxy_auth_token);
+      localStorage.setItem('proxy_token', proxyAuthToken);
+  
       if (process.env.NEXT_PUBLIC_ENV === 'local') {
         const localToken = await loginUser({
           userId: searchParams.get('user_ref_id'),
           orgId: searchParams.get('company_ref_id'),
           userName: '',
           orgName: ''
-        })
+        });
         localStorage.setItem('local_token', localToken.token);
       }
+  
       router.replace("/org");
       return;
     }
-
-    // If the user has not logged in, redirect the user to the login page
+  
+    // Configuration for the MSG91 authentication
     const configuration = {
-      referenceId: process.env.NEXT_PUBLIC_REFERENCEID, // The unique id of the app
-      success: (data) => { // Called when the user is successfully authenticated
-        // Get the verified token in response
+      referenceId: process.env.NEXT_PUBLIC_REFERENCEID,
+      success: (data) => {
         console.dir('success response', data);
       },
-      failure: (error) => { // Called when there is an error
-        // Handle the error
+      failure: (error) => {
         console.error('failure reason', error);
       }
     };
-
+  
     // Load the login script from msg91
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.onload = () => {
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.onload = () => {
       const checkInitVerification = setInterval(() => {
         if (typeof initVerification === 'function') {
           clearInterval(checkInitVerification);

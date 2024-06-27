@@ -10,7 +10,7 @@ import { useDropzone } from 'react-dropzone';
 function CreateNewBridge({ orgid }) {
     const [selectedService, setSelectedService] = useState('openai');
     const [selectedModel, setSelectedModel] = useState("gpt-3.5-turbo");
-    const [seletedType, setSelectedType] = useState("chat");
+    const [selectedType, setSelectedType] = useState("chat");
     const [bridgeType, setBridgeType] = useState("api");
     const allBridgeLength = useCustomSelector((state) => state.bridgeReducer.org[orgid] || []).length;
     const [isLoading, setIsLoading] = useState(false);
@@ -35,20 +35,19 @@ function CreateNewBridge({ orgid }) {
     const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
     const createBridgeHandler = (name, slugname) => {
-        if (name.length > 0 && selectedModel && seletedType) {
+        if (name.length > 0 && selectedModel && selectedType) {
             setIsLoading(true);
             const dataToSend = {
                 "configuration": {
                     "model": selectedModel,
                     "name": name,
-                    "type": seletedType,
+                    "type": selectedType,
                     "slugName": slugname || name
                 },
                 "service": selectedService,
                 "bridgeType": bridgeType // Added missing semicolon
             };
             dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
-                // document.getElementById('file_upload_modal').close();
                 setShowFileUploadModal(false);
                 route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
                 document.getElementById('my_modal_1').close();
@@ -69,13 +68,8 @@ function CreateNewBridge({ orgid }) {
         setBridgeType("api");
         setUploadedFile(null);
         document.getElementById('bridge-name').value = "";
-        if(document.getElementById('slug-name')) document.getElementById('slug-name').value = "";
+        if (document.getElementById('slug-name')) document.getElementById('slug-name').value = "";
     };
-
-    // const handleNext = () => {
-    //     document.getElementById('my_modal_1').close();
-    //     setShowFileUploadModal(true);
-    // };
 
     return (
         <div>
@@ -83,7 +77,6 @@ function CreateNewBridge({ orgid }) {
                 (<div className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-filter backdrop-blur-lg flex justify-center items-center z-50">
                     <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-xl">
                         <div className="flex items-center justify-center space-x-2">
-                            {/* Tailwind CSS Spinner */}
                             <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -96,8 +89,8 @@ function CreateNewBridge({ orgid }) {
             <dialog id="my_modal_1" className="modal">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Create Bridge !</h3>
-                    <div >
-                    <div className="items-center justify-start mt-2">
+                    <div>
+                        <div className="items-center justify-start mt-2">
                             <div className="label">
                                 <span className="label-text">Used as</span>
                             </div>
@@ -123,9 +116,9 @@ function CreateNewBridge({ orgid }) {
                                 <span className="label-text">Select Service</span>
                             </div>
                             <select value={selectedService} onChange={handleService} className="select select-bordered w-full ">
-                                <option disabled selected></option>
-                                <option>openai</option>
-                                <option>google</option>
+                                <option disabled></option>
+                                <option value="openai">openai</option>
+                                <option value="google">google</option>
                             </select>
                         </label>
                         <label className="form-control w-full mb-2 ">
@@ -133,10 +126,10 @@ function CreateNewBridge({ orgid }) {
                                 <span className="label-text">Pick a model</span>
                             </div>
                             <select value={selectedModel} onChange={handleModel} className="select select-bordered">
-                                <option disabled selected></option>
+                                <option disabled></option>
                                 {Object.entries(services?.[selectedService] || {}).map(([group, options]) => (
                                     group !== 'models' && // Exclude the 'models' group
-                                    <optgroup label={group}>
+                                    <optgroup label={group} key={group}>
                                         {[...options].map(option => (
                                             <option key={option}>{option}</option>
                                         ))}
@@ -145,7 +138,7 @@ function CreateNewBridge({ orgid }) {
                                 {!services?.[selectedService] && <option disabled key="0">Please select a service first !</option>}
                             </select>
                         </label>
-                       { bridgeType === 'chatbot' ? <label className="form-control w-full mb-2">
+                        {bridgeType === 'chatbot' ? <label className="form-control w-full mb-2">
                             <div className="label">
                                 <span className="label-text">Slug Name</span>
                             </div>
@@ -157,7 +150,6 @@ function CreateNewBridge({ orgid }) {
                             <button className="btn" onClick={cleanState}>Close</button>
                         </form>
                         <button className="btn" onClick={() => createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name")?.value)}>+ Create</button>
-                        {/* <button className="btn" onClick={handleNext}>Next</button> */}
                     </div>
                 </div>
             </dialog>

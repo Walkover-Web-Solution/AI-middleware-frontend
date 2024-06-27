@@ -3,7 +3,7 @@ import Link from 'next/link';
 import React from 'react';
 
 const ComplitionApi = (bridgeId) => {
-  return `curl --location 'https://routes.msg91.com/api/proxy/1258584/29gjrmh24/api/v1/model/chat/completion' \\
+  return `curl --location '${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/model/chat/completion' \\
 --header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
 --header 'Content-Type: application/json' \\
 --data '{ 
