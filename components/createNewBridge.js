@@ -9,7 +9,7 @@ import { useDropzone } from 'react-dropzone';
 
 function CreateNewBridge({ orgid }) {
     const [selectedService, setSelectedService] = useState('openai');
-    const [selectedModel, setSelectedModel] = useState("gpt-3.5-turbo");
+    const [selectedModel, setSelectedModel] = useState("gpt-4o");
     const [selectedType, setSelectedType] = useState("chat");
     const [bridgeType, setBridgeType] = useState("api");
     const allBridgeLength = useCustomSelector((state) => state.bridgeReducer.org[orgid] || []).length;
@@ -63,7 +63,7 @@ function CreateNewBridge({ orgid }) {
 
     const cleanState = () => {
         setSelectedService("openai");
-        setSelectedModel("gpt-3.5-turbo");
+        setSelectedModel("gpt-4o");
         setSelectedType("chat");
         setBridgeType("api");
         setUploadedFile(null);

@@ -15,15 +15,13 @@ function Home({ params }) {
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id] || []).slice().reverse();
   useEffect(()=>{
-    dispatch(getAllBridgesAction())
+    dispatch(getAllBridgesAction((data) => {
+      if(data === 0 ){
+        document.getElementById('my_modal_1').showModal()
+      }
+      else  document.getElementById('my_modal_1').closeModel()
+    }))
   },[])
-  useEffect(() => {
-    if (allBridges && allBridges.length === 0) {
-      document.getElementById('my_modal_1').showModal()
-    } else {
-      document.getElementById('my_modal_1').close()
-    }
-  }, [allBridges])
 
   const { isLoading } = useCustomSelector((state) => ({
     isLoading: state.bridgeReducer.loading,
