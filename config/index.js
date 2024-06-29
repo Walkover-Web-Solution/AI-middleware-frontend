@@ -60,9 +60,9 @@ export const createBridge = async (dataToSend) => {
 }
 
 
-export const getAllBridges = async () => {
+export const getAllBridges = async (org_id) => {
   try {
-    const data = await axios.get(`${URL}/api/v1/config/getbridges/all`)
+    const data = await axios.get(`${URL}/api/v1/config/getbridges/all/${org_id}`)
     return data;
   } catch (error) {
     console.error(error)

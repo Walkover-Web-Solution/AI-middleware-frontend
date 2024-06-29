@@ -54,8 +54,8 @@ function Home({ params }) {
   }
 
   useEffect(() => {
-    dispatch(getAllBridgesAction())
-  }, [params?.id])
+    dispatch(getAllBridgesAction(params?.org_id))
+  }, [params?.org_id])
 
 
 
