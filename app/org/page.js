@@ -29,8 +29,8 @@ function Page() {
           orgName: name
         })
         localStorage.setItem('local_token', localToken.token);
-        route.push(`/org/${id}/bridges`);
       }
+      route.push(`/org/${id}/bridges`);
       
       dispatch(setCurrentOrgIdAction(id));
       if (response.status === 200) {
