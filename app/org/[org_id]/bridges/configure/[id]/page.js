@@ -76,7 +76,7 @@ const Page = ({ params }) => {
         <div className="drawer-content flex flex-col items-start justify-start">
           <div className="flex w-full justify-start gap-16 items-start">
             <div className="w-full flex  ">
-              <div className="w-2/3 overflow-auto p-4 h-[93vh] border-r border-gray-300 bg-gray-100 min-w-[350px] configurationPage">
+              <div className="w-2/3 overflow-auto p-4 h-[93vh] border-r min-w-[350px] configurationPage">
                 <ConfigurationPage params={params} />
                 <div className='h-[70px]' />
               </div>

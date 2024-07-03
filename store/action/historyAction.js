@@ -4,9 +4,9 @@ import { getHistory, getSingleThreadData } from "@/config";
 
 
 
-export const getHistoryAction = (id, page=1) => async (dispatch, getState) => {
+export const getHistoryAction = (id,start, end,page=1) => async (dispatch, getState) => {
   try {
-    const data = await getHistory(id, page);
+    const data = await getHistory(id, page, start , end );
     if (data && data.data) {
       dispatch(fetchAllHistoryReducer({ data: data.data, page }));
       return data.data; // Return the data for further checks

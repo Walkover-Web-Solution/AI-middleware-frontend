@@ -105,9 +105,10 @@ export const getSingleThreadData = async (threadId, bridgeId) => {
 }
 
 
-export const getHistory = async (bridgeId, page = 1) => {
+export const getHistory = async (bridgeId, page = 1, start, end) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}?pageNo=${page}&limit=40`);
+    
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}?pageNo=${page}&limit=40&startTime=${start}&endTime=${end}`);
     return getSingleThreadData.data;
   } catch (error) {
     console.error(error);

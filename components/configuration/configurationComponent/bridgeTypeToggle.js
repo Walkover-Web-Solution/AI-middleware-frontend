@@ -28,7 +28,7 @@ const BridgeTypeToggle = ({ params }) => {
     }
 
     return (
-        <label className='flex items-center justify-start w-fit gap-4'>
+        <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
             <div className="label">
                 <span className="label-text">API</span>
             </div>

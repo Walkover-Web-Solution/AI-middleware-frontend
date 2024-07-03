@@ -70,7 +70,7 @@ const InputConfigComponent = ({ params }) => {
                     <span className="label-text capitalize">{key}</span>
                 </div>
                 <textarea
-                    className="textarea textarea-bordered w-full min-h-96 resize-y"
+                    className="textarea textarea-bordered border w-full min-h-96 resize-y"
                     defaultValue={value?.default?.content || value?.prompt || value?.input || ""}
                     onBlur={(e) => { handleInputConfigChanges(e.target.value, key); SaveData(e.target.value, key) }}
                 ></textarea>

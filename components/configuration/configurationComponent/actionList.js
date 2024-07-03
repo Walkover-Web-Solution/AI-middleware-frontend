@@ -36,12 +36,12 @@ export default function ActionList({ params }) {
     return (
         bridgeType === "chatbot" && (
             <div className="form-control">
-                <p className='text-xl font-medium'>Action</p>
+                <p className='text-xl font-medium text-base-content'>Action</p>
                 <div className='flex flex-wrap gap-4'>
                     {action && Object.entries(action).sort().map(([key, value]) => (
                         <div
                             key={key}
-                            className="flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer"
+                            className="flex w-[250px] flex-col items-start rounded-md border hover:bg-base-200 md:flex-row cursor-pointer"
                             onClick={() => {
                                 setSelectedKey(key);
                                 document.getElementById('actionModel').showModal();
@@ -49,24 +49,26 @@ export default function ActionList({ params }) {
                         >
                             <div className="p-4 w-full">
                                 <div className='flex items-center justify-between'>
-                                    <h1 className="inline-flex items-center text-lg font-semibold">
+                                    <h1 className="inline-flex items-center text-lg font-semibold text-base-content">
                                         {key}
                                     </h1>
                                     <div onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.variable, e)} className='hover:scale-125 transition duration-100 ease-in-out'>
-                                        <Trash size={16} className='cursor-pointer' />
+                                        <Trash size={16} className='cursor-pointer text-error' />
                                     </div>
                                 </div>
-                                <p className="mt-3 text-xs sm:text-sm text-gray-600 line-clamp-3">
+                                <p className="mt-3 text-xs sm:text-sm 
+ line-clamp-3">
                                     Description: {value?.description}
                                 </p>
                                 {value?.variable && (
-                                    <p className="mt-3 text-xs sm:text-sm text-gray-600 line-clamp-3">
+                                    <p className="mt-3 text-xs sm:text-sm 
+ line-clamp-3">
                                         Structure: {value?.variable}
                                     </p>
                                 )}
                                 {value?.type && (
                                     <div className="mt-4">
-                                        <span className="mr-2 inline-block rounded-full capitalize bg-white px-3 py-1 text-[10px] sm:text-xs font-semibold text-gray-900">
+                                        <span className="mr-2 inline-block rounded-full capitalize bg-base-300 text-base px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content">
                                             {value.type}
                                         </span>
                                     </div>
