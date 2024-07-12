@@ -34,10 +34,10 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
   }
 };
 
-export const getAllBridgesAction = () => async (dispatch, getState) => {
+export const getAllBridgesAction = (org_id) => async (dispatch, getState) => {
   try {
     dispatch(isPending())
-    const response = await getAllBridges();
+    const response = await getAllBridges(org_id);
     dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridges, orgId: response?.data?.org_id }));
   } catch (error) {
     dispatch(isError())
@@ -60,7 +60,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
   try {
     dispatch(isPending());
     const data = await updateBridge({bridgeId,dataToSend});
-    dispatch(updateBridgeReducer({ bridgeId, bridges: data.data.bridges, bridgeType: dataToSend.bridgeType }));
+    dispatch(updateBridgeReducer({ bridges: data.data.bridges, bridgeType: dataToSend.bridgeType }));
   } catch (error) {
     console.error(error);
     dispatch(isError());
