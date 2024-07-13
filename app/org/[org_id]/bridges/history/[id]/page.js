@@ -165,7 +165,7 @@ function Page({ params }) {
                     <div key={`item.id${index}`}>
                       {item.role === "tools_call" ?
                         <div className="w-full flex align-center justify-center" >
-                          {Object.keys(item.function).map((funcName, index) => (
+                          {Object.keys(item.function || {}).map((funcName, index) => (
                             // <div role="alert" className="alert shadow-lg w-2/3 cursor-pointer hover:bg-base-300 transition-colors duration-200" onClick={() => openViasocket(funcName)}>
                             <div role="alert" className="alert shadow-lg w-1/3 transition-colors duration-200" >
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -173,7 +173,7 @@ function Page({ params }) {
                                 <h3 className="font-bold">Functions Executed</h3>
                                 <div key={index}>
                                   {/* <div className="text-xs">Function "{integrationData[funcName].title || funcName}" executed successfully. Inspect details?</div> */}
-                                  <div className="text-xs">Function "{integrationData[funcName].title || funcName}" executed successfully.</div>
+                                  <div className="text-xs">Function "{integrationData?.[funcName]?.title || funcName}" executed successfully.</div>
                                 </div>
                               </div>
                             </div>
@@ -259,7 +259,7 @@ function Page({ params }) {
                 </button>
               </div>
               <ul className="mt-4">
-                {Object.entries(selectedItem).map(([key, value]) => {
+                {Object.entries(selectedItem || {}).map(([key, value]) => {
                   return (
                     <li key={key} className="mb-2">
                       <strong className="font-medium text-gray-700 capitalize">{key}:</strong>
