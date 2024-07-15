@@ -15,19 +15,27 @@ const ComplitionApi = (bridgeId) => {
 }'`
 }
 
+const Section = ({ title, caption, children }) => (
+  <div className="flex items-start flex-col justify-center">
+    <h3 className="text-lg font-semibold">{title}</h3>
+    <caption className="text-sm text-gray-600 block">{caption}</caption>
+  </div>
+);
+
 const ApiGuide = ({ params }) => {
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4">API Guide</h1>
+    <div className="min-h-screen bg-gray-100 gap-4 flex flex-col">
+      <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
 
-        <h2 className="text-xl font-bold mb-2">Step 1: Create `pauthkey`</h2>
-        <p className="mb-4">
+        <Section title="Step 1" caption="Create `pauthkey`" />
+
+        <p className=" text-sm">
           Follow the on-screen instructions to create a new API key. Ignore if already created
           <br /> <Link href={`/org/${params.org_id}/apikey`} target='_blank' className="link link-primary">Create pauthkey</Link>
         </p>
-
-        <h2 className="text-xl font-bold mb-2">Step 2: Use the API</h2>
+      </div>
+      <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
+        <Section title="Step 2" caption="Use the API" />
         <div className="mockup-code relative">
           <CopyButton data={ComplitionApi(params.id)} />
           <pre className="break-words whitespace-pre-wrap">

@@ -66,14 +66,14 @@ export default function ConfigurationPage({ params }) {
                     </>
                     :
                     bridgeType === 'api' ?
-                        <div className="flex  flex-col w-100 overflow-auto p-4 ">
-                            <h1 className="text-2xl font-semibold">API Configuration</h1>
+                        <div className="flex flex-col w-100 overflow-auto gap-3">
+                            <h1 className="text-xl font-semibold">API Configuration</h1>
                             <div className="flex flex-col gap-4">
                                 <ApiGuide params={params}/>
                             </div>
                         </div> :
-                        <div className="flex  flex-col w-100 overflow-auto p-4 ">
-                            <h1 className="text-2xl font-semibold">Chatbot Configuration</h1>
+                        <div className="flex  flex-col w-100 overflow-auto gap-3">
+                            <h1 className="text-xl font-semibold">Chatbot Configuration</h1>
                             <div className="flex flex-col gap-4">
                                 <PrivateFormSection params={params} ChooseChatbot={true}/>
                                 <SecondStep />
