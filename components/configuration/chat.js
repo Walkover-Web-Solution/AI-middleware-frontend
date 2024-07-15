@@ -226,16 +226,12 @@ function Chat({ params }) {
   };
 
   const handleRemoveKeyValuePair = (index) => {
-    const { key } = keyValuePairs[index]; // Get the key of the pair being removed
+    const { key } = keyValuePairs[index];
 
-    // Filter out the pair at the specified index
     const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
     setKeyValuePairs(updatedPairs); // Update local state
 
-    // Dispatch action to remove the pair from Redux store
     dispatch(removeKeyValuePair({ bridge_id: params?.id, key }));
-
-    // Optionally, you might want to update Redux state here, if not already done in the reducer
   };
 
   const handleKeyValueChange = (index, field, value) => {

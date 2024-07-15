@@ -40,7 +40,7 @@ export const bridgeReducer = createSlice({
         bridge_id
       ].variable.filter((pair) => Object.keys(pair)[0] !== key);
 
-      console.log(action.payload);
+      // console.log(action.payload);
     },
     isPending: (state) => {
       state.loading = true;
