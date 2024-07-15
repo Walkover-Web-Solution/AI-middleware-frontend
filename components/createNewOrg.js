@@ -53,7 +53,6 @@ function CreateOrg({ onClose }) {
                 onClose();
                 dispatch(userDetails());
                 toast.success('Organization created successfully');
-                console.log(data);
                 route.push(`/org/${data.id}/bridges`);
             }));
         } catch (error) {
