@@ -62,7 +62,6 @@ function Home({ params }) {
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
   }
 
-
   return (<div className="drawer lg:drawer-open ">
     {isLoading &&
       <Loader />}
