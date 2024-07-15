@@ -1,12 +1,20 @@
 import { dryRun } from "@/config";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
+
+import {
+  removeKeyValuePair,
+  setKeyValuePair,
+} from "@/store/reducer/bridgeReducer";
+
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
 function Chat({ params }) {
+  const dispatch = useDispatch();
   const { bridge } = useCustomSelector((state) => ({
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
   }));
@@ -14,12 +22,12 @@ function Chat({ params }) {
   const dataToSend = {
     configuration: {
       model: bridge?.configuration?.model?.default,
-      type: bridge?.type
+      type: bridge?.type,
     },
     service: bridge?.service?.toLowerCase(),
     apikey: bridge?.apikey,
     bridgeType: bridge?.bridgeType,
-    slugName: bridge?.slugName
+    slugName: bridge?.slugName,
   };
 
   // State variables
@@ -30,24 +38,34 @@ function Chat({ params }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [conversation, setConversation] = useState([]);
   const [isAccordionVisible, setIsAccordionVisible] = useState(false); // State for visibility of key-value fields
-  const [keyValuePairs, setKeyValuePairs] = useState([]); // State for key-value pairs
-
+  //const [keyValuePairs, setKeyValuePairs] = useState([]); // State for key-value pairs
+  const [keyValuePairs, setKeyValuePairs] = useState(
+    bridge?.variable?.map((pair) => ({
+      key: Object.keys(pair)[0],
+      value: Object.values(pair)[0],
+    })) || []
+  );
   const defaultsMap = useMemo(() => {
-    return bridge ? Object.entries(bridge?.configuration).reduce((acc, [key, value]) => {
-      const isToolsEmptyArray = key === 'tools' && Array.isArray(value.default) && value.default.length === 0;
-      if (!isToolsEmptyArray && value.default !== undefined) {
-        acc[key] = value.default;
-      }
-      if (!acc.hasOwnProperty('tools') || acc?.tools?.length === 0) {
-        delete acc['tool_choice'];
-      }
-      return acc;
-    }, {}) : {};
+    return bridge
+      ? Object.entries(bridge?.configuration).reduce((acc, [key, value]) => {
+          const isToolsEmptyArray =
+            key === "tools" &&
+            Array.isArray(value.default) &&
+            value.default.length === 0;
+          if (!isToolsEmptyArray && value.default !== undefined) {
+            acc[key] = value.default;
+          }
+          if (!acc.hasOwnProperty("tools") || acc?.tools?.length === 0) {
+            delete acc["tool_choice"];
+          }
+          return acc;
+        }, {})
+      : {};
   }, [bridge]);
 
   // Update localDataToSend configuration
-  const updateLocalDataToSend = useCallback(updateFn => {
-    setLocalDataToSend(prevDataToSend => ({
+  const updateLocalDataToSend = useCallback((updateFn) => {
+    setLocalDataToSend((prevDataToSend) => ({
       ...prevDataToSend,
       bridge_id: params?.id,
       configuration: {
@@ -59,7 +77,8 @@ function Chat({ params }) {
 
   // Handle sending message
   const handleSendMessage = useCallback(async () => {
-    if (dataToSend.configuration.type === "chat") if (newMessage.trim() === "") return;
+    if (dataToSend.configuration.type === "chat")
+      if (newMessage.trim() === "") return;
     setErrorMessage("");
     setNewMessage("");
     setLoading(true);
@@ -86,9 +105,10 @@ function Chat({ params }) {
       let data;
       if (dataToSend.configuration.type === "chat") {
         data = modelInfo[localDataToSend.service].chatmessage.chat;
-        const chatPath = modelInfo[localDataToSend.service].chatmessage.chatpath;
+        const chatPath =
+          modelInfo[localDataToSend.service].chatmessage.chatpath;
         _.set(data, chatPath, newMessage);
-        setMessages(prevMessages => [...prevMessages, newChat]);
+        setMessages((prevMessages) => [...prevMessages, newChat]);
         responseData = await dryRun({
           localDataToSend: {
             ...localDataToSend,
@@ -99,45 +119,46 @@ function Chat({ params }) {
               ...defaultsMap,
               user: data.content,
             },
-            variables // Include variables in the request data
+            variables, // Include variables in the request data
           },
-          bridge_id: params?.id
+          bridge_id: params?.id,
         });
-      }
-      else if (dataToSend.configuration.type === "completion") {
+      } else if (dataToSend.configuration.type === "completion") {
         responseData = await dryRun({
           localDataToSend: {
             ...localDataToSend,
             configuration: {
-              ...localDataToSend.configuration
+              ...localDataToSend.configuration,
             },
-            prompt: bridge?.inputConfig?.prompt?.prompt
+            prompt: bridge?.inputConfig?.prompt?.prompt,
           },
-          bridge_id: params?.id
+          bridge_id: params?.id,
         });
-      }
-      else if (dataToSend.configuration.type === "embedding") {
+      } else if (dataToSend.configuration.type === "embedding") {
         responseData = await dryRun({
           localDataToSend: {
             ...localDataToSend,
             configuration: {
-              ...localDataToSend.configuration
+              ...localDataToSend.configuration,
             },
-            input: bridge?.inputConfig?.input?.input
+            input: bridge?.inputConfig?.input?.input,
           },
-          bridge_id: params?.id
+          bridge_id: params?.id,
         });
       }
       if (!responseData.success) {
         if (dataToSend.configuration.type === "chat") {
-          setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
+          setConversation((prevConversation) =>
+            [...prevConversation, _.cloneDeep(data)].slice(-6)
+          );
         }
         toast.error(responseData.error);
         setLoading(false);
         return;
       }
       response = responseData.data;
-      const { outputConfig } = modelInfo[localDataToSend.service][localDataToSend.configuration.model];
+      const { outputConfig } =
+        modelInfo[localDataToSend.service][localDataToSend.configuration.model];
       const outputPath = outputConfig.message;
       const assistPath = outputConfig.assistant;
       const content = _.get(response.response, outputPath, "");
@@ -145,7 +166,9 @@ function Chat({ params }) {
 
       // Update localDataToSend with assistant conversation
       if (dataToSend.configuration.type === "chat") {
-        setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
+        setConversation((prevConversation) =>
+          [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6)
+        );
       }
       const newChatAssist = {
         id: messages.length + 2,
@@ -154,11 +177,13 @@ function Chat({ params }) {
           hour: "2-digit",
           minute: "2-digit",
         }),
-        content: Array.isArray(content) ? content.join(", ") : content.toString(),
+        content: Array.isArray(content)
+          ? content.join(", ")
+          : content.toString(),
       };
 
       // Add assistant chat to messages
-      setMessages(prevMessages => [...prevMessages, newChatAssist]);
+      setMessages((prevMessages) => [...prevMessages, newChatAssist]);
 
       // Clear new message input
       setNewMessage("");
@@ -167,11 +192,20 @@ function Chat({ params }) {
     } finally {
       setLoading(false);
     }
-  }, [newMessage, messages, localDataToSend, updateLocalDataToSend, keyValuePairs, defaultsMap, conversation, dataToSend.configuration.type]);
+  }, [
+    newMessage,
+    messages,
+    localDataToSend,
+    updateLocalDataToSend,
+    keyValuePairs,
+    defaultsMap,
+    conversation,
+    dataToSend.configuration.type,
+  ]);
 
   // Handle key press event
   const handleKeyPress = useCallback(
-    event => {
+    (event) => {
       if (event.key === "Enter") {
         handleSendMessage();
       }
@@ -189,15 +223,19 @@ function Chat({ params }) {
 
   const handleAddKeyValuePair = () => {
     setKeyValuePairs([...keyValuePairs, { key: "", value: "" }]);
-    setIsAccordionVisible(true);
   };
 
-  const handleRemoveKeyValuePair = index => {
+  const handleRemoveKeyValuePair = (index) => {
+    const { key } = keyValuePairs[index]; // Get the key of the pair being removed
+
+    // Filter out the pair at the specified index
     const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
-    setKeyValuePairs(updatedPairs);
-    if (updatedPairs.length === 0) {
-      setIsAccordionVisible(false);
-    }
+    setKeyValuePairs(updatedPairs); // Update local state
+
+    // Dispatch action to remove the pair from Redux store
+    dispatch(removeKeyValuePair({ bridge_id: params?.id, key }));
+
+    // Optionally, you might want to update Redux state here, if not already done in the reducer
   };
 
   const handleKeyValueChange = (index, field, value) => {
@@ -205,6 +243,17 @@ function Chat({ params }) {
     updatedPairs[index][field] = value;
     setKeyValuePairs(updatedPairs);
   };
+  console.log(bridge?.variable);
+  console.log(keyValuePairs);
+  const handleBlur = useCallback(() => {
+    keyValuePairs.forEach((pair) => {
+      if (pair.key && pair.value) {
+        dispatch(
+          setKeyValuePair({ bridge_id: params?.id, keyValuePair: pair })
+        );
+      }
+    });
+  }, [keyValuePairs, dispatch]);
 
   return (
     <>
@@ -218,17 +267,22 @@ function Chat({ params }) {
           className="flex flex-col w-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch z-10"
         >
           {messages.map((message, index) => (
-            < div
+            <div
               key={message.id}
               ref={index === messages.length - 1 ? messagesEndRef : null}
-              className={`chat ${message.sender === "user" ? "chat-end" : "chat-start"}`}
+              className={`chat ${
+                message.sender === "user" ? "chat-end" : "chat-start"
+              }`}
             >
               <div className="chat-image avatar"></div>
               <div className="chat-header">
                 {message.sender}
                 <time className="text-xs opacity-50 pl-2">{message.time}</time>
               </div>
-              <div className="chat-bubble break-keep"> <ReactMarkdown>{message.content}</ReactMarkdown></div>
+              <div className="chat-bubble break-keep">
+                {" "}
+                <ReactMarkdown>{message.content}</ReactMarkdown>
+              </div>
             </div>
           ))}
         </div>
@@ -236,16 +290,18 @@ function Chat({ params }) {
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-10">
           <div className="relative flex flex-col gap-4 w-full">
             <div className="input-group flex gap-2 w-full">
-              {localDataToSend && (dataToSend?.configuration?.type !== "completion") && (dataToSend?.configuration?.type !== "embedding") && (
-                <input
-                  type="text"
-                  placeholder="Type here"
-                  className="input input-bordered w-full"
-                  value={newMessage}
-                  onChange={e => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                />
-              )}
+              {localDataToSend &&
+                dataToSend?.configuration?.type !== "completion" &&
+                dataToSend?.configuration?.type !== "embedding" && (
+                  <input
+                    type="text"
+                    placeholder="Type here"
+                    className="input input-bordered w-full"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                  />
+                )}
               <button
                 className="btn"
                 onClick={handleSendMessage}
@@ -280,8 +336,11 @@ function Chat({ params }) {
                   </div>
                   <div className="collapse-content">
                     <div className="flex flex-col gap-4 max-h-56 overflow-y-auto">
-                      {keyValuePairs.map((pair, index) => (
-                        <div key={index} className="flex flex-row gap-4 items-center">
+                      {keyValuePairs?.map((pair, index) => (
+                        <div
+                          key={index}
+                          className="flex flex-row gap-4 items-center"
+                        >
                           <div className="form-control w-full sm:w-1/2">
                             <label className="label">
                               <span className="label-text">Key</span>
@@ -291,7 +350,14 @@ function Chat({ params }) {
                               className="input input-bordered input-sm w-full"
                               placeholder="Enter key"
                               value={pair.key}
-                              onChange={e => handleKeyValueChange(index, "key", e.target.value)}
+                              onChange={(e) =>
+                                handleKeyValueChange(
+                                  index,
+                                  "key",
+                                  e.target.value
+                                )
+                              }
+                              onBlur={handleBlur}
                             />
                           </div>
                           <div className="form-control w-full sm:w-1/2">
@@ -303,7 +369,14 @@ function Chat({ params }) {
                               className="input input-bordered input-sm w-full"
                               placeholder="Enter value"
                               value={pair.value}
-                              onChange={e => handleKeyValueChange(index, "value", e.target.value)}
+                              onChange={(e) =>
+                                handleKeyValueChange(
+                                  index,
+                                  "value",
+                                  e.target.value
+                                )
+                              }
+                              onBlur={handleBlur}
                             />
                           </div>
                           <button
@@ -330,10 +403,9 @@ function Chat({ params }) {
             <div className="text-red-500 mt-2">{errorMessage}</div>
           )}
         </div>
-      </div >
+      </div>
     </>
   );
 }
 
 export default Chat;
-
