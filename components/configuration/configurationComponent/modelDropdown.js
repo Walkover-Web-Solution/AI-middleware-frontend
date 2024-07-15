@@ -12,7 +12,6 @@ const ModelDropdown = ({ params }) => {
 
     const dispatch = useDispatch();
 
-
     const updateBridge = (currentDataToSend) => {
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
     };
@@ -48,6 +47,7 @@ const ModelDropdown = ({ params }) => {
 
         updateBridge(updatedDataToSend);
     };
+
     return (
         <label className="form-control max-w-xs ">
             <div className="label">
@@ -59,11 +59,11 @@ const ModelDropdown = ({ params }) => {
                 className="select select-sm max-w-xs select-bordered"
             >
                 <option disabled>Select a Model</option>
-                {services && Object.entries(services?.[service] || {}).map(([group, options], Index) => (
+                {services && Object.entries(services?.[service] || {}).map(([group, options], groupIndex) => (
                     group !== 'models' && (
-                        <optgroup label={group} key={`${group}_${options}_${Index}_${bridge?.type}`}>
-                            {Array.from(options).map((option) => (
-                                <option key={`${group}_${options}_${Index}`} value={`${group + '|' + option}`}>
+                        <optgroup label={group} key={`group_${groupIndex}`}>
+                            {Array.from(options).map((option, optionIndex) => (
+                                <option key={`option_${groupIndex}_${optionIndex}`} value={`${group}|${option}`}>
                                     {option}
                                 </option>
                             ))}
@@ -76,8 +76,3 @@ const ModelDropdown = ({ params }) => {
 };
 
 export default ModelDropdown;
-
-
-
-
-

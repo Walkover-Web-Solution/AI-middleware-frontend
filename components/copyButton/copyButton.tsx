@@ -18,14 +18,14 @@ const CopyButton = ({data}) => {
   };
 
   return (
-    <div>
+    <div className='absolute right-5 top-5'>
       <Copy
-        className="absolute right-5 top-5 cursor-pointer text-white"
+        className=" cursor-pointer text-white"
         size={'20px'}
         onClick={copyToClipboardSendData}
       />
       {copied && (
-        <span className="absolute right-5 top-10 text-sm text-green-500">
+        <span className=" text-sm text-green-500">
           Copied!
         </span>
       )}
