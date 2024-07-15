@@ -35,7 +35,6 @@ export const bridgeReducer = createSlice({
     removeKeyValuePair: (state, action) => {
       const { bridge_id, key } = action.payload;
 
-      // Remove the key-value pair from the variable array
       state.allBridgesMap[bridge_id].variable = state.allBridgesMap[
         bridge_id
       ].variable.filter((pair) => Object.keys(pair)[0] !== key);

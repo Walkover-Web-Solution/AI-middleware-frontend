@@ -229,8 +229,7 @@ function Chat({ params }) {
     const { key } = keyValuePairs[index];
 
     const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
-    setKeyValuePairs(updatedPairs); // Update local state
-
+    setKeyValuePairs(updatedPairs);
     dispatch(removeKeyValuePair({ bridge_id: params?.id, key }));
   };
 
@@ -239,8 +238,8 @@ function Chat({ params }) {
     updatedPairs[index][field] = value;
     setKeyValuePairs(updatedPairs);
   };
-  console.log(bridge?.variable);
-  console.log(keyValuePairs);
+  // console.log(bridge?.variable);
+  // console.log(keyValuePairs);
   const handleBlur = useCallback(() => {
     keyValuePairs.forEach((pair) => {
       if (pair.key && pair.value) {
