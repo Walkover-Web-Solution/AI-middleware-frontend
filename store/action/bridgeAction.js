@@ -62,7 +62,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
   try {
     dispatch(isPending());
     const data = await updateBridge({bridgeId,dataToSend});
-    dispatch(updateBridgeReducer({ bridgeId, bridges: data.data.bridges, bridgeType: dataToSend.bridgeType }));
+    dispatch(updateBridgeReducer({ bridges: data.data.bridges, bridgeType: dataToSend.bridgeType }));
   } catch (error) {
     console.error(error);
     dispatch(isError());

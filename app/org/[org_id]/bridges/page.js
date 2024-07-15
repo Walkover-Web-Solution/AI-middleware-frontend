@@ -17,9 +17,9 @@ function Home({ params }) {
   useEffect(()=>{
     dispatch(getAllBridgesAction((data) => {
       if(data === 0 ){
-        document.getElementById('my_modal_1').showModal()
+        document.getElementById('my_modal_1') && document.getElementById('my_modal_1')?.showModal()
       }
-      else  document.getElementById('my_modal_1').closeModel()
+      // document.getElementById('my_modal_1') && document.getElementById('my_modal_1')?.closeModel()
     }))
   },[])
 

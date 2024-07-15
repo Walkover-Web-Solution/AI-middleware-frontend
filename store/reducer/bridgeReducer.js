@@ -39,14 +39,14 @@ export const bridgeReducer = createSlice({
       state.org[action.payload.orgId].push(action.payload.data.data.bridge);
     },
     updateBridgeReducer: (state, action) => {
-      const { bridgeId, bridges, bridgeType } = action.payload;
+      const { bridges, bridgeType } = action.payload;
       const responseFormat = handleResponseFormat(bridges);
       const { _id, configuration, service, type } = bridges;
       const modelDefault = configuration.model.default;
       const obj2 = modelInfo[service][modelDefault];
       const response = updatedData(bridges, obj2, type);
-      state.allBridgesMap[bridgeId] = {
-        ...state.allBridgesMap[bridgeId],
+      state.allBridgesMap[_id] = {
+        ...state.allBridgesMap[_id],
         ...response,
         responseFormat,
       };
