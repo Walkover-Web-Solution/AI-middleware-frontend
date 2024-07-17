@@ -88,11 +88,11 @@ const ResponseFormatSelector = ({ params }) => {
 
     const responseOptions = [
         { value: 'default', label: 'Default' },
-        { value: 'RTLayer', label: 'RTLayer' },
+        // { value: 'RTLayer', label: 'RTLayer' },
         { value: 'custom', label: 'Custom' },
     ];
 
-    return (bridge?.bridgeType === "chatbot" &&
+    return (bridge?.bridgeType === "api" &&
         <div>
             <p className='text-xl font-medium'>Select Response Format</p>
             {responseOptions.map(({ value, label }) => (

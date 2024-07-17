@@ -92,14 +92,14 @@ function Page({ params }) {
       const firstThreadId = historyData[0].thread_id;
       setSelectedThread(firstThreadId);
       dispatch(getThread(firstThreadId, params.id));
-      
+
       let url = `${pathName}?thread_id=${firstThreadId}`;
       if (startDate && endDate) {
         url += `&start=${startDate}&end=${endDate}`;
       }
       router.push(url, undefined, { shallow: true });
     }
-  }, [search, historyData, params.id, dispatch, router, pathName]);
+  }, [search, historyData, params.id, pathName]);
 
   const threadHandler = useCallback(
     async (thread_id, item) => {

@@ -31,13 +31,15 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
     dispatch(createBridgeReducer({ data, orgId: dataToSend.orgid }));
   } catch (error) {
     console.error(error);
+    throw error
   }
 };
 
-export const getAllBridgesAction = (org_id) => async (dispatch, getState) => {
+export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
   try {
     dispatch(isPending())
-    const response = await getAllBridges(org_id);
+    const response = await getAllBridges();
+    onSuccess(response?.data?.bridges?.length)
     dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridges, orgId: response?.data?.org_id }));
   } catch (error) {
     dispatch(isError())

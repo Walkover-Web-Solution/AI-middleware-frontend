@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
 import { createOrgToken } from "@/config";
 import { Copy } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCustomSelector } from "@/customSelector/customSelector";
+import CopyButton from "../copyButton/copyButton";
 
 function InputWithCopyButton({ label, placeholder, value, disabled }) {
     const copyToClipboard = () => { navigator.clipboard.writeText(value) };
@@ -20,29 +21,93 @@ function InputWithCopyButton({ label, placeholder, value, disabled }) {
 }
 
 
-export default function PrivateFormSection({ params }) {
-    const [showInput, setShowInput] = useState(false); // State to control the visibility
-    const router = useRouter();
+export default function PrivateFormSection({ params, ChooseChatbot }) {
+    const [showInput, setShowInput] = useState(false);
     const [accessKey, setAccessKey] = useState("");
+    const [chatbotId, setChatBotId] = useState("");
+
     const handleGetAccessKey = async () => {
-        const response = await createOrgToken(params?.org_id);
-        setAccessKey(response?.data?.orgAcessToken);
-        setShowInput(true)
-    }
+        try {
+            const response = await createOrgToken(params?.org_id);
+            setAccessKey(response?.data?.orgAcessToken);
+            setShowInput(true);
+        } catch (error) {
+            console.error("Error fetching access key:", error);
+        }
+    };
     return (
-        <div className="flex items-start justify-start flex-col gap-4 bg-white rounded-lg shadow p-4">
+        <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
             <div>
-                <h3 className="text-lg font-semibold">Step One</h3>
-                <caption className="text-xs text-gray-600">AccessType</caption>
+                <h3 className="text-lg font-semibold">Step 1</h3>
+                <p className="text-sm text-gray-600">Generate a JWT token</p>
             </div>
-            <div className="flex flex-col gap-2 ">
-                {showInput ? <InputWithCopyButton label="access key" placeholder="access key" value={accessKey} /> : <button className="btn btn-primary w-fit btn-sm" onClick={handleGetAccessKey}>Get Access Key</button>}
-                <InputWithCopyButton label="org_id" placeholder="org_id" value={params?.org_id} disabled />
-                {/* <InputWithCopyButton label="project_id" placeholder="project_id" /> */}
-                <InputWithCopyButton label="chatbot_id" placeholder="chatbot_id" value={params?.chatbot_id} disabled />
+            {ChooseChatbot && <div className="join absolute right-5 ">
+                <ChatbotDropdown params={params} setChatBotId={(chatbotData) => {
+                    setChatBotId(chatbotData?._id)
+                }} />
+            </div>}
+            <div className="mockup-code">
+                <CopyButton data={`{
+    org_id: "${params?.org_id}",
+    chatbot_id: "${params.chatbot_id || chatbotId}",
+    user_id:  // Add your User Id here,
+    variables: {
+        // Add your variables here
+        }
+    }`} />
+                <pre data-prefix=">" className="text-sm p-2 rounded">
+                    {`{
+    org_id: "${params?.org_id}",
+    chatbot_id: "${params.chatbot_id || chatbotId}",
+    user_id:  // Add your User Id here,
+    variables: {
+        // Add your variables here
+        }
+    }`}
+                </pre>
             </div>
-            <p className="text-sm">Generate a JWT token using org_id, chatbot_id, and user_id, variables, then sign it with the access key.</p>
-            <a className="link link-hover text-sm" target="_blank" href="https://viasocket.com/faq/create-jwt-token">Learn, How to create JWT token?</a>
-        </div >
+            <div className="flex flex-col gap-2">
+                {showInput ? (
+                    <InputWithCopyButton label="Access Key" placeholder="Access Key" value={accessKey} />
+                ) : (
+                    <button className="btn btn-primary w-fit btn-sm" onClick={handleGetAccessKey}>
+                        Your AccessKey
+                    </button>
+                )}
+            </div>
+            <p className="text-sm">
+                Generate a JWT token using org_id, chatbot_id, and user_id variables, then sign it with the access key.
+            </p>
+            <a className="link link-hover text-sm" target="_blank" href="/faq/create-jwt-for-chatbot">
+                Learn, How to create JWT token?
+            </a>
+        </div>
     );
+}
+
+function ChatbotDropdown({ params, setChatBotId }) {
+    const [selectedChatbot, setSelectedChatbot] = useState(null);
+
+    const { chatbots } = useCustomSelector((state) => ({
+        chatbots: state?.ChatBot?.org?.[params?.org_id] || [],
+    }));
+
+    useEffect(() => {
+        if (chatbots.length > 0 && !selectedChatbot) {
+            handleSelectChatbot(chatbots[0]);
+        }
+    }, [chatbots]);
+
+    const handleSelectChatbot = (chatbot) => {
+        setSelectedChatbot(chatbot);
+        setChatBotId(chatbot);
+    };
+    return (<div className="dropdown dropdown-end">
+        <div tabIndex={0} role="button" className="btn m-1">{selectedChatbot ? selectedChatbot.title : 'Select a chatbot'}</div>
+        <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+            {chatbots.map((chatbot) => (
+                <li onClick={() => handleSelectChatbot(chatbot)}><a>{chatbot.title}</a></li>
+            ))}
+        </ul>
+    </div>)
 }

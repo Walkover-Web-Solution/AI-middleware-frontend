@@ -1,13 +1,13 @@
 "use client"; // Correct import statement
 
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import ConfigurationPage from "@/components/configuration/ConfigurationPage";
 import Chat from "@/components/configuration/chat";
 import Chatbot from "@/components/configuration/chatbot";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
 const Page = ({ params }) => {

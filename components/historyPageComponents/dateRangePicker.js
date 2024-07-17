@@ -14,8 +14,8 @@ import { useSearchParams } from 'next/navigation';
 
 const DateRangePicker = ({ params }) => {
   const dispatch = useDispatch();
-  const [startingDate, setStartingDate] = useState(getDefaultDate());
-  const [endingDate, setEndingDate] = useState(getDefaultDate());
+  const [startingDate, setStartingDate] = useState(null);
+  const [endingDate, setEndingDate] = useState(null);
 
   const searchParams = useSearchParams();
 
