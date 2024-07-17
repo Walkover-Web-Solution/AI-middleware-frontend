@@ -289,9 +289,9 @@ function Chat({ params }) {
                       {keyValuePairs.map((pair, index) => (
                         <div key={index} className="flex flex-row gap-4 items-center">
                           <div className="form-control w-full sm:w-1/2">
-                            <label className="label">
+                            {index===0 && <label className="label">
                               <span className="label-text">Key</span>
-                            </label>
+                            </label>}
                             <input
                               type="text"
                               className="input input-bordered input-sm w-full"
@@ -303,9 +303,9 @@ function Chat({ params }) {
                             />
                           </div>
                           <div className="form-control w-full sm:w-1/2">
-                            <label className="label">
+                            {index ===0 && <label className="label">
                               <span className="label-text">Value</span>
-                            </label>
+                            </label>}
                             <input
                               type="text"
                               className="input input-bordered input-sm w-full"
