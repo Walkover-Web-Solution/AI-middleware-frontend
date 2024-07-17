@@ -11,7 +11,7 @@ const Chatbot = ({ params }) => {
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            if (window.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot')) {
+            if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot')) {
                 clearInterval(intervalId);
                 window.SendDataToChatbot({
                     bridgeName: bridge?.slugName,

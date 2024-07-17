@@ -71,7 +71,7 @@ function Page({ params }) {
 
   const deleteModel = (authname, authid, index) => {
     setSingleAuthData({ name: authname, id: authid, index })
-    document.getElementById('my_modal_1').showModal()
+    document.getElementById('api-key-modal').showModal()
   }
 
   const DeleteAuth = () => {
@@ -79,7 +79,7 @@ function Page({ params }) {
       toast.success("Auth Key Deleted Successfully")
       // Optionally, you can show a success message to the user
     })
-    document.getElementById('my_modal_1').close()
+    document.getElementById('api-key-modal').close()
   }
   return (
     <div className="drawer lg:drawer-open">
@@ -187,7 +187,7 @@ function Page({ params }) {
               </div>
             </dialog>
 
-            <dialog id="my_modal_1" className="modal">
+            <dialog id="api-key-modal" className="modal">
               <div className="modal-box">
                 <h3 className="font-bold text-lg">Do you want to delete {singleAuthData.name} ?</h3>
                 {/* <p className="py-4">Do you want to delete {singleAuthData.name } ?</p> */}

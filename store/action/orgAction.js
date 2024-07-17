@@ -4,7 +4,7 @@ import { organizationCreated, organizationsFetched, setCurrentOrgId } from "../r
 export const createOrgAction = (dataToSend, onSuccess) => async (dispatch) => {
   try {
     const data = await createOrg(dataToSend);
-    onSuccess(data);
+    onSuccess(data.data.data);
     dispatch(organizationCreated(data));
   } catch (error) {
     console.error(error);

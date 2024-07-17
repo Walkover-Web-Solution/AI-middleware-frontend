@@ -46,7 +46,7 @@ const SecondStep = () => {
 
     return (
         <div className="flex w-full flex-col gap-4 bg-white rounded-lg shadow p-4">
-            <Section title="Step Two" caption="Add below code in your product." />
+            <Section title="Step 2" caption="Add below code in your product." />
             <div className="mockup-code">
                 <CopyButton data={DataObject.script} />
                 <pre data-prefix=">" className="text-error" ><code>&lt;script </code></pre>
