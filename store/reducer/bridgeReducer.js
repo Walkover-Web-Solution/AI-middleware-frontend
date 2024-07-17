@@ -28,7 +28,7 @@ export const bridgeReducer = createSlice({
       const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;
       const obj2 = modelInfo[service][modelDefault];
       const response = updatedData(bridges, obj2, type);
-      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id]|| {}), ...response, integrationData, responseFormat };
+      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...response, integrationData, responseFormat };
       state.loading = false;
     },
     fetchAllBridgeReducer: (state, action) => {
@@ -67,6 +67,10 @@ export const bridgeReducer = createSlice({
     integrationReducer: (state, action) => {
       const { dataToSend, id } = action.payload;
       state.allBridgesMap[id].integrationData[dataToSend.id] = dataToSend
+    },
+    updateVariables: (state, action) => {
+      const { data, bridgeId } = action.payload;
+      state.allBridgesMap[bridgeId].variables = data;
     }
   },
 });
@@ -80,6 +84,7 @@ export const {
   updateBridgeReducer,
   deleteBridgeReducer,
   integrationReducer,
+  updateVariables
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
