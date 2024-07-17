@@ -1,14 +1,17 @@
 import { dryRun } from "@/config";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
+import { updateVariables } from "@/store/reducer/bridgeReducer";
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
 function Chat({ params }) {
-  const { bridge } = useCustomSelector((state) => ({
+  const { bridge, variablesKeyValue } = useCustomSelector((state) => ({
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+    variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || []
   }));
   const messagesEndRef = useRef(null);
   const dataToSend = {
@@ -21,6 +24,7 @@ function Chat({ params }) {
     bridgeType: bridge?.bridgeType,
     slugName: bridge?.slugName
   };
+  const dispatch = useDispatch();
 
   // State variables
   const [messages, setMessages] = useState([]);
@@ -30,7 +34,7 @@ function Chat({ params }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [conversation, setConversation] = useState([]);
   const [isAccordionVisible, setIsAccordionVisible] = useState(false); // State for visibility of key-value fields
-  const [keyValuePairs, setKeyValuePairs] = useState([]); // State for key-value pairs
+  const [keyValuePairs, setKeyValuePairs] = useState(variablesKeyValue || []); // State for key-value pairs
 
   const defaultsMap = useMemo(() => {
     return bridge ? Object.entries(bridge?.configuration).reduce((acc, [key, value]) => {
@@ -65,7 +69,7 @@ function Chat({ params }) {
     setLoading(true);
     try {
       // Create the variables object
-      const variables = keyValuePairs.reduce((acc, pair) => {
+      const variables = variablesKeyValue.reduce((acc, pair) => {
         if (pair.key && pair.value) {
           acc[pair.key] = pair.value;
         }
@@ -194,6 +198,7 @@ function Chat({ params }) {
 
   const handleRemoveKeyValuePair = index => {
     const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
+    dispatch(updateVariables({data: updatedPairs, bridgeId: params.id}))
     setKeyValuePairs(updatedPairs);
     if (updatedPairs.length === 0) {
       setIsAccordionVisible(false);
@@ -201,8 +206,9 @@ function Chat({ params }) {
   };
 
   const handleKeyValueChange = (index, field, value) => {
-    const updatedPairs = [...keyValuePairs];
-    updatedPairs[index][field] = value;
+    let updatedPairs = [...keyValuePairs];
+    updatedPairs[index] = { ...updatedPairs[index], [field]: value };
+    dispatch(updateVariables({data: updatedPairs, bridgeId: params.id}))
     setKeyValuePairs(updatedPairs);
   };
 
@@ -290,8 +296,10 @@ function Chat({ params }) {
                               type="text"
                               className="input input-bordered input-sm w-full"
                               placeholder="Enter key"
-                              value={pair.key}
-                              onChange={e => handleKeyValueChange(index, "key", e.target.value)}
+                              key={pair.key}
+                              defaultValue={pair.key}
+                              // value={pair.key}
+                              onBlur={e => handleKeyValueChange(index, "key", e.target.value)}
                             />
                           </div>
                           <div className="form-control w-full sm:w-1/2">
@@ -302,8 +310,10 @@ function Chat({ params }) {
                               type="text"
                               className="input input-bordered input-sm w-full"
                               placeholder="Enter value"
-                              value={pair.value}
-                              onChange={e => handleKeyValueChange(index, "value", e.target.value)}
+                              // value={pair.value}
+                              key={pair.value}
+                              defaultValue={pair.value}
+                              onBlur={e => handleKeyValueChange(index, "value", e.target.value)}
                             />
                           </div>
                           <button
