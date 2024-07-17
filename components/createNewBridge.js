@@ -21,6 +21,7 @@ function CreateNewBridge({ orgid }) {
 
     const handleService = (e) => {
         setSelectedService(e.target.value);
+        setSelectedModel(e.target.value === "google" ? "gemini-pro": "gpt-4o" );
     };
 
     const handleModel = (e) => {
