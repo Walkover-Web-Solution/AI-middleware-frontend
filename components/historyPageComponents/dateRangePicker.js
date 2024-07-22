@@ -28,24 +28,25 @@ const DateRangePicker = ({ params }) => {
 
   const handleDataChange = async () => {
     const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('start', startingDate);
-    newSearchParams.set('end', endingDate);
+    // newSearchParams.set('start', startingDate);
+    // newSearchParams.set('end', endingDate);
     newSearchParams.delete('thread_id'); // Clear the thread_id data
     const queryString = newSearchParams.toString();
     await dispatch(getHistoryAction(params.id, startingDate, endingDate));
     window.history.replaceState(null, '', `?${queryString}`);
   };
-  const handleClear = () => {
-    const start = searchParams.get('start');
-    const end = searchParams.get('end');
-    if (!start && !end) return; // Do nothing if 'start' and 'end' are not in the URL
+  const handleClear = async () => {
+    // const start = searchParams.get('start');
+    // const end = searchParams.get('end');
+    // if (!start && !end) return; // Do nothing if 'start' and 'end' are not in the URL
   
     setStartingDate('');
     setEndingDate('');
     const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.delete('start');
-    newSearchParams.delete('end');
-    newSearchParams.delete('thread_id');
+    // newSearchParams.delete('start');
+    // newSearchParams.delete('end');
+    // newSearchParams.delete('thread_id');
+    await dispatch(getHistoryAction(params.id, null, null));
     const queryString = newSearchParams.toString();
     window.history.replaceState(null, '', `?${queryString}`);
   };

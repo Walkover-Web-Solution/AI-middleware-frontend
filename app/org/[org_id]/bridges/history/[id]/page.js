@@ -79,7 +79,7 @@ function Page({ params }) {
       setLoading(false);
     };
     fetchInitialData();
-  }, [params.id, search, dispatch]);
+  }, [params.id]);
 
   useEffect(() => {
     const thread_id = search.get("thread_id");
@@ -118,15 +118,15 @@ function Page({ params }) {
         }
       } else {
         setSelectedThread(thread_id);
-        if (start && end) {
-          router.push(`${pathName}?thread_id=${thread_id}&start=${start}&end=${end}`, undefined, {
-            shallow: true,
-          });
-        } else {
+        // if (start && end) {
+        //   router.push(`${pathName}?thread_id=${thread_id}&start=${start}&end=${end}`, undefined, {
+        //     shallow: true,
+        //   });
+        // } else {
           router.push(`${pathName}?thread_id=${thread_id}`, undefined, {
             shallow: true,
           });
-        }
+        // }
       }
     },
     [params.id, pathName]
