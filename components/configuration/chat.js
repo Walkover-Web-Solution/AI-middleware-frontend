@@ -1,22 +1,18 @@
 import { dryRun } from "@/config";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
-
-import {
-  removeKeyValuePair,
-  setKeyValuePair,
-} from "@/store/reducer/bridgeReducer";
-
+import { updateVariables } from "@/store/reducer/bridgeReducer";
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
 function Chat({ params }) {
-  const dispatch = useDispatch();
-  const { bridge } = useCustomSelector((state) => ({
+  const { bridge, variablesKeyValue } = useCustomSelector((state) => ({
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+    variablesKeyValue:
+      state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
   }));
   const messagesEndRef = useRef(null);
   const dataToSend = {
@@ -29,6 +25,7 @@ function Chat({ params }) {
     bridgeType: bridge?.bridgeType,
     slugName: bridge?.slugName,
   };
+  const dispatch = useDispatch();
 
   // State variables
   const [messages, setMessages] = useState([]);
@@ -38,13 +35,11 @@ function Chat({ params }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [conversation, setConversation] = useState([]);
   const [isAccordionVisible, setIsAccordionVisible] = useState(false); // State for visibility of key-value fields
-  //const [keyValuePairs, setKeyValuePairs] = useState([]); // State for key-value pairs
-  const [keyValuePairs, setKeyValuePairs] = useState(
-    bridge?.variable?.map((pair) => ({
-      key: Object.keys(pair)[0],
-      value: Object.values(pair)[0],
-    })) || []
-  );
+  const [keyValuePairs, setKeyValuePairs] = useState(variablesKeyValue || []); // State for key-value pairs
+
+  const [text, setText] = useState("");
+  const textareaRef = useRef(null);
+
   const defaultsMap = useMemo(() => {
     return bridge
       ? Object.entries(bridge?.configuration).reduce((acc, [key, value]) => {
@@ -84,7 +79,7 @@ function Chat({ params }) {
     setLoading(true);
     try {
       // Create the variables object
-      const variables = keyValuePairs.reduce((acc, pair) => {
+      const variables = variablesKeyValue.reduce((acc, pair) => {
         if (pair.key && pair.value) {
           acc[pair.key] = pair.value;
         }
@@ -223,32 +218,50 @@ function Chat({ params }) {
 
   const handleAddKeyValuePair = () => {
     setKeyValuePairs([...keyValuePairs, { key: "", value: "" }]);
+    setIsAccordionVisible(true);
   };
 
   const handleRemoveKeyValuePair = (index) => {
-    const { key } = keyValuePairs[index];
-
     const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
+    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }));
     setKeyValuePairs(updatedPairs);
-    dispatch(removeKeyValuePair({ bridge_id: params?.id, key }));
+    if (updatedPairs.length === 0) {
+      setIsAccordionVisible(false);
+    }
   };
 
   const handleKeyValueChange = (index, field, value) => {
-    const updatedPairs = [...keyValuePairs];
-    updatedPairs[index][field] = value;
+    let updatedPairs = [...keyValuePairs];
+    updatedPairs[index] = { ...updatedPairs[index], [field]: value };
+    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }));
     setKeyValuePairs(updatedPairs);
   };
-  // console.log(bridge?.variable);
-  // console.log(keyValuePairs);
-  const handleBlur = useCallback(() => {
-    keyValuePairs.forEach((pair) => {
-      if (pair.key && pair.value) {
-        dispatch(
-          setKeyValuePair({ bridge_id: params?.id, keyValuePair: pair })
-        );
-      }
-    });
-  }, [keyValuePairs, dispatch]);
+
+  const formatPairsForTextarea = () => {
+    return variablesKeyValue
+      ?.reduce((acc, pair) => {
+        if (pair?.key && pair?.value) {
+          acc.push(`${pair?.key}:${pair?.value}`);
+        }
+        return acc;
+      }, [])
+      .join("\n");
+  };
+
+  const onblurHandler = (text) => {
+    let pairs = text
+      .trim()
+      .split("\n") // Split the text by lines
+      .map((line) => {
+        const [key, value] = line.split(":").map((part) => part.trim());
+        return key && value ? { key, value } : null;
+      });
+
+    pairs ? [...variablesKeyValue, ...pairs] : [...variablesKeyValue];
+    if (pairs) {
+      dispatch(updateVariables({ data: pairs, bridgeId: params?.id }));
+    }
+  };
 
   return (
     <>
@@ -323,6 +336,18 @@ function Chat({ params }) {
               </button>
             </div>
             {isAccordionVisible && (
+              <div>
+                <textarea
+                  className="border-gray-50 border-2 rounded-md p-[20px] outline-none"
+                  rows="10"
+                  cols="50"
+                  onBlur={(e) => onblurHandler(e.target.value)}
+                  defaultValue={formatPairsForTextarea()}
+                />
+              </div>
+            )}
+
+            {/* (
               <div className="join join-vertical w-full mt-4">
                 <div className="collapse collapse-arrow join-item border border-base-300">
                   <input type="checkbox" className="peer" />
@@ -331,7 +356,7 @@ function Chat({ params }) {
                   </div>
                   <div className="collapse-content">
                     <div className="flex flex-col gap-4 max-h-56 overflow-y-auto">
-                      {keyValuePairs?.map((pair, index) => (
+                      {keyValuePairs.map((pair, index) => (
                         <div
                           key={index}
                           className="flex flex-row gap-4 items-center"
@@ -345,6 +370,7 @@ function Chat({ params }) {
                               className="input input-bordered input-sm w-full"
                               placeholder="Enter key"
                               value={pair.key}
+                              required //intern
                               onChange={(e) =>
                                 handleKeyValueChange(
                                   index,
@@ -352,7 +378,7 @@ function Chat({ params }) {
                                   e.target.value
                                 )
                               }
-                              onBlur={handleBlur}
+                              onBlur={handleBlur} //intern
                             />
                           </div>
                           <div className="form-control w-full sm:w-1/2">
@@ -364,6 +390,7 @@ function Chat({ params }) {
                               className="input input-bordered input-sm w-full"
                               placeholder="Enter value"
                               value={pair.value}
+                              required //intern
                               onChange={(e) =>
                                 handleKeyValueChange(
                                   index,
@@ -371,7 +398,7 @@ function Chat({ params }) {
                                   e.target.value
                                 )
                               }
-                              onBlur={handleBlur}
+                              onBlur={handleBlur} //intern
                             />
                           </div>
                           <button
@@ -382,6 +409,7 @@ function Chat({ params }) {
                           </button>
                         </div>
                       ))}
+
                       <button
                         className="btn self-center mt-4"
                         onClick={handleAddKeyValuePair}
@@ -392,7 +420,7 @@ function Chat({ params }) {
                   </div>
                 </div>
               </div>
-            )}
+            ) */}
           </div>
           {errorMessage && (
             <div className="text-red-500 mt-2">{errorMessage}</div>

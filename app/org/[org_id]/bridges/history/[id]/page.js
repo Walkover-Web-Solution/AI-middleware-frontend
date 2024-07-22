@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { getSingleMessage } from "@/config";
 import { CircleX } from "lucide-react";
+import { toast } from "react-toastify";
 
 export const runtime = "edge";
 
@@ -20,14 +21,15 @@ function Page({ params }) {
   const pathName = usePathname();
   const dispatch = useDispatch();
 
-  const { historyData, thread, embedToken, integrationData
-
-  } = useCustomSelector((state) => ({
-    historyData: state?.historyReducer?.history || [],
-    thread: state?.historyReducer?.thread,
-    embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
-    integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData
-  }));
+  const { historyData, thread, embedToken, integrationData } =
+    useCustomSelector((state) => ({
+      historyData: state?.historyReducer?.history || [],
+      thread: state?.historyReducer?.thread,
+      embedToken:
+        state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
+      integrationData:
+        state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData,
+    }));
 
   useEffect(() => {
     if (embedToken) {
@@ -38,7 +40,9 @@ function Page({ params }) {
       document.body.appendChild(script);
 
       return () => {
-        document.body.removeChild(document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID));
+        document.body.removeChild(
+          document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID)
+        );
       };
     }
   }, [embedToken]);
@@ -100,11 +104,21 @@ function Page({ params }) {
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
-      if (item?.role === "assistant") return ""
-      if (item?.role === "user" || item?.role === "tools_call" && !thread_id) {
+      if (item?.role === "assistant") return "";
+      if (
+        item?.role === "user" ||
+        (item?.role === "tools_call" && !thread_id)
+      ) {
         try {
-          const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
-          setSelectedItem({ variables: item.variables, "System Prompt": systemPromptResponse, ...item });
+          const systemPromptResponse = await getSingleMessage({
+            bridge_id: params.id,
+            message_id: item.createdAt,
+          });
+          setSelectedItem({
+            variables: item.variables,
+            "System Prompt": systemPromptResponse,
+            ...item,
+          });
           setIsSliderOpen(true);
         } catch (error) {
           console.error("Failed to fetch single message:", error);
@@ -150,11 +164,27 @@ function Page({ params }) {
       </div>
     );
   }
+  const copyToClipboard = (content) => {
+    const keyValueArray = Object.entries(content).map(([key, value]) => {
+      return `${key}:${value}`;
+    });
 
+    const data = keyValueArray.join("\n");
+
+    navigator.clipboard
+      .writeText(data)
+      .then(() => {
+        toast.success(`Copied to clipboard`);
+      })
+      .catch((error) => {
+        toast.error(`Copied to clipboard`);
+        console.log(error);
+      });
+  };
 
   return (
     <div className="flex">
-      <div className="drawer drawer-open">
+      <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center justify-center">
           <div className="w-full min-h-screen bg-base-200">
@@ -163,26 +193,50 @@ function Page({ params }) {
                 {thread &&
                   thread.map((item, index) => (
                     <div key={`item.id${index}`}>
-                      {item.role === "tools_call" ?
-                        <div className="w-full flex align-center justify-center" >
-                          {Object.keys(item.function || {}).map((funcName, index) => (
+                      {item.role === "tools_call" ? (
+                        <div className="w-full flex align-center justify-center">
+                          {Object.keys(item.function).map((funcName, index) => (
                             // <div role="alert" className="alert shadow-lg w-2/3 cursor-pointer hover:bg-base-300 transition-colors duration-200" onClick={() => openViasocket(funcName)}>
-                            <div role="alert" className="alert shadow-lg w-1/3 transition-colors duration-200" >
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <div
+                              role="alert"
+                              className="alert shadow-lg w-1/3 transition-colors duration-200"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                className="stroke-info shrink-0 w-6 h-6"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                ></path>
+                              </svg>
+
                               <div>
-                                <h3 className="font-bold">Functions Executed</h3>
+                                <h3 className="font-bold">
+                                  Functions Executed
+                                </h3>
                                 <div key={index}>
                                   {/* <div className="text-xs">Function "{integrationData[funcName].title || funcName}" executed successfully. Inspect details?</div> */}
-                                  <div className="text-xs">Function "{integrationData?.[funcName]?.title || funcName}" executed successfully.</div>
+                                  <div className="text-xs">
+                                    Function "
+                                    {integrationData[funcName].title ||
+                                      funcName}
+                                    " executed successfully.
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           ))}
                         </div>
-                        :
+                      ) : (
                         <div
-                          className={`chat ${item.role === "user" ? "chat-start" : "chat-end"
-                            }`}
+                          className={`chat ${
+                            item.role === "user" ? "chat-start" : "chat-end"
+                          }`}
                         >
                           <div className="chat-header flex gap-2">
                             {item.role.replaceAll("_", " ")}
@@ -191,14 +245,17 @@ function Page({ params }) {
                             </time>
                           </div>
                           <div
-                            className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary" : "bg-base-100 text-black"
-                              } chat-bubble`}
+                            className={`${
+                              item.role === "user"
+                                ? "cursor-pointer chat-bubble-primary"
+                                : "bg-base-100 text-black"
+                            } chat-bubble`}
                             onClick={() => threadHandler(item.thread_id, item)}
                           >
                             <ReactMarkdown>{item.content}</ReactMarkdown>
                           </div>
                         </div>
-                      }
+                      )}
                     </div>
                   ))}
               </div>
@@ -230,8 +287,11 @@ function Page({ params }) {
                     onClick={() => threadHandler(item.thread_id)}
                   >
                     <a
-                      className={`${selectedThread === item.thread_id ? "text-white bg-primary hover:text-white hover:bg-primary" : ""
-                        } block overflow-hidden whitespace-nowrap text-ellipsis`}
+                      className={`${
+                        selectedThread === item.thread_id
+                          ? "text-white bg-primary hover:text-white hover:bg-primary"
+                          : ""
+                      } block overflow-hidden whitespace-nowrap text-ellipsis`}
                     >
                       {item.thread_id}
                     </a>
@@ -244,8 +304,9 @@ function Page({ params }) {
       </div>
       <div
         ref={sidebarRef}
-        className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
-          } overflow-y-auto bg-base-200 transition-all duration-300 z-50`}
+        className={`fixed inset-y-0 right-0 border-l-2 ${
+          isSliderOpen ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
+        } overflow-y-auto bg-base-200 transition-all duration-300 z-50`}
       >
         {selectedItem && (
           <aside className="flex w-full flex-col h-screen overflow-y-auto">
@@ -259,13 +320,48 @@ function Page({ params }) {
                 </button>
               </div>
               <ul className="mt-4">
-                {Object.entries(selectedItem || {}).map(([key, value]) => {
+                {Object.entries(selectedItem).map(([key, value]) => {
                   return (
                     <li key={key} className="mb-2">
-                      <strong className="font-medium text-gray-700 capitalize">{key}:</strong>
+                      <strong className="font-medium text-gray-700 capitalize">
+                        {key}:value
+                      </strong>
                       <span className="ml-2 text-gray-600">
                         {typeof value === "object" ? (
-                          <pre className="bg-gray-200 p-2 rounded text-sm overflow-x-auto">{JSON.stringify(value, null, 2)}</pre>
+                          <pre className="bg-gray-200 p-2 rounded text-sm flex flex-row-reverse items-center justify-between ">
+                            <div
+                              className="tooltip tooltip-primary"
+                              onClick={() => copyToClipboard(value)}
+                              data-tip="copy variables"
+                            >
+                              <a>
+                                <svg
+                                  width="20"
+                                  height="20"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <g clip-path="url(#clip0_7_7)">
+                                    <path
+                                      d="M7 6V3C7 2.73478 7.10536 2.48043 7.29289 2.29289C7.48043 2.10536 7.73478 2 8 2H20C20.2652 2 20.5196 2.10536 20.7071 2.29289C20.8946 2.48043 21 2.73478 21 3V17C21 17.2652 20.8946 17.5196 20.7071 17.7071C20.5196 17.8946 20.2652 18 20 18H17V21C17 21.552 16.55 22 15.993 22H4.007C3.87513 22.0008 3.7444 21.9755 3.62232 21.9256C3.50025 21.8757 3.38923 21.8022 3.29566 21.7093C3.20208 21.6164 3.12779 21.5059 3.07705 21.3841C3.02632 21.2624 3.00013 21.1319 3 21L3.003 7C3.003 6.448 3.453 6 4.01 6H7ZM5.003 8L5 20H15V8H5.003ZM9 6H17V16H19V4H9V6Z"
+                                      fill="#03053D"
+                                    />
+                                  </g>
+                                  <defs>
+                                    <clipPath id="clip0_7_7">
+                                      <rect
+                                        width="24 "
+                                        height="24"
+                                        fill="white"
+                                      />
+                                    </clipPath>
+                                  </defs>
+                                </svg>
+                              </a>
+                            </div>
+                            {JSON.stringify(value, null, 2)}
+                          </pre>
                         ) : (
                           value?.toString()
                         )}

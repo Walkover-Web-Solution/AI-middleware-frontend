@@ -117,6 +117,10 @@ export const bridgeReducer = createSlice({
       const { dataToSend, id } = action.payload;
       state.allBridgesMap[id].integrationData[dataToSend.id] = dataToSend;
     },
+    updateVariables: (state, action) => {
+      const { data, bridgeId } = action.payload;
+      state.allBridgesMap[bridgeId].variables = data;
+    },
   },
 });
 
@@ -131,6 +135,7 @@ export const {
   setKeyValuePair,
   removeKeyValuePair,
   integrationReducer,
+  updateVariables,
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
