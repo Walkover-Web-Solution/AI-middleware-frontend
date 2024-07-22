@@ -4,6 +4,7 @@ import axios from "@/utils/interceptor"
 import { toast } from "react-toastify";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
+const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
 
 export const runtime = 'edge';
@@ -106,10 +107,10 @@ export const getSingleThreadData = async (threadId, bridgeId) => {
 }
 
 
-export const getHistory = async (bridgeId, page = 1, start, end) => {
+export const getHistory = async (bridgeId, page = 1, start, end, keyword = '') => {
   try {
     
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}?pageNo=${page}&limit=40&startTime=${start}&endTime=${end}`);
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}?pageNo=${page}&limit=40&startTime=${start}&endTime=${end}&keyword_search=${keyword}`);
     return getSingleThreadData.data;
   } catch (error) {
     console.error(error);
@@ -122,7 +123,7 @@ export const dryRun = async ({ localDataToSend, bridge_id }) => {
 
   try {
     let dryRun
-    if (localDataToSend.configuration.type === "chat") dryRun = await axios.post(`${URL}/api/v1/model/playground/chat/completion/${bridge_id}`, localDataToSend)
+    if (localDataToSend.configuration.type === "chat") dryRun = await axios.post(`${PYTHON_URL}/api/v1/model/playground/chat/completion/${bridge_id}`, localDataToSend)
     if (localDataToSend.configuration.type === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
     if (localDataToSend.configuration.type === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings/${bridge_id}`, localDataToSend)
 

@@ -27,6 +27,7 @@ function Page({ params }) {
     embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
     integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData
   }));
+  const searchParams = useSearchParams();
 
   const [selectedThread, setSelectedThread] = useState("");
   const [isSliderOpen, setIsSliderOpen] = useState(false);
@@ -101,6 +102,9 @@ function Page({ params }) {
     }
   }, [search, historyData, params.id, pathName]);
 
+  const start = searchParams.get('start');
+  const end = searchParams.get('end');
+
   const threadHandler = useCallback(
     async (thread_id, item) => {
       if (item?.role === "assistant") return ""
@@ -114,12 +118,18 @@ function Page({ params }) {
         }
       } else {
         setSelectedThread(thread_id);
-        router.push(`${pathName}?thread_id=${thread_id}`, undefined, {
-          shallow: true,
-        });
+        if (start && end) {
+          router.push(`${pathName}?thread_id=${thread_id}&start=${start}&end=${end}`, undefined, {
+            shallow: true,
+          });
+        } else {
+          router.push(`${pathName}?thread_id=${thread_id}`, undefined, {
+            shallow: true,
+          });
+        }
       }
     },
-    [params.id, router, pathName]
+    [params.id, pathName]
   );
 
   const fetchMoreData = async () => {

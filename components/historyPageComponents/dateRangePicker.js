@@ -53,7 +53,7 @@ const DateRangePicker = ({ params }) => {
 
 
   return (
-    <div className="p-4 border-b sticky flex flex-col gap-2 top-0 bg-base-200 z-10">
+    <div className="border-b sticky flex flex-col gap-2 top-0 bg-base-200 z-10">
       <div>
         <label htmlFor="from" className="block text-sm font-medium text-base-content ">From</label>
         <input
