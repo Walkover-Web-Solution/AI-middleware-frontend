@@ -12,7 +12,7 @@ import CreateNewBridge from './createNewBridge';
 import { toast } from 'react-toastify';
 import { deleteBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
 
-function Navbar(params) {
+function Navbar() {
   const router = useRouter();
   const dispatch = useDispatch();
   const pathName = usePathname()
