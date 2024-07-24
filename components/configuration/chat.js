@@ -95,15 +95,9 @@ function Chat({ params }) {
         setMessages(prevMessages => [...prevMessages, newChat]);
         responseData = await dryRun({
           localDataToSend: {
-            ...localDataToSend,
-            configuration: {
-              ...localDataToSend.configuration,
-              prompt: bridge?.inputConfig?.system?.default,
-              conversation: conversation,
-              ...defaultsMap,
-              user: data.content,
-            },
-            variables // Include variables in the request data
+            variables, // Include variables in the request data
+            user: data.content,
+            configuration:{conversation: conversation,type: 'chat'}
           },
           bridge_id: params?.id
         });
