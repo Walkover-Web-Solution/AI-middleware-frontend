@@ -434,3 +434,17 @@ export const createOrRemoveAction = async ({ orgId, bridgeId, type, dataToSend }
     return error;
   }
 } 
+
+export const createDuplicateBridge = async (bridge_id) => {
+  try {
+    const response = await axios.post(
+      `${PROXY_URL}/api/proxy/1258584/32akhmo24/bridge/duplicate`,
+      { bridge_id }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};
