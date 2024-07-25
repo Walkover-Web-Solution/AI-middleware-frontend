@@ -1,9 +1,7 @@
-import { createBridge, getAllBridges, getSingleBridge, deleteBridge, integration, createapi, updateBridge, getAllResponseTypesApi, addorRemoveResponseIdInBridge, getChatBotOfBridge } from "@/config";
-import { createBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, updateBridgeReducer, deleteBridgeReducer, integrationReducer, isPending, isError,updateService } from "../reducer/bridgeReducer";
+import { addorRemoveResponseIdInBridge, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge } from "@/config";
+import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
-
-
-
+import { toast } from "react-toastify";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
@@ -61,7 +59,7 @@ export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) =
 export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch) => {
   try {
     dispatch(isPending());
-    const data = await updateBridge({bridgeId,dataToSend});
+    const data = await updateBridge({ bridgeId, dataToSend });
     dispatch(updateBridgeReducer({ bridges: data.data.bridges, bridgeType: dataToSend.bridgeType }));
   } catch (error) {
     console.error(error);
@@ -119,4 +117,13 @@ export const getChatBotOfBridgeAction = (orgId, bridgeId) => async (dispatch) =>
   }
 }
 
-
+export const duplicateBridgeAction = (bridge_id) => async (dispatch) => {
+  try {
+    const response = await createDuplicateBridge(bridge_id);
+    dispatch(duplicateBridgeReducer(response));
+    return response?.result?.['_id'];
+  } catch (error) {
+    toast.error('Failed to duplicate the bridge');
+    console.error("Failed to duplicate the bridge: ", error);
+  }
+}

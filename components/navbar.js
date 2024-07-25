@@ -3,7 +3,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customSelector/customSelector';
-import { deleteBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
+import { deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { Building2, ChevronDown, FileSliders, History, Home, KeyRound, LogOut, Mail, Rss, Settings2 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
@@ -162,28 +162,47 @@ function Navbar() {
     };
   }, []);
 
-  const handleDeleteBridge = async () => {
+  const handleDeleteBridge = async (item) => {
     const bridgeId = path[5];
     const orgId = path[2];
-    // Confirm delete action
-    const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
 
-    // If confirmed
-    if (confirmDelete) {
-      try {
-        // Dispatch delete bridge action and get all bridges
-        dispatch(deleteBridgeAction({ bridgeId, orgId: orgId }));
-        router.push(`/org/${path[2]}/bridges`)
-        toast.success('Bridge deleted successfully');
-        dispatch(getAllBridgesAction());
-      } catch (error) {
-        // Log error
-        console.error('Failed to delete bridge:', error);
-        // Show toast error
-        toast.error('Error deleting bridge');
-      }
+    switch (item.trim().toLowerCase()) {
+      case 'duplicate':
+        try {
+          dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId) => {
+            if (newBridgeId) {
+              router.push(`/org/${path[2]}/bridges/configure/${newBridgeId}`)
+              toast.success('Bridge duplicate successfully');
+            }
+          });
+        } catch (error) {
+          console.error('Failed to duplicate bridge:', error);
+          toast.error('Error duplicating bridge');
+        }
+        break;
+
+      case 'delete':
+        // Confirm delete action
+        const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
+
+        if (confirmDelete) {
+          try {
+            // Dispatch delete bridge action and get all bridges
+            await dispatch(deleteBridgeAction({ bridgeId, orgId }));
+            router.push(`/org/${orgId}/bridges`);
+            toast.success('Bridge deleted successfully');
+            dispatch(getAllBridgesAction());
+          } catch (error) {
+            console.error('Failed to delete bridge:', error);
+            toast.error('Error deleting bridge');
+          }
+        }
+        break;
+      default:
+        break;
     }
   };
+
 
   return (
     <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar bg-white border `}>
@@ -229,8 +248,8 @@ function Navbar() {
                 </svg>
               </div>
               <ul tabIndex={0} className="dropdown-content z-[9999999999] menu p-2 shadow bg-base-100 rounded-box w-52 custom-dropdown">
-                {['Delete'].map((item) => (
-                  <li key={item} onClick={handleDeleteBridge}>
+                {['Duplicate', 'Delete'].map((item) => (
+                  <li key={item} onClick={() => handleDeleteBridge(item)}>
                     <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
                   </li>
                 ))}
