@@ -166,9 +166,10 @@ function Navbar() {
     const bridgeId = path[5];
 
     if (item.trim().toLowerCase() === 'duplicate') {
-      dispatch(duplicateBridgeAction(bridgeId));
-      toast.success('Bridge duplicate successfully');
-      router.push(`/org/${path[2]}/bridges`)
+      dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId)=>{
+        toast.success('Bridge duplicate successfully');
+        router.push(`/org/${path[2]}/bridges/configure/${newBridgeId}`)
+      });
     } else {
       const orgId = path[2];
       // Confirm delete action

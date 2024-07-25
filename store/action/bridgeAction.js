@@ -120,6 +120,7 @@ export const duplicateBridgeAction = (bridge_id) => async (dispatch) => {
   try {
     const response = await createDuplicateBridge(bridge_id);
     dispatch(duplicateBridgeReducer(response));
+    return response?.result?.['_id'];
   } catch (error) {
     console.error("Failed to duplicate the bridge: ", error);
   }

@@ -37,7 +37,7 @@ function Chat({ params }) {
   const [keyValuePairs, setKeyValuePairs] = useState(variablesKeyValue || []); // State for key-value pairs
 
   const defaultsMap = useMemo(() => {
-    return bridge ? Object.entries(bridge?.configuration).reduce((acc, [key, value]) => {
+    return bridge ? Object.entries(bridge?.configuration || {}).reduce((acc, [key, value]) => {
       const isToolsEmptyArray = key === 'tools' && Array.isArray(value.default) && value.default.length === 0;
       if (!isToolsEmptyArray && value.default !== undefined) {
         acc[key] = value.default;
@@ -198,7 +198,7 @@ function Chat({ params }) {
 
   const handleRemoveKeyValuePair = index => {
     const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
-    dispatch(updateVariables({data: updatedPairs, bridgeId: params.id}))
+    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }))
     setKeyValuePairs(updatedPairs);
     if (updatedPairs.length === 0) {
       setIsAccordionVisible(false);
@@ -208,7 +208,7 @@ function Chat({ params }) {
   const handleKeyValueChange = (index, field, value) => {
     let updatedPairs = [...keyValuePairs];
     updatedPairs[index] = { ...updatedPairs[index], [field]: value };
-    dispatch(updateVariables({data: updatedPairs, bridgeId: params.id}))
+    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }))
     setKeyValuePairs(updatedPairs);
   };
 
@@ -289,7 +289,7 @@ function Chat({ params }) {
                       {keyValuePairs.map((pair, index) => (
                         <div key={index} className="flex flex-row gap-4 items-center">
                           <div className="form-control w-full sm:w-1/2">
-                            {index===0 && <label className="label">
+                            {index === 0 && <label className="label">
                               <span className="label-text">Key</span>
                             </label>}
                             <input
@@ -303,7 +303,7 @@ function Chat({ params }) {
                             />
                           </div>
                           <div className="form-control w-full sm:w-1/2">
-                            {index ===0 && <label className="label">
+                            {index === 0 && <label className="label">
                               <span className="label-text">Value</span>
                             </label>}
                             <input
