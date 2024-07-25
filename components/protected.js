@@ -12,8 +12,8 @@ const Protected = (WrappedComponent) => {
 localStorageGet()
     }, []);
 
-    const localStorageGet = () => {
-      if (typeof window !== 'undefined' && (!localStorage.getItem("proxy_token") || !localStorage.getItem("local_token"))) {
+    const localStorageGet = () =>{
+      if (typeof window !== 'undefined' && !localStorage.getItem("proxy_token")) {
         router.replace('/');
         return null;
       }
