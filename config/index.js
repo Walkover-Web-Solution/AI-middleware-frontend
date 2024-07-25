@@ -109,7 +109,7 @@ export const getSingleThreadData = async (threadId, bridgeId) => {
 
 export const getHistory = async (bridgeId, page = 1, start, end, keyword = '') => {
   try {
-    
+
     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}?pageNo=${page}&limit=40&startTime=${start}&endTime=${end}&keyword_search=${keyword}`);
     return getSingleThreadData.data;
   } catch (error) {
@@ -433,12 +433,12 @@ export const createOrRemoveAction = async ({ orgId, bridgeId, type, dataToSend }
     console.error(error);
     return error;
   }
-} 
+}
 
 export const createDuplicateBridge = async (bridge_id) => {
   try {
     const response = await axios.post(
-      `${PROXY_URL}/api/proxy/1258584/32akhmo24/bridge/duplicate`,
+      `${PYTHON_URL}/bridge/duplicate`,
       { bridge_id }
     );
 

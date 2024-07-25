@@ -164,35 +164,45 @@ function Navbar() {
 
   const handleDeleteBridge = async (item) => {
     const bridgeId = path[5];
+    const orgId = path[2];
 
-    if (item.trim().toLowerCase() === 'duplicate') {
-      dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId)=>{
-        toast.success('Bridge duplicate successfully');
-        router.push(`/org/${path[2]}/bridges/configure/${newBridgeId}`)
-      });
-    } else {
-      const orgId = path[2];
-      // Confirm delete action
-      const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
-
-      // If confirmed
-      if (confirmDelete) {
+    switch (item.trim().toLowerCase()) {
+      case 'duplicate':
         try {
-          // Dispatch delete bridge action and get all bridges
-          dispatch(deleteBridgeAction({ bridgeId, orgId: orgId }));
-          router.push(`/org/${path[2]}/bridges`)
-          toast.success('Bridge deleted successfully');
-          dispatch(getAllBridgesAction());
+          dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId) => {
+            if (newBridgeId) {
+              router.push(`/org/${path[2]}/bridges/configure/${newBridgeId}`)
+              toast.success('Bridge duplicate successfully');
+            }
+          });
         } catch (error) {
-          // Log error
-          console.error('Failed to delete bridge:', error);
-          // Show toast error
-          toast.error('Error deleting bridge');
+          console.error('Failed to duplicate bridge:', error);
+          toast.error('Error duplicating bridge');
         }
-      }
-    }
+        break;
 
+      case 'delete':
+        // Confirm delete action
+        const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
+
+        if (confirmDelete) {
+          try {
+            // Dispatch delete bridge action and get all bridges
+            await dispatch(deleteBridgeAction({ bridgeId, orgId }));
+            router.push(`/org/${orgId}/bridges`);
+            toast.success('Bridge deleted successfully');
+            dispatch(getAllBridgesAction());
+          } catch (error) {
+            console.error('Failed to delete bridge:', error);
+            toast.error('Error deleting bridge');
+          }
+        }
+        break;
+      default:
+        break;
+    }
   };
+
 
   return (
     <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar bg-white border `}>

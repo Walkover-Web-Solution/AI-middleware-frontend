@@ -1,6 +1,7 @@
 import { addorRemoveResponseIdInBridge, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge } from "@/config";
 import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
+import { toast } from "react-toastify";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
@@ -122,6 +123,7 @@ export const duplicateBridgeAction = (bridge_id) => async (dispatch) => {
     dispatch(duplicateBridgeReducer(response));
     return response?.result?.['_id'];
   } catch (error) {
+    toast.error('Failed to duplicate the bridge');
     console.error("Failed to duplicate the bridge: ", error);
   }
 }
