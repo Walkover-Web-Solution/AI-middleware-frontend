@@ -80,7 +80,7 @@ const AdvancedParameters = ({ params }) => {
     };
 
     return (
-        <div className="collapse">
+        <div className="collapse text-base-content">
             <input type="radio" name="my-accordion-1" onClick={toggleAccordion} />
             <div className="collapse-title p-0 flex items-center justify-start gap-4 text-xl font-medium cursor-pointer" onClick={toggleAccordion}>
                 Advanced Parameters

@@ -77,7 +77,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
             </button>
 
             <dialog id="actionModel" className="modal">
-                <div className="modal-box w-full">
+                <div className="modal-box w-full bg-base-100 text-base-content">
                     <label className="form-control">
                         <div className="label">
                             <span className="label-text text-lg">Select an Action</span>
