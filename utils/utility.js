@@ -1,12 +1,12 @@
 import { cloneDeep } from "lodash";
 
-export const updatedData = (obj1, obj2, type) => {
+export const updatedData = (obj1, obj2={}, type) => {
     // Deep clone obj1 to avoid mutating the original object
 
     const updatedObj1 = JSON.parse(JSON.stringify(obj1));
 
     // Iterate over the keys of obj2.configuration
-    for (const key in obj2.configuration) {
+    for (const key in obj2?.configuration) {
         if (obj2.configuration.hasOwnProperty(key)) {
             // Delete the key from updatedObj1.configuration
             delete updatedObj1.configuration[key];
