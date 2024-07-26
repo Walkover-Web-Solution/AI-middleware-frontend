@@ -30,11 +30,17 @@ function Home({ params }) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredBridges = allBridges.filter((item) =>
+    item.slugName.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
     item._id.toLowerCase().includes(searchTerm.toLowerCase()) // Add this line
+    
   );
+
+
+
+
   // const handleDeleteBridge = async (bridgeId) => {
   //   // Confirm delete action
   //   const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
@@ -114,8 +120,10 @@ function Home({ params }) {
                                 <>
                                   {Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
                                     <div key={index}>
+                                      <p>SlugName: {item.slugName}</p>
                                       <p>Role: {promptItem.role}</p>
                                       <p>Content: {promptItem.content}</p>
+                                    
                                     </div>
                                   )) : (
                                     <p>Prompt: {item.configuration.prompt}</p>
