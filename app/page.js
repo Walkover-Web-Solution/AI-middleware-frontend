@@ -1,11 +1,11 @@
 
 "use client"
 
-import React, { useLayoutEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation';
+import LoadingSpinner from '@/components/loadingSpinner';
 import WithAuth from '@/components/withauth';
 import { loginUser } from '@/config';
-import Loader from '@/components/loader';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useLayoutEffect, useState } from 'react';
 
 /**
  * This page is the entry point for the user to start the login process.
@@ -81,7 +81,7 @@ function page() {
 
   return (
     <div style={{ width: "100vw", height: "100vh" }} className=' flex justify-center items-center'>
-      {loading ? <Loader />
+      {loading ? <LoadingSpinner />
         : <div id={process.env.NEXT_PUBLIC_REFERENCEID} />}
       {/* The div is required for the login script to work */}
     </div>
