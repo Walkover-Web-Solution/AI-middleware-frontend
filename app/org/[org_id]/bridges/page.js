@@ -32,8 +32,8 @@ function Home({ params }) {
   const filteredBridges = allBridges.filter((item) =>
    
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     item?.slugName?.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
-    item.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     item?.slugName?.toLowerCase()?.includes(searchTerm.toLocaleLowerCase()) ||
+    item?.service?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
     item._id.toLowerCase().includes(searchTerm.toLowerCase()) // Add this line
     
@@ -94,7 +94,7 @@ function Home({ params }) {
                               {item.name}
                             </h1>
                             <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
-                           {item.slugName.length>0 && item.bridgeType==="api"? <p>SlugName: {item.slugName}</p>:""}
+                           {item.slugName.length>0 ? <p>SlugName: {item.slugName}</p>:""}
                               {item.configuration?.prompt && (
                                 <>
                                 {Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
