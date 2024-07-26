@@ -28,38 +28,16 @@ function Home({ params }) {
   const dispatch = useDispatch();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-
+   console.log(allBridges);
   const filteredBridges = allBridges.filter((item) =>
-    item.slugName.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
+   
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     item?.slugName?.toLowerCase().includes(searchTerm.toLocaleLowerCase()) ||
     item.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
     item._id.toLowerCase().includes(searchTerm.toLowerCase()) // Add this line
     
   );
-
-
-
-
-  // const handleDeleteBridge = async (bridgeId) => {
-  //   // Confirm delete action
-  //   const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
-
-  //   // If confirmed
-  //   if (confirmDelete) {
-  //     try {
-  //       // Dispatch delete bridge action and get all bridges
-  //       dispatch(deleteBridgeAction({ bridgeId, orgId: params.org_id }));
-  //       toast.success('Bridge deleted successfully');
-  //       dispatch(getAllBridgesAction());
-  //     } catch (error) {
-  //       // Log error
-  //       console.error('Failed to delete bridge:', error);
-  //       // Show toast error
-  //       toast.error('Error deleting bridge');
-  //     }
-  //   }
-  // };
 
   const onClickConfigure = (id) => {
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
@@ -116,7 +94,7 @@ function Home({ params }) {
                               {item.name}
                             </h1>
                             <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
-                            <p>SlugName: {item.slugName}</p>
+                           {item.slugName.length>0 && item.bridgeType==="api"? <p>SlugName: {item.slugName}</p>:""}
                               {item.configuration?.prompt && (
                                 <>
                                 {Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
