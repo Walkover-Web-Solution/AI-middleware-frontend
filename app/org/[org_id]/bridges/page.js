@@ -91,7 +91,6 @@ function Home({ params }) {
 
                               }
                               {item['name']}
-                              {item.name}
                             </h1>
                             <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
                            {item.slugName.length>0 ? <p>SlugName: {item.slugName}</p>:""}
