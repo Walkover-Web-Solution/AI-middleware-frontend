@@ -92,14 +92,14 @@ function Home({ params }) {
                               {item.name}
                             </h1>
                             <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
-                            <p>SlugName: {item.slugName}</p>
+                              {item?.slugName && <p>SlugName: {item.slugName}</p>}
                               {item.configuration?.prompt && (
                                 <>
-                                {Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
+                                  {Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
                                     <div key={index}>
                                       <p>Role: {promptItem.role}</p>
                                       <p>Content: {promptItem.content}</p>
-                                    
+
                                     </div>
                                   )) : (
                                     <p>Prompt: {item.configuration.prompt}</p>
