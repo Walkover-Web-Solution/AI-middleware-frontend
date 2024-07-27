@@ -15,9 +15,7 @@
     "debounce": "^2.0.0",
     "interface-chatbot": "^1.0.14",
     "lodash": "^4.17.21",
-    "lodash-next": "^2.0.1",
     "lodash.clonedeep": "^4.5.0",
-    "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.378.0",
     "next": "14.1.0",
     "react": "^18",
@@ -28,8 +26,7 @@
     "react-redux": "^9.1.0",
     "react-toastify": "^10.0.4",
     "redux-persist": "^6.0.0",
-    "redux-thunk": "^3.1.0",
-    "remixicon": "^4.1.0"
+    "redux-thunk": "^3.1.0"
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.11.3",

@@ -3,6 +3,7 @@ import { getInvitedUsers, inviteUser } from '@/config';
 import Protected from '@/components/protected';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { CircleUser } from 'lucide-react';
 
 export const runtime = 'edge';
 
@@ -118,7 +119,7 @@ function InvitePage({ params }) {
             <div className="space-y-4 my-4">
               {invitedMembers.map((member, index) => (
                 <div key={index} className="flex items-center justify-start space-x-4 bg-white p-4 rounded-lg shadow border border-gray-200">
-                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 4v4a2 2 0 001 1.732M15 7v4a2 2 0 01-1 1.732M12 20.01l.01-.011M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  <CircleUser />
                   <span className="text-md font-medium text-gray-700">{member.name}</span>
                 </div>
               ))}
