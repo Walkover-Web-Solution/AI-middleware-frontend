@@ -12,10 +12,6 @@ const ModelDropdown = ({ params }) => {
 
     const dispatch = useDispatch();
 
-    const updateBridge = (currentDataToSend) => {
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
-    };
-
     const handleModel = (e) => {
         const selectedModel = e.target.value.split('|')[1];
         const modelType = e.target.selectedOptions[0].parentNode.label;
@@ -45,6 +41,7 @@ const ModelDropdown = ({ params }) => {
             };
         }
 
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
         updateBridge(updatedDataToSend);
     };
 

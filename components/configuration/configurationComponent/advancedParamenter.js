@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -79,6 +79,25 @@ const AdvancedParameters = ({ params }) => {
         setIsAccordionOpen((prevState) => !prevState);
     };
 
+    const AdvancedParameters = {
+        creativity_level: { name: 'Creativity Level', fieldtype: 'slider', description: 'Adjusts how creative the responses are' },
+        token_selection_limit: { name: 'Max Tokens Limit', fieldtype: 'slider', description: 'Sets the maximum number of tokens' },
+        topP: { name: 'Top P', fieldtype: 'slider', description: 'Controls the diversity of responses' },
+        json_mode: { name: 'JSON Mode', fieldtype: 'boolean', description: 'Enable or disable JSON format' },
+        probability_cutoff: { name: 'Probability Cutoff', fieldtype: 'slider', description: 'Sets the threshold for probability' },
+        repetition_penalty: { name: 'Repetition Penalty', fieldtype: 'slider', description: 'Reduces repetition in responses' },
+        novelty_penalty: { name: 'Novelty Penalty', fieldtype: 'slider', description: 'Penalizes responses that lack novelty' },
+        log_probability: { name: 'Log Probability', fieldtype: 'boolean', description: 'Log the probabilities of responses' },
+        response_count: { name: 'Response Count', fieldtype: 'number', description: 'Number of responses to generate' },
+        response_suffix: { name: 'Response Suffix', fieldtype: 'text', description: 'Text to add at the end of responses' },
+        stop_sequences: { name: 'Stop Sequences', fieldtype: 'text', description: 'Sequences that signal the end of response' },
+        input_text: { name: 'Input Text', fieldtype: 'text', description: 'The initial input text' },
+        echo_input: { name: 'Echo Input', fieldtype: 'boolean', description: 'Repeat the input text in the response' },
+        best_of: { name: 'Best Of', fieldtype: 'number', description: 'Generate multiple responses and select the best' },
+        seed: { name: 'Seed', fieldtype: 'number', description: 'Set a seed for random number generation' }
+    };
+    
+    
     return (
         <div className="collapse text-base-content">
             <input type="radio" name="my-accordion-1" onClick={toggleAccordion} />
@@ -86,8 +105,8 @@ const AdvancedParameters = ({ params }) => {
                 Advanced Parameters
                 {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
-            {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-0">
-                {modelInfoData && Object.entries(modelInfoData)?.map(([key, value]) => (
+            {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-2">
+                {/* {modelInfoData && Object.entries(modelInfoData)?.map(([key, value]) => (
                     key !== 'model' && key !== 'tools' && key !== 'tool_choice' && key !== "stream" &&
                     <div key={key} className={` ${value?.field === "boolean" ? "flex justify-between item-center" : ""}`}>
                         <div className='flex justify-between items-center w-full'>
@@ -138,7 +157,81 @@ const AdvancedParameters = ({ params }) => {
                             "this field is under development"
                         )}
                     </div>
-                ))}
+                ))} */}
+
+                {modelInfoData && Object.entries(AdvancedParameters).map(([key, { name, fieldtype, description }]) => {
+                    if (!modelInfoData[key]) return null;
+                    const fieldData = modelInfoData[key] || {};
+                    const { min, max, value, default: defaultValue, step } = fieldData;
+
+                    return (
+                        <div key={key} className="form-control">
+                            <label className="label">
+                                <div className='flex flex-row gap-2 items-center'>
+                                    <span className="label-text capitalize">{name}</span>
+                                    <div className="tooltip tooltip-right" data-tip={description}>
+                                        <Info size={12} />
+                                    </div>
+                                </div>
+                                <p className='text-right'>{value}</p>
+                            </label>
+                            {fieldtype === 'slider' && (
+                                <div>
+                                    <input
+                                        type="range"
+                                        min={min || 0}
+                                        max={max || 100}
+                                        step={step || 1}
+                                        defaultValue={defaultValue || 0}
+                                        onChange={(e) => handleInputChange(e, key)}
+                                        className="range range-xs w-full"
+                                        name={key}
+                                    />
+                                </div>
+                            )}
+                            {fieldtype === 'text' && (
+                                <input
+                                    type="text"
+                                    defaultValue={defaultValue || ''}
+                                    onBlur={(e) => handleInputChange(e, key)}
+                                    className="input input-bordered input-sm w-full"
+                                    name={key}
+                                />
+                            )}
+                            {fieldtype === 'number' && (
+                                <input
+                                    type="number"
+                                    min={min}
+                                    max={max}
+                                    step={step}
+                                    defaultValue={defaultValue || 0}
+                                    onBlur={(e) => handleInputChange(e, key)}
+                                    className="input input-bordered input-sm w-full"
+                                    name={key}
+                                />
+                            )}
+                            {fieldtype === 'boolean' && (
+                                // <input
+                                //     type="checkbox"
+                                //     defaultChecked={defaultValue || false}
+                                //     onChange={(e) => handleInputChange(e, key)}
+                                //     className="checkbox"
+                                //     name={key}
+                                // />
+
+                                <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+                                    <input
+                                        type="checkbox"
+                                        key={bridge?.bridgeType}
+                                        className="toggle"
+                                        defaultChecked={bridge?.bridgeType === "chatbot" ? true : false}
+                                        onChange={(e) => handleInputChange(e, "bridgeType")}
+                                    />
+                                </label>
+                            )}
+                        </div>
+                    );
+                })}
             </div>}
         </div>
     );

@@ -1,20 +1,21 @@
-"use client"; // Correct import statement
+"use client";
 
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import ConfigurationPage from "@/components/configuration/ConfigurationPage";
 import Chat from "@/components/configuration/chat";
 import Chatbot from "@/components/configuration/chatbot";
+import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction";
-import LoadingSpinner from "@/components/loadingSpinner";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
 const Page = ({ params }) => {
   const dispatch = useDispatch();
-  const { bridge, embedToken } = useCustomSelector((state) => ({
-    bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+  const { isLoading, bridgeType, embedToken } = useCustomSelector((state) => ({
+    isLoading: state?.bridgeReducer?.isLoading,
+    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
   }));
 
@@ -71,7 +72,7 @@ const Page = ({ params }) => {
 
   return (
     <>
-      {!bridge && <LoadingSpinner />}
+      {isLoading && <LoadingSpinner />}
       <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-start justify-start">
@@ -84,7 +85,7 @@ const Page = ({ params }) => {
               <div className="resizer w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
               <div className="w-1/3 flex-1 chatPage min-w-[450px]">
                 <div className="p-4 h-full" id="parentChatbot">
-                  {bridge?.bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />
+                  {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />
                   }
                 </div>
               </div>
@@ -97,8 +98,6 @@ const Page = ({ params }) => {
 };
 
 // Extracted functions for better readability
-
-
 function handleResizer() {
   const resizer = document.querySelector(".resizer");
   const leftSide = resizer.previousElementSibling;

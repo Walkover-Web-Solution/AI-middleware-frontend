@@ -1,39 +1,31 @@
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { updateServiceAction, updateBridgeAction } from '@/store/action/bridgeAction';
-import { useEffect, useState } from "react";
-import { useDispatch } from 'react-redux';
 import { services } from '@/jsonFiles/models'; // Adjust the path as needed
+import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch } from 'react-redux';
 
-export default function ServiceDropdown({ params }) {
-    const [selectedService, setSelectedService] = useState('');
+function ServiceDropdown({ params }) {
+    const { service } = useCustomSelector((state) => ({
+        service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
+    }));
+    const [selectedService, setSelectedService] = useState(service);
     const dispatch = useDispatch();
 
-    const { bridge } = useCustomSelector((state) => ({
-        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
-    }));
-
     useEffect(() => {
-        if (bridge) {
-            setSelectedService(bridge?.service);
+        if (service) {
+            setSelectedService(service);
         }
-    }, [bridge]);
+    }, [service]);
 
-    const handleServiceChange = (e) => {
-        const service = e.target.value;
-        const defaultModel = services[service]?.completion?.values().next().value || null; // Get the default model for the selected service
-
-        setSelectedService(service);
-        const updatedDataToSend = {
-            service: service,
-            configuration: {
-                type: bridge?.type,
-                model: defaultModel,
-            },
-        };
-
-        // dispatch(updateServiceAction({ bridgeId: params.id, service }));
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: updatedDataToSend }));
-    };
+    const handleServiceChange = useCallback((e) => {
+        const newService = e.target.value;
+        const defaultModel = services[newService]?.completion?.values().next().value || null; // Get the default model for the selected service
+        setSelectedService(newService);
+        dispatch(updateBridgeAction({
+            bridgeId: params.id,
+            dataToSend: { service: newService, configuration: { model: defaultModel } }
+        }));
+    }, [dispatch, params.id]);
 
     return (
         <div>
@@ -50,13 +42,4 @@ export default function ServiceDropdown({ params }) {
         </div>
     );
 }
-
-
-
-
-
-
-
-
-
-
+export default ServiceDropdown;

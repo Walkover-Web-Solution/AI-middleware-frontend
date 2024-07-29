@@ -1,16 +1,14 @@
-import React, { useMemo } from 'react';
-import { CircleAlert, Plus } from 'lucide-react';
 import { useCustomSelector } from '@/customSelector/customSelector';
+import { CircleAlert, Plus } from 'lucide-react';
+import React, { useMemo } from 'react';
 
 const EmbedList = ({ params }) => {
-
-    const { integrationData, bridge } = useCustomSelector((state) => ({
+    const { integrationData, bridge_tools } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData,
-        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
-
+        bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools,
     }))
-    const renderEmbed = useMemo(() => (
 
+    const renderEmbed = useMemo(() => (
         integrationData && (Object.values(integrationData))
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
@@ -27,8 +25,7 @@ const EmbedList = ({ params }) => {
                             </h1>
                             {value?.description?.trim() === "" && <CircleAlert color='red' size={16} />}
                         </div>
-                        <p className="mt-3 text-xs sm:text-sm 
- line-clamp-3">
+                        <p className="mt-3 text-xs sm:text-sm line-clamp-3">
                             {value.description ? value.description : "A description is required for proper functionality."}
                         </p>
                         <div className="mt-4">
@@ -41,7 +38,7 @@ const EmbedList = ({ params }) => {
             ))
     ), [integrationData]);
 
-    return (bridge?.configuration?.tools &&
+    return (bridge_tools &&
         <div>
             <div className="form-control ">
                 <div className="label flex-col mt-2 items-start">

@@ -22,13 +22,24 @@ export const bridgeReducer = createSlice({
       const { response } = action.payload;
       state.allBridgesMap[response.bridge_id] = { ...state.allBridgesMap[response.bridge_id], ...response };
     },
+    // fetchSingleBridgeReducer: (state, action) => {
+    //   const { bridges, integrationData } = action.payload;
+    //   const responseFormat = handleResponseFormat(bridges);
+    //   const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;
+    //   const obj2 = modelInfo[service][modelDefault];
+    //   const response = updatedData(bridges, obj2, type);
+    //   state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...response, integrationData, responseFormat };
+    //   state.loading = false;
+    // },
+
+    // new format
     fetchSingleBridgeReducer: (state, action) => {
       const { bridges, integrationData } = action.payload;
-      const responseFormat = handleResponseFormat(bridges);
+      // const responseFormat = handleResponseFormat(bridges);
       const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;
-      const obj2 = modelInfo[service][modelDefault];
-      const response = updatedData(bridges, obj2, type);
-      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...response, integrationData, responseFormat };
+      // const obj2 = modelInfo[service][modelDefault];
+      // const response = updatedData(bridges, obj2, type);
+      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridges};
       state.loading = false;
     },
     fetchAllBridgeReducer: (state, action) => {
