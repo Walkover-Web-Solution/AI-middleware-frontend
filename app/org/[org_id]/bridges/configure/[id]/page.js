@@ -13,8 +13,9 @@ import LoadingSpinner from "@/components/loadingSpinner";
 export const runtime = 'edge';
 const Page = ({ params }) => {
   const dispatch = useDispatch();
-  const { bridge, embedToken } = useCustomSelector((state) => ({
+  const { isLoading, bridge, embedToken } = useCustomSelector((state) => ({
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+    isLoading: state?.bridgeReducer?.loading || false,
     embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
   }));
 
@@ -68,10 +69,9 @@ const Page = ({ params }) => {
     }
   }
 
-
   return (
     <>
-      {!bridge && <LoadingSpinner />}
+      {isLoading && <LoadingSpinner />}
       <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-start justify-start">

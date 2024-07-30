@@ -74,6 +74,7 @@ export const bridgeReducer = createSlice({
     },
     duplicateBridgeReducer: (state, action) => {
       state.allBridgesMap[action.payload.result._id] = action.payload.result;
+      state.loading = false;
     },
   },
 });
