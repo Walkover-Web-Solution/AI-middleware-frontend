@@ -31,7 +31,8 @@ function Home({ params }) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const filteredBridges = allBridges.filter((item) =>
-    item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item?.slugName?.toLowerCase()?.includes(searchTerm.toLocaleLowerCase()) ||
     item?.service?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -85,6 +86,7 @@ function Home({ params }) {
                               {item.service === 'openai' ?
                                 <OpenAiIcon /> : <GeminiIcon />
                               }
+
                               {item['name']}
                             </h1>
                             <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
@@ -95,7 +97,6 @@ function Home({ params }) {
                                     <div key={index}>
                                       <p>Role: {promptItem.role}</p>
                                       <p>Content: {promptItem.content}</p>
-
                                     </div>
                                   )) : (
                                     <p>Prompt: {item.configuration.prompt}</p>
