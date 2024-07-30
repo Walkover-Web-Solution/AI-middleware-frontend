@@ -123,9 +123,9 @@ function Page({ params }) {
         //     shallow: true,
         //   });
         // } else {
-          router.push(`${pathName}?thread_id=${thread_id}`, undefined, {
-            shallow: true,
-          });
+        router.push(`${pathName}?thread_id=${thread_id}`, undefined, {
+          shallow: true,
+        });
         // }
       }
     },
@@ -184,9 +184,7 @@ function Page({ params }) {
         </div>
         <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} />
       </div>
-       {isSliderOpen && (
-          <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} />
-        )}
+      <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>
   );
 }
