@@ -93,10 +93,11 @@ function Home({ params }) {
                               {item.slugName ? <p>SlugName: {item.slugName}</p> : ""}
                               {item.configuration?.prompt && (
                                 <>
-                                  {Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
+                                {Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
                                     <div key={index}>
                                       <p>Role: {promptItem.role}</p>
                                       <p>Content: {promptItem.content}</p>
+                                    
                                     </div>
                                   )) : (
                                     <p>Prompt: {item.configuration.prompt}</p>

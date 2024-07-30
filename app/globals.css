@@ -60,3 +60,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+html {
+  scroll-behavior: smooth;
+}
