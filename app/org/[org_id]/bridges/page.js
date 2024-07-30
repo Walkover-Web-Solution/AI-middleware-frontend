@@ -28,7 +28,6 @@ function Home({ params }) {
   const dispatch = useDispatch();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-   console.log(allBridges);
   const filteredBridges = allBridges.filter((item) =>
    
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
