@@ -123,9 +123,9 @@ function Page({ params }) {
         //     shallow: true,
         //   });
         // } else {
-          router.push(`${pathName}?thread_id=${thread_id}`, undefined, {
-            shallow: true,
-          });
+        router.push(`${pathName}?thread_id=${thread_id}`, undefined, {
+          shallow: true,
+        });
         // }
       }
     },
@@ -167,14 +167,14 @@ function Page({ params }) {
   // }
 
   return (
-    <div className="flex bg-base-100  relative text-base-content h-screen">
+    <div className="bg-base-100  relative scrollbar-hide text-base-content h-screen">
       <EmbedScriptLoader embedToken={embedToken} />
-      <div className="drawer drawer-open w-3/4">
+      <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center overflow-scroll justify-center ">
           <div className="w-full min-h-screen">
             <div className="w-full text-start">
-              <div className="pb-16 p-4">
+              <div className="pb-16 pl-2 pt-4">
                 {thread && thread.map((item, index) => (
                   <ThreadItem key={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
                 ))}
@@ -184,11 +184,7 @@ function Page({ params }) {
         </div>
         <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} />
       </div>
-      <div className="inset-y-0 right-0 border-l-2 border-base-300 w-1/4 md:w-1/4 lg:w-1/4overflow-y-auto bg-base-200 transition-transform duration-300 transform translate-x-0">
-        {isSliderOpen && (
-          <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} />
-        )}
-      </div>
+      <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>
   );
 }

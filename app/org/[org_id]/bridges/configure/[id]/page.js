@@ -14,7 +14,7 @@ export const runtime = 'edge';
 const Page = ({ params }) => {
   const dispatch = useDispatch();
   const { isLoading, bridgeType, embedToken } = useCustomSelector((state) => ({
-    isLoading: state?.bridgeReducer?.isLoading,
+    isLoading: state?.bridgeReducer?.loading || false,
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
   }));
@@ -68,7 +68,6 @@ const Page = ({ params }) => {
       }
     }
   }
-
 
   return (
     <>
