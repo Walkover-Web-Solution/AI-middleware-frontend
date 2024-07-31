@@ -58,7 +58,6 @@ export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) =
 
 export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch) => {
   try {
-    dispatch(isPending());
     const data = await updateBridge({ bridgeId, dataToSend });
     dispatch(updateBridgeReducer({ bridges: data.data.bridges, bridgeType: dataToSend.bridgeType }));
   } catch (error) {
@@ -120,11 +119,11 @@ export const getChatBotOfBridgeAction = (orgId, bridgeId) => async (dispatch) =>
 export const duplicateBridgeAction = (bridge_id) => async (dispatch) => {
   try {
     dispatch(isPending());
-    const response = await createDuplicateBridge(bridge_id);
+   const response = await createDuplicateBridge(bridge_id);
     dispatch(duplicateBridgeReducer(response));
     return response?.result?.['_id'];
   } catch (error) {
-    dispatch(isError());
+    
     toast.error('Failed to duplicate the bridge');
     console.error("Failed to duplicate the bridge: ", error);
   }
