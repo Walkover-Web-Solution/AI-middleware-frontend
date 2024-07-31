@@ -165,7 +165,8 @@ function Chat({ params }) {
       setMessages(prevMessages => [...prevMessages, newChatAssist]);
 
       // Clear new message input
-      setNewMessage("");
+      
+      //setNewMessage("");
     } catch (error) {
       setErrorMessage("Something went wrong. Please try again.");
     } finally {
@@ -247,8 +248,8 @@ function Chat({ params }) {
                   type="text"
                   placeholder="Type here"
                   className="input input-bordered w-full"
-                  value={newMessage}
-                  onChange={e => setNewMessage(e.target.value)}
+                   value = {newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                 />
               )}
@@ -340,7 +341,7 @@ function Chat({ params }) {
             <div className="text-red-500 mt-2">{errorMessage}</div>
           )}
         </div>
-      </div >
+      </div>
     </>
   );
 }

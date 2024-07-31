@@ -86,7 +86,7 @@ function CreateNewBridge({ orgid }) {
                             </div>
                             <div className="flex items-center gap-6">
                                 <label className="flex items-center justify-center gap-2">
-                                    <input type="radio" name="radio-1" className="radio" value="api" defaultChecked={bridgeType === "api"} onChange={() => setBridgeType('api')} />
+                                    <input type="radio" name="radio-1" className="radio" value="api" defaultChecked={bridgeType === "api"}  onChange={() => setBridgeType('api')} />
                                     API
                                 </label>
                                 <label className="flex items-center justify-center gap-2">

@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import CreateNewBridge from './createNewBridge';
 import OpenAiIcon from '@/icons/OpenAiIcon';
 import GeminiIcon from '@/icons/GeminiIcon';
+import CreateOrg from './createNewOrg';
 
 function Navbar() {
   const router = useRouter();
@@ -33,6 +34,8 @@ function Navbar() {
   const sideBridgeRef = useRef(null);
   const sideBotRef = useRef(null);
 
+  const [isNewOrg,setIsNewOrg] = useState(false);
+const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
   // Event handler for bridge search query change
   const handleBridgeSearchChange = (e) => {
     setBridgeSearchQuery(e.target.value);
@@ -204,7 +207,15 @@ function Navbar() {
         break;
     }
   };
+  
+  const handleOpenCreateOrgModal = () => {
+    setShowCreateOrgModal(true);
+  };
+  const handleCloseCreateOrgModal = () => {
+    setShowCreateOrgModal(false);
+  };
 
+  
 
   return (
     <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar bg-white border `}>
@@ -218,7 +229,7 @@ function Navbar() {
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn capitalize m-1">{path[3] === 'apikey' ? 'API Key' : path[3]} <ChevronDown size={16} /></div>
           <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-            {['bridges', "chatbot", 'apikey', 'metrics', 'invite'].map((item) => (
+            {['bridges', "chatbot", 'metrics', 'invite'].map((item) => (
               <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
                 <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
               </li>
@@ -275,7 +286,7 @@ function Navbar() {
           } overflow-y-auto border-l bg-base-200 transition-all duration-300 z-50`}
       >
         <aside className="flex w-full  flex-col h-screen overflow-y-auto">
-          <div className="p-4 flex flex-col gap-4">
+          <div className="p-4 flex flex-col gap-4 ">
             <p className='text-xl'> Organization </p>
             <input
               type="text"
@@ -291,6 +302,14 @@ function Navbar() {
                   <li key={item.id}><a className={`${item.id == path[2] ? "active" : `${item.id}`} py-2 px-2 rounded-md`} key={item.id} onClick={() => { handleSwitchOrg(item.id, item.name); router.push(`/org/${item.id}/${path[3]}`) }}  > <Building2 size={16} /> {item.name}</a></li>
                 ))}
             </ul>
+
+         <button
+        onClick={handleOpenCreateOrgModal}
+        className="p-2 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+      >
+        New org + 
+         </button>
+           {showCreateOrgModal && <CreateOrg onClose={handleCloseCreateOrgModal} />}
           </div>
           <div className='mt-auto w-full p-4'>
             <details
