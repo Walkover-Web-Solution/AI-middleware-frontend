@@ -61,7 +61,7 @@ export const bridgeReducer = createSlice({
         ...response,
         responseFormat,
       };
-
+      
       if (bridgeType) {
         const allData = state.org[bridges.org_id];
         const foundBridge = allData.find(bridge => bridge._id === _id);
@@ -69,6 +69,9 @@ export const bridgeReducer = createSlice({
           foundBridge.bridgeType = bridges.bridgeType;
         }
       }
+      state.loading = false;
+    
+    
     },
     deleteBridgeReducer: (state, action) => {
       const { bridgeId, orgId } = action.payload;

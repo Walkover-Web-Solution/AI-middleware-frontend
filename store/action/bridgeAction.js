@@ -219,7 +219,7 @@ export const getChatBotOfBridgeAction = (orgId, bridgeId) => async (dispatch) =>
 export const duplicateBridgeAction = (bridge_id) => async (dispatch) => {
   try {
     dispatch(isPending());
-    const response = await createDuplicateBridge(bridge_id);
+   const response = await createDuplicateBridge(bridge_id);
     dispatch(duplicateBridgeReducer(response));
     return response?.result?.['_id'];
   } catch (error) {
