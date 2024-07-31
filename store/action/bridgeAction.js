@@ -58,6 +58,7 @@ export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) =
 
 export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch) => {
   try {
+    dispatch(isPending());
     const data = await updateBridge({ bridgeId, dataToSend });
     dispatch(updateBridgeReducer({ bridges: data.data.bridges, bridgeType: dataToSend.bridgeType }));
   } catch (error) {

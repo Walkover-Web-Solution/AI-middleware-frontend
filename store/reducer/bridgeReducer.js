@@ -58,6 +58,7 @@ export const bridgeReducer = createSlice({
           foundBridge.bridgeType = bridges.bridgeType;
         }
       }
+      state.loading = false;
     
     
     },
