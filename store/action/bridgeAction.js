@@ -123,7 +123,7 @@ export const duplicateBridgeAction = (bridge_id) => async (dispatch) => {
     dispatch(duplicateBridgeReducer(response));
     return response?.result?.['_id'];
   } catch (error) {
-    
+    dispatch(isError());
     toast.error('Failed to duplicate the bridge');
     console.error("Failed to duplicate the bridge: ", error);
   }
