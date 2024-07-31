@@ -31,7 +31,7 @@ export const getSingleMessage = async ({ bridge_id, message_id }) => {
 
 export const getSingleBridge = async (bridgeId) => {
   try {
-    const response = await axios.get(`${URL}/api/v1/config/getbridges/${bridgeId}`)
+    const response = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/${bridgeId}`)
     return response
   } catch (error) {
     console.error(error)
@@ -54,7 +54,7 @@ export const deleteBridge = async (bridgeId) => {
 
 export const createBridge = async (dataToSend) => {
   try {
-    return await axios.post(`${URL}/api/v1/config/createbridges`, dataToSend)
+    return await axios.post(`${PYTHON_URL}/api/v1/config/create_bridge`, dataToSend)
   } catch (error) {
     toast.error(error.response.data.error)
     throw error
@@ -64,7 +64,7 @@ export const createBridge = async (dataToSend) => {
 
 export const getAllBridges = async (org_id) => {
   try {
-    const data = await axios.get(`${URL}/api/v1/config/getbridges/all`, org_id)
+    const data = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/all`, org_id)
     return data;
   } catch (error) {
     console.error(error)
@@ -86,7 +86,8 @@ export const getAllResponseTypesApi = async (orgId) => {
 
 export const updateBridge = async ({ bridgeId, dataToSend }) => {
   try {
-    const response = await axios.post(`${URL}/api/v1/config/updatebridges/${bridgeId}`, dataToSend)
+    const response = await axios.post(`${PYTHON_URL}/api/v1/config/update_bridge/${bridgeId}`, dataToSend);
+    console.log(response,'response')
     // toast.success("Bridge is updated");
     return response
   } catch (error) {

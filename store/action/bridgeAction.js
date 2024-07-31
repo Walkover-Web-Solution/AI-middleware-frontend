@@ -8,12 +8,13 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   try {
     dispatch(isPending())
     const data = await getSingleBridge(id);
-    const integrationData = await integration(data.data.bridges.embed_token)
+    console.log(data,23423)
+    // const integrationData = await integration(data.data.bridges.embed_token)
 
-    const flowObject = integrationData.flows.reduce((obj, item) => {
-      obj[item.id] = item;
-      return obj;
-    }, {});
+    // const flowObject = integrationData.flows.reduce((obj, item) => {
+    //   obj[item.id] = item;
+    //   return obj;
+    // }, {});
 
     const dataToSend = {
       "configuration": {
@@ -114,7 +115,8 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
       "service": "openai",  // same
       "_id": "66a1e9316c4eeb9c621baf57"
      }
-    dispatch(fetchSingleBridgeReducer({ bridges: dataToSend, integrationData: flowObject }));
+    dispatch(fetchSingleBridgeReducer({ bridges: data.data }));
+    // dispatch(fetchSingleBridgeReducer({ bridges: data.data, integrationData: flowObject }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -159,7 +161,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
   try {
     dispatch(isPending());
     const data = await updateBridge({ bridgeId, dataToSend });
-    // dispatch(updateBridgeReducer({ bridges: data.data.bridges, bridgeType: dataToSend.bridgeType }));
+    dispatch(updateBridgeReducer({ bridges: data.data.bridges }));
   } catch (error) {
     console.error(error);
     dispatch(isError());

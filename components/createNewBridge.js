@@ -40,14 +40,11 @@ function CreateNewBridge({ orgid }) {
         if (name.length > 0 && selectedModel && selectedType) {
             setIsLoading(true);
             const dataToSend = {
-                "configuration": {
-                    "model": selectedModel,
-                    "name": name,
-                    "type": selectedType,
-                    "slugName": slugname || name
-                },
                 "service": selectedService,
-                "bridgeType": bridgeType // Added missing semicolon
+                "model": selectedModel,
+                "name": name,
+                "slugName": slugname || name,
+                "bridgeType": bridgeType
             };
             dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
                 setShowFileUploadModal(false);

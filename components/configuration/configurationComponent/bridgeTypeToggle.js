@@ -4,28 +4,19 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 
 const BridgeTypeToggle = ({ params }) => {
-
-    const { bridge } = useCustomSelector((state) => ({
-        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+    const dispatch = useDispatch();
+    const { bridgeType } = useCustomSelector((state) => ({
+        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     }));
 
-    const dispatch = useDispatch();
 
     const handleInputChange = (e) => {
         let newCheckedValue = e.target.checked
         let updatedDataToSend = {
-            configuration: {
-                model: bridge?.configuration?.model?.default,
-            },
-            service: bridge?.service?.toLowerCase(),
             bridgeType: newCheckedValue ? 'chatbot' : 'api'
         };
-        UpdateBridge(updatedDataToSend);
+        dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { ...updatedDataToSend } }));
     };
-
-    const UpdateBridge = (currentDataToSend) => {
-        dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { ...currentDataToSend } }));
-    }
 
     return (
         <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
@@ -34,9 +25,9 @@ const BridgeTypeToggle = ({ params }) => {
             </div>
             <input
                 type="checkbox"
-                key={bridge?.bridgeType}
+                key={bridgeType}
                 className="toggle"
-                defaultChecked={bridge?.bridgeType === "chatbot" ? true : false}
+                defaultChecked={bridgeType?.toString()?.toLowerCase() === "chatbot" ? true : false}
                 onChange={(e) => handleInputChange(e, "bridgeType")}
             />
             <div className="label">

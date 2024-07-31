@@ -55,7 +55,6 @@ export default function ConfigurationPage({ params }) {
                         <InputConfigComponent params={params} />
                         <EmbedList params={params} />
                         <ServiceDropdown params={params} />
-                        {/* pending */}
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
                         <AdvancedParameters params={params} />

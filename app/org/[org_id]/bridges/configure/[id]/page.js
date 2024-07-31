@@ -13,8 +13,7 @@ import { useDispatch } from "react-redux";
 export const runtime = 'edge';
 const Page = ({ params }) => {
   const dispatch = useDispatch();
-  const { isLoading, bridgeType, embedToken } = useCustomSelector((state) => ({
-    isLoading: state?.bridgeReducer?.loading || false,
+  const { bridgeType, embedToken } = useCustomSelector((state) => ({
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
   }));
@@ -71,7 +70,7 @@ const Page = ({ params }) => {
 
   return (
     <>
-      {!bridge && <LoadingSpinner />}
+      {!bridgeType && <LoadingSpinner />}
       <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-start justify-start">
