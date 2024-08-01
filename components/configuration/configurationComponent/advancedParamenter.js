@@ -5,11 +5,12 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const AdvancedParameters = ({ params }) => {
-    const { service, model, type, bridge } = useCustomSelector((state) => ({
+    const { service, model, type, bridge, configuration } = useCustomSelector((state) => ({
         service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service?.toLowerCase(),
         model: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.model,
         type: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type,
         bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+        configuration: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration,
 
     }));
     const serviceModel = model?.replace(/-/g, '_');
@@ -112,7 +113,7 @@ const AdvancedParameters = ({ params }) => {
                 {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
             {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-2">
-                {modelInfoData && Object.entries(modelInfoData).map(([key, { field, min, max, step, default: defaultValue}]) => {
+                {modelInfoData && Object.entries(modelInfoData).map(([key, { field, min, max, step, default: defaultValue }]) => {
                     const name = AdvancedParameters[key]?.name || key;
                     const description = AdvancedParameters[key]?.description || '';
 
@@ -126,7 +127,7 @@ const AdvancedParameters = ({ params }) => {
                                         <Info size={12} />
                                     </div>
                                 </div>
-                                <p className='text-right'>{bridge?.configuration?.[key]}</p>
+                                {field === 'slider' && <p className='text-right' id={`sliderValue-${key}`}>{configuration?.[key]}</p> }
                             </label>
                             {field === 'slider' && (
                                 <div>
@@ -135,8 +136,12 @@ const AdvancedParameters = ({ params }) => {
                                         min={min || 0}
                                         max={max || 100}
                                         step={step || 1}
-                                        defaultValue={defaultValue || 0}
+                                        key={configuration?.[key]}
+                                        defaultValue={configuration?.[key] || 0}
                                         onBlur={(e) => handleInputChange(e, key)}
+                                        onInput={(e) => {
+                                            document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
+                                        }}
                                         className="range range-xs w-full"
                                         name={key}
                                     />
@@ -145,7 +150,7 @@ const AdvancedParameters = ({ params }) => {
                             {field === 'text' && (
                                 <input
                                     type="text"
-                                    defaultValue={defaultValue || ''}
+                                    defaultValue={configuration?.[key] || ''}
                                     onBlur={(e) => handleInputChange(e, key)}
                                     className="input input-bordered input-sm w-full"
                                     name={key}
@@ -157,7 +162,7 @@ const AdvancedParameters = ({ params }) => {
                                     min={min}
                                     max={max}
                                     step={step}
-                                    defaultValue={defaultValue || 0}
+                                    defaultValue={configuration?.[key] || 0}
                                     onBlur={(e) => handleInputChange(e, key)}
                                     className="input input-bordered input-sm w-full"
                                     name={key}
@@ -169,7 +174,7 @@ const AdvancedParameters = ({ params }) => {
                                         type="checkbox"
                                         key={bridge?.bridgeType}
                                         className="toggle"
-                                        defaultChecked={bridge?.bridgeType === "chatbot" ? true : false}
+                                        defaultChecked={configuration?.[key]}
                                         onChange={(e) => handleInputChange(e, "bridgeType")}
                                     />
                                 </label>
