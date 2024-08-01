@@ -34,12 +34,12 @@ export const bridgeReducer = createSlice({
 
     // new format
     fetchSingleBridgeReducer: (state, action) => {
-      const { bridges, integrationData } = action.payload;
+      const { bridge, integrationData } = action.payload;
       // const responseFormat = handleResponseFormat(bridges);
-      const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;
+      const { _id } = bridge;
       // const obj2 = modelInfo[service][modelDefault];
       // const response = updatedData(bridges, obj2, type);
-      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridges};
+      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge};
       state.loading = false;
     },
     fetchAllBridgeReducer: (state, action) => {

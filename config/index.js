@@ -87,7 +87,7 @@ export const getAllResponseTypesApi = async (orgId) => {
 export const updateBridge = async ({ bridgeId, dataToSend }) => {
   try {
     const response = await axios.post(`${PYTHON_URL}/api/v1/config/update_bridge/${bridgeId}`, dataToSend);
-    console.log(response,'response')
+    console.log(response, 'response')
     // toast.success("Bridge is updated");
     return response
   } catch (error) {
@@ -134,12 +134,6 @@ export const dryRun = async ({ localDataToSend, bridge_id }) => {
     return { success: false, error: error.response.data.error }
   }
 }
-
-
-
-
-
-
 
 // api keys api 
 
@@ -443,6 +437,16 @@ export const createDuplicateBridge = async (bridge_id) => {
       { bridge_id }
     );
 
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};
+
+export const getAllModels = async (service) => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/api/v1/config/service/models/${service}`);
     return response.data;
   } catch (error) {
     console.error(error);

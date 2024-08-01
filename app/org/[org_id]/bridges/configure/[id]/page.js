@@ -7,20 +7,29 @@ import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction";
+import { getModelAction } from "@/store/action/modelAction";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
 const Page = ({ params }) => {
   const dispatch = useDispatch();
-  const { bridgeType, embedToken } = useCustomSelector((state) => ({
+  const { bridgeType, service, embedToken, isServiceModelsAvailable } = useCustomSelector((state) => ({
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+    service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
     embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
+    isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service],
   }));
 
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
   }, []);
+
+  useEffect(() => {
+    if (service && !isServiceModelsAvailable) {
+      dispatch(getModelAction({ service }))
+    }
+  }, [service]);
 
   useEffect(() => {
     if (embedToken) {
