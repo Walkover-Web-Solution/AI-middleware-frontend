@@ -38,9 +38,9 @@ function Chat({ params }) {
 
   const defaultsMap = useMemo(() => {
     return bridge ? Object.entries(bridge?.configuration || {}).reduce((acc, [key, value]) => {
-      const isToolsEmptyArray = key === 'tools' && Array.isArray(value.default) && value.default.length === 0;
-      if (!isToolsEmptyArray && value.default !== undefined) {
-        acc[key] = value.default;
+      const isToolsEmptyArray = key === 'tools' && Array.isArray(value?.default) && value?.default.length === 0;
+      if (!isToolsEmptyArray && value?.default !== undefined) {
+        acc[key] = value?.default;
       }
       if (!acc.hasOwnProperty('tools') || acc?.tools?.length === 0) {
         delete acc['tool_choice'];
