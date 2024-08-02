@@ -38,8 +38,8 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
   try {
     dispatch(isPending())
     const response = await getAllBridges();
-    onSuccess(response?.data?.bridges?.length)
-    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridges, orgId: response?.data?.org_id }));
+    onSuccess(response?.data?.bridge?.length)
+    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -61,7 +61,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
   try {
     dispatch(isPending());
     const data = await updateBridge({ bridgeId, dataToSend });
-    dispatch(updateBridgeReducer({ bridges: data.data.bridges }));
+    dispatch(updateBridgeReducer({ bridges: data.data.bridge }));
   } catch (error) {
     console.error(error);
     dispatch(isError());

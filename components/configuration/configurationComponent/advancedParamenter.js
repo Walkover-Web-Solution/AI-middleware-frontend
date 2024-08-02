@@ -19,41 +19,6 @@ const AdvancedParameters = ({ params }) => {
     }));
 
     const [isAccordionOpen, setIsAccordionOpen] = useState(false);
-    const [sliderValues, setSliderValues] = useState({}); // State to hold slider values
-
-
-    useEffect(() => {
-        if (modelInfoData) {
-            const initialSliderValues = Object.entries(modelInfoData).reduce((acc, [key, value]) => {
-                if (value.field === 'slider') {
-                    acc[key] = value?.default;
-                }
-                return acc;
-            }, {});
-            setSliderValues(initialSliderValues);
-        }
-    }, [modelInfoData]);
-
-    const dispatch = useDispatch();
-
-    const handleSliderChange = (e, key) => {
-        const newValue = Number(e?.target?.value);
-        setSliderValues({ ...sliderValues, [key]: newValue });
-    };
-
-    const handleSliderBlur = (e, key) => {
-        const newValue = Number(e.target.value);
-
-        let updatedDataToSend = {
-            configuration: {
-                model: bridge?.configuration?.model?.default,
-                [key]: newValue,
-            },
-            service: bridge?.service?.toLowerCase(),
-        };
-
-        UpdateBridge(updatedDataToSend);
-    };
 
     const handleInputChange = (e, key, isSlider = false) => {
         let newValue = e.target.value;
@@ -130,7 +95,8 @@ const AdvancedParameters = ({ params }) => {
                                         <Info size={12} />
                                     </div>
                                 </div>
-                                {field === 'slider' && <p className='text-right' id={`sliderValue-${key}`}>{configuration?.[key]}</p> }
+                                {!(min<=configuration?.[key]<=max) &&  <p className='text-right bg-error-content'>Error</p>}
+                                {field === 'slider' && <p className='text-right' id={`sliderValue-${key}`}>{configuration?.[key]}</p>}
                             </label>
                             {field === 'slider' && (
                                 <div>
