@@ -1,10 +1,13 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
+import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const AdvancedParameters = ({ params }) => {
+    const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+    const dispatch = useDispatch();
     const { service, model, type, bridge, configuration } = useCustomSelector((state) => ({
         service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service?.toLowerCase(),
         model: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.model,
@@ -19,7 +22,6 @@ const AdvancedParameters = ({ params }) => {
         modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[serviceModel]?.configuration?.additional_parameters,
     }));
 
-    const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
     const handleInputChange = (e, key, isSlider = false) => {
         let newValue = e.target.value;
@@ -27,7 +29,6 @@ const AdvancedParameters = ({ params }) => {
         if (e.target.type === 'number') {
             newValue = newValue.includes('.') ? parseFloat(newValue) : parseInt(newValue, 10);
         }
-
 
         let updatedDataToSend = {
             service: bridge?.service?.toLowerCase(),
@@ -39,39 +40,12 @@ const AdvancedParameters = ({ params }) => {
         if (key === 'response_format') {
             updatedDataToSend.configuration.response_format = newCheckedValue ? { type: "json_object" } : { type: "text" };
         }
-
-        UpdateBridge(updatedDataToSend);
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
     };
-
-    const UpdateBridge = (currentDataToSend) => {
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
-    };
-
 
     const toggleAccordion = () => {
         setIsAccordionOpen((prevState) => !prevState);
     };
-
-    const AdvancedParameters = {
-        creativity_level: { name: 'Creativity Level', description: 'Adjusts how creative the responses are' },
-        token_selection_limit: { name: 'Max Tokens Limit', description: 'Sets the maximum number of tokens' },
-        topP: { name: 'Top P', description: 'Controls the diversity of responses' },
-        json_mode: { name: 'JSON Mode', description: 'Enable or disable JSON format' },
-        probability_cutoff: { name: 'Probability Cutoff', description: 'Sets the threshold for probability' },
-        repetition_penalty: { name: 'Repetition Penalty', description: 'Reduces repetition in responses' },
-        novelty_penalty: { name: 'Novelty Penalty', description: 'Penalizes responses that lack novelty' },
-        log_probability: { name: 'Log Probability', description: 'Log the probabilities of responses' },
-        response_count: { name: 'Response Count', description: 'Number of responses to generate' },
-        response_suffix: { name: 'Response Suffix', description: 'Text to add at the end of responses' },
-        additional_stop_sequences: { name: 'Stop Sequences', description: 'Sequences that signal the end of response' },
-        input_text: { name: 'Input Text', description: 'The initial input text' },
-        echo_input: { name: 'Echo Input', description: 'Repeat the input text in the response' },
-        best_response_count: { name: 'Best Of', description: 'Generate multiple responses and select the best' },
-        seed: { name: 'Seed', description: 'Set a seed for random number generation' },
-        tool_choice: { name: 'Tool Choice', description: 'Number of responses to generate' }, // need to change description
-    };
-
-    const keysNotToDisplay = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format'];
 
     return (
         <div className="collapse text-base-content">
@@ -81,11 +55,10 @@ const AdvancedParameters = ({ params }) => {
                 {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
             {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-2">
-                {modelInfoData && Object.entries(modelInfoData).map(([key, { field, min, max, step, default: defaultValue }]) => {
-                    if (keysNotToDisplay.includes(key)) return null;
-                    const name = AdvancedParameters[key]?.name || key;
-                    const description = AdvancedParameters[key]?.description || '';
-
+                {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue }]) => {
+                    if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
+                    const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
+                    const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
 
                     return (
                         <div key={key} className="form-control">
