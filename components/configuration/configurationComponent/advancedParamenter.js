@@ -101,9 +101,11 @@ const AdvancedParameters = ({ params }) => {
         input_text: { name: 'Input Text', description: 'The initial input text' },
         echo_input: { name: 'Echo Input', description: 'Repeat the input text in the response' },
         best_of: { name: 'Best Of', description: 'Generate multiple responses and select the best' },
-        seed: { name: 'Seed', description: 'Set a seed for random number generation' }
+        seed: { name: 'Seed', description: 'Set a seed for random number generation' },
+        tool_choice: { name: 'Tool Choice', description: 'Number of responses to generate' }, // need to change description
     };
 
+    const keysNotToDisplay = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format'];
 
     return (
         <div className="collapse text-base-content">
@@ -114,6 +116,7 @@ const AdvancedParameters = ({ params }) => {
             </div>
             {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-2">
                 {modelInfoData && Object.entries(modelInfoData).map(([key, { field, min, max, step, default: defaultValue }]) => {
+                    if (keysNotToDisplay.includes(key)) return null;
                     const name = AdvancedParameters[key]?.name || key;
                     const description = AdvancedParameters[key]?.description || '';
 
@@ -122,7 +125,7 @@ const AdvancedParameters = ({ params }) => {
                         <div key={key} className="form-control">
                             <label className="label">
                                 <div className='flex flex-row gap-2 items-center'>
-                                    <span className="label-text capitalize">{name}</span>
+                                    <span className="label-text capitalize">{name || key}</span>
                                     <div className="tooltip tooltip-right" data-tip={description}>
                                         <Info size={12} />
                                     </div>

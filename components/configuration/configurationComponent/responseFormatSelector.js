@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 
 const ResponseFormatSelector = ({ params }) => {
     const { response_format } = useCustomSelector((state) => ({
-        response_format: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.response_format,
+        response_format: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.response_format,
     }));
 
     const [selectedOption, setSelectedOption] = useState(response_format?.type || 'default');
