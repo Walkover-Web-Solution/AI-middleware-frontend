@@ -6,11 +6,12 @@ import { useDispatch } from 'react-redux';
 
 const ModelDropdown = ({ params }) => {
     const dispatch = useDispatch();
-    const { service, model, modelType } = useCustomSelector((state) => ({
-        service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
+    const { model, modelType, modelsList } = useCustomSelector((state) => ({
         model: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.model,
         modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type,
+        modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service],
     }));
+    console.log(modelType, model)
 
     const handleModel = (e) => {
         const selectedModel = e.target.value.split('|')[1];
@@ -30,17 +31,25 @@ const ModelDropdown = ({ params }) => {
                 className="select select-sm max-w-xs select-bordered"
             >
                 <option disabled>Select a Model</option>
-                {services && Object.entries(services?.[service] || {}).map(([group, options], groupIndex) => (
-                    group !== 'models' && (
-                        <optgroup label={group} key={`group_${groupIndex}`}>
-                            {Array.from(options).map((option, optionIndex) => (
-                                <option key={`option_${groupIndex}_${optionIndex}`} value={`${group}|${option}`}>
-                                    {option}
-                                </option>
-                            ))}
-                        </optgroup>
-                    )
-                ))}
+                {services && Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
+                    if (group !== 'models') {
+                        return (
+                            <optgroup label={group} key={`group_${groupIndex}`}>
+                                {Object.keys(options || {}).map((option, optionIndex) => {
+                                    const modelName = options?.[option]?.configuration?.model?.default;
+                                    return (
+                                        <option key={`option_${groupIndex}_${optionIndex}`} value={`${group}|${modelName}`}>
+                                            {modelName}
+                                        </option>
+                                    );
+                                })}
+                            </optgroup>
+                        );
+                    }
+                    return null;
+                })}
+
+
             </select>
         </label>
     );

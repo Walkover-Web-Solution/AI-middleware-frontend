@@ -13,6 +13,7 @@ const AdvancedParameters = ({ params }) => {
         configuration: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration,
 
     }));
+    console.log(model)
     const serviceModel = model?.replace(/-/g, '_');
     const { modelInfoData } = useCustomSelector((state) => ({
         modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[serviceModel]?.configuration?.additional_parameters,
@@ -62,10 +63,10 @@ const AdvancedParameters = ({ params }) => {
         log_probability: { name: 'Log Probability', description: 'Log the probabilities of responses' },
         response_count: { name: 'Response Count', description: 'Number of responses to generate' },
         response_suffix: { name: 'Response Suffix', description: 'Text to add at the end of responses' },
-        stop_sequences: { name: 'Stop Sequences', description: 'Sequences that signal the end of response' },
+        additional_stop_sequences: { name: 'Stop Sequences', description: 'Sequences that signal the end of response' },
         input_text: { name: 'Input Text', description: 'The initial input text' },
         echo_input: { name: 'Echo Input', description: 'Repeat the input text in the response' },
-        best_of: { name: 'Best Of', description: 'Generate multiple responses and select the best' },
+        best_response_count: { name: 'Best Of', description: 'Generate multiple responses and select the best' },
         seed: { name: 'Seed', description: 'Set a seed for random number generation' },
         tool_choice: { name: 'Tool Choice', description: 'Number of responses to generate' }, // need to change description
     };
@@ -95,7 +96,7 @@ const AdvancedParameters = ({ params }) => {
                                         <Info size={12} />
                                     </div>
                                 </div>
-                                {!(min<=configuration?.[key]<=max) &&  <p className='text-right bg-error-content'>Error</p>}
+                                {((field === 'slider' || field === 'number') && !(min <= configuration?.[key] <= max)) &&  <p className='text-right bg-error-content'>Error</p>}
                                 {field === 'slider' && <p className='text-right' id={`sliderValue-${key}`}>{configuration?.[key]}</p>}
                             </label>
                             {field === 'slider' && (
