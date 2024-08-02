@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import CreateNewBridge from './createNewBridge';
 import OpenAiIcon from '@/icons/OpenAiIcon';
 import GeminiIcon from '@/icons/GeminiIcon';
+import AddVariable from './addVariable';
 
 function Navbar() {
   const router = useRouter();
@@ -28,7 +29,8 @@ function Navbar() {
   const [isOpenChatbot, setIsOpenChatbot] = useState(false)
   const [searchQuery, setSearchQuery] = useState('');
   const [bridgeSearchQuery, setBridgeSearchQuery] = useState('');
-  const [chatbotSearchQuery, setChatbotSearchQuery] = useState('');
+  const [chatbotSearchQuery, setChatbotSearchQuery] = useState(''); 
+    const [showAddVaribablePopup, setShowAddVariablePopup] = useState(false);
   const sidebarRef = useRef(null);
   const sideBridgeRef = useRef(null);
   const sideBotRef = useRef(null);
@@ -234,6 +236,35 @@ function Navbar() {
       <div className="justify-end w-full" >
         {path.length === 6 && path[3] === 'bridges' ? (
           <>
+          <div className="pr-3">
+              <div className="dropdown dropdown-bottom dropdown-end">
+                <div tabIndex={0} role="button" className="btn m-1">
+                  Add Variable
+                  <ChevronDown size={16} />
+                </div>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+                >
+                  <li>
+                    <a>No Envirnoment Variable</a>
+                  </li>
+                  <li>
+                    <a>local</a>
+                  </li>
+                  <li>
+                    <a>Testing</a>
+                  </li>
+                  <li>
+                    <a onClick={() => setShowAddVariablePopup(true)}>
+                      Add Variable
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <AddVariable id={path[5]} setShowAddVariablePopup={setShowAddVariablePopup} showAddVaribablePopup={showAddVaribablePopup}/>
+              
+            </div>
             <div className="join">
               <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${path[5]}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>
               <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${path[5]}`)} className={` ${path[4] === 'history' ? "btn-primary" : ""}   btn join-item `}><History size={16} /> History</button>
@@ -267,6 +298,7 @@ function Navbar() {
                 </button> : ""
         )}
       </div>
+      
       {/* org slider  */}
 
       <div
