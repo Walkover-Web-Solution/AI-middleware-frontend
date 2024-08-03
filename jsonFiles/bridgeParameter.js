@@ -17,3 +17,5 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
 };
 
 export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format'];
+
+export const SERVICES = ['openai', 'google'];

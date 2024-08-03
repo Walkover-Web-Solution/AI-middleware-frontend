@@ -1,5 +1,4 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
-import { services } from '@/jsonFiles/models';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React from 'react';
 import { useDispatch } from 'react-redux';
@@ -11,7 +10,6 @@ const ModelDropdown = ({ params }) => {
         modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type,
         modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service],
     }));
-    console.log(modelType, model)
 
     const handleModel = (e) => {
         const selectedModel = e.target.value.split('|')[1];
@@ -31,7 +29,7 @@ const ModelDropdown = ({ params }) => {
                 className="select select-sm max-w-xs select-bordered"
             >
                 <option disabled>Select a Model</option>
-                {services && Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
+                {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
                     if (group !== 'models') {
                         return (
                             <optgroup label={group} key={`group_${groupIndex}`}>

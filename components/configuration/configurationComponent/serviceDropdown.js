@@ -1,4 +1,5 @@
 import { useCustomSelector } from "@/customSelector/customSelector";
+import { SERVICES } from "@/jsonFiles/bridgeParameter";
 import { services } from '@/jsonFiles/models'; // Adjust the path as needed
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { useCallback, useEffect, useState } from "react";
@@ -35,8 +36,9 @@ function ServiceDropdown({ params }) {
                 </div>
                 <select value={selectedService} onChange={handleServiceChange} className="select select-sm max-w-xs select-bordered">
                     <option disabled>Select a Service</option>
-                    <option value="google">google</option>
-                    <option value="openai">openai</option>
+                    {SERVICES.map((service, index) => (
+                        <option key={index} value={service}>{service}</option>
+                    ))}
                 </select>
             </label>
         </div>
