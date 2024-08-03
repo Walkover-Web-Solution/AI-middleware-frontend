@@ -120,13 +120,11 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '') =
 
 
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
-
   try {
     let dryRun
     if (localDataToSend.configuration.type === "chat") dryRun = await axios.post(`${PYTHON_URL}/api/v1/model/playground/chat/completion/${bridge_id}`, localDataToSend)
     if (localDataToSend.configuration.type === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
     if (localDataToSend.configuration.type === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings/${bridge_id}`, localDataToSend)
-
     return { success: true, data: dryRun.data }
   } catch (error) {
     console.error("dry run error", error, error.response.data.error);

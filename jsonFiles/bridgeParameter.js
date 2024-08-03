@@ -1,6 +1,6 @@
 export const ADVANCED_BRIDGE_PARAMETERS = {
     creativity_level: { name: 'Creativity Level', description: 'Adjusts how creative the responses are' },
-    max_output_tokens: { name: 'Max Tokens Limit', description: 'Sets the maximum number of tokens' },
+    max_tokens: { name: 'Max Tokens Limit', description: 'Sets the maximum number of tokens' },
     token_selection_limit: { name: 'Max Tokens Limit (Top  K)', description: 'Sets the maximum number of tokens' },
     json_mode: { name: 'JSON Mode', description: 'Enable or disable JSON format' },
     probability_cutoff: { name: 'Probability Cutoff (Top P)', description: 'Sets the threshold for probability' },

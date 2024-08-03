@@ -47,7 +47,7 @@ function Home({ params }) {
   return (
     <div className="drawer lg:drawer-open">
       <CreateNewBridge />
-      {isLoading && <LoadingSpinner />}
+      {!allBridges && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col items-start justify-start">
         <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
@@ -79,42 +79,30 @@ function Home({ params }) {
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
                   {filteredBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
                     <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center gap-7 rounded-md border cursor-pointer hover:shadow-lg bg-base-100">
-                      <div className="w-full">
-                        <div className="p-4 flex flex-col justify-between h-[200px] items-start">
-                          <div className="w-full">
-                            <h1 className="inline-flex truncate w-full items-center gap-2 text-lg font-semibold text-base-content">
-                              {item.service === 'openai' ?
-                                <OpenAiIcon /> : <GeminiIcon />
-                              }
-
-                              {item['name']}
-                            </h1>
-                            <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
-                              {item.slugName ? <p>SlugName: {item.slugName}</p> : ""}
-                              {item.configuration?.prompt && (
-                                <>
-                                {Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
-                                    <div key={index}>
-                                      <p>Role: {promptItem.role}</p>
-                                      <p>Content: {promptItem.content}</p>
-                                    
-                                    </div>
-                                  )) : (
-                                    <p>Prompt: {item.configuration.prompt}</p>
-                                  )}
-                                </>
-                              )}
-                              {item.configuration?.input && <p className="text-xs">Input: {item.configuration.input}</p>}
-                            </p>
-                          </div>
-                          <div className="mt-auto">
-                            <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
-                              {item.service}
-                            </span>
-                            <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
-                              {item.configuration?.model || ""}
-                            </span>
-                          </div>
+                      <div className="w-full p-4 flex flex-col justify-between h-[200px] items-start">
+                        <h1 className="inline-flex truncate w-full items-center gap-2 text-lg font-semibold text-base-content">
+                          {item.service === 'openai' ? <OpenAiIcon /> : <GeminiIcon />}
+                          {item.name}
+                        </h1>
+                        <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
+                          {item.slugName && <span>SlugName: {item.slugName}</span>}
+                          {item.configuration?.prompt && (
+                            Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
+                              <div key={index}>
+                                <p>Role: {promptItem.role}</p>
+                                <p>Content: {promptItem.content}</p>
+                              </div>
+                            )) : <p>Prompt: {item.configuration.prompt}</p>
+                          )}
+                          {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
+                        </p>
+                        <div className="mt-auto">
+                          <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
+                            {item.service}
+                          </span>
+                          <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
+                            {item.configuration?.model || ""}
+                          </span>
                         </div>
                       </div>
                     </div>

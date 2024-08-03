@@ -9,11 +9,17 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
 function Chat({ params }) {
-  const { bridge, variablesKeyValue } = useCustomSelector((state) => ({
+  const dispatch = useDispatch();
+
+  const { bridge,modelType,  variablesKeyValue } = useCustomSelector((state) => ({
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+    modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type?.toLowerCase(),
     variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || []
   }));
   const messagesEndRef = useRef(null);
+  // const dataToSend = {
+  // };
+
   const dataToSend = {
     configuration: {
       model: bridge?.configuration?.model?.default,
@@ -49,6 +55,15 @@ function Chat({ params }) {
     }, {}) : {};
   }, [bridge]);
 
+  const variables = useMemo(() => {
+    return variablesKeyValue.reduce((acc, pair) => {
+      if (pair.key && pair.value) {
+        acc[pair.key] = pair.value;
+      }
+      return acc;
+    }, {});
+  }, [variablesKeyValue]);
+
   // Update localDataToSend configuration
   const updateLocalDataToSend = useCallback(updateFn => {
     setLocalDataToSend(prevDataToSend => ({
@@ -63,19 +78,12 @@ function Chat({ params }) {
 
   // Handle sending message
   const handleSendMessage = useCallback(async () => {
-    if (dataToSend.configuration.type === "chat") if (newMessage.trim() === "") return;
+    // debugger
+    if (modelType === "chat") if (newMessage.trim() === "") return;
     setErrorMessage("");
     setNewMessage("");
     setLoading(true);
     try {
-      // Create the variables object
-      const variables = variablesKeyValue.reduce((acc, pair) => {
-        if (pair.key && pair.value) {
-          acc[pair.key] = pair.value;
-        }
-        return acc;
-      }, {});
-
       // Create user chat
       const newChat = {
         id: messages.length + 1,
@@ -88,27 +96,24 @@ function Chat({ params }) {
       };
       let response, responseData;
       let data;
-      if (dataToSend.configuration.type === "chat") {
-        data = modelInfo[localDataToSend.service].chatmessage.chat;
-        const chatPath = modelInfo[localDataToSend.service].chatmessage.chatpath;
-        _.set(data, chatPath, newMessage);
+      if (modelType === "chat") {
+        // data = modelInfo[localDataToSend.service].chatmessage.chat;
+        // const chatPath = modelInfo[localDataToSend.service].chatmessage.chatpath;
+        // _.set(data, chatPath, newMessage);
         setMessages(prevMessages => [...prevMessages, newChat]);
         responseData = await dryRun({
           localDataToSend: {
-            ...localDataToSend,
             configuration: {
-              ...localDataToSend.configuration,
-              prompt: bridge?.inputConfig?.system?.default,
               conversation: conversation,
-              ...defaultsMap,
-              user: data.content,
+              type: modelType
             },
+            user: newMessage,
             variables // Include variables in the request data
           },
           bridge_id: params?.id
         });
       }
-      else if (dataToSend.configuration.type === "completion") {
+      else if (modelType === "completion") {
         responseData = await dryRun({
           localDataToSend: {
             ...localDataToSend,
@@ -120,7 +125,7 @@ function Chat({ params }) {
           bridge_id: params?.id
         });
       }
-      else if (dataToSend.configuration.type === "embedding") {
+      else if (modelType === "embedding") {
         responseData = await dryRun({
           localDataToSend: {
             ...localDataToSend,
@@ -132,8 +137,9 @@ function Chat({ params }) {
           bridge_id: params?.id
         });
       }
+      debugger
       if (!responseData.success) {
-        if (dataToSend.configuration.type === "chat") {
+        if (modelType === "chat") {
           setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
         }
         toast.error(responseData.error);
@@ -148,7 +154,7 @@ function Chat({ params }) {
       const assistConversation = _.get(response.response, assistPath, "");
 
       // Update localDataToSend with assistant conversation
-      if (dataToSend.configuration.type === "chat") {
+      if (modelType === "chat") {
         setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
       }
       const newChatAssist = {
@@ -171,7 +177,7 @@ function Chat({ params }) {
     } finally {
       setLoading(false);
     }
-  }, [newMessage, messages, localDataToSend, updateLocalDataToSend, keyValuePairs, defaultsMap, conversation, dataToSend.configuration.type]);
+  }, [newMessage, messages, localDataToSend, updateLocalDataToSend, keyValuePairs, defaultsMap, conversation, modelType]);
 
   // Handle key press event
   const handleKeyPress = useCallback(

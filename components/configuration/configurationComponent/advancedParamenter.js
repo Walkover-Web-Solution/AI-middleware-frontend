@@ -21,7 +21,7 @@ const AdvancedParameters = ({ params }) => {
     }));
 
     const handleInputChange = (e, key, isSlider = false) => {
-        let newValue = e.target.value;
+        let newValue = Number(e.target.value);
         let newCheckedValue = e.target.checked;
         if (e.target.type === 'number') {
             newValue = newValue.includes('.') ? parseFloat(newValue) : parseInt(newValue, 10);
