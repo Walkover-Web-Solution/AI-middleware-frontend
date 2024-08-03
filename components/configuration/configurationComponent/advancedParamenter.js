@@ -16,12 +16,9 @@ const AdvancedParameters = ({ params }) => {
         configuration: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration,
 
     }));
-    console.log(model)
-    const serviceModel = model?.replace(/-/g, '_');
     const { modelInfoData } = useCustomSelector((state) => ({
-        modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[serviceModel]?.configuration?.additional_parameters,
+        modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters,
     }));
-
 
     const handleInputChange = (e, key, isSlider = false) => {
         let newValue = e.target.value;

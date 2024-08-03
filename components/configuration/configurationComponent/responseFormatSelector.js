@@ -26,7 +26,7 @@ const ResponseFormatSelector = ({ params }) => {
     const handleChangeWebhook = (e) => {
         const newurl = e.target.value;
         if (newurl.trim() === "") {
-            setErrors(prevErrors => ({ ...prevErrors, webhook: '' }));
+            setErrors(prevErrors => ({ ...prevErrors, webhook: 'Please enter a valid webhook URL' }));
             return;
         }
         const isValid = validateWebhook(newurl);
@@ -37,7 +37,7 @@ const ResponseFormatSelector = ({ params }) => {
     const handleChangeHeaders = (e) => {
         const newHeaders = e.target.value;
         if (newHeaders.trim() === "") {
-            setErrors(prevErrors => ({ ...prevErrors, headers: '' }));
+            setErrors(prevErrors => ({ ...prevErrors, headers: 'Please enter a valid headers' }));
             return;
         }
         const isValid = isValidJson(newHeaders);
@@ -103,7 +103,7 @@ const ResponseFormatSelector = ({ params }) => {
                         <textarea
                             className="textarea textarea-bordered h-24 w-full"
                             id="headers"
-                            defaultValue={webhookData?.headers}
+                            defaultValue={typeof webhookData?.headers === 'object' ? JSON.stringify(webhookData?.headers, null, 2) : webhookData?.headers}
                             onBlur={handleChangeHeaders}
                             placeholder='{"Content-Type": "application/json"}'
                         ></textarea>

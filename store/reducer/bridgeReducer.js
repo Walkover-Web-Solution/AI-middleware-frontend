@@ -63,13 +63,20 @@ export const bridgeReducer = createSlice({
         configuration: { ...state.allBridgesMap[_id].configuration, ...configuration }
       };
       
-      // if (bridgeType) {
-      //   const allData = state.org[bridges.org_id];
-      //   const foundBridge = allData.find(bridge => bridge._id === _id);
-      //   if (foundBridge) {
-      //     foundBridge.bridgeType = bridges.bridgeType;
-      //   }
-      // }
+      if (extraData?.bridgeType) {
+        const allData = state.org[bridges.org_id];
+        if (allData) {
+          // Find the index of the bridge to update
+          const index = allData.findIndex(bridge => bridge._id === _id);
+          if (index !== -1) {
+            // Update the specific bridge object within the array immutably
+            state.org[bridges.org_id][index] = {
+              ...state.org[bridges.org_id][index],
+              ...bridges
+            };
+          }
+        }
+      }
       state.loading = false;
     },
     deleteBridgeReducer: (state, action) => {
