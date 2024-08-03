@@ -71,7 +71,10 @@ function OrgSlider() {
                     {filteredOrganizations.slice() // Create a copy of the array to avoid mutating the original
                         .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically based on title
                         .map((item) => (
-                            <li key={item.id}><a className={`${item.id == path[2] ? "active" : `${item.id}`} py-2 px-2 rounded-md`} key={item.id} onClick={() => { handleSwitchOrg(item.id, item.name); router.push(`/org/${item.id}/${path[3]}`) }}  > <Building2 size={16} /> {item.name}</a></li>
+                            <li key={item.id}><a className={`${item.id == path[2] ? "active" : `${item.id}`} py-2 px-2 rounded-md`} key={item.id}
+                                onClick={() => { handleSwitchOrg(item.id, item.name)}} >
+                                <Building2 size={16} /> {item.name}</a>
+                            </li>
                         ))}
                 </ul>
             </div>
@@ -92,7 +95,7 @@ function OrgSlider() {
                     <div className="border-t border-gray-200 bg-white">
                         <ul className="menu w-full   text-base-content">
                             <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
-                            <li> <a className={`py-2 px-2  ${path[3] === 'apikey' ? "active" : ""}  rounded-md`} onClick={() => { router.push(`/org/${path[2]}/apikey`)}}> <KeyRound size={16} />API key</a> </li>
+                            <li> <a className={`py-2 px-2  ${path[3] === 'apikey' ? "active" : ""}  rounded-md`} onClick={() => { router.push(`/org/${path[2]}/apikey`) }}> <KeyRound size={16} />API key</a> </li>
                             <li onClick={logoutHandler}><a className='py-2 px-2 rounded-md'> <LogOut size={16} />  logout</a></li>
                         </ul>
                     </div>

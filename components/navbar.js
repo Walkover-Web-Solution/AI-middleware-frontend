@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatbotSlider';
 import OrgSlider from './sliders/orgSlider';
+import { toggleSidebar } from '@/utils/utility';
 
 function Navbar() {
   const router = useRouter();
@@ -60,28 +61,40 @@ function Navbar() {
         break;
     }
   };
-  const toggleSidebar = (sidebarId) => {
-    const sidebar = document.getElementById(sidebarId);
-    const handleClickOutside = (event) => {
-      const sidebar = document.getElementById(sidebarId);
-      const button = event.target.closest('button');
+  
+  // const toggleSidebar = (sidebarId) => {
+  //   const sidebar = document.getElementById(sidebarId);
+  //   const handleClickOutside = (event) => {
+  //     const sidebar = document.getElementById(sidebarId);
+  //     const button = event.target.closest('button');
 
-      if (sidebar && !sidebar.contains(event.target) && !button) {
-        sidebar.classList.add('-translate-x-full');
-        document.removeEventListener('click', handleClickOutside);
-      }
-    };
+  //     if (sidebar && !sidebar.contains(event.target) && !button) {
+  //       sidebar.classList.add('-translate-x-full');
+  //       document.removeEventListener('click', handleClickOutside);
+  //       document.removeEventListener('keydown', handleEscPress);
+  //     }
+  //   };
 
-    if (sidebar) {
-      sidebar.classList.toggle('-translate-x-full');
+  //   const handleEscPress = (event) => {
+  //     if (event.key === 'Escape') {
+  //       sidebar.classList.add('-translate-x-full');
+  //       document.removeEventListener('click', handleClickOutside);
+  //       document.removeEventListener('keydown', handleEscPress);
+  //     }
+  //   };
 
-      if (!sidebar.classList.contains('-translate-x-full')) {
-        document.addEventListener('click', handleClickOutside);
-      } else {
-        document.removeEventListener('click', handleClickOutside);
-      }
-    }
-  };
+  //   if (sidebar) {
+  //     sidebar.classList.toggle('-translate-x-full');
+
+  //     if (!sidebar.classList.contains('-translate-x-full')) {
+  //       document.addEventListener('click', handleClickOutside);
+  //       document.addEventListener('keydown', handleEscPress);
+  //     } else {
+  //       document.removeEventListener('click', handleClickOutside);
+  //       document.removeEventListener('keydown', handleEscPress);
+  //     }
+  //   }
+  // };
 
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleBridgeSidebar = () => toggleSidebar('default-bridge-sidebar');

@@ -1,4 +1,5 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
+import { toggleSidebar } from '@/utils/utility';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useState } from 'react'
 
@@ -16,13 +17,18 @@ function ChatBotSlider() {
     const filteredChatbotsList = chatbotList.filter(
         (item) => item?.title?.toLowerCase().includes(chatbotSearchQuery?.toLowerCase())
     );
+
+    const handleNavigation = (id) => {
+        router.push(`/org/${path[2]}/chatbot/configure/${id}`);
+        toggleSidebar('default-chatbot-sidebar');
+    }
     return (
         <aside
             id="default-chatbot-sidebar"
             className="sidebar-container fixed flex flex-col top-0 left-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen -translate-x-full py-4 overflow-y-auto bg-base-200 transition-all duration-300 z-50"
             aria-label="Sidebar"
         >
-            <div className="flex flex-col overflow-hidden gap-4">
+            <div className="flex flex-col overflow-hidden gap-4 w-full">
                 <p className='text-xl'> Chatbots </p>
                 {/* Input field for chatbot search */}
                 <input
@@ -40,7 +46,7 @@ function ChatBotSlider() {
                             <li key={item._id} className=' w-full'>
                                 <a
                                     className={`${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md`}
-                                    onClick={() => router.push(`/org/${path[2]}/chatbot/configure/${item._id}`)}
+                                    onClick={() => handleNavigation(item._id)}
                                 >
                                     {item?.title}
                                 </a>

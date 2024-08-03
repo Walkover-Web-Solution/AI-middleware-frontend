@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import CreateNewBridge from '../createNewBridge';
 import OpenAiIcon from '@/icons/OpenAiIcon';
 import GeminiIcon from '@/icons/GeminiIcon';
+import { toggleSidebar } from '@/utils/utility';
 
 function BridgeSlider() {
     const router = useRouter();
@@ -21,6 +22,11 @@ function BridgeSlider() {
     const filteredBridgesList = bridgesList.filter(
         (item) => item.name.toLowerCase().includes(bridgeSearchQuery.toLowerCase())
     );
+
+    const handleNavigation = (id) => {
+        router.push(`/org/${path[2]}/bridges/configure/${id}`);
+        toggleSidebar('default-bridge-sidebar');
+    } 
 
     return (
         <aside
@@ -46,7 +52,7 @@ function BridgeSlider() {
                             <li key={item._id} className='max-w-full'>
                                 <a
                                     className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md truncate max-w-full`}
-                                    onClick={() => router.push(`/org/${path[2]}/bridges/configure/${item._id}`)}
+                                    onClick={() => handleNavigation(item._id)}
                                 >
                                     {item.service === 'openai' ?
                                         <OpenAiIcon /> : <GeminiIcon />
