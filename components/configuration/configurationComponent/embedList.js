@@ -29,7 +29,7 @@ const EmbedList = ({ params }) => {
                             {value.description ? value.description : "A description is required for proper functionality."}
                         </p>
                         <div className="mt-4">
-                            <span className="mr-2 inline-block rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content">
+                            <span className={`mr-2 inline-block rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${value.status?.toLowerCase() === 'drafted' ? 'bg-yellow-100' : value?.status?.toLowerCase() === 'paused'? 'bg-red-100': 'bg-green-100'}`}>
                                 {value?.description?.trim() === "" ? "Description Required" : value.status}
                             </span>
                         </div>

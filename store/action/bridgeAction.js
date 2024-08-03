@@ -8,15 +8,14 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   try {
     dispatch(isPending())
     const data = await getSingleBridge(id);
-    // const integrationData = await integration(data.data.bridges.embed_token)
+    const integrationData = await integration(data.data?.bridge?.embed_token)
 
-    // const flowObject = integrationData.flows.reduce((obj, item) => {
-    //   obj[item.id] = item;
-    //   return obj;
-    // }, {});
+    const flowObject = integrationData.flows.reduce((obj, item) => {
+      obj[item.id] = item;
+      return obj;
+    }, {});
 
-    dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge }));
-    // dispatch(fetchSingleBridgeReducer({ bridges: data.data, integrationData: flowObject }));
+    dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge, integrationData: flowObject }));
   } catch (error) {
     dispatch(isError())
     console.error(error);

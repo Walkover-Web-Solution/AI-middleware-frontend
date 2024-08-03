@@ -39,7 +39,7 @@ export const bridgeReducer = createSlice({
       const { _id } = bridge;
       // const obj2 = modelInfo[service][modelDefault];
       // const response = updatedData(bridges, obj2, type);
-      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge};
+      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge, integrationData };
       state.loading = false;
     },
     fetchAllBridgeReducer: (state, action) => {
