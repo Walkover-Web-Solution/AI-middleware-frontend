@@ -128,6 +128,7 @@ export const dryRun = async ({ localDataToSend, bridge_id }) => {
     return { success: true, data: dryRun.data }
   } catch (error) {
     console.error("dry run error", error, error.response.data.error);
+    toast.error(error?.response?.data?.error);
     return { success: false, error: error.response.data.error }
   }
 }

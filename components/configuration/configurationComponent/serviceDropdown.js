@@ -33,7 +33,7 @@ function ServiceDropdown({ params }) {
                 <div className="label">
                     <span className="label-text">Service</span>
                 </div>
-                <select value={selectedService} onChange={handleServiceChange} className="select select-sm max-w-xs select-bordered">
+                <select value={selectedService} onChange={handleServiceChange} className="select select-sm max-w-xs select-bordered capitalize">
                     <option disabled>Select a Service</option>
                     {SERVICES.map((service, index) => (
                         <option key={index} value={service}>{service}</option>
