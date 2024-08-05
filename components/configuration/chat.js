@@ -78,12 +78,14 @@ function Chat({ params }) {
           <div className="relative flex flex-col gap-4 w-full">
             <div className="flex flex-row gap-2">
               <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} params={params} />
-              <button
-                className="btn"
-                onClick={() => setIsAccordionVisible(!isAccordionVisible)}
-              >
-                +
-              </button>
+              <div className="tooltip" onClick={() => setIsAccordionVisible(!isAccordionVisible)} data-tip="Add variables">
+                <button
+                  className="btn"
+                  onClick={() => setIsAccordionVisible(!isAccordionVisible)}
+                >
+                  +
+                </button>
+              </div>
             </div>
             {isAccordionVisible && (
               <div className="join join-vertical w-full mt-4">
@@ -95,7 +97,7 @@ function Chat({ params }) {
                   <div className="collapse-content">
                     <div className="flex flex-col gap-4 max-h-56 overflow-y-auto">
                       {keyValuePairs.map((pair, index) => (
-                        <div key={index} className="flex flex-row gap-4 items-center">
+                        <div key={index} className="flex flex-row gap-4 items-end">
                           <div className="form-control w-full sm:w-1/2">
                             {index === 0 && <label className="label">
                               <span className="label-text">Key</span>
@@ -125,7 +127,7 @@ function Chat({ params }) {
                             />
                           </div>
                           <button
-                            className="btn btn-sm mt-7"
+                            className="btn btn-sm"
                             onClick={() => handleRemoveKeyValuePair(index)}
                           >
                             -
@@ -136,7 +138,7 @@ function Chat({ params }) {
                         className="btn self-center mt-4"
                         onClick={handleAddKeyValuePair}
                       >
-                        Add Variable
+                        +
                       </button>
                     </div>
                   </div>
