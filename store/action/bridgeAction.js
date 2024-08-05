@@ -28,6 +28,11 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
     onSuccess(data);
     dispatch(createBridgeReducer({ data, orgId: dataToSend.orgid }));
   } catch (error) {
+    if (error?.response?.data?.message?.includes("duplicate key")) {
+      toast.error("Bridge Name can't be duplicate");
+    } else {
+      toast.error("Something went wrong");
+    }
     console.error(error);
     throw error
   }

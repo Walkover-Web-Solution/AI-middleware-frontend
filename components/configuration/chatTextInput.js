@@ -8,10 +8,11 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
     const [conversation, setConversation] = useState([]);
     const inputRef = useRef(null);
 
-    const { bridge, modelType, modelName, variablesKeyValue } = useCustomSelector((state) => ({
+    const { bridge, modelType, modelName, variablesKeyValue, prompt } = useCustomSelector((state) => ({
         bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
         modelName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.model?.toLowerCase(),
         modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type?.toLowerCase(),
+        prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt,
         variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
     }));
 
@@ -45,6 +46,10 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
     }, [variablesKeyValue]);
 
     const handleSendMessage = async (e) => {
+        if(prompt?.trim() === "" && modelType === "chat") {
+            setErrorMessage("Prompt is required");
+            return;
+        }
         const newMessage = e.target.value;
         if (modelType === "chat") if (newMessage.trim() === "") return;
         setErrorMessage("");
