@@ -101,9 +101,13 @@ function Chat({ params }) {
       let response, responseData;
       let data;
       if (modelType === "chat") {
+        data = {
+          role: "user",
+          content: ""
+      }
         // data = modelInfo[localDataToSend.service].chatmessage.chat;
         // const chatPath = modelInfo[localDataToSend.service].chatmessage.chatpath;
-        // _.set(data, chatPath, newMessage);
+        _.set(data, "content", newMessage);
         setMessages(prevMessages => [...prevMessages, newChat]);
         responseData = await dryRun({
           localDataToSend: {
