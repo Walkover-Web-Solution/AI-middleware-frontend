@@ -11,11 +11,17 @@ import { toast } from "react-toastify";
 function Chat({ params }) {
   const dispatch = useDispatch();
 
-  const { bridge,modelType,  variablesKeyValue } = useCustomSelector((state) => ({
+  const { bridge, modelType, modelName, variablesKeyValue } = useCustomSelector((state) => ({
     bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+    modelName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.model?.toLowerCase(),
     modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type?.toLowerCase(),
-    variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || []
+    variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
   }));
+
+  const { outputConfig } = useCustomSelector((state) => ({
+    outputConfig: state?.modelReducer?.serviceModels?.[bridge?.service]?.[modelType]?.[modelName]?.configuration?.outputConfig
+  }));
+
   const messagesEndRef = useRef(null);
   // const dataToSend = {
   // };
@@ -30,7 +36,6 @@ function Chat({ params }) {
     bridgeType: bridge?.bridgeType,
     slugName: bridge?.slugName
   };
-  const dispatch = useDispatch();
 
   // State variables
   const [messages, setMessages] = useState([]);
@@ -78,7 +83,6 @@ function Chat({ params }) {
 
   // Handle sending message
   const handleSendMessage = useCallback(async () => {
-    // debugger
     if (modelType === "chat") if (newMessage.trim() === "") return;
     setErrorMessage("");
     setNewMessage("");
@@ -137,7 +141,6 @@ function Chat({ params }) {
           bridge_id: params?.id
         });
       }
-      debugger
       if (!responseData.success) {
         if (modelType === "chat") {
           setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
@@ -147,7 +150,6 @@ function Chat({ params }) {
         return;
       }
       response = responseData.data;
-      const { outputConfig } = modelInfo[localDataToSend.service][localDataToSend.configuration.model];
       const outputPath = outputConfig.message;
       const assistPath = outputConfig.assistant;
       const content = _.get(response.response, outputPath, "");
