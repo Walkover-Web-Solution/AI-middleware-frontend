@@ -1,15 +1,13 @@
 "use client"
 import { useCustomSelector } from '@/customSelector/customSelector';
-import GeminiIcon from '@/icons/GeminiIcon';
-import OpenAiIcon from '@/icons/OpenAiIcon';
 import { deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
-import { toggleSidebar } from '@/utils/utility';
+import { getIconOfService, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import BridgeSlider from './sliders/bridgeSlider';
-import ChatBotSlider from './sliders/chatBotSlider'; 
+import ChatBotSlider from './sliders/chatBotSlider';
 import OrgSlider from './sliders/orgSlider';
 
 function Navbar() {
@@ -85,7 +83,7 @@ function Navbar() {
             ))}
           </ul>
         </div>
-        {path[3] === 'bridges' && path.length === 6 && <button className="btn m-1" onClick={toggleBridgeSidebar}> {bridgeData?.service === 'openai' ? <OpenAiIcon /> : <GeminiIcon />}  {bridgeData?.name} </button>}
+        {path[3] === 'bridges' && path.length === 6 && <button className="btn m-1" onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service)}  {bridgeData?.name} </button>}
         {path[3] === 'chatbot' && path[4] === 'configure' && <button className="btn m-1" onClick={toggleChatbotSidebar}> <Rss size={16} /> {chatbotData?.title} </button>}
       </div>
 

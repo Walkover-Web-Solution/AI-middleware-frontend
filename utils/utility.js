@@ -1,3 +1,7 @@
+import AnthropicIcon from "@/icons/AnthropicIcon";
+import GeminiIcon from "@/icons/GeminiIcon";
+import GroqIcon from "@/icons/GroqIcon";
+import OpenAiIcon from "@/icons/OpenAiIcon";
 import { cloneDeep } from "lodash";
 
 export const updatedData = (obj1, obj2={}, type) => {
@@ -164,3 +168,19 @@ export const toggleSidebar = (sidebarId) => {
       }
     }
   };
+
+
+  export const getIconOfService = (service) => {
+    switch (service) {
+        case 'openai':
+            return <OpenAiIcon />;
+        case 'anthropic':
+            return <AnthropicIcon />;
+        case 'groq':
+            return <GroqIcon />;
+        case 'google':
+            return <GeminiIcon />;
+        default:
+            return <OpenAiIcon />;
+    }
+}

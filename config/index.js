@@ -275,7 +275,7 @@ export const integration = async (embed_token) => {
 
 export const createapi = async (bridge_id, dataFromEmbed) => {
   try {
-    await axios.post(`${URL}/api/v1/config/createapi/${bridge_id}`, dataFromEmbed);
+    await axios.post(`${PYTHON_URL}/api/v1/config/createapi/${bridge_id}`, dataFromEmbed);
   } catch (error) {
     console.error(error);
     return error;

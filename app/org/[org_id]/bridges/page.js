@@ -3,9 +3,8 @@ import CreateNewBridge from "@/components/createNewBridge";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
-import GeminiIcon from "@/icons/GeminiIcon";
-import OpenAiIcon from "@/icons/OpenAiIcon";
 import { getAllBridgesAction } from "@/store/action/bridgeAction";
+import { getIconOfService } from "@/utils/utility";
 import { Box } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
@@ -81,7 +80,7 @@ function Home({ params }) {
                     <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center gap-7 rounded-md border cursor-pointer hover:shadow-lg bg-base-100">
                       <div className="w-full p-4 flex flex-col justify-between h-[200px] items-start">
                         <h1 className="inline-flex truncate w-full items-center gap-2 text-lg font-semibold text-base-content">
-                          {item.service === 'openai' ? <OpenAiIcon /> : <GeminiIcon />}
+                          {getIconOfService(item.service)}
                           {item.name}
                         </h1>
                         <p className="text-xs w-full flex items-center gap-2 line-clamp-5">

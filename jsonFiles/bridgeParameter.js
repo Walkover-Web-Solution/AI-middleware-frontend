@@ -19,7 +19,7 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
     stop: { name: 'Stop', description: 'Stop the response' },
 };
 
-export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format'];
+export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format', 'stream'];
 
 export const SERVICES = ['openai', 'anthropic', 'groq'];
 
