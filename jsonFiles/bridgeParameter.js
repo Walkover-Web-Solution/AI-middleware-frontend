@@ -2,7 +2,7 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
     creativity_level: { name: 'Creativity Level', description: 'Adjusts how creative the responses are' },
     max_tokens: { name: 'Max Tokens Limit', description: 'Sets the maximum number of tokens' },
     token_selection_limit: { name: 'Max Tokens Limit (Top  K)', description: 'Sets the maximum number of tokens' },
-    json_mode: { name: 'JSON Mode', description: 'Enable or disable JSON format' },
+    response_type: { name: 'JSON Mode', description: 'Enable or disable JSON format' },
     probability_cutoff: { name: 'Probability Cutoff (Top P)', description: 'Sets the threshold for probability' },
     repetition_penalty: { name: 'Repetition Penalty', description: 'Reduces repetition in responses' },
     novelty_penalty: { name: 'Novelty Penalty', description: 'Penalizes responses that lack novelty' },
@@ -13,7 +13,10 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
     input_text: { name: 'Input Text', description: 'The initial input text' },
     echo_input: { name: 'Echo Input', description: 'Repeat the input text in the response' },
     best_response_count: { name: 'Best Of', description: 'Generate multiple responses and select the best' },
-    seed: { name: 'Seed', description: 'Set a seed for random number generation' }
+    seed: { name: 'Seed', description: 'Set a seed for random number generation' },
+    tool_choice: { name: 'Tool Choice', description: 'Choose the tool to use' },
+    stream: { name: 'Stream', description: 'Stream the response' },
+    stop: { name: 'Stop', description: 'Stop the response' },
 };
 
 export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format'];

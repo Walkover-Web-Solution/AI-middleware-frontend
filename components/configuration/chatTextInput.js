@@ -48,7 +48,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
         const newMessage = e.target.value;
         if (modelType === "chat") if (newMessage.trim() === "") return;
         setErrorMessage("");
-        inputRef.current.value = "";
+        if(modelType !== "completion" && modelType !== "embedding")  inputRef.current.value = "";
         // setNewMessage("");
         setLoading(true);
         try {

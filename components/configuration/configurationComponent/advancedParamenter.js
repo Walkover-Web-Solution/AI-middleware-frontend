@@ -62,11 +62,11 @@ const AdvancedParameters = ({ params }) => {
                             <label className="label">
                                 <div className='flex flex-row gap-2 items-center'>
                                     <span className="label-text capitalize">{name || key}</span>
-                                    <div className="tooltip tooltip-right" data-tip={description}>
+                                    {description && <div className="tooltip tooltip-right" data-tip={description}>
                                         <Info size={12} />
-                                    </div>
+                                    </div>}
                                 </div>
-                                {((field === 'slider' || field === 'number') && !(min <= configuration?.[key] <= max)) &&  <p className='text-right bg-error-content'>Error</p>}
+                                {((field === 'slider') && !(min <= configuration?.[key] <= max)) && <p className='text-right bg-error-content'>Error</p>}
                                 {field === 'slider' && <p className='text-right' id={`sliderValue-${key}`}>{configuration?.[key]}</p>}
                             </label>
                             {field === 'slider' && (
