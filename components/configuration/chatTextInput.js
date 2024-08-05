@@ -165,7 +165,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                     ref={inputRef}
                     type="text"
                     placeholder="Type here"
-                    className="input input-bordered w-full"
+                    className="input input-bordered w-full focus:border-primary"
                     // value={newMessage}
                     // onChange={e => setNewMessage(e.target.value)}
                     // onBlur={e => setNewMessage(e.target.value)}

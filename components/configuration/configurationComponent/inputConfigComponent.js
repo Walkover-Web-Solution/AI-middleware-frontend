@@ -27,7 +27,7 @@ const InputConfigComponent = ({ params }) => {
             </div>
             <textarea
                 key={prompt}
-                className="textarea textarea-bordered border w-full min-h-96 resize-y"
+                className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary"
                 defaultValue={prompt}
                 onBlur={handlePromptChange}
             ></textarea>

@@ -21,4 +21,11 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
 
 export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format'];
 
-export const SERVICES = ['openai', 'google'];
+export const SERVICES = ['openai', 'anthropic', 'groq'];
+
+export const DEFAULT_MODEL = {
+    'openai': "gpt-4o",
+    'google': 'gemini-pro',
+    'anthropic': "claude-3-5-sonnet-20240620",
+    'groq': "mixtral-8x7b-32768"
+}

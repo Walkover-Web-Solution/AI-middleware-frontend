@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import LoadingSpinner from "./loadingSpinner";
-import { SERVICES } from "@/jsonFiles/bridgeParameter";
+import { DEFAULT_MODEL, SERVICES } from "@/jsonFiles/bridgeParameter";
 
 function CreateNewBridge({ orgid }) {
     const [selectedService, setSelectedService] = useState('openai');
@@ -34,7 +34,7 @@ function CreateNewBridge({ orgid }) {
 
     const handleService = (e) => {
         setSelectedService(e.target.value);
-        setSelectedModel(e.target.value === "google" ? "gemini-pro" : "gpt-4o");
+        setSelectedModel(DEFAULT_MODEL[e.target.value]);
     };
 
     const handleModel = (e) => {

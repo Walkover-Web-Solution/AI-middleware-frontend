@@ -9,7 +9,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import BridgeSlider from './sliders/bridgeSlider';
-import ChatBotSlider from './sliders/chatbotSlider';
+import ChatBotSlider from './sliders/chatBotSlider'; 
 import OrgSlider from './sliders/orgSlider';
 
 function Navbar() {
@@ -67,7 +67,7 @@ function Navbar() {
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
 
   return (
-    <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar bg-white border `}>
+    <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar border `}>
       <div className='flex items-center w-full justify-start gap-2'>
         <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/${path[3]}`)}>
           <Home size={16} />

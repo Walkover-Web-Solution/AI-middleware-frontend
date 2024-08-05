@@ -1,6 +1,5 @@
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { SERVICES } from "@/jsonFiles/bridgeParameter";
-import { services } from '@/jsonFiles/models'; // Adjust the path as needed
+import { DEFAULT_MODEL, SERVICES } from "@/jsonFiles/bridgeParameter";
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
@@ -20,7 +19,7 @@ function ServiceDropdown({ params }) {
 
     const handleServiceChange = useCallback((e) => {
         const newService = e.target.value;
-        const defaultModel = services[newService]?.completion?.values().next().value || null; // Get the default model for the selected service
+        const defaultModel = DEFAULT_MODEL?.[newService];
         setSelectedService(newService);
         dispatch(updateBridgeAction({
             bridgeId: params.id,
