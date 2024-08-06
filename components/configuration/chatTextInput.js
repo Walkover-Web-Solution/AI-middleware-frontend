@@ -116,7 +116,9 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             }
             if (!responseData.success) {
                 if (modelType === "chat") {
-                    setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
+                    inputRef.current.value = data.content;
+                    setMessages(prevMessages => prevMessages.slice(0, -1)); // Remove the last message
+                    // setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
                 }
                 toast.error(responseData.error);
                 setLoading(false);
@@ -130,7 +132,10 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
 
             // Update localDataToSend with assistant conversation
             if (modelType === "chat") {
-                setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
+                setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), {
+                    role: assistConversation,
+                    content: content
+                }].slice(-6));
             }
             const newChatAssist = {
                 id: messages.length + 2,
