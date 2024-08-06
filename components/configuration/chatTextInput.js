@@ -138,7 +138,6 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                     content: content
                 }
             }
-
             // Update localDataToSend with assistant conversation
             if (modelType === "chat") {
                 setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
