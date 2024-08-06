@@ -23,6 +23,12 @@ function BridgeNameInput({ params }) {
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { name: newValue } }));
     }, [dispatch, params.id]);
 
+    const handleKeyDown = useCallback((e) => {
+        if (e.key === 'Enter') {
+            handleBridgeNameChange(e);
+        }
+    }, [handleBridgeNameChange]);
+
     return (
         <div className='mb-2'>
             {!isEditable &&
@@ -31,7 +37,7 @@ function BridgeNameInput({ params }) {
                     <Pencil size={18} onClick={() => setIsEditable(true)} className='' />
                 </div>
             }
-            {isEditable && <input key={bridgeName} type="text" placeholder="Type here" autoFocus className="input w-full max-w-xs text-lg" onBlur={handleBridgeNameChange} defaultValue={bridgeName} />}
+            {isEditable && <input key={bridgeName} type="text" placeholder="Type here" autoFocus className="input w-full max-w-xs text-lg" onBlur={handleBridgeNameChange} defaultValue={bridgeName} onKeyDown={handleKeyDown}/>}
         </div>
     )
 }
