@@ -28,7 +28,10 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
         service: bridge?.service?.toLowerCase(),
         apikey: bridge?.apikey,
         bridgeType: bridge?.bridgeType,
-        slugName: bridge?.slugName
+        slugName: bridge?.slugName,
+        response_format: {
+            type:'default'
+        }
     };
     const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
 
@@ -128,12 +131,11 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             const outputPath = outputConfig.message;
             const assistPath = outputConfig.assistant;
             const content = _.get(response.response, outputPath, "");
-            const assistConversation = _.get(response.response, assistPath, "");
 
             // Update localDataToSend with assistant conversation
             if (modelType === "chat") {
                 setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), {
-                    role: assistConversation,
+                    role: 'assistant',
                     content: content
                 }].slice(-6));
             }
