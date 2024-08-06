@@ -21,22 +21,20 @@ const AdvancedParameters = ({ params }) => {
     }));
 
     const handleInputChange = (e, key, isSlider = false) => {
-        let newValue = Number(e.target.value);
+        let newValue = e.target.value;
         let newCheckedValue = e.target.checked;
         if (e.target.type === 'number') {
-            newValue = newValue.includes('.') ? parseFloat(newValue) : parseInt(newValue, 10);
+            newValue = String(newValue)?.includes('.') ? parseFloat(newValue) : parseInt(newValue, 10);
         }
 
         let updatedDataToSend = {
-            service: bridge?.service?.toLowerCase(),
             configuration: {
-                model: bridge?.configuration?.model?.default,
                 [key]: isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue,
             }
         };
-        if (key === 'response_format') {
-            updatedDataToSend.configuration.response_format = newCheckedValue ? { type: "json_object" } : { type: "text" };
-        }
+        // if (key === 'response_format') {
+        //     updatedDataToSend.configuration.response_format = newCheckedValue ? { type: "json_object" } : { type: "text" };
+        // }
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
     };
 
@@ -78,7 +76,7 @@ const AdvancedParameters = ({ params }) => {
                                         step={step || 1}
                                         key={configuration?.[key]}
                                         defaultValue={configuration?.[key] || 0}
-                                        onBlur={(e) => handleInputChange(e, key)}
+                                        onBlur={(e) => handleInputChange(e, key, true)}
                                         onInput={(e) => {
                                             document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
                                         }}
@@ -111,11 +109,12 @@ const AdvancedParameters = ({ params }) => {
                             {field === 'boolean' && (
                                 <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
                                     <input
+                                        name={key}
                                         type="checkbox"
                                         key={bridge?.bridgeType}
                                         className="toggle"
                                         defaultChecked={configuration?.[key]}
-                                        onChange={(e) => handleInputChange(e, "bridgeType")}
+                                        onChange={(e) => handleInputChange(e, key)}
                                     />
                                 </label>
                             )}
