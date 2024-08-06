@@ -28,7 +28,10 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
         service: bridge?.service?.toLowerCase(),
         apikey: bridge?.apikey,
         bridgeType: bridge?.bridgeType,
-        slugName: bridge?.slugName
+        slugName: bridge?.slugName,
+        response_format: {
+            type:'default'
+        }
     };
     const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
 
@@ -50,7 +53,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             setErrorMessage("Prompt is required");
             return;
         }
-        const newMessage = e.target.value;
+        const newMessage = inputRef?.current?.value;
         if (modelType === "chat") if (newMessage?.trim() === "") return;
         setErrorMessage("");
         if(modelType !== "completion" && modelType !== "embedding")  inputRef.current.value = "";
@@ -116,7 +119,9 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             }
             if (!responseData.success) {
                 if (modelType === "chat") {
-                    setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
+                    inputRef.current.value = data.content;
+                    setMessages(prevMessages => prevMessages.slice(0, -1)); // Remove the last message
+                    // setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
                 }
                 toast.error(responseData.error);
                 setLoading(false);
@@ -126,7 +131,13 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             const outputPath = outputConfig.message;
             const assistPath = outputConfig.assistant;
             const content = _.get(response.response, outputPath, "");
-            const assistConversation = _.get(response.response, assistPath, "");
+            let assistConversation = _.get(response.response, assistPath, ""); // in anthropic assistant
+            if(typeof assistConversation  != 'object'){
+                assistConversation = {
+                    role: 'assistant',
+                    content: content
+                }
+            }
 
             // Update localDataToSend with assistant conversation
             if (modelType === "chat") {
