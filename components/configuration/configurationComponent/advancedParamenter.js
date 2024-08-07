@@ -66,7 +66,8 @@ const AdvancedParameters = ({ params }) => {
                     if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
                     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
                     const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
-
+                    // console.log(min, max, configuration?.[key],2323423);
+                    let error = false;
                     return (
                         <div key={key} className="form-control">
                             <label className="label">
@@ -76,8 +77,8 @@ const AdvancedParameters = ({ params }) => {
                                         <Info size={12} />
                                     </div>}
                                 </div>
-                                {((field === 'slider') && !(min <= configuration?.[key] <= max)) && <p className='text-right bg-error-content'>Error</p>}
-                                {field === 'slider' && <p className='text-right' id={`sliderValue-${key}`}>{configuration?.[key]}</p>}
+                                {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (error = true)}
+                                {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{configuration?.[key]}</p>}
                             </label>
                             {field === 'slider' && (
                                 <div>

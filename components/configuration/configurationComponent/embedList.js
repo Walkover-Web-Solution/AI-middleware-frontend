@@ -8,6 +8,23 @@ const EmbedList = ({ params }) => {
         bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools,
     }))
 
+    const getStatusClass = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'drafted':
+                return 'bg-yellow-100';
+            case 'paused':
+                return 'bg-red-100';
+            case 'active':
+            case 'published':
+                return 'bg-green-100';
+            case 'rejected':
+                return 'bg-gray-100';
+            // Add more cases as needed
+            default:
+                return 'bg-gray-100';
+        }
+    };
+
     const renderEmbed = useMemo(() => (
         integrationData && (Object.values(integrationData))
             .slice() // Create a copy of the array to avoid mutating the original
@@ -29,7 +46,7 @@ const EmbedList = ({ params }) => {
                             {value.description ? value.description : "A description is required for proper functionality."}
                         </p>
                         <div className="mt-4">
-                            <span className={`mr-2 inline-block rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${value.status?.toLowerCase() === 'drafted' ? 'bg-yellow-100' : value?.status?.toLowerCase() === 'paused'? 'bg-red-100': 'bg-green-100'}`}>
+                            <span className={`mr-2 inline-block rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(value?.status)}`}>
                                 {value?.description?.trim() === "" ? "Description Required" : value.status}
                             </span>
                         </div>

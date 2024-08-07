@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import LoadingSpinner from './loadingSpinner';
 
-const CreateOrg = ({ onClose }) => {
+const CreateOrg = ({ onClose, handleSwitchOrg }) => {
     const [orgDetails, setOrgDetails] = useState({ name: '', about: '' });
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
@@ -35,6 +35,7 @@ const CreateOrg = ({ onClose }) => {
             dispatch(createOrgAction(dataToSend, (data) => {
                 onClose();
                 dispatch(userDetails());
+                handleSwitchOrg(data.id, data.name);
                 toast.success('Organization created successfully');
                 route.push(`/org/${data.id}/bridges`);
             }));

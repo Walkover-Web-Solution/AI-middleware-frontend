@@ -60,9 +60,9 @@ export const bridgeReducer = createSlice({
       state.allBridgesMap[_id] = {
         ...state.allBridgesMap[_id],
         ...extraData,
-        configuration: { ...state.allBridgesMap[_id].configuration, ...configuration }
+        configuration: { ...configuration }
       };
-      
+
       if (extraData?.bridgeType) {
         const allData = state.org[bridges.org_id];
         if (allData) {

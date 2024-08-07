@@ -79,7 +79,7 @@ function Page() {
         <div className="grid grid-rows-1 md:grid-rows-2 lg:grid-rows-3 gap-4 mb-8 cursor-pointer">
           {renderedOrganizations}
         </div>
-        {showCreateOrgModal && <CreateOrg onClose={handleCloseCreateOrgModal} />}
+        {showCreateOrgModal && <CreateOrg onClose={handleCloseCreateOrgModal} handleSwitchOrg={handleSwitchOrg} />}
       </div>
     </div>
   );
