@@ -5,7 +5,7 @@ import { useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import ActionModel from './actionModel';
 
-export default function ActionList({ params }) {
+function ActionList({ params }) {
     const { action, bridgeType } = useCustomSelector((state) => ({
         action: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.actions,
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
@@ -56,13 +56,11 @@ export default function ActionList({ params }) {
                                         <Trash size={16} className='cursor-pointer text-error' />
                                     </div>
                                 </div>
-                                <p className="mt-3 text-xs sm:text-sm 
- line-clamp-3">
+                                <p className="mt-3 text-xs sm:text-sm line-clamp-3">
                                     Description: {value?.description}
                                 </p>
                                 {value?.variable && (
-                                    <p className="mt-3 text-xs sm:text-sm 
- line-clamp-3">
+                                    <p className="mt-3 text-xs sm:text-sm line-clamp-3">
                                         Structure: {value?.variable}
                                     </p>
                                 )}
@@ -82,3 +80,4 @@ export default function ActionList({ params }) {
         )
     );
 }
+export default ActionList;

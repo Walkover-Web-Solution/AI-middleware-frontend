@@ -1,3 +1,7 @@
+import AnthropicIcon from "@/icons/AnthropicIcon";
+import GeminiIcon from "@/icons/GeminiIcon";
+import GroqIcon from "@/icons/GroqIcon";
+import OpenAiIcon from "@/icons/OpenAiIcon";
 import { cloneDeep } from "lodash";
 
 export const updatedData = (obj1, obj2={}, type) => {
@@ -130,3 +134,53 @@ export const isValidJson = (jsonString) => {
         return false; // Return false if an error is thrown
     }
 };
+
+export const toggleSidebar = (sidebarId) => {
+    const sidebar = document.getElementById(sidebarId);
+    const handleClickOutside = (event) => {
+      const sidebar = document.getElementById(sidebarId);
+      const button = event.target.closest('button');
+
+      if (sidebar && !sidebar.contains(event.target) && !button) {
+        sidebar.classList.add('-translate-x-full');
+        document.removeEventListener('click', handleClickOutside);
+        document.removeEventListener('keydown', handleEscPress);
+      }
+    };
+
+    const handleEscPress = (event) => {
+      if (event.key === 'Escape') {
+        sidebar.classList.add('-translate-x-full');
+        document.removeEventListener('click', handleClickOutside);
+        document.removeEventListener('keydown', handleEscPress);
+      }
+    };
+
+    if (sidebar) {
+      sidebar.classList.toggle('-translate-x-full');
+
+      if (!sidebar.classList.contains('-translate-x-full')) {
+        document.addEventListener('click', handleClickOutside);
+        document.addEventListener('keydown', handleEscPress);
+      } else {
+        document.removeEventListener('click', handleClickOutside);
+        document.removeEventListener('keydown', handleEscPress);
+      }
+    }
+  };
+
+
+  export const getIconOfService = (service) => {
+    switch (service) {
+        case 'openai':
+            return <OpenAiIcon />;
+        case 'anthropic':
+            return <AnthropicIcon />;
+        case 'groq':
+            return <GroqIcon />;
+        case 'google':
+            return <GeminiIcon />;
+        default:
+            return <OpenAiIcon />;
+    }
+}

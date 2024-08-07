@@ -1,13 +1,13 @@
 import axios from "axios";
 import { fetchModelReducer } from "../reducer/modelReducer";
+import { getAllModels } from "@/config";
 
 
-export const getModelAction = () => async (dispatch, getState) => {
-    try {
-      const data = await axios.get(`http://localhost:7072/api/v1/config/models/openai`);
-      console
-      dispatch(fetchModelReducer(data.data));
-    } catch (error) {
-      console.error(error);
-    }
-  };
+export const getModelAction = ({ service }) => async (dispatch) => {
+  try {
+    const data = await getAllModels(service);
+    dispatch(fetchModelReducer({ data: data, service }));
+  } catch (error) {
+    console.error(error);
+  }
+};

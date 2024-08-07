@@ -7,84 +7,59 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const ResponseFormatSelector = ({ params }) => {
-    const { bridge } = useCustomSelector((state) => ({
-        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+    const { response_format } = useCustomSelector((state) => ({
+        response_format: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.response_format,
     }));
 
-    const [selectedOption, setSelectedOption] = useState('default');
-    const [webhook, setWebhook] = useState("");
-    const [headers, setHeaders] = useState("");
+    const [selectedOption, setSelectedOption] = useState(response_format?.type || 'default');
+    const [webhookData, setWebhookData] = useState({ url: response_format?.cred?.url || "", headers: response_format?.cred?.headers || "" });
     const [errors, setErrors] = useState({ webhook: "", headers: "" });
     const dispatch = useDispatch();
 
     useEffect(() => {
-        if (bridge?.responseFormat) {
-            if (bridge.responseFormat.RTLayer === true) {
-                setSelectedOption('RTLayer');
-            } else if (bridge.responseFormat.webhook) {
-                setSelectedOption('custom');
-            }
+        if (response_format) {
+            setSelectedOption(response_format.type === 'RTLayer' ? 'RTLayer' : response_format.type === 'webhook' ? 'custom' : 'default');
+            setWebhookData({ url: response_format?.cred?.url || "", headers: response_format?.cred?.headers || "" });
         }
-    }, [bridge]);
+    }, [response_format, params.id]);
 
-    useEffect(() => {
-        setWebhook(bridge?.responseFormat?.webhook || "");
-        setHeaders(bridge?.responseFormat?.headers || "");
-    }, [bridge, params]);
-
-    const handleChangeWebhook = (value) => {
-        if (value.trim() === "") {
-            setErrors(prevErrors => ({ ...prevErrors, webhook: '' }));
+    const handleChangeWebhook = (e) => {
+        const newurl = e.target.value;
+        if (newurl.trim() === "") {
+            setErrors(prevErrors => ({ ...prevErrors, webhook: 'Please enter a valid webhook URL' }));
             return;
         }
-        const isValid = validateWebhook(value);
+        const isValid = validateWebhook(newurl);
         setErrors(prevErrors => ({ ...prevErrors, webhook: isValid ? '' : 'Invalid URL' }));
+        setWebhookData((prevData) => ({ ...prevData, url: newurl }));
     };
 
-    const handleChangeHeaders = (value) => {
-        if (value.trim() === "") {
-            setErrors(prevErrors => ({ ...prevErrors, headers: '' }));
+    const handleChangeHeaders = (e) => {
+        const newHeaders = e.target.value;
+        if (newHeaders.trim() === "") {
+            setErrors(prevErrors => ({ ...prevErrors, headers: 'Please enter a valid headers' }));
             return;
         }
-        const isValid = isValidJson(value);
+        const isValid = isValidJson(newHeaders);
         setErrors(prevErrors => ({ ...prevErrors, headers: isValid ? '' : 'Invalid JSON' }));
+        setWebhookData((prevData) => ({ ...prevData, headers: newHeaders }));
     };
 
-    const handleResponseChange = (key, webhook, headers) => {
-        let updatedDataToSend = {
+    const handleResponseChange = (key) => {
+        const cred = key === 'custom' ? { url: webhookData?.url, headers: webhookData?.headers } : { url: "", headers: {} };
+        const type = key === 'custom' ? 'webhook' : key;
+
+        const updatedDataToSend = {
             configuration: {
-                model: bridge?.configuration?.model?.default,
-            },
-            service: bridge?.service?.toLowerCase(),
+                response_format: {
+                    type,
+                    cred
+                }
+            }
         };
-        if (key === "default") {
-            updatedDataToSend.configuration = {
-                ...updatedDataToSend.configuration,
-                RTLayer: false,
-                webhook: "", // Set webhook to an empty string for default option
-                headers: {}
-            };
-        } else if (key === 'RTLayer') {
-            updatedDataToSend.configuration = {
-                ...updatedDataToSend.configuration,
-                RTLayer: true,
-                webhook: "", // Set webhook to an empty string for RTLayer option
-                headers: {}
-            };
-        } else if (key === 'custom') {
-            updatedDataToSend.configuration = {
-                ...updatedDataToSend.configuration,
-                RTLayer: false,
-                webhook: webhook, // Set webhook to the valid input
-                headers: headers // Set headers to the parsed JSON
-            };
-        }
-        UpdateBridge(updatedDataToSend);
-    };
 
-    const UpdateBridge = (currentDataToSend) => {
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
-    };
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+    }
 
     const responseOptions = [
         { value: 'default', label: 'Default' },
@@ -92,7 +67,7 @@ const ResponseFormatSelector = ({ params }) => {
         { value: 'custom', label: 'Custom' },
     ];
 
-    return (bridge?.bridgeType === "api" &&
+    return (
         <div>
             <p className='text-xl font-medium'>Select Response Format</p>
             {responseOptions.map(({ value, label }) => (
@@ -103,7 +78,7 @@ const ResponseFormatSelector = ({ params }) => {
                             name="radio-10"
                             className="radio checked:bg-blue-500"
                             checked={selectedOption === value}
-                            onChange={() => { setSelectedOption(value); handleResponseChange(value, webhook, headers); }}
+                            onChange={() => { setSelectedOption(value); handleResponseChange(value); }}
                         />
                         <span className="label-text">{label}</span>
                     </label>
@@ -118,11 +93,8 @@ const ResponseFormatSelector = ({ params }) => {
                             placeholder="https://example.com/webhook"
                             className="input input-bordered max-w-xs input-sm w-full"
                             id="webhook"
-                            value={webhook}
-                            onChange={e => {
-                                setWebhook(e.target.value);
-                                handleChangeWebhook(e.target.value);
-                            }}
+                            defaultValue={webhookData?.url}
+                            onBlur={handleChangeWebhook}
                         />
                         {errors.webhook && <p className="text-red-500 text-xs mt-2">{errors.webhook}</p>}
                     </label>
@@ -131,16 +103,13 @@ const ResponseFormatSelector = ({ params }) => {
                         <textarea
                             className="textarea textarea-bordered h-24 w-full"
                             id="headers"
-                            value={headers}
-                            onChange={e => {
-                                setHeaders(e.target.value);
-                                handleChangeHeaders(e.target.value);
-                            }}
+                            defaultValue={typeof webhookData?.headers === 'object' ? JSON.stringify(webhookData?.headers, null, 2) : webhookData?.headers}
+                            onBlur={handleChangeHeaders}
                             placeholder='{"Content-Type": "application/json"}'
                         ></textarea>
                         {errors.headers && <p className="text-red-500 text-xs mt-2">{errors.headers}</p>}
                     </label>
-                    <button className="btn btn-primary btn-sm my-2 float-right" onClick={() => handleResponseChange("custom", webhook, headers)} disabled={errors.webhook !== '' || errors.headers !== ''}>
+                    <button className="btn btn-primary btn-sm my-2 float-right" onClick={() => handleResponseChange("custom")} disabled={errors.webhook !== '' || errors.headers !== ''}>
                         Apply
                     </button>
                 </div>

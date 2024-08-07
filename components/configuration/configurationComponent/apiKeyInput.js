@@ -1,45 +1,31 @@
-import { updateBridge } from '@/config';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
 const ApiKeyInput = ({ params }) => {
-
-    const dispatch = useDispatch()
-
-    const { bridge } = useCustomSelector((state) => ({
-        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+    const dispatch = useDispatch();
+    const { bridge_apiKey } = useCustomSelector((state) => ({
+        bridge_apiKey: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.apikey,
     }));
 
-
-    const onSave = (value) => {
-        const updatedDataToSend = {
-            configuration: {
-                model: bridge?.configuration?.model?.default,
-            },
-            service: bridge?.service?.toLowerCase(),
-            apikey: value // Update the field with the new value
-        };
-        UpdateBridge(updatedDataToSend);
-    };
-
-    const UpdateBridge = (currentDataToSend) => {
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
+    const onChangeApiKey = (e) => {
+        const newValue = e.target?.value;
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey: newValue } }));
     }
-
 
     return (
         <label className="form-control max-w-xs text-base-content">
             <div className="label">
-                <span className="label-text">Provide Your API Key</span>
+                <span className="label-text">Service's API Key</span>
             </div>
             <input
                 type="text"
                 required
-                defaultValue={bridge?.apikey}
+                key={bridge_apiKey}
+                defaultValue={bridge_apiKey}
                 className="input input-bordered max-w-xs input-sm bg-base-100 text-base-content"
-                onBlur={(e) => onSave(e.target.value)}
+                onBlur={onChangeApiKey}
             />
         </label>
     );

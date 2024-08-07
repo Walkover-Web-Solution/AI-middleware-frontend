@@ -1,40 +1,40 @@
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCustomSelector } from "@/customSelector/customSelector";
 import { Bot, Cog } from "lucide-react";
-import BridgeTypeToggle from "./configurationComponent/bridgeTypeToggle";
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import PrivateFormSection from '../chatbotConfiguration/firstStep';
+import SecondStep from '../chatbotConfiguration/secondStep';
+import ApiGuide from './configurationComponent/ApiGuide';
+import ActionList from "./configurationComponent/actionList";
 import AdvancedParameters from "./configurationComponent/advancedParamenter";
 import ApiKeyInput from "./configurationComponent/apiKeyInput";
+import BridgeNameInput from "./configurationComponent/bridgeNameInput";
+import BridgeTypeToggle from "./configurationComponent/bridgeTypeToggle";
 import EmbedList from "./configurationComponent/embedList";
 import InputConfigComponent from "./configurationComponent/inputConfigComponent";
 import ModelDropdown from "./configurationComponent/modelDropdown";
 import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
-import ActionList from "./configurationComponent/actionList";
-import { useCustomSelector } from "@/customSelector/customSelector";
-import PrivateFormSection from '../chatbotConfiguration/firstStep';
-import SecondStep from '../chatbotConfiguration/secondStep';
-import ApiGuide from './configurationComponent/ApiGuide';
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
-    const searchParams = useSearchParams()
-    const [currentView, setCurrentView] = useState('setup')
+    const searchParams = useSearchParams();
+    const view = searchParams.get('view');
+    const [currentView, setCurrentView] = useState(view || 'setup')
     const { bridgeType } = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType || 'api',
+        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
     }));
-
-    useEffect(() => {
-        const view = searchParams.get('view')
-        if (view) setCurrentView(view)
-    }, [searchParams]);
 
     const handleNavigation = (target) => {
         setCurrentView(target)
         router.push(`/org/${params.org_id}/bridges/configure/${params.id}?view=${target}`);
     };
+
     return (
         <div className="flex flex-col gap-3 relative">
+            <BridgeNameInput params={params} />
+
             <BridgeTypeToggle params={params} />
             <div className="join absolute right-0 top-0">
                 <button
@@ -54,7 +54,7 @@ export default function ConfigurationPage({ params }) {
             {
                 currentView === 'setup' ?
                     <>
-                        <SlugNameInput params={params} />
+                        {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
                         <InputConfigComponent params={params} />
                         <EmbedList params={params} />
                         <ServiceDropdown params={params} />
@@ -62,20 +62,20 @@ export default function ConfigurationPage({ params }) {
                         <ApiKeyInput params={params} />
                         <AdvancedParameters params={params} />
                         <ActionList params={params} />
-                        <ResponseFormatSelector params={params} />
+                        {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
                     </>
                     :
                     bridgeType === 'api' ?
                         <div className="flex flex-col w-100 overflow-auto gap-3">
                             <h1 className="text-xl font-semibold">API Configuration</h1>
                             <div className="flex flex-col gap-4">
-                                <ApiGuide params={params}/>
+                                <ApiGuide params={params} />
                             </div>
                         </div> :
                         <div className="flex  flex-col w-100 overflow-auto gap-3">
                             <h1 className="text-xl font-semibold">Chatbot Configuration</h1>
                             <div className="flex flex-col gap-4">
-                                <PrivateFormSection params={params} ChooseChatbot={true}/>
+                                <PrivateFormSection params={params} ChooseChatbot={true} />
                                 <SecondStep />
                             </div>
                         </div>
