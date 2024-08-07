@@ -29,3 +29,13 @@ export const DEFAULT_MODEL = {
     'anthropic': "claude-3-5-sonnet-20240620",
     'groq': "mixtral-8x7b-32768"
 }
+
+export function getDefaultValues(additionalParams, bridgeParams) {
+    const defaults = {};
+    for (const key in bridgeParams) {
+        if (additionalParams.hasOwnProperty(key) && additionalParams[key].hasOwnProperty('default')) {
+            defaults[key] = additionalParams[key]['default'];
+        }
+    }
+    return defaults;
+}

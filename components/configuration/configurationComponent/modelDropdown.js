@@ -1,4 +1,5 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
+import { ADVANCED_BRIDGE_PARAMETERS, getDefaultValues } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React from 'react';
 import { useDispatch } from 'react-redux';
@@ -16,6 +17,8 @@ const ModelDropdown = ({ params }) => {
         const selectedModelType = e.target.selectedOptions[0].parentNode.label;
 
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { model: selectedModel, type: selectedModelType } } }));
+        const updatedParams = getDefaultValues(modelsList?.[selectedModelType]?.[selectedModel]?.configuration?.['additional_parameters'],ADVANCED_BRIDGE_PARAMETERS)
+        updatedParams && dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: updatedParams } }));
     };
 
     return (
