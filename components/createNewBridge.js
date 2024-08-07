@@ -1,5 +1,5 @@
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { services } from "@/jsonFiles/models";
+import { DEFAULT_MODEL, SERVICES } from "@/jsonFiles/bridgeParameter";
 import { createBridgeAction } from "@/store/action/bridgeAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { useRouter } from "next/navigation";
@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import LoadingSpinner from "./loadingSpinner";
-import { DEFAULT_MODEL, SERVICES } from "@/jsonFiles/bridgeParameter";
 
 function CreateNewBridge({ orgid }) {
     const [selectedService, setSelectedService] = useState('openai');
@@ -154,7 +153,6 @@ function CreateNewBridge({ orgid }) {
                                         }
                                         return null;
                                     })}
-                                    {!services?.[selectedService] && <option disabled key="0">Please select a service first !</option>}
                                 </select>
                             </label>
                             {bridgeType === 'chatbot' ? <label className="form-control w-full mb-2">
