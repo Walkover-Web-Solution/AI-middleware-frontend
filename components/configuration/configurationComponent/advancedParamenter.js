@@ -32,9 +32,21 @@ const AdvancedParameters = ({ params }) => {
                 [key]: isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue,
             }
         };
-        // if (key === 'response_format') {
-        //     updatedDataToSend.configuration.response_format = newCheckedValue ? { type: "json_object" } : { type: "text" };
-        // }
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+    };
+
+    const handleSelectChange = (e, key) => {
+        let newValue;
+        try {
+            newValue = JSON.parse(e.target.value);
+        } catch (error) {
+            newValue = e.target.value;
+        }
+        let updatedDataToSend = {
+            configuration: {
+                [key]: newValue,
+            }
+        };
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
     };
 
@@ -50,7 +62,7 @@ const AdvancedParameters = ({ params }) => {
                 {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
             {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-2">
-                {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue }]) => {
+                {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
                     if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
                     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
                     const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
@@ -116,6 +128,16 @@ const AdvancedParameters = ({ params }) => {
                                         defaultChecked={configuration?.[key]}
                                         onChange={(e) => handleInputChange(e, key)}
                                     />
+                                </label>
+                            )}
+                            {field === 'select' && (
+                                <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+                                    <select value={JSON.stringify(configuration?.[key])} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
+                                        <option disabled>Select response mode</option>
+                                        {options?.map((service, index) => (
+                                            <option key={index} value={JSON.stringify(service)}>{service?.type}</option>
+                                        ))}
+                                    </select>
                                 </label>
                             )}
                         </div>

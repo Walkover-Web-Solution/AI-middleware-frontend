@@ -2,7 +2,7 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
     creativity_level: { name: 'Creativity Level', description: 'Adjusts how creative the responses are' },
     max_tokens: { name: 'Max Tokens Limit', description: 'Sets the maximum number of tokens' },
     token_selection_limit: { name: 'Max Tokens Limit (Top  K)', description: 'Sets the maximum number of tokens' },
-    response_type: { name: 'JSON Mode', description: 'Enable or disable JSON format' },
+    response_type: { name: 'Response Type', description: 'Response type for the response' },
     probability_cutoff: { name: 'Probability Cutoff (Top P)', description: 'Sets the threshold for probability' },
     repetition_penalty: { name: 'Repetition Penalty', description: 'Reduces repetition in responses' },
     novelty_penalty: { name: 'Novelty Penalty', description: 'Penalizes responses that lack novelty' },
