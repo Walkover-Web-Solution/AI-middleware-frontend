@@ -8,6 +8,7 @@ import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
 import AdvancedParameters from "./configurationComponent/advancedParamenter";
 import ApiKeyInput from "./configurationComponent/apiKeyInput";
+import BridgeNameInput from "./configurationComponent/bridgeNameInput";
 import BridgeTypeToggle from "./configurationComponent/bridgeTypeToggle";
 import EmbedList from "./configurationComponent/embedList";
 import InputConfigComponent from "./configurationComponent/inputConfigComponent";
@@ -15,7 +16,6 @@ import ModelDropdown from "./configurationComponent/modelDropdown";
 import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
-import BridgeNameInput from "./configurationComponent/bridgeNameInput";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -33,7 +33,7 @@ export default function ConfigurationPage({ params }) {
 
     return (
         <div className="flex flex-col gap-3 relative">
-                        <BridgeNameInput params={params} />
+            <BridgeNameInput params={params} />
 
             <BridgeTypeToggle params={params} />
             <div className="join absolute right-0 top-0">

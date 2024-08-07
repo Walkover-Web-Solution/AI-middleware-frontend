@@ -1,5 +1,6 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { Info, QrCode } from 'lucide-react';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -33,6 +34,10 @@ const BridgeTypeToggle = ({ params }) => {
             <div className="label">
                 <span className="label-text">ChatBot</span>
             </div>
+            {bridgeType?.toString()?.toLowerCase() === "chatbot" && <div role="alert" className="alert p-2">
+                <Info size={16} />
+                <span>Only supports models which have JSON support. &#40; like gpt-4o &#41;</span>
+            </div>}
         </label>
     );
 };
