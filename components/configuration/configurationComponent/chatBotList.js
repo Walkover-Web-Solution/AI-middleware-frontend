@@ -23,13 +23,13 @@ const ChatBotList = ({ params }) => {
 
     return (bridgeType === 'chatbot' &&
         <div className="form-control">
-            <p className='text-xl font-medium'>ChatBot</p>
+            <p className='text-xl font-medium text-base-content'>ChatBot</p>
             <div className='flex flex-wrap gap-4'>
                 {chatbotData?.map((chatBot, index) => (
                     <div key={index} onClick={() => router.push(`/org/${params.org_id}/chatbot/configure/${chatBot._id}`)} className="flex max-w-xs flex-col items-center rounded-md border md:flex-row cursor-pointer transform transition duration-150 ease-in-out hover:bg-gray-200">
                         <div>
                             <div className="p-4">
-                                <h1 className="inline-flex items-center text-lg font-semibold">
+                                <h1 className="inline-flex items-center text-lg font-semibold text-base-content">
                                     {chatBot.title}<ArrowUpRight className="ml-2 h-4 w-4" />
                                 </h1>
                             </div>
@@ -39,10 +39,10 @@ const ChatBotList = ({ params }) => {
             </div>
             <button className="btn btn-outline btn-sm mt-4 w-fit" onClick={handleAddChatbotClick}><Plus size={16} /> Add ChatBot</button>
 
-            {isSliderOpen && <aside className="absolute  right-0 top-0 z-[10000] flex h-full w-1/3 flex-col overflow-y-auto bg-white px-5 py-8 shadow-lg ">
+            {isSliderOpen && <aside className="absolute right-0 top-0 z-[10000] flex h-full w-1/3 flex-col overflow-y-auto bg-base-100 px-5 py-8 shadow-lg ">
 
                 <div className="flex items-center justify-between ">
-                    <h1 className='text-xl font-medium flex items-center gap-2'><Bot /> Chat Bot list</h1>
+                    <h1 className='text-xl font-medium flex items-center gap-2 text-base-content'><Bot /> Chat Bot list</h1>
                     <button className="btn btn-outline btn-circle btn-xs" onClick={handleAddChatbotClick}><X size={16} /></button>
                 </div>
 
@@ -59,7 +59,7 @@ const ChatBotList = ({ params }) => {
                                         // No need to manually call handleChatbotSelect here since clicking the checkbox will trigger its onClick event
                                     }}
                                     key={index} // Keep the key for list rendering
-                                    className="flex transform items-center justify-between rounded-lg px-3 py-2 text-gray-600 transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700"
+                                    className="flex transform items-center justify-between rounded-lg px-3 py-2 text-base-content transition-colors duration-300 hover:bg-base-200 hover:text-base-content"
                                     href="#"
                                     style={{ overflow: 'hidden' }}
                                 >

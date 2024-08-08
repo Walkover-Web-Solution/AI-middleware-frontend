@@ -1,55 +1,68 @@
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { services } from "@/jsonFiles/models";
+import { DEFAULT_MODEL, SERVICES } from "@/jsonFiles/bridgeParameter";
 import { createBridgeAction } from "@/store/action/bridgeAction";
+import { getModelAction } from "@/store/action/modelAction";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { useDropzone } from 'react-dropzone';
+import LoadingSpinner from "./loadingSpinner";
 
 function CreateNewBridge({ orgid }) {
     const [selectedService, setSelectedService] = useState('openai');
     const [selectedModel, setSelectedModel] = useState("gpt-4o");
     const [selectedType, setSelectedType] = useState("chat");
     const [bridgeType, setBridgeType] = useState("api");
-    const allBridgeLength = useCustomSelector((state) => state.bridgeReducer.org[orgid] || []).length;
+
+    const { allBridgeLength, modelsList } = useCustomSelector((state) => ({
+        allBridgeLength: (state.bridgeReducer.org[orgid] || [])?.length,
+        modelsList: state?.modelReducer?.serviceModels[selectedService],
+    }));
+
     const [isLoading, setIsLoading] = useState(false);
-    const [uploadedFile, setUploadedFile] = useState(null);
-    const [showFileUploadModal, setShowFileUploadModal] = useState(false);
+    // const [uploadedFile, setUploadedFile] = useState(null);
+    // const [showFileUploadModal, setShowFileUploadModal] = useState(false);
     const dispatch = useDispatch();
     const route = useRouter();
 
+    useEffect(() => {
+        if (selectedService && !modelsList) {
+            dispatch(getModelAction({ service: selectedService }))
+        }
+    }, [selectedService]);
+
     const handleService = (e) => {
         setSelectedService(e.target.value);
-        setSelectedModel(e.target.value === "google" ? "gemini-pro": "gpt-4o" );
+        setSelectedModel(DEFAULT_MODEL[e.target.value]);
     };
 
     const handleModel = (e) => {
-        setSelectedModel(e.target.value);
-        setSelectedType(e.target.selectedOptions[0].parentNode.label);
+        const selectedModel = e.target.value;
+        const selectedModelType = e.target.selectedOptions[0].parentNode.label;
+
+        setSelectedModel(selectedModel);
+        setSelectedType(selectedModelType);
     };
 
-    const onDrop = (acceptedFiles) => {
-        setUploadedFile(acceptedFiles[0]);
-    };
+    // const onDrop = (acceptedFiles) => {
+    //     setUploadedFile(acceptedFiles[0]);
+    // };
 
-    const { getRootProps, getInputProps } = useDropzone({ onDrop });
+    // const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
     const createBridgeHandler = (name, slugname) => {
         if (name.length > 0 && selectedModel && selectedType) {
             setIsLoading(true);
             const dataToSend = {
-                "configuration": {
-                    "model": selectedModel,
-                    "name": name,
-                    "type": selectedType,
-                    "slugName": slugname || name
-                },
                 "service": selectedService,
-                "bridgeType": bridgeType // Added missing semicolon
+                "model": selectedModel,
+                "name": name,
+                "slugName": slugname || name,
+                "bridgeType": bridgeType,
+                "type": selectedType,
             };
             dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
-                setShowFileUploadModal(false);
+                // setShowFileUploadModal(false);
                 route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
                 document.getElementById('my_modal_1').close();
                 setIsLoading(false);
@@ -67,95 +80,99 @@ function CreateNewBridge({ orgid }) {
         setSelectedModel("gpt-4o");
         setSelectedType("chat");
         setBridgeType("api");
-        setUploadedFile(null);
+        // setUploadedFile(null);
         document.getElementById('bridge-name').value = "";
         if (document.getElementById('slug-name')) document.getElementById('slug-name').value = "";
     };
 
+    const handleCreateBridge = e => {
+        e.preventDefault();
+        createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name")?.value);
+    }
+
     return (
         <div>
-            {isLoading &&
-                (<div className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-filter backdrop-blur-lg flex justify-center items-center z-50">
-                    <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-xl">
-                        <div className="flex items-center justify-center space-x-2">
-                            <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span className="text-xl font-medium text-gray-700">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-                )}
+            {isLoading && <LoadingSpinner />}
             <dialog id="my_modal_1" className="modal">
                 <div className="modal-box">
-                    <h3 className="font-bold text-lg">Create Bridge !</h3>
-                    <div>
-                        <div className="items-center justify-start mt-2">
-                            <div className="label">
-                                <span className="label-text">Used as</span>
+                    <h3 className="font-bold text-lg">Create Bridge</h3>
+                    <form onSubmit={handleCreateBridge}>
+                        <div>
+                            <div className="items-center justify-start mt-2">
+                                <div className="label">
+                                    <span className="label-text">Used as</span>
+                                </div>
+                                <div className="flex items-center gap-6">
+                                    <label className="flex items-center justify-center gap-2">
+                                        <input type="radio" name="radio-1" className="radio" value="api" defaultChecked={bridgeType === "api"} onChange={() => setBridgeType('api')} required />
+                                        API
+                                    </label>
+                                    <label className="flex items-center justify-center gap-2">
+                                        <input type="radio" name="radio-1" className="radio" value="chatbot" defaultChecked={bridgeType === "chatbot"} onChange={() => setBridgeType('chatbot')} required />
+                                        ChatBot
+                                    </label>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-6">
-                                <label className="flex items-center justify-center gap-2">
-                                    <input type="radio" name="radio-1" className="radio" value="api" defaultChecked={bridgeType === "api"} onChange={() => setBridgeType('api')} />
-                                    API
-                                </label>
-                                <label className="flex items-center justify-center gap-2">
-                                    <input type="radio" name="radio-1" className="radio" value="chatbot" defaultChecked={bridgeType === "chatbot"} onChange={() => setBridgeType('chatbot')} />
-                                    ChatBot
-                                </label>
-                            </div>
+                            <label className="form-control w-full mb-2">
+                                <div className="label">
+                                    <span className="label-text">Bridge Name</span>
+                                </div>
+                                <input type="text" id="bridge-name" defaultValue={allBridgeLength === 0 ? "Assistant" : ""} placeholder="Type here" className="input input-bordered w-full" maxLength="50" required />
+                            </label>
+                            <label>
+                                <div className="label">
+                                    <span className="label-text">Select Service</span>
+                                </div>
+                                <select value={selectedService} onChange={handleService} className="select select-bordered w-full ">
+                                    <option disabled></option>
+                                    {SERVICES.map((service, index) => (
+                                        <option key={index} value={service}>{service}</option>
+                                    ))}
+                                </select>
+                            </label>
+                            <label className="form-control w-full mb-2 ">
+                                <div className="label">
+                                    <span className="label-text">Pick a model</span>
+                                </div>
+                                <select value={selectedModel} onChange={handleModel} className="select select-bordered">
+                                    <option disabled></option>
+                                    {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
+                                        if (group !== 'models') {
+                                            return (
+                                                <optgroup label={group} key={`group_${groupIndex}`}>
+                                                    {Object.keys(options || {}).map((option, optionIndex) => {
+                                                        const modelName = options?.[option]?.configuration?.model?.default;
+                                                        return (
+                                                            <option key={`option_${groupIndex}_${optionIndex}`}>
+                                                                {modelName}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                </optgroup>
+                                            );
+                                        }
+                                        return null;
+                                    })}
+                                </select>
+                            </label>
+                            {bridgeType === 'chatbot' ? <label className="form-control w-full mb-2">
+                                <div className="label">
+                                    <span className="label-text">Slug Name</span>
+                                </div>
+                                <input type="text" id="slug-name" defaultValue={allBridgeLength === 0 ? "root" : ""} placeholder="Type here" className="input input-bordered w-full " required={bridgeType === 'chatbot'} />
+                            </label> : null}
                         </div>
-                        <label className="form-control w-full mb-2">
-                            <div className="label">
-                                <span className="label-text">Bridge Name</span>
-                            </div>
-                            <input type="text" id="bridge-name" defaultValue={allBridgeLength === 0 ? "Assistant" : ""} placeholder="Type here" className="input input-bordered w-full" maxLength="50" />
-                        </label>
-                        <label>
-                            <div className="label">
-                                <span className="label-text">Select Service</span>
-                            </div>
-                            <select value={selectedService} onChange={handleService} className="select select-bordered w-full ">
-                                <option disabled></option>
-                                <option value="openai">openai</option>
-                                <option value="google">google</option>
-                            </select>
-                        </label>
-                        <label className="form-control w-full mb-2 ">
-                            <div className="label">
-                                <span className="label-text">Pick a model</span>
-                            </div>
-                            <select value={selectedModel} onChange={handleModel} className="select select-bordered">
-                                <option disabled></option>
-                                {Object.entries(services?.[selectedService] || {}).map(([group, options]) => (
-                                    group !== 'models' && // Exclude the 'models' group
-                                    <optgroup label={group} key={group}>
-                                        {[...options].map(option => (
-                                            <option key={option}>{option}</option>
-                                        ))}
-                                    </optgroup>
-                                ))}
-                                {!services?.[selectedService] && <option disabled key="0">Please select a service first !</option>}
-                            </select>
-                        </label>
-                        {bridgeType === 'chatbot' ? <label className="form-control w-full mb-2">
-                            <div className="label">
-                                <span className="label-text">Slug Name</span>
-                            </div>
-                            <input type="text" id="slug-name" defaultValue={allBridgeLength === 0 ? "root" : ""} placeholder="Type here" className="input input-bordered w-full " />
-                        </label> : null}
-                    </div>
-                    <div className="modal-action">
-                        <form method="dialog">
-                            <button className="btn" onClick={cleanState}>Close</button>
-                        </form>
-                        <button className="btn" onClick={() => createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name")?.value)}>+ Create</button>
-                    </div>
+                        <div className="modal-action">
+                            <form method="dialog">
+                                <button className="btn" onClick={cleanState}>Close</button>
+                            </form>
+                            <button className="btn">+ Create</button>
+                        </div>
+                    </form>
                 </div>
             </dialog>
 
-            {showFileUploadModal && (
+            {/* {showFileUploadModal && (
                 <dialog id="file_upload_modal" className="modal" open>
                     <div className="modal-box">
                         <h3 className="font-bold text-lg">Upload Postman Collection</h3>
@@ -172,7 +189,7 @@ function CreateNewBridge({ orgid }) {
                         </div>
                     </div>
                 </dialog>
-            )}
+            )} */}
         </div>
     );
 }

@@ -22,13 +22,24 @@ export const bridgeReducer = createSlice({
       const { response } = action.payload;
       state.allBridgesMap[response.bridge_id] = { ...state.allBridgesMap[response.bridge_id], ...response };
     },
+    // fetchSingleBridgeReducer: (state, action) => {
+    //   const { bridges, integrationData } = action.payload;
+    //   const responseFormat = handleResponseFormat(bridges);
+    //   const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;
+    //   const obj2 = modelInfo[service][modelDefault];
+    //   const response = updatedData(bridges, obj2, type);
+    //   state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...response, integrationData, responseFormat };
+    //   state.loading = false;
+    // },
+
+    // new format
     fetchSingleBridgeReducer: (state, action) => {
-      const { bridges, integrationData } = action.payload;
-      const responseFormat = handleResponseFormat(bridges);
-      const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;
-      const obj2 = modelInfo[service][modelDefault];
-      const response = updatedData(bridges, obj2, type);
-      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...response, integrationData, responseFormat };
+      const { bridge, integrationData } = action.payload;
+      // const responseFormat = handleResponseFormat(bridges);
+      const { _id } = bridge;
+      // const obj2 = modelInfo[service][modelDefault];
+      // const response = updatedData(bridges, obj2, type);
+      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge, integrationData };
       state.loading = false;
     },
     fetchAllBridgeReducer: (state, action) => {
@@ -39,25 +50,34 @@ export const bridgeReducer = createSlice({
       state.org[action.payload.orgId].push(action.payload.data.data.bridge);
     },
     updateBridgeReducer: (state, action) => {
-      const { bridges, bridgeType } = action.payload;
-      const responseFormat = handleResponseFormat(bridges);
-      const { _id, configuration, service, type } = bridges;
-      const modelDefault = configuration.model.default;
-      const obj2 = modelInfo[service][modelDefault];
-      const response = updatedData(bridges, obj2, type);
+      const { bridges } = action.payload;
+      // const responseFormat = handleResponseFormat(bridges);
+      const { _id, configuration, ...extraData } = bridges;
+      // const modelDefault = configuration.model.default;
+      // const obj2 = modelInfo[service][modelDefault];
+      // const response = updatedData(bridges, obj2, type);
+
       state.allBridgesMap[_id] = {
         ...state.allBridgesMap[_id],
-        ...response,
-        responseFormat,
+        ...extraData,
+        configuration: { ...configuration }
       };
 
-      if (bridgeType) {
+      if (extraData?.bridgeType) {
         const allData = state.org[bridges.org_id];
-        const foundBridge = allData.find(bridge => bridge._id === _id);
-        if (foundBridge) {
-          foundBridge.bridgeType = bridges.bridgeType;
+        if (allData) {
+          // Find the index of the bridge to update
+          const index = allData.findIndex(bridge => bridge._id === _id);
+          if (index !== -1) {
+            // Update the specific bridge object within the array immutably
+            state.org[bridges.org_id][index] = {
+              ...state.org[bridges.org_id][index],
+              ...bridges
+            };
+          }
         }
       }
+      state.loading = false;
     },
     deleteBridgeReducer: (state, action) => {
       const { bridgeId, orgId } = action.payload;
@@ -70,8 +90,12 @@ export const bridgeReducer = createSlice({
     },
     updateVariables: (state, action) => {
       const { data, bridgeId } = action.payload;
-      state.allBridgesMap[bridgeId].variables = data;
-    }
+      state.allBridgesMap[bridgeId].variables = data;̦
+    },
+    duplicateBridgeReducer: (state, action) => {
+      state.allBridgesMap[action.payload.result._id] = action.payload.result;
+      state.loading = false;
+    },
   },
 });
 
@@ -84,7 +108,8 @@ export const {
   updateBridgeReducer,
   deleteBridgeReducer,
   integrationReducer,
-  updateVariables
+  updateVariables,
+  duplicateBridgeReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;

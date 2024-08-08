@@ -12,12 +12,12 @@ const Protected = (WrappedComponent) => {
 localStorageGet()
     }, []);
 
-const localStorageGet = () =>{
-  if (typeof window !== 'undefined' && !localStorage.getItem("proxy_token")) {
-    router.replace('/');
-    return null;
-  }
-}
+    const localStorageGet = () =>{
+      if (typeof window !== 'undefined' && !localStorage.getItem("proxy_token")) {
+        router.replace('/');
+        return null;
+      }
+    }
     return <WrappedComponent {...props} />;
   };
 };

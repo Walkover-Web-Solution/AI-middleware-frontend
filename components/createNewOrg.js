@@ -1,57 +1,41 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
 import { createOrgAction } from '@/store/action/orgAction';
 import { userDetails } from '@/store/action/userDetailsAction';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
+import LoadingSpinner from './loadingSpinner';
 
-function CreateOrg({ onClose }) {
-    const [orgDetails, setOrgDetails] = useState({
-        name: '',
-        about: '',
-    });
+const CreateOrg = ({ onClose, handleSwitchOrg }) => {
+    const [orgDetails, setOrgDetails] = useState({ name: '', about: '' });
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
     const route = useRouter();
 
-    const handleChange = (e) => {
-        setOrgDetails({
-            ...orgDetails,
-            [e.target.name]: e.target.value
-        });
-    };
-    const handleAboutCompanyChange = (e) => {
-        setOrgDetails({
-            ...orgDetails,
-            [e.target.name]: e.target.value
-        });
-    };
+    const handleChange = useCallback((e) => {
+        const { name, value } = e.target;
+        setOrgDetails((prevDetails) => ({
+            ...prevDetails,
+            [name]: value,
+        }));
+    }, []);
 
-    const createOrgHandler = async () => {
+    const createOrgHandler = useCallback(async (e) => {
+        e.preventDefault();
         const { name, about } = orgDetails;
-        if (!name.trim() || name.trim().length < 3 ) {
-            toast.error("Organization name is required and must be at least 3 characters long");
-            return;
-        }
-        if (!about.trim() || about.trim().length < 10 ) {
-            toast.error("About Organization is required and must be at least 10 characters long");
-            return;
-        }
-
         setIsLoading(true);
         try {
             const dataToSend = {
-                "company": {
-                    "name": name,
-                    "meta": {
-                        about
-                    }
-                }
+                company: {
+                    name,
+                    meta: { about },
+                },
             };
 
             dispatch(createOrgAction(dataToSend, (data) => {
                 onClose();
                 dispatch(userDetails());
+                handleSwitchOrg(data.id, data.name);
                 toast.success('Organization created successfully');
                 route.push(`/org/${data.id}/bridges`);
             }));
@@ -61,44 +45,50 @@ function CreateOrg({ onClose }) {
         } finally {
             setIsLoading(false);
         }
-    };
-
+    }, [orgDetails, dispatch, onClose, route]);
 
     return (
         <div>
-            {isLoading &&
-                (<div className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-filter backdrop-blur-lg flex justify-center items-center z-50">
-                    <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-xl">
-                        <div className="flex items-center justify-center space-x-2">
-                            {/* Tailwind CSS Spinner */}
-                            <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span className="text-xl font-medium text-gray-700">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-                )
-            }
+            {isLoading && <LoadingSpinner />}
             <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-
             <dialog id="create-org-modal" className="modal fixed z-50 inset-0 overflow-y-auto" open>
                 <div className="flex items-center justify-center min-h-screen">
-                    <div className="modal-box relative p-5 bg-white rounded-lg shadow-xl mx-4">
-                        <h3 className="font-bold text-lg">Create Organization</h3>
-                        <input type="text" name="name" value={orgDetails.name} onChange={handleChange} placeholder="Organization Name" className="input input-bordered w-full mb-4" />
-                        <textarea id="message" name="about" rows="4" value={orgDetails.about} onChange={handleAboutCompanyChange} placeholder="About your Organization" className="p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500" />
+                    <form className="modal-box relative p-5 bg-white rounded-lg shadow-xl mx-4" onSubmit={createOrgHandler}>
+                        <h3 className="font-bold text-lg mb-2">Create Organization</h3>
+                        <label className='label-text'>Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={orgDetails.name}
+                            onChange={handleChange}
+                            placeholder="Organization Name"
+                            className="input input-bordered w-full mb-4"
+                            minLength={3}
+                            maxLength={40}
+                            required
+                        />
+                        <label className='label-text'>Description</label>
+                        <textarea
+                            id="message"
+                            name="about"
+                            rows="4"
+                            value={orgDetails.about}
+                            onChange={handleChange}
+                            placeholder="About your Organization"
+                            className="p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500"
+                            minLength={10}
+                            maxLength={400}
+                            required
+                        />
                         <div className="modal-action">
-                            <button onClick={onClose} className="btn">Close</button>
-                            <button onClick={createOrgHandler} className="btn btn-primary">Create</button>
+                            <button type="button" onClick={onClose} className="btn">Close</button>
+                            <button type="submit" className="btn btn-primary">Create</button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </dialog>
         </div>
     );
-}
+};
 
 export default CreateOrg;
-
