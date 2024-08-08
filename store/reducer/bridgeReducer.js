@@ -90,7 +90,7 @@ export const bridgeReducer = createSlice({
     },
     updateVariables: (state, action) => {
       const { data, bridgeId } = action.payload;
-      state.allBridgesMap[bridgeId].variables = data;̦
+      state.allBridgesMap[bridgeId].variables = data;
     },
     duplicateBridgeReducer: (state, action) => {
       state.allBridgesMap[action.payload.result._id] = action.payload.result;
