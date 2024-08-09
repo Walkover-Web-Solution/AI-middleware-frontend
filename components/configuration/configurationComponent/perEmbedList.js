@@ -1,6 +1,8 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
-import { CircleAlert, Plus } from 'lucide-react';
+import { updateApiAction } from '@/store/action/bridgeAction';
+import { CircleAlert, Trash2 } from 'lucide-react';
 import React, { useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
 const PerEmbedList = ({ params }) => {
     const { integrationData, bridge_pre_tools, bridge_tools } = useCustomSelector((state) => ({
@@ -8,8 +10,7 @@ const PerEmbedList = ({ params }) => {
         bridge_pre_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.pre_tools || [],
         bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools || [],
     }));
-
-    console.log(bridge_tools,'bridge_tools')
+    const dispatch = useDispatch();
 
     const getStatusClass = (status) => {
         switch (status?.toLowerCase()) {
@@ -28,6 +29,21 @@ const PerEmbedList = ({ params }) => {
         }
     };
 
+    const handleChangePreFunction = (e) => {
+        const toolName = e.target.value;
+        dispatch(updateApiAction(params.id, {
+            "id": toolName,
+            "preFunctionCall": true
+        }))
+    }
+
+    const removePreFunction = (id) => {
+        dispatch(updateApiAction(params.id, {
+            "id": id,
+            "preFunctionCall": false
+        }))
+    }
+
     const renderEmbed = useMemo(() => (
         integrationData && (Object.values(integrationData))
             .filter(value => bridge_pre_tools?.some(tool => tool?.name === value?.id)) // Filter to only include items with ids in bridge_pre_tools
@@ -38,32 +54,31 @@ const PerEmbedList = ({ params }) => {
                 return a?.title?.localeCompare(b?.title); // Sort alphabetically based on title
             })
             .map((value) => (
-                <div key={value?.id} id={value.id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `} onClick={() => openViasocket(value?.id)}>
-                    <div className="p-4 ">
-                        <div className="flex justify-between items-center">
-                            <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full text-base-content">
-                                {value.title}
-                            </h1>
-                            {value?.description?.trim() === "" && <CircleAlert color='red' size={16} />}
+                <div className='flex flex-row gap-1'>
+                    <div key={value?.id} id={value.id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `} onClick={() => openViasocket(value?.id)}>
+                        <div className="p-4 ">
+                            <div className="flex justify-between items-center">
+                                <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full text-base-content">
+                                    {value.title}
+                                </h1>
+                                {value?.description?.trim() === "" && <CircleAlert color='red' size={16} />}
+                            </div>
+                            <p className="mt-3 text-xs sm:text-sm line-clamp-3">
+                                {value.description ? value.description : "A description is required for proper functionality."}
+                            </p>
+                            <div className="mt-4">
+                                <span className={`mr-2 inline-block rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(value?.status)}`}>
+                                    {value?.description?.trim() === "" ? "Description Required" : value.status}
+                                </span>
+                            </div>
                         </div>
-                        <p className="mt-3 text-xs sm:text-sm line-clamp-3">
-                            {value.description ? value.description : "A description is required for proper functionality."}
-                        </p>
-                        <div className="mt-4">
-                            <span className={`mr-2 inline-block rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(value?.status)}`}>
-                                {value?.description?.trim() === "" ? "Description Required" : value.status}
-                            </span>
-                        </div>
+                    </div>
+                    <div className='p-2 cursor-pointer' onClick={() => removePreFunction(value?.id)}>
+                        <Trash2 size={16} />
                     </div>
                 </div>
             ))
     ), [integrationData, bridge_pre_tools]);
-
-    const handleChangePreFunction = (e) => {
-        const toolIndex = e.target.value;
-        const selectedTool = bridge_tools[toolIndex];
-        console.log(selectedTool, 'e.target.value', bridge_tools, toolIndex)
-    }
 
     return (bridge_pre_tools?.length > 0 ?
         <div>
@@ -73,7 +88,6 @@ const PerEmbedList = ({ params }) => {
                     <div className="flex flex-wrap gap-4">
                         {renderEmbed}
                     </div>
-                    {/* <button onClick={() => openViasocket()} className="btn btn-outline btn-sm mt-4"><Plus size={16} /> Add new Function</button> */}
                 </div>
             </div>
         </div> :
@@ -84,12 +98,10 @@ const PerEmbedList = ({ params }) => {
                     className="select select-bordered select-sm max-w-[200px]"
                     name='pre_tools'
                     onChange={handleChangePreFunction}
-                // value={unit || ''}
-                // onChange={onChange}
-                // name={`${name}Unit`}
+                    value={bridge_pre_tools[0]?.name}
                 >
                     {bridge_tools?.map((option, index) => (
-                        <option key={index} value={index}>
+                        <option key={index} value={option?.name}>
                             {option?.name}
                         </option>
                     ))}

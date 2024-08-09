@@ -283,6 +283,16 @@ export const createapi = async (bridge_id, dataFromEmbed) => {
   }
 }
 
+export const updateapi = async (bridge_id, dataFromEmbed) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/api/v1/config/updateapi/${bridge_id}`, dataFromEmbed);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
 export const createReponseTypeInOrg = async (orgId) => {
   try {
     const data = await axios.post(`${URL}/chatbot/${orgId}/createResponse`)
