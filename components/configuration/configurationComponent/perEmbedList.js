@@ -2,11 +2,14 @@ import { useCustomSelector } from '@/customSelector/customSelector';
 import { CircleAlert, Plus } from 'lucide-react';
 import React, { useMemo } from 'react';
 
-const EmbedList = ({ params }) => {
-    const { integrationData, bridge_tools } = useCustomSelector((state) => ({
+const PerEmbedList = ({ params }) => {
+    const { integrationData, bridge_pre_tools, bridge_tools } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData,
-        bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools,
-    }))
+        bridge_pre_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.pre_tools || [],
+        bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools || [],
+    }));
+
+    console.log(bridge_tools,'bridge_tools')
 
     const getStatusClass = (status) => {
         switch (status?.toLowerCase()) {
@@ -27,7 +30,7 @@ const EmbedList = ({ params }) => {
 
     const renderEmbed = useMemo(() => (
         integrationData && (Object.values(integrationData))
-            .filter(value => bridge_tools?.some(tool => tool?.name === value?.id))
+            .filter(value => bridge_pre_tools?.some(tool => tool?.name === value?.id)) // Filter to only include items with ids in bridge_pre_tools
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
                 if (!a?.title) return 1;
@@ -54,20 +57,46 @@ const EmbedList = ({ params }) => {
                     </div>
                 </div>
             ))
-    ), [integrationData, bridge_tools]);
+    ), [integrationData, bridge_pre_tools]);
 
-    return (bridge_tools &&
+    const handleChangePreFunction = (e) => {
+        const toolIndex = e.target.value;
+        const selectedTool = bridge_tools[toolIndex];
+        console.log(selectedTool, 'e.target.value', bridge_tools, toolIndex)
+    }
+
+    return (bridge_pre_tools?.length > 0 ?
         <div>
             <div className="form-control ">
+                <label className='label-text'>Pre functions</label>
                 <div className="label flex-col mt-2 items-start">
                     <div className="flex flex-wrap gap-4">
                         {renderEmbed}
                     </div>
-                    <button onClick={() => openViasocket()} className="btn btn-outline btn-sm mt-4"><Plus size={16} /> Add new Function</button>
+                    {/* <button onClick={() => openViasocket()} className="btn btn-outline btn-sm mt-4"><Plus size={16} /> Add new Function</button> */}
                 </div>
             </div>
-        </div>
+        </div> :
+        (
+            <div className='flex flex-col gap-2'>
+                <label className='label-text'>Select Pre functions</label>
+                <select
+                    className="select select-bordered select-sm max-w-[200px]"
+                    name='pre_tools'
+                    onChange={handleChangePreFunction}
+                // value={unit || ''}
+                // onChange={onChange}
+                // name={`${name}Unit`}
+                >
+                    {bridge_tools?.map((option, index) => (
+                        <option key={index} value={index}>
+                            {option?.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        )
     );
-};
+}
 
-export default EmbedList;
+export default PerEmbedList
