@@ -1,27 +1,35 @@
-"use client"; // Correct import statement
+"use client";
 
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import ConfigurationPage from "@/components/configuration/ConfigurationPage";
 import Chat from "@/components/configuration/chat";
 import Chatbot from "@/components/configuration/chatbot";
+import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction";
-import LoadingSpinner from "@/components/loadingSpinner";
+import { getModelAction } from "@/store/action/modelAction";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
 const Page = ({ params }) => {
   const dispatch = useDispatch();
-  const { isLoading, bridge, embedToken } = useCustomSelector((state) => ({
-    bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
-    isLoading: state?.bridgeReducer?.loading || false,
+  const { bridgeType, service, embedToken, isServiceModelsAvailable } = useCustomSelector((state) => ({
+    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+    service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
     embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
+    isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service],
   }));
 
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
   }, []);
+
+  useEffect(() => {
+    if (service && !isServiceModelsAvailable) {
+      dispatch(getModelAction({ service }))
+    }
+  }, [service]);
 
   useEffect(() => {
     if (embedToken) {
@@ -71,7 +79,7 @@ const Page = ({ params }) => {
 
   return (
     <>
-      {!bridge && <LoadingSpinner />}
+      {!bridgeType && <LoadingSpinner />}
       <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-start justify-start">
@@ -84,7 +92,7 @@ const Page = ({ params }) => {
               <div className="resizer w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
               <div className="w-1/3 flex-1 chatPage min-w-[450px]">
                 <div className="p-4 h-full" id="parentChatbot">
-                  {bridge?.bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />
+                  {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />
                   }
                 </div>
               </div>
@@ -97,8 +105,6 @@ const Page = ({ params }) => {
 };
 
 // Extracted functions for better readability
-
-
 function handleResizer() {
   const resizer = document.querySelector(".resizer");
   const leftSide = resizer.previousElementSibling;

@@ -1,79 +1,54 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
+import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const AdvancedParameters = ({ params }) => {
-    const { modelInfoData, bridge } = useCustomSelector((state) => ({
-        modelInfoData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration,
+    const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+    const dispatch = useDispatch();
+    const { service, model, type, bridge, configuration } = useCustomSelector((state) => ({
+        service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service?.toLowerCase(),
+        model: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.model,
+        type: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type,
         bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
+        configuration: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration,
 
     }));
-
-    const [isAccordionOpen, setIsAccordionOpen] = useState(false);
-    const [sliderValues, setSliderValues] = useState({}); // State to hold slider values
-
-
-    useEffect(() => {
-        if (modelInfoData) {
-            const initialSliderValues = Object.entries(modelInfoData).reduce((acc, [key, value]) => {
-                if (value.field === 'slider') {
-                    acc[key] = value?.default;
-                }
-                return acc;
-            }, {});
-            setSliderValues(initialSliderValues);
-        }
-    }, [modelInfoData]);
-
-    const dispatch = useDispatch();
-
-    const handleSliderChange = (e, key) => {
-        const newValue = Number(e?.target?.value);
-        setSliderValues({ ...sliderValues, [key]: newValue });
-    };
-
-    const handleSliderBlur = (e, key) => {
-        const newValue = Number(e.target.value);
-
-        let updatedDataToSend = {
-            configuration: {
-                model: bridge?.configuration?.model?.default,
-                [key]: newValue,
-            },
-            service: bridge?.service?.toLowerCase(),
-        };
-
-        UpdateBridge(updatedDataToSend);
-    };
+    const { modelInfoData } = useCustomSelector((state) => ({
+        modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters,
+    }));
 
     const handleInputChange = (e, key, isSlider = false) => {
         let newValue = e.target.value;
         let newCheckedValue = e.target.checked;
         if (e.target.type === 'number') {
-            newValue = newValue.includes('.') ? parseFloat(newValue) : parseInt(newValue, 10);
+            newValue = String(newValue)?.includes('.') ? parseFloat(newValue) : parseInt(newValue, 10);
         }
 
-
         let updatedDataToSend = {
-            service: bridge?.service?.toLowerCase(),
             configuration: {
-                model: bridge?.configuration?.model?.default,
                 [key]: isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue,
             }
         };
-        if (key === 'response_format') {
-            updatedDataToSend.configuration.response_format = newCheckedValue ? { type: "json_object" } : { type: "text" };
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+    };
+
+    const handleSelectChange = (e, key) => {
+        let newValue;
+        try {
+            newValue = JSON.parse(e.target.value);
+        } catch (error) {
+            newValue = e.target.value;
         }
-
-        UpdateBridge(updatedDataToSend);
+        let updatedDataToSend = {
+            configuration: {
+                [key]: newValue,
+            }
+        };
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
     };
-
-    const UpdateBridge = (currentDataToSend) => {
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...currentDataToSend } }));
-    };
-
 
     const toggleAccordion = () => {
         setIsAccordionOpen((prevState) => !prevState);
@@ -86,59 +61,89 @@ const AdvancedParameters = ({ params }) => {
                 Advanced Parameters
                 {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
-            {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-0">
-                {modelInfoData && Object.entries(modelInfoData)?.map(([key, value]) => (
-                    key !== 'model' && key !== 'tools' && key !== 'tool_choice' && key !== "stream" &&
-                    <div key={key} className={` ${value?.field === "boolean" ? "flex justify-between item-center" : ""}`}>
-                        <div className='flex justify-between items-center w-full'>
-                            <p className='capitalize'>{key?.replaceAll("_", " ")}</p>
-                            {value?.field === 'slider' && <p>{sliderValues[key]}</p>}
+            {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-2">
+                {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
+                    if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
+                    const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
+                    const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
+                    // console.log(min, max, configuration?.[key],2323423);
+                    let error = false;
+                    return (
+                        <div key={key} className="form-control">
+                            <label className="label">
+                                <div className='flex flex-row gap-2 items-center'>
+                                    <span className="label-text capitalize">{name || key}</span>
+                                    {description && <div className="tooltip tooltip-right" data-tip={description}>
+                                        <Info size={12} />
+                                    </div>}
+                                </div>
+                                {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (error = true)}
+                                {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{configuration?.[key]}</p>}
+                            </label>
+                            {field === 'slider' && (
+                                <div>
+                                    <input
+                                        type="range"
+                                        min={min || 0}
+                                        max={max || 100}
+                                        step={step || 1}
+                                        key={configuration?.[key]}
+                                        defaultValue={configuration?.[key] || 0}
+                                        onBlur={(e) => handleInputChange(e, key, true)}
+                                        onInput={(e) => {
+                                            document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
+                                        }}
+                                        className="range range-xs w-full"
+                                        name={key}
+                                    />
+                                </div>
+                            )}
+                            {field === 'text' && (
+                                <input
+                                    type="text"
+                                    defaultValue={configuration?.[key] || ''}
+                                    onBlur={(e) => handleInputChange(e, key)}
+                                    className="input input-bordered input-sm w-full"
+                                    name={key}
+                                />
+                            )}
+                            {field === 'number' && (
+                                <input
+                                    type="number"
+                                    min={min}
+                                    max={max}
+                                    step={step}
+                                    defaultValue={configuration?.[key] || 0}
+                                    onBlur={(e) => handleInputChange(e, key)}
+                                    className="input input-bordered input-sm w-full"
+                                    name={key}
+                                />
+                            )}
+                            {field === 'boolean' && (
+                                <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+                                    <input
+                                        name={key}
+                                        type="checkbox"
+                                        key={bridge?.bridgeType}
+                                        className="toggle"
+                                        defaultChecked={configuration?.[key]}
+                                        onChange={(e) => handleInputChange(e, key)}
+                                    />
+                                </label>
+                            )}
+                            {field === 'select' && (
+                                <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+                                    <select value={JSON.stringify(configuration?.[key])} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
+                                        <option disabled>Select response mode</option>
+                                        {options?.map((service, index) => (
+                                            <option key={index} value={JSON.stringify(service)}>{service?.type}</option>
+                                        ))}
+                                    </select>
+                                </label>
+                            )}
                         </div>
-                        {value?.field === "slider" ? (
-                            <input
-                                type="range"
-                                min={value?.min}
-                                max={value?.max}
-                                step={value?.step}
-                                defaultValue={sliderValues[key] || value?.default}
-                                onChange={(e) => handleSliderChange(e, key)}
-                                onBlur={(e) => handleSliderBlur(e, key)}
-                                className="range range-xs w-full"
-                                name={key}
-                                id={key}
-                            />
-                        ) : value?.field === 'text' ? (
-                            <input
-                                type="text"
-                                required={value?.level === 1}
-                                defaultValue={typeof value?.default === 'object' ? JSON.stringify(value?.default) : value?.default}
-                                onBlur={(e) => handleInputChange(e, key)}
-                                className="input w-full input-bordered max-w-xs input-sm"
-                                name={key}
-                            />
-                        ) : value?.field === 'number' ? (
-                            <input
-                                type="number"
-                                required={value?.level === 1}
-                                defaultValue={value?.default}
-                                onBlur={(e) => handleInputChange(e, key)}
-                                className="input input-bordered max-w-xs input-sm"
-                                name={key}
-                            />
-                        ) : value?.field === 'boolean' ? (
-                            <input
-                                type="checkbox"
-                                required={value?.level === 1}
-                                defaultChecked={value?.default?.type === "text" ? false : value?.default?.type === "json_object" ? true : value?.default}
-                                onChange={(e) => handleInputChange(e, key)}
-                                className="checkbox"
-                                name={key}
-                            />
-                        ) : (
-                            "this field is under development"
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
             </div>}
         </div>
     );

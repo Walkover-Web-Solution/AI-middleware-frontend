@@ -1,8 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
- model : [] ,
- modelInfo : [],
+  serviceModels: {},
   loading: false,
 };
 
@@ -10,14 +9,14 @@ export const modelReducer = createSlice({
   name: "Model",
   initialState,
   reducers: {
-    fetchModelReducer : (state, action) => {
-      state.model = action.payload.models
-      state.modelInfo = action.payload.modelInfo
-    } 
+    fetchModelReducer: (state, action) => {
+      const { data, service } = action.payload;
+      state.serviceModels[service] = data;
+    }
   },
 });
 
 export const {
-    fetchModelReducer
+  fetchModelReducer
 } = modelReducer.actions;
 export default modelReducer.reducer;
