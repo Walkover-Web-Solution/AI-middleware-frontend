@@ -102,11 +102,10 @@ export const createApiAction = (bridge_id, dataFromEmbed) => async () => {
   }
 }
 
-export const updateApiAction = (bridge_id, dataFromEmbed) => async () => {
+export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) => {
   try {
-   const data = await updateapi(bridge_id, dataFromEmbed);
-   console.log(data, '2345')
-    dispatch(updateBridgeReducer({ bridges: data.data.bridge }));
+    const data = await updateapi(bridge_id, dataFromEmbed);
+    dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
   } catch (error) {
     console.error(error)
   }

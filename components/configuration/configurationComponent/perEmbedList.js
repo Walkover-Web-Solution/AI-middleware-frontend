@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 const PerEmbedList = ({ params }) => {
     const { integrationData, bridge_pre_tools, bridge_tools } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData,
-        bridge_pre_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.pre_tools || [],
+        bridge_pre_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.pre_tools || [],
         bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools || [],
     }));
     const dispatch = useDispatch();
@@ -46,7 +46,7 @@ const PerEmbedList = ({ params }) => {
 
     const renderEmbed = useMemo(() => (
         integrationData && (Object.values(integrationData))
-            .filter(value => bridge_pre_tools?.some(tool => tool?.name === value?.id)) // Filter to only include items with ids in bridge_pre_tools
+            .filter(value => bridge_pre_tools?.some(tool => tool === value?.id)) // Filter to only include items with ids in bridge_pre_tools
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
                 if (!a?.title) return 1;
@@ -80,6 +80,9 @@ const PerEmbedList = ({ params }) => {
             ))
     ), [integrationData, bridge_pre_tools]);
 
+    if(!bridge_tools?.length && !bridge_pre_tools?.length) {
+        return null;
+    }
     return (bridge_pre_tools?.length > 0 ?
         <div>
             <div className="form-control ">
@@ -98,11 +101,11 @@ const PerEmbedList = ({ params }) => {
                     className="select select-bordered select-sm max-w-[200px]"
                     name='pre_tools'
                     onChange={handleChangePreFunction}
-                    value={bridge_pre_tools[0]?.name}
                 >
+                    <option disabled selected>Select tool</option>
                     {bridge_tools?.map((option, index) => (
                         <option key={index} value={option?.name}>
-                            {option?.name}
+                            {integrationData?.[option?.name]?.title}
                         </option>
                     ))}
                 </select>
