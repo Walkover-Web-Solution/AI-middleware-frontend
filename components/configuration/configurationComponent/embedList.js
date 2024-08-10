@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { CircleAlert, Plus } from 'lucide-react';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateTools } from '@/store/reducer/bridgeReducer';
@@ -12,10 +12,35 @@ const EmbedList = ({ params }) => {
   const [index, setIndex] = useState(null);
   const [updateCompleted, setUpdateCompleted] = useState(false);
 
-  const dispatch = useDispatch();
-  const { bridge_tools } = useCustomSelector((state) => ({
+   const { bridge_tools } = useCustomSelector((state) => ({
     bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools || [],
   }));
+
+   useEffect(() => {
+    const closeModalOnEsc = (event) => {
+      if (event.key === "Escape") {
+        setIsModalOpen(false);
+      }
+    };
+
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        setIsModalOpen(false)
+      }
+    };
+
+    document.addEventListener("keydown", closeModalOnEsc);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", closeModalOnEsc);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const modalRef = useRef(null)
+  const dispatch = useDispatch();
+ 
 
   const handleOpenModal = (tool, index) => {
     setSelectedTool(tool);
@@ -27,8 +52,9 @@ const EmbedList = ({ params }) => {
     }, {}));
     setIsModalOpen(true);
   };
-
-  const handleCloseModal = useCallback(async () => {
+  
+ 
+  const handleData = useCallback(async () => {
     if(!bridge_tools[index].required){
        setIsModalOpen(false);
        return;
@@ -59,7 +85,7 @@ const EmbedList = ({ params }) => {
       [key]: !prevState[key],
     }));
   };
-
+  
   const renderEmbed = useMemo(() => (
     bridge_tools
       .map((value,index) => (
@@ -104,42 +130,100 @@ const EmbedList = ({ params }) => {
         </div>
       </div>
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-800 bg-opacity-50">
-          <div className="bg-white rounded-lg p-8 w-full max-w-lg">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">
-                <span>Function Name: </span> {selectedTool?.name}
-              </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-600 hover:text-gray-800 bg-gray-200 px-2 py-1 rounded-md">&times;</button>
-            </div>
-            <p className="mt-4">
-              <span>Description: </span> {selectedTool?.description}
-            </p>
-            <ul className="mt-4">
-              {selectedTool?.properties ? (
-                Object.entries(selectedTool.properties).map(([key, value], index) => (
-                  <li key={index} className="flex items-center gap-4 mb-3">
-                    <input
-                      type="checkbox"
-                      className="mr-2 checkbox"
-                      id={`modal-param-${index}`}
-                      checked={checkedState[key]}
-                      onChange={() => handleCheckboxChange(key)}
-                    />
-                    <label htmlFor={`modal-param-${index}`}>{key}: <span>{typeof value === 'object' ? JSON.stringify(value) : value || ""}</span></label>
-                  </li>
-                ))
-              ) : (
-                <li>No parameters</li>
-              )}
-            </ul>
-            <div className="flex justify-end mt-4">
-              <button onClick={handleCloseModal} className="bg-gray-200 hover:bg-gray-400 px-4 py-2 rounded">OK</button>
-            </div>
-          </div>
+  <div className='p-10'>
+    <div  className="fixed inset-0  flex items-center justify-center z-50 bg-gray-800 bg-opacity-50">
+      
+      <div className="bg-white rounded-lg p-8 w-full max-w-lg">
+        <div className="flex justify-between items-center">
+          <h2 className="text-[16px] font-semibold">
+            <span>Function Name: </span> {selectedTool?.name}
+          </h2>
+          <button
+            onClick={handleData}
+            // className="text-gray-600 hover:text-gray-800"
+          >
+            <svg
+      height="30px"
+      width="30px"
+      version="1.1"
+      id="Capa_1"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      viewBox="0 0 26 26"
+      xmlSpace="preserve"
+    >
+      <g>
+        <path
+          style={{ fill: '#030104' }}
+          d="M21.125,0H4.875C2.182,0,0,2.182,0,4.875v16.25C0,23.818,2.182,26,4.875,26h16.25
+          C23.818,26,26,23.818,26,21.125V4.875C26,2.182,23.818,0,21.125,0z M18.78,17.394l-1.388,1.387c-0.254,0.255-0.67,0.255-0.924,0
+          L13,15.313L9.533,18.78c-0.255,0.255-0.67,0.255-0.925-0.002L7.22,17.394c-0.253-0.256-0.253-0.669,0-0.926l3.468-3.467
+          L7.221,9.534c-0.254-0.256-0.254-0.672,0-0.925l1.388-1.388c0.255-0.257,0.671-0.257,0.925,0L13,10.689l3.468-3.468
+          c0.255-0.257,0.671-0.257,0.924,0l1.388,1.386c0.254,0.255,0.254,0.671,0.001,0.927l-3.468,3.467l3.468,3.467
+          C19.033,16.725,19.033,17.138,18.78,17.394z"
+        />
+      </g>
+    </svg>
+     </button>
         </div>
-      )}
+        <p className="mt-4">
+          <span className="font-semibold">Description: </span> {selectedTool?.description}
+        </p>
+        <div className="mt-4">
+          {selectedTool?.properties ? (
+            <>
+              <h2 className="font-semibold mb-4 text-[16px]">Required Parameters:</h2>
+              <div className="overflow-y-auto max-h-[300px] ">
+                <table className="min-w-full divide-y divide-gray-200 overflow-y-auto">
+                  <thead className="bg-gray-100">
+                    <tr>
+
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parameters</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {Object.entries(selectedTool.properties).map(([key, value], index) => (
+                      <tr key={key}>
+                        
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <input
+                            type="checkbox"
+                            className="checkbox mr-2"
+                            id={`modal-param-${index}`}
+                            checked={checkedState[key]}
+                            onChange={() => handleCheckboxChange(key)}
+                          />
+                        
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{key}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {typeof value === 'object' ? JSON.stringify(value) : value || ""}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
+            <p>No parameters</p>
+          )}
+        </div>
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={handleData}
+            className="bg-gray-200 hover:bg-gray-400 px-4 py-2 rounded"
+          >
+            OK
+          </button>
+        </div>
+      </div>
     </div>
+ </div>
+)}
+</div>
     )
   );
 };
