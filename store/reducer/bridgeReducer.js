@@ -62,7 +62,7 @@ export const bridgeReducer = createSlice({
         ...extraData,
         configuration: { ...configuration }
       };
-
+      
       if (extraData?.bridgeType) {
         const allData = state.org[bridges.org_id];
         if (allData) {
@@ -96,7 +96,15 @@ export const bridgeReducer = createSlice({
       state.allBridgesMap[action.payload.result._id] = action.payload.result;
       state.loading = false;
     },
-  },
+    updateTools : (state, action) => {
+      const { bridgeId,index, data } = action.payload;
+        if (state.allBridgesMap[bridgeId]?.configuration?.tools) {
+            state.allBridgesMap[bridgeId].configuration.tools[index]['required'] = data;
+        } else {
+            console.error('Tools not found');
+        }
+    },
+  }
 });
 
 export const {
@@ -109,7 +117,8 @@ export const {
   deleteBridgeReducer,
   integrationReducer,
   updateVariables,
-  duplicateBridgeReducer
+  duplicateBridgeReducer,
+  updateTools
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
