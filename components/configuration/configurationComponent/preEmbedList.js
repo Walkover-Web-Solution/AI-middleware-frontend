@@ -1,10 +1,10 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateApiAction } from '@/store/action/bridgeAction';
-import { CircleAlert, Trash2 } from 'lucide-react';
+import { CircleAlert, Info, Trash2 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-const PerEmbedList = ({ params }) => {
+const PreEmbedList = ({ params }) => {
     const { integrationData, bridge_pre_tools, bridge_tools } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData,
         bridge_pre_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.pre_tools || [],
@@ -80,18 +80,19 @@ const PerEmbedList = ({ params }) => {
             ))
     ), [integrationData, bridge_pre_tools]);
 
-    if(!bridge_tools?.length && !bridge_pre_tools?.length) {
+    if (!bridge_tools?.length && !bridge_pre_tools?.length) {
         return null;
     }
     return (bridge_pre_tools?.length > 0 ?
         <div>
-            <div className="form-control ">
+            <div className="form-control inline-block">
                 <label className='label-text'>Pre functions</label>
                 <div className="label flex-col mt-2 items-start">
                     <div className="flex flex-wrap gap-4">
                         {renderEmbed}
                     </div>
                 </div>
+                <p role='alert' className='label-text-alt mt-2 alert p-2'><Info size={16} />Use pre_function variable to use this function data. &#123;&#123;pre_function&#125;&#125;</p>
             </div>
         </div> :
         (
@@ -114,4 +115,4 @@ const PerEmbedList = ({ params }) => {
     );
 }
 
-export default PerEmbedList
+export default PreEmbedList

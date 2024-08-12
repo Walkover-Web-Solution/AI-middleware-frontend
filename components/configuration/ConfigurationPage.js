@@ -16,7 +16,7 @@ import ModelDropdown from "./configurationComponent/modelDropdown";
 import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
-import PerEmbedList from "./configurationComponent/perEmbedList";
+import PreEmbedList from "./configurationComponent/preEmbedList";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -56,7 +56,7 @@ export default function ConfigurationPage({ params }) {
                 currentView === 'setup' ?
                     <>
                         {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
-                        <PerEmbedList params={params} />
+                        <PreEmbedList params={params} />
                         <InputConfigComponent params={params} />
                         <EmbedList params={params} />
                         <ServiceDropdown params={params} />
