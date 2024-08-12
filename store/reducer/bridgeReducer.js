@@ -96,6 +96,18 @@ export const bridgeReducer = createSlice({
       state.allBridgesMap[action.payload.result._id] = action.payload.result;
       state.loading = false;
     },
+     updateTools : (state, action) => {
+      const { bridgeId,toolsId, data } = action.payload;
+        if (state.allBridgesMap[bridgeId]?.configuration?.tools) {
+           state.allBridgesMap[bridgeId].configuration.tools.forEach((tool) => {
+        if (tool.name === toolsId) {
+            tool['required'] = data;
+        }
+    });
+        } else {
+            console.error('Tools not found');
+        }
+    },
   },
 });
 
@@ -109,7 +121,8 @@ export const {
   deleteBridgeReducer,
   integrationReducer,
   updateVariables,
-  duplicateBridgeReducer
+  duplicateBridgeReducer,
+  updateTools
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
