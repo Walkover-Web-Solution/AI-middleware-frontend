@@ -27,6 +27,7 @@ const EmbedList = ({ params }) => {
 
     const renderEmbed = useMemo(() => (
         integrationData && (Object.values(integrationData))
+            .filter(value => bridge_tools?.some(tool => tool?.name === value?.id))
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
                 if (!a?.title) return 1;
@@ -53,7 +54,7 @@ const EmbedList = ({ params }) => {
                     </div>
                 </div>
             ))
-    ), [integrationData]);
+    ), [integrationData, bridge_tools]);
 
     return (bridge_tools &&
         <div>

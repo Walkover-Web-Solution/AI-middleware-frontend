@@ -7,11 +7,27 @@ import dryRunReducer from "./reducer/dryRunReducer";
 import userDetailsReducer from "./reducer/userDetailsReducer";
 import authDataReducer from "./reducer/authkeyReducer";
 import orgReducer from "./reducer/orgReducer";
-import storage from 'redux-persist/lib/storage';
+import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
 import persistReducer from "redux-persist/es/persistReducer";
 import persistStore from "redux-persist/es/persistStore";
 import responseTypeReducer from "./reducer/responseTypeReducer";
 import ChatBot from "./reducer/ChatBotReducer";
+
+const createNoopStorage = () => {
+    return {
+        getItem(_key) {
+            return Promise.resolve(null);
+        },
+        setItem(_key, value) {
+            return Promise.resolve(value);
+        },
+        removeItem(_key) {
+            return Promise.resolve();
+        },
+    };
+};
+
+const storage = typeof window !== "undefined" ? createWebStorage("local") : createNoopStorage();
 
 const persistConfig = { key: 'root', storage };
 

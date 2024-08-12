@@ -1,4 +1,4 @@
-import { addorRemoveResponseIdInBridge, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge } from "@/config";
+import { addorRemoveResponseIdInBridge, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateapi } from "@/config";
 import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { toast } from "react-toastify";
@@ -97,6 +97,15 @@ export const createApiAction = (bridge_id, dataFromEmbed) => async () => {
   try {
     await createapi(bridge_id, dataFromEmbed);
 
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) => {
+  try {
+    const data = await updateapi(bridge_id, dataFromEmbed);
+    dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
   } catch (error) {
     console.error(error)
   }
