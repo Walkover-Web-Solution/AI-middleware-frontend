@@ -64,11 +64,11 @@ const EmbedList = ({ params }) => {
                             </span>
                         </div>
                     </div>
-                    <div className="dropdown m-1 shadow-none border-none">
+                    {value?.status?.toString()?.toLowerCase() !== 'paused' && <div className="dropdown m-1 shadow-none border-none">
                         <div tabindex={0} role="button" className="btn m-1 bg-transparent shadow-none border-none outline-none hover:bg-base-200" onClick={() => handleOpenModal(value?.id)}>
                             <Settings size={18} />
                         </div>
-                    </div>
+                    </div>}
                 </div>
             ))
     ), [integrationData, bridge_tools]);
