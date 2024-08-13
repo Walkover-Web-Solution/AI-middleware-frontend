@@ -66,7 +66,6 @@ const AdvancedParameters = ({ params }) => {
                     if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
                     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
                     const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
-                    // console.log(min, max, configuration?.[key],2323423);
                     let error = false;
                     return (
                         <div key={key} className="form-control">
