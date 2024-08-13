@@ -1,8 +1,10 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
-import { CircleAlert, Plus } from 'lucide-react';
-import React, { useMemo } from 'react';
+import { CircleAlert, Plus, Settings } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import FunctionParameterModal from './functionParameterModal';
 
 const EmbedList = ({ params }) => {
+    const [functionId, setFunctionId] = useState(null);
     const { integrationData, bridge_tools, bridge_pre_tools } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData,
         bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools || [],
@@ -26,6 +28,15 @@ const EmbedList = ({ params }) => {
         }
     };
 
+
+    const handleOpenModal = (functionId) => {
+        setFunctionId(functionId);
+        const modal = document.getElementById('function-parameter-modal');
+        if(modal) {
+            modal.showModal();
+        }
+    }
+
     const renderEmbed = useMemo(() => (
         integrationData && (Object.values(integrationData))
             .filter(value => !bridge_pre_tools?.includes(value?.id))
@@ -36,8 +47,8 @@ const EmbedList = ({ params }) => {
                 return a?.title?.localeCompare(b?.title); // Sort alphabetically based on title
             })
             .map((value) => (
-                <div key={value?.id} id={value.id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `} onClick={() => openViasocket(value?.id)}>
-                    <div className="p-4 ">
+                <div key={value?.id} id={value.id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer justify-between bg-base-100 ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
+                    <div className="p-4" onClick={() => openViasocket(value?.id)}>
                         <div className="flex justify-between items-center">
                             <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full text-base-content">
                                 {value.title}
@@ -53,12 +64,18 @@ const EmbedList = ({ params }) => {
                             </span>
                         </div>
                     </div>
+                    <div className="dropdown m-1 shadow-none border-none">
+                        <div tabindex={0} role="button" className="btn m-1 bg-transparent shadow-none border-none outline-none hover:bg-base-200" onClick={() => handleOpenModal(value?.id)}>
+                            <Settings size={18} />
+                        </div>
+                    </div>
                 </div>
             ))
     ), [integrationData, bridge_tools]);
 
     return (bridge_tools &&
         <div>
+            <FunctionParameterModal functionId={functionId} params={params}/>
             <div className="form-control ">
                 <div className="label flex-col mt-2 items-start">
                     <div className="flex flex-wrap gap-4">
