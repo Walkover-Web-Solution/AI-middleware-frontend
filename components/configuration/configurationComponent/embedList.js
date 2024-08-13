@@ -3,9 +3,10 @@ import { CircleAlert, Plus } from 'lucide-react';
 import React, { useMemo } from 'react';
 
 const EmbedList = ({ params }) => {
-    const { integrationData, bridge_tools } = useCustomSelector((state) => ({
+    const { integrationData, bridge_tools, bridge_pre_tools } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData,
-        bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools,
+        bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools || [],
+        bridge_pre_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.pre_tools || [],
     }))
 
     const getStatusClass = (status) => {
@@ -27,7 +28,7 @@ const EmbedList = ({ params }) => {
 
     const renderEmbed = useMemo(() => (
         integrationData && (Object.values(integrationData))
-            .filter(value => bridge_tools?.some(tool => tool?.name === value?.id))
+            .filter(value => !bridge_pre_tools?.includes(value?.id))
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
                 if (!a?.title) return 1;
