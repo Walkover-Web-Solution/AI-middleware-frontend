@@ -4,8 +4,38 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import { useDispatch } from "react-redux";
 import ChatTextInput from "./chatTextInput";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 function Chat({ params }) {
+
+  const Code = ({
+  inline,
+  className,
+  children,
+  ...props
+}) => {
+  const match = /language-(\w+)/.exec(className || "");
+  return !inline && match ? (
+    <div className="text-sm m-0 rounded-sm  w-full">
+      <SyntaxHighlighter
+         style={vscDarkPlus}
+        className=" outline-none border-0 m-0 w-full rounded-md"
+        language={match[1]}
+        wrapLongLines={true} // Enable word wrapping
+        codeTagProps={{ style: { whiteSpace: "pre-wrap", backgroundColor:"inherit" } }} // Ensure word wrapping
+        PreTag="div"
+        {...props}
+      >
+        {String(children).replace(/\n$/, "")}
+      </SyntaxHighlighter>
+    </div>
+  ) : (
+    <code className={className} {...props}>
+      {children}
+    </code>
+  );
+};
   const dispatch = useDispatch();
 
   const { variablesKeyValue } = useCustomSelector((state) => ({
@@ -68,7 +98,10 @@ function Chat({ params }) {
                   {message.sender}
                   <time className="text-xs opacity-50 pl-2">{message.time}</time>
                 </div>
-                <div className="chat-bubble break-keep"> <ReactMarkdown>{message.content}</ReactMarkdown></div>
+                <div className="chat-bubble break-keep"> 
+                <ReactMarkdown components={{
+                          code: Code,
+                        }}>{message.content}</ReactMarkdown></div>
               </div>
             )
           })}
@@ -150,7 +183,7 @@ function Chat({ params }) {
             <div className="text-red-500 mt-2">{errorMessage}</div>
           )}
         </div>
-      </div >
+      </div>
     </>
   );
 }
