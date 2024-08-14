@@ -47,8 +47,8 @@ const EmbedList = ({ params }) => {
                 return a?.title?.localeCompare(b?.title); // Sort alphabetically based on title
             })
             .map((value) => (
-                <div key={value?.id} id={value.id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer justify-between bg-base-100 ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
-                    <div className="p-4" onClick={() => openViasocket(value?.id)}>
+                <div key={value?.id} id={value.id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
+                    <div className="p-4 w-full" onClick={() => openViasocket(value?.id)}>
                         <div className="flex justify-between items-center">
                             <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full text-base-content">
                                 {value.title}
@@ -64,8 +64,8 @@ const EmbedList = ({ params }) => {
                             </span>
                         </div>
                     </div>
-                    {value?.status?.toString()?.toLowerCase() !== 'paused' && <div className="dropdown m-1 shadow-none border-none">
-                        <div tabindex={0} role="button" className="btn m-1 bg-transparent shadow-none border-none outline-none hover:bg-base-200" onClick={() => handleOpenModal(value?.id)}>
+                    {value?.status?.toString()?.toLowerCase() !== 'paused' && <div className="dropdown shadow-none border-none absolute right-1 top-1">
+                        <div tabindex={0} role="button" className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200" onClick={() => handleOpenModal(value?.id)}>
                             <Settings size={18} />
                         </div>
                     </div>}

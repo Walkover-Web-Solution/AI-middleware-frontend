@@ -1,7 +1,9 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
+import { parameterTypes } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
 
 function FunctionParameterModal({ functionId, params }) {
     const dispatch = useDispatch();
@@ -53,6 +55,78 @@ function FunctionParameterModal({ functionId, params }) {
             };
         });
     };
+    const handleTypeChange = (key, newType) => {
+        setToolData(prevToolData => {
+            const updatedProperties = {
+                ...prevToolData.properties,
+                [key]: {
+                    ...prevToolData.properties[key],
+                    type: newType
+                }
+            };
+
+            return {
+                ...prevToolData,
+                properties: updatedProperties
+            };
+        });
+    };
+
+    const handleEnumChange = (key, newEnum) => {
+        try {
+            // If the input is empty, remove the `enum` field
+            if (!newEnum.trim()) {
+                setToolData(prevToolData => {
+                    const updatedProperties = JSON.parse(JSON.stringify(prevToolData.properties));
+                    // Check if the key exists in properties and has an enum field
+                    if (updatedProperties[key] && updatedProperties[key].enum) {
+                        delete updatedProperties[key]?.enum;
+                    }
+                    return {
+                        ...prevToolData,
+                        properties: updatedProperties
+                    };
+                });
+                return;
+            }
+    
+            if (typeof newEnum === 'string') {
+                newEnum = newEnum.trim();
+                newEnum = newEnum.replace(/'/g, '"');
+                if (newEnum.startsWith("[") && newEnum.endsWith("]")) {
+                    newEnum = JSON.parse(newEnum);
+                } else {
+                    toast.error("Invalid format. Expected a JSON array format.");
+                }
+            }
+    
+            // Ensure the parsed value is an array
+            if (!Array.isArray(newEnum)) {
+                toast.error("Parsed value is not an array.");
+            }
+    
+            // Update the state with the parsed array
+            setToolData(prevToolData => {
+                const updatedProperties = {
+                    ...prevToolData.properties,
+                    [key]: {
+                        ...prevToolData.properties[key],
+                        enum: newEnum
+                    }
+                };
+    
+                return {
+                    ...prevToolData,
+                    properties: updatedProperties
+                };
+            });
+    
+        } catch (error) {
+            toast.error("Failed to update enum:", error.message);
+        }
+    };
+    
+    
     const handleSaveFunctionData = () => {
         const updatedTools = bridge_tools.map(tool =>
             tool.name === toolData.name ? toolData : tool
@@ -75,6 +149,7 @@ function FunctionParameterModal({ functionId, params }) {
                                     <th>Type</th>
                                     <th>Required</th>
                                     <th>Description</th>
+                                    <th>Enum: comma seperated</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -82,7 +157,14 @@ function FunctionParameterModal({ functionId, params }) {
                                     <tr key={key}>
                                         <td>{index}</td>
                                         <td>{key}</td>
-                                        <td>{value?.type}</td>
+                                        <td>
+                                            <select className="select select-sm select-bordered" value={value?.type} onChange={(e) => handleTypeChange(key, e.target.value)}>
+                                                <option disabled selected>Select parameter type</option>
+                                                {parameterTypes && (parameterTypes).map((type, index) => (
+                                                    <option key={index} value={type}>{type}</option>
+                                                ))}
+                                            </select>
+                                        </td>
                                         <td>
                                             <input type="checkbox"
                                                 className="checkbox"
@@ -99,6 +181,15 @@ function FunctionParameterModal({ functionId, params }) {
                                                 onBlur={(e) => handleDescriptionChange(key, e.target.value)}
                                             />
                                         </td>
+                                        <td>
+                                            <input
+                                                type="text"
+                                                placeholder="['a','b','c']"
+                                                className="input input-bordered w-full input-sm"
+                                                defaultValue={JSON.stringify(value?.enum)}
+                                                onBlur={(e) => handleEnumChange(key, e.target.value)}
+                                            />
+                                        </td>
                                     </tr>
                                 ))}
 
@@ -106,7 +197,7 @@ function FunctionParameterModal({ functionId, params }) {
                         </table>
                     </div>}
                 <div className="modal-action">
-                    <form method="dialog" className='flex flex-row gap-4'>
+                    <form method="dialog" className='flex flex-row gap-2'>
                         {/* if there is a button, it will close the modal */}
                         {isDataAvailable && <button className="btn" onClick={handleSaveFunctionData}>Save</button>}
                         <button className="btn">Close</button>
