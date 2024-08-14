@@ -1,5 +1,5 @@
 import { addorRemoveResponseIdInBridge, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateapi } from "@/config";
-import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer } from "../reducer/bridgeReducer";
+import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer, updateBridgeToolsReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { toast } from "react-toastify";
 
@@ -93,10 +93,12 @@ export const integrationAction = (dataToSend, bridge_id) => async (dispatch) => 
 }
 
 
-export const createApiAction = (bridge_id, dataFromEmbed) => async () => {
+export const createApiAction = (bridge_id, dataFromEmbed) => async (dispatch) => {
   try {
-    await createapi(bridge_id, dataFromEmbed);
-
+    const data = await createapi(bridge_id, dataFromEmbed);
+    if(data?.success){
+      dispatch(updateBridgeToolsReducer({ bridgeId: bridge_id, tools: data?.tools_call }));
+    }
   } catch (error) {
     console.error(error)
   }
