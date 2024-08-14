@@ -27,7 +27,7 @@ export const DEFAULT_MODEL = {
     'openai': "gpt-4o",
     'google': 'gemini-pro',
     'anthropic': "claude-3-5-sonnet-20240620",
-    'groq': "mixtral-8x7b-32768"
+    'groq': "llama3-8b-8192"
 }
 
 export function getDefaultValues(additionalParams, bridgeParams) {
