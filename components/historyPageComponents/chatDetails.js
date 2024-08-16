@@ -24,7 +24,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
       document.removeEventListener("keydown", closeSliderOnEsc);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [setIsSliderOpen]);
+  }, []);
 
   const sidebarRef = useRef(null);
 
