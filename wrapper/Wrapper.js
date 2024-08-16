@@ -23,7 +23,7 @@ const Wrapper = ({ children }) => {
     <>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <div className="w-full h-svh relative ">
+          <div className="w-screen">
             {/* All the child components */}
             {children}
             {/* Notification toast container */}
