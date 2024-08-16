@@ -6,7 +6,6 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 function BridgeNameInput({ params }) {
-    console.log('render')
     const dispatch = useDispatch();
     const [isEditable, setIsEditable] = React.useState(false);
     const { bridgeName } = useCustomSelector((state) => ({
