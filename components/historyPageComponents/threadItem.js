@@ -1,5 +1,6 @@
 import { Bot, Info, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import CodeBlock from "../codeBlock/codeBlock";
 
 const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData }) => (
   <div key={`item.id${item.id}`} >
@@ -19,8 +20,8 @@ const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData })
       <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
         <div class="chat-image avatar flex justify-center items-center">
           <div class="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
-            {item.role === "user" ? <User /> :<Bot />}
-            
+            {item.role === "user" ? <User /> : <Bot />}
+
           </div>
         </div>
         <div className="chat-header flex gap-2">
@@ -29,7 +30,17 @@ const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData })
           <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
         </div>
         <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content"} chat-bubble`} onClick={() => threadHandler(item.thread_id, item)}>
-          <ReactMarkdown>{item?.content}</ReactMarkdown>
+          <ReactMarkdown components={{
+            code: ({ node, inline, className, children, ...props }) => (
+              <CodeBlock
+                inline={inline}
+                className={className}
+                {...props}
+              >
+                {children}
+              </CodeBlock>
+            )
+          }}>{item?.content}</ReactMarkdown>
         </div>
       </div>
     )}
