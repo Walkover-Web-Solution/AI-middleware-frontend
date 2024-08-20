@@ -3,12 +3,13 @@ import CreateNewBridge from "@/components/createNewBridge";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { getAllBridgesAction } from "@/store/action/bridgeAction";
+import { duplicateBridgeAction, getAllBridgesAction } from "@/store/action/bridgeAction";
 import { getIconOfService } from "@/utils/utility";
-import { Box } from "lucide-react";
-import { useRouter } from 'next/navigation';
+import { Box, Ellipsis } from "lucide-react";
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 export const runtime = 'edge';
 
@@ -43,6 +44,23 @@ function Home({ params }) {
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
   };
 
+  const pathName = usePathname()
+  const path = pathName.split('?')[0].split('/');
+  
+  const handleDuplicateBridge=(bridgeId)=>{
+    try {
+          dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId) => {
+            if (newBridgeId) {
+              router.push(`/org/${path[2]}/bridges/configure/${newBridgeId}`)
+              toast.success('Bridge duplicate successfully');
+            }
+          });
+        } catch (error) {
+          console.error('Failed to duplicate bridge:', error);
+          toast.error('Error duplicating bridge');
+        }
+  }
+
   return (
     <div className="drawer lg:drawer-open">
       <CreateNewBridge />
@@ -76,37 +94,47 @@ function Home({ params }) {
                   </button>
                 </div>
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
-                  {filteredBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
-                    <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center gap-7 rounded-md border cursor-pointer hover:shadow-lg bg-base-100">
-                      <div className="w-full p-4 flex flex-col justify-between h-[200px] items-start">
-                        <h1 className="inline-flex truncate w-full items-center gap-2 text-lg font-semibold text-base-content">
-                          {getIconOfService(item.service)}
-                          {item.name}
-                        </h1>
-                        <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
-                          {item.slugName && <span>SlugName: {item.slugName}</span>}
-                          {item.configuration?.prompt && (
-                            Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
-                              <div key={index}>
-                                <p>Role: {promptItem.role}</p>
-                                <p>Content: {promptItem.content}</p>
-                              </div>
-                            )) : <p>Prompt: {item.configuration.prompt}</p>
-                          )}
-                          {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
-                        </p>
-                        <div className="mt-auto">
-                          <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
-                            {item.service}
-                          </span>
-                          <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
-                            {item.configuration?.model || ""}
-                          </span>
+                 {filteredBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                     <div  className="flex  items-start  justify-between rounded-md border cursor-pointer hover:shadow-lg bg-base-100">
+                        <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center gap-7 ">
+                        <div className="w-full p-4 flex flex-col justify-between h-[200px] items-start">
+                          <h1 className="inline-flex truncate items-center gap-2 text-lg leading-5 font-semibold text-base-content">
+                            {getIconOfService(item.service)}
+                            {item.name}
+                          </h1>
+                          <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
+                            {item.slugName && <span>SlugName: {item.slugName}</span>}
+                            {item.configuration?.prompt && (
+                              Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
+                                <div key={index}>
+                                  <p>Role: {promptItem.role}</p>
+                                  <p>Content: {promptItem.content}</p>
+                                </div>
+                              )) : <p>Prompt: {item.configuration.prompt}</p>
+                            )}
+                            {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
+                          </p>
+                          <div className="mt-auto">
+                            <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
+                              {item.service}
+                            </span>
+                            <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
+                              {item.configuration?.model || ""}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                  </div>
+                        <div className="pr-4 py-4">
+                          <div className="dropdown bg-transparent">
+                            <div tabIndex={0} role="button" className=""><Ellipsis className="rotate-90 h-[15px]"/></div>
+                            <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                              <li><a onClick={() => handleDuplicateBridge(item._id)}>Duplicate Bridge</a></li>
+                              </ul>
+                          </div>
+                        </div>
+                     </div>
+                    ))}
+               </div>
               </div>
             )}
           </div>

@@ -50,6 +50,9 @@ function BridgeSlider() {
                     onChange={handleBridgeSearchChange}
                     className="border border-gray-300 rounded p-2 w-full"
                 />
+              <button className="bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() => document.getElementById('my_modal_1').showModal()}>
+                + Create new bridge 
+              </button>
                 {/* Render filtered bridge list */}
                 <ul className="menu p-0 w-full truncate text-base-content">
                     {filteredBridgesList.slice() // Create a copy of the array to avoid mutating the original
