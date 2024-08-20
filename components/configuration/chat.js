@@ -3,12 +3,11 @@ import { updateVariables } from "@/store/reducer/bridgeReducer";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import { useDispatch } from "react-redux";
-import CodeBlock from "../codeBlock/codeBlock";
 import ChatTextInput from "./chatTextInput";
 
 function Chat({ params }) {
-
   const dispatch = useDispatch();
+
   const { variablesKeyValue } = useCustomSelector((state) => ({
     variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
   }));
@@ -69,19 +68,7 @@ function Chat({ params }) {
                   {message.sender}
                   <time className="text-xs opacity-50 pl-2">{message.time}</time>
                 </div>
-                <div className="chat-bubble break-keep">
-                  <ReactMarkdown components={{
-                    code: ({ node, inline, className, children, ...props }) => (
-                      <CodeBlock
-                        inline={inline}
-                        className={className}
-                        isDark={true} // Pass isDark to CodeBlock
-                        {...props}
-                      >
-                        {children}
-                      </CodeBlock>
-                    )
-                  }}>{message.content}</ReactMarkdown></div>
+                <div className="chat-bubble break-keep"> <ReactMarkdown>{message.content}</ReactMarkdown></div>
               </div>
             )
           })}
@@ -163,7 +150,7 @@ function Chat({ params }) {
             <div className="text-red-500 mt-2">{errorMessage}</div>
           )}
         </div>
-      </div>
+      </div >
     </>
   );
 }
