@@ -1,9 +1,10 @@
 import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { Building2, ChevronDown, KeyRound, LogOut, Mail, Settings2 } from 'lucide-react';
+import { toggleSidebar } from '@/utils/utility';
+import { Building2, ChevronDown, KeyRound, LogOut, Mail, Settings2, X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react';
 
 function OrgSlider() {
     const router = useRouter();
@@ -52,6 +53,10 @@ function OrgSlider() {
         }
     };
 
+    const handleCloseOrgSlider = useCallback(() => {
+        toggleSidebar('default-org-sidebar');
+    }, [])
+
     return (
         <aside
             id="default-org-sidebar"
@@ -59,7 +64,10 @@ function OrgSlider() {
             aria-label="Sidebar"
         >
             <div className="flex flex-col gap-4 w-full">
-                <p className='text-xl'>Organizations</p>
+                <div className='flex flex-row justify-between'>
+                    <p className='text-xl font-semibold'>Organizations</p>
+                    <X className="block md:hidden" onClick={handleCloseOrgSlider} />
+                </div>
                 <input
                     type="text"
                     placeholder="Search org..."
@@ -72,7 +80,7 @@ function OrgSlider() {
                         .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically based on title
                         .map((item) => (
                             <li key={item.id}><a className={`${item.id == path[2] ? "active" : `${item.id}`} py-2 px-2 rounded-md`} key={item.id}
-                                onClick={() => { handleSwitchOrg(item.id, item.name)}} >
+                                onClick={() => { handleSwitchOrg(item.id, item.name) }} >
                                 <Building2 size={16} /> {item.name}</a>
                             </li>
                         ))}

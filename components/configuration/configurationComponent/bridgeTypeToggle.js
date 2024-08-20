@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
-import { Info, QrCode } from 'lucide-react';
+import { Info } from 'lucide-react';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -20,24 +20,28 @@ const BridgeTypeToggle = ({ params }) => {
     };
 
     return (
-        <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
-            <div className="label">
-                <span className="label-text">API</span>
+        <label className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
+            <div className='flex flex-row items-center gap-2'>
+                <div className="label">
+                    <span className="label-text">API</span>
+                </div>
+                <input
+                    type="checkbox"
+                    key={bridgeType}
+                    className="toggle"
+                    defaultChecked={bridgeType?.toString()?.toLowerCase() === "chatbot" ? true : false}
+                    onChange={(e) => handleInputChange(e, "bridgeType")}
+                />
+                <div className="label">
+                    <span className="label-text">ChatBot</span>
+                </div>
             </div>
-            <input
-                type="checkbox"
-                key={bridgeType}
-                className="toggle"
-                defaultChecked={bridgeType?.toString()?.toLowerCase() === "chatbot" ? true : false}
-                onChange={(e) => handleInputChange(e, "bridgeType")}
-            />
-            <div className="label">
-                <span className="label-text">ChatBot</span>
+            <div>
+                {bridgeType?.toString()?.toLowerCase() === "chatbot" && <div role="alert" className="alert p-2">
+                    <Info size={16} />
+                    <span className='label-text-alt'>Only supports models which have JSON support. &#40; like gpt-4o &#41;</span>
+                </div>}
             </div>
-            {bridgeType?.toString()?.toLowerCase() === "chatbot" && <div role="alert" className="alert p-2">
-                <Info size={16} />
-                <span className='label-text-alt'>Only supports models which have JSON support. &#40; like gpt-4o &#41;</span>
-            </div>}
         </label>
     );
 };

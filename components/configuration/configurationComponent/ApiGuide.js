@@ -3,16 +3,16 @@ import Link from 'next/link';
 import React from 'react';
 
 const ComplitionApi = (bridgeId) => {
-  return `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_URL}/api/v1/model/chat/completion' \\
---header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
---header 'Content-Type: application/json' \\
---data '{ 
-  "user": YOUR_USER_QUESTION,
-  "bridge_id": "${bridgeId}",
-  "variables": {
-    ...VARIABLES_USED_IN_BRIDGE
-  }
-}'`
+  return `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_URL}/api/v2/model/chat/completion' \\
+  --header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
+  --header 'Content-Type: application/json' \\
+  --data '{ 
+    "user": YOUR_USER_QUESTION,
+    "bridge_id": "${bridgeId}",
+    "variables": {
+      // ...VARIABLES_USED_IN_BRIDGE
+    }
+  }'`
 }
 
 const Section = ({ title, caption, children }) => (
@@ -24,8 +24,8 @@ const Section = ({ title, caption, children }) => (
 
 const ApiGuide = ({ params }) => {
   return (
-    <div className="min-h-screen bg-gray-100 gap-4 flex flex-col">
-      <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
+    <div className="min-h-screen gap-4 flex flex-col">
+      <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
 
         <Section title="Step 1" caption="Create `pauthkey`" />
 
@@ -34,7 +34,7 @@ const ApiGuide = ({ params }) => {
           <br /> <Link href={`/org/${params.org_id}/apikey`} target='_blank' className="link link-primary">Create pauthkey</Link>
         </p>
       </div>
-      <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
+      <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
         <Section title="Step 2" caption="Use the API" />
         <div className="mockup-code relative">
           <CopyButton data={ComplitionApi(params.id)} />
