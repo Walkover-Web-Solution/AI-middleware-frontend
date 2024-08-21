@@ -1,7 +1,8 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { getIconOfService, toggleSidebar } from '@/utils/utility';
+import { X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import CreateNewBridge from '../createNewBridge';
 
 function BridgeSlider() {
@@ -26,6 +27,10 @@ function BridgeSlider() {
         toggleSidebar('default-bridge-sidebar');
     }
 
+    const handlCloseBridgeSlider = useCallback(() => {
+        toggleSidebar('default-bridge-sidebar');
+    },[])
+
     return (
         <aside
             id="default-bridge-sidebar"
@@ -33,7 +38,10 @@ function BridgeSlider() {
             aria-label="Sidebar"
         >
             <div className="flex w-full flex-col gap-4">
-                <p className='text-xl'> Bridges </p>
+                <div className='flex flex-row justify-between'>
+                    <p className='text-xl font-semibold'> Bridges </p>
+                    <X className="block md:hidden" onClick={handlCloseBridgeSlider}/>
+                </div>
                 {/* Input field for bridge search */}
                 <input
                     type="text"

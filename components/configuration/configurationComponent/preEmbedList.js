@@ -99,7 +99,7 @@ const PreEmbedList = ({ params }) => {
             <div className='flex flex-col gap-2'>
                 <label className='label-text'>Select Pre functions</label>
                 <select
-                    className="select select-bordered select-sm max-w-[200px]"
+                    className="select select-bordered select-sm max-w-xs"
                     name='pre_tools'
                     onChange={handleChangePreFunction}
                 >

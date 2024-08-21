@@ -48,20 +48,20 @@ export default function PrivateFormSection({ params, ChooseChatbot }) {
             </div>}
             <div className="mockup-code">
                 <CopyButton data={`{
-    org_id: "${params?.org_id}",
-    chatbot_id: "${params.chatbot_id || chatbotId}",
-    user_id:  // Add your User Id here,
-    variables: {
-        // Add your variables here
-        }
-    }`} />
+    "org_id": "${params?.org_id}",
+    "chatbot_id": "${params.chatbot_id || chatbotId}",
+    "user_id":  "// Add your User Id here",
+    "variables": {
+        "key": "value"
+    }
+}`} />
                 <pre data-prefix=">" className="text-sm p-2 rounded">
                     {`{
-    org_id: "${params?.org_id}",
-    chatbot_id: "${params.chatbot_id || chatbotId}",
-    user_id:  // Add your User Id here,
-    variables: {
-        // Add your variables here
+        "org_id": "${params?.org_id}",
+        "chatbot_id": "${params.chatbot_id || chatbotId}",
+        "user_id":  // Add your User Id here,
+        "variables": {
+            // Add your variables here: "key": "value"
         }
     }`}
                 </pre>
