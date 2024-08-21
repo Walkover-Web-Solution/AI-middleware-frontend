@@ -15,6 +15,23 @@ const ComplitionApi = (bridgeId) => {
   }'`
 }
 
+const ResponseFormat = () => {
+ return `success: true,
+  "response": {
+        "data": {
+            "id": "chatcmpl-785654654v4ew54656",
+            "content": "Response from the AI",
+            "model": "Your selected model",
+            "role": "assistant",
+            "finish_reason": "stop"
+        },
+        "usage": {
+            "input_tokens": 269,
+            "output_tokens": 10,
+            "total_tokens": 279
+        }
+    }`
+}
 const Section = ({ title, caption, children }) => (
   <div className="flex items-start flex-col justify-center">
     <h3 className="text-lg font-semibold">{title}</h3>
@@ -42,6 +59,18 @@ const ApiGuide = ({ params }) => {
             <code>
               {ComplitionApi(params.id)}
             </code>
+
+          </pre>
+        </div>
+        <Section  caption="Response Format" />
+        <div className="mockup-code relative">
+          <CopyButton data={ResponseFormat()} />
+          <pre className="break-words whitespace-pre-wrap">
+          {console.log(ResponseFormat())}
+            <code>
+              {ResponseFormat()}
+            </code>
+
           </pre>
         </div>
 
