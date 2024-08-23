@@ -1,6 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { modelInfo } from "@/jsonFiles/allModelsConfig (1)";
-import { handleResponseFormat, updatedData } from "@/utils/utility";
 
 const initialState = {
   allBridgesMap: {},
@@ -34,23 +32,26 @@ export const bridgeReducer = createSlice({
 
     // new format
     fetchSingleBridgeReducer: (state, action) => {
-      const { bridge, integrationData } = action.payload;
-      // const responseFormat = handleResponseFormat(bridges);
+      const { bridge } = action.payload;
       const { _id } = bridge;
-      // const obj2 = modelInfo[service][modelDefault];
-      // const response = updatedData(bridges, obj2, type);
-      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge, integrationData };
+      state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge };
       state.loading = false;
     },
     fetchAllBridgeReducer: (state, action) => {
-      state.org = { ...state.org, [action.payload.orgId]: [...action.payload.bridges] };
+      const { bridges, orgId, integrationData, embed_token } = action.payload;
+      state.org = { ...state.org, [orgId]: { ...state.org?.[orgId], orgs: [...bridges], integrationData, embed_token } };
+      state.loading = false;
+    },
+    fetchAllFunctionsReducer: (state, action) => {
+      const { orgId, functionData } = action.payload;
+      state.org = { ...state.org, [orgId]: { ...state.org?.[orgId], functionData } };
       state.loading = false;
     },
     createBridgeReducer: (state, action) => {
-      state.org[action.payload.orgId].push(action.payload.data.data.bridge);
+      state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.bridge);
     },
     updateBridgeReducer: (state, action) => {
-      const { bridges } = action.payload;
+      const { bridges, functionData } = action.payload;
       // const responseFormat = handleResponseFormat(bridges);
       const { _id, configuration, ...extraData } = bridges;
       // const modelDefault = configuration.model.default;
@@ -64,34 +65,46 @@ export const bridgeReducer = createSlice({
       };
 
       if (extraData?.bridgeType) {
-        const allData = state.org[bridges.org_id];
+        const allData = state.org[bridges.org_id]?.orgs;
         if (allData) {
           // Find the index of the bridge to update
           const index = allData.findIndex(bridge => bridge._id === _id);
           if (index !== -1) {
             // Update the specific bridge object within the array immutably
-            state.org[bridges.org_id][index] = {
-              ...state.org[bridges.org_id][index],
+            state.org[bridges.org_id].orgs[index] = {
+              ...state.org[bridges.org_id].orgs[index],
               ...bridges
             };
+          }
+        }
+      }
+      if (functionData) {
+        const bridgeIds = state.org[bridges.org_id].functionData[functionData.function_id]?.['bridge_ids'] || [];
+        if (functionData?.function_operation) {
+          bridgeIds.push(_id);
+        } else {
+          // i want to remove function_id from function_ids array
+          const index = bridgeIds?.indexOf(_id);
+          if (index !== -1) {
+            bridgeIds?.splice(index, 1);
           }
         }
       }
       state.loading = false;
     },
     updateBridgeToolsReducer: (state, action) => {
-      const { bridgeId, tools } = action.payload;
-      state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], configuration: { ...state.allBridgesMap[bridgeId].configuration, tools } };
+      const { orgId, functionData = {} } = action.payload;
+      state.org[orgId].functionData[functionData._id] = { ...(state.org[orgId].functionData[functionData._id] || {}), ...functionData };
     },
 
     deleteBridgeReducer: (state, action) => {
       const { bridgeId, orgId } = action.payload;
       delete state.allBridgesMap[bridgeId];
-      state.org[orgId] = state.org[orgId].filter(bridge => bridge._id !== bridgeId);
+      state.org[orgId].orgs = state.org[orgId]?.orgs?.filter(bridge => bridge._id !== bridgeId);
     },
     integrationReducer: (state, action) => {
-      const { dataToSend, id } = action.payload;
-      state.allBridgesMap[id].integrationData[dataToSend.id] = dataToSend
+      const { dataToSend, orgId } = action.payload;
+      state.org[orgId].integrationData[dataToSend.id] = dataToSend
     },
     updateVariables: (state, action) => {
       const { data, bridgeId } = action.payload;
@@ -99,6 +112,7 @@ export const bridgeReducer = createSlice({
     },
     duplicateBridgeReducer: (state, action) => {
       state.allBridgesMap[action.payload.result._id] = action.payload.result;
+      state.org[action.payload.result.org_id].orgs.push(action.payload.result);
       state.loading = false;
     },
   },
@@ -108,6 +122,7 @@ export const {
   isPending,
   isError,
   fetchAllBridgeReducer,
+  fetchAllFunctionsReducer,
   fetchSingleBridgeReducer,
   createBridgeReducer,
   updateBridgeReducer,

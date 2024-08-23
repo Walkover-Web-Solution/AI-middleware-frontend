@@ -17,7 +17,7 @@ const Page = ({ params }) => {
   const { bridgeType, service, embedToken, isServiceModelsAvailable } = useCustomSelector((state) => ({
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
-    embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
+    embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service],
   }));
 
@@ -58,12 +58,13 @@ const Page = ({ params }) => {
   }, []);
 
   function handleMessage(e) {
+    // todo: need to make api call to update the name & description
     if (e?.data?.webhookurl) {
       const dataToSend = {
         ...e.data,
         status: e?.data?.action
       }
-      dispatch(integrationAction(dataToSend, params?.id));
+      dispatch(integrationAction(dataToSend, params?.org_id));
       if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
         const dataFromEmbed = {
           url: e?.data?.webhookurl,
@@ -72,7 +73,7 @@ const Page = ({ params }) => {
           id: e?.data?.id,
           status: e?.data?.action,
         };
-        dispatch(createApiAction(params.id, dataFromEmbed));
+        dispatch(createApiAction(params.org_id, dataFromEmbed));
       }
     }
   }
