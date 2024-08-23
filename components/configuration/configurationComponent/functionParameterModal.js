@@ -1,22 +1,27 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { parameterTypes } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { Info, Trash2 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 function FunctionParameterModal({ functionId, params }) {
     const dispatch = useDispatch();
-    const { bridge_tools } = useCustomSelector((state) => ({
+    const { bridge_tools, function_details } = useCustomSelector((state) => ({
         bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools || [],
+        function_details: state?.bridgeReducer?.org?.[params?.org_id]?.functionData?.[functionId] || {},
     }))
 
     const initialFunctionData = useMemo(() => {
         return bridge_tools.find(tool => tool?.name === functionId);
     }, [functionId]);
 
-    const [toolData, setToolData] = useState(initialFunctionData);
-    const { properties, required } = toolData || {};
+    const [toolData, setToolData] = useState(function_details);
+    const { fields: properties, required_params: required } = toolData || {};
+
+    // const {fields, required_params} = function_details || {};
+    // console.log(fields, required_params,2323);
     const [isDataAvailable, setIsDataAvailable] = useState(Object.keys(properties || {}).length > 0);
 
     // Update the state when `functionId` or `bridge_tools` changes
@@ -89,7 +94,7 @@ function FunctionParameterModal({ functionId, params }) {
                 });
                 return;
             }
-    
+
             if (typeof newEnum === 'string') {
                 newEnum = newEnum.trim();
                 newEnum = newEnum.replace(/'/g, '"');
@@ -99,12 +104,12 @@ function FunctionParameterModal({ functionId, params }) {
                     toast.error("Invalid format. Expected a JSON array format.");
                 }
             }
-    
+
             // Ensure the parsed value is an array
             if (!Array.isArray(newEnum)) {
                 toast.error("Parsed value is not an array.");
             }
-    
+
             // Update the state with the parsed array
             setToolData(prevToolData => {
                 const updatedProperties = {
@@ -114,19 +119,19 @@ function FunctionParameterModal({ functionId, params }) {
                         enum: newEnum
                     }
                 };
-    
+
                 return {
                     ...prevToolData,
                     properties: updatedProperties
                 };
             });
-    
+
         } catch (error) {
             toast.error("Failed to update enum:", error.message);
         }
     };
-    
-    
+
+
     const handleSaveFunctionData = () => {
         const updatedTools = bridge_tools.map(tool =>
             tool.name === toolData.name ? toolData : tool
@@ -134,10 +139,33 @@ function FunctionParameterModal({ functionId, params }) {
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { tools: updatedTools } } }));
     };
 
+    const handleRemoveFunctionFromBridge = () => {
+        dispatch(updateBridgeAction({
+            bridgeId: params.id,
+            dataToSend: {
+                functionData: {
+                    function_id: functionId,
+                }
+            }
+        })).then(() => {
+            document.getElementById('function-parameter-modal').close();
+        }
+        );
+    }
+
     return (
         <dialog id="function-parameter-modal" className="modal">
             <div className="modal-box w-11/12 max-w-5xl">
-                <h3 className="font-bold text-lg mb-2">Configure fields</h3>
+                <div className='flex flex-row justify-between'>
+                    <span className='flex flex-row items-center gap-4'>
+                        <h3 className="font-bold text-lg">Configure fields</h3>
+                        <div className="flex flex-row gap-1">
+                            <Info size={16} />
+                            <span className='label-text-alt'>Used in {(function_details?.bridge_ids || [])?.length} bridges, changes may affect all bridges.</span>
+                        </div>
+                    </span>
+                    <button onClick={handleRemoveFunctionFromBridge} className='btn btn-sm btn-error text-white'><Trash2 size={16} />Remove function</button>
+                </div>
                 {!isDataAvailable ? <p>No Parameters used in the function</p> :
                     <div className="overflow-x-auto">
                         <table className="table">
