@@ -67,7 +67,7 @@ function Home({ params }) {
                   <input
                     type="text"
                     placeholder="Search for bridges"
-                    className="input input-bordered max-w-sm input-md w-full mb-4 md:mb-0"
+                    className="input input-bordered md:max-w-sm input-md w-full mb-4 md:mb-0"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />

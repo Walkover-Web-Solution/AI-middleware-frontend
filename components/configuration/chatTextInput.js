@@ -16,9 +16,9 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
         variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
     }));
 
-    const { outputConfig } = useCustomSelector((state) => ({
-        outputConfig: state?.modelReducer?.serviceModels?.[bridge?.service]?.[modelType]?.[modelName]?.configuration?.outputConfig
-    }));
+    // const { outputConfig } = useCustomSelector((state) => ({
+    //     outputConfig: state?.modelReducer?.serviceModels?.[bridge?.service]?.[modelType]?.[modelName]?.configuration?.outputConfig
+    // }));
 
     const dataToSend = {
         configuration: {
@@ -30,7 +30,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
         bridgeType: bridge?.bridgeType,
         slugName: bridge?.slugName,
         response_format: {
-            type:'default'
+            type: 'default'
         }
     };
     const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
@@ -49,14 +49,14 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
     }, [variablesKeyValue]);
 
     const handleSendMessage = async (e) => {
-        if(prompt?.trim() === "" && modelType === "chat") {
+        if (prompt?.trim() === "" && modelType === "chat") {
             setErrorMessage("Prompt is required");
             return;
         }
         const newMessage = inputRef?.current?.value;
         if (modelType === "chat") if (newMessage?.trim() === "") return;
         setErrorMessage("");
-        if(modelType !== "completion" && modelType !== "embedding")  inputRef.current.value = "";
+        if (modelType !== "completion" && modelType !== "embedding") inputRef.current.value = "";
         // setNewMessage("");
         setLoading(true);
         try {
@@ -127,17 +127,18 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                 setLoading(false);
                 return;
             }
-            response = responseData.data;
-            const outputPath = outputConfig.message;
-            const assistPath = outputConfig.assistant;
-            const content = _.get(response.response, outputPath, "");
-            let assistConversation = _.get(response.response, assistPath, ""); // in anthropic assistant
-            if(typeof assistConversation  != 'object'){
-                assistConversation = {
-                    role: 'assistant',
-                    content: content
-                }
+            response = responseData.response?.data;
+            // const outputPath = outputConfig.message;
+            // const assistPath = outputConfig.assistant;
+            // const content = _.get(response.response, outputPath, "");
+            const content = response?.content || "";
+            // let assistConversation = _.get(response.response, assistPath, ""); // in anthropic assistant
+            // if(typeof assistConversation  != 'object'){
+            const assistConversation = {
+                role: response?.role || "assistant",
+                content: content
             }
+            // }
             // Update localDataToSend with assistant conversation
             if (modelType === "chat") {
                 setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
@@ -154,9 +155,6 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
 
             // Add assistant chat to messages
             setMessages(prevMessages => [...prevMessages, newChatAssist]);
-
-            // Clear new message input
-            // setNewMessage("");
         } catch (error) {
             setErrorMessage("Something went wrong. Please try again.");
         } finally {

@@ -79,6 +79,11 @@ export const bridgeReducer = createSlice({
       }
       state.loading = false;
     },
+    updateBridgeToolsReducer: (state, action) => {
+      const { bridgeId, tools } = action.payload;
+      state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], configuration: { ...state.allBridgesMap[bridgeId].configuration, tools } };
+    },
+
     deleteBridgeReducer: (state, action) => {
       const { bridgeId, orgId } = action.payload;
       delete state.allBridgesMap[bridgeId];
@@ -106,6 +111,7 @@ export const {
   fetchSingleBridgeReducer,
   createBridgeReducer,
   updateBridgeReducer,
+  updateBridgeToolsReducer,
   deleteBridgeReducer,
   integrationReducer,
   updateVariables,
