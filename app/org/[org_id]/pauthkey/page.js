@@ -19,7 +19,7 @@ function Page({ params }) {
   const [isCreating, setIsCreating] = useState(false);
   const path = usePathname()
   const route = useRouter()
-  // const [authData, setAuthData] = useState([])
+ 
 
   useEffect(() => {
     dispatch(getAllAuthData())

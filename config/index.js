@@ -90,7 +90,7 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
     // toast.success("Bridge is updated");
     return response
   } catch (error) {
-    console.log(error)
+    console.error(error)
     toast.error(error?.response?.data?.error);
   }
 }
@@ -465,3 +465,47 @@ export const getAllModels = async (service) => {
     throw new Error(error);
   }
 };
+
+export const saveApiKeys = async(data)=>{
+  try {
+    const response = await axios.post(`${URL}/apikeys`, data);
+    return response;
+} catch (error) {
+    console.error(error);
+    return  error;
+}
+}
+
+export const updateApikey = async(dataToSend)=>{
+  
+  try {
+   const response =  await axios.put(`${URL}/apikeys`,dataToSend)
+    return  response;
+  } catch (error) {
+    console.error(error)
+    return error;
+  }
+}
+
+export const deleteApikey = async (id) => {
+  try {
+    const response = await axios.delete(`${URL}/apikeys`, {
+      data: {   apikey_object_id:id },
+    });
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+
+export const getAllApikey = async()=>{
+  try {
+    const response  = await  axios.get(`${URL}/apikeys`)
+    return response;
+  } catch (error) {
+    console.error(error)
+    return error;
+  }
+}
