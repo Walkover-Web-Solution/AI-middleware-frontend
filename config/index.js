@@ -500,9 +500,9 @@ export const deleteApikey = async (id) => {
 };
 
 
-export const getAllApikey = async()=>{
+export const getAllApikey = async(org_id)=>{
   try {
-    const response  = await  axios.get(`${URL}/apikeys`)
+    const response  = await  axios.get(`${URL}/apikeys`,org_id)
     return response;
   } catch (error) {
     console.error(error)
