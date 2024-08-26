@@ -55,7 +55,7 @@ const ApiKeyInput = ({ params }) => {
             </div>
             <div>
                 <select
-                    className="select select-bordered w-full"
+                    className="select select-bordered select-sm w-full"
                     onChange={handleDropdownChange}
                     value={selectedValue}
                 >
