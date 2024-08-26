@@ -11,7 +11,7 @@ function BridgeSlider() {
     const path = pathName.split('?')[0].split('/')
     const [bridgeSearchQuery, setBridgeSearchQuery] = useState('');
 
-    const bridgesList = useCustomSelector((state) => state.bridgeReducer.org[path[2]]) || [];
+    const bridgesList = useCustomSelector((state) => state.bridgeReducer.org[path[2]]?.orgs) || [];
 
     const handleBridgeSearchChange = (e) => {
         setBridgeSearchQuery(e.target.value);
