@@ -88,7 +88,7 @@ const PreEmbedList = ({ params }) => {
         </div> :
         (
             <div className='flex'>
-                <EmbedListSuggestionDropdownMenu params={params} name={"Select Pre function"} hideCreateFunction={true} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} />
+                <EmbedListSuggestionDropdownMenu key={'preEmbedList'} params={params} name={"Select Pre function"} hideCreateFunction={true} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} />
             </div>
         )
     );
