@@ -186,7 +186,7 @@ export const getIconOfService = (service) => {
 }
 
 export function getStatusClass (status) {
-    switch (status?.toLowerCase()) {
+    switch (status?.toString().trim().toLowerCase()) {
         case 'drafted':
             return 'bg-yellow-100';
         case 'paused':
