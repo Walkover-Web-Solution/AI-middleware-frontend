@@ -113,6 +113,14 @@ export const bridgeReducer = createSlice({
       }
       state.apikeys[org_id] = data;
     },
+    createApiKeyReducer: (state, action) => {
+      const { org_id, data } = action.payload;
+      if (state.apikeys[org_id]) {
+        state.apikeys[org_id].push(data);
+      } else {
+        state.apikeys[org_id] = [data];
+      }
+    },
     apikeyUpdateReducer: (state, action) => {
       const { org_id, id, data,name,comment } = action.payload;
       if (state.apikeys[org_id]) {
@@ -148,6 +156,7 @@ export const {
   duplicateBridgeReducer,
   apikeyDataReducer,
   apikeyUpdateReducer,
+  createApiKeyReducer,
   apikeyDeleteReducer
 } = bridgeReducer.actions;
 

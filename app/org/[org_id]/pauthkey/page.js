@@ -1,29 +1,25 @@
 "use client"
-import Sidebar from '@/components/Sidebar'
 import LoadingSpinner from '@/components/loadingSpinner'
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customSelector/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
 import { Copy, Trash2 } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 
 export const runtime = 'edge';
 
-function Page({ params }) {
+function Page() {
   const dispatch = useDispatch();
   const authData = useCustomSelector((state) => state?.authDataReducer?.authData || [])
   const [singleAuthData, setSingleAuthData] = useState({})
   const [isCreating, setIsCreating] = useState(false);
-  const path = usePathname()
-  const route = useRouter()
  
 
   useEffect(() => {
     dispatch(getAllAuthData())
-  }, [authData]); // Removed authData from dependencies to avoid infinite loop
+  }, []); // Removed authData from dependencies to avoid infinite loop
 
   const columns = ["name", "authkey", "created_at"];
 

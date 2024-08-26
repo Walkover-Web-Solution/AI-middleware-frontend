@@ -1,6 +1,7 @@
 'use client';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { deleteApikeyAction, getAllApikeyAction, saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
+import { API_KEY_COLUMNS } from '@/utils/enums';
 import { SquarePen, Trash2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import React, { useState, useCallback, useEffect } from 'react';
@@ -11,11 +12,16 @@ const Page = () => {
     const dispatch = useDispatch();
     const path = pathName?.split('?')[0].split('/');
     const orgId = path[2] || '';
-   
-    const apikeyData = useCustomSelector((state) => {
-        const apikeys = state?.bridgeReducer?.apikeys || {};
-        return apikeys[orgId] || [];
-    });
+
+    const { apikeyData } = useCustomSelector((state) => ({
+        apikeyData: state?.bridgeReducer?.apikeys[orgId] || []
+    }));
+
+    useEffect(() => {
+        if (orgId) {
+            dispatch(getAllApikeyAction(orgId));
+        }
+    }, []);
 
     const [selectedApiKey, setSelectedApiKey] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -31,7 +37,7 @@ const Page = () => {
 
     const deleteApikey = useCallback((item) => {
         if (window.confirm("Are you sure you want to delete this API key?")) {
-            dispatch(deleteApikeyAction({org_id: item.org_id, name: item.name, id: item._id }));
+            dispatch(deleteApikeyAction({ org_id: item.org_id, name: item.name, id: item._id }));
         }
     }, [dispatch]);
 
@@ -52,17 +58,12 @@ const Page = () => {
             const isNameChange = apikeyData.some(item => item.name === data.name);
             const isCommentChange = apikeyData.some(item => item.comment === data.comment);
 
-            if(!isIdChange) {
-                const dataToSend = { org_id: orgId, apikey_object_id: data._id, apikey: data.apikey, comment: data.comment };
-                dispatch(updateApikeyAction(dataToSend));
-            }
-            if (!isNameChange || !isCommentChange) {
-                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, comment: data.comment };
+            if (!isIdChange || !isNameChange || !isCommentChange) {
+                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, apikey: data.apikey, comment: data.comment };
                 dispatch(updateApikeyAction(dataToSend));
             }
         } else {
-            dispatch(saveApiKeysAction(data));
-            dispatch(getAllApikeyAction(orgId));
+            dispatch(saveApiKeysAction(data, orgId));
         }
 
         event.target.reset();
@@ -83,15 +84,10 @@ const Page = () => {
         setSelectedApiKey(null);
         setIsEditing(false);
     }, []);
-    
-    useEffect(() => {
-        dispatch(getAllApikeyAction(orgId));
-    }, [dispatch]);
 
-    const columns = ["name", "apikey", "comment", "service"];
-
+    const columns = API_KEY_COLUMNS || [];
     return (
-        <div>
+        <div className='p-5'>
             <table className="table">
                 <thead>
                     <tr>
@@ -131,48 +127,48 @@ const Page = () => {
                 </tbody>
             </table>
             <dialog id="my_modal_6" className="modal modal-bottom sm:modal-middle">
-       <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
-        <h3 className="font-bold text-lg">
-            {isEditing ? 'Update API Key' : 'Create New API Key'}
-        </h3>
-        {['name', 'apikey', 'comment'].map((field) => (
-            <div key={field} className="flex flex-col gap-2">
-                <label htmlFor={field} className="font-semibold">
-                    {field.charAt(0).toUpperCase() + field.slice(1)}:
-                </label>
-                <input
-                    id={field}
-                    type="text"
-                    className="input input-bordered"
-                    name={field}
-                    placeholder="Type here"
-                    defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
-                    required
-                />
-            </div>
-        ))}
-        <div className="flex flex-col gap-2">
-            <label htmlFor="service" className="font-semibold">
-                Service:
-            </label>
-            <select
-                id="service"
-                name="service"
-                className="input input-bordered"
-                defaultValue={selectedApiKey ? selectedApiKey.service : ''}
-                required
-            >
-                <option value="openai">OpenAI</option>
-                <option value="groq">Groq</option>
-                <option value="anthropic">Anthropic</option>
-            </select>
-        </div>
-        <div className="modal-action">
-            <button type="submit" className="btn">{isEditing ? 'Update' : 'Submit'}</button>
-            <button type="button" className="btn" onClick={handleClose}>Cancel</button>
-        </div>
-    </form>
-</dialog>
+                <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
+                    <h3 className="font-bold text-lg">
+                        {isEditing ? 'Update API Key' : 'Create New API Key'}
+                    </h3>
+                    {['name', 'apikey', 'comment'].map((field) => (
+                        <div key={field} className="flex flex-col gap-2">
+                            <label htmlFor={field} className="label-text">
+                                {field.charAt(0).toUpperCase() + field.slice(1)}:
+                            </label>
+                            <input
+                                id={field}
+                                type="text"
+                                className="input input-bordered"
+                                name={field}
+                                placeholder={`Enter ${field}`}
+                                defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
+                                required
+                            />
+                        </div>
+                    ))}
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="service" className="label-text">
+                            Service:
+                        </label>
+                        <select
+                            id="service"
+                            name="service"
+                            className="select select-bordered"
+                            defaultValue={selectedApiKey ? selectedApiKey.service : ''}
+                            required
+                        >
+                            <option value="openai">OpenAI</option>
+                            <option value="groq">Groq</option>
+                            <option value="anthropic">Anthropic</option>
+                        </select>
+                    </div>
+                    <div className="modal-action">
+                        <button type="submit" className="btn">{isEditing ? 'Update' : 'Submit'}</button>
+                        <button type="button" className="btn" onClick={handleClose}>Cancel</button>
+                    </div>
+                </form>
+            </dialog>
         </div>
     );
 };
