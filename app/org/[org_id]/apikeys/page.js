@@ -40,7 +40,7 @@ const Page = () => {
         const formData = new FormData(event.target);
 
         const data = {
-            name: formData.get('name').trim(),
+            name: formData.get('name').trim().replace(/\s+/g, ''),
             service: formData.get('service'),
             apikey: formData.get('apikey'),
             comment: formData.get('comment'),
@@ -48,7 +48,7 @@ const Page = () => {
         };
 
         if (isEditing) {
-            const isIdChange = apikeyData.some(item => item._id === data._id);
+            const isIdChange = apikeyData.some(item => item.apikey === data.apikey);
             const isNameChange = apikeyData.some(item => item.name === data.name);
             const isCommentChange = apikeyData.some(item => item.comment === data.comment);
 
@@ -83,9 +83,10 @@ const Page = () => {
         setSelectedApiKey(null);
         setIsEditing(false);
     }, []);
-        useEffect(() => {
+    
+    useEffect(() => {
         dispatch(getAllApikeyAction(orgId));
-    }, [dispatch, orgId]);
+    }, [dispatch]);
 
     const columns = ["name", "apikey", "comment", "service"];
 
@@ -130,40 +131,48 @@ const Page = () => {
                 </tbody>
             </table>
             <dialog id="my_modal_6" className="modal modal-bottom sm:modal-middle">
-                <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
-                    <h3 className="font-bold text-lg">{isEditing ? 'Update API Key' : 'Create New API Key'}</h3>
-                    {['name', 'apikey', 'comment'].map((field) => (
-                        <label key={field} className="input input-bordered flex justify-evenly items-center gap-5">
-                            {field.charAt(0).toUpperCase() + field.slice(1)}:
-                            <input
-                                type="text"
-                                className="grow"
-                                name={field}
-                                placeholder="Type here"
-                                defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
-                                required
-                            />
-                        </label>
-                    ))}
-                    <label className="dropdown input input-bordered flex items-center gap-2">
-                        Service:
-                        <select
-                            name="service"
-                            className="grow"
-                            defaultValue={selectedApiKey ? selectedApiKey.service : ''}
-                            required
-                        >
-                            <option value="openai">OpenAI</option>
-                            <option value="groq">Groq</option>
-                            <option value="anthropic">Anthropic</option>
-                        </select>
-                    </label>
-                    <div className="modal-action">
-                        <button type="submit" className="btn">{isEditing ? 'Update' : 'Submit'}</button>
-                        <button type="button" className="btn" onClick={handleClose}>Cancel</button>
-                    </div>
-                </form>
-            </dialog>
+       <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
+        <h3 className="font-bold text-lg">
+            {isEditing ? 'Update API Key' : 'Create New API Key'}
+        </h3>
+        {['name', 'apikey', 'comment'].map((field) => (
+            <div key={field} className="flex flex-col gap-2">
+                <label htmlFor={field} className="font-semibold">
+                    {field.charAt(0).toUpperCase() + field.slice(1)}:
+                </label>
+                <input
+                    id={field}
+                    type="text"
+                    className="input input-bordered"
+                    name={field}
+                    placeholder="Type here"
+                    defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
+                    required
+                />
+            </div>
+        ))}
+        <div className="flex flex-col gap-2">
+            <label htmlFor="service" className="font-semibold">
+                Service:
+            </label>
+            <select
+                id="service"
+                name="service"
+                className="input input-bordered"
+                defaultValue={selectedApiKey ? selectedApiKey.service : ''}
+                required
+            >
+                <option value="openai">OpenAI</option>
+                <option value="groq">Groq</option>
+                <option value="anthropic">Anthropic</option>
+            </select>
+        </div>
+        <div className="modal-action">
+            <button type="submit" className="btn">{isEditing ? 'Update' : 'Submit'}</button>
+            <button type="button" className="btn" onClick={handleClose}>Cancel</button>
+        </div>
+    </form>
+</dialog>
         </div>
     );
 };

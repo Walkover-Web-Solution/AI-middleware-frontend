@@ -118,9 +118,9 @@ export const bridgeReducer = createSlice({
       if (state.apikeys[org_id]) {
       const index = state.apikeys[org_id].findIndex(apikey => apikey._id === id);
       if (index !== -1) {
-          state.apikeys[org_id][index].name = name;
+          state.apikeys[org_id][index].name = name || state.apikeys[org_id][index].name;
           state.apikeys[org_id][index].apikey = data || state.apikeys[org_id][index].apikey;
-          state.apikeys[org_id][index].comment = comment;
+          state.apikeys[org_id][index].comment = comment ||state.apikeys[org_id][index].comment;
         }
       }
     },
