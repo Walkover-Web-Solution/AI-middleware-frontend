@@ -2,38 +2,30 @@ import { useCustomSelector } from '@/customSelector/customSelector';
 import { parameterTypes } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { Info, Trash2 } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 function FunctionParameterModal({ functionId, params }) {
     const dispatch = useDispatch();
-    const { bridge_tools, function_details } = useCustomSelector((state) => ({
-        bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools || [],
+    const { function_details } = useCustomSelector((state) => ({
         function_details: state?.bridgeReducer?.org?.[params?.org_id]?.functionData?.[functionId] || {},
-    }))
+    }));
 
-    const initialFunctionData = useMemo(() => {
-        return bridge_tools.find(tool => tool?.name === functionId);
-    }, [functionId]);
+    const [toolData, setToolData] = useState({ properties: function_details.fields || [], required: function_details.required_params || [] });
+    const { properties, required } = toolData || {};
 
-    const [toolData, setToolData] = useState(function_details);
-    const { fields: properties, required_params: required } = toolData || {};
-
-    // const {fields, required_params} = function_details || {};
-    // console.log(fields, required_params,2323);
     const [isDataAvailable, setIsDataAvailable] = useState(Object.keys(properties || {}).length > 0);
 
-    // Update the state when `functionId` or `bridge_tools` changes
     useEffect(() => {
-        setToolData(initialFunctionData);
-        setIsDataAvailable(Object.keys(initialFunctionData?.properties || {}).length > 0);
-    }, [initialFunctionData]);
+        setToolData({ properties: function_details.fields, required: function_details.required_params });
+        setIsDataAvailable((function_details.fields || []).length > 0);
+    }, [function_details]);
 
     // Handle checkbox change
     const handleRequiredChange = (key) => {
         setToolData(prevToolData => {
-            const updatedRequired = prevToolData.required.includes(key)
+            const updatedRequired = prevToolData?.required?.includes(key)
                 ? prevToolData.required.filter(item => item !== key)
                 : [...prevToolData.required, key];
 
@@ -46,13 +38,9 @@ function FunctionParameterModal({ functionId, params }) {
 
     const handleDescriptionChange = (key, newDescription) => {
         setToolData(prevToolData => {
-            const updatedProperties = {
-                ...prevToolData.properties,
-                [key]: {
-                    ...prevToolData.properties[key],
-                    description: newDescription
-                }
-            };
+            const updatedProperties = prevToolData.properties.map(property =>
+                property.variable_name === key ? { ...property, description: newDescription } : property
+            );
 
             return {
                 ...prevToolData,
@@ -62,13 +50,9 @@ function FunctionParameterModal({ functionId, params }) {
     };
     const handleTypeChange = (key, newType) => {
         setToolData(prevToolData => {
-            const updatedProperties = {
-                ...prevToolData.properties,
-                [key]: {
-                    ...prevToolData.properties[key],
-                    type: newType
-                }
-            };
+            const updatedProperties = prevToolData.properties.map(property =>
+                property.variable_name === key ? { ...property, type: newType } : property
+            );
 
             return {
                 ...prevToolData,
@@ -82,11 +66,13 @@ function FunctionParameterModal({ functionId, params }) {
             // If the input is empty, remove the `enum` field
             if (!newEnum.trim()) {
                 setToolData(prevToolData => {
-                    const updatedProperties = JSON.parse(JSON.stringify(prevToolData.properties));
-                    // Check if the key exists in properties and has an enum field
-                    if (updatedProperties[key] && updatedProperties[key].enum) {
-                        delete updatedProperties[key]?.enum;
-                    }
+                    const updatedProperties = prevToolData.properties.map(property => {
+                        if (property.variable_name === key && property.enum) {
+                            const { enum: _, ...rest } = property;
+                            return rest;
+                        }
+                        return property;
+                    });
                     return {
                         ...prevToolData,
                         properties: updatedProperties
@@ -112,13 +98,9 @@ function FunctionParameterModal({ functionId, params }) {
 
             // Update the state with the parsed array
             setToolData(prevToolData => {
-                const updatedProperties = {
-                    ...prevToolData.properties,
-                    [key]: {
-                        ...prevToolData.properties[key],
-                        enum: newEnum
-                    }
-                };
+                const updatedProperties = prevToolData.properties.map(property =>
+                    property.variable_name === key ? { ...property, enum: newEnum } : property
+                );
 
                 return {
                     ...prevToolData,
@@ -133,10 +115,7 @@ function FunctionParameterModal({ functionId, params }) {
 
 
     const handleSaveFunctionData = () => {
-        const updatedTools = bridge_tools.map(tool =>
-            tool.name === toolData.name ? toolData : tool
-        );
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { tools: updatedTools } } }));
+        // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { tools: updatedTools } } }));
     };
 
     const handleRemoveFunctionFromBridge = () => {
@@ -159,7 +138,7 @@ function FunctionParameterModal({ functionId, params }) {
                 <div className='flex flex-row justify-between'>
                     <span className='flex flex-row items-center gap-4'>
                         <h3 className="font-bold text-lg">Configure fields</h3>
-                        <div className="flex flex-row gap-1">
+                        <div className="flex flex-row gap-1 items-center">
                             <Info size={16} />
                             <span className='label-text-alt'>Used in {(function_details?.bridge_ids || [])?.length} bridges, changes may affect all bridges.</span>
                         </div>
@@ -181,46 +160,48 @@ function FunctionParameterModal({ functionId, params }) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {Object.entries(properties || {}).map(([key, value], index) => (
-                                    <tr key={key}>
-                                        <td>{index}</td>
-                                        <td>{key}</td>
-                                        <td>
-                                            <select className="select select-sm select-bordered" value={value?.type} onChange={(e) => handleTypeChange(key, e.target.value)}>
-                                                <option disabled selected>Select parameter type</option>
-                                                {parameterTypes && (parameterTypes).map((type, index) => (
-                                                    <option key={index} value={type}>{type}</option>
-                                                ))}
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input type="checkbox"
-                                                className="checkbox"
-                                                defaultChecked={required?.includes(key)}
-                                                onChange={() => handleRequiredChange(key)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <input
-                                                type="text"
-                                                placeholder="Parameter description"
-                                                className="input input-bordered w-full input-sm"
-                                                defaultValue={value?.description}
-                                                onBlur={(e) => handleDescriptionChange(key, e.target.value)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <input
-                                                type="text"
-                                                placeholder="['a','b','c']"
-                                                className="input input-bordered w-full input-sm"
-                                                defaultValue={JSON.stringify(value?.enum)}
-                                                onBlur={(e) => handleEnumChange(key, e.target.value)}
-                                            />
-                                        </td>
-                                    </tr>
-                                ))}
-
+                                {(properties || []).map((obj, index) => {
+                                    const key = obj?.variable_name;
+                                    return (
+                                        <tr key={key}>
+                                            <td>{index}</td>
+                                            <td>{key}</td>
+                                            <td>
+                                                <select className="select select-sm select-bordered" value={obj?.type || 'string'} onChange={(e) => handleTypeChange(key, e.target.value)}>
+                                                    <option disabled selected>Select parameter type</option>
+                                                    {parameterTypes && (parameterTypes).map((type, index) => (
+                                                        <option key={index} value={type}>{type}</option>
+                                                    ))}
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="checkbox"
+                                                    className="checkbox"
+                                                    defaultChecked={required?.includes(key)}
+                                                    onChange={() => handleRequiredChange(key)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Parameter description"
+                                                    className="input input-bordered w-full input-sm"
+                                                    defaultValue={obj?.description}
+                                                    onBlur={(e) => handleDescriptionChange(key, e.target.value)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    placeholder="['a','b','c']"
+                                                    className="input input-bordered w-full input-sm"
+                                                    defaultValue={JSON.stringify(obj?.enum)}
+                                                    onBlur={(e) => handleEnumChange(key, e.target.value)}
+                                                />
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
                             </tbody>
                         </table>
                     </div>}
