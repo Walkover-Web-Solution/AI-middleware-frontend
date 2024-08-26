@@ -1,7 +1,6 @@
 'use client';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { deleteApikeyAction, getAllApikeyAction, saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
-import { apikeyDeleteReducer, apikeyUpdateReducer } from '@/store/reducer/bridgeReducer';
 import { SquarePen, Trash2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import React, { useState, useCallback, useEffect } from 'react';
@@ -11,11 +10,23 @@ const Page = () => {
     const pathName = usePathname();
     const dispatch = useDispatch();
     const path = pathName?.split('?')[0].split('/');
-    const orgId = path[2];
-    const apikeyData = useCustomSelector((state) => state.bridgeReducer?.apikeys[orgId]) || [];
+    const orgId = path[2] || '';
+
+    // Ensure orgId is valid
+    if (!orgId) {
+        console.error('orgId is not defined.');
+        return <div>Error: Organization ID not found.</div>;
+    }
+
+    // Retrieve API key data with fallback to empty array
+    const apikeyData = useCustomSelector((state) => {
+        const apikeys = state?.bridgeReducer?.apikeys || {};
+        return apikeys[orgId] || [];
+    });
+
     const [selectedApiKey, setSelectedApiKey] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    
+
     const handleUpdateClick = useCallback((item) => {
         setSelectedApiKey(item);
         setIsEditing(true);
@@ -25,40 +36,37 @@ const Page = () => {
         }
     }, []);
 
-    // Handle API key deletion
     const deleteApikey = useCallback((item) => {
         if (window.confirm("Are you sure you want to delete this API key?")) {
-            dispatch(deleteApikeyAction({org_id: item.org_id, name: item.name ,id:item._id}));
+            dispatch(deleteApikeyAction({ org_id: item.org_id, name: item.name, id: item._id }));
         }
     }, [dispatch]);
 
-    // Handle form submission
     const handleSubmit = useCallback((event) => {
         event.preventDefault();
         const formData = new FormData(event.target);
 
         const data = {
-            name : formData.get('name').split(' ').join(''),
+            name: formData.get('name').trim(),
             service: formData.get('service'),
             apikey: formData.get('apikey'),
             comment: formData.get('comment'),
             _id: selectedApiKey ? selectedApiKey._id : null
         };
 
-        
-
         if (isEditing) {
-            const isIdChange = apikeyData.some(item=>item._id === data._id)
-            const isNameChange = apikeyData.some(item=>item.name === data.name)
-            const isCommentChange = apikeyData.some(item=>item.comment === data.name)
-            if(!isIdChange ){
-            const dataToSend = {org_id: orgId, apikey_object_id: data._id, apikey: data.apikey,comment:data.comment};
-            dispatch(updateApikeyAction(dataToSend));
-            }
-            if(!isNameChange ||  !isCommentChange){
-                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name:data.name,comment:data.comment};
+            const isIdChange = apikeyData.some(item => item._id === data._id);
+            const isNameChange = apikeyData.some(item => item.name === data.name);
+            const isCommentChange = apikeyData.some(item => item.comment === data.comment);
+
+            if (!isIdChange) {
+                const dataToSend = { org_id: orgId, apikey_object_id: data._id, apikey: data.apikey, comment: data.comment };
                 dispatch(updateApikeyAction(dataToSend));
-        }           
+            }
+            if (!isNameChange || !isCommentChange) {
+                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, comment: data.comment };
+                dispatch(updateApikeyAction(dataToSend));
+            }
         } else {
             dispatch(saveApiKeysAction(data));
             dispatch(getAllApikeyAction(orgId));
@@ -72,7 +80,7 @@ const Page = () => {
         if (modal) {
             modal.close();
         }
-    }, [dispatch, orgId, isEditing, selectedApiKey]);
+    }, [dispatch, orgId, isEditing, selectedApiKey, apikeyData]);
 
     const handleClose = useCallback(() => {
         const modal = document.getElementById('my_modal_6');
@@ -82,9 +90,10 @@ const Page = () => {
         setSelectedApiKey(null);
         setIsEditing(false);
     }, []);
+
     useEffect(() => {
         dispatch(getAllApikeyAction(orgId));
-    }, [handleSubmit,dispatch,handleUpdateClick]);
+    }, [dispatch, orgId]);
 
     const columns = ["name", "apikey", "comment", "service"];
 
@@ -99,7 +108,7 @@ const Page = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {apikeyData? apikeyData?.map((item) => (
+                    {apikeyData.length > 0 ? apikeyData.map((item) => (
                         item ? (
                             <tr key={item._id} className="hover-row hover">
                                 {columns.map(column => (
@@ -121,7 +130,11 @@ const Page = () => {
                                 </td>
                             </tr>
                         ) : null
-                    )):""}
+                    )) : (
+                        <tr>
+                            <td colSpan={columns.length} className="text-center">No API keys available</td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
             <dialog id="my_modal_6" className="modal modal-bottom sm:modal-middle">

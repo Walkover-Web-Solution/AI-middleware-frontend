@@ -10,19 +10,26 @@ const ApiKeyInput = ({ params }) => {
     const pathName = usePathname();
     const path = pathName?.split('?')[0].split('/');
     const org_id = path[2];
-    
+
     // Dispatch action to fetch API keys
     useEffect(() => {
-        dispatch(getAllApikeyAction(org_id));
+        if (org_id) {
+            dispatch(getAllApikeyAction(org_id));
+        }
     }, [dispatch, org_id]);
 
     // Retrieve necessary state using custom selector
-    const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id } = useCustomSelector((state) => ({
-        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
-        bridge_apiKey: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.apikey,
-        apikeydata: state?.bridgeReducer?.apikeys[org_id] || [],
-        bridgeApikey_object_id: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.apikey_object_id,
-    }));
+    const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id } = useCustomSelector((state) => {
+        const bridgeMap = state?.bridgeReducer?.allBridgesMap || {};
+        const apikeys = state?.bridgeReducer?.apikeys || {};
+        
+        return {
+            bridge: bridgeMap[params?.id],
+            bridge_apiKey: bridgeMap[params?.id]?.apikey,
+            apikeydata: apikeys[org_id] || [], // Ensure apikeydata is an array
+            bridgeApikey_object_id: bridgeMap[params?.id]?.apikey_object_id,
+        };
+    });
 
     // Memoize filtered API keys
     const filteredApiKeys = useMemo(() => {
@@ -35,7 +42,7 @@ const ApiKeyInput = ({ params }) => {
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
     }, [dispatch, params.id]);
 
-    
+    // Determine the currently selected value
     const selectedValue = useMemo(() => {
         const currentApiKey = apikeydata.find(apiKey => apiKey._id === bridgeApikey_object_id);
         return currentApiKey ? currentApiKey._id : bridge_apiKey || '';
