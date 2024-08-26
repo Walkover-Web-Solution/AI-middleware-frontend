@@ -80,7 +80,7 @@ function Page() {
     document.getElementById('api-key-modal').close()
   }
   return (
-    <div className="drawer lg:drawer-open">
+    <div className="drawer lg:drawer-open p-5">
       {isCreating && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex pl-2 flex-col items-start justify-start">

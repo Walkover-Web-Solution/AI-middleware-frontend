@@ -164,7 +164,7 @@ const Page = () => {
                         </select>
                     </div>
                     <div className="modal-action">
-                        <button type="submit" className="btn">{isEditing ? 'Update' : 'Submit'}</button>
+                        <button type="submit" className="btn">{isEditing ? 'Update' : 'Create'}</button>
                         <button type="button" className="btn" onClick={handleClose}>Cancel</button>
                     </div>
                 </form>
