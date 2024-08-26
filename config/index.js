@@ -72,16 +72,6 @@ export const getAllBridges = async (org_id) => {
   }
 }
 
-export const getAllFunctionsApi = async (org_id) => {
-  try {
-    const data = await axios.get(`${PYTHON_URL}/functions/all`, org_id)
-    return data;
-  } catch (error) {
-    console.error(error)
-    throw new Error(error)
-  }
-}
-
 export const getAllResponseTypesApi = async (orgId) => {
   try {
     const data = await axios.get(`${URL}/chatbot/${orgId}/getAllResponse`)
@@ -287,9 +277,9 @@ export const integration = async (embed_token) => {
 }
 
 
-export const createapi = async (dataFromEmbed) => {
+export const createapi = async (bridge_id, dataFromEmbed) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/api/v1/config/createapi`, dataFromEmbed);
+    const response = await axios.post(`${PYTHON_URL}/api/v1/config/createapi/${bridge_id}`, dataFromEmbed);
     return response?.data;
   } catch (error) {
     console.error(error);

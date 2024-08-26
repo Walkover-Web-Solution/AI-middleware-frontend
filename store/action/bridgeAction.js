@@ -1,5 +1,5 @@
-import { addorRemoveResponseIdInBridge, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateapi } from "@/config";
-import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer, updateBridgeToolsReducer } from "../reducer/bridgeReducer";
+import { addorRemoveResponseIdInBridge, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateapi } from "@/config";
+import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer, updateBridgeToolsReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { toast } from "react-toastify";
 
@@ -8,7 +8,14 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
   try {
     dispatch(isPending())
     const data = await getSingleBridge(id);
-    dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge }));
+    const integrationData = await integration(data.data?.bridge?.embed_token)
+
+    const flowObject = integrationData.flows.reduce((obj, item) => {
+      obj[item.id] = item;
+      return obj;
+    }, {});
+
+    dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge, integrationData: flowObject }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -35,30 +42,8 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
   try {
     dispatch(isPending())
     const response = await getAllBridges();
-    const embed_token = response?.data?.embed_token;
-    const integrationData = await integration(embed_token);
-    const flowObject = integrationData.flows.reduce((obj, item) => {
-      obj[item.id] = item;
-      return obj;
-    }, {});
-    if(onSuccess) onSuccess(response?.data?.bridge?.length)
-    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, integrationData: flowObject, embed_token }));
-  } catch (error) {
-    dispatch(isError())
-    console.error(error);
-  }
-};
-
-export const getAllFunctions = () => async (dispatch) => {
-  try {
-    dispatch(isPending())
-    const response = await getAllFunctionsApi();
-    const functionsArray = response.data?.data || [];
-    const functionsObject = functionsArray.reduce((obj, item) => {
-      obj[item._id] = item;
-      return obj;
-    }, {});
-    dispatch(fetchAllFunctionsReducer({ orgId: response?.data?.org_id, functionData: functionsObject }));
+    onSuccess(response?.data?.bridge?.length)
+    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -80,7 +65,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
   try {
     dispatch(isPending());
     const data = await updateBridge({ bridgeId, dataToSend });
-    dispatch(updateBridgeReducer({ bridges: data.data.bridge, functionData: dataToSend?.functionData || null }));
+    dispatch(updateBridgeReducer({ bridges: data.data.bridge }));
   } catch (error) {
     console.error(error);
     dispatch(isError());
@@ -99,20 +84,20 @@ export const deleteBridgeAction = ({ bridgeId, orgId }) => async (dispatch) => {
 };
 
 
-export const integrationAction = (dataToSend, org_id) => async (dispatch) => {
+export const integrationAction = (dataToSend, bridge_id) => async (dispatch) => {
   try {
-    dispatch(integrationReducer({ dataToSend, orgId: org_id }))
+    dispatch(integrationReducer({ dataToSend, id: bridge_id }))
   } catch (error) {
     console.error(error)
   }
 }
 
 
-export const createApiAction = (org_id, dataFromEmbed) => async (dispatch) => {
+export const createApiAction = (bridge_id, dataFromEmbed) => async (dispatch) => {
   try {
-    const data = await createapi(dataFromEmbed);
-    if (data?.success) {
-      dispatch(updateBridgeToolsReducer({ orgId: org_id, functionData: data?.data }));
+    const data = await createapi(bridge_id, dataFromEmbed);
+    if(data?.success){
+      dispatch(updateBridgeToolsReducer({ bridgeId: bridge_id, tools: data?.tools_call }));
     }
   } catch (error) {
     console.error(error)

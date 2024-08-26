@@ -3,20 +3,30 @@ import CreateNewBridge from "@/components/createNewBridge";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
+import { getAllBridgesAction } from "@/store/action/bridgeAction";
 import { getIconOfService } from "@/utils/utility";
 import { Box } from "lucide-react";
 import { useRouter } from 'next/navigation';
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
 
 function Home({ params }) {
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
+  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id] || []).slice().reverse();
+  useEffect(() => {
+    dispatch(getAllBridgesAction((data) => {
+      if (data === 0) {
+        document.getElementById('my_modal_1') && document.getElementById('my_modal_1')?.showModal()
+      }
+      // document.getElementById('my_modal_1') && document.getElementById('my_modal_1')?.closeModel()
+    }))
+  }, [])
 
   const { isLoading } = useCustomSelector((state) => ({
     isLoading: state.bridgeReducer.loading,
   }));
-
+  const dispatch = useDispatch();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const filteredBridges = allBridges.filter((item) =>
