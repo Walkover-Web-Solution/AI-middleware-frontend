@@ -1,11 +1,27 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
-import { getStatusClass } from '@/utils/utility';
 import { CircleAlert, Settings } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
+
+function getStatusClass (status) {
+    switch (status?.toString().trim().toLowerCase()) {
+        case 'drafted':
+            return 'bg-yellow-100';
+        case 'paused':
+            return 'bg-red-100';
+        case 'active':
+        case 'published':
+            return 'bg-green-100';
+        case 'rejected':
+            return 'bg-gray-100';
+        // Add more cases as needed
+        default:
+            return 'bg-gray-100';
+    }
+};
 
 const EmbedList = ({ params }) => {
     const [functionId, setFunctionId] = useState(null);
@@ -45,16 +61,18 @@ const EmbedList = ({ params }) => {
 
                 return (
                     <div key={value?._id} id={value?._id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
-                        <div className="p-4 w-full" onClick={() => openViasocket(functionName)}>
-                            <div className="flex justify-between items-center">
-                                <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content">
-                                    {title}
-                                </h1>
-                                {value?.description?.trim() === "" && <CircleAlert color='red' size={16} />}
-                            </div>
-                            <p className="mt-3 text-xs sm:text-sm line-clamp-3">
-                                {value?.description ? value.description : "A description is required for proper functionality."}
-                            </p>
+                        <div className="p-4 w-full h-full flex flex-col justify-between" onClick={() => openViasocket(functionName)}>
+                           <div>
+                                <div className="flex justify-between items-center">
+                                    <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content">
+                                        {title}
+                                    </h1>
+                                    {value?.description?.trim() === "" && <CircleAlert color='red' size={16} />}
+                                </div>
+                                <p className="mt-3 text-xs sm:text-sm line-clamp-3">
+                                    {value?.description ? value.description : "A description is required for proper functionality."}
+                                </p>
+                           </div>
                             <div className="mt-4">
                                 <span className={`mr-2 inline-block rounded-full capitalize px-3 bg-base-200 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(status)}`}>
                                     {value?.description?.trim() === "" ? "Description Required" : status}
