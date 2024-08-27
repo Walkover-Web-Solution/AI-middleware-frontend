@@ -26,7 +26,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             type: modelType
         },
         service: bridge?.service?.toLowerCase(),
-        apikey: bridge?.apikey,
+        apikey_object_id: bridge?.apikey,
         bridgeType: bridge?.bridgeType,
         slugName: bridge?.slugName,
         response_format: {
