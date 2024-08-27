@@ -170,7 +170,7 @@ export const toggleSidebar = (sidebarId) => {
 };
 
 
-export const getIconOfService = (service, height, width) => {
+export const getIconOfService = (service) => {
     switch (service) {
         case 'openai':
             return <OpenAiIcon height={height} width={width} />;
@@ -184,3 +184,20 @@ export const getIconOfService = (service, height, width) => {
             return <OpenAiIcon height={height} width={width} />;
     }
 }
+
+export function getStatusClass (status) {
+    switch (status?.toString().trim().toLowerCase()) {
+        case 'drafted':
+            return 'bg-yellow-100';
+        case 'paused':
+            return 'bg-red-100';
+        case 'active':
+        case 'published':
+            return 'bg-green-100';
+        case 'rejected':
+            return 'bg-gray-100';
+        // Add more cases as needed
+        default:
+            return 'bg-gray-100';
+    }
+};
