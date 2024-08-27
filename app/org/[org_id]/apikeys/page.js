@@ -8,6 +8,8 @@ import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+export const runtime = 'edge';
+
 const Page = () => {
     const pathName = usePathname();
     const dispatch = useDispatch();
