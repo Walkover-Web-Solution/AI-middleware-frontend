@@ -27,8 +27,8 @@ const ModelDocs = () => {
   const filteredSections = searchQuery
     ? sections.filter(
       (section) =>
-        section.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        section.description.toLowerCase().includes(searchQuery.toLowerCase())
+        section?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        section?.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
     : sections;
 
@@ -56,7 +56,7 @@ const ModelDocs = () => {
           <ul className="list-disc list-inside">
             {filteredSections.map((section) => (
               <li key={section.id} className="flex gap-[5px] flex-row">
-                <Tooltip text={section.description}>
+                <Tooltip text={section?.description}>
                   <a
                     href={`#${section.id}`}
                     className={`text-blue-500 hover:underline ${activeSection === section.id ? 'font-bold' : ''}`}
@@ -76,8 +76,8 @@ const ModelDocs = () => {
               id={section.id}
               className={`mt-[20px] ${activeSection === section.id ? 'bg-blue-100 p-4 rounded-md' : ''}`}
             >
-              <h3 className=" text-black font-semibold">{section.title}</h3>
-              <p className="text-md text-gray-700">{section.description}</p>
+              <h3 className=" text-black font-semibold">{section?.title}</h3>
+              <p className="text-md text-gray-700">{section?.description}</p>
             </div>
           ))
         }

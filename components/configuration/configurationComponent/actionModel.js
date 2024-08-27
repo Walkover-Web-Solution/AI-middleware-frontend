@@ -61,7 +61,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
 
     useEffect(() => {
         if (actionId && actions) {
-            descriptionRef.current.value = actions.description;
+            descriptionRef.current.value = actions?.description;
             dataRef.current.value = actions.variable;
             setSelectedAction(actions.type);
         }
