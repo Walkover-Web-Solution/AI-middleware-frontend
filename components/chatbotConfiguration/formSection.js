@@ -140,7 +140,7 @@ export default function FormSection({ params }) {
                 console.log('Data sent to iframe via interval:', chatBotConfig);
                 clearInterval(intervalId); // Clear interval once the message is successfully sent
             }
-        }, 1500); // Attempt to send every 500ms
+        }, 1800); // Attempt to send every 500ms
 
         // Clean up the interval and event listener on unmount
         return () => {
@@ -220,7 +220,7 @@ export default function FormSection({ params }) {
                 <div className="label">
                     <span className="label-text">ChatBot Preview </span>
                 </div>
-                <div className="p-2 shadow-sm border">
+                <div className="shadow-sm border">
                     <iframe
                         ref={iframeRef}
                         src={`http://localhost:3000/chatbotPreview`}
