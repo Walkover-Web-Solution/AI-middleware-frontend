@@ -1,5 +1,6 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { createStaticResponseAction } from '@/store/action/chatBotAction';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -30,10 +31,15 @@ const InputConfigComponent = ({ params }) => {
         return null;
     }
 
+    const handleCreateStatic = () => {
+        dispatch(createStaticResponseAction({ bridgeId: params.id }));
+    }
+
     return (
         <div className="form-control">
             <div className="label">
                 <span className="label-text capitalize">Prompt</span>
+                <button className="btn btn-xs btn-outline" onClick={handleCreateStatic}>Generate Static response</button>
             </div>
             <textarea
                 className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary"
@@ -42,7 +48,7 @@ const InputConfigComponent = ({ params }) => {
                 onBlur={savePrompt}
             ></textarea>
         </div>
-    );
+     );
 };
 
 export default InputConfigComponent;

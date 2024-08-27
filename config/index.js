@@ -465,3 +465,16 @@ export const getAllModels = async (service) => {
     throw new Error(error);
   }
 };
+
+export const createStaticResponseApi = async (bridgeId) => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/chatbot/${bridgeId}/staticResponseSave`);
+    if(response?.data?.success){
+      toast.success("Static Response Created");
+    }
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};

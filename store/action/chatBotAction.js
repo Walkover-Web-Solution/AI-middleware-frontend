@@ -1,4 +1,4 @@
-import { addorRemoveBridgeInChatBot, createChatBot, createOrRemoveAction, getAllChatBot, getChatBotDetails, updateChatBot, updateChatBotConfig } from "@/config";
+import { addorRemoveBridgeInChatBot, createChatBot, createOrRemoveAction, createStaticResponseApi, getAllChatBot, getChatBotDetails, updateChatBot, updateChatBotConfig } from "@/config";
 import { createNewBotReducer, getAllChatBotReducer, getChatBotDetailsReducer, updateChatBotConfigReducer, updateChatBotReducer } from "../reducer/ChatBotReducer";
 import { updateBridgeReducer } from "../reducer/bridgeReducer";
 
@@ -71,5 +71,13 @@ export const createOrRemoveActionBridge = (dataToSend) => async (dispatch) => {
         dispatch(updateBridgeReducer({ bridges: response.data }))
     } catch (error) {
         console.error(error)
+    }
+}
+
+export const createStaticResponseAction = ({bridgeId}) => async (dispatch) => {
+    try {
+        const response = await createStaticResponseApi(bridgeId);
+    } catch (error) {
+        console.error(error);
     }
 }
