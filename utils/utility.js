@@ -170,7 +170,7 @@ export const toggleSidebar = (sidebarId) => {
 };
 
 
-export const getIconOfService = (service, height, width) => {
+export const getIconOfService = (service) => {
     switch (service) {
         case 'openai':
             return <OpenAiIcon height={height} width={width} />;
