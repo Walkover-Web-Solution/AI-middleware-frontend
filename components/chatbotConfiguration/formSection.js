@@ -1,6 +1,6 @@
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { updateChatBotConfigAction } from "@/store/action/chatBotAction";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 
 function RadioButton({ name, label, checked, onChange }) {
@@ -86,6 +86,7 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
 }
 
 export default function FormSection({ params }) {
+    const iframeRef = useRef(null);
     const [formData, setFormData] = useState({
         buttonName: '',
         height: '',
@@ -110,6 +111,12 @@ export default function FormSection({ params }) {
                 [name]: value
             };
             dispatch(updateChatBotConfigAction(params?.chatbot_id, updatedFormData));
+            if (iframeRef.current && iframeRef.current.contentWindow) {
+                iframeRef.current.contentWindow.postMessage(
+                    { type: 'chatbotConfig', data: updatedFormData },
+                    '*' // You can specify a target origin here for security, replacing '*' with the domain of the iframe
+                );
+            }
             return updatedFormData;
         });
     }, [dispatch, params?.chatbot_id]);
@@ -119,6 +126,27 @@ export default function FormSection({ params }) {
             setFormData(chatBotConfig);
         }
     }, [chatBotConfig]);
+
+
+    useEffect(() => {
+
+        // Use setInterval to repeatedly try sending the message
+        const intervalId = setTimeout(() => {
+            if (iframeRef.current && iframeRef.current.contentWindow && chatBotConfig) {
+                iframeRef.current.contentWindow.postMessage(
+                    { type: 'chatbotConfig', data: chatBotConfig },
+                    '*' // Replace '*' with the domain of the iframe for security
+                );
+                console.log('Data sent to iframe via interval:', chatBotConfig);
+                clearInterval(intervalId); // Clear interval once the message is successfully sent
+            }
+        }, 1500); // Attempt to send every 500ms
+
+        // Clean up the interval and event listener on unmount
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, []);
 
     return (
         <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
@@ -188,6 +216,18 @@ export default function FormSection({ params }) {
                 </div>
 
             </label>
+            <div className="">
+                <div className="label">
+                    <span className="label-text">ChatBot Preview </span>
+                </div>
+                <div className="p-2 shadow-sm border">
+                    <iframe
+                        ref={iframeRef}
+                        src={`http://localhost:3000/chatbotPreview`}
+                        className="w-full h-[500px] border-none"
+                    ></iframe>
+                </div>
+            </div>
         </div>
     );
 }
