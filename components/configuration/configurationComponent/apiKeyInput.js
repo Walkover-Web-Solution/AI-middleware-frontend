@@ -22,7 +22,7 @@ const ApiKeyInput = ({ params }) => {
     const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id } = useCustomSelector((state) => {
         const bridgeMap = state?.bridgeReducer?.allBridgesMap || {};
         const apikeys = state?.bridgeReducer?.apikeys || {};
-        
+
         return {
             bridge: bridgeMap[params?.id],
             bridge_apiKey: bridgeMap[params?.id]?.apikey,
@@ -59,7 +59,7 @@ const ApiKeyInput = ({ params }) => {
                     onChange={handleDropdownChange}
                     value={selectedValue}
                 >
-                    <option value="">Select a Service</option>
+                    <option value="">Select API key</option>
 
                     {/* Display bridge_apiKey if it is not in the filtered API keys */}
                     {!bridgeApikey_object_id && bridge_apiKey && !apikeydata.some(apiKey => apiKey._id === bridge_apiKey) && (

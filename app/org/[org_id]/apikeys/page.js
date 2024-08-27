@@ -2,9 +2,10 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { deleteApikeyAction, getAllApikeyAction, saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS } from '@/utils/enums';
+import { getIconOfService } from '@/utils/utility';
 import { SquarePen, Trash2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const Page = () => {
@@ -91,7 +92,7 @@ const Page = () => {
             <table className="table">
                 <thead>
                     <tr>
-                        {columns.map(column => (
+                        {columns?.map(column => (
                             <th key={column}>{column.replace(/_/g, ' ').charAt(0).toUpperCase() + column.replace(/_/g, ' ').slice(1)}</th>
                         ))}
                     </tr>
@@ -102,7 +103,7 @@ const Page = () => {
                             <tr key={item._id} className="hover-row hover">
                                 {columns.map(column => (
                                     <td key={`${item._id}-${column}`}>
-                                        {column === "apikey" ? '************' : item[column]}
+                                        {column === "apikey" ? '************' : (column === "service" && item.service ? <div className="badge badge-ghost p-3">{getIconOfService(item[column], 18, 18)}<span className='capitalize ml-2'>{item[column]}</span></div> : item[column])}
                                     </td>
                                 ))}
                                 <td className="gap-3 flex justify-center items-center">
@@ -155,7 +156,9 @@ const Page = () => {
                             id="service"
                             name="service"
                             className="select select-bordered"
+                            key={selectedApiKey?.service}
                             defaultValue={selectedApiKey ? selectedApiKey.service : ''}
+                            disabled={selectedApiKey && selectedApiKey.service}
                             required
                         >
                             <option value="openai">OpenAI</option>
