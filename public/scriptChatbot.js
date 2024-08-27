@@ -190,19 +190,14 @@ loadChatbotEmbed = async function () {
         const { type, data } = event.data;
         if (type === 'chatbotConfig') {
             config = data;
-            loadChatbotEmbed();
+            updateConfig(config);
         }
-        // event.source.postMessage(
-        //     {
-        //         type: 'chatbotConfigResponse',
-        //         status: 'success',
-        //         message: 'chatbotConfig successfully received and processed',
-        //     },
-        //     event.origin // Respond to the origin that sent the message
-        // );
     }
     window.addEventListener('message', handleChatbotConfigMessage, false);
+    document.getElementById('iframe-component-interfaceEmbed').src = urlToViasocket
+}
 
+updateConfig = function (config={}) {
     const interfaceEmbedElement = document.getElementById('interfaceEmbed');
     if (config) {
         if (config.title) {
@@ -238,7 +233,6 @@ loadChatbotEmbed = async function () {
         document.getElementById('iframe-parent-container').style.height = `${config?.height}${config?.heightUnit || ''}` || '70vh'
         document.getElementById('iframe-parent-container').style.width = `${config?.width}${config?.widthUnit || ''}` || '40vw'
     }
-    document.getElementById('iframe-component-interfaceEmbed').src = urlToViasocket
 }
 
 const loadContent = function (parentId = props.parentId || '', bodyLoadedHai = bodyLoaded) {
