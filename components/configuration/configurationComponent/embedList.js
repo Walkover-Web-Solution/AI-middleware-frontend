@@ -1,7 +1,7 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { CircleAlert, Settings } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
@@ -39,6 +39,12 @@ const EmbedList = ({ params }) => {
             modal.showModal();
         }
     }
+    useEffect(()=>{
+        return()=>{
+            if(handleclose)
+                handleclose();
+        }
+    },[])
 
     const bridgeFunctions = useMemo(() => bridge_functions.map((id) => function_data?.[id]), [bridge_functions, function_data]);
 
