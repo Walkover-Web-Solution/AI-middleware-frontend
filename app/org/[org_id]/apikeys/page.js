@@ -61,8 +61,12 @@ const Page = () => {
             const isNameChange = apikeyData.some(item => item.name === data.name);
             const isCommentChange = apikeyData.some(item => item.comment === data.comment);
 
-            if (!isIdChange || !isNameChange || !isCommentChange) {
+            if (!isIdChange) {
                 const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, apikey: data.apikey, comment: data.comment };
+                dispatch(updateApikeyAction(dataToSend));
+            }
+            if (!isNameChange || !isCommentChange) {
+                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, comment: data.comment };
                 dispatch(updateApikeyAction(dataToSend));
             }
         } else {
@@ -137,19 +141,19 @@ const Page = () => {
                     {['name', 'apikey', 'comment'].map((field) => (
                         <div key={field} className="flex flex-col gap-2">
                             <label htmlFor={field} className="label-text">
-                                {field.charAt(0).toUpperCase() + field.slice(1)}:
+                            {field.charAt(0).toUpperCase() + field.slice(1)}:
                             </label>
                             <input
-                                id={field}
-                                type="text"
-                                className="input input-bordered"
-                                name={field}
-                                placeholder={`Enter ${field}`}
-                                defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
-                                required
+                            id={field}
+                            type={field === 'apikey' && isEditing ? 'password' : 'text'}  
+                            className="input input-bordered"
+                            name={field}
+                            placeholder={`Enter ${field}`}
+                            defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
+                            required
                             />
                         </div>
-                    ))}
+                        ))}
                     <div className="flex flex-col gap-2">
                         <label htmlFor="service" className="label-text">
                             Service:
