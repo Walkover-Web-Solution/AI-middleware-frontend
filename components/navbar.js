@@ -76,7 +76,7 @@ function Navbar() {
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn capitalize m-1">{path[3] === 'apikey' ? 'API Key' : path[3]} <ChevronDown size={16} /></div>
           <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-            {['bridges', "chatbot", 'apikey', 'metrics', 'invite'].map((item) => (
+            {['bridges', "chatbot", 'pauthkey','apikeys', 'metrics', 'invite'].map((item) => (
               <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
                 <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
               </li>
@@ -111,13 +111,17 @@ function Navbar() {
             </div>
           </>
         ) : (
-          path[3] === 'apikey' ?
-            <button className="btn  btn-primary" onClick={() => document.getElementById('my_modal_5').showModal()}>+ create new key</button>
+          path[3] === 'apikeys' ?
+            <button className="btn  btn-primary" onClick={() => document.getElementById('my_modal_6').showModal()}>+ create new Api key</button>
+            : path[3] === 'pauthkey' ?
+            <button className="btn  btn-primary" onClick={() => document.getElementById('my_modal_5').showModal()}>+ create new Pauth Key</button>
             :
             path[3] === 'bridges' ?
+              <div>
               <button className="btn btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>
                 + create new bridge
-              </button> : (path[3] === 'chatbot' && path.length === 4) ?
+              </button>
+              </div> : (path[3] === 'chatbot' && path.length === 4) ?
                 <button className="btn btn-primary" onClick={() => document.getElementById('chatBot_model').showModal()}>
                   + create new chatbot
                 </button> : ""

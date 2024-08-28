@@ -5,6 +5,7 @@ import { handleResponseFormat, updatedData } from "@/utils/utility";
 const initialState = {
   allBridgesMap: {},
   org: {},
+  apikeys:{},
   loading: false,
 };
 
@@ -101,7 +102,44 @@ export const bridgeReducer = createSlice({
       state.allBridgesMap[action.payload.result._id] = action.payload.result;
       state.loading = false;
     },
-  },
+    apikeyDataReducer: (state, action) => {
+      const { org_id,data } = action.payload;
+      if (!state.apikeys) {
+        state.apikeys = {};
+      }
+
+      if (!state.apikeys[org_id]) {
+        state.apikeys[org_id] = [];
+      }
+      state.apikeys[org_id] = data;
+    },
+    createApiKeyReducer: (state, action) => {
+      const { org_id, data } = action.payload;
+      if (state.apikeys[org_id]) {
+        state.apikeys[org_id].push(data);
+      } else {
+        state.apikeys[org_id] = [data];
+      }
+    },
+    apikeyUpdateReducer: (state, action) => {
+      const { org_id, id, data,name,comment } = action.payload;
+      if (state.apikeys[org_id]) {
+      const index = state.apikeys[org_id].findIndex(apikey => apikey._id === id);
+      if (index !== -1) {
+          state.apikeys[org_id][index].name = name || state.apikeys[org_id][index].name;
+          state.apikeys[org_id][index].apikey = data || state.apikeys[org_id][index].apikey;
+          state.apikeys[org_id][index].comment = comment ||state.apikeys[org_id][index].comment;
+        }
+      }
+    },
+      apikeyDeleteReducer: (state, action) => {
+      const {org_id,name} = action.payload;
+      if (state.apikeys[org_id]) {
+            state.apikeys[org_id] = state.apikeys[org_id].filter(apiKey => apiKey.name !== name);
+          }
+        }
+        
+      },
 });
 
 export const {
@@ -115,7 +153,11 @@ export const {
   deleteBridgeReducer,
   integrationReducer,
   updateVariables,
-  duplicateBridgeReducer
+  duplicateBridgeReducer,
+  apikeyDataReducer,
+  apikeyUpdateReducer,
+  createApiKeyReducer,
+  apikeyDeleteReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
