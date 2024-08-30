@@ -4,7 +4,7 @@ import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { createWebhookAlertAction, deleteWebhookAlertAction, getAllWebhookAlertAction, updateWebhookAlertAction } from '@/store/action/webhookAlertAction';
-import { SquarePen, Trash2 } from 'lucide-react';
+import { Info, SquarePen, Trash2 } from 'lucide-react';
 import { ALERT_TYPE, WEBHOOKALERT_COLUMNS } from '@/utils/enums';
 
 export const runtime = 'edge';
@@ -23,12 +23,13 @@ const WebhookPage = ({ params }) => {
     const [selectedBridges, setSelectedBridges] = useState([]);
     const [headerValue, setHeaderValue] = useState('');
     const [headerError, setHeaderError] = useState('');
-    const [alertType, setAlertType] = useState('');
-    const [isUpdate,setIsUpdate] = useState(false);
+    const [selectedAlertTypes, setSelectedAlertTypes] = useState([]);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [isUpdate, setIsUpdate] = useState(false);
 
     useEffect(() => {
         dispatch(getAllWebhookAlertAction(params.org_id));
-    }, []);
+    }, [dispatch, params.org_id]);
 
     const resetForm = () => {
         if (modalRef.current) modalRef.current.close();
@@ -37,8 +38,9 @@ const WebhookPage = ({ params }) => {
         setSearchQuery('');
         setHeaderValue('');
         setHeaderError('');
-        setAlertType('');
-        setIsUpdate(false)
+        setSelectedAlertTypes([]);
+        setDropdownOpen(false);
+        setIsUpdate(false);
     };
 
     const isValidJSON = (str) => {
@@ -65,8 +67,8 @@ const WebhookPage = ({ params }) => {
                 headers: headerValue ? JSON.parse(headerValue) : "",
             },
             bridges: selectedBridges,
-            alertType: form.alertType.value, 
-            id: isUpdate? form.id.value : null,
+            alertType: selectedAlertTypes, // Use the array of selected alert types
+            id: isUpdate ? form.id.value : null,
         };
 
         if (isUpdate) {
@@ -74,22 +76,20 @@ const WebhookPage = ({ params }) => {
         } else {
             dispatch(createWebhookAlertAction(data));
         }
-        form.id.value= "";
-        formRef.current.id.value = null;
         resetForm();
-    }, [dispatch, selectedBridges, headerValue, alertType]);
-
+    }, [dispatch, selectedBridges, headerValue, selectedAlertTypes, isUpdate]);
     const handleEdit = (item) => {
-      setIsUpdate(true);
+        setIsUpdate(true);
         if (formRef.current) {
             formRef.current.name.value = item.name;
             formRef.current.url.value = item.webhookConfiguration.url;
             setHeaderValue(JSON.stringify(item.webhookConfiguration.headers));
-            setAlertType(item.alertType || ''); // Set the alert type
+            setSelectedAlertTypes(item.alertType || []); // Set the alert types
             formRef.current.id.value = item._id;
         }
 
-        setSelectedBridges(item.bridges);
+        const bridgeIds = item.bridges.includes('all') ? filteredBridgeList.map(b => b._id) : item.bridges;
+        setSelectedBridges(bridgeIds);
 
         if (modalRef.current) modalRef.current.showModal();
     };
@@ -108,11 +108,20 @@ const WebhookPage = ({ params }) => {
         );
     };
 
+    const handleAlertTypeChange = (alertType) => {
+        setSelectedAlertTypes(prevSelected =>
+            prevSelected.includes(alertType)
+                ? prevSelected.filter(type => type !== alertType)
+                : [...prevSelected, alertType]
+        );
+    };
+
     const filteredBridgeList = filteredBridges?.filter(bridge =>
         bridge.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const truncateText = (text, length) => {
+      if(!text)return   
         if (text.length > length) {
             return text.substring(0, length) + '...';
         }
@@ -120,6 +129,37 @@ const WebhookPage = ({ params }) => {
     };
 
     const CHAR_LIMIT = 30;
+
+    const AlertTypeDropdown = () => (
+        <div className="relative">
+            <button
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="btn bg-transparent w-full h-auto text-left mb-1 p-2"
+            >
+                {selectedAlertTypes.length > 0 
+                    ? `Selected Alert Types: ${selectedAlertTypes.join(', ')}`
+                    : 'Select Alert Types'}
+            </button>
+            {dropdownOpen && (
+                <div className=" bg-white border rounded-md mt-2 w-full ">
+                    <div className="p-2">
+                        {ALERT_TYPE.map((alert) => (
+                            <div key={alert} className="flex items-center p-2 hover:bg-gray-100">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedAlertTypes.includes(alert)}
+                                    onChange={() => handleAlertTypeChange(alert)}
+                                    className="checkbox mr-2"
+                                />
+                                <span>{alert}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 
     const renderTable = () => (
         <div className="w-full">
@@ -144,23 +184,26 @@ const WebhookPage = ({ params }) => {
                                             truncateText(JSON.stringify(item.webhookConfiguration[column]), CHAR_LIMIT)
                                         ) : column === 'bridges' ? (
                                             <div className="space-x-1 space-y-1">
-                                                {filteredBridges
+                                                {item.bridges.includes("all") ? (
+                                                    <span className='badge badge-ghost'>All bridges are selected</span>
+                                                ) : filteredBridges
                                                     .filter(bridge => item.bridges.includes(bridge._id))
                                                     .slice(0, 2)
                                                     .map(bridge => (
                                                         <div key={bridge._id} className="badge badge-ghost">
                                                             {bridge.name}
                                                         </div>
-                                                    ))
-                                                }
+                                                    ))}
                                                 {filteredBridges.filter(bridge => item.bridges.includes(bridge._id)).length > 2 && (
                                                     <div className="badge badge-ghost">
                                                         ... and {filteredBridges.filter(bridge => item.bridges.includes(bridge._id)).length - 2} more
                                                     </div>
                                                 )}
                                             </div>
+                                        ) : column === "alertType" ? (
+                                            item[column].join(', ') // Display selected alert types
                                         ) : (
-                                            column === "alert type"?item[column]:truncateText(item[column], CHAR_LIMIT)
+                                            truncateText(item[column], CHAR_LIMIT)
                                         )}
                                     </td>
                                 ))}
@@ -240,19 +283,7 @@ const WebhookPage = ({ params }) => {
                         <label className="label">
                             <span className="label-text">Alert Type</span>
                         </label>
-                        <select
-                            name="alertType"
-                            value={alertType}
-                            onChange={(e) => setAlertType(e.target.value)}
-                            className="select select-bordered w-full"
-                            required
-                        >
-                            {ALERT_TYPE.map((alert) => (
-                                <option key={alert} value={alert}>
-                                    {alert}
-                                </option>
-                            ))}
-                        </select>
+                        <AlertTypeDropdown />
                     </div>
 
                     <div className="relative">
@@ -266,15 +297,19 @@ const WebhookPage = ({ params }) => {
                         >
                             {selectedBridges.length > 0 ? `Selected Bridges: ${selectedBridges.length}` : 'No Bridges Selected'}
                         </button>
+                        <div role="alert" className="alert alert-info bg-inherit p-1 text-sm mb-1">
+                        <Info />
+                            <span>If you don't select any bridge by default all bridges will be selected</span>
+                        </div>
                         <div ref={dropdownRef} className="p-4 w-full border rounded-md">
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search Bridges..."
-                                 className="input input-bordered w-full p-2"
+                                className="input input-bordered w-full p-2"
                             />
-                            <div className="max-h-60 overflow-y-auto ">
+                            <div className="max-h-60 overflow-y-auto">
                                 {filteredBridgeList.map(bridge => (
                                     <div key={bridge._id} className="flex items-center p-2 hover:bg-gray-100">
                                         <input
@@ -292,14 +327,14 @@ const WebhookPage = ({ params }) => {
                 </div>
                 <div className="flex justify-end gap-2">
                     <button type="button" onClick={resetForm} className="btn">Cancel</button>
-                    <button type="submit" className="btn">{isUpdate?"Update":"Create"}</button>
+                    <button type="submit" className="btn">{isUpdate ? "Update" : "Create"}</button>
                 </div>
             </form>
         </dialog>
     );
 
     return (
-        <div >
+        <div>
             {renderForm()}
             {renderTable()}
         </div>
