@@ -93,7 +93,9 @@ export default function FormSection({ params }) {
         width: '',
         widthUnit: '',
         type: '',
-        themeColor: ""
+        themeColor: "",
+        chatbotTitle: "Chatbot",
+        chatbotSubtitle: "Smart Help, On Demand",
     });
 
     const { chatBotConfig } = useCustomSelector((state) => ({
@@ -116,7 +118,13 @@ export default function FormSection({ params }) {
 
     useEffect(() => {
         if (chatBotConfig) {
-            setFormData(chatBotConfig);
+            setFormData((prevFormData) => {
+                const updatedFormData = {
+                    ...prevFormData,
+                    ...chatBotConfig
+                };
+                return updatedFormData;
+            })
         }
     }, [chatBotConfig]);
 
@@ -125,11 +133,35 @@ export default function FormSection({ params }) {
             <h3 className="text-lg font-semibold">Display</h3>
             <label className="form-control w-full max-w-xs">
                 <div className="label">
+                    <span className="label-text">Chatbot title</span>
+                </div>
+                <input
+                    type="text"
+                    placeholder="Chatbot title"
+                    key={formData.chatbotTitle}
+                    className="input input-bordered w-full max-w-xs input-sm"
+                    defaultValue={formData.chatbotTitle}
+                    onBlur={handleInputChange}
+                    name="chatbotTitle"
+                />
+                <div className="label">
+                    <span className="label-text">Chatbot subtitle </span>
+                </div>
+                <input
+                    type="text"
+                    placeholder="Chatbot subtitle here"
+                    key={formData.chatbotSubtitle}
+                    className="input input-bordered w-full max-w-xs input-sm"
+                    defaultValue={formData.chatbotSubtitle}
+                    onBlur={handleInputChange}
+                    name="chatbotSubtitle"
+                />
+                <div className="label">
                     <span className="label-text">Button title </span>
                 </div>
                 <input
                     type="text"
-                    placeholder="Type here"
+                    placeholder="Button title here"
                     key={formData.buttonName}
                     className="input input-bordered w-full max-w-xs input-sm"
                     defaultValue={formData.buttonName}
@@ -138,8 +170,6 @@ export default function FormSection({ params }) {
                 />
             </label>
             <div className="flex items-center justify-start gap-2">
-
-
                 <DimensionInput
                     placeholder="Height"
                     options={[
