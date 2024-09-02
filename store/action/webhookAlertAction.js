@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 export const createWebhookAlertAction = (dataToSend) => async (dispatch) => {
     try {
       const response = await createWebhookAlert(dataToSend);
-      if(response.data.success)
+      if(response.success)
       dispatch(createWebhookAlertReducer(response.data));
     } catch (error) {
       toast.error(error)

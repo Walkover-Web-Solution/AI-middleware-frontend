@@ -29,7 +29,7 @@ const WebhookPage = ({ params }) => {
 
     useEffect(() => {
         dispatch(getAllWebhookAlertAction(params.org_id));
-    }, [dispatch, params.org_id]);
+    }, []);
 
     const resetForm = () => {
         if (modalRef.current) modalRef.current.close();
