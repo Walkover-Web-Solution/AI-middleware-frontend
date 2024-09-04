@@ -132,10 +132,11 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '') =
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
   try {
     let dryRun
-    if (localDataToSend.configuration.type === "chat") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
-    if (localDataToSend.configuration.type === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
-    if (localDataToSend.configuration.type === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings/${bridge_id}`, localDataToSend)
-    if (localDataToSend.configuration.type === "chat") {
+    const modelType =  localDataToSend.configuration.type
+    if (modelType === "chat" || modelType === "fine-tune") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
+    if (modelType === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
+    if (modelType === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings/${bridge_id}`, localDataToSend)
+    if (modelType === "chat" || modelType === "fine-tune") {
       return dryRun.data;
     }
     return { success: true, data: dryRun.data }
