@@ -20,6 +20,11 @@ imgElement.alt = 'Ask Ai';
 imgElement.src = AI_BLACK_ICON
 imgElement.style.visibility = 'hidden';
 chatBotIcon.appendChild(imgElement);
+// Create a span element to hold the button text
+const textElement = document.createElement('span');
+textElement.id = 'popup-interfaceEmbed-text';
+chatBotIcon.appendChild(textElement);
+
 document.body.appendChild(chatBotIcon);
 
 var link = document.createElement('link');
@@ -50,7 +55,6 @@ const closebutton = ` <button id='close-button-interfaceEmbed' onclick="closeCha
 
 const updateProps = (newprops = {}) => {
     props = { ...props, ...newprops }
-    // console.log(props, 12312312312)
     setPropValues(newprops)
 }
 const setPropValues = (newprops) => {
@@ -142,7 +146,7 @@ function makeImageUrl(imageId) {
 
 closeChatbot = function () {
     const iframeContainer = document.getElementById('iframe-parent-container');
-    
+
     if (iframeContainer?.style?.display === 'block') {
         // Apply inline animation for fade out
         iframeContainer.style.transition = 'opacity 0.2s ease-in-out';
@@ -174,13 +178,11 @@ function SendTempDataToChatbot(event) {
     const { type } = event.data;
     if (type === 'interfaceLoaded') {
         if (tempDataToSend) {
-            console.log('data sent')
             document.getElementById('iframe-component-interfaceEmbed').contentWindow.postMessage({ type: messageType, data: tempDataToSend }, '*')
             tempDataToSend = null;
         }
         window.removeEventListener('message', SendTempDataToChatbot);
         clearTimeout(timeoutId);
-        console.log("interfaceLoaded and event listener removed");
     }
 }
 
@@ -203,7 +205,7 @@ loadChatbotEmbed = async function () {
     function handleChatbotConfigMessage(event) {
         const { type, data } = event.data;
         if (type === 'chatbotConfig') {
-            if(config['themeColor']!=data['themeColor']) document.getElementById('iframe-component-interfaceEmbed')?.contentWindow?.postMessage({ type: 'themeChange', themeColor: data['themeColor'] }, '*')
+            if (config['themeColor'] != data['themeColor']) document.getElementById('iframe-component-interfaceEmbed')?.contentWindow?.postMessage({ type: 'themeChange', themeColor: data['themeColor'] }, '*')
             config = data;
             updateConfig(config);
         }
@@ -212,24 +214,24 @@ loadChatbotEmbed = async function () {
     document.getElementById('iframe-component-interfaceEmbed').src = urlToViasocket
 }
 
-updateConfig = function (config={}) {
+updateConfig = function (config = {}) {
     const interfaceEmbedElement = document.getElementById('interfaceEmbed');
+    const textElement = document.getElementById('popup-interfaceEmbed-text');
+    const imgElement = document.getElementById('popup-interfaceEmbed');
     if (config) {
         if (config.title) {
             title = config.title
         }
         if (config.buttonName) {
             buttonName = config.buttonName;
-            interfaceEmbedElement.innerText = buttonName;
-
+            textElement.innerText = buttonName;
             // Add a class to show the background color when the button text is shown
             interfaceEmbedElement.classList.add('show-bg-color');
-            // interfaceEmbedElement.style.backgroundColor = config.themeColor || '#000000'; // Default to original color if themeColor is not set
+            imgElement.style.visibility = 'hidden';// Hide the icon when button text is shown
         } else {
+            textElement.innerText = '';
             interfaceEmbedElement?.classList.remove('show-bg-color');
-            imgElement.style.visibility = 'visible';
-            // Reset the background color
-            // interfaceEmbedElement.style.backgroundColor = 'transparent'; // or any default background color you want when icon is visible
+            imgElement.style.visibility = 'visible';// Show the icon when button text is empty
         }
 
         if (config.type) {
@@ -251,7 +253,6 @@ updateConfig = function (config={}) {
 }
 
 const loadContent = function (parentId = props.parentId || '', bodyLoadedHai = bodyLoaded) {
-    console.log(bodyLoadedHai, '=-=-=-=', parentId, 'new value');
     if (bodyLoadedHai) return;
     window.addEventListener('message', SendTempDataToChatbot);
     if (!parentContainer) {
@@ -266,17 +267,14 @@ const loadContent = function (parentId = props.parentId || '', bodyLoadedHai = b
     }
 
     if (parentId) {
-        console.log(1);
         const container = document.getElementById(parentId);
         if (container) {
             container.style.position = 'relative';
             container.appendChild(parentContainer);
         }
     } else if (document.getElementById('interface-chatbot')) {
-        console.log(2);
         document.getElementById('interface-chatbot').appendChild(parentContainer);
     } else {
-        console.log(3);
         document.body.appendChild(parentContainer);
     }
 
@@ -292,14 +290,12 @@ if (document?.body) loadContent()
 const iframeComponent = document.getElementById('iframe-component-interfaceEmbed');
 if (iframeComponent) {
     iframeComponent.onload = function () {
-        console.log('ifram onload and remove event listener', tempDataToSend, 'tempDataToSend');
         iframeComponent.contentWindow?.postMessage({ type: messageType, data: tempDataToSend }, '*')
     }
 }
 
 SendDataToChatbot = function (dataToSend) {
     if ('parentId' in dataToSend) {
-        console.log(props['parentId'], 'previous value');
         const previousParentId = props['parentId'];
         if (previousParentId !== dataToSend.parentId) {
             if (previousParentId) {
@@ -341,12 +337,12 @@ SendDataToChatbot = function (dataToSend) {
 openChatbot = function () {
     window.parent?.postMessage({ type: 'open', data: {} }, '*');
     iframeComponent.contentWindow?.postMessage({ type: 'open', data: {} }, '*');
-    
+
     if (document.getElementById('interfaceEmbed') && document.getElementById('iframe-parent-container')) {
         document.getElementById('interfaceEmbed').style.display = 'none';
         const iframeContainer = document.getElementById('iframe-parent-container');
         iframeContainer.style.display = 'block';
-        
+
         // Reset opacity to 0 before applying animation (in case the element was previously shown)
         iframeContainer.style.opacity = 0;
         // Apply inline animation

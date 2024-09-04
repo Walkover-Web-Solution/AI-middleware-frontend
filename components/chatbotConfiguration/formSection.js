@@ -85,7 +85,8 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
     );
 }
 
-export default function FormSection({ params }) {
+export default function FormSection({ params, chatbotId=null }) {
+    const chatBotId = chatbotId || params?.chatbot_id;
     const iframeRef = useRef(null);
     const [formData, setFormData] = useState({
         buttonName: '',
@@ -98,7 +99,7 @@ export default function FormSection({ params }) {
     });
 
     const { chatBotConfig } = useCustomSelector((state) => ({
-        chatBotConfig: state?.ChatBot?.ChatBotMap?.[params?.chatbot_id]?.config
+        chatBotConfig: state?.ChatBot?.ChatBotMap?.[chatBotId]?.config
     }));
 
     const dispatch = useDispatch();
@@ -110,7 +111,7 @@ export default function FormSection({ params }) {
                 ...prevFormData,
                 [name]: value
             };
-            dispatch(updateChatBotConfigAction(params?.chatbot_id, updatedFormData));
+            dispatch(updateChatBotConfigAction(chatBotId, updatedFormData));
             if (iframeRef.current && iframeRef.current.contentWindow) {
                 iframeRef.current.contentWindow.postMessage(
                     { type: 'chatbotConfig', data: updatedFormData },
@@ -119,7 +120,7 @@ export default function FormSection({ params }) {
             }
             return updatedFormData;
         });
-    }, [dispatch, params?.chatbot_id]);
+    }, [dispatch, params?.chatbot_id, chatBotId]);
 
     useEffect(() => {
         if (chatBotConfig) {
@@ -137,7 +138,6 @@ export default function FormSection({ params }) {
                     { type: 'chatbotConfig', data: chatBotConfig },
                     '*' // Replace '*' with the domain of the iframe for security
                 );
-                console.log('Data sent to iframe via interval:', chatBotConfig);
                 clearInterval(intervalId); // Clear interval once the message is successfully sent
             }
         }, 1800); // Attempt to send every 500ms
@@ -146,7 +146,7 @@ export default function FormSection({ params }) {
         return () => {
             clearInterval(intervalId);
         };
-    }, []);
+    }, [chatBotId]);
 
     return (
         <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">

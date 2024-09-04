@@ -2,8 +2,7 @@ import { useCustomSelector } from "@/customSelector/customSelector";
 import { Bot, Cog } from "lucide-react";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import PrivateFormSection from '../chatbotConfiguration/firstStep';
-import SecondStep from '../chatbotConfiguration/secondStep';
+import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
 import AdvancedParameters from "./configurationComponent/advancedParamenter";
@@ -13,10 +12,10 @@ import BridgeTypeToggle from "./configurationComponent/bridgeTypeToggle";
 import EmbedList from "./configurationComponent/embedList";
 import InputConfigComponent from "./configurationComponent/inputConfigComponent";
 import ModelDropdown from "./configurationComponent/modelDropdown";
+import PreEmbedList from "./configurationComponent/preEmbedList";
 import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
-import PreEmbedList from "./configurationComponent/preEmbedList";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -77,8 +76,7 @@ export default function ConfigurationPage({ params }) {
                         <div className="flex  flex-col w-100 overflow-auto gap-3">
                             <h1 className="text-xl font-semibold">Chatbot Configuration</h1>
                             <div className="flex flex-col gap-4">
-                                <PrivateFormSection params={params} ChooseChatbot={true} />
-                                <SecondStep />
+                                <ChatbotGuide params={params}/>
                             </div>
                         </div>
             }
