@@ -235,7 +235,7 @@ export default function FormSection({ params, chatbotId=null }) {
                         { label: "px", value: "px" },
                         { label: "%", value: "%" }
                     ]}
-                    onChange={handleInputChange}
+                    onChange={handleBlur}
                     name="height"
                     value={formData.height}
                     unit={formData.heightUnit}
@@ -247,7 +247,7 @@ export default function FormSection({ params, chatbotId=null }) {
                         { label: "px", value: "px" },
                         { label: "%", value: "%" }
                     ]}
-                    onChange={handleInputChange}
+                    onChange={handleBlur}
                     name="width"
                     value={formData.width}
                     unit={formData.widthUnit}
@@ -256,7 +256,7 @@ export default function FormSection({ params, chatbotId=null }) {
             <div className="flex items-center justify-start gap-2">
                 <RadioGroup
                     value={formData.type}
-                    onChange={handleInputChange}
+                    onChange={handleBlur}
                     name="type"
                 />
             </div>
@@ -269,7 +269,7 @@ export default function FormSection({ params, chatbotId=null }) {
                         type="color"
                         key={formData?.themeColor}
                         defaultValue={formData.themeColor}
-                        onBlur={handleInputChange}
+                        onBlur={handleBlur}
                         name="themeColor"
                     />
                     <span>{formData.themeColor}</span>
