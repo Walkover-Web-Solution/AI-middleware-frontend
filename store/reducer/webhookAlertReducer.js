@@ -20,6 +20,10 @@ export  const webhookAlertReducer = createSlice({
            
         },
         createWebhookAlertReducer:(state,action)=>{
+            if(!state.webhookAlert)
+                {
+                   state.webhookAlert=[]
+                }
             state.webhookAlert.push(action.payload) 
         },
         updateWebhookAlertReducer:(state,action)=>{
