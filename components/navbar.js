@@ -74,7 +74,7 @@ function Navbar() {
           <Building2 size={16} /> {organizations[path[2]]?.name}
         </button>
         <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn capitalize m-1">{path[3] === 'apikey' ? 'API Key' : path[3]} <ChevronDown size={16} /></div>
+          <div tabIndex={0} role="button" className="btn capitalize m-1">{path[3] === 'apikeys' ? 'API Keys' : path[3]} <ChevronDown size={16} /></div>
           <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
             {['bridges', "chatbot", 'pauthkey','apikeys', 'metrics', 'invite'].map((item) => (
               <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
