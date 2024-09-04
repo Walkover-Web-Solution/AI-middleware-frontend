@@ -106,6 +106,18 @@ export default function FormSection({ params }) {
 
     const handleInputChange = useCallback((event) => {
         const { name, value } = event.target;
+
+        // Update local state without making API calls
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value
+        }));
+    }, [params?.chatbot_id]);
+
+    const handleBlur = useCallback((event) => {
+        const { name, value } = event.target;
+
+        // Dispatch the action to update the chatbot config on blur
         setFormData((prevFormData) => {
             const updatedFormData = {
                 ...prevFormData,
@@ -138,10 +150,10 @@ export default function FormSection({ params }) {
                 <input
                     type="text"
                     placeholder="Chatbot title"
-                    key={formData.chatbotTitle}
                     className="input input-bordered w-full max-w-xs input-sm"
-                    defaultValue={formData.chatbotTitle}
-                    onBlur={handleInputChange}
+                    value={formData.chatbotTitle}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
                     name="chatbotTitle"
                 />
                 <div className="label">
@@ -150,10 +162,10 @@ export default function FormSection({ params }) {
                 <input
                     type="text"
                     placeholder="Chatbot subtitle here"
-                    key={formData.chatbotSubtitle}
                     className="input input-bordered w-full max-w-xs input-sm"
-                    defaultValue={formData.chatbotSubtitle}
-                    onBlur={handleInputChange}
+                    value={formData.chatbotSubtitle}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
                     name="chatbotSubtitle"
                 />
                 <div className="label">
@@ -162,10 +174,10 @@ export default function FormSection({ params }) {
                 <input
                     type="text"
                     placeholder="Button title here"
-                    key={formData.buttonName}
                     className="input input-bordered w-full max-w-xs input-sm"
-                    defaultValue={formData.buttonName}
-                    onBlur={handleInputChange}
+                    value={formData.buttonName}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
                     name="buttonName"
                 />
             </label>
