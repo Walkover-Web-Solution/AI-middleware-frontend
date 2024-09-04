@@ -27,7 +27,7 @@ export const authDataReducer = createSlice({
 
 export const {
     fetchAllAuthData , 
-    addAuthData  , 
+    addAuthData, 
     removeAuthData
 } = authDataReducer.actions;
 export default authDataReducer.reducer;

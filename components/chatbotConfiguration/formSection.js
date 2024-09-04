@@ -98,7 +98,9 @@ export default function FormSection({ params, chatbotId=null }) {
         width: '',
         widthUnit: '',
         type: '',
-        themeColor: ""
+        themeColor: "",
+        chatbotTitle: "Chatbot",
+        chatbotSubtitle: "Smart Help, On Demand",
     });
 
     const { chatBotConfig } = useCustomSelector((state) => ({
@@ -111,6 +113,18 @@ export default function FormSection({ params, chatbotId=null }) {
 
     const handleInputChange = useCallback((event) => {
         const { name, value } = event.target;
+
+        // Update local state without making API calls
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value
+        }));
+    }, [params?.chatbot_id]);
+
+    const handleBlur = useCallback((event) => {
+        const { name, value } = event.target;
+
+        // Dispatch the action to update the chatbot config on blur
         setFormData((prevFormData) => {
             const updatedFormData = {
                 ...prevFormData,
@@ -129,7 +143,13 @@ export default function FormSection({ params, chatbotId=null }) {
 
     useEffect(() => {
         if (chatBotConfig) {
-            setFormData(chatBotConfig);
+            setFormData((prevFormData) => {
+                const updatedFormData = {
+                    ...prevFormData,
+                    ...chatBotConfig
+                };
+                return updatedFormData;
+            })
         }
     }, [chatBotConfig]);
 
@@ -171,21 +191,43 @@ export default function FormSection({ params, chatbotId=null }) {
             <h3 className="text-lg font-semibold">Display</h3>
             <label className="form-control w-full max-w-xs">
                 <div className="label">
+                    <span className="label-text">Chatbot title</span>
+                </div>
+                <input
+                    type="text"
+                    placeholder="Chatbot title"
+                    className="input input-bordered w-full max-w-xs input-sm"
+                    value={formData.chatbotTitle}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    name="chatbotTitle"
+                />
+                <div className="label">
+                    <span className="label-text">Chatbot subtitle </span>
+                </div>
+                <input
+                    type="text"
+                    placeholder="Chatbot subtitle here"
+                    className="input input-bordered w-full max-w-xs input-sm"
+                    value={formData.chatbotSubtitle}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    name="chatbotSubtitle"
+                />
+                <div className="label">
                     <span className="label-text">Button title </span>
                 </div>
                 <input
                     type="text"
-                    placeholder="Type here"
-                    key={formData.buttonName}
+                    placeholder="Button title here"
                     className="input input-bordered w-full max-w-xs input-sm"
-                    defaultValue={formData.buttonName}
-                    onBlur={handleInputChange}
+                    value={formData.buttonName}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
                     name="buttonName"
                 />
             </label>
             <div className="flex items-center justify-start gap-2">
-
-
                 <DimensionInput
                     placeholder="Height"
                     options={[

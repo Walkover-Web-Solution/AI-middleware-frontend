@@ -4,7 +4,7 @@ import GroqIcon from "@/icons/GroqIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { cloneDeep } from "lodash";
 
-export const updatedData = (obj1, obj2={}, type) => {
+export const updatedData = (obj1, obj2 = {}, type) => {
     // Deep clone obj1 to avoid mutating the original object
 
     const updatedObj1 = JSON.parse(JSON.stringify(obj1));
@@ -138,49 +138,49 @@ export const isValidJson = (jsonString) => {
 export const toggleSidebar = (sidebarId) => {
     const sidebar = document.getElementById(sidebarId);
     const handleClickOutside = (event) => {
-      const sidebar = document.getElementById(sidebarId);
-      const button = event.target.closest('button');
+        const sidebar = document.getElementById(sidebarId);
+        const button = event.target.closest('button');
 
-      if (sidebar && !sidebar.contains(event.target) && !button) {
-        sidebar.classList.add('-translate-x-full');
-        document.removeEventListener('click', handleClickOutside);
-        document.removeEventListener('keydown', handleEscPress);
-      }
+        if (sidebar && !sidebar.contains(event.target) && !button) {
+            sidebar.classList.add('-translate-x-full');
+            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('keydown', handleEscPress);
+        }
     };
 
     const handleEscPress = (event) => {
-      if (event.key === 'Escape') {
-        sidebar.classList.add('-translate-x-full');
-        document.removeEventListener('click', handleClickOutside);
-        document.removeEventListener('keydown', handleEscPress);
-      }
+        if (event.key === 'Escape') {
+            sidebar.classList.add('-translate-x-full');
+            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('keydown', handleEscPress);
+        }
     };
 
     if (sidebar) {
-      sidebar.classList.toggle('-translate-x-full');
+        sidebar.classList.toggle('-translate-x-full');
 
-      if (!sidebar.classList.contains('-translate-x-full')) {
-        document.addEventListener('click', handleClickOutside);
-        document.addEventListener('keydown', handleEscPress);
-      } else {
-        document.removeEventListener('click', handleClickOutside);
-        document.removeEventListener('keydown', handleEscPress);
-      }
+        if (!sidebar.classList.contains('-translate-x-full')) {
+            document.addEventListener('click', handleClickOutside);
+            document.addEventListener('keydown', handleEscPress);
+        } else {
+            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('keydown', handleEscPress);
+        }
     }
-  };
+};
 
 
-  export const getIconOfService = (service) => {
+export const getIconOfService = (service, height, width) => {
     switch (service) {
         case 'openai':
-            return <OpenAiIcon />;
+            return <OpenAiIcon height={height} width={width} />;
         case 'anthropic':
-            return <AnthropicIcon />;
+            return <AnthropicIcon height={height} width={width} />;
         case 'groq':
-            return <GroqIcon />;
+            return <GroqIcon height={height} width={width} />;
         case 'google':
-            return <GeminiIcon />;
+            return <GeminiIcon height={height} width={width} />;
         default:
-            return <OpenAiIcon />;
+            return <OpenAiIcon height={height} width={width} />;
     }
 }

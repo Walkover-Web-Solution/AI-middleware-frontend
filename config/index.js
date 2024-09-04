@@ -1,6 +1,6 @@
 "use client"
 
-import axios from "@/utils/interceptor"
+import axios from "@/utils/interceptor";
 import { toast } from "react-toastify";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -90,7 +90,7 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
     // toast.success("Bridge is updated");
     return response
   } catch (error) {
-    console.log(error)
+    console.error(error)
     toast.error(error?.response?.data?.error);
   }
 }
@@ -122,10 +122,11 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '') =
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
   try {
     let dryRun
-    if (localDataToSend.configuration.type === "chat") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
-    if (localDataToSend.configuration.type === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
-    if (localDataToSend.configuration.type === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings/${bridge_id}`, localDataToSend)
-    if(localDataToSend.configuration.type === "chat"){
+    const modelType =  localDataToSend.configuration.type
+    if (modelType === "chat" || modelType === "fine-tune") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
+    if (modelType === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
+    if (modelType === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings/${bridge_id}`, localDataToSend)
+    if (modelType === "chat" || modelType === "fine-tune") {
       return dryRun.data;
     }
     return { success: true, data: dryRun.data }
@@ -465,3 +466,48 @@ export const getAllModels = async (service) => {
     throw new Error(error);
   }
 };
+
+export const saveApiKeys = async (data) => {
+  try {
+    const response = await axios.post(`${URL}/apikeys`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    toast.error(error?.response?.data?.error);
+    return error;
+  }
+}
+
+export const updateApikey = async (dataToSend) => {
+  try {
+    const response = await axios.put(`${URL}/apikeys/${dataToSend.apikey_object_id}`, dataToSend)
+
+    return response;
+  } catch (error) {
+    console.error(error)
+    return error;
+  }
+}
+
+export const deleteApikey = async (id) => {
+  try {
+    const response = await axios.delete(`${URL}/apikeys`, {
+      data: { apikey_object_id: id },
+    });
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+
+export const getAllApikey = async (org_id) => {
+  try {
+    const response = await axios.get(`${URL}/apikeys`, org_id)
+    return response;
+  } catch (error) {
+    console.error(error)
+    return error;
+  }
+}
