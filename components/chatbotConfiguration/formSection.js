@@ -1,5 +1,6 @@
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { updateChatBotConfigAction } from "@/store/action/chatBotAction";
+import { getChatBotDetailsAction, updateChatBotConfigAction } from "@/store/action/chatBotAction";
+import { RefreshCw } from "lucide-react";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 
@@ -87,6 +88,8 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
 
 export default function FormSection({ params, chatbotId=null }) {
     const chatBotId = chatbotId || params?.chatbot_id;
+    const dispatch = useDispatch();
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const iframeRef = useRef(null);
     const [formData, setFormData] = useState({
         buttonName: '',
@@ -102,7 +105,9 @@ export default function FormSection({ params, chatbotId=null }) {
         chatBotConfig: state?.ChatBot?.ChatBotMap?.[chatBotId]?.config
     }));
 
-    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(getChatBotDetailsAction(chatBotId))
+    }, [chatBotId])
 
     const handleInputChange = useCallback((event) => {
         const { name, value } = event.target;
@@ -147,6 +152,19 @@ export default function FormSection({ params, chatbotId=null }) {
             clearInterval(intervalId);
         };
     }, [chatBotId]);
+
+    const handleRefreshConfiguration = () => {
+        setIsRefreshing(true);
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.contentWindow.postMessage(
+                { type: 'chatbotConfig', data: chatBotConfig },
+                '*' // Replace '*' with the domain of the iframe for security
+            );
+        }
+        setTimeout(() => {
+            setIsRefreshing(false); // Stop the animation after 1 second or when the action is complete
+          }, 1000);
+    }
 
     return (
         <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
@@ -219,6 +237,7 @@ export default function FormSection({ params, chatbotId=null }) {
             <div className="">
                 <div className="label">
                     <span className="label-text">ChatBot Preview </span>
+                    <span className="flex flex-row items-center gap-3 cursor-pointer" onClick={handleRefreshConfiguration}>Refresh <RefreshCw className={isRefreshing ? 'animate-spin' : ''} size={16} /></span>
                 </div>
                 <div className="shadow-sm border">
                     <iframe
