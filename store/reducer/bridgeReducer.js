@@ -48,6 +48,15 @@ export const bridgeReducer = createSlice({
       state.org = { ...state.org, [orgId]: { ...state.org?.[orgId], functionData } };
       state.loading = false;
     },
+    updateFunctionReducer:(state,action)=>{
+     
+      const {org_id,data} =action.payload;
+      const id = data._id;
+      if(state.org[org_id].functionData)
+      {
+        state.org[org_id].functionData[id] = data
+      }
+    },
     createBridgeReducer: (state, action) => {
       state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.bridge);
     },
@@ -172,7 +181,8 @@ export const {
   apikeyDataReducer,
   apikeyUpdateReducer,
   createApiKeyReducer,
-  apikeyDeleteReducer
+  apikeyDeleteReducer,
+  updateFunctionReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
