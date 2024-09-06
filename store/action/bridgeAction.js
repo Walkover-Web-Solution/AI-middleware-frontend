@@ -164,7 +164,6 @@ export const archiveBridgeAction = (bridge_id) => async (dispatch) => {
   try {
     dispatch(isPending());
     const response = await archiveBridge(bridge_id);
-    console.log(response)
     dispatch(updateBridgeReducer({bridges: response.data, functionData:  null}))
   } catch (error) {
     dispatch(isError());
