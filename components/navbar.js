@@ -1,6 +1,6 @@
 "use client"
 import { useCustomSelector } from '@/customSelector/customSelector';
-import { deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
+import { archiveBridgeAction, deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
 import { getIconOfService, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -18,6 +18,7 @@ function Navbar() {
   const organizations = useCustomSelector((state) => state.userDetailsReducer.organizations);
   const bridgeData = useCustomSelector((state) => state.bridgeReducer.allBridgesMap[path[5]]);
   const chatbotData = useCustomSelector((state) => state.ChatBot.ChatBotMap[path[5]])
+  const bridge =  useCustomSelector((state)=>state.bridgeReducer.allBridgesMap[path[5]],[])||[];
 
   const handleDeleteBridge = async (item) => {
     const bridgeId = path[5];
@@ -55,6 +56,17 @@ function Navbar() {
           }
         }
         break;
+        case "archive":
+          try{
+          await dispatch(archiveBridgeAction(bridgeId))
+          router.push(`/org/${orgId}/bridges`);
+          bridge.status===0?toast.success('Bridge Archived Succesfully'):toast.success('Bridge Unrchived Succesfully');
+          dispatch(getAllBridgesAction());
+          }
+          catch(error){
+            bridge.status===0?console.error('Failed to archive bridge',error):console.error('Failed to unarchive bridge',error);               
+          }
+          break;
       default:
         break;
     }
@@ -102,9 +114,9 @@ function Navbar() {
                 <Ellipsis />
               </div>
               <ul tabIndex={0} className="dropdown-content z-[9999999999] menu p-2 shadow bg-base-100 rounded-box w-52 custom-dropdown">
-                {['Duplicate', 'Delete'].map((item) => (
+                {['Duplicate', 'Delete','Archive'].map((item) => (
                   <li key={item} onClick={() => handleDeleteBridge(item)}>
-                    <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
+                    <a className={path[3] === item ? "active" : ""}>{item==='Archive'?(bridge.status&&bridge.status===1?'Unarchive':'Archive'):item.charAt(0).toUpperCase() + item.slice(1)}</a>
                   </li>
                 ))}
               </ul>

@@ -521,3 +521,13 @@ export const getAllApikey = async (org_id) => {
     return error;
   }
 }
+
+export const archiveBridge = async (bridge_id) => {
+  try {
+    const response = await axios.put(`${URL}/api/v1/config/bridgearchive/${bridge_id}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};

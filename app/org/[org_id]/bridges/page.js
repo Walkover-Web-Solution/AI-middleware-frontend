@@ -19,14 +19,24 @@ function Home({ params }) {
 
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  const filteredBridges = allBridges.filter((item) =>
+  const UnrchievedfilteredBridges = allBridges.filter((item) =>
 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item?.slugName?.toLowerCase()?.includes(searchTerm.toLocaleLowerCase()) ||
     item?.service?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    item._id.toLowerCase().includes(searchTerm.toLowerCase()) // Add this line
+    item._id.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    item.status===0
 
+  );
+  const ArchievedfilteredBridges = allBridges.filter((item) =>
+
+    (item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item?.slugName?.toLowerCase()?.includes(searchTerm.toLocaleLowerCase()) ||
+    item?.service?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    item._id.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    item.status===1
   );
 
   const onClickConfigure = (id) => {
@@ -65,8 +75,55 @@ function Home({ params }) {
                     <Box size={16} /> Metrics
                   </button>
                 </div>
+                {UnrchievedfilteredBridges && (
+                  <>
+                    <span className="badge badge-neutral ml-4 mb-2 font-bold">Unarchived Bridges</span>
+                    <hr />
+                  </>
+                )}
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
-                  {filteredBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                  
+                  {UnrchievedfilteredBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                    <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center gap-7 rounded-md border cursor-pointer hover:shadow-lg bg-base-100">
+                      <div className="w-full p-4 flex flex-col justify-between h-[200px] items-start">
+                        <h1 className="inline-flex truncate w-full items-center gap-2 text-lg font-semibold text-base-content">
+                          {getIconOfService(item.service)}
+                          {item.name}
+                        </h1>
+                        <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
+                          {item.slugName && <span>SlugName: {item.slugName}</span>}
+                          {item.configuration?.prompt && (
+                            Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
+                              <div key={index}>
+                                <p>Role: {promptItem.role}</p>
+                                <p>Content: {promptItem.content}</p>
+                              </div>
+                            )) : <p>Prompt: {item.configuration.prompt}</p>
+                          )}
+                          {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
+                        </p>
+                        <div className="mt-auto">
+                          <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
+                            {item.service}
+                          </span>
+                          <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
+                            {item.configuration?.model || ""}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                </div>
+                {ArchievedfilteredBridges.length>0 && (
+                  <>
+                    <span className="badge badge-neutral ml-4 mb-2 font-bold">Archived Bridges</span>
+                    <hr />
+                  </>
+                )}
+                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
+                  
+                  {ArchievedfilteredBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
                     <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center gap-7 rounded-md border cursor-pointer hover:shadow-lg bg-base-100">
                       <div className="w-full p-4 flex flex-col justify-between h-[200px] items-start">
                         <h1 className="inline-flex truncate w-full items-center gap-2 text-lg font-semibold text-base-content">
