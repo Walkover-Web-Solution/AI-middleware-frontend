@@ -163,9 +163,7 @@ function CreateNewBridge({ orgid }) {
                             </label> : null}
                         </div>
                         <div className="modal-action">
-                            <form method="dialog">
-                                <button className="btn" onClick={cleanState}>Close</button>
-                            </form>
+                            <button className="btn" onClick={cleanState}>Close</button>
                             <button className="btn">+ Create</button>
                         </div>
                     </form>

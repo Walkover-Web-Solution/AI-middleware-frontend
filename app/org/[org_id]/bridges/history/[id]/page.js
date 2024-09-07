@@ -24,7 +24,7 @@ function Page({ params }) {
   const { historyData, thread, embedToken, integrationData } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread,
-    embedToken: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.embed_token,
+    embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData
   }));
   const searchParams = useSearchParams();
