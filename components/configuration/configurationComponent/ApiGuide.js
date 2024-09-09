@@ -32,7 +32,7 @@ const ApiGuide = ({ params }) => {
 
         <p className=" text-sm">
           Follow the on-screen instructions to create a new API key. Ignore if already created
-          <br /> <Link href={`/org/${params.org_id}/apikey`} target='_blank' className="link link-primary">Create pauthkey</Link>
+          <br /> <Link href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create pauthkey</Link>
         </p>
       </div>
       <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
