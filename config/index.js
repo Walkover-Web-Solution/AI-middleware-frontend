@@ -554,7 +554,6 @@ export const getAllWebhookAlert = async (org_id) => {
 
 export const deleteWebhookAlert = async (id) => {
   try {
-    console.log({id})
     const response = await axios.delete(`${URL}/alerting`,{
       data: { id: id },
     });

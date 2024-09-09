@@ -92,7 +92,7 @@ const WebhookPage = ({ params }) => {
         modalRef.current?.showModal();
     };
 
-    const handleDeleteClick = (item)=> {
+    const handleDeleteClick = (item) => {
         if (window.confirm('Are you sure you want to delete this webhook alert?')) {
             dispatch(deleteWebhookAlertAction(item._id));
         }
@@ -253,7 +253,7 @@ const WebhookPage = ({ params }) => {
                                 onClick={() => setDropdownOpen(prev => !prev)}
                                 className="border btn text-center bg-transparent w-full h-auto rounded-md p-3"
                             >
-                                {selectedAlertTypes.length > 0 
+                                {selectedAlertTypes.length > 0
                                     ? `Selected Alert Types: ${selectedAlertTypes.join(', ')}`
                                     : 'Select Alert Types'}
                                 <span className='text-end'><ChevronDown height={20} /></span>
@@ -279,16 +279,16 @@ const WebhookPage = ({ params }) => {
                     </div>
 
                     <div className="relative">
-                    <div className={`flex justify-start items-center ${selectedBridges.length === 0 ? 'mb-2' : 'mb-0'}`}>   
+                        <div className={`flex justify-start items-center ${selectedBridges.length === 0 ? 'mb-2' : 'mb-0'}`}>
                             <label className="label">
                                 <span className="label-text">Select Bridges For Getting Alert</span>
                             </label>
                             {!isUpdate && selectedBridges.length === 0 && (
-                                <div 
-                                    className="tooltip tooltip-open tooltip-right bg-transparent" 
+                                <div
+                                    className="tooltip tooltip-open tooltip-right bg-transparent"
                                     data-tip="If you don't select any bridge, all bridges will be selected"
                                 >
-                                    <span><Info className='h-4 text-gray-500'/></span>
+                                    <span><Info className='h-4 text-gray-500' /></span>
                                 </div>
                             )}
                         </div>
