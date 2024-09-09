@@ -1,11 +1,12 @@
     import { useCustomSelector } from '@/customSelector/customSelector';
     import { parameterTypes } from '@/jsonFiles/bridgeParameter';
-    import { updateBridgeAction } from '@/store/action/bridgeAction';
+    import { updateBridgeAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
     import { updateFunctionReducer } from '@/store/reducer/bridgeReducer';
     import { Info, Trash2 } from 'lucide-react';
     import React, { useEffect, useState } from 'react';
     import { useDispatch } from 'react-redux';
     import { toast } from 'react-toastify';
+    import { isEqual } from 'lodash'
 
     function flattenParameters(parameters, prefix = '') {
         let flat = [];
@@ -36,6 +37,7 @@
         const properties = function_details.fields || {};
         const [toolData, setToolData] = useState(function_details);
         const [isDataAvailable, setIsDataAvailable] = useState(Object.keys(properties).length > 0);
+        const [isModified, setIsModified] = useState(false); // Track changes
         // const [temporaryType, setTemporaryType] = useState(''); // Temporary state for optimistic update
 
         const flattenedParameters = flattenParameters(properties);
@@ -121,6 +123,9 @@
 
             return _updateField(fieldClone, keyParts);
         };
+        useEffect(() => {
+            setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
+        }, [toolData, function_details]);
         // Reset the modal data to the original function_details
         const resetModalData = () => {
             setToolData(function_details);
@@ -191,12 +196,7 @@
         };
 
         const handleSaveFunctionData = () => {
-            console.log(toolData);
-            const updatedTools = bridge_tools.map(tool =>
-                tool.name === toolData.name ? toolData : tool
-            );
-            dispatch(updateFunctionReducer({ org_id: params.org_id, data: toolData }));
-            // Add your save logic here.
+            dispatch(updateFuntionApiAction({function_id:toolData._id,dataToSend:toolData}))
             setToolData("");
         };
 
@@ -321,12 +321,16 @@
                         </div>
                     )}
                     <div className="modal-action">
-                        <form method="dialog" className='flex flex-row gap-2'>
-                            {/* if there is a button, it will close the modal */}
-                            {isDataAvailable && <button className="btn" onClick={handleSaveFunctionData}>Save</button>}
-                            <button className="btn" onClick={handleCloseModal}>Close</button>
-                        </form>
-                    </div>
+                    <form method="dialog" className='flex flex-row gap-2'>
+                        {/* Disable Save button if no changes are detected */}
+                        {isDataAvailable && (
+                            <button className="btn" onClick={handleSaveFunctionData} disabled={!isModified}>
+                                Save
+                            </button>
+                        )}
+                        <button className="btn" onClick={handleCloseModal}>Close</button>
+                    </form>
+                </div>
                 </div>
             </dialog>
         );

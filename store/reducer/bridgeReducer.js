@@ -49,7 +49,6 @@ export const bridgeReducer = createSlice({
       state.loading = false;
     },
     updateFunctionReducer:(state,action)=>{
-     
       const {org_id,data} =action.payload;
       const id = data._id;
       if(state.org[org_id].functionData)

@@ -1,5 +1,5 @@
-import { addorRemoveResponseIdInBridge, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateapi } from "@/config";
-import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer, updateBridgeToolsReducer } from "../reducer/bridgeReducer";
+import { addorRemoveResponseIdInBridge, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateFunctionApi, updateapi } from "@/config";
+import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer, updateBridgeToolsReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { toast } from "react-toastify";
 
@@ -64,6 +64,17 @@ export const getAllFunctions = () => async (dispatch) => {
     console.error(error);
   }
 };
+
+export const updateFuntionApiAction = ({function_id,dataToSend}) => async(dispatch)=>{
+  try {
+    const response = await updateFunctionApi({function_id,dataToSend});
+    dispatch(updateFunctionReducer({ org_id: response.data.data.org_id, data: response.data.data}))
+  } catch (error) {
+    dispatch(isError())
+    console.error(error);
+    
+  }
+}
 
 export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) => {
   try {
