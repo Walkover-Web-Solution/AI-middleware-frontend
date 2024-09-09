@@ -1,7 +1,7 @@
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { getStatusClass } from '@/utils/utility';
 import { Plus } from 'lucide-react';
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo } from 'react';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [] }) {
     const { integrationData, function_data } = useCustomSelector((state) => ({
@@ -15,7 +15,11 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
     const renderEmbedSuggestions = useMemo(() => (
         function_data && (Object.values(function_data))
             // .filter(value => !bridge_pre_tools?.includes(value?._id))
-            .filter(value => !(connectedFunctions || [])?.includes(value?._id))
+            // .filter(value => !(connectedFunctions || [])?.includes(value?._id))
+            .filter(value => {
+                const title = integrationData[value?.endpoint]?.title || integrationData[value?.function_name]?.title;
+                return title !== undefined && !(connectedFunctions || [])?.includes(value?._id);
+            })
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
                 const aTitle = integrationData[a?.endpoint]?.title || integrationData[a?.function_name]?.title;
@@ -28,7 +32,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             .map((value) => {
                 const functionName = value?.function_name || value?.endpoint;
                 const status = integrationData?.[functionName]?.status;
-                const title = integrationData?.[functionName]?.title;
+                const title = integrationData?.[functionName]?.title || 'Untitled';
 
                 return (
                     <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
