@@ -50,7 +50,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 )
             }
             )
-    ), [integrationData, function_data, getStatusClass]);
+    ), [integrationData, function_data, getStatusClass, connectedFunctions]);
 
     return (
         <div className="dropdown dropdown-right">

@@ -112,7 +112,7 @@ const EmbedList = ({ params }) => {
                     <div className="flex flex-wrap gap-4">
                         {renderEmbed}
                     </div>
-                    <EmbedListSuggestionDropdownMenu key={'embedList'} params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} />
+                    <EmbedListSuggestionDropdownMenu params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} />
                 </div>
             </div>
         </div>
