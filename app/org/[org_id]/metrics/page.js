@@ -3,7 +3,6 @@ import { getMetricsData } from '@/config';
 import Protected from '@/components/protected';
 import Table from '@/components/table';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 
 export const runtime = 'edge';
 
@@ -12,7 +11,6 @@ function Page({ params }) {
   const [metricsData, setMetricsData] = useState([]);
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
-  const currentOrgId = useSelector((state) => state.orgReducer.currentOrgId);
 
   const adjustTimeForUTC = (date, includeEndTime) => {
     const localDate = new Date(date);

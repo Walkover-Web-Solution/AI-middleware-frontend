@@ -18,7 +18,8 @@ const ComplitionApi = (bridgeId) => {
 const Section = ({ title, caption, children }) => (
   <div className="flex items-start flex-col justify-center">
     <h3 className="text-lg font-semibold">{title}</h3>
-    <caption className="text-sm text-gray-600 block">{caption}</caption>
+    <p className="text-sm text-gray-600 block">{caption}</p>
+    {children}
   </div>
 );
 

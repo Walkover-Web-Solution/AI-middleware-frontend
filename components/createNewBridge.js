@@ -83,6 +83,7 @@ function CreateNewBridge({ orgid }) {
         // setUploadedFile(null);
         document.getElementById('bridge-name').value = "";
         if (document.getElementById('slug-name')) document.getElementById('slug-name').value = "";
+        document.getElementById('my_modal_1').close();
     };
 
     const handleCreateBridge = e => {
@@ -163,9 +164,7 @@ function CreateNewBridge({ orgid }) {
                             </label> : null}
                         </div>
                         <div className="modal-action">
-                            <form method="dialog">
-                                <button className="btn" onClick={cleanState}>Close</button>
-                            </form>
+                            <button className="btn" onClick={cleanState}>Close</button>
                             <button className="btn">+ Create</button>
                         </div>
                     </form>
