@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { updateBridgeAction } from "../action/bridgeAction";
 
 const initialState = {
   allBridgesMap: {},
@@ -53,11 +54,7 @@ export const bridgeReducer = createSlice({
     },
     updateBridgeReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
-      // const responseFormat = handleResponseFormat(bridges);
       const { _id, configuration, ...extraData } = bridges;
-      // const modelDefault = configuration.model.default;
-      // const obj2 = modelInfo[service][modelDefault];
-      // const response = updatedData(bridges, obj2, type);
 
       state.allBridgesMap[_id] = {
         ...state.allBridgesMap[_id],
@@ -92,6 +89,10 @@ export const bridgeReducer = createSlice({
         }
       }
       state.loading = false;
+    },
+    updateBridgeActionReducer: (state, action) => {
+      const { bridgeId, actionData } = action.payload;
+      state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], actions: actionData };
     },
     updateBridgeToolsReducer: (state, action) => {
       const { orgId, functionData = {} } = action.payload;
@@ -172,7 +173,8 @@ export const {
   apikeyDataReducer,
   apikeyUpdateReducer,
   createApiKeyReducer,
-  apikeyDeleteReducer
+  apikeyDeleteReducer,
+  updateBridgeActionReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
