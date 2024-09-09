@@ -25,7 +25,7 @@ function Page({ params }) {
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread,
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
-    integrationData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.integrationData
+    integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData
   }));
   const searchParams = useSearchParams();
 

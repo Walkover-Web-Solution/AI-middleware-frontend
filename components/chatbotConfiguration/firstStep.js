@@ -105,8 +105,8 @@ function ChatbotDropdown({ params, setChatBotId }) {
     return (<div className="dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn m-1">{selectedChatbot ? selectedChatbot.title : 'Select a chatbot'}</div>
         <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-            {chatbots.map((chatbot) => (
-                <li onClick={() => handleSelectChatbot(chatbot)}><a>{chatbot.title}</a></li>
+            {chatbots.map((chatbot, index) => (
+                <li key={index} onClick={() => handleSelectChatbot(chatbot)}><a>{chatbot.title}</a></li>
             ))}
         </ul>
     </div>)

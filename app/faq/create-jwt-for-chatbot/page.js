@@ -4,7 +4,7 @@ import Protected from '@/components/protected.js';
 const CreateJwtToken = () => {
   return (
     <div id="someContent" className="m-14">
-      <h1 id="someHeading" className="text-4xl font-bold mb-4">Create harsh JWT Token For ChatBot</h1>
+      <h1 id="someHeading" className="text-4xl font-bold mb-4">Create JWT Token For ChatBot</h1>
       <p className="mb-4">This document will guide you through the process of generating a JWT token for integrating AI middleware's ChatBot. The token will be created using your organization's ID (<code>org_id</code>), the ChatBot ID (<code>chatbot_id</code>), and the User ID (<code>user_id</code>). The token will be signed with an access key provided by AI middleware.</p>
       
       <h2 className="text-2xl font-semibold mb-2">

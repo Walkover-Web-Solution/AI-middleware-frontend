@@ -83,6 +83,7 @@ function CreateNewBridge({ orgid }) {
         // setUploadedFile(null);
         document.getElementById('bridge-name').value = "";
         if (document.getElementById('slug-name')) document.getElementById('slug-name').value = "";
+        document.getElementById('my_modal_1').close();
     };
 
     const handleCreateBridge = e => {
