@@ -69,7 +69,6 @@ const Page = () => {
                 const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, comment: data.comment };
                 dispatch(updateApikeyAction(dataToSend));
             }
-
         } else {
             dispatch(saveApiKeysAction(data, orgId));
         }

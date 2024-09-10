@@ -103,7 +103,7 @@ function OrgSlider() {
                     <div className="border-t border-gray-200 bg-white">
                         <ul className="menu w-full   text-base-content">
                             <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
-                            <li> <a className={`py-2 px-2  ${path[3] === 'apikey' ? "active" : ""}  rounded-md`} onClick={() => { router.push(`/org/${path[2]}/apikey`) }}> <KeyRound size={16} />API key</a> </li>
+                            <li> <a className={`py-2 px-2  ${path[3] === 'Pauthkey' ? "active" : ""}  rounded-md`} onClick={() => { router.push(`/org/${path[2]}/pauthkey`) }}> <KeyRound size={16} />Pauth key</a> </li>
                             <li onClick={logoutHandler}><a className='py-2 px-2 rounded-md'> <LogOut size={16} />  logout</a></li>
                         </ul>
                     </div>
