@@ -21,7 +21,7 @@ function InputWithCopyButton({ label, placeholder, value, disabled }) {
 }
 
 
-export default function PrivateFormSection({ params, ChooseChatbot }) {
+export default function PrivateFormSection({ params, ChooseChatbot, setChatBotIdFucntion=null }) {
     const [showInput, setShowInput] = useState(false);
     const [accessKey, setAccessKey] = useState("");
     const [chatbotId, setChatBotId] = useState("");
@@ -43,7 +43,10 @@ export default function PrivateFormSection({ params, ChooseChatbot }) {
             </div>
             {ChooseChatbot && <div className="join absolute right-5 ">
                 <ChatbotDropdown params={params} setChatBotId={(chatbotData) => {
-                    setChatBotId(chatbotData?._id)
+                    setChatBotId(chatbotData?._id);
+                    if(setChatBotIdFucntion){
+                        setChatBotIdFucntion(chatbotData?._id)
+                    }
                 }} />
             </div>}
             <div className="mockup-code">

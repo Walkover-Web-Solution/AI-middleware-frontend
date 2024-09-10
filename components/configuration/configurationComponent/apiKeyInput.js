@@ -49,8 +49,8 @@ const ApiKeyInput = ({ params }) => {
     }, [apikeydata, bridge_apiKey, bridgeApikey_object_id]);
     const truncateText = (text, maxLength) => {
         return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-      };
-    const maxChar = 20; 
+    };
+    const maxChar = 20;
     return (
         <label className="form-control max-w-xs text-base-content">
             <div className="label">
@@ -67,17 +67,17 @@ const ApiKeyInput = ({ params }) => {
 
                     {/* Display bridge_apiKey if it is not in the filtered API keys */}
                     {!bridgeApikey_object_id && bridge_apiKey && !apikeydata.some(apiKey => apiKey._id === bridge_apiKey) && (
-                        <option 
-                        maxLength="10"
-                        value={bridge_apiKey}>
-                            {truncateText(bridge_apiKey,maxChar)}
+                        <option
+                            maxLength="10"
+                            value={bridge_apiKey}>
+                            {truncateText(bridge_apiKey, maxChar)}
                         </option>
                     )}
                     {filteredApiKeys.length > 0 ? (
                         filteredApiKeys.map(apiKey => (
-                            <option 
-                             maxLength="10"
-                            key={apiKey._id} value={apiKey._id}>
+                            <option
+                                maxLength="10"
+                                key={apiKey._id} value={apiKey._id}>
                                 {apiKey.name}
                             </option>
                         ))

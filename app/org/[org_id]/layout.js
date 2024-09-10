@@ -45,7 +45,6 @@ export default function layoutOrgPage({ children, params }) {
 
     useEffect(() => {
         dispatch(getAllChatBotAction(params.org_id))
-        // dispatch(getAllResponseTypesAction(params.org_id)); // todo: need to remove this line
     }, []);
 
     return (

@@ -141,19 +141,19 @@ const Page = () => {
                     {['name', 'apikey', 'comment'].map((field) => (
                         <div key={field} className="flex flex-col gap-2">
                             <label htmlFor={field} className="label-text">
-                            {field.charAt(0).toUpperCase() + field.slice(1)}:
+                                {field.charAt(0).toUpperCase() + field.slice(1)}:
                             </label>
                             <input
-                            id={field}
-                            type={field === 'apikey' && isEditing ? 'password' : 'text'}  
-                            className="input input-bordered"
-                            name={field}
-                            placeholder={`Enter ${field}`}
-                            defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
-                            required
+                                id={field}
+                                type={field === 'apikey' && isEditing ? 'password' : 'text'}
+                                className="input input-bordered"
+                                name={field}
+                                placeholder={`Enter ${field}`}
+                                defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
+                                required
                             />
                         </div>
-                        ))}
+                    ))}
                     <div className="flex flex-col gap-2">
                         <label htmlFor="service" className="label-text">
                             Service:
