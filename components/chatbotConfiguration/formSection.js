@@ -284,7 +284,7 @@ export default function FormSection({ params, chatbotId=null }) {
                 <div className="shadow-sm border">
                     <iframe
                         ref={iframeRef}
-                        src={`http://localhost:3000/chatbotPreview`}
+                        src={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/chatbotPreview`}
                         className="w-full h-[500px] border-none"
                     ></iframe>
                 </div>
