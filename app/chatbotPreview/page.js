@@ -6,7 +6,7 @@ export const runtime = 'edge';
 function page() {
 
     const scriptId = "chatbot-main-script";
-    // const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
+    const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_PREVIEW_URL;
 
     useEffect(() => {
         const updateScriptElement = () => {
@@ -15,7 +15,7 @@ function page() {
           if (!script) {
             script = document.createElement("script");
             script.id = scriptId;
-            script.src = './scriptChatbot.js';
+            script.src = scriptSrc;
             document.head.appendChild(script);
           }
         };
