@@ -1,25 +1,53 @@
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 const Chatbot = ({ params }) => {
 
-    const { bridge, chatbot_token } = useCustomSelector((state) => ({
-        chatbotData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.chatbotData,
-        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
-        chatbot_token: state?.ChatBot?.chatbot_token || ''
+    const { bridgeName, bridgeSlugName, chatbot_token, variablesKeyValue } = useCustomSelector((state) => ({
+        bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
+        bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
+        chatbot_token: state?.ChatBot?.chatbot_token || '',
+        variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
     }));
+
+    const variables = useMemo(() => {
+        return variablesKeyValue.reduce((acc, pair) => {
+            if (pair.key && pair.value) {
+                acc[pair.key] = pair.value;
+            }
+            return acc;
+        }, {});
+    }, [variablesKeyValue]);
+
+    useEffect(() => {
+        if (bridgeSlugName && window?.SendDataToChatbot) {
+            SendDataToChatbot({
+                bridgeName: bridgeSlugName
+            });
+        }
+    }, [bridgeSlugName]);
+
+    useEffect(() => {
+        if (variables && window?.SendDataToChatbot) {
+            window.SendDataToChatbot({
+                variables: variables
+            });
+        }
+    }, [variables])
 
     useEffect(() => {
         const intervalId = setInterval(() => {
             if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot')) {
                 clearInterval(intervalId);
                 window.SendDataToChatbot({
-                    bridgeName: bridge?.slugName,
-                    threadId: bridge?.name.replaceAll(" ", ""),
+                    bridgeName: bridgeSlugName,
+                    threadId: bridgeName.replaceAll(" ", ""),
                     variables: {},
                     parentId: 'parentChatbot',
                     fullScreen: true,
-                    hideCloseButton: true
+                    hideCloseButton: true,
+                    hideIcon: true,
+                    variables: variables || {}
                 });
                 window.openChatbot();
             }
@@ -28,11 +56,11 @@ const Chatbot = ({ params }) => {
         return () => {
             clearInterval(intervalId);
             if (typeof window.closeChatbot === "function") {
+                window.closeChatbot();
                 window.SendDataToChatbot({
                     parentId: '',
-                    fullScreen: false
+                    fullScreen: false,
                 });
-                window.closeChatbot();
             }
         };
     }, [chatbot_token]);

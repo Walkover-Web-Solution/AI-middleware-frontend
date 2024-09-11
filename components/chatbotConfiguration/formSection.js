@@ -101,6 +101,7 @@ export default function FormSection({ params, chatbotId=null }) {
         themeColor: "",
         chatbotTitle: "Chatbot",
         chatbotSubtitle: "Smart Help, On Demand",
+        iconUrl: ""
     });
 
     const { chatBotConfig } = useCustomSelector((state) => ({
@@ -225,6 +226,18 @@ export default function FormSection({ params, chatbotId=null }) {
                     onChange={handleInputChange}
                     onBlur={handleBlur}
                     name="buttonName"
+                />
+                <div className="label">
+                    <span className="label-text">Button Icon URL</span>
+                </div>
+                <input
+                    type="text"
+                    placeholder="Button Icon URL here"
+                    className="input input-bordered w-full max-w-xs input-sm"
+                    value={formData.iconUrl}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    name="iconUrl"
                 />
             </label>
             <div className="flex items-center justify-start gap-2">
