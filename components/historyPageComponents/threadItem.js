@@ -17,7 +17,7 @@ const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData })
         ))}
       </div>
     ) : (
-      <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
+      !item.error ? (<div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
         <div className="chat-image avatar flex justify-center items-center">
           <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
             {item.role === "user" ? <User /> : <Bot />}
@@ -43,7 +43,55 @@ const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData })
           }}>{item?.content}</ReactMarkdown>
         </div>
       </div>
-    )}
+    ):(
+      item.error && (
+        <div>
+        <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
+        <div className="chat-image avatar flex justify-center items-center">
+          <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
+            {item.role === "user" ? <User /> : <Bot />}
+          </div>
+        </div>
+        <div className="chat-header flex gap-2">
+          <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
+        </div>
+        <div
+          className={`${
+            item.role === "user" ? "cursor-pointer chat-bubble-primary" : "bg-base-200 text-base-content"
+          } chat-bubble`}
+          onClick={() => threadHandler(item.thread_id, item)}
+        >
+          <ReactMarkdown
+            components={{
+              code: ({ node, inline, className, children, ...props }) => (
+                <CodeBlock inline={inline} className={className} {...props}>
+                  {children}
+                </CodeBlock>
+              ),
+            }}
+          >
+            {item?.content}
+          </ReactMarkdown>
+        </div>
+      </div>
+      
+      <div className="chat chat-end">
+          <div className="chat-image avatar flex justify-center items-center">
+            <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
+              <Bot />
+            </div>
+          </div>
+          <div className="chat-header flex gap-2">
+            <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
+          </div>
+          <div className="bg-base-200 text-base-content chat-bubble">
+            <span  className="text-red-500 ">{item['error']}</span> {/* Display the error message */}
+          </div>
+        </div>
+        </div>
+      )  
+   
+    ))}
   </div>
 );
 
