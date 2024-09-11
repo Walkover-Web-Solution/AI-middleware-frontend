@@ -102,7 +102,7 @@ function Navbar() {
                 <Ellipsis />
               </div>
               <ul tabIndex={0} className="dropdown-content z-[9999999999] menu p-2 shadow bg-base-100 rounded-box w-52 custom-dropdown">
-                {['Duplicate', 'Delete'].map((item) => (
+                {['Duplicate'].map((item) => (
                   <li key={item} onClick={() => handleDeleteBridge(item)}>
                     <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
                   </li>
