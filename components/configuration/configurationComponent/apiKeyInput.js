@@ -47,11 +47,10 @@ const ApiKeyInput = ({ params }) => {
         const currentApiKey = apikeydata.find(apiKey => apiKey._id === bridgeApikey_object_id);
         return currentApiKey ? currentApiKey._id : bridge_apiKey || '';
     }, [apikeydata, bridge_apiKey, bridgeApikey_object_id]);
-
     const truncateText = (text, maxLength) => {
         return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
     };
-
+    const maxChar = 20;
     return (
         <label className="form-control max-w-xs text-base-content">
             <div className="label">
@@ -61,6 +60,7 @@ const ApiKeyInput = ({ params }) => {
                 <select
                     className="select select-bordered select-sm w-full"
                     onChange={handleDropdownChange}
+                    maxLength="10"
                     value={selectedValue}
                 >
                     <option value="">Select API key</option>
@@ -70,12 +70,14 @@ const ApiKeyInput = ({ params }) => {
                         <option
                             maxLength="10"
                             value={bridge_apiKey}>
-                            {truncateText(bridge_apiKey, 20)}
+                            {truncateText(bridge_apiKey, maxChar)}
                         </option>
                     )}
                     {filteredApiKeys.length > 0 ? (
                         filteredApiKeys.map(apiKey => (
-                            <option key={apiKey._id} value={apiKey._id}>
+                            <option
+                                maxLength="10"
+                                key={apiKey._id} value={apiKey._id}>
                                 {apiKey.name}
                             </option>
                         ))

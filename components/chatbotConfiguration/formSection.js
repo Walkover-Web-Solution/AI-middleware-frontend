@@ -1,6 +1,7 @@
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { updateChatBotConfigAction } from "@/store/action/chatBotAction";
-import { useEffect, useState, useCallback } from "react";
+import { getChatBotDetailsAction, updateChatBotConfigAction } from "@/store/action/chatBotAction";
+import { RefreshCw } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 
 function RadioButton({ name, label, checked, onChange }) {
@@ -85,7 +86,11 @@ function DimensionInput({ placeholder, options, onChange, name, value, unit }) {
     );
 }
 
-export default function FormSection({ params }) {
+export default function FormSection({ params, chatbotId=null }) {
+    const chatBotId = chatbotId || params?.chatbot_id;
+    const dispatch = useDispatch();
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const iframeRef = useRef(null);
     const [formData, setFormData] = useState({
         buttonName: '',
         height: '',
@@ -96,13 +101,16 @@ export default function FormSection({ params }) {
         themeColor: "",
         chatbotTitle: "Chatbot",
         chatbotSubtitle: "Smart Help, On Demand",
+        iconUrl: ""
     });
 
     const { chatBotConfig } = useCustomSelector((state) => ({
-        chatBotConfig: state?.ChatBot?.ChatBotMap?.[params?.chatbot_id]?.config
+        chatBotConfig: state?.ChatBot?.ChatBotMap?.[chatBotId]?.config
     }));
 
-    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(getChatBotDetailsAction(chatBotId))
+    }, [chatBotId])
 
     const handleInputChange = useCallback((event) => {
         const { name, value } = event.target;
@@ -123,10 +131,16 @@ export default function FormSection({ params }) {
                 ...prevFormData,
                 [name]: value
             };
-            dispatch(updateChatBotConfigAction(params?.chatbot_id, updatedFormData));
+            dispatch(updateChatBotConfigAction(chatBotId, updatedFormData));
+            if (iframeRef.current && iframeRef.current.contentWindow) {
+                iframeRef.current.contentWindow.postMessage(
+                    { type: 'chatbotConfig', data: updatedFormData },
+                    '*' // You can specify a target origin here for security, replacing '*' with the domain of the iframe
+                );
+            }
             return updatedFormData;
         });
-    }, [dispatch, params?.chatbot_id]);
+    }, [dispatch, params?.chatbot_id, chatBotId]);
 
     useEffect(() => {
         if (chatBotConfig) {
@@ -139,6 +153,39 @@ export default function FormSection({ params }) {
             })
         }
     }, [chatBotConfig]);
+
+
+    useEffect(() => {
+
+        // Use setInterval to repeatedly try sending the message
+        const intervalId = setTimeout(() => {
+            if (iframeRef.current && iframeRef.current.contentWindow && chatBotConfig) {
+                iframeRef.current.contentWindow.postMessage(
+                    { type: 'chatbotConfig', data: chatBotConfig },
+                    '*' // Replace '*' with the domain of the iframe for security
+                );
+                clearInterval(intervalId); // Clear interval once the message is successfully sent
+            }
+        }, 1800); // Attempt to send every 500ms
+
+        // Clean up the interval and event listener on unmount
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [chatBotId]);
+
+    const handleRefreshConfiguration = () => {
+        setIsRefreshing(true);
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.contentWindow.postMessage(
+                { type: 'chatbotConfig', data: chatBotConfig },
+                '*' // Replace '*' with the domain of the iframe for security
+            );
+        }
+        setTimeout(() => {
+            setIsRefreshing(false); // Stop the animation after 1 second or when the action is complete
+          }, 1000);
+    }
 
     return (
         <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
@@ -180,6 +227,18 @@ export default function FormSection({ params }) {
                     onBlur={handleBlur}
                     name="buttonName"
                 />
+                <div className="label">
+                    <span className="label-text">Button Icon URL</span>
+                </div>
+                <input
+                    type="text"
+                    placeholder="Button Icon URL here"
+                    className="input input-bordered w-full max-w-xs input-sm"
+                    value={formData.iconUrl}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    name="iconUrl"
+                />
             </label>
             <div className="flex items-center justify-start gap-2">
                 <DimensionInput
@@ -189,7 +248,7 @@ export default function FormSection({ params }) {
                         { label: "px", value: "px" },
                         { label: "%", value: "%" }
                     ]}
-                    onChange={handleInputChange}
+                    onChange={handleBlur}
                     name="height"
                     value={formData.height}
                     unit={formData.heightUnit}
@@ -201,7 +260,7 @@ export default function FormSection({ params }) {
                         { label: "px", value: "px" },
                         { label: "%", value: "%" }
                     ]}
-                    onChange={handleInputChange}
+                    onChange={handleBlur}
                     name="width"
                     value={formData.width}
                     unit={formData.widthUnit}
@@ -210,7 +269,7 @@ export default function FormSection({ params }) {
             <div className="flex items-center justify-start gap-2">
                 <RadioGroup
                     value={formData.type}
-                    onChange={handleInputChange}
+                    onChange={handleBlur}
                     name="type"
                 />
             </div>
@@ -223,13 +282,26 @@ export default function FormSection({ params }) {
                         type="color"
                         key={formData?.themeColor}
                         defaultValue={formData.themeColor}
-                        onBlur={handleInputChange}
+                        onBlur={handleBlur}
                         name="themeColor"
                     />
                     <span>{formData.themeColor}</span>
                 </div>
 
             </label>
+            <div className="">
+                <div className="label">
+                    <span className="label-text">ChatBot Preview </span>
+                    <span className="flex flex-row items-center gap-3 cursor-pointer" onClick={handleRefreshConfiguration}>Refresh <RefreshCw className={isRefreshing ? 'animate-spin' : ''} size={16} /></span>
+                </div>
+                <div className="shadow-sm border">
+                    <iframe
+                        ref={iframeRef}
+                        src={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/chatbotPreview`}
+                        className="w-full h-[500px] border-none"
+                    ></iframe>
+                </div>
+            </div>
         </div>
     );
 }

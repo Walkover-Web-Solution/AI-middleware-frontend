@@ -3,30 +3,20 @@ import CreateNewBridge from "@/components/createNewBridge";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customSelector/customSelector";
-import { getAllBridgesAction } from "@/store/action/bridgeAction";
 import { getIconOfService } from "@/utils/utility";
 import { Box } from "lucide-react";
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useState } from "react";
 
 export const runtime = 'edge';
 
 function Home({ params }) {
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id] || []).slice().reverse();
-  useEffect(() => {
-    dispatch(getAllBridgesAction((data) => {
-      if (data === 0) {
-        document.getElementById('my_modal_1') && document.getElementById('my_modal_1')?.showModal()
-      }
-      // document.getElementById('my_modal_1') && document.getElementById('my_modal_1')?.closeModel()
-    }))
-  }, [])
+  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
 
   const { isLoading } = useCustomSelector((state) => ({
     isLoading: state.bridgeReducer.loading,
   }));
-  const dispatch = useDispatch();
+
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const filteredBridges = allBridges.filter((item) =>
@@ -83,7 +73,7 @@ function Home({ params }) {
                           {getIconOfService(item.service)}
                           {item.name}
                         </h1>
-                        <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
+                        <div className="text-xs w-full flex items-center gap-2 line-clamp-5">
                           {item.slugName && <span>SlugName: {item.slugName}</span>}
                           {item.configuration?.prompt && (
                             Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
@@ -94,7 +84,7 @@ function Home({ params }) {
                             )) : <p>Prompt: {item.configuration.prompt}</p>
                           )}
                           {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
-                        </p>
+                        </div>
                         <div className="mt-auto">
                           <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
                             {item.service}
