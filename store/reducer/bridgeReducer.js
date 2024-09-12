@@ -77,15 +77,14 @@ export const bridgeReducer = createSlice({
         }
       }
       if (functionData) {
-        const bridgeIds = state.org[bridges.org_id].functionData[functionData.function_id]?.['bridge_ids'] || [];
+        const existingBridgeIds = state.org[bridges.org_id].functionData[functionData.function_id]?.bridge_ids || [];
+    
         if (functionData?.function_operation) {
-          bridgeIds.push(_id);
+          // Create a new array with the added bridge_id
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = [...existingBridgeIds, _id];
         } else {
-          // i want to remove function_id from function_ids array
-          const index = bridgeIds?.indexOf(_id);
-          if (index !== -1) {
-            bridgeIds?.splice(index, 1);
-          }
+          // Create a new array without the removed bridge_id
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(id => id !== _id);
         }
       }
       state.loading = false;
