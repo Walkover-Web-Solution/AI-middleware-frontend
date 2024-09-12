@@ -70,12 +70,12 @@ const EmbedList = ({ params }) => {
                                     {value?.description?.trim() === "" && <CircleAlert color='red' size={16} />}
                                 </div>
                                 <p className="mt-3 text-xs sm:text-sm line-clamp-3">
-                                    {value?.description ? value?.description : "A description is required for proper functionality."}
+                                    {value?.description || value?.api_description || value?.short_description || "A description is required for proper functionality."}
                                 </p>
                            </div>
                             <div className="mt-4">
                                 <span className={`mr-2 inline-block rounded-full capitalize px-3 bg-base-200 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(status)}`}>
-                                    {value?.description?.trim() === "" ? "Description Required" : status}
+                                    {!(value?.description || value?.api_description || value?.short_description) ? "Description Required" : status}
                                 </span>
                             </div>
                         </div>
