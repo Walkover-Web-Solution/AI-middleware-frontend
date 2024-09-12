@@ -56,11 +56,13 @@ const Chatbot = ({ params }) => {
         return () => {
             clearInterval(intervalId);
             if (typeof window.closeChatbot === "function") {
-                window.closeChatbot();
-                window.SendDataToChatbot({
+                SendDataToChatbot({
                     parentId: '',
                     fullScreen: false,
                 });
+                setTimeout(() => {
+                    closeChatbot();
+                }, 0);
             }
         };
     }, [chatbot_token]);
