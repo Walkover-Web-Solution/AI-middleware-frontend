@@ -1,5 +1,6 @@
-
 export const API_KEY_COLUMNS = ["name", "apikey", "comment", "service"];
+export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers','alertType', 'bridges'];
+export const ALERT_TYPE = ['Error','Variable'];
 export const DOCUMENT_SECTIONS = [
   {
     id: "model",

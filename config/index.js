@@ -271,6 +271,7 @@ export const getMetricsData = async (org_id, startDate, endDate) => {
 
 
 export const integration = async (embed_token) => {
+
   try {
     const response = await fetch("https://flow-api.viasocket.com/projects/projXzlaXL3n/integrations", {
       method: "GET",
@@ -521,3 +522,45 @@ export const getAllApikey = async (org_id) => {
     return error;
   }
 }
+
+export const createWebhookAlert = async (dataToSend) => {
+  try {
+    const response = await axios.post(`${URL}/alerting`,dataToSend);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const updateWebhookAlert = async ( {data,id}) => {
+  try {
+    const response = await axios.put(`${URL}/alerting/${id}`,data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const getAllWebhookAlert = async (org_id) => {
+  try {
+    const response = await axios.get(`${URL}/alerting`,org_id);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const deleteWebhookAlert = async (id) => {
+  try {
+    const response = await axios.delete(`${URL}/alerting`,{
+      data: { id: id },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};

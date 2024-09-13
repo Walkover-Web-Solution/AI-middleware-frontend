@@ -12,6 +12,7 @@ import persistReducer from "redux-persist/es/persistReducer";
 import persistStore from "redux-persist/es/persistStore";
 import responseTypeReducer from "./reducer/responseTypeReducer";
 import ChatBot from "./reducer/ChatBotReducer";
+import webhookAlertReducer from "./reducer/webhookAlertReducer";
 
 const createNoopStorage = () => {
     return {
@@ -40,7 +41,8 @@ const rootReducer = combineReducers({
     authDataReducer,
     orgReducer,
     responseTypeReducer,
-    ChatBot
+    ChatBot,
+    webhookAlertReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
