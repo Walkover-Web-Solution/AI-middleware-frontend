@@ -73,9 +73,9 @@ function Navbar() {
         <button className="btn m-1" onClick={toggleOrgSidebar}>
           <Building2 size={16} /> {organizations[path[2]]?.name}
         </button>
-        <div className="dropdown z-[99]">
+        <div className="dropdown">
           <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3] === 'webhookalert' ? 'Webhook Alert' : path[3]}<ChevronDown size={16} /></div>
-          <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+          <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
             {['bridges', "chatbot", 'pauthkey', 'apikeys', 'webhook Alert', 'invite'].map((item) => (
               <li key={item} onClick={() => (item === "webhook Alert" ? router.push(`/org/${path[2]}/webhookalert`) : router.push(`/org/${path[2]}/${item}`))}>
                 <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
