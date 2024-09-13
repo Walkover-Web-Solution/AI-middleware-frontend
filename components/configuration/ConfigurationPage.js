@@ -14,6 +14,7 @@ import InputConfigComponent from "./configurationComponent/inputConfigComponent"
 import ModelDropdown from "./configurationComponent/modelDropdown";
 import PreEmbedList from "./configurationComponent/preEmbedList";
 import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
+import RichTextToggle from "./configurationComponent/richTextToggle";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 
@@ -61,6 +62,7 @@ export default function ConfigurationPage({ params }) {
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
+                        {bridgeType === 'chatbot' && <RichTextToggle params={params} />}
                         <AdvancedParameters params={params} />
                         <ActionList params={params} />
                         {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
