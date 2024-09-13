@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { updateBridgeAction } from "../action/bridgeAction";
 
 const initialState = {
   allBridgesMap: {},
@@ -53,11 +54,7 @@ export const bridgeReducer = createSlice({
     },
     updateBridgeReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
-      // const responseFormat = handleResponseFormat(bridges);
       const { _id, configuration, ...extraData } = bridges;
-      // const modelDefault = configuration.model.default;
-      // const obj2 = modelInfo[service][modelDefault];
-      // const response = updatedData(bridges, obj2, type);
 
       state.allBridgesMap[_id] = {
         ...state.allBridgesMap[_id],
@@ -80,18 +77,21 @@ export const bridgeReducer = createSlice({
         }
       }
       if (functionData) {
-        const bridgeIds = state.org[bridges.org_id].functionData[functionData.function_id]?.['bridge_ids'] || [];
+        const existingBridgeIds = state.org[bridges.org_id].functionData[functionData.function_id]?.bridge_ids || [];
+    
         if (functionData?.function_operation) {
-          bridgeIds.push(_id);
+          // Create a new array with the added bridge_id
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = [...existingBridgeIds, _id];
         } else {
-          // i want to remove function_id from function_ids array
-          const index = bridgeIds?.indexOf(_id);
-          if (index !== -1) {
-            bridgeIds?.splice(index, 1);
-          }
+          // Create a new array without the removed bridge_id
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(id => id !== _id);
         }
       }
       state.loading = false;
+    },
+    updateBridgeActionReducer: (state, action) => {
+      const { bridgeId, actionData } = action.payload;
+      state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], actions: actionData };
     },
     updateBridgeToolsReducer: (state, action) => {
       const { orgId, functionData = {} } = action.payload;
@@ -172,7 +172,8 @@ export const {
   apikeyDataReducer,
   apikeyUpdateReducer,
   createApiKeyReducer,
-  apikeyDeleteReducer
+  apikeyDeleteReducer,
+  updateBridgeActionReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;

@@ -43,11 +43,11 @@ const PreEmbedList = ({ params }) => {
                                 {value?.description?.trim() === "" && <CircleAlert color='red' size={16} />}
                             </div>
                             <p className="mt-3 text-xs sm:text-sm line-clamp-3">
-                                {value?.description ? value?.description : "A description is required for proper functionality."}
+                                {value?.description || value?.api_description || value?.short_description || "A description is required for proper functionality."}
                             </p>
                             <div className="mt-4">
                                 <span className={`mr-2 inline-block rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(status)}`}>
-                                    {value?.description?.trim() === "" ? "Description Required" : status}
+                                    {!(value?.description || value?.api_description || value?.short_description) ? "Description Required" : status}
                                 </span>
                             </div>
                         </div>
@@ -88,7 +88,7 @@ const PreEmbedList = ({ params }) => {
         </div> :
         (
             <div className='flex'>
-                <EmbedListSuggestionDropdownMenu key={'preEmbedList'} params={params} name={"Select Pre function"} hideCreateFunction={true} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} />
+                <EmbedListSuggestionDropdownMenu params={params} name={"Select Pre function"} hideCreateFunction={true} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} />
             </div>
         )
     );

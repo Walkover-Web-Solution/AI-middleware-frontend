@@ -14,8 +14,8 @@ import { useSearchParams } from 'next/navigation';
 
 const DateRangePicker = ({ params }) => {
   const dispatch = useDispatch();
-  const [startingDate, setStartingDate] = useState(null);
-  const [endingDate, setEndingDate] = useState(null);
+  const [startingDate, setStartingDate] = useState(getDefaultDate());
+  const [endingDate, setEndingDate] = useState(getDefaultDate());
 
   const searchParams = useSearchParams();
 
@@ -40,8 +40,8 @@ const DateRangePicker = ({ params }) => {
     // const end = searchParams.get('end');
     // if (!start && !end) return; // Do nothing if 'start' and 'end' are not in the URL
   
-    setStartingDate('');
-    setEndingDate('');
+    setStartingDate(getDefaultDate()); 
+    setEndingDate(getDefaultDate());
     const newSearchParams = new URLSearchParams(searchParams);
     // newSearchParams.delete('start');
     // newSearchParams.delete('end');

@@ -21,7 +21,7 @@ function InputWithCopyButton({ label, placeholder, value, disabled }) {
 }
 
 
-export default function PrivateFormSection({ params, ChooseChatbot }) {
+export default function PrivateFormSection({ params, ChooseChatbot, setChatBotIdFucntion=null }) {
     const [showInput, setShowInput] = useState(false);
     const [accessKey, setAccessKey] = useState("");
     const [chatbotId, setChatBotId] = useState("");
@@ -43,7 +43,10 @@ export default function PrivateFormSection({ params, ChooseChatbot }) {
             </div>
             {ChooseChatbot && <div className="join absolute right-5 ">
                 <ChatbotDropdown params={params} setChatBotId={(chatbotData) => {
-                    setChatBotId(chatbotData?._id)
+                    setChatBotId(chatbotData?._id);
+                    if(setChatBotIdFucntion){
+                        setChatBotIdFucntion(chatbotData?._id)
+                    }
                 }} />
             </div>}
             <div className="mockup-code">
@@ -105,8 +108,8 @@ function ChatbotDropdown({ params, setChatBotId }) {
     return (<div className="dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn m-1">{selectedChatbot ? selectedChatbot.title : 'Select a chatbot'}</div>
         <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-            {chatbots.map((chatbot) => (
-                <li onClick={() => handleSelectChatbot(chatbot)}><a>{chatbot.title}</a></li>
+            {chatbots.map((chatbot, index) => (
+                <li key={index} onClick={() => handleSelectChatbot(chatbot)}><a>{chatbot.title}</a></li>
             ))}
         </ul>
     </div>)

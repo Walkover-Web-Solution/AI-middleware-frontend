@@ -1,6 +1,6 @@
 import { addorRemoveBridgeInChatBot, createChatBot, createOrRemoveAction, getAllChatBot, getChatBotDetails, updateChatBot, updateChatBotConfig } from "@/config";
 import { createNewBotReducer, getAllChatBotReducer, getChatBotDetailsReducer, updateChatBotConfigReducer, updateChatBotReducer } from "../reducer/ChatBotReducer";
-import { updateBridgeReducer } from "../reducer/bridgeReducer";
+import { updateBridgeActionReducer, updateBridgeReducer } from "../reducer/bridgeReducer";
 
 
 export const getAllChatBotAction = (orgId) => async (dispatch, getState) => {
@@ -68,7 +68,7 @@ export const updateChatBotConfigAction = (botId, dataToSend) => async (dispatch,
 export const createOrRemoveActionBridge = (dataToSend) => async (dispatch) => {
     try {
         const response = await createOrRemoveAction(dataToSend)
-        dispatch(updateBridgeReducer({ bridges: response.data }))
+        dispatch(updateBridgeActionReducer({ bridgeId: response.data?.['_id'], actionData: response.data?.actions }))
     } catch (error) {
         console.error(error)
     }

@@ -73,7 +73,7 @@ function Home({ params }) {
                           {getIconOfService(item.service)}
                           {item.name}
                         </h1>
-                        <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
+                        <div className="text-xs w-full flex items-center gap-2 line-clamp-5">
                           {item.slugName && <span>SlugName: {item.slugName}</span>}
                           {item.configuration?.prompt && (
                             Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
@@ -84,7 +84,7 @@ function Home({ params }) {
                             )) : <p>Prompt: {item.configuration.prompt}</p>
                           )}
                           {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
-                        </p>
+                        </div>
                         <div className="mt-auto">
                           <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
                             {item.service}

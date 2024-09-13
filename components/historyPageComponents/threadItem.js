@@ -9,7 +9,7 @@ const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData })
         {Object.keys(item.function).map((funcName, index) => (
           <div key={index} role="alert" className="alert w-1/3 transition-colors duration-200">
             <Info size={16} />
-            <div>
+            <div onClick={() => openViasocket(funcName, {flowHitId: JSON.parse(item.function[funcName])?.metadata?.flowHitId})} className="cursor-pointer">
               <h3 className="font-bold">Functions Executed</h3>
               <div className="text-xs">Function "{integrationData?.[funcName]?.title || funcName}" executed successfully.</div>
             </div>
@@ -18,8 +18,8 @@ const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData })
       </div>
     ) : (
       <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
-        <div class="chat-image avatar flex justify-center items-center">
-          <div class="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
+        <div className="chat-image avatar flex justify-center items-center">
+          <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
             {item.role === "user" ? <User /> : <Bot />}
 
           </div>
