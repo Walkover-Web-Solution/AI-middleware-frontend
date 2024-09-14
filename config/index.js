@@ -523,6 +523,7 @@ export const getAllApikey = async (org_id) => {
   }
 }
 
+<<<<<<< Updated upstream
 export const createWebhookAlert = async (dataToSend) => {
   try {
     const response = await axios.post(`${URL}/alerting`,dataToSend);
@@ -564,3 +565,10 @@ export const deleteWebhookAlert = async (id) => {
     return error;
   }
 };
+=======
+
+export const downloadFineTuneData = async (bridge_id,threadIds) => {
+    const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`,{ thread_ids: threadIds });
+    return response?.data;
+}
+>>>>>>> Stashed changes
