@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { getHistoryAction } from "@/store/action/historyAction.js";
 import { useRef, useState } from "react";
 import { Download } from "lucide-react";
+import { downloadFineTuneData } from "@/config/index.js";
 
 const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params }) => {
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
@@ -27,12 +28,9 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
 
   const handleDownload = async () => {
     try {
-      const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      const blob = new Blob([JSON.stringify(data)], { type: 'application/jsonl;charset=utf-8;' });
+      const response = await downloadFineTuneData(params.id, selectedThreadIds)
+
+      const blob = new Blob([`[${response}]`], { type: 'application/jsonl;charset=utf-8;' });
 
       // Create a link element
       const link = document.createElement('a');
@@ -113,24 +111,24 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
       ) : (
         <InfiniteScroll dataLength={historyData.length} next={fetchMoreData} hasMore={hasMore} loader={<h4></h4>} scrollableTarget="sidebar">
           <div className="slider-container w-[fixed-width] overflow-x-auto">
-            <ul className="menu min-h-full text-base-content flex flex-row space-x-4">
+            <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData.map((item) => (
-                <li key={item.id} className="flex flex-row items-center min-w-[min-width]">
+                <li key={item.id} className={` ${selectedThread === item.thread_id
+                    ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary"
+                    : ""
+                    } block truncateflex items-center min-w-[min-width] flex flex-row`}
+                    onClick={() => threadHandler(item.thread_id)}>
                   {isThreadSelectable && (
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-lg mr-2"
-                      checked={selectedThreadIds?.includes(item.thread_id)}
-                      onChange={() => handleThreadIds(item.thread_id)}
-                    />
+                    <div onClick={(e)=>{
+                       e.stopPropagation()
+                    }}><input
+                    type="checkbox"
+                    className="checkbox checkbox-lg mr-2 bg-white"
+                    checked={selectedThreadIds?.includes(item.thread_id)}
+                    onChange={() => handleThreadIds(item.thread_id)}
+                  /></div>
                   )}
-                  <a
-                    onClick={() => threadHandler(item.thread_id)}
-                    className={`${selectedThread === item.thread_id
-                        ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary"
-                        : ""
-                      } block truncate`}
-                  >
+                  <a>
                     {item.thread_id}
                   </a>
                 </li>

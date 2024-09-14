@@ -521,3 +521,9 @@ export const getAllApikey = async (org_id) => {
     return error;
   }
 }
+
+
+export const downloadFineTuneData = async (bridge_id,threadIds) => {
+    const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`,{ thread_ids: threadIds });
+    return response?.data;
+}
