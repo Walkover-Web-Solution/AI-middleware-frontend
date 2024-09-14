@@ -132,7 +132,7 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '') =
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
   try {
     let dryRun
-    const modelType =  localDataToSend.configuration.type
+    const modelType = localDataToSend.configuration.type
     if (modelType === "chat" || modelType === "fine-tune") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
     if (modelType === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
     if (modelType === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings/${bridge_id}`, localDataToSend)
@@ -523,10 +523,9 @@ export const getAllApikey = async (org_id) => {
   }
 }
 
-<<<<<<< Updated upstream
 export const createWebhookAlert = async (dataToSend) => {
   try {
-    const response = await axios.post(`${URL}/alerting`,dataToSend);
+    const response = await axios.post(`${URL}/alerting`, dataToSend);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -534,9 +533,9 @@ export const createWebhookAlert = async (dataToSend) => {
   }
 };
 
-export const updateWebhookAlert = async ( {data,id}) => {
+export const updateWebhookAlert = async ({ data, id }) => {
   try {
-    const response = await axios.put(`${URL}/alerting/${id}`,data);
+    const response = await axios.put(`${URL}/alerting/${id}`, data);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -546,7 +545,7 @@ export const updateWebhookAlert = async ( {data,id}) => {
 
 export const getAllWebhookAlert = async (org_id) => {
   try {
-    const response = await axios.get(`${URL}/alerting`,org_id);
+    const response = await axios.get(`${URL}/alerting`, org_id);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -556,7 +555,7 @@ export const getAllWebhookAlert = async (org_id) => {
 
 export const deleteWebhookAlert = async (id) => {
   try {
-    const response = await axios.delete(`${URL}/alerting`,{
+    const response = await axios.delete(`${URL}/alerting`, {
       data: { id: id },
     });
     return response.data;
@@ -565,10 +564,8 @@ export const deleteWebhookAlert = async (id) => {
     return error;
   }
 };
-=======
 
-export const downloadFineTuneData = async (bridge_id,threadIds) => {
-    const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`,{ thread_ids: threadIds });
-    return response?.data;
+export const downloadFineTuneData = async (bridge_id, threadIds) => {
+  const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`, { thread_ids: threadIds });
+  return response?.data;
 }
->>>>>>> Stashed changes
