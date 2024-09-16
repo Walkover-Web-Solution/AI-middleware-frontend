@@ -117,7 +117,7 @@ function Navbar() {
               <button className="btn  btn-primary" onClick={() => document.getElementById('my_modal_5').showModal()}>+ create new Pauth Key</button>
               :
               path[3] === 'alerts' ?
-                <button className="btn  btn-primary" onClick={() => document.getElementById('my_modal_7').showModal()}>+ create new webhook Alert</button>
+                <button className="btn  btn-primary" onClick={() => document.getElementById('my_modal_7').showModal()}>+ create new Alert</button>
                 :
                 path[3] === 'bridges' ?
                   <div>
