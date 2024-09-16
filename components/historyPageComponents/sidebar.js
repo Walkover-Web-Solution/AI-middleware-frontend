@@ -30,7 +30,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     try {
       const response = await downloadFineTuneData(params.id, selectedThreadIds)
 
-      const blob = new Blob([`[${response}]`], { type: 'application/jsonl;charset=utf-8;' });
+      const blob = new Blob([typeof response == 'object' ? JSON.stringify(response) : response], { type: 'application/jsonl;charset=utf-8;' });
 
       // Create a link element
       const link = document.createElement('a');
