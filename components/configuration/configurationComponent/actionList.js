@@ -36,7 +36,7 @@ function ActionList({ params }) {
     return (
         bridgeType === "chatbot" && (
             <div className="form-control">
-                <p className='text-xl font-medium text-base-content'>Action</p>
+                <p className='font-medium text-base-content'>Action</p>
                 <div className='flex flex-wrap gap-4'>
                     {action && Object.entries(action).sort().map(([key, value]) => (
                         <div

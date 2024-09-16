@@ -16,6 +16,7 @@ import PreEmbedList from "./configurationComponent/preEmbedList";
 import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
+import AddVariable from "../addVariable";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -62,6 +63,7 @@ export default function ConfigurationPage({ params }) {
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
                         <AdvancedParameters params={params} />
+                        <AddVariable params={params}/>
                         <ActionList params={params} />
                         {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
                     </>
