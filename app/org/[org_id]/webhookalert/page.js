@@ -6,6 +6,7 @@ import { useCustomSelector } from '@/customSelector/customSelector';
 import { createWebhookAlertAction, deleteWebhookAlertAction, getAllWebhookAlertAction, updateWebhookAlertAction } from '@/store/action/webhookAlertAction';
 import { ChevronDown, Info, SquarePen, Trash2 } from 'lucide-react';
 import { ALERT_TYPE, WEBHOOKALERT_COLUMNS } from '@/utils/enums';
+import { validateUrl } from '@/utils/utility';
 
 export const runtime = 'edge';
 
@@ -15,7 +16,6 @@ const WebhookPage = ({ params }) => {
         filteredBridges: state.bridgeReducer.org[params.org_id]?.orgs || [],
         webhookAlertData: state.webhookAlertReducer.webhookAlert || []
     }));
-
     const formRef = useRef(null);
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
@@ -23,6 +23,8 @@ const WebhookPage = ({ params }) => {
     const [selectedBridges, setSelectedBridges] = useState([]);
     const [headerValue, setHeaderValue] = useState('');
     const [headerError, setHeaderError] = useState('');
+    const [URLError, setURLError] = useState('');
+    const [nameError, setNameError] = useState('');
     const [selectedAlertTypes, setSelectedAlertTypes] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
@@ -54,11 +56,19 @@ const WebhookPage = ({ params }) => {
 
     const handleSubmit = useCallback(e => {
         e.preventDefault();
+        const form = formRef.current;
         if (headerValue && !isValidJSON(headerValue)) {
             setHeaderError('Header must be a valid JSON format.');
             return;
         }
-        const form = formRef.current;
+        if (webhookAlertData.some(alert => alert.name === form.name.value)) {
+            setNameError('Name must be Unique');
+            return;
+        }
+        if (!validateUrl(form.url.value)) {
+            setURLError('Enter Valid URl');
+            return;
+        }
         const data = {
             name: form.name.value,
             webhookConfiguration: {
@@ -214,6 +224,7 @@ const WebhookPage = ({ params }) => {
                             placeholder="Enter the Webhook Alert name"
                             required
                         />
+                        {nameError && <p className="text-red-500 text-sm mt-1">{nameError}</p>}
                     </div>
 
                     <div>
@@ -227,6 +238,7 @@ const WebhookPage = ({ params }) => {
                             placeholder="https://example.com/webhook"
                             required
                         />
+                        {URLError && <p className="text-red-500 text-sm mt-1">{URLError}</p>}
                     </div>
 
                     <div>
