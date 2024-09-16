@@ -205,7 +205,7 @@ const AddVariable = ({ params }) => {
             {/* Conditional Rendering based on isFormData */}
             {!isFormData ? (
               <textarea
-                className="border-2 border-gray-200 rounded-md p-4 w-full max-h-[400px]"
+                className="border-2 border-gray-200 rounded-md p-4 w-full max-h-[400px] focus:outline-none"
                 placeholder={`key:value\nkey:value\nkey:value`}
                 rows="8"
                 onBlur={(e) => onBlurHandler(e.target.value)}
@@ -253,6 +253,9 @@ const AddVariable = ({ params }) => {
                     Please fill out all existing key-value pairs before adding a new one.
                   </p>
                 )}
+                {
+                  variablesKeyValue.length===0 ? <p className="text-center text-lg font-semibold">No Variables Found</p>:""
+                }
                 <button
                   className="btn btn-blue mt-4 self-center border-2 bg-gray-200 border-white"
                   onClick={handleAddKeyValuePair}
