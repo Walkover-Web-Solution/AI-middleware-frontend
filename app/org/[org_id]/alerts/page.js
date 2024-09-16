@@ -103,7 +103,7 @@ const WebhookPage = ({ params }) => {
     };
 
     const handleDeleteClick = (item) => {
-        if (window.confirm('Are you sure you want to delete this webhook alert?')) {
+        if (window.confirm('Are you sure you want to delete this alert?')) {
             dispatch(deleteWebhookAlertAction(item._id));
         }
     };
@@ -198,7 +198,7 @@ const WebhookPage = ({ params }) => {
                     ) : (
                         <tr>
                             <td colSpan={WEBHOOKALERT_COLUMNS.length + 1} className="px-6 py-4 text-center text-sm font-medium text-gray-900">
-                                No webhook alerts available
+                                No alerts available
                             </td>
                         </tr>
                     )}
@@ -215,13 +215,13 @@ const WebhookPage = ({ params }) => {
                     <h3 className="font-semibold">Webhook Configuration</h3>
                     <div>
                         <label className="label">
-                            <span className="label-text">Webhook Alert Name</span>
+                            <span className="label-text"> Alert Name</span>
                         </label>
                         <input
                             type="text"
                             name="name"
                             className="input input-bordered w-full"
-                            placeholder="Enter the Webhook Alert name"
+                            placeholder="Enter the Alert name"
                             required
                         />
                         {nameError && <p className="text-red-500 text-sm mt-1">{nameError}</p>}
