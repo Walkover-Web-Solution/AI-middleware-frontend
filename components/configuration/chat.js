@@ -91,16 +91,16 @@ function Chat({ params }) {
           <div className="relative flex flex-col gap-4 w-full">
             <div className="flex flex-row gap-2">
               <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} params={params} />
-              <div className="tooltip" onClick={() => setIsAccordionVisible(!isAccordionVisible)} data-tip="Add variables">
+              {/* <div className="tooltip" onClick={() => setIsAccordionVisible(!isAccordionVisible)} data-tip="Add variables">
                 <button
                   className="btn"
                   onClick={() => setIsAccordionVisible(!isAccordionVisible)}
                 >
                   +
                 </button>
-              </div>
+              </div> */}
             </div>
-            {isAccordionVisible && (
+            {/* {isAccordionVisible && (
               <div className="join join-vertical w-full mt-4">
                 <div className="collapse collapse-arrow join-item border border-base-300">
                   <input type="checkbox" className="peer" />
@@ -157,7 +157,7 @@ function Chat({ params }) {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
           {errorMessage && (
             <div className="text-red-500 mt-2">{errorMessage}</div>

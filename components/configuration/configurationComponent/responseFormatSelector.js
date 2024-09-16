@@ -69,7 +69,7 @@ const ResponseFormatSelector = ({ params }) => {
 
     return (
         <div>
-            <p className='text-xl font-medium'>Select Response Format</p>
+            <p className='font-medium'>Select Response Format</p>
             {responseOptions.map(({ value, label }) => (
                 <div className="form-control w-fit" key={value}>
                     <label className="label cursor-pointer mx-w-sm flex items-center gap-5">
