@@ -1,6 +1,6 @@
 import axios from "axios";
-import { fetchAllHistoryReducer, fetchThreadReducer } from "../reducer/historyReducer";
-import { getHistory, getSingleThreadData } from "@/config";
+import { fetchAllHistoryReducer, fetchThreadReducer, updateHistoryMessageReducer } from "../reducer/historyReducer";
+import { getHistory, getSingleThreadData, updateHistoryMessage } from "@/config";
 
 
 
@@ -27,3 +27,13 @@ export const getThread = (thread_id, id) => async (dispatch, getState) => {
     console.error(error);
   }
 };
+
+export const updateContentHistory = ({id,bridge_id,message,key}) => async (dispatch,getState)=>{
+  try {
+    const data = await updateHistoryMessage({id,bridge_id,message});
+    dispatch(updateHistoryMessageReducer({data:data.data,key}));
+   
+  } catch (error) {
+    console.error(error)
+  }
+} 

@@ -569,3 +569,9 @@ export const downloadFineTuneData = async (bridge_id, threadIds) => {
   const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`, { thread_ids: threadIds });
   return response?.data;
 }
+
+
+export const updateHistoryMessage = async ({id,bridge_id,message})=>{
+  const response = await axios.put(`${URL}/api/v1/config/gethistory/${bridge_id}` ,{id:id,message:message})
+  return response.data;
+}
