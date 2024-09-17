@@ -28,10 +28,10 @@ export const getThread = (thread_id, id) => async (dispatch, getState) => {
   }
 };
 
-export const updateContentHistory = ({id,bridge_id,message,key}) => async (dispatch,getState)=>{
+export const updateContentHistory = ({id,bridge_id,message,index}) => async (dispatch,getState)=>{
   try {
-    const data = await updateHistoryMessage({id,bridge_id,message});
-    dispatch(updateHistoryMessageReducer({data:data.data,key}));
+  const data = await updateHistoryMessage({id,bridge_id,message});
+  dispatch(updateHistoryMessageReducer({data:data.result.data,index}));
    
   } catch (error) {
     console.error(error)

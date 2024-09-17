@@ -7,7 +7,7 @@ import { updateContentHistory } from "@/store/action/historyAction";
 import { usePathname } from "next/navigation";
 
 
-const ThreadItem = ({key, item, threadHandler, formatDateAndTime, integrationData }) => {
+const ThreadItem = ({index, item, threadHandler, formatDateAndTime, integrationData }) => {
   const pathName = usePathname();
   const dispatch = useDispatch();
   const path = pathName?.split('?')[0].split('/');
@@ -19,7 +19,6 @@ const ThreadItem = ({key, item, threadHandler, formatDateAndTime, integrationDat
   const [thread,setThread] = useState(item);
   
   const handleEdit = () => {
-    console.log(item)
     setModalInput(item.content);
     setIsModalOpen(true);
   };
@@ -30,8 +29,7 @@ const ThreadItem = ({key, item, threadHandler, formatDateAndTime, integrationDat
   };
 
   const handleSave = () => {
-    console.log(modalInput);
-    dispatch(updateContentHistory({id:item.id,bridge_id,message:modalInput,key}))
+    dispatch(updateContentHistory({id:item.id,bridge_id,message:modalInput,index}))
     setIsModalOpen(false);
     setModalInput("");
   };
@@ -75,7 +73,7 @@ const ThreadItem = ({key, item, threadHandler, formatDateAndTime, integrationDat
                 </CodeBlock>
               )
             }}>
-              {item?.content}
+              {item.role==='assistant' && item.updated_message ? item?.updated_message:item?.content}
             </ReactMarkdown>
             {item.role === 'assistant' && (
               <FilePenLine 
@@ -102,7 +100,6 @@ const ThreadItem = ({key, item, threadHandler, formatDateAndTime, integrationDat
                 className="input input-bordered textarea min-h-[200px]" 
                 defaultValue={modalInput}
                 onBlur={(e) => setModalInput(e.target.value)}
-                // placeholder="Type something..."
               />
             </div>
             <div className="flex justify-end gap-2">
