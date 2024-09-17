@@ -3,9 +3,12 @@ import DateRangePicker from "./dateRangePicker.js";
 import { useDispatch } from "react-redux";
 import { getHistoryAction } from "@/store/action/historyAction.js";
 import { useRef, useState } from "react";
+import { Download } from "lucide-react";
+import { downloadFineTuneData } from "@/config/index.js";
 
 const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params }) => {
-
+  const [isThreadSelectable, setIsThreadSelectable] = useState(false);
+  const [selectedThreadIds, setSelectedThreadIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const searchRef = useRef();
@@ -23,13 +26,51 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     dispatch(getHistoryAction(params.id, null, null, 1, ""));
   }
 
+  const handleDownload = async () => {
+    try {
+      const response = await downloadFineTuneData(params.id, selectedThreadIds)
+
+      const blob = new Blob([typeof response == 'object' ? JSON.stringify(response) : response], { type: 'application/jsonl;charset=utf-8;' });
+
+      // Create a link element
+      const link = document.createElement('a');
+      if (link.download !== undefined) {
+        // Set the href and download attributes for the link
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'data.jsonl');
+        link.style.visibility = 'hidden';
+
+        // Append the link to the body
+        document.body.appendChild(link);
+
+        // Programmatically click the link to trigger the download
+        link.click();
+
+        // Clean up and remove the link
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const handleThreadIds = (id) => {
+    if (selectedThreadIds && selectedThreadIds.includes(id)) {
+      setSelectedThreadIds(selectedThreadIds.filter((threadId) => threadId !== id));
+    } else {
+      setSelectedThreadIds([...selectedThreadIds, id]);
+    }
+  }
+
   return (
     <div className="drawer-side bg-base-200 border-r" id="sidebar">
       <div className="p-4 gap-3 flex flex-col">
         <div className="collapse collapse-arrow join-item border border-base-300">
           <input type="checkbox" className="peer" />
-          <div className="collapse-title text-lg font-medium peer-checked:bg-base-300 peer-checked:text-base-content">
-            Add Filter
+          <div className="collapse-title text-md font-medium peer-checked:bg-base-300 peer-checked:text-base-content">
+            Advance Filter
           </div>
           <div className="collapse-content">
             <DateRangePicker params={params} />
@@ -69,15 +110,48 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
         </div>
       ) : (
         <InfiniteScroll dataLength={historyData.length} next={fetchMoreData} hasMore={hasMore} loader={<h4></h4>} scrollableTarget="sidebar">
-          <ul className="menu min-h-full text-base-content">
-            {historyData.map((item) => (
-              <li key={item.id} onClick={() => threadHandler(item.thread_id)}>
-                <a className={`${selectedThread === item.thread_id ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary" : ""} block  truncate`}>{item.thread_id}</a>
-              </li>
-            ))}
-          </ul>
+          <div className="slider-container w-[fixed-width] overflow-x-auto">
+            <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
+              {historyData.map((item) => (
+                <li key={item.id} className={` ${selectedThread === item.thread_id
+                    ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary"
+                    : ""
+                    } block truncateflex items-center min-w-[min-width] flex flex-row`}
+                    onClick={() => threadHandler(item.thread_id)}>
+                  {isThreadSelectable && (
+                    <div onClick={(e)=>{
+                       e.stopPropagation()
+                    }}><input
+                    type="checkbox"
+                    className="checkbox checkbox-lg mr-2 bg-white"
+                    checked={selectedThreadIds?.includes(item.thread_id)}
+                    onChange={() => handleThreadIds(item.thread_id)}
+                  /></div>
+                  )}
+                  <a>
+                    {item.thread_id}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </InfiniteScroll>
       )}
+      {!isThreadSelectable && <button onClick={() => { setIsThreadSelectable(true) }} className="btn fixed bottom-2">
+        Generate Fine tunning file
+      </button>}
+      {
+        isThreadSelectable && (
+          <div className="fixed bottom-2">
+            <button onClick={handleDownload} className="btn">
+              Download <Download size={16} />
+            </button>
+            <button onClick={() => setIsThreadSelectable(false)} className="btn">
+              Cancel
+            </button>
+          </div>
+        )
+      }
     </div>
   )
 };
