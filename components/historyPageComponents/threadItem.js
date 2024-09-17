@@ -16,10 +16,9 @@ const ThreadItem = ({index, item, threadHandler, formatDateAndTime, integrationD
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInput, setModalInput] = useState("");
-  const [thread,setThread] = useState(item);
   
   const handleEdit = () => {
-    setModalInput(item.content);
+    item.updated_message ? setModalInput(item.updated_message):setModalInput(item.content);
     setIsModalOpen(true);
   };
 
@@ -58,10 +57,10 @@ const ThreadItem = ({index, item, threadHandler, formatDateAndTime, integrationD
         </div>
         <div className="chat-header flex gap-2">
           {/* {item.role.replaceAll("_", " ")} */}
-
+           {item.updated_message ? <p className="text-xs opacity-50">edited</p>  :""}
           <time className="text-xs opacity-50">{formatDateAndTime(item?.createdAt)}</time>
         </div>
-        <div className={`${item?.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content"} chat-bubble relative`} onClick={() => threadHandler(item.thread_id, item)}>
+        <div className={`${item?.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble relative`} onClick={() => threadHandler(item.thread_id, item)}>
             <ReactMarkdown components={{
               code: ({ node, inline, className, children, ...props }) => (
                 <CodeBlock
