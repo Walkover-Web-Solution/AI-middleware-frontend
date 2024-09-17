@@ -1,50 +1,80 @@
+import { useEffect, useState } from "react";
 import { Bot, Info, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import CodeBlock from "../codeBlock/codeBlock";
 
-const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData }) => (
-  <div key={`item.id${item.id}`} >
-    {item.role === "tools_call" ? (
-      <div className="w-full flex overflow-y-scroll align-center justify-center gap-2">
-        {Object.keys(item.function).map((funcName, index) => (
-          <div key={index} role="alert" className="alert w-1/3 transition-colors duration-200">
-            <Info size={16} />
-            <div onClick={() => openViasocket(funcName, {flowHitId: JSON.parse(item.function[funcName])?.metadata?.flowHitId})} className="cursor-pointer">
-              <h3 className="font-bold">Functions Executed</h3>
-              <div className="text-xs">Function "{integrationData?.[funcName]?.title || funcName}" executed successfully.</div>
+const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData }) => {
+
+  const [showChatbotMessage, setShowChatbotMessage] = useState(false);
+  const handleToggle = () => {
+    setShowChatbotMessage((prevState) => !prevState);
+  };
+  return (
+    <div key={`item.id${item.id}`}>
+      {item.role === "tools_call" ? (
+        <div className="w-full flex overflow-y-scroll align-center justify-center gap-2">
+          {Object.keys(item.function).map((funcName, index) => (
+            <div key={index} role="alert" className="alert w-1/3 transition-colors duration-200">
+              <Info size={16} />
+              <div onClick={() => openViasocket(funcName, { flowHitId: JSON.parse(item.function[funcName])?.metadata?.flowHitId })} className="cursor-pointer">
+                <h3 className="font-bold">Functions Executed</h3>
+                <div className="text-xs">Function "{integrationData?.[funcName]?.title || funcName}" executed successfully.</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
+          <div className="chat-image avatar flex justify-center items-center">
+            <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
+              {item.role === "user" ? <User /> : <Bot />}
             </div>
           </div>
-        ))}
-      </div>
-    ) : (
-      <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
-        <div className="chat-image avatar flex justify-center items-center">
-          <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
-            {item.role === "user" ? <User /> : <Bot />}
-
+          <div className="chat-header flex gap-2 items-center mb-1">
+            {item.role === 'assistant' && item.chatbot_message ?
+              <div className="flex gap-2">
+                <div className="text-gray-500">switch to normal response</div>
+                <input
+                  type="checkbox"
+                  className="toggle"
+                  checked={showChatbotMessage}
+                  onChange={handleToggle}
+                />
+              </div>
+              : ""}
+            <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
           </div>
-        </div>
-        <div className="chat-header flex gap-2">
-          {/* {item.role.replaceAll("_", " ")} */}
+          {item.role === 'user' ? (
+            <div className={`cursor-pointer chat-bubble-primary chat-bubble`} onClick={() => threadHandler(item.thread_id, item)}>
+              <ReactMarkdown components={{
+                code: ({ node, inline, className, children, ...props }) => (
+                  <CodeBlock inline={inline} className={className} {...props}>
+                    {children}
+                  </CodeBlock>
+                )
+              }}>
+                {item?.content}
+              </ReactMarkdown>
+            </div>
+          ) : (
+            <div className={`bg-base-200 text-base-content chat-bubble`}>
+              <ReactMarkdown components={{
+                code: ({ node, inline, className, children, ...props }) => (
+                  <CodeBlock inline={inline} className={className} {...props}>
+                    {children}
+                  </CodeBlock>
+                )
+              }}>
+                {!showChatbotMessage ? item.chatbot_message : item.content}
+              </ReactMarkdown>
 
-          <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
+
+            </div>
+          )}
         </div>
-        <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content"} chat-bubble`} onClick={() => threadHandler(item.thread_id, item)}>
-          <ReactMarkdown components={{
-            code: ({ node, inline, className, children, ...props }) => (
-              <CodeBlock
-                inline={inline}
-                className={className}
-                {...props}
-              >
-                {children}
-              </CodeBlock>
-            )
-          }}>{item?.content}</ReactMarkdown>
-        </div>
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
+};
 
 export default ThreadItem;
