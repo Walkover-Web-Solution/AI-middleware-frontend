@@ -2,7 +2,7 @@
 
 import { useCustomSelector } from '@/customSelector/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
-import { isValidJson, validateWebhook } from '@/utils/utility';
+import { isValidJson, validateUrl } from '@/utils/utility';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -29,7 +29,7 @@ const ResponseFormatSelector = ({ params }) => {
             setErrors(prevErrors => ({ ...prevErrors, webhook: 'Please enter a valid webhook URL' }));
             return;
         }
-        const isValid = validateWebhook(newurl);
+        const isValid = validateUrl(newurl);
         setErrors(prevErrors => ({ ...prevErrors, webhook: isValid ? '' : 'Invalid URL' }));
         setWebhookData((prevData) => ({ ...prevData, url: newurl }));
     };
