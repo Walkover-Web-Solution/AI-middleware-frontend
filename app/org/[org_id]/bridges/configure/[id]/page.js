@@ -72,6 +72,7 @@ const Page = ({ params }) => {
           desc: e?.data?.description,
           id: e?.data?.id,
           status: e?.data?.action,
+          title: e?.data?.title,
         };
         dispatch(createApiAction(params.org_id, dataFromEmbed));
       }
