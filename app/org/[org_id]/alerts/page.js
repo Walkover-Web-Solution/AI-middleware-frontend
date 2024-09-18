@@ -61,6 +61,10 @@ const WebhookPage = ({ params }) => {
             setHeaderError('Header must be a valid JSON format.');
             return;
         }
+        if (!form.id.value && webhookAlertData.some(alert => alert.name === form.name.value)) {
+            setNameError('Name must be Unique');
+            return;
+        }
         if (!validateUrl(form.url.value)) {
             setURLError('Enter Valid URl');
             return;
