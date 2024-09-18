@@ -53,7 +53,7 @@ function Home({ params }) {
               </div>
             ) : (
               <div className="flex flex-col">
-                <div className="relative flex flex-col md:flex-row items-center justify-between mx-4">
+                <div className="relative flex flex-col md:flex-row items-center justify-between m-4">
                   <input
                     type="text"
                     placeholder="Search for bridges"
@@ -61,9 +61,6 @@ function Home({ params }) {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <button className="btn w-full md:w-auto float-start md:m-4 btn-primary" onClick={() => router.push(`/org/${params.org_id}/metrics`)}>
-                    <Box size={16} /> Metrics
-                  </button>
                 </div>
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
                   {filteredBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (

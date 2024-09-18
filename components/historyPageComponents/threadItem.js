@@ -123,7 +123,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             <textarea
               type="text"
               className="input input-bordered textarea min-h-[200px]"
-              defaultValue={modalInput}
+              value={modalInput}
               onChange={(e) => setModalInput(e.target.value)}
             />
           </div>

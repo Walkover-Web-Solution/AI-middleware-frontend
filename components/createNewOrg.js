@@ -75,7 +75,7 @@ const CreateOrg = ({ onClose, handleSwitchOrg }) => {
                             value={orgDetails.about}
                             onChange={handleChange}
                             placeholder="About your Organization"
-                            className="p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500"
+                            className="p-2.5 w-full text-sm textarea textarea-bordered"
                             minLength={10}
                             maxLength={400}
                             required

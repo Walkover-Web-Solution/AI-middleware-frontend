@@ -146,7 +146,7 @@ function Page() {
                       <button className="btn">Cancel</button>
                     </div>
                   </form>
-                  <button className="btn" onClick={(e) => createAuthKeyHandler(e, document.getElementById('authNameInput').value)}>+ Create</button>
+                  <button className="btn btn-primary" onClick={(e) => createAuthKeyHandler(e, document.getElementById('authNameInput').value)}>+ Create</button>
                 </div>
               </div>
             </dialog>
