@@ -77,8 +77,8 @@ const PreEmbedList = ({ params }) => {
     return (bridge_pre_tools?.length > 0 ?
         <div>
             <div className="form-control inline-block">
-                <label className='label-text'>Pre functions</label>
-                <div className="label flex-col mt-2 items-start">
+                <label className='label-text font-medium'>Pre functions</label>
+                <div className="label flex-col items-start">
                     <div className="flex flex-wrap gap-4">
                         {renderEmbed}
                     </div>

@@ -55,13 +55,16 @@ const AdvancedParameters = ({ params }) => {
     };
 
     return (
-        <div className="collapse text-base-content">
-            <input type="radio" name="my-accordion-1" onClick={toggleAccordion} />
-            <div className="collapse-title p-0 flex items-center justify-start gap-4 text-xl font-medium cursor-pointer" onClick={toggleAccordion}>
-                Advanced Parameters
+        <div className="collapse text-base-content" tabIndex={0}>
+            <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
+                <span className="mr-2 cursor-pointer">
+                    Advanced Parameters
+                </span>
+
                 {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
-            {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-2">
+            
+            {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
                 {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
                     if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
                     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
