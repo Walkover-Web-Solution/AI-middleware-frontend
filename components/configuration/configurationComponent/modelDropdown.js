@@ -32,7 +32,7 @@ const ModelDropdown = ({ params }) => {
             {/* First Dropdown */}
             <label className="form-control w-full max-w-xs">
                 <div className="label">
-                    <span className="label-text">Model</span>
+                    <span className="label-text font-medium">Model</span>
                 </div>
                 <select
                     value={`${modelType}|${model}`}
@@ -72,7 +72,7 @@ const ModelDropdown = ({ params }) => {
                     defaultValue={fineTuneModel}
                     onBlur={handleFinetuneModelChange}
                     placeholder="Fine-tune model Name"
-                    className="input input-bordered input-sm w-full mb-4"
+                    className="input input-bordered input-sm w-full"
                 />
             </label>
             }

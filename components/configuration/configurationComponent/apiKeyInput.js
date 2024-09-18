@@ -54,7 +54,7 @@ const ApiKeyInput = ({ params }) => {
     return (
         <label className="form-control max-w-xs text-base-content">
             <div className="label">
-                <span className="label-text">Service's API Key</span>
+                <span className="label-text font-medium">Service's API Key</span>
             </div>
             <div>
                 <select

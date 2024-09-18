@@ -55,7 +55,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
     return (
         <div className="dropdown dropdown-right">
             <button tabIndex={0}
-                className="btn btn-outline btn-sm mt-4"><Plus size={16} />{name || "Connect function"}</button>
+                className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect function"}</button>
             <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-0">
                 <div className='flex flex-col gap-2 w-full'>
                     <li className="text-sm font-semibold disabled">Suggested Functions</li>

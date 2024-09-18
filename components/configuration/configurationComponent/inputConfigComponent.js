@@ -177,7 +177,7 @@ const InputConfigComponent = ({ params }) => {
     return (
         <div>
             <div className="label">
-                <span className="label-text capitalize">Prompt</span>
+                <span className="label-text capitalize font-medium">Prompt</span>
             </div>
             <div className="form-control h-full">
                 <textarea
