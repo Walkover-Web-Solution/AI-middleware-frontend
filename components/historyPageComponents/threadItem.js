@@ -9,7 +9,7 @@ const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData })
         {Object.keys(item.function).map((funcName, index) => (
           <div key={index} role="alert" className="alert w-1/3 transition-colors duration-200">
             <Info size={16} />
-            <div onClick={() => openViasocket(funcName, {flowHitId: JSON.parse(item.function[funcName])?.metadata?.flowHitId})} className="cursor-pointer">
+            <div onClick={() => openViasocket(funcName, { flowHitId: JSON.parse(item.function[funcName])?.metadata?.flowHitId })} className="cursor-pointer">
               <h3 className="font-bold">Functions Executed</h3>
               <div className="text-xs">Function "{integrationData?.[funcName]?.title || funcName}" executed successfully.</div>
             </div>
@@ -17,81 +17,46 @@ const ThreadItem = ({ item, threadHandler, formatDateAndTime, integrationData })
         ))}
       </div>
     ) : (
-      !item.error ? (<div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
-        <div className="chat-image avatar flex justify-center items-center">
-          <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
-            {item.role === "user" ? <User /> : <Bot />}
-
-          </div>
-        </div>
-        <div className="chat-header flex gap-2">
-          {/* {item.role.replaceAll("_", " ")} */}
-
-          <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
-        </div>
-        <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content"} chat-bubble`} onClick={() => threadHandler(item.thread_id, item)}>
-          <ReactMarkdown components={{
-            code: ({ node, inline, className, children, ...props }) => (
-              <CodeBlock
-                inline={inline}
-                className={className}
-                {...props}
-              >
-                {children}
-              </CodeBlock>
-            )
-          }}>{item?.content}</ReactMarkdown>
-        </div>
-      </div>
-    ):(
-      item.error && (
-        <div>
+      <div>
         <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
-        <div className="chat-image avatar flex justify-center items-center">
-          <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
-            {item.role === "user" ? <User /> : <Bot />}
-          </div>
-        </div>
-        <div className="chat-header flex gap-2">
-          <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
-        </div>
-        <div
-          className={`${
-            item.role === "user" ? "cursor-pointer chat-bubble-primary" : "bg-base-200 text-base-content"
-          } chat-bubble`}
-          onClick={() => threadHandler(item.thread_id, item)}
-        >
-          <ReactMarkdown
-            components={{
-              code: ({ node, inline, className, children, ...props }) => (
-                <CodeBlock inline={inline} className={className} {...props}>
-                  {children}
-                </CodeBlock>
-              ),
-            }}
-          >
-            {item?.content}
-          </ReactMarkdown>
-        </div>
-      </div>
-      
-      <div className="chat chat-end">
           <div className="chat-image avatar flex justify-center items-center">
             <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
-              <Bot />
+              {item.role === "user" ? <User /> : <Bot />}
+
             </div>
           </div>
           <div className="chat-header flex gap-2">
             <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
           </div>
-          <div className="bg-base-200 text-base-content chat-bubble">
-            <span  className="text-red-500 ">{item['error']}</span> {/* Display the error message */}
+          <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content"} chat-bubble`} onClick={() => threadHandler(item.thread_id, item)}>
+            <ReactMarkdown components={{
+              code: ({ node, inline, className, children, ...props }) => (
+                <CodeBlock
+                  inline={inline}
+                  className={className}
+                  {...props}
+                >
+                  {children}
+                </CodeBlock>
+              )
+            }}>{item?.content}</ReactMarkdown>
           </div>
         </div>
-        </div>
-      )  
-   
-    ))}
+        {
+          item?.error && (
+            <div className="chat chat-end">
+              <div className="flex-1 chat-bubble bg-base-200 text-error">
+                <span className="font-bold">Error</span>
+                <p>{item.error}</p>
+              </div>
+              <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
+                <Bot />
+              </div>
+            </div>
+          )
+        }
+      </div>
+    )}
   </div>
 );
 
