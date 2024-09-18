@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
- history : [] ,
- thread : [],
+  history: [],
+  thread: [],
   loading: false,
-  success : false
+  success: false
 };
 
 export const historyReducer = createSlice({
@@ -25,13 +25,18 @@ export const historyReducer = createSlice({
     clearThreadData: (state) => {
       state.thread = [];
     },
+    updateHistoryMessageReducer: (state, action) => {
+      const { index, data } = action.payload
+      state.thread[index] = data;
+    }
   },
 });
 
 
 export const {
-    fetchAllHistoryReducer ,
-    fetchThreadReducer,
-    clearThreadData
+  fetchAllHistoryReducer,
+  fetchThreadReducer,
+  clearThreadData,
+  updateHistoryMessageReducer
 } = historyReducer.actions;
 export default historyReducer.reducer;
