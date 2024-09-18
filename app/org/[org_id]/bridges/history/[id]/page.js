@@ -176,7 +176,7 @@ function Page({ params }) {
             <div className="w-full text-start">
               <div className="pb-16 pl-2 pt-4">
                 {thread && thread.map((item, index) => (
-                  <ThreadItem index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
+                  <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
                 ))}
               </div>
             </div>

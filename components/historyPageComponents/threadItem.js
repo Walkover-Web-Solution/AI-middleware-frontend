@@ -1,36 +1,53 @@
-import { useState } from "react";
-import { Bot, FilePenLine, Info, User } from "lucide-react";
+// components/ThreadItem.js
+import React, { useState, useRef } from "react";
+import { Bot, Info, Pencil, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import CodeBlock from "../codeBlock/codeBlock";
 import { useDispatch } from "react-redux";
 import { updateContentHistory } from "@/store/action/historyAction";
-import { usePathname } from "next/navigation";
 
 
-const ThreadItem = ({index, item, threadHandler, formatDateAndTime, integrationData }) => {
-  const pathName = usePathname();
+const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params }) => {
   const dispatch = useDispatch();
-  const path = pathName?.split('?')[0].split('/');
-  const bridge_id = path[5] || '';
-
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInput, setModalInput] = useState("");
-  
+  const modalRef = useRef(null);
+
   const handleEdit = () => {
-    item.updated_message ? setModalInput(item.updated_message):setModalInput(item.content);
-    setIsModalOpen(true);
+    setModalInput(item.updated_message || item.content);
+    if (modalRef.current) {
+      modalRef.current.showModal();
+    } else {
+      console.error("Modal element not found");
+    }
   };
 
   const handleClose = () => {
-    setIsModalOpen(false);
-    setModalInput(""); 
+    setModalInput("");
+    if (modalRef.current) {
+      modalRef.current.close();
+    } else {
+      console.error("Modal element not found");
+    }
   };
 
   const handleSave = () => {
-    dispatch(updateContentHistory({id:item.id,bridge_id,message:modalInput,index}))
-    setIsModalOpen(false);
+    if (modalInput.trim() === "") {
+      alert("Message cannot be empty.");
+      return;
+    }
+    dispatch(updateContentHistory({
+      id: item.id,
+      bridge_id: params.id,
+      message: modalInput,
+      index
+    }));
     setModalInput("");
+
+    if (modalRef.current) {
+      modalRef.current.close();
+    } else {
+      console.error("Modal element not found");
+    }
   };
 
   return (
@@ -40,7 +57,7 @@ const ThreadItem = ({index, item, threadHandler, formatDateAndTime, integrationD
         {Object.keys(item.function).map((funcName, index) => (
           <div key={index} role="alert" className="alert w-1/3 transition-colors duration-200">
             <Info size={16} />
-            <div onClick={() => openViasocket(funcName, {flowHitId: JSON.parse(item.function[funcName])?.metadata?.flowHitId})} className="cursor-pointer">
+            <div onClick={() => openViasocket(funcName, { flowHitId: JSON.parse(item.function[funcName])?.metadata?.flowHitId })} className="cursor-pointer">
               <h3 className="font-bold">Functions Executed</h3>
               <div className="text-xs">Function "{integrationData?.[funcName]?.title || funcName}" executed successfully.</div>
             </div>
@@ -57,7 +74,7 @@ const ThreadItem = ({index, item, threadHandler, formatDateAndTime, integrationD
         </div>
         <div className="chat-header flex gap-2">
           {/* {item.role.replaceAll("_", " ")} */}
-           {item.updated_message ? <p className="text-xs opacity-50">edited</p>  :""}
+          {item.updated_message ? <p className="text-xs opacity-50">edited</p> : ""}
           <time className="text-xs opacity-50">{formatDateAndTime(item?.createdAt)}</time>
         </div>
         <div className={`${item?.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble relative`} onClick={() => threadHandler(item.thread_id, item)}>
@@ -72,52 +89,46 @@ const ThreadItem = ({index, item, threadHandler, formatDateAndTime, integrationD
                 </CodeBlock>
               )
             }}>
-              {item?.role==='assistant' && item?.updated_message ? item?.updated_message:item?.content}
+              {item?.role === 'assistant' && item?.updated_message ? item?.updated_message : item?.content}
             </ReactMarkdown>
             {item?.role === 'assistant' && (
-              <FilePenLine 
-                className="absolute top-2 right-2 text-sm cursor-pointer"
-                onClick={() => handleEdit()} 
-              />
+              <div className="tooltip absolute top-2  right-2 text-sm cursor-pointer" data-tip="Edit response">
+                <Pencil
+                  className="h-[20px]"
+                  onClick={handleEdit}
+                />
+              </div>
+
             )}
           </div>
         </div>
       )}
 
-      {isModalOpen && (
-        <div  
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300"
-        >
-          <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] transform transition-transform duration-300 scale-100 p-6">
-            <h2 className="text-xl font-semibold mb-4">Edit Message</h2>
-            <div className="form-control mb-4">
-              <label className="label">
-                <span className="label-text">Enter your input:</span>
-              </label>
-              <textarea 
-                type="text" 
-                className="input input-bordered textarea min-h-[200px]" 
-                defaultValue={modalInput}
-                onBlur={(e) => setModalInput(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button 
-                className="btn " 
-                onClick={handleClose}
-              >
-                Cancel
-              </button>
-              <button 
-                className="btn" 
-                onClick={(e)=>handleSave(e)}
-              >
-                Save
-              </button>
-            </div>
+      {/* Modal */}
+      <dialog className="modal modal-bottom sm:modal-middle" ref={modalRef}>
+        <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6">
+          <h2 className="text-xl font-semibold mb-4">Edit Message</h2>
+          <div className="form-control mb-4">
+            <label className="label">
+              <span className="label-text">Enter your input:</span>
+            </label>
+            <textarea
+              type="text"
+              className="input input-bordered textarea min-h-[200px]"
+              defaultValue={modalInput}
+              onChange={(e) => setModalInput(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button className="btn" onClick={handleClose}>
+              Cancel
+            </button>
+            <button className="btn" onClick={handleSave}>
+              Save
+            </button>
           </div>
         </div>
-      )}
+      </dialog>
     </div>
   );
 };
