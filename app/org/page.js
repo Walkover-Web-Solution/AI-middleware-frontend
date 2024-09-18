@@ -16,6 +16,7 @@ import { useDispatch } from "react-redux";
 function Page() {
 
   const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const route = useRouter()
   const organizations = useCustomSelector(state => state.userDetailsReducer.organizations);
@@ -51,8 +52,11 @@ function Page() {
     dispatch(userDetails());
   }, []);
 
+  const filteredOrganizations = Object.values(organizations).filter(
+    item => item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const renderedOrganizations = useMemo(() => (
-    Object.values(organizations)?.slice().reverse().map((org, index) => (
+    filteredOrganizations.slice().reverse().map((org, index) => (
       <div
         key={index}
         onClick={() => handleSwitchOrg(org.id, org.name)}
@@ -63,19 +67,27 @@ function Page() {
         </div>
       </div>
     ))
-  ), [organizations, handleSwitchOrg]);
+  ), [filteredOrganizations, handleSwitchOrg]);
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-50vh bg-gray-100 px-2 md:px-0">
-      <button
-        onClick={handleOpenCreateOrgModal}
-        className="px-6 py-3 my-5 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
-      >
-        + Create New Organization
-      </button>
-
-      <div className="w-full max-w-4xl mt-4">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Existing Organizations</h2>
+    <div className="flex flex-col justify-start items-center min-h-screen bg-gray-100 px-2 md:px-0">
+      <div className="w-full max-w-4xl mt-4 flex flex-col gap-3">
+        <div className='flex flex-row justify-between items-center'>
+          <h2 className="text-2xl font-semibold text-gray-800">Existing Organizations</h2>
+          <button
+            onClick={handleOpenCreateOrgModal}
+            className="px-6 py-3 my-5 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+          >
+            + Create New Organization
+          </button>
+        </div>
+        <input
+          type="text"
+          placeholder="Search organizations"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border border-gray-300 input input-bordered outline-none p-4 rounded-md  w-full mb-4"
+        />
         <div className="grid grid-rows-1 md:grid-rows-2 lg:grid-rows-3 gap-4 mb-8 cursor-pointer">
           {renderedOrganizations}
         </div>
