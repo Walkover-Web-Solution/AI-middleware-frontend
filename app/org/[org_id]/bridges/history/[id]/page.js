@@ -1,16 +1,16 @@
 "use client"
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useDispatch } from "react-redux";
+import ChatDetails from "@/components/historyPageComponents/chatDetails";
+import EmbedScriptLoader from "@/components/historyPageComponents/embedScriptLoader";
+import Sidebar from "@/components/historyPageComponents/sidebar";
+import ThreadItem from "@/components/historyPageComponents/threadItem";
+import Protected from "@/components/protected";
+import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customSelector/customSelector";
 import { getHistoryAction, getThread } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import Sidebar from "@/components/historyPageComponents/sidebar";
-import ChatDetails from "@/components/historyPageComponents/chatDetails";
-import ThreadItem from "@/components/historyPageComponents/threadItem";
-import EmbedScriptLoader from "@/components/historyPageComponents/embedScriptLoader";
-import Protected from "@/components/protected";
-import { getSingleMessage } from "@/config";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 
 export const runtime = "edge";
 
@@ -167,16 +167,16 @@ function Page({ params }) {
   // }
 
   return (
-    <div className="bg-base-100  relative scrollbar-hide text-base-content h-screen">
+    <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <EmbedScriptLoader embedToken={embedToken} />
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center overflow-scroll justify-center ">
           <div className="w-full min-h-screen">
             <div className="w-full text-start">
-              <div className="pb-16 pl-2 pt-4">
+              <div className="pb-16 px-3 pt-4">
                 {thread && thread.map((item, index) => (
-                  <ThreadItem key={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
+                  <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
                 ))}
               </div>
             </div>
