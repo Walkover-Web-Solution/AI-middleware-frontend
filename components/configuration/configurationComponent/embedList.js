@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
 
-function getStatusClass (status) {
+function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
         case 'drafted':
             return 'bg-yellow-100';
@@ -62,7 +62,7 @@ const EmbedList = ({ params }) => {
                 return (
                     <div key={value?._id} id={value?._id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
                         <div className="p-4 w-full h-full flex flex-col justify-between" onClick={() => openViasocket(functionName)}>
-                           <div>
+                            <div>
                                 <div className="flex justify-between items-center">
                                     <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content">
                                         {title}
@@ -72,18 +72,18 @@ const EmbedList = ({ params }) => {
                                 <p className="mt-3 text-xs sm:text-sm line-clamp-3">
                                     {value?.description || value?.api_description || value?.short_description || "A description is required for proper functionality."}
                                 </p>
-                           </div>
+                            </div>
                             <div className="mt-4">
                                 <span className={`mr-2 inline-block rounded-full capitalize px-3 bg-base-200 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(status)}`}>
                                     {!(value?.description || value?.api_description || value?.short_description) ? "Description Required" : status}
                                 </span>
                             </div>
                         </div>
-                        {status?.toString()?.toLowerCase() !== 'paused' && <div className="dropdown shadow-none border-none absolute right-1 top-1">
+                        <div className="dropdown shadow-none border-none absolute right-1 top-1">
                             <div role="button" className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200" onClick={() => handleOpenModal(value?._id)}>
                                 <Settings size={18} />
                             </div>
-                        </div>}
+                        </div>
                     </div>
                 )
             }
@@ -107,14 +107,12 @@ const EmbedList = ({ params }) => {
     return (bridge_functions &&
         <div>
             <FunctionParameterModal functionId={functionId} params={params} />
-            <div className="form-control ">
-                <div className="label flex-col mt-2 items-start">
-                    <div className="flex flex-wrap gap-4">
-                        {renderEmbed}
-                    </div>
-                    <EmbedListSuggestionDropdownMenu params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} />
+            <div className="label flex-col items-start">
+                <div className="flex flex-wrap gap-4">
+                    {renderEmbed}
                 </div>
             </div>
+            <EmbedListSuggestionDropdownMenu params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} />
         </div>
     );
 };

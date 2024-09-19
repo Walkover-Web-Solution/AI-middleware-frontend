@@ -1,50 +1,16 @@
-import { useCustomSelector } from "@/customSelector/customSelector";
-import { updateVariables } from "@/store/reducer/bridgeReducer";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
-import { useDispatch } from "react-redux";
 import CodeBlock from "../codeBlock/codeBlock";
 import ChatTextInput from "./chatTextInput";
 
 function Chat({ params }) {
-
-  const dispatch = useDispatch();
-  const { variablesKeyValue } = useCustomSelector((state) => ({
-    variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
-  }));
-
   const messagesEndRef = useRef(null);
-
-  // State variables
   const [messages, setMessages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isAccordionVisible, setIsAccordionVisible] = useState(false); // State for visibility of key-value fields
-  const [keyValuePairs, setKeyValuePairs] = useState(variablesKeyValue || []); // State for key-value pairs
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const handleAddKeyValuePair = () => {
-    setKeyValuePairs([...keyValuePairs, { key: "", value: "" }]);
-    setIsAccordionVisible(true);
-  };
-
-  const handleRemoveKeyValuePair = index => {
-    const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
-    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }))
-    setKeyValuePairs(updatedPairs);
-    if (updatedPairs.length === 0) {
-      setIsAccordionVisible(false);
-    }
-  };
-
-  const handleKeyValueChange = (index, field, value) => {
-    let updatedPairs = [...keyValuePairs];
-    updatedPairs[index] = { ...updatedPairs[index], [field]: value };
-    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }))
-    setKeyValuePairs(updatedPairs);
-  };
 
   return (
     <>
@@ -91,73 +57,7 @@ function Chat({ params }) {
           <div className="relative flex flex-col gap-4 w-full">
             <div className="flex flex-row gap-2">
               <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} params={params} />
-              <div className="tooltip" onClick={() => setIsAccordionVisible(!isAccordionVisible)} data-tip="Add variables">
-                <button
-                  className="btn"
-                  onClick={() => setIsAccordionVisible(!isAccordionVisible)}
-                >
-                  +
-                </button>
-              </div>
             </div>
-            {isAccordionVisible && (
-              <div className="join join-vertical w-full mt-4">
-                <div className="collapse collapse-arrow join-item border border-base-300">
-                  <input type="checkbox" className="peer" />
-                  <div className="collapse-title text-xl font-medium peer-checked:bg-base-300 peer-checked:text-base-content">
-                    Add Variables
-                  </div>
-                  <div className="collapse-content">
-                    <div className="flex flex-col gap-4 max-h-56 overflow-y-auto">
-                      {keyValuePairs.map((pair, index) => (
-                        <div key={index} className="flex flex-row gap-4 items-end">
-                          <div className="form-control w-full sm:w-1/2">
-                            {index === 0 && <label className="label">
-                              <span className="label-text">Key</span>
-                            </label>}
-                            <input
-                              type="text"
-                              className="input input-bordered input-sm w-full"
-                              placeholder="Enter key"
-                              key={pair.key}
-                              defaultValue={pair.key}
-                              // value={pair.key}
-                              onBlur={e => handleKeyValueChange(index, "key", e.target.value)}
-                            />
-                          </div>
-                          <div className="form-control w-full sm:w-1/2">
-                            {index === 0 && <label className="label">
-                              <span className="label-text">Value</span>
-                            </label>}
-                            <input
-                              type="text"
-                              className="input input-bordered input-sm w-full"
-                              placeholder="Enter value"
-                              // value={pair.value}
-                              key={pair.value}
-                              defaultValue={pair.value}
-                              onBlur={e => handleKeyValueChange(index, "value", e.target.value)}
-                            />
-                          </div>
-                          <button
-                            className="btn btn-sm"
-                            onClick={() => handleRemoveKeyValuePair(index)}
-                          >
-                            -
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        className="btn self-center mt-4"
-                        onClick={handleAddKeyValuePair}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
           {errorMessage && (
             <div className="text-red-500 mt-2">{errorMessage}</div>

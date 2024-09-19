@@ -17,6 +17,7 @@ import ResponseFormatSelector from "./configurationComponent/responseFormatSelec
 import RichTextToggle from "./configurationComponent/richTextToggle";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
+import AddVariable from "../addVariable";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -64,6 +65,7 @@ export default function ConfigurationPage({ params }) {
                         <ApiKeyInput params={params} />
                         {bridgeType === 'chatbot' && <RichTextToggle params={params} />}
                         <AdvancedParameters params={params} />
+                        <AddVariable params={params}/>
                         <ActionList params={params} />
                         {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
                     </>

@@ -31,7 +31,7 @@ function ServiceDropdown({ params }) {
         <div>
             <label className="form-control w-full">
                 <div className="label">
-                    <span className="label-text">Service</span>
+                    <span className="label-text font-medium">Service</span>
                 </div>
                 <select value={selectedService} onChange={handleServiceChange} className="select select-sm max-w-xs select-bordered capitalize">
                     <option disabled>Select a Service</option>
