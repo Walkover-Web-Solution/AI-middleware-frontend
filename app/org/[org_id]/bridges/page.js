@@ -36,7 +36,7 @@ function Home({ params }) {
   return (
     <div className="drawer lg:drawer-open">
       <CreateNewBridge />
-      {!allBridges && isLoading && <LoadingSpinner />}
+      {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col items-start justify-start">
         <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">

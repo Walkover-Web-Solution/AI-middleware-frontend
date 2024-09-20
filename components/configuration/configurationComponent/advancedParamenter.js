@@ -56,6 +56,7 @@ const AdvancedParameters = ({ params }) => {
 
     return (
         <div className="collapse text-base-content" tabIndex={0}>
+            <input type="radio" name="my-accordion-1" onClick={toggleAccordion} className='cursor-pointer'/>
             <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
                 <span className="mr-2 cursor-pointer">
                     Advanced Parameters
