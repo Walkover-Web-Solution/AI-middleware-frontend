@@ -27,7 +27,7 @@ export const historyReducer = createSlice({
     },
     updateHistoryMessageReducer: (state, action) => {
       const { index, data } = action.payload
-      state.thread[index] = data;
+      state.thread[index] = {...state.thread[index], ...data};
     }
   },
 });
