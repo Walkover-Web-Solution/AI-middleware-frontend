@@ -1,5 +1,5 @@
 'use client';
-import { useCustomSelector } from '@/customSelector/customSelector';
+import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, getAllApikeyAction, saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS } from '@/utils/enums';
 import { getIconOfService } from '@/utils/utility';

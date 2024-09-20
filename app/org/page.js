@@ -2,7 +2,7 @@
 import CreateOrg from '@/components/createNewOrg';
 import Protected from '@/components/protected';
 import { switchOrg, switchUser } from '@/config';
-import { useCustomSelector } from '@/customSelector/customSelector';
+import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { userDetails } from '@/store/action/userDetailsAction';
 import { useRouter } from 'next/navigation';

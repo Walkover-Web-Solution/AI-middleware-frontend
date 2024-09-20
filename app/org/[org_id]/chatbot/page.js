@@ -4,7 +4,7 @@ import ChatBotModel from "@/components/chatbot/chatBotModel";
 import ChatBotCardHome from "@/components/chatbotHome/chatbotCard";
 import Protected from "@/components/protected";
 export const runtime = 'edge';
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { Bot } from "lucide-react";
 
 function ChatbotPage({ params }) {
