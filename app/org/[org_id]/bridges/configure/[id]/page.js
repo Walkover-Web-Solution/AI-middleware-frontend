@@ -23,6 +23,10 @@ const Page = ({ params }) => {
 
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
+    return () => {
+      if (handleclose)
+        handleclose();
+    }
   }, []);
 
   useEffect(() => {
