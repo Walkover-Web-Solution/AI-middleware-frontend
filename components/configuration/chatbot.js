@@ -3,9 +3,10 @@ import { useEffect, useMemo } from "react";
 
 const Chatbot = ({ params }) => {
 
-    const { bridgeName, bridgeSlugName, chatbot_token, variablesKeyValue } = useCustomSelector((state) => ({
+    const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue } = useCustomSelector((state) => ({
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
         bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
+        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         chatbot_token: state?.ChatBot?.chatbot_token || '',
         variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
     }));
@@ -38,7 +39,6 @@ const Chatbot = ({ params }) => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot')) {
-                clearInterval(intervalId);
                 window.SendDataToChatbot({
                     bridgeName: bridgeSlugName,
                     threadId: bridgeName.replaceAll(" ", ""),
@@ -49,7 +49,8 @@ const Chatbot = ({ params }) => {
                     hideIcon: true,
                     variables: variables || {}
                 });
-                window.openChatbot();
+                if (bridgeType === 'chatbot') window.openChatbot();
+                clearInterval(intervalId);
             }
         }, 100); // Check every 100ms
 
@@ -67,9 +68,7 @@ const Chatbot = ({ params }) => {
         };
     }, [chatbot_token]);
 
-    return (
-        <p>Loading....</p>
-    )
+    return null
 };
 
 export default Chatbot;

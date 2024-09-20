@@ -4,11 +4,11 @@ import Sidebar from "@/components/historyPageComponents/sidebar";
 import ThreadItem from "@/components/historyPageComponents/threadItem";
 import Protected from "@/components/protected";
 import { getSingleMessage } from "@/config";
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { getHistoryAction, getThread } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { default as React, default as React, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from "react-redux";
 
 export const runtime = "edge";
@@ -20,10 +20,9 @@ function Page({ params }) {
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
 
-  const { historyData, thread, embedToken, integrationData } = useCustomSelector((state) => ({
+  const { historyData, thread, integrationData } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread,
-    embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData
   }));
   const searchParams = useSearchParams();

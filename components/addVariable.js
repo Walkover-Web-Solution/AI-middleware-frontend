@@ -1,10 +1,9 @@
 "use client";
-
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
-import { useDispatch } from "react-redux";
-import { useCustomSelector } from "@/customSelector/customSelector";
-import { useState, useEffect, useRef } from "react";
 import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 
 const AddVariable = ({ params }) => {
   const { variablesKeyValue } = useCustomSelector((state) => ({

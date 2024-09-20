@@ -8,11 +8,12 @@ import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getSingleBridgesAction } from "@/store/action/bridgeAction";
 import { getModelAction } from "@/store/action/modelAction";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
 const Page = ({ params }) => {
+  const mountRef = useRef(false);
   const dispatch = useDispatch();
   const { bridgeType, service, isServiceModelsAvailable } = useCustomSelector((state) => ({
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
@@ -34,6 +35,21 @@ const Page = ({ params }) => {
     handleResizer();
   }, []);
 
+  useEffect(() => {
+    if (mountRef.current) {
+      if (bridgeType === 'chatbot') {
+        if (typeof openChatbot !== 'undefined') {
+          openChatbot()
+        }
+      } else {
+        if (typeof closeChatbot !== 'undefined') {
+          closeChatbot()
+        }
+      }
+    }
+    mountRef.current = true;
+  }, [bridgeType])
+
   return (
     <>
       {!bridgeType && <LoadingSpinner />}
@@ -47,7 +63,9 @@ const Page = ({ params }) => {
             <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
             <div className="w-full md:w-1/3 flex-1 chatPage min-w-[450px]">
               <div className="p-4 m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
-                {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />}
+                {/* {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />} */}
+                <Chatbot params={params} />
+                <Chat params={params} />
               </div>
             </div>
           </div>
