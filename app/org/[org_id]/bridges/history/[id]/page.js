@@ -1,15 +1,14 @@
 "use client"
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
-import EmbedScriptLoader from "@/components/historyPageComponents/embedScriptLoader";
 import Sidebar from "@/components/historyPageComponents/sidebar";
 import ThreadItem from "@/components/historyPageComponents/threadItem";
 import Protected from "@/components/protected";
 import { getSingleMessage } from "@/config";
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { getHistoryAction, getThread } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from "react-redux";
 
 export const runtime = "edge";
@@ -21,10 +20,9 @@ function Page({ params }) {
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
 
-  const { historyData, thread, embedToken, integrationData } = useCustomSelector((state) => ({
+  const { historyData, thread, integrationData } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread,
-    embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData
   }));
   const searchParams = useSearchParams();
@@ -167,8 +165,7 @@ function Page({ params }) {
   // }
 
   return (
-    <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
-      <EmbedScriptLoader embedToken={embedToken} />
+    <div className="bg-base-100  relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center overflow-scroll justify-center ">

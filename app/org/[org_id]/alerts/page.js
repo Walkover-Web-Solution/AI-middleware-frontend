@@ -2,7 +2,7 @@
 
 import React, { useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { useCustomSelector } from '@/customSelector/customSelector';
+import { useCustomSelector } from '@/customHooks/customSelector';
 import { createWebhookAlertAction, deleteWebhookAlertAction, getAllWebhookAlertAction, updateWebhookAlertAction } from '@/store/action/webhookAlertAction';
 import { ChevronDown, Info, SquarePen, Trash2 } from 'lucide-react';
 import { ALERT_TYPE, WEBHOOKALERT_COLUMNS } from '@/utils/enums';

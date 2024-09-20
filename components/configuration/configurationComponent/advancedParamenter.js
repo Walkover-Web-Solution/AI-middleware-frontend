@@ -1,4 +1,4 @@
-import { useCustomSelector } from '@/customSelector/customSelector';
+import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';

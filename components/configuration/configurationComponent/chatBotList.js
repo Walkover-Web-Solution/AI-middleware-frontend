@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowUpRight, BarChart, Plus, X, Bot } from 'lucide-react';
-import { useCustomSelector } from '@/customSelector/customSelector';
+import { useCustomSelector } from '@/customHooks/customSelector';
 import { addorRemoveBridgeInChatBotAction } from '@/store/action/chatBotAction';
 import { useDispatch } from 'react-redux';
 

@@ -1,4 +1,4 @@
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { DEFAULT_MODEL, SERVICES } from "@/jsonFiles/bridgeParameter";
 import { createBridgeAction } from "@/store/action/bridgeAction";
 import { getModelAction } from "@/store/action/modelAction";
