@@ -65,7 +65,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   }
 
   return (
-    <div className="drawer-side bg-base-200 border-r" id="sidebar">
+    <div className="drawer-side bg-base-200 border-r relative" id="sidebar">
       <div className="p-4 gap-3 flex flex-col">
         <div className="collapse collapse-arrow join-item border border-base-300">
           <input type="checkbox" className="peer" />
@@ -113,45 +113,51 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
           <div className="slider-container w-[fixed-width] overflow-x-auto">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData.map((item) => (
-                <li key={item.id} className={` ${selectedThread === item.thread_id
-                    ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary"
-                    : ""
-                    } block truncateflex items-center min-w-[min-width] flex flex-row`}
-                    onClick={() => threadHandler(item.thread_id)}>
-                  {isThreadSelectable && (
-                    <div onClick={(e)=>{
-                       e.stopPropagation()
-                    }}><input
-                    type="checkbox"
-                    className="checkbox checkbox-lg mr-2 bg-white"
-                    checked={selectedThreadIds?.includes(item.thread_id)}
-                    onChange={() => handleThreadIds(item.thread_id)}
-                  /></div>
-                  )}
-                  <a>
-                    {item.thread_id}
-                  </a>
-                </li>
+                <div className="flex">
+                  {isThreadSelectable && <div onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      className="checkbox checkbox-lg mr-2 bg-white"
+                      checked={selectedThreadIds?.includes(item.thread_id)}
+                      onChange={() => handleThreadIds(item.thread_id)}
+                    />
+                  </div>}
+                  <li
+                    key={item.id}
+                    className={`${selectedThread === item.thread_id
+                      ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
+                      : ""
+                      } flex-grow cursor-pointer`} // Add flex-grow and cursor-pointer
+                    onClick={() => threadHandler(item.thread_id)}
+                  >
+                    <a className="block w-full h-full"> {/* Ensure the anchor takes full width and height */}
+                      {item.thread_id}
+                    </a>
+                  </li>
+                </div>
+
               ))}
             </ul>
           </div>
         </InfiniteScroll>
       )}
-      {!isThreadSelectable && <button onClick={() => { setIsThreadSelectable(true) }} className="btn fixed bottom-2">
-        Generate Fine tunning file
-      </button>}
-      {
-        isThreadSelectable && (
-          <div className="fixed bottom-2">
-            <button onClick={handleDownload} className="btn">
-              Download <Download size={16} />
-            </button>
-            <button onClick={() => setIsThreadSelectable(false)} className="btn">
-              Cancel
-            </button>
-          </div>
-        )
-      }
+      <div className="fixed bottom-2 left-16">
+        {!isThreadSelectable && <button onClick={() => { setIsThreadSelectable(true) }} className="btn">
+          Generate Fine tunning file
+        </button>}
+        {
+          isThreadSelectable && (
+            <div >
+              <button onClick={handleDownload} className="btn">
+                Download <Download size={16} />
+              </button>
+              <button onClick={() => setIsThreadSelectable(false)} className="btn">
+                Cancel
+              </button>
+            </div>
+          )
+        }
+      </div>
     </div>
   )
 };

@@ -8,6 +8,10 @@ import CodeBlock from "../codeBlock/codeBlock";
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params }) => {
   const dispatch = useDispatch();
+  const [showNormalMessage, setShowNormalMessage] = useState(false);
+  const handleToggle = () => {
+    setShowNormalMessage((prevState) => !prevState);
+  };
   const [modalInput, setModalInput] = useState("");
   const modalRef = useRef(null);
 
@@ -68,12 +72,22 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
             <div className="chat-image avatar flex justify-center items-center">
               <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center">
-                {item.role === "user" ? <User size={20}/> : <Bot size={20}/>}
+                {item.role === "user" ? <User size={20} /> : <Bot size={20} />}
               </div>
             </div>
-            <div className="chat-header flex gap-2">
-              {item.updated_message ? <p className="text-xs opacity-50">Edited</p> : ""}
-              <time className="text-xs opacity-50">{formatDateAndTime(item.createdAt)}</time>
+            <div className="chat-header flex gap-4 items-center mb-1">
+              {item.role === 'assistant' && item.chatbot_message ?
+                <div className="flex gap-2">
+                  <div className="text-gray-500">switch to normal response</div>
+                  <input
+                    type="checkbox"
+                    className="toggle"
+                    checked={showNormalMessage}
+                    onChange={handleToggle}
+                  />
+                </div>
+                : ""}
+                {item.updated_message ? <p className="text-xs opacity-50">Edited</p> : ""}
             </div>
             <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble`} onClick={() => threadHandler(item.thread_id, item)}>
               <ReactMarkdown components={{
@@ -86,7 +100,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     {children}
                   </CodeBlock>
                 )
-              }}>{item?.updated_message || item?.content}</ReactMarkdown>
+              }}>
+                {showNormalMessage ? item?.content : item?.updated_message || item?.chatbot_message || item?.content}
+              </ReactMarkdown>
               {item?.role === 'assistant' && (
                 <div className="tooltip absolute top-2  right-2 text-sm cursor-pointer" data-tip="Edit response">
                   <Pencil
@@ -96,6 +112,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </div>
               )}
             </div>
+            {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
           {
             item?.error && (
@@ -110,6 +127,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             )
           }
+          
         </div>
       )}
       {/* Modal */}
