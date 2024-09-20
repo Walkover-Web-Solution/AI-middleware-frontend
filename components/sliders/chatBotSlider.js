@@ -1,4 +1,4 @@
-import { useCustomSelector } from '@/customSelector/customSelector';
+import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
 import { X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';

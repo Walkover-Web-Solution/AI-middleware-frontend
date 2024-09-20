@@ -5,8 +5,8 @@ import Chat from "@/components/configuration/chat";
 import Chatbot from "@/components/configuration/chatbot";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
-import { useCustomSelector } from "@/customSelector/customSelector";
-import { createApiAction, getSingleBridgesAction, integrationAction } from "@/store/action/bridgeAction";
+import { useCustomSelector } from "@/customHooks/customSelector";
+import { getSingleBridgesAction } from "@/store/action/bridgeAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -14,10 +14,9 @@ import { useDispatch } from "react-redux";
 export const runtime = 'edge';
 const Page = ({ params }) => {
   const dispatch = useDispatch();
-  const { bridgeType, service, embedToken, isServiceModelsAvailable } = useCustomSelector((state) => ({
+  const { bridgeType, service, isServiceModelsAvailable } = useCustomSelector((state) => ({
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
-    embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service],
   }));
 
@@ -32,52 +31,8 @@ const Page = ({ params }) => {
   }, [service]);
 
   useEffect(() => {
-    if (embedToken) {
-      const script = document.createElement("script");
-      script.setAttribute("embedToken", embedToken);
-      script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
-      script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC;
-      document.body.appendChild(script);
-
-      return () => {
-        document.body.removeChild(document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID));
-      };
-    }
-  }, [embedToken]);
-
-  useEffect(() => {
-    window.addEventListener("message", handleMessage);
-
-    return () => {
-      window.removeEventListener("message", handleMessage);
-    };
-  }, [params.id]);
-
-  useEffect(() => {
     handleResizer();
   }, []);
-
-  function handleMessage(e) {
-    // todo: need to make api call to update the name & description
-    if (e?.data?.webhookurl) {
-      const dataToSend = {
-        ...e.data,
-        status: e?.data?.action
-      }
-      dispatch(integrationAction(dataToSend, params?.org_id));
-      if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
-        const dataFromEmbed = {
-          url: e?.data?.webhookurl,
-          payload: e?.data?.payload,
-          desc: e?.data?.description,
-          id: e?.data?.id,
-          status: e?.data?.action,
-          title: e?.data?.title,
-        };
-        dispatch(createApiAction(params.org_id, dataFromEmbed));
-      }
-    }
-  }
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEffect, useMemo } from "react";
 
 const Chatbot = ({ params }) => {

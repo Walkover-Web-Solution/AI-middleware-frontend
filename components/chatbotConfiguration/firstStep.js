@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createOrgToken } from "@/config";
 import { Copy } from "lucide-react";
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import CopyButton from "../copyButton/copyButton";
 
 function InputWithCopyButton({ label, placeholder, value, disabled }) {

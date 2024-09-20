@@ -1,7 +1,7 @@
 "use client"
 import LoadingSpinner from '@/components/loadingSpinner'
 import Protected from '@/components/protected'
-import { useCustomSelector } from '@/customSelector/customSelector'
+import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
 import { Copy, Trash2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
