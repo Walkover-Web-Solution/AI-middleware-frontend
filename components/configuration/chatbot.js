@@ -41,7 +41,7 @@ const Chatbot = ({ params }) => {
             if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot')) {
                 window.SendDataToChatbot({
                     bridgeName: bridgeSlugName,
-                    threadId: bridgeName.replaceAll(" ", ""),
+                    threadId: bridgeName?.replaceAll(" ", ""),
                     variables: {},
                     parentId: 'parentChatbot',
                     fullScreen: true,
