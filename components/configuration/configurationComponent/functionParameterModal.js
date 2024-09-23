@@ -196,7 +196,11 @@
         };
 
         const handleSaveFunctionData = () => {
-            dispatch(updateFuntionApiAction({function_id:toolData._id,dataToSend:toolData}))
+            const { _id, ...dataToSend } = toolData;
+            dispatch(updateFuntionApiAction({
+                function_id: _id,
+                dataToSend: dataToSend,
+            }));
             setToolData("");
         };
 

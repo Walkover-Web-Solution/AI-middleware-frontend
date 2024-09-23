@@ -524,7 +524,7 @@ export const getAllApikey = async (org_id) => {
 
 export const updateFunctionApi = async ({function_id,dataToSend}) => {
   try {
-    const response = await axios.put(`${PYTHON_URL}/functions`,{function_id,dataToSend});
+    const response = await axios.put(`${PYTHON_URL}/functions/`,{function_id,dataToSend});
     return response.data;
   } catch (error) {
     console.error(error);
