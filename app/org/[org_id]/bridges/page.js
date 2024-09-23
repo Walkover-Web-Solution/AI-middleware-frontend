@@ -33,7 +33,6 @@ function Home({ params }) {
   );
 
   const onClickConfigure = (id) => {
-    console.log('id,', id)
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
   };
 
