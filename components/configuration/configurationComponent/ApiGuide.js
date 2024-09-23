@@ -15,6 +15,25 @@ const ComplitionApi = (bridgeId) => {
   }'`
 }
 
+const ResponseFormat = () => {
+  return `{
+    "success": true,
+    "response": {
+         "data": {
+            "id": "chatcmpl-785654654v4ew54656",
+            "content": "Response from the AI",
+            "model": "Your selected model",
+            "role": "assistant",
+            "finish_reason": "stop"
+         },
+         "usage": {
+            "input_tokens": 269,
+            "output_tokens": 10,
+            "total_tokens": 279
+         }
+    }
+  }`
+}
 const Section = ({ title, caption, children }) => (
   <div className="flex items-start flex-col justify-center">
     <h3 className="text-lg font-semibold">{title}</h3>
@@ -27,9 +46,7 @@ const ApiGuide = ({ params }) => {
   return (
     <div className="min-h-screen gap-4 flex flex-col">
       <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
-
         <Section title="Step 1" caption="Create `pauthkey`" />
-
         <p className=" text-sm">
           Follow the on-screen instructions to create a new API key. Ignore if already created
           <br /> <Link href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create pauthkey</Link>
@@ -45,7 +62,17 @@ const ApiGuide = ({ params }) => {
             </code>
           </pre>
         </div>
-
+      </div>
+      <div className="flex flex-col gap-4 bg-white rounded-lg shadow-lg p-4">
+        <Section title="Response Format" />
+        <div className="mockup-code relative">
+          <CopyButton data={ResponseFormat()} />
+          <pre className="break-words whitespace-pre-wrap">
+            <code>
+              {ResponseFormat()}
+            </code>
+          </pre>
+        </div>
       </div>
     </div>
   );
