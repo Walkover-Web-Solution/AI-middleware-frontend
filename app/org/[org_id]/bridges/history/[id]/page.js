@@ -7,6 +7,7 @@ import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getHistoryAction, getThread } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
+import { Info } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from "react-redux";
@@ -172,6 +173,10 @@ function Page({ params }) {
           <div className="w-full min-h-screen">
             <div className="w-full text-start">
               <div className="pb-16 px-3 pt-4">
+                <div className="flex items-center gap-5">
+                  <p role='alert' className='label-text-alt mt-2 alert p-2'><Info size={16} />On clicking the user message you can see the thread details</p>
+                  <p role='alert' className='label-text-alt mt-2 alert p-2'><Info size={16} />On clicking on chatbot icon you can change the response type</p>
+                </div>
                 {thread && thread.map((item, index) => (
                   <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
                 ))}
