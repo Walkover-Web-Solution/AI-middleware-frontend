@@ -5,6 +5,7 @@ import { toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, KeyRound, LogOut, Mail, Settings2, X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
+import CreateOrg from '../createNewOrg';
 
 function OrgSlider() {
     const router = useRouter();
@@ -13,10 +14,20 @@ function OrgSlider() {
     const [searchQuery, setSearchQuery] = useState('');
     const organizations = useCustomSelector((state) => state.userDetailsReducer.organizations);
     const userdetails = useCustomSelector((state) => state?.userDetailsReducer?.userDetails);
+    const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
 
     const filteredOrganizations = Object.values(organizations).filter(
         (item) => item.name.toLowerCase()?.includes(searchQuery.toLowerCase())
     );
+
+    const handleOpenCreateOrgModal = useCallback(() => {
+        setShowCreateOrgModal(true);
+    }, []);
+
+    const handleCloseCreateOrgModal = useCallback(() => {
+        setShowCreateOrgModal(false);
+    }, []);
+
 
     const logoutHandler = async () => {
         try {
@@ -75,15 +86,24 @@ function OrgSlider() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="border border-gray-300 rounded p-2 w-full"
                 />
-                <ul className="menu p-0 w-full   text-base-content">
-                    {filteredOrganizations.slice() // Create a copy of the array to avoid mutating the original
-                        .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically based on title
-                        .map((item) => (
-                            <li key={item.id}><a className={`${item.id == path[2] ? "active" : `${item.id}`} py-2 px-2 rounded-md`} key={item.id}
-                                onClick={() => { handleSwitchOrg(item.id, item.name) }} >
-                                <Building2 size={16} /> {item.name}</a>
-                            </li>
-                        ))}
+                <button onClick={handleOpenCreateOrgModal} className="  bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50 "><span className='flex justify-center items-center gap-2 text-gray font-semibold'>+ Create New Org<Building2 size={16} /></span></button>
+                <ul className="menu p-0 w-full text-base-content">
+                    {filteredOrganizations.length === 0 ? (
+                        <div className='max-w-full'>
+                            <p className="py-2 px-2 rounded-md truncate max-w-full">No organizations found</p>
+                        </div>
+                    ) : (
+                        filteredOrganizations.slice() // Create a copy of the array to avoid mutating the original
+                            .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically based on title
+                            .map((item) => (
+                                <li key={item.id}>
+                                    <a className={`${item.id == path[2] ? "active" : `${item.id}`} py-2 px-2 rounded-md`}
+                                        onClick={() => { handleSwitchOrg(item.id, item.name) }}>
+                                        <Building2 size={16} /> {item.name}
+                                    </a>
+                                </li>
+                            ))
+                    )}
                 </ul>
             </div>
             <div className='mt-auto w-full'>
@@ -110,6 +130,7 @@ function OrgSlider() {
 
                 </details>
             </div>
+            {showCreateOrgModal && <CreateOrg onClose={handleCloseCreateOrgModal} handleSwitchOrg={handleSwitchOrg} />}
         </aside>
     )
 }
