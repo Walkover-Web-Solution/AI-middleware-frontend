@@ -1,4 +1,4 @@
-import { useCustomSelector } from "@/customSelector/customSelector"
+import { useCustomSelector } from "@/customHooks/customSelector"
 import { addorRemoveBridgeInChatBotAction } from "@/store/action/chatBotAction"
 import { BarChart, Bot, Plus, X } from "lucide-react"
 import { useState } from "react"

@@ -6,7 +6,7 @@ import PrivateFormSection from "@/components/chatbotConfiguration/firstStep";
 import FormSection from "@/components/chatbotConfiguration/formSection";
 import SecondStep from "@/components/chatbotConfiguration/secondStep";
 import Protected from "@/components/protected";
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { getChatBotDetailsAction } from "@/store/action/chatBotAction";
 import { Pencil } from "lucide-react";
 import { useEffect } from "react";

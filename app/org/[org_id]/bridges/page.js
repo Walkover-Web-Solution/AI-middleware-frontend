@@ -2,7 +2,7 @@
 import CreateNewBridge from "@/components/createNewBridge";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { getIconOfService } from "@/utils/utility";
 import { Box } from "lucide-react";
 import { useRouter } from 'next/navigation';

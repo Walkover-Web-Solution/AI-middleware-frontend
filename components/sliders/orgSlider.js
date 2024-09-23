@@ -1,5 +1,5 @@
 import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
-import { useCustomSelector } from '@/customSelector/customSelector';
+import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, KeyRound, LogOut, Mail, Settings2, X } from 'lucide-react';

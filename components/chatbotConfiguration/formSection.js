@@ -1,4 +1,4 @@
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { getChatBotDetailsAction, updateChatBotConfigAction } from "@/store/action/chatBotAction";
 import { RefreshCw } from "lucide-react";
 import { useEffect, useState, useCallback, useRef } from "react";

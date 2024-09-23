@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { getChatBotDetailsAction } from "@/store/action/chatBotAction";
 import { Bot } from "lucide-react";
 import { useRouter } from "next/navigation";

@@ -1,4 +1,4 @@
-import { useCustomSelector } from "@/customSelector/customSelector";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { createOrRemoveActionBridge } from "@/store/action/chatBotAction";
 import { Plus } from "lucide-react";
 import { useRef, useState, useEffect, useCallback } from "react";

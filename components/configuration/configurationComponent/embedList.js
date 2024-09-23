@@ -1,4 +1,4 @@
-import { useCustomSelector } from '@/customSelector/customSelector';
+import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { CircleAlert, Settings } from 'lucide-react';
 import React, { useMemo, useState } from 'react';

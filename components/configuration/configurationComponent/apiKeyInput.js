@@ -1,8 +1,7 @@
-import { useCustomSelector } from '@/customSelector/customSelector';
-import { getAllApikeyAction } from '@/store/action/apiKeyAction';
+import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { usePathname } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 const ApiKeyInput = ({ params }) => {
@@ -10,14 +9,6 @@ const ApiKeyInput = ({ params }) => {
     const pathName = usePathname();
     const path = pathName?.split('?')[0].split('/');
     const org_id = path[2];
-
-    // Dispatch action to fetch API keys
-    useEffect(() => {
-        if (org_id) {
-            dispatch(getAllApikeyAction(org_id));
-        }
-    }, [dispatch, org_id]);
-
     // Retrieve necessary state using custom selector
     const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id } = useCustomSelector((state) => {
         const bridgeMap = state?.bridgeReducer?.allBridgesMap || {};
