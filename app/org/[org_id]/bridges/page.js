@@ -3,14 +3,18 @@ import CreateNewBridge from "@/components/createNewBridge";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
+import { duplicateBridgeAction } from "@/store/action/bridgeAction";
 import { getIconOfService } from "@/utils/utility";
-import { Box } from "lucide-react";
+import { Ellipsis } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 export const runtime = 'edge';
 
 function Home({ params }) {
+  const dispatch = useDispatch();
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
 
   const { isLoading } = useCustomSelector((state) => ({
@@ -26,12 +30,26 @@ function Home({ params }) {
     item?.service?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
     item._id.toLowerCase().includes(searchTerm.toLowerCase()) // Add this line
-
   );
 
   const onClickConfigure = (id) => {
+    console.log('id,', id)
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
   };
+
+  const handleDuplicateBridge = (bridgeId) => {
+    try {
+      dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId) => {
+        if (newBridgeId) {
+          router.push(`/org/${params?.org_id}/bridges/configure/${newBridgeId}`)
+          toast.success('Bridge duplicate successfully');
+        }
+      });
+    } catch (error) {
+      console.error('Failed to duplicate bridge:', error);
+      toast.error('Error duplicating bridge');
+    }
+  }
 
   return (
     <div className="drawer lg:drawer-open">
@@ -61,38 +79,43 @@ function Home({ params }) {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <button className="btn w-full md:w-auto float-start md:m-4 btn-primary" onClick={() => router.push(`/org/${params.org_id}/metrics`)}>
-                    <Box size={16} /> Metrics
-                  </button>
                 </div>
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
                   {filteredBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
-                    <div key={item._id} onClick={() => onClickConfigure(item._id)} className="flex flex-col items-center gap-7 rounded-md border cursor-pointer hover:shadow-lg bg-base-100">
-                      <div className="w-full p-4 flex flex-col justify-between h-[200px] items-start">
-                        <h1 className="inline-flex truncate w-full items-center gap-2 text-lg font-semibold text-base-content">
-                          {getIconOfService(item.service)}
-                          {item.name}
-                        </h1>
-                        <div className="text-xs w-full flex items-center gap-2 line-clamp-5">
-                          {item.slugName && <span>SlugName: {item.slugName}</span>}
-                          {item.configuration?.prompt && (
-                            Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
-                              <div key={index}>
-                                <p>Role: {promptItem.role}</p>
-                                <p>Content: {promptItem.content}</p>
-                              </div>
-                            )) : <p>Prompt: {item.configuration.prompt}</p>
-                          )}
-                          {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
+                    <div className="flex rounded-md border cursor-pointer hover:shadow-lg bg-base-100 p-4 relative w-full">
+                      <div key={item._id} className="flex flex-col items-center w-full" onClick={() => onClickConfigure(item._id)}>
+                        <div className="flex flex-col h-[200px] gap-2 w-full">
+                          <h1 className="flex items-center overflow-hidden gap-2 text-lg leading-5 font-semibold text-base-content mr-2">
+                            {getIconOfService(item.service)}
+                            {item.name}
+                          </h1>
+                          <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
+                            {item.slugName && <span>SlugName: {item.slugName}</span>}
+                            {item.configuration?.prompt && (
+                              Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
+                                <div key={index}>
+                                  <p>Role: {promptItem.role}</p>
+                                  <p>Content: {promptItem.content}</p>
+                                </div>
+                              )) : <p>Prompt: {item.configuration.prompt}</p>
+                            )}
+                            {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
+                          </p>
+                          <div className="mt-auto">
+                            <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-xs font-semibold">
+                              {item.service}
+                            </span>
+                            <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-xs font-semibold">
+                              {item.configuration?.model || ""}
+                            </span>
+                          </div>
                         </div>
-                        <div className="mt-auto">
-                          <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
-                            {item.service}
-                          </span>
-                          <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-[10px] font-semibold">
-                            {item.configuration?.model || ""}
-                          </span>
-                        </div>
+                      </div>
+                      <div className="dropdown bg-transparent absolute right-3 top-2">
+                        <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
+                        <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                          <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li>
+                        </ul>
                       </div>
                     </div>
                   ))}

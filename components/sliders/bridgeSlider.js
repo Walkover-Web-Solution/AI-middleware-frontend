@@ -29,7 +29,7 @@ function BridgeSlider() {
 
     const handlCloseBridgeSlider = useCallback(() => {
         toggleSidebar('default-bridge-sidebar');
-    },[])
+    }, [])
 
     return (
         <aside
@@ -40,7 +40,7 @@ function BridgeSlider() {
             <div className="flex w-full flex-col gap-4">
                 <div className='flex flex-row justify-between'>
                     <p className='text-xl font-semibold'> Bridges </p>
-                    <X className="block md:hidden" onClick={handlCloseBridgeSlider}/>
+                    <X className="block md:hidden" onClick={handlCloseBridgeSlider} />
                 </div>
                 {/* Input field for bridge search */}
                 <input
@@ -50,24 +50,32 @@ function BridgeSlider() {
                     onChange={handleBridgeSearchChange}
                     className="border border-gray-300 rounded p-2 w-full"
                 />
+                <button className="bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() => document.getElementById('my_modal_1').showModal()}>
+                    + Create new bridge
+                </button>
                 {/* Render filtered bridge list */}
                 <ul className="menu p-0 w-full truncate text-base-content">
-                    {filteredBridgesList.slice() // Create a copy of the array to avoid mutating the original
-                        .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically based on title
-                        .map((item) => (
-                            <li key={item._id} className='max-w-full'>
-                                <a
-                                    className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md truncate max-w-full`}
-                                    onClick={() => handleNavigation(item._id)}
-                                >
-                                    {getIconOfService(item.service)}
-                                    {item.name}
-                                </a>
-                            </li>
-                        ))}
+                    {filteredBridgesList.length === 0 ? (
+                        <div className='max-w-full'>
+                            <p className="py-2 px-2 rounded-md truncate max-w-full">No bridges found</p>
+                        </div>
+                    ) : (
+                        filteredBridgesList.slice() // Create a copy of the array to avoid mutating the original
+                            .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically based on title
+                            .map((item) => (
+                                <li key={item._id} className='max-w-full'>
+                                    <a
+                                        className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md truncate max-w-full`}
+                                        onClick={() => handleNavigation(item._id)}
+                                    >
+                                        {getIconOfService(item.service)}
+                                        {item.name}
+                                    </a>
+                                </li>
+                            ))
+                    )}
                 </ul>
             </div>
-
             <CreateNewBridge orgid={path[2]} Heading="Create New Bridge" />
         </aside>
     )
