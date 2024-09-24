@@ -55,7 +55,7 @@ const CreateOrg = ({ onClose, handleSwitchOrg }) => {
                 <div className="flex items-center justify-center min-h-screen">
                     <form className="modal-box relative p-5 bg-white rounded-lg shadow-xl mx-4" onSubmit={createOrgHandler}>
                         <h3 className="font-bold text-lg mb-2">Create Organization</h3>
-                        <label className='label-text'>Name</label>
+                        <label className='label-text mb-1'>Name</label>
                         <input
                             type="text"
                             name="name"
@@ -67,7 +67,7 @@ const CreateOrg = ({ onClose, handleSwitchOrg }) => {
                             maxLength={40}
                             required
                         />
-                        <label className='label-text'>Description</label>
+                        <label className='label-text mb-1'>Description</label>
                         <textarea
                             id="message"
                             name="about"
@@ -75,7 +75,8 @@ const CreateOrg = ({ onClose, handleSwitchOrg }) => {
                             value={orgDetails.about}
                             onChange={handleChange}
                             placeholder="About your Organization"
-                            className="p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500"
+                            // className="p-2.5 w-full text-sm text-gray-900 rounded-lg"
+                            className="textarea textarea-bordered w-full mb-4"
                             minLength={10}
                             maxLength={400}
                             required
