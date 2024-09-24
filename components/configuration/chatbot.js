@@ -38,11 +38,10 @@ const Chatbot = ({ params }) => {
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot')) {
+            if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeName && bridgeType) {
                 window.SendDataToChatbot({
                     bridgeName: bridgeSlugName,
                     threadId: bridgeName?.replaceAll(" ", ""),
-                    variables: {},
                     parentId: 'parentChatbot',
                     fullScreen: true,
                     hideCloseButton: true,
