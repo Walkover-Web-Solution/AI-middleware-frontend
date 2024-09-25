@@ -20,8 +20,14 @@ export const historyReducer = createSlice({
       state.success = true;
     },
     fetchThreadReducer: (state, action) => {
-      state.thread = action.payload.data;
+      if (action.payload.nextPage == 1) { 
+        state.thread = action.payload.data.data; 
+      }
+      else {
+        state.thread = [...action.payload.data.data, ...state.thread];
+      }
     },
+    
     clearThreadData: (state) => {
       state.thread = [];
     },
