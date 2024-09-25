@@ -200,3 +200,22 @@ export const validateUrl = (url) => {
         '(\\#[\\w\\d\\-]*)?$', 'i'); // Optional fragment
     return pattern.test(url);
 };
+
+export function flattenParameters(parameters, prefix = '') {
+    let flat = [];
+    Object.entries(parameters).forEach(([key, value]) => {
+        const currentKey = prefix ? `${prefix}.${key}` : key;
+        flat.push({
+            key: currentKey,
+            type: value.type,
+            description: value.description,
+            enum: value.enum,
+            required_params: value.required_params,
+            parameter: value.parameter
+        });
+        if (value.type === 'object' && value.parameter) {
+            flat = flat.concat(flattenParameters(value.parameter, currentKey));
+        }
+    });
+    return flat;
+}
