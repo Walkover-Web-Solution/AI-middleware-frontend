@@ -213,7 +213,7 @@ export function flattenParameters(parameters, prefix = '') {
             required_params: value.required_params,
             parameter: value.parameter
         });
-        if (value.type === 'object' && value.parameter) {
+        if (Object.keys(value.parameter).length > 0) {
             flat = flat.concat(flattenParameters(value.parameter, currentKey));
         }
     });

@@ -245,12 +245,12 @@ function FunctionParameterModal({ functionId, params }) {
                                                 value={
                                                     getNestedFieldValue(toolData.fields, param.key.split('.'))?.type || param.type || ""
                                                 } // Get the correct nested value
-                                                disabled={param.type === 'object'}
+                                                //  disabled={param.type === 'object'}
                                                 onChange={(e) => handleTypeChange(param.key, e.target.value)}
                                             >
                                                 <option value="" disabled>Select parameter type</option>
                                                 {parameterTypes && parameterTypes.map((type, index) => (
-                                                    <option key={index} value={type} disabled={type === 'object'}>
+                                                    <option key={index} value={type}>
                                                         {type}
 
                                                     </option>
