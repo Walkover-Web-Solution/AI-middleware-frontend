@@ -17,10 +17,9 @@ function BridgeSlider() {
         setBridgeSearchQuery(e.target.value);
     };
 
-    // Filtered bridge list based on search query
     const filteredBridgesList = bridgesList.filter(
         (item) => 
-            item.name.toLowerCase().includes(bridgeSearchQuery.toLowerCase()) &&
+            item.name.toLowerCase().includes(bridgeSearchQuery.toLowerCase()) ||
             item.slugName.toLowerCase().includes(bridgeSearchQuery.toLowerCase())
     );
     
