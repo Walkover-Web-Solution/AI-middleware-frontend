@@ -11,7 +11,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
-        setSearchQuery(e.target.value); // Update search query when the input changes
+        setSearchQuery(e.target?.value || ""); // Update search query when the input changes
     };
 
     const handleItemClick = (id) => {
@@ -23,7 +23,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             // .filter(value => !(connectedFunctions || [])?.includes(value?._id))
             .filter(value => {
                 const title = integrationData[value?.endpoint]?.title || integrationData[value?.function_name]?.title;
-                return title && title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                return title !== undefined && title?.toLowerCase()?.includes(searchQuery.toLowerCase()) &&
                     !(connectedFunctions || [])?.includes(value?._id);
             })
             .slice() // Create a copy of the array to avoid mutating the original
