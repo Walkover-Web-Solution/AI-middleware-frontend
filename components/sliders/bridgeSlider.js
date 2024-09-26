@@ -19,8 +19,11 @@ function BridgeSlider() {
 
     // Filtered bridge list based on search query
     const filteredBridgesList = bridgesList.filter(
-        (item) => item.name.toLowerCase().includes(bridgeSearchQuery.toLowerCase())
+        (item) => 
+            item?.name?.toLowerCase()?.includes(bridgeSearchQuery?.toLowerCase()) &&
+            item?.slugName?.toLowerCase()?.includes(bridgeSearchQuery?.toLowerCase())
     );
+    
 
     const handleNavigation = (id) => {
         router.push(`/org/${path[2]}/bridges/configure/${id}`);
