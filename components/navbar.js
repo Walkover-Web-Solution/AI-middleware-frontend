@@ -65,7 +65,7 @@ function Navbar() {
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
 
   return (
-    <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap `}>
+    <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap sticky top-0 z-50 bg-white/50 backdrop-blur`}>
       <div className='flex items-center w-full justify-start gap-2'>
         <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/${path[3]}`)}>
           <Home size={16} />
