@@ -1,13 +1,18 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
 import { Plus } from 'lucide-react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [] }) {
     const { integrationData, function_data } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData,
-    }))
+    }));
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleInputChange = (e) => {
+        setSearchQuery(e.target?.value || ""); // Update search query when the input changes
+    };
 
     const handleItemClick = (id) => {
         onSelect(id); // Assuming onSelect is a function you've defined elsewhere
@@ -18,7 +23,8 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             // .filter(value => !(connectedFunctions || [])?.includes(value?._id))
             .filter(value => {
                 const title = integrationData[value?.endpoint]?.title || integrationData[value?.function_name]?.title;
-                return title !== undefined && !(connectedFunctions || [])?.includes(value?._id);
+                return title !== undefined && title?.toLowerCase()?.includes(searchQuery.toLowerCase()) &&
+                    !(connectedFunctions || [])?.includes(value?._id);
             })
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
@@ -50,16 +56,27 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 )
             }
             )
-    ), [integrationData, function_data, getStatusClass, connectedFunctions]);
+    ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions]);
 
     return (
         <div className="dropdown dropdown-right">
             <button tabIndex={0}
                 className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect function"}</button>
-            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-0">
+            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                 <div className='flex flex-col gap-2 w-full'>
                     <li className="text-sm font-semibold disabled">Suggested Functions</li>
-                    {renderEmbedSuggestions}
+                    <input
+                        type='text'
+                        placeholder='Search Function'
+                        value={searchQuery}
+                        onChange={handleInputChange} // Update search query on input change
+                        className='input input-bordered w-full input-sm'
+                    />
+                    {renderEmbedSuggestions.length > 0 ? (
+                        renderEmbedSuggestions
+                    ) : (
+                        <li className="text-center mt-2">No functions found</li>
+                    )}
                     {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket()}>
                         <div>
                             <Plus size={16} /><p className='font-semibold'>Add new Function</p>

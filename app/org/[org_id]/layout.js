@@ -87,13 +87,14 @@ export default function layoutOrgPage({ children, params }) {
         status: e?.data?.action
       }
       dispatch(integrationAction(dataToSend, params?.org_id));
-      if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
+      if ((e?.data?.action  === 'updated'|| e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
         const dataFromEmbed = {
           url: e?.data?.webhookurl,
           payload: e?.data?.payload,
           desc: e?.data?.description,
           id: e?.data?.id,
           status: e?.data?.action,
+          title: e?.data?.title,
         };
         dispatch(createApiAction(params.org_id, dataFromEmbed));
       }
