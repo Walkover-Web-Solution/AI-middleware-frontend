@@ -1,142 +1,187 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { parameterTypes } from '@/jsonFiles/bridgeParameter';
-import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { updateBridgeAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
+import { flattenParameters } from '@/utils/utility';
+import { isEqual } from 'lodash';
 import { Info, Trash2 } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 function FunctionParameterModal({ functionId, params }) {
     const dispatch = useDispatch();
-    const { bridge_tools, function_details } = useCustomSelector((state) => ({
-        bridge_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.tools || [],
+    const { function_details } = useCustomSelector((state) => ({
         function_details: state?.bridgeReducer?.org?.[params?.org_id]?.functionData?.[functionId] || {},
-    }))
+    }));
 
-    const initialFunctionData = useMemo(() => {
-        return bridge_tools.find(tool => tool?.name === functionId);
-    }, [functionId]);
-
+    const properties = function_details.fields || {};
     const [toolData, setToolData] = useState(function_details);
-    const { fields: properties, required_params: required } = toolData || {};
+    const [isDataAvailable, setIsDataAvailable] = useState(Object.keys(properties).length > 0);
+    const [isModified, setIsModified] = useState(false); // Track changes
 
-    // const {fields, required_params} = function_details || {};
-    // console.log(fields, required_params,2323);
-    const [isDataAvailable, setIsDataAvailable] = useState(Object.keys(properties || {}).length > 0);
+    const flattenedParameters = flattenParameters(properties);
 
-    // Update the state when `functionId` or `bridge_tools` changes
     useEffect(() => {
-        setToolData(initialFunctionData);
-        setIsDataAvailable(Object.keys(initialFunctionData?.properties || {}).length > 0);
-    }, [initialFunctionData]);
+        setToolData(function_details);
+        setIsDataAvailable(Object.keys(properties).length > 0);
+    }, [function_details, properties]);
 
-    // Handle checkbox change
+    useEffect(() => {
+        setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
+    }, [toolData, function_details]);
+
     const handleRequiredChange = (key) => {
-        setToolData(prevToolData => {
-            const updatedRequired = prevToolData.required.includes(key)
-                ? prevToolData.required.filter(item => item !== key)
-                : [...prevToolData.required, key];
+        const keyParts = key.split('.');
+        if (keyParts.length === 1) {
+            // Top-level field
+            setToolData(prevToolData => {
+                const updatedRequiredParams = prevToolData.required_params || [];
+                const newRequiredParams = updatedRequiredParams.includes(keyParts[0])
+                    ? updatedRequiredParams.filter(item => item !== keyParts[0])
+                    : [...updatedRequiredParams, keyParts[0]];
 
-            return {
-                ...prevToolData,
-                required: updatedRequired
-            };
-        });
+                return {
+                    ...prevToolData,
+                    required_params: newRequiredParams
+                };
+            });
+        } else {
+            // Nested field
+            setToolData(prevToolData => {
+                const updatedFields = updateField(prevToolData.fields, keyParts.slice(0, -1), (field) => {
+                    if (!field) {
+                        console.warn(`Field not found for key: ${keyParts.slice(0, -1).join('.')}`);
+                        return {}; // Return an empty object if field is not found
+                    }
+
+                    const fieldKey = keyParts[keyParts.length - 1];
+                    const updatedRequiredParams = field.required_params || [];
+                    const newRequiredParams = updatedRequiredParams.includes(fieldKey)
+                        ? updatedRequiredParams.filter(item => item !== fieldKey)
+                        : [...updatedRequiredParams, fieldKey];
+
+                    return {
+                        ...field,
+                        required_params: newRequiredParams
+                    };
+                });
+
+                return {
+                    ...prevToolData,
+                    fields: updatedFields
+                };
+            });
+        }
     };
 
     const handleDescriptionChange = (key, newDescription) => {
         setToolData(prevToolData => {
-            const updatedProperties = {
-                ...prevToolData.properties,
-                [key]: {
-                    ...prevToolData.properties[key],
-                    description: newDescription
-                }
-            };
-
+            const updatedFields = updateField(prevToolData.fields, key.split('.'), (field) => ({
+                ...field,
+                description: newDescription
+            }));
             return {
                 ...prevToolData,
-                properties: updatedProperties
+                fields: updatedFields
             };
         });
     };
+
+    const updateField = (fields, keyParts, updateFn) => {
+        const fieldClone = JSON.parse(JSON.stringify(fields)); // Deep clone the fields
+
+        const _updateField = (fields, keyParts) => {
+            if (keyParts.length === 1) {
+                // When we've reached the last key, apply the update function
+                fields[keyParts[0]] = updateFn(fields[keyParts[0]]);
+            } else {
+                const [head, ...tail] = keyParts;
+                if (fields[head] && fields[head].parameter) {
+                    // Continue to recursively traverse nested fields
+                    fields[head].parameter = _updateField(fields[head].parameter, tail);
+                }
+            }
+            return fields;
+        };
+
+        return _updateField(fieldClone, keyParts);
+    };
+    // Reset the modal data to the original function_details
+    const resetModalData = () => {
+        setToolData(function_details);
+    };
+
+    // Event handler to reset the modal when closed
+    const handleCloseModal = () => {
+        resetModalData();
+        document.getElementById('function-parameter-modal').close();
+    };
+
     const handleTypeChange = (key, newType) => {
         setToolData(prevToolData => {
-            const updatedProperties = {
-                ...prevToolData.properties,
-                [key]: {
-                    ...prevToolData.properties[key],
-                    type: newType
-                }
-            };
-
+            const updatedFields = updateField(prevToolData.fields, key.split('.'), (field) => ({
+                ...field,
+                type: newType // Update the type of the specific field
+            }));
             return {
                 ...prevToolData,
-                properties: updatedProperties
+                fields: updatedFields
             };
         });
     };
 
     const handleEnumChange = (key, newEnum) => {
         try {
-            // If the input is empty, remove the `enum` field
             if (!newEnum.trim()) {
                 setToolData(prevToolData => {
-                    const updatedProperties = JSON.parse(JSON.stringify(prevToolData.properties));
-                    // Check if the key exists in properties and has an enum field
-                    if (updatedProperties[key] && updatedProperties[key].enum) {
-                        delete updatedProperties[key]?.enum;
-                    }
+                    const updatedFields = updateField(prevToolData.fields, key.split('.'), (field) => {
+                        const { enum: _, ...rest } = field;
+                        return rest;
+                    });
                     return {
                         ...prevToolData,
-                        properties: updatedProperties
+                        fields: updatedFields
                     };
                 });
                 return;
             }
 
-            if (typeof newEnum === 'string') {
-                newEnum = newEnum.trim();
-                newEnum = newEnum.replace(/'/g, '"');
-                if (newEnum.startsWith("[") && newEnum.endsWith("]")) {
-                    newEnum = JSON.parse(newEnum);
-                } else {
-                    toast.error("Invalid format. Expected a JSON array format.");
-                }
+            let parsedEnum = newEnum.trim().replace(/'/g, '"');
+            if (parsedEnum.startsWith("[") && parsedEnum.endsWith("]")) {
+                parsedEnum = JSON.parse(parsedEnum);
+            } else {
+                toast.error("Invalid format. Expected a JSON array format.");
+                return;
             }
 
-            // Ensure the parsed value is an array
-            if (!Array.isArray(newEnum)) {
+            if (!Array.isArray(parsedEnum)) {
                 toast.error("Parsed value is not an array.");
+                return;
             }
 
-            // Update the state with the parsed array
             setToolData(prevToolData => {
-                const updatedProperties = {
-                    ...prevToolData.properties,
-                    [key]: {
-                        ...prevToolData.properties[key],
-                        enum: newEnum
-                    }
-                };
-
+                const updatedFields = updateField(prevToolData.fields, key.split('.'), (field) => ({
+                    ...field,
+                    enum: parsedEnum
+                }));
                 return {
                     ...prevToolData,
-                    properties: updatedProperties
+                    fields: updatedFields
                 };
             });
 
         } catch (error) {
-            toast.error("Failed to update enum:", error.message);
+            toast.error("Failed to update enum: " + error.message);
         }
     };
 
-
     const handleSaveFunctionData = () => {
-        const updatedTools = bridge_tools.map(tool =>
-            tool.name === toolData.name ? toolData : tool
-        );
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { tools: updatedTools } } }));
+        const { _id, ...dataToSend } = toolData;
+        dispatch(updateFuntionApiAction({
+            function_id: _id,
+            dataToSend: dataToSend,
+        }));
+        setToolData("");
     };
 
     const handleRemoveFunctionFromBridge = () => {
@@ -149,14 +194,19 @@ function FunctionParameterModal({ functionId, params }) {
             }
         })).then(() => {
             document.getElementById('function-parameter-modal').close();
-        }
-        );
-    }
+        });
+    };
+
+    const getNestedFieldValue = (fields, keyParts) => {
+        return keyParts.reduce((currentField, key) => {
+            return currentField?.parameter?.[key] || currentField?.[key] || {}; // Ensure fallback to an empty object
+        }, fields);
+    };
 
     return (
         <dialog id="function-parameter-modal" className="modal">
             <div className="modal-box w-11/12 max-w-5xl">
-                <div className='flex flex-row justify-between'>
+                <div className='flex flex-row justify-between mb-2'>
                     <span className='flex flex-row items-center gap-4'>
                         <h3 className="font-bold text-lg">Configure fields</h3>
                         <div className="flex flex-row gap-1">
@@ -164,9 +214,13 @@ function FunctionParameterModal({ functionId, params }) {
                             <span className='label-text-alt'>Used in {(function_details?.bridge_ids || [])?.length} bridges, changes may affect all bridges.</span>
                         </div>
                     </span>
-                    <button onClick={handleRemoveFunctionFromBridge} className='btn btn-sm btn-error text-white'><Trash2 size={16} />Remove function</button>
+                    <button onClick={handleRemoveFunctionFromBridge} className='btn btn-sm btn-error text-white'>
+                        <Trash2 size={16} /> Remove function
+                    </button>
                 </div>
-                {!isDataAvailable ? <p>No Parameters used in the function</p> :
+                {!isDataAvailable ? (
+                    <p>No Parameters used in the function</p>
+                ) : (
                     <div className="overflow-x-auto">
                         <table className="table">
                             {/* head */}
@@ -177,27 +231,52 @@ function FunctionParameterModal({ functionId, params }) {
                                     <th>Type</th>
                                     <th>Required</th>
                                     <th>Description</th>
-                                    <th>Enum: comma seperated</th>
+                                    <th>Enum: comma separated</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {Object.entries(properties || {}).map(([key, value], index) => (
-                                    <tr key={key}>
+                                {flattenedParameters.map((param, index) => (
+                                    <tr key={param.key}>
                                         <td>{index}</td>
-                                        <td>{key}</td>
+                                        <td>{param.key}</td>
                                         <td>
-                                            <select className="select select-sm select-bordered" value={value?.type} onChange={(e) => handleTypeChange(key, e.target.value)}>
-                                                <option disabled selected>Select parameter type</option>
-                                                {parameterTypes && (parameterTypes).map((type, index) => (
-                                                    <option key={index} value={type}>{type}</option>
+                                            <select
+                                                className="select select-sm select-bordered"
+                                                value={
+                                                    getNestedFieldValue(toolData.fields, param.key.split('.'))?.type || param.type || ""
+                                                } // Get the correct nested value
+                                                //  disabled={param.type === 'object'}
+                                                onChange={(e) => handleTypeChange(param.key, e.target.value)}
+                                            >
+                                                <option value="" disabled>Select parameter type</option>
+                                                {parameterTypes && parameterTypes.map((type, index) => (
+                                                    <option key={index} value={type}>
+                                                        {type}
+
+                                                    </option>
                                                 ))}
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="checkbox"
+                                            <input
+                                                type="checkbox"
                                                 className="checkbox"
-                                                defaultChecked={required?.includes(key)}
-                                                onChange={() => handleRequiredChange(key)}
+                                                checked={
+                                                    (() => {
+                                                        const keyParts = param.key.split('.');
+
+                                                        if (keyParts.length === 1) {
+                                                            // Top-level field
+                                                            return (toolData.required_params || []).includes(param.key);
+                                                        } else {
+                                                            // Nested field
+                                                            const parentKeyParts = keyParts.slice(0, -1);
+                                                            const nestedField = getNestedFieldValue(toolData.fields, parentKeyParts);
+                                                            return nestedField?.required_params?.includes(keyParts[keyParts.length - 1]) || false;
+                                                        }
+                                                    })()
+                                                }
+                                                onChange={() => handleRequiredChange(param.key)}
                                             />
                                         </td>
                                         <td>
@@ -205,35 +284,40 @@ function FunctionParameterModal({ functionId, params }) {
                                                 type="text"
                                                 placeholder="Parameter description"
                                                 className="input input-bordered w-full input-sm"
-                                                defaultValue={value?.description}
-                                                onBlur={(e) => handleDescriptionChange(key, e.target.value)}
+                                                defaultValue={param.description || ''}
+                                                onBlur={(e) => handleDescriptionChange(param.key, e.target.value)}
                                             />
+
                                         </td>
                                         <td>
-                                            <input
+                                            {param.type !== 'object' ? (<input
                                                 type="text"
                                                 placeholder="['a','b','c']"
                                                 className="input input-bordered w-full input-sm"
-                                                defaultValue={JSON.stringify(value?.enum)}
-                                                onBlur={(e) => handleEnumChange(key, e.target.value)}
-                                            />
+                                                defaultValue={param.enum ? JSON.stringify(param.enum) : ""}
+                                                onBlur={(e) => handleEnumChange(param.key, e.target.value)}
+                                            />) : ""}
                                         </td>
                                     </tr>
                                 ))}
-
                             </tbody>
                         </table>
-                    </div>}
+                    </div>
+                )}
                 <div className="modal-action">
                     <form method="dialog" className='flex flex-row gap-2'>
-                        {/* if there is a button, it will close the modal */}
-                        {isDataAvailable && <button className="btn" onClick={handleSaveFunctionData}>Save</button>}
-                        <button className="btn">Close</button>
+                        {/* Disable Save button if no changes are detected */}
+                        {isDataAvailable && (
+                            <button className="btn" onClick={handleSaveFunctionData} disabled={!isModified}>
+                                Save
+                            </button>
+                        )}
+                        <button className="btn" onClick={handleCloseModal}>Close</button>
                     </form>
                 </div>
             </div>
         </dialog>
-    )
+    );
 }
 
-export default FunctionParameterModal
+export default FunctionParameterModal;

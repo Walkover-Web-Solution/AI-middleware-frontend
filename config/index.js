@@ -573,3 +573,13 @@ export const updateHistoryMessage = async ({ id, bridge_id, message }) => {
   const response = await axios.put(`${URL}/api/v1/config/gethistory/${bridge_id}`, { id: id, message: message })
   return response?.data;
 }
+
+export const updateFunctionApi = async ({ function_id, dataToSend }) => {
+  try {
+    const response = await axios.put(`${PYTHON_URL}/functions/`, { function_id, dataToSend });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};
