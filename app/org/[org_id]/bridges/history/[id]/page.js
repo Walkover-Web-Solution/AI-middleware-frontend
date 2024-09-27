@@ -165,7 +165,7 @@ function Page({ params }) {
   // }
 
   return (
-    <div className="bg-base-100  relative scrollbar-hide text-base-content h-screen">
+    <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center overflow-scroll justify-center ">
