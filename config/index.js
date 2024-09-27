@@ -576,7 +576,7 @@ export const updateHistoryMessage = async ({ id, bridge_id, message }) => {
 
 export const updateFunctionApi = async ({ function_id, dataToSend }) => {
   try {
-    const response = await axios.put(`${PYTHON_URL}/functions/`, { function_id, dataToSend });
+    const response = await axios.put(`${PYTHON_URL}/functions/${function_id}`, { dataToSend });
     return response.data;
   } catch (error) {
     console.error(error);
