@@ -40,4 +40,4 @@ export function getDefaultValues(additionalParams, bridgeParams) {
     return defaults;
 }
 
-export const parameterTypes = ['string', 'number', 'boolean','array','object'];
+export const parameterTypes = ['string', 'number', 'boolean'];
