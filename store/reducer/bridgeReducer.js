@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { updateBridgeAction } from "../action/bridgeAction";
 
 const initialState = {
   allBridgesMap: {},
@@ -48,6 +47,14 @@ export const bridgeReducer = createSlice({
       const { orgId, functionData } = action.payload;
       state.org = { ...state.org, [orgId]: { ...state.org?.[orgId], functionData } };
       state.loading = false;
+    },
+    updateFunctionReducer:(state,action)=>{
+      const {org_id,data} =action.payload;
+      const id = data._id;
+      if(state.org[org_id].functionData)
+      {
+        state.org[org_id].functionData[id] = data
+      }
     },
     createBridgeReducer: (state, action) => {
       state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.bridge);
@@ -173,10 +180,8 @@ export const {
   apikeyUpdateReducer,
   createApiKeyReducer,
   apikeyDeleteReducer,
-  updateBridgeActionReducer
+  updateBridgeActionReducer,
+  updateFunctionReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
-
-
-
