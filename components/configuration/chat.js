@@ -18,10 +18,10 @@ function Chat({ params }) {
         <span className="label-text">Playground</span>
       </div>
 
-      <div className="p-2 sm:p-6 mt-4 justify-between flex flex-col h-[86vh] border rounded-md w-full z-10">
+      <div className="sm:p-2 mt-4 justify-between flex flex-col h-[86vh] border rounded-md w-full z-10">
         <div
           id="messages"
-          className="flex flex-col w-full space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch z-10"
+          className="flex flex-col w-full overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2"
         >
           {messages.map((message, index) => {
             return (

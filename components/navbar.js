@@ -67,7 +67,7 @@ function Navbar() {
   return (
     <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap `}>
       <div className='flex items-center w-full justify-start gap-2'>
-        <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/${path[3]}`)}>
+        <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/bridges`)}>
           <Home size={16} />
         </button>
         <button className="btn m-1" onClick={toggleOrgSidebar}>
