@@ -18,14 +18,16 @@ import RichTextToggle from "./configurationComponent/richTextToggle";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import AddVariable from "../addVariable";
+import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const view = searchParams.get('view');
     const [currentView, setCurrentView] = useState(view || 'setup')
-    const { bridgeType } = useCustomSelector((state) => ({
+    const { bridgeType,is_rich_text} = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
+        is_rich_text: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text || false,
     }));
 
     const handleNavigation = (target) => {
@@ -66,6 +68,7 @@ export default function ConfigurationPage({ params }) {
                         {bridgeType === 'chatbot' && <RichTextToggle params={params} />}
                         <AdvancedParameters params={params} />
                         <AddVariable params={params}/>
+                        {bridgeType==="chatbot" && is_rich_text && <UserRefernceForRichText params={params}/>}
                         <ActionList params={params} />
                         {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
                     </>
