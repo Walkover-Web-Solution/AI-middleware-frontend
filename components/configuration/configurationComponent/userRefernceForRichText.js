@@ -6,12 +6,10 @@ import { useDispatch } from 'react-redux';
 const UserReferenceForRichText = ({ params }) => {
     const dispatch = useDispatch();
 
-    // Destructure the necessary state using the custom selector
-    const { userReferenceRichText } = useCustomSelector((state) => ({
-        userReferenceRichText: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.userReferenceRichText || "",
+    const { user_reference } = useCustomSelector((state) => ({
+        user_reference: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.user_reference || "",
     }));
-
-    // Handler for when the textarea loses focus (onBlur)
+    
     const handleUserReferenceChange = (e) => {
         const newValue = e.target.value;
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { user_reference: newValue } }));
@@ -26,7 +24,7 @@ const UserReferenceForRichText = ({ params }) => {
                     <textarea
                         placeholder="Type here"
                         className="textarea textarea-bordered w-full min-h-[10rem] input-sm"
-                        defaultValue={userReferenceRichText}
+                        defaultValue={user_reference}
                         onBlur={handleUserReferenceChange}
                     />
                 </label>
