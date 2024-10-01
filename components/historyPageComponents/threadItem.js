@@ -174,6 +174,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             </div>
             <div className="chat-header flex gap-4 items-center mb-1">    
+            {messageType===2 ? <p className="text-xs opacity-50">Edited</p> : ""}
             </div>
             <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>       
               <ReactMarkdown components={{
