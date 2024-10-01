@@ -9,14 +9,15 @@ import CodeBlock from "../codeBlock/codeBlock";
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params }) => {
   const dispatch = useDispatch();
-  const [messageType, setMessageType] = useState(item.chatbot_message?0:1); 
+  const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
+
   const [modalInput, setModalInput] = useState("");
   const [isDropupOpen, setIsDropupOpen] = useState(false);
   const modalRef = useRef(null);
   const dropupRef = useRef(null);
 
   useEffect(() => {
-    setMessageType(item.chatbot_message ? 0 : 1);
+    setMessageType(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   }, [item]);
 
   const handleEdit = () => {
