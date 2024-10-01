@@ -3,6 +3,7 @@ import LoadingSpinner from '@/components/loadingSpinner'
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
+import { PAUTH_KEY_COLUMNS } from '@/utils/enums'
 import { Copy, Trash2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -21,7 +22,6 @@ function Page() {
     dispatch(getAllAuthData())
   }, []); // Removed authData from dependencies to avoid infinite loop
 
-  const columns = ["name", "authkey", "created_at"];
 
   /**
    * Copies given content to clipboard
@@ -55,9 +55,9 @@ function Page() {
           temporary_throttle_time: "30",
         }));
         toast.success("Auth key created successfully");
-        document.getElementById('my_modal_5').close();
+        
       } catch (error) {
-        toast.error("Failed to create auth key");
+        toast.error("Failed to create pauth key");
         console.error(error);
       } finally {
         setIsCreating(false); // End loading
@@ -65,11 +65,14 @@ function Page() {
     } else {
       toast.error("Input field cannot be empty");
     }
+    document.getElementById('my_modal_5').close();
+    document.getElementById('authNameInput').value=''
   };
 
   const deleteModel = (authname, authid, index) => {
     setSingleAuthData({ name: authname, id: authid, index })
     document.getElementById('api-key-modal').showModal()
+    document.getElementById('authNameInput').value = ''
   }
 
   const DeleteAuth = () => {
@@ -90,7 +93,7 @@ function Page() {
             <table className="table">
               <thead>
                 <tr>
-                  {columns.map(column => (
+                  {PAUTH_KEY_COLUMNS.map(column => (
                     <th key={column}>{column.replace(/_/g, ' ').charAt(0).toUpperCase() + column.replace(/_/g, ' ').slice(1)}</th> // Beautify the column headers
                   ))}
                 </tr>
@@ -98,7 +101,7 @@ function Page() {
               <tbody>
                 {authData?.map((item, index) => (
                   <tr key={item._id} className="hover-row hover">
-                    {columns.map(column => (
+                    {PAUTH_KEY_COLUMNS.map(column => (
                       <td key={`${item._id}-${column}`}>{item[column]}</td>
                     ))}
                     <td className="gap-3 flex justify-center align-center">
@@ -117,9 +120,9 @@ function Page() {
             </table>
             <dialog id="my_modal_5" className="modal modal-bottom sm:modal-middle">
               <div className="modal-box">
-                <h3 className="font-bold text-lg">Create New Auth</h3>
+                <h3 className="font-bold text-lg mb-2">Create New Auth</h3>
                 <label className="input input-bordered flex items-center gap-2">
-                  Name
+                  Name :
                   <input
                     type="text"
                     className="grow"

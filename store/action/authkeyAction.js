@@ -36,6 +36,7 @@ export const createNewAuthData = (dataToSend) => async (dispatch, getState) => {
   } catch (error) {
     // Log the error if any
     console.error(error);
+    throw error;
   }
 };
 
@@ -50,7 +51,7 @@ export const createNewAuthData = (dataToSend) => async (dispatch, getState) => {
 export const deleteAuthData = (data) => async (dispatch, getState) => {
   try {
     // Remove the auth key from the authkeys reducer
-    dispatch(removeAuthData(data.index));
+    dispatch(removeAuthData(data.id));
 
     // Make a request to the server to delete the auth key
     await deleteAuthkey(data.id);
