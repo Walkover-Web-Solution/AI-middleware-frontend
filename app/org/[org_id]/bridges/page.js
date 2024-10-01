@@ -70,7 +70,7 @@ function Home({ params }) {
               </div>
             ) : (
               <div className="flex flex-col">
-                <div className="relative flex flex-col md:flex-row items-center justify-between mx-4">
+                <div className="relative flex flex-col md:flex-row items-center justify-between m-4">
                   <input
                     type="text"
                     placeholder="Search for bridges"
