@@ -61,7 +61,7 @@ const WebhookPage = ({ params }) => {
             setHeaderError('Header must be a valid JSON format.');
             return;
         }
-        if (webhookAlertData.some(alert => alert.name === form.name.value)) {
+        if (!form.id.value && webhookAlertData.some(alert => alert.name === form.name.value)) {
             setNameError('Name must be Unique');
             return;
         }
@@ -337,7 +337,7 @@ const WebhookPage = ({ params }) => {
                 </div>
                 <div className="flex justify-end gap-2 mt-4">
                     <button type="button" onClick={resetForm} className="btn">Cancel</button>
-                    <button type="submit" className="btn">{isUpdate ? "Update" : "Create"}</button>
+                    <button type="submit" className="btn btn-primary">{isUpdate ? "Update" : "Create"}</button>
                 </div>
             </form>
         </dialog>
