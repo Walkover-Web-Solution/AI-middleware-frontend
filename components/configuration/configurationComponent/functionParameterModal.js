@@ -126,12 +126,15 @@ function FunctionParameterModal({ functionId, params }) {
             ...(newType === 'object' ? { enum: "", description: '' } : {}),
         }));
 
+
         setToolData(prevToolData => ({
             ...prevToolData,
             fields: updatedFields,
         }));
 
+
     };
+
 
 
     const handleEnumChange = (key, newEnum) => {
@@ -209,19 +212,31 @@ function FunctionParameterModal({ functionId, params }) {
     };
 
     const handleToggleChange = (e) => {
-        setObjectFieldValue(JSON.stringify(toolData['fields'], undefined, 4));
-        const { _id, ...dataToSend } = toolData;
-        if (isModified && !e.target.checked) {
-            dispatch(updateFuntionApiAction({
-                function_id: _id,
-                dataToSend: dataToSend,
-            }));
+        if (e.target.checked) {
+            setObjectFieldValue(JSON.stringify(toolData['fields'], undefined, 4));
             setIsTextareaVisible(prev => !prev);
         }
-        else if (!isModified || e.target.checked)
-            setIsTextareaVisible(prev => !prev);
-        else
+        else if (!e.target.checked) {
+            try {
+                const updatedField = JSON.parse(objectFieldValue);
+                if (typeof updatedField !== 'object' || updatedField === null) {
+                    throw new Error('Invalid JSON format. Please enter a valid object.');
+                }
+                setToolData(prevToolData => ({
+                    ...prevToolData,
+                    fields: updatedField
+                }));
+                setIsTextareaVisible(prev => !prev);
+            } catch (error) {
+                toast.error("Invalid JSON format. Please correct the data.");
+                console.error("JSON Parsing Error:", error.message);
+            }
+        }
+        else {
             toast.error("Must be valid json");
+        }
+
+
 
     };
 
@@ -232,14 +247,10 @@ function FunctionParameterModal({ functionId, params }) {
             if (typeof updatedField !== 'object' || updatedField === null) {
                 throw new Error('Invalid JSON format. Please enter a valid object.');
             }
-            setToolData(prevToolData => {
-                return {
-                    ...prevToolData,
-                    fields: updatedField
-                };
-            });
-
-
+            setToolData(prevToolData => ({
+                ...prevToolData,
+                fields: updatedField
+            }));
         } catch (error) {
             toast.error("Invalid JSON format. Please correct the data.");
             console.error("JSON Parsing Error:", error.message);
@@ -274,10 +285,9 @@ function FunctionParameterModal({ functionId, params }) {
                 {!isDataAvailable ? (
                     <p>No Parameters used in the function</p>
                 ) : (
-                    !isTextareaVisible ?
+                    !isTextareaVisible ? (
                         <div className="overflow-x-auto border rounded-md">
                             <table className="table">
-                                {/* head */}
                                 <thead>
                                     <tr>
                                         <th></th>
@@ -291,6 +301,9 @@ function FunctionParameterModal({ functionId, params }) {
                                 <tbody>
                                     {flattenedParameters.map((param, index) => {
                                         const currentType = getNestedFieldValue(toolData.fields, param.key.split('.'))?.type || param.type || "";
+                                        const currentDesc = getNestedFieldValue(toolData.fields, param.key.split('.'))?.description || "";
+                                        const currentEnum = getNestedFieldValue(toolData.fields, param.key.split('.'))?.enum || param.enum || "";
+
                                         return (
                                             <tr key={param.key}>
                                                 <td>{index}</td>
@@ -305,7 +318,6 @@ function FunctionParameterModal({ functionId, params }) {
                                                         {parameterTypes && parameterTypes.map((type, index) => (
                                                             <option key={index} value={type}>
                                                                 {type}
-
                                                             </option>
                                                         ))}
                                                     </select>
@@ -314,56 +326,49 @@ function FunctionParameterModal({ functionId, params }) {
                                                     <input
                                                         type="checkbox"
                                                         className="checkbox"
-                                                        checked={
-                                                            (() => {
-                                                                const keyParts = param.key.split('.');
-
-                                                                if (keyParts.length === 1) {
-                                                                    return (toolData.required_params || []).includes(param.key);
-                                                                } else {
-                                                                    const parentKeyParts = keyParts.slice(0, -1);
-                                                                    const nestedField = getNestedFieldValue(toolData.fields, parentKeyParts);
-                                                                    return nestedField?.required_params?.includes(keyParts[keyParts.length - 1]) || false;
-                                                                }
-                                                            })()
-                                                        }
+                                                        checked={(() => {
+                                                            const keyParts = param.key.split('.');
+                                                            if (keyParts.length === 1) {
+                                                                return (toolData.required_params || []).includes(param.key);
+                                                            } else {
+                                                                const parentKeyParts = keyParts.slice(0, -1);
+                                                                const nestedField = getNestedFieldValue(toolData.fields, parentKeyParts);
+                                                                return nestedField?.required_params?.includes(keyParts[keyParts.length - 1]) || false;
+                                                            }
+                                                        })()}
                                                         onChange={() => handleRequiredChange(param.key)}
                                                     />
                                                 </td>
-                                                {
-                                                    currentType !== 'object' &&
+                                                {currentType !== 'object' && (
                                                     <td>
-
-
                                                         <input
                                                             type="text"
                                                             placeholder="Parameter description"
                                                             className="input input-bordered w-full input-sm"
-                                                            defaultValue={param.description || ''}
-                                                            onBlur={(e) => handleDescriptionChange(param.key, e.target.value)}
+                                                            value={currentDesc}
+                                                            onChange={(e) => handleDescriptionChange(param.key, e.target.value)}
                                                         />
-
-                                                    </td>}
-                                                {currentType !== 'object' &&
+                                                    </td>
+                                                )}
+                                                {currentType !== 'object' && (
                                                     <td>
                                                         <input
                                                             type="text"
                                                             placeholder="['a','b','c']"
                                                             className="input input-bordered w-full input-sm"
-                                                            defaultValue={param.enum ? JSON.stringify(param.enum) : ""}
-                                                            onBlur={(e) => handleEnumChange(param.key, e.target.value)}
+                                                            value={currentEnum ? JSON.stringify(currentEnum) : ""}
+                                                            onChange={(e) => handleEnumChange(param.key, e.target.value)}
                                                         />
-
                                                     </td>
-                                                }
+                                                )}
                                                 {currentType === 'object' && <td colSpan="3" className='flex items-center gap-1 whitespace-nowrap text-sm'><InfoIcon size={16}/> You can change the data in raw json format </td>}
                                             </tr>
-                                        )
+                                        );
                                     })}
                                 </tbody>
                             </table>
                         </div>
-                        :
+                    ) : (
                         <div className="mt-4">
                             <textarea
                                 type="input"
@@ -374,10 +379,10 @@ function FunctionParameterModal({ functionId, params }) {
                                 placeholder="Enter valid JSON object here..."
                             />
                         </div>
+                    )
                 )}
                 <div className="modal-action">
                     <form method="dialog" className='flex flex-row gap-2'>
-                        {/* Disable Save button if no changes are detected */}
                         {isDataAvailable && (
                             <button className="btn" onClick={handleSaveFunctionData} disabled={!isModified}>
                                 Save

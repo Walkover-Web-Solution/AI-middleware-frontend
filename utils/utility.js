@@ -203,7 +203,7 @@ export const validateUrl = (url) => {
 
 export function flattenParameters(parameters, prefix = '') {
     let flat = [];
-    Object.entries(parameters)?.forEach(([key, value]) => {
+    Object.entries(parameters || {})?.forEach(([key, value]) => {
         const currentKey = prefix ? `${prefix}.${key}` : key;
         flat.push({
             key: currentKey,
