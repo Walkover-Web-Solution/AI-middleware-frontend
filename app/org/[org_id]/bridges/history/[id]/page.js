@@ -10,6 +10,7 @@ import { clearThreadData } from "@/store/reducer/historyReducer";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from "react-redux";
+import { CircleChevronDown, Info } from "lucide-react"; // Import the component
 
 export const runtime = "edge";
 
@@ -19,6 +20,7 @@ function Page({ params }) {
   const pathName = usePathname();
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
+  const containerRef = useRef(null);
 
   const { historyData, thread, integrationData } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
@@ -33,6 +35,7 @@ function Page({ params }) {
   const [page, setPage] = useState(1); // Track the current page of data
   const [hasMore, setHasMore] = useState(true); // Track if more data is available
   const [loading, setLoading] = useState(false); // Track loading state
+  const [isAtBottom, setIsAtBottom] = useState(true); // New state variable
 
   const closeSliderOnEsc = (event) => {
     if (event.key === "Escape") {
@@ -164,20 +167,77 @@ function Page({ params }) {
   //   );
   // }
 
+  // Scroll position effect
+  useEffect(() => {
+    const container = containerRef.current;
+
+    const handleScroll = () => {
+      if (container) {
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        const isUserAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // Adjust threshold
+        setIsAtBottom(isUserAtBottom);
+      }
+    };
+
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
+
+  // Scroll to bottom when new messages arrive (with smooth scrolling)
+  useEffect(() => {
+    if (containerRef.current) {
+      const { scrollHeight, clientHeight } = containerRef.current;
+      if (scrollHeight > clientHeight && isAtBottom) {
+        // Smooth scroll to the bottom when content overflows and user is at the bottom
+        containerRef.current.scrollTo({
+          top: scrollHeight - clientHeight,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [thread, isAtBottom]);
+
   return (
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex flex-col items-center overflow-scroll justify-center ">
-          <div className="w-full min-h-screen">
-            <div className="w-full text-start">
+        <div className="drawer-content flex flex-col items-center overflow-scroll justify-center">
+          <div className="w-full min-h-auto">       
+            <div
+              ref={containerRef}
+              className="w-full text-start flex flex-col overflow-y-auto h-screen"
+            >
               <div className="pb-16 px-3 pt-4">
-                {thread && thread.map((item, index) => (
+                {thread &&
+                  [...thread].map((item, index) => (
                   <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
                 ))}
               </div>
             </div>
           </div>
+          {/* Scroll-to-Bottom Button */}
+          {!isAtBottom && (
+            <button
+              onClick={() => {
+                if (containerRef.current) {
+                  containerRef.current.scrollTo({
+                    top: containerRef.current.scrollHeight,
+                    behavior: "smooth",
+                  });
+                }
+              }}
+              className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-10"
+            >
+              <CircleChevronDown size={24} />
+            </button>
+          )}
         </div>
         <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} />
       </div>
