@@ -135,8 +135,6 @@ function FunctionParameterModal({ functionId, params }) {
 
     };
 
-
-
     const handleEnumChange = (key, newEnum) => {
         try {
             if (!newEnum.trim()) {
@@ -302,7 +300,7 @@ function FunctionParameterModal({ functionId, params }) {
                                     {flattenedParameters.map((param, index) => {
                                         const currentType = getNestedFieldValue(toolData.fields, param.key.split('.'))?.type || param.type || "";
                                         const currentDesc = getNestedFieldValue(toolData.fields, param.key.split('.'))?.description || "";
-                                        const currentEnum = getNestedFieldValue(toolData.fields, param.key.split('.'))?.enum || param.enum || "";
+                                        const currentEnum = getNestedFieldValue(toolData.fields, param.key.split('.'))?.enum || [];
 
                                         return (
                                             <tr key={param.key}>
@@ -353,11 +351,12 @@ function FunctionParameterModal({ functionId, params }) {
                                                 {currentType !== 'object' && (
                                                     <td>
                                                         <input
+                                                            key={currentEnum}
                                                             type="text"
                                                             placeholder="['a','b','c']"
                                                             className="input input-bordered w-full input-sm"
-                                                            value={currentEnum ? JSON.stringify(currentEnum) : ""}
-                                                            onChange={(e) => handleEnumChange(param.key, e.target.value)}
+                                                            defaultValue={JSON.stringify(currentEnum)}
+                                                            onBlur={(e) => handleEnumChange(param.key,  e.target.value)}
                                                         />
                                                     </td>
                                                 )}
