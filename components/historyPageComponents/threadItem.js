@@ -1,16 +1,18 @@
-// components/ThreadItem.js
-import { updateContentHistory } from "@/store/action/historyAction";
-import { Bot, MessageCircleCode, Pencil, User, Info } from "lucide-react";
+import { Bot, MessageCircleCode, Pencil, User, Info, FileClock, SquareFunction, Parentheses} from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { useDispatch } from "react-redux";
 import CodeBlock from "../codeBlock/codeBlock";
+import { updateContentHistory } from "@/store/action/historyAction";
+import ToolsDataModal from "./toolsDataModal";
 
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params }) => {
   const dispatch = useDispatch();
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
-
+  const [showNormalMessage, setShowNormalMessage] = useState(false);
+  const [toolsData, setToolsData] = useState([]); // Track the selected tool call data
+  const toolsDataModalRef = useRef(null);
   const [modalInput, setModalInput] = useState("");
   const [isDropupOpen, setIsDropupOpen] = useState(false);
   const modalRef = useRef(null);
@@ -19,6 +21,11 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   useEffect(() => {
     setMessageType(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   }, [item]);
+  
+
+  const handleToggle = () => {
+    setShowNormalMessage((prevState) => !prevState);
+  };
 
   const handleEdit = () => {
     setModalInput(item.updated_message || item.content);
@@ -93,19 +100,52 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     };
   }, [isDropupOpen]);
 
+  const handleCloseToolsDataModal = () => {
+    setToolsData([]);
+    if (toolsDataModalRef.current) {
+      toolsDataModalRef.current.close();
+    }
+  };
+
   return (
     <div key={`item-id-${item?.id}`} >
       {item?.role === "tools_call" ? (
-        <div className="w-full flex overflow-y-scroll align-center justify-center gap-2">
-          {Object.keys(item.function).map((funcName, index) => (
-            <div key={index} role="alert" className="alert w-1/3 transition-colors duration-200">
-              <Info size={16} />
-              <div onClick={() => openViasocket(funcName, { flowHitId: JSON.parse(item.function[funcName])?.metadata?.flowHitId })} className="cursor-pointer">
-                <h3 className="font-bold">Functions Executed</h3>
-                <div className="text-xs">Function "{integrationData?.[funcName]?.title || funcName}" executed successfully.</div>
+        <div className="mb-2">
+          <h1 className="mt-4 auto bg-base-200 p-2 w-1/4 mb-2 opacity-80 rounded-md flex items-center gap-2">
+            <span><Parentheses size={16} /></span> Functions Executed Successfully
+          </h1>
+          <div className="w-full flex overflow-x-auto h-full gap-1 justify-start items-center whitespace-nowrap">
+            {Object.entries(item.tools_call_data[0] || {}).map(([key, tool], index) => (
+              <div key={index} className="bg-base-200 rounded-lg w-1/4 flex gap-2 duration-200 items-center justify-between hover:bg-base-300">
+                <div
+                  onClick={() => openViasocket(tool.name, { flowHitId: JSON.parse(item.function[tool.name])?.metadata?.flowHitId })}
+                  className="cursor-pointer flex items-center justify-center pl-2"
+                >
+                  <div className="text-xs font-bold text-center">
+                    {integrationData?.[tool.name]?.title || tool.name}
+                  </div>
+                </div>
+                <div className="flex gap-3">
+
+                  <div className="tooltip tooltip-left py-4 relative" data-tip="function logs">
+                    <SquareFunction size={18}
+                      onClick={() => openViasocket(tool.name, { flowHitId: JSON.parse(item.function[tool.name])?.metadata?.flowHitId })}
+                      className="opacity-80 cursor-pointer" />
+                  </div>
+                  <div className="tooltip tooltip-left py-4 pr-2 relative" data-tip="function data">
+                    <FileClock
+                      size={18}
+                      onClick={() => {
+                        setToolsData(tool?.tool_call);
+                        toolsDataModalRef.current.showModal();
+                      }}
+                      className="opacity-80 bg-inherit cursor-pointer"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : (
         <div>
@@ -201,10 +241,17 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             </div>
             {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
+          {item.role == 'assistant' && item.is_reset && <div class="flex justify-center items-center my-4">
+                <p class="border-t border-base-300 w-full"></p>
+                <p class="bg-error text-base-100 py-2 px-4 rounded-md mx-4 whitespace-nowrap">
+                  History cleared
+                </p>
+                <p class="border-t border-base-300 w-full"></p>
+              </div>}
           {
             item?.error && (
               <div className="chat chat-end">
-                <div className="flex-1 chat-bubble bg-base-200 text-error">
+                <div className="flex-1 chat-bubble bg-base-200 text-error mb-3">
                   <span className="font-bold">Error</span>
                   <p>{item.error}</p>
                 </div>
@@ -217,6 +264,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           
         </div>
       )}
+
+      <ToolsDataModal toolsData={toolsData} handleClose={handleCloseToolsDataModal} toolsDataModalRef={toolsDataModalRef} integrationData={integrationData} />
+
       {/* Modal */}
       <dialog className="modal modal-bottom sm:modal-middle" ref={modalRef}>
         <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6">
