@@ -10,12 +10,14 @@ import { toast } from 'react-toastify';
 
 function FunctionParameterModal({ functionId, params }) {
     const dispatch = useDispatch();
-    const { function_details } = useCustomSelector((state) => ({
+    const { function_details, variables_path } = useCustomSelector((state) => ({
         function_details: state?.bridgeReducer?.org?.[params?.org_id]?.functionData?.[functionId] || {},
+        variables_path: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables_path || {},
     }));
 
     const properties = function_details.fields || {};
     const [toolData, setToolData] = useState(function_details);
+    const [variablesPath, setVariablesPath] = useState(variables_path || {});
     const [isDataAvailable, setIsDataAvailable] = useState(Object.keys(properties).length > 0);
     const [isModified, setIsModified] = useState(false); // Track changes
 
@@ -27,8 +29,16 @@ function FunctionParameterModal({ functionId, params }) {
     }, [function_details, properties]);
 
     useEffect(() => {
+        setVariablesPath(variables_path);
+    }, [variables_path])
+
+    useEffect(() => {
         setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
     }, [toolData, function_details]);
+
+    useEffect(()=>{
+        setIsModified(!isEqual(variablesPath, variables_path));
+    },[variablesPath])
 
     const handleRequiredChange = (key) => {
         const keyParts = key.split('.');
@@ -181,6 +191,7 @@ function FunctionParameterModal({ functionId, params }) {
             function_id: _id,
             dataToSend: dataToSend,
         }));
+        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: variablesPath } }));
         setToolData("");
     };
 
@@ -203,9 +214,18 @@ function FunctionParameterModal({ functionId, params }) {
         }, fields);
     };
 
+    const handleVariablePathChange = (key, value = "") => {
+        setVariablesPath(prevVariablesPath => {
+            return {
+                ...prevVariablesPath,
+                [key]: value || ""
+            };
+        });
+    }
+
     return (
         <dialog id="function-parameter-modal" className="modal">
-            <div className="modal-box w-11/12 max-w-5xl">
+            <div className="modal-box w-full max-w-6xl">
                 <div className='flex flex-row justify-between mb-2'>
                     <span className='flex flex-row items-center gap-4'>
                         <h3 className="font-bold text-lg">Configure fields</h3>
@@ -232,6 +252,8 @@ function FunctionParameterModal({ functionId, params }) {
                                     <th>Required</th>
                                     <th>Description</th>
                                     <th>Enum: comma separated</th>
+                                    <th>Fill with AI</th>
+                                    <th>Value Path: variables.your_path</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -297,6 +319,33 @@ function FunctionParameterModal({ functionId, params }) {
                                                 defaultValue={param.enum ? JSON.stringify(param.enum) : ""}
                                                 onBlur={(e) => handleEnumChange(param.key, e.target.value)}
                                             />) : ""}
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="checkbox"
+                                                className="checkbox"
+                                                checked={!(param.key in variablesPath)}
+                                                onChange={() => {
+                                                    const updatedVariablesPath = { ...variablesPath };
+                                                    if (param.key in updatedVariablesPath) {
+                                                        delete updatedVariablesPath[param.key];
+                                                    } else {
+                                                        updatedVariablesPath[param.key] = ""; // or any default value
+                                                    }
+                                                    setVariablesPath(updatedVariablesPath);
+                                                }}
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="text"
+                                                placeholder="name"
+                                                className="input input-bordered w-full input-sm"
+                                                value={variablesPath[param.key] || ''}
+                                                onChange={(e) => {
+                                                    handleVariablePathChange(param.key, e.target.value);
+                                                }}
+                                            />
                                         </td>
                                     </tr>
                                 ))}
