@@ -1,16 +1,15 @@
-import { Bot, MessageCircleCode, Pencil, User, Info, FileClock, SquareFunction, Parentheses } from "lucide-react";
-import React, { useRef, useState, useEffect } from "react";
+import { updateContentHistory } from "@/store/action/historyAction";
+import { Bot, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, User } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useDispatch } from "react-redux";
 import CodeBlock from "../codeBlock/codeBlock";
-import { updateContentHistory } from "@/store/action/historyAction";
 import ToolsDataModal from "./toolsDataModal";
 
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params }) => {
   const dispatch = useDispatch();
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
-  const [showNormalMessage, setShowNormalMessage] = useState(false);
   const [toolsData, setToolsData] = useState([]); // Track the selected tool call data
   const toolsDataModalRef = useRef(null);
   const [modalInput, setModalInput] = useState("");
@@ -67,7 +66,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
 
   const getMessageToDisplay = () => {
     if (messageType === 0) return item.chatbot_message;
-    if (messageType===1)return  item.content;
+    if (messageType === 1) return item.content;
     if (messageType === 2) return item.updated_message;
 
   };
@@ -81,8 +80,8 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        dropupRef.current &&
-        !dropupRef.current.contains(event.target) &&
+        dropupRef?.current &&
+        !dropupRef?.current?.contains(event.target) &&
         !event.target.closest('.bot-icon')
       ) {
         setIsDropupOpen(false);
@@ -107,42 +106,42 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     }
   };
   // Truncate function
-function truncate(string, maxLength) {
-  if (string.length > maxLength) {
-      return string.substring(0, maxLength - 3) + '...'; 
+  function truncate(string="", maxLength) {
+    if (string.length > maxLength) {
+      return string.substring(0, maxLength - 3) + '...';
+    }
+    return string;
   }
-  return string;
-}
 
   return (
-    <div key={`item-id-${item?.id}`} >
+    <div key={`item-id-${item?.id}`} className="">
       {item?.role === "tools_call" ? (
-        <div className="mb-2">
-          <h1 className="mt-4 auto p-2 w-1/4 mb-2 opacity-80 rounded-md flex items-center gap-2">
-            <span><Parentheses size={16} /></span> Functions Executed Successfully
+        <div className="mb-2 flex flex-col justify-center items-center">
+          <h1 className="p-2 mb-2 ">
+            <span className="flex justify-center items-center gap-2 font-semibold"><Parentheses size={16} />Functions Executed Successfully</span>
           </h1>
-          <div className="w-full flex overflow-x-auto h-full gap-1 justify-start items-center whitespace-nowrap">
-            {Object.entries(item.tools_call_data[0] || {}).map(([key, tool], index) => (
-              <div key={index} className="bg-base-200 rounded-lg w-1/7  flex gap-4 duration-200 items-center justify-between hover:bg-base-300">
-                <div onClick={() => openViasocket(tool.name, { flowHitId: JSON.parse(item.function[tool.name])?.metadata?.flowHitId })}
+          <div className="flex h-full gap-1 justify-center items-center flex-wrap">
+            {Object?.entries(item?.tools_call_data?.[0] || {})?.map(([key, tool], index) => (
+              <div key={index} className="bg-base-200 rounded-lg  flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
+                <div onClick={() => openViasocket(tool?.name, { flowHitId: JSON?.parse(item?.function[tool?.name])?.metadata?.flowHitId })}
                   className="cursor-pointer flex items-center justify-center py-4 pl-2">
-                  <div className="text-xs font-bold text-center">
-                    {truncate(integrationData?.[tool.name]?.title || tool.name, 20)}
+                  <div className="font-semibold text-center">
+                    {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
                   </div>
                 </div>
                 <div className="flex gap-3">
 
-                  <div className="tooltip tooltip-left  relative" data-tip="function logs">
-                    <SquareFunction size={18}
-                      onClick={() => openViasocket(tool.name, { flowHitId: JSON.parse(item.function[tool.name])?.metadata?.flowHitId })}
+                  <div className="tooltip tooltip-right  relative" data-tip="function logs">
+                    <SquareFunction size={22}
+                      onClick={() => openViasocket(tool.name, { flowHitId: JSON?.parse(item.function[tool.name])?.metadata?.flowHitId })}
                       className="opacity-80 cursor-pointer" />
                   </div>
-                  <div className="tooltip tooltip-left  pr-2 relative" data-tip="function data">
+                  <div className="tooltip tooltip-right  pr-2 relative" data-tip="function data">
                     <FileClock
-                      size={18}
+                      size={22}
                       onClick={() => {
                         setToolsData(tool?.tool_call);
-                        toolsDataModalRef.current.showModal();
+                        toolsDataModalRef.current?.showModal();
                       }}
                       className="opacity-80 bg-inherit cursor-pointer"
                     />
@@ -246,7 +245,7 @@ function truncate(string, maxLength) {
             </div>
             {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
-          {item.role == 'assistant' && item.is_reset && <div class="flex justify-center items-center my-4">
+          {item?.role == 'assistant' && item?.is_reset && <div class="flex justify-center items-center my-4">
             <p class="border-t border-base-300 w-full"></p>
             <p class="bg-error text-base-100 py-2 px-4 rounded-md mx-4 whitespace-nowrap">
               History cleared
@@ -258,7 +257,7 @@ function truncate(string, maxLength) {
               <div className="chat chat-end">
                 <div className="flex-1 chat-bubble bg-base-200 text-error mb-3">
                   <span className="font-bold">Error</span>
-                  <p>{item.error}</p>
+                  <p>{item?.error}</p>
                 </div>
                 <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
                   <Bot size={20} />
