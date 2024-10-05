@@ -7,11 +7,11 @@ import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getHistoryAction, getThread } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
+import { CircleChevronDown } from "lucide-react"; // Corrected import
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
-import { CircleChevronDown } from "lucide-react"; // Corrected import
 
 export const runtime = "edge";
 
@@ -66,17 +66,6 @@ function Page({ params }) {
     };
   }, []);
 
-  // useEffect(() => {
-  //   const fetchInitialData = async () => {
-  //     setLoading(true);
-  //     await dispatch(getHistoryAction(params.id));
-  //     dispatch(clearThreadData());
-  //     setLoading(false);
-  //   };
-  //   fetchInitialData();
-  // }, [params.id, dispatch]);
-
-
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
@@ -111,9 +100,6 @@ function Page({ params }) {
     }
   }, [search, historyData, params.id, pathName]);
 
-  const start = search.get("start");
-  const end = search.get("end");
-
   const threadHandler = useCallback(
     async (thread_id, item) => {
       if (item?.role === "assistant") return "";
@@ -127,11 +113,6 @@ function Page({ params }) {
         }
       } else {
         setSelectedThread(thread_id);
-        // if (start && end) {
-        //   router.push(`${pathName}?thread_id=${thread_id}&start=${start}&end=${end}`, undefined, {
-        //     shallow: true,
-        //   });
-        // } else {
         router.push(`${pathName}?thread_id=${thread_id}`, undefined, { shallow: true });
       }
     },
@@ -274,7 +255,7 @@ function Page({ params }) {
               }}
             >
               <InfiniteScroll
-                dataLength={thread.length}
+                dataLength={thread?.length}
                 next={fetchMoreThreadData}
                 hasMore={hasMoreThreadData}
                 loader={<h4></h4>}
