@@ -106,7 +106,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     }
   };
   // Truncate function
-  function truncate(string="", maxLength) {
+  function truncate(string = "", maxLength) {
     if (string.length > maxLength) {
       return string.substring(0, maxLength - 3) + '...';
     }
@@ -121,34 +121,54 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             <span className="flex justify-center items-center gap-2 font-semibold"><Parentheses size={16} />Functions Executed Successfully</span>
           </h1>
           <div className="flex h-full gap-1 justify-center items-center flex-wrap">
-            {Object?.entries(item?.tools_call_data?.[0] || {})?.map(([key, tool], index) => (
-              <div key={index} className="bg-base-200 rounded-lg  flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
-                <div onClick={() => openViasocket(tool?.name, { flowHitId: JSON?.parse(item?.function[tool?.name])?.metadata?.flowHitId })}
-                  className="cursor-pointer flex items-center justify-center py-4 pl-2">
-                  <div className="font-semibold text-center">
-                    {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
+            {item?.tools_call_data ?
+              Object?.entries(item?.tools_call_data?.[0] || {})?.map(([key, tool], index) => (
+                <div key={index} className="bg-base-200 rounded-lg  flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
+                  <div onClick={() => openViasocket(tool?.name, { flowHitId: JSON?.parse(item?.function[tool?.name])?.metadata?.flowHitId })}
+                    className="cursor-pointer flex items-center justify-center py-4 pl-2">
+                    <div className="font-semibold text-center">
+                      {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+
+                    <div className="tooltip tooltip-top  relative" data-tip="function logs">
+                      <SquareFunction size={22}
+                        onClick={() => openViasocket(tool.name, { flowHitId: JSON?.parse(item.function[tool.name])?.metadata?.flowHitId })}
+                        className="opacity-80 cursor-pointer" />
+                    </div>
+                    <div className="tooltip tooltip-top  pr-2 relative" data-tip="function data">
+                      <FileClock
+                        size={22}
+                        onClick={() => {
+                          setToolsData(tool?.tool_call);
+                          toolsDataModalRef.current?.showModal();
+                        }}
+                        className="opacity-80 bg-inherit cursor-pointer"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-3">
+              ))
+              :
+              Object.keys(item.function).map((funcName, index) => (
+                <div key={index} className="bg-base-200 rounded-lg  flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
+                  <div onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName])?.metadata?.flowHitId })}
+                    className="cursor-pointer flex items-center justify-center py-4 pl-2">
+                    <div className="font-semibold text-center">
+                      {truncate(integrationData?.[funcName]?.title || funcName, 20)}
+                    </div>
+                  </div>
 
-                  <div className="tooltip tooltip-right  relative" data-tip="function logs">
+                  <div className="tooltip tooltip-top pr-2" data-tip="function logs">
                     <SquareFunction size={22}
-                      onClick={() => openViasocket(tool.name, { flowHitId: JSON?.parse(item.function[tool.name])?.metadata?.flowHitId })}
+                      onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName])?.metadata?.flowHitId })}
                       className="opacity-80 cursor-pointer" />
                   </div>
-                  <div className="tooltip tooltip-right  pr-2 relative" data-tip="function data">
-                    <FileClock
-                      size={22}
-                      onClick={() => {
-                        setToolsData(tool?.tool_call);
-                        toolsDataModalRef.current?.showModal();
-                      }}
-                      className="opacity-80 bg-inherit cursor-pointer"
-                    />
-                  </div>
+
                 </div>
-              </div>
-            ))}
+              ))
+            }
           </div>
         </div>
       ) : (
@@ -245,9 +265,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             </div>
             {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
-          {item?.role == 'assistant' && item?.is_reset && <div class="flex justify-center items-center my-4">
+          {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div class="flex justify-center items-center my-4">
             <p class="border-t border-base-300 w-full"></p>
-            <p class="bg-error text-base-100 py-2 px-4 rounded-md mx-4 whitespace-nowrap">
+            <p class="bg-error text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
               History cleared
             </p>
             <p class="border-t border-base-300 w-full"></p>
