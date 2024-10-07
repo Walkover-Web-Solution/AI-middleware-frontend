@@ -38,7 +38,7 @@ function FunctionParameterModal({ functionId, params }) {
     }, [toolData, function_details]);
 
     useEffect(() => {
-        setIsModified(!isEqual(variablesPath, variables_path));
+        setIsModified(!isEqual(variablesPath, variables_path[functionName]));
     }, [variablesPath])
 
     const handleRequiredChange = (key) => {
@@ -187,13 +187,17 @@ function FunctionParameterModal({ functionId, params }) {
     };
 
     const handleSaveFunctionData = () => {
-        const { _id, ...dataToSend } = toolData;
-        dispatch(updateFuntionApiAction({
-            function_id: _id,
-            dataToSend: dataToSend,
-        }));
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
-        setToolData("");
+        if (!isEqual(toolData, function_details)) {
+            const { _id, ...dataToSend } = toolData;
+            dispatch(updateFuntionApiAction({
+                function_id: functionId,
+                dataToSend: dataToSend,
+            }));
+            setToolData("");
+        }
+        if (!isEqual(variablesPath, variables_path[functionName])) {
+            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
+        }
     };
 
     const handleRemoveFunctionFromBridge = () => {
