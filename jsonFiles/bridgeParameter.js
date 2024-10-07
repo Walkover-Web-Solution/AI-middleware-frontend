@@ -1,12 +1,12 @@
 export const ADVANCED_BRIDGE_PARAMETERS = {
-    creativity_level: { name: 'Creativity Level', description: 'Controls how imaginative or straightforward the responses are. Higher values (e.g., 0.7) make responses more creative; lower values (e.g., 0.2) make them more predictable.' },
-    max_tokens: { name: 'Max Tokens Limit', description: 'Specifies the maximum number of tokens for the response.' },
+    creativity_level: { name: 'Creativity Level', description: 'Controls the creativity of responses. Higher values (e.g., 0.7) increase creativity; lower values (e.g., 0.2) make responses more predictable.' },
+    max_tokens: { name: 'Max Tokens Limit', description: 'Specifies the maximum number of text units (tokens) allowed in a response, limiting its length.' },
     token_selection_limit: { name: 'Max Tokens Limit (Top K)', description: 'Limits responses to the most likely words. Lower values focus on the most probable choices.' },
     response_type: { name: 'Response Type', description: 'Defines the format or type of the generated response.' },
     probability_cutoff: { name: 'Probability Cutoff (Top P)', description: 'Focuses on the most likely words based on a percentage of probability.' },
-    repetition_penalty: { name: 'Repetition Penalty', description: 'Reduces the likelihood of repeated phrases in responses.' },
+    repetition_penalty: { name: 'Repetition Penalty', description: 'The `frequency_penalty` controls how often the model repeats itself, with higher positive values reducing repetition and negative values encouraging it.' },
     novelty_penalty: { name: 'Novelty Penalty', description: 'Discourages responses that are too similar to previous ones.' },
-    log_probability: { name: 'Log Probability', description: 'Keeps track of how likely each word in the response is.' },
+    log_probability: { name: 'Log Probability', description: 'If true, returns the log probabilities of each output token returned in the content of message.' },
     response_count: { name: 'Response Count (n)', description: 'Specifies how many different responses to generate.' },
     response_suffix: { name: 'Response Suffix', description: 'Adds specific text at the end of each response.' },
     additional_stop_sequences: { name: 'Stop Sequences', description: 'Stops generating text when certain phrases are reached.' },
@@ -16,7 +16,7 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
     seed: { name: 'Seed', description: 'Ensures consistent responses by setting a fixed value.' },
     tool_choice: { name: 'Tool Choice', description: 'Decides whether to use tools or just the model for generating responses.' },
     stream: { name: 'Stream', description: 'Sends the response in real-time as it\'s being generated.' },
-    stop: { name: 'Stop', description: 'Ends the text generation process.' }
+    stop: { name: 'Stop', description: 'This parameter tells the model to stop generating text when it reaches any of the specified sequences (like a word or punctuation)' }
 };
 
 export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format', 'stream'];
