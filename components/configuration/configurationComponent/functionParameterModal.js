@@ -4,7 +4,7 @@ import { updateBridgeAction, updateFuntionApiAction } from '@/store/action/bridg
 import { flattenParameters } from '@/utils/utility';
 import { isEqual } from 'lodash';
 import { Info, Trash2 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
@@ -15,9 +15,10 @@ function FunctionParameterModal({ functionId, params }) {
         variables_path: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables_path || {},
     }));
 
+    const functionName = useMemo(() => function_details['endpoint'] || function_details['function_name'], [function_details]);
     const properties = function_details.fields || {};
     const [toolData, setToolData] = useState(function_details);
-    const [variablesPath, setVariablesPath] = useState(variables_path || {});
+    const [variablesPath, setVariablesPath] = useState(variables_path[functionName] || {});
     const [isDataAvailable, setIsDataAvailable] = useState(Object.keys(properties).length > 0);
     const [isModified, setIsModified] = useState(false); // Track changes
 
@@ -29,16 +30,16 @@ function FunctionParameterModal({ functionId, params }) {
     }, [function_details, properties]);
 
     useEffect(() => {
-        setVariablesPath(variables_path);
+        setVariablesPath(variables_path[functionName] || {});
     }, [variables_path])
 
     useEffect(() => {
         setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
     }, [toolData, function_details]);
 
-    useEffect(()=>{
-        setIsModified(!isEqual(variablesPath, variables_path));
-    },[variablesPath])
+    useEffect(() => {
+        setIsModified(!isEqual(variablesPath, variables_path[functionName]));
+    }, [variablesPath])
 
     const handleRequiredChange = (key) => {
         const keyParts = key.split('.');
@@ -186,13 +187,17 @@ function FunctionParameterModal({ functionId, params }) {
     };
 
     const handleSaveFunctionData = () => {
-        const { _id, ...dataToSend } = toolData;
-        dispatch(updateFuntionApiAction({
-            function_id: _id,
-            dataToSend: dataToSend,
-        }));
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: variablesPath } }));
-        setToolData("");
+        if (!isEqual(toolData, function_details)) {
+            const { _id, ...dataToSend } = toolData;
+            dispatch(updateFuntionApiAction({
+                function_id: functionId,
+                dataToSend: dataToSend,
+            }));
+            setToolData("");
+        }
+        if (!isEqual(variablesPath, variables_path[functionName])) {
+            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
+        }
     };
 
     const handleRemoveFunctionFromBridge = () => {
@@ -201,6 +206,7 @@ function FunctionParameterModal({ functionId, params }) {
             dataToSend: {
                 functionData: {
                     function_id: functionId,
+                    function_name: functionName,
                 }
             }
         })).then(() => {
