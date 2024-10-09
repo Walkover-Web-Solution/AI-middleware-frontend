@@ -4,18 +4,21 @@ import { updateBridgeAction, updateFuntionApiAction } from '@/store/action/bridg
 import { flattenParameters } from '@/utils/utility';
 import { isEqual } from 'lodash';
 import { Info, InfoIcon, Trash2 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 function FunctionParameterModal({ functionId, params }) {
     const dispatch = useDispatch();
-    const { function_details } = useCustomSelector((state) => ({
+    const { function_details, variables_path } = useCustomSelector((state) => ({
         function_details: state?.bridgeReducer?.org?.[params?.org_id]?.functionData?.[functionId] || {},
+        variables_path: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables_path || {},
     }));
 
+    const functionName = useMemo(() => function_details['endpoint'] || function_details['function_name'], [function_details]);
     const properties = function_details.fields || {};
     const [toolData, setToolData] = useState(function_details || {});
+    const [variablesPath, setVariablesPath] = useState(variables_path[functionName] || {});
     const [isDataAvailable, setIsDataAvailable] = useState(Object.keys(properties).length > 0);
     const [isModified, setIsModified] = useState(false);
     const [objectFieldValue, setObjectFieldValue] = useState('');
@@ -28,8 +31,16 @@ function FunctionParameterModal({ functionId, params }) {
     }, [function_details, properties]);
 
     useEffect(() => {
+        setVariablesPath(variables_path[functionName] || {});
+    }, [variables_path])
+
+    useEffect(() => {
         setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
     }, [toolData, function_details]);
+
+    useEffect(() => {
+        setIsModified(!isEqual(variablesPath, variables_path[functionName]));
+    }, [variablesPath])
 
     const handleRequiredChange = (key) => {
         const keyParts = key.split('.');
@@ -181,12 +192,17 @@ function FunctionParameterModal({ functionId, params }) {
     };
 
     const handleSaveFunctionData = () => {
-        const { _id, ...dataToSend } = toolData;
-        dispatch(updateFuntionApiAction({
-            function_id: _id,
-            dataToSend: dataToSend,
-        }));
-        setToolData("");
+        if (!isEqual(toolData, function_details)) {
+            const { _id, ...dataToSend } = toolData;
+            dispatch(updateFuntionApiAction({
+                function_id: functionId,
+                dataToSend: dataToSend,
+            }));
+            setToolData("");
+        }
+        if (!isEqual(variablesPath, variables_path[functionName])) {
+            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
+        }
         resetModalData();
     };
 
@@ -196,6 +212,7 @@ function FunctionParameterModal({ functionId, params }) {
             dataToSend: {
                 functionData: {
                     function_id: functionId,
+                    function_name: functionName,
                 }
             }
         })).then(() => {
@@ -255,6 +272,15 @@ function FunctionParameterModal({ functionId, params }) {
         }
     };
 
+    const handleVariablePathChange = (key, value = "") => {
+        setVariablesPath(prevVariablesPath => {
+            return {
+                ...prevVariablesPath,
+                [key]: value || ""
+            };
+        });
+    }
+
     return (
         <dialog id="function-parameter-modal" className="modal">
             <div className="modal-box w-11/12 max-w-6xl">
@@ -280,6 +306,8 @@ function FunctionParameterModal({ functionId, params }) {
                         title="Toggle to edit object parameter"
                     />
                 </div>}
+
+                <p colSpan="3" className='flex items-center gap-1 whitespace-nowrap text-xs mb-2'><InfoIcon size={16} /> You can change the data in raw json format </p>
                 {!isDataAvailable ? (
                     <p>No Parameters used in the function</p>
                 ) : (
@@ -294,6 +322,8 @@ function FunctionParameterModal({ functionId, params }) {
                                         <th>Required</th>
                                         <th>Description</th>
                                         <th>Enum: comma separated</th>
+                                        <th>Fill with AI</th>
+                                        <th>Value Path: variables.your_path</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -337,30 +367,56 @@ function FunctionParameterModal({ functionId, params }) {
                                                         onChange={() => handleRequiredChange(param.key)}
                                                     />
                                                 </td>
-                                                {currentType !== 'object' && (
-                                                    <td>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Parameter description"
-                                                            className="input input-bordered w-full input-sm"
-                                                            value={currentDesc}
-                                                            onChange={(e) => handleDescriptionChange(param.key, e.target.value)}
-                                                        />
-                                                    </td>
-                                                )}
-                                                {currentType !== 'object' && (
-                                                    <td>
-                                                        <input
-                                                            key={currentEnum}
-                                                            type="text"
-                                                            placeholder="['a','b','c']"
-                                                            className="input input-bordered w-full input-sm"
-                                                            defaultValue={JSON.stringify(currentEnum)}
-                                                            onBlur={(e) => handleEnumChange(param.key,  e.target.value)}
-                                                        />
-                                                    </td>
-                                                )}
-                                                {currentType === 'object' && <td colSpan="3" className='flex items-center gap-1 whitespace-nowrap text-sm'><InfoIcon size={16}/> You can change the data in raw json format </td>}
+                                                {/* {currentType !== 'object' && ( */}
+                                                <td>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Parameter description"
+                                                        className="input input-bordered w-full input-sm"
+                                                        value={currentDesc}
+                                                        disabled={currentType === 'object'}
+                                                        onChange={(e) => handleDescriptionChange(param.key, e.target.value)}
+                                                    />
+                                                </td>
+                                                {/* )} */}
+                                                <td>
+                                                    <input
+                                                        key={currentEnum}
+                                                        type="text"
+                                                        placeholder="['a','b','c']"
+                                                        className="input input-bordered w-full input-sm"
+                                                        defaultValue={JSON.stringify(currentEnum)}
+                                                        disabled={currentType === 'object'}
+                                                        onBlur={(e) => handleEnumChange(param.key, e.target.value)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="checkbox"
+                                                        className="checkbox"
+                                                        checked={!(param.key in variablesPath)}
+                                                        onChange={() => {
+                                                            const updatedVariablesPath = { ...variablesPath };
+                                                            if (param.key in updatedVariablesPath) {
+                                                                delete updatedVariablesPath[param.key];
+                                                            } else {
+                                                                updatedVariablesPath[param.key] = ""; // or any default value
+                                                            }
+                                                            setVariablesPath(updatedVariablesPath);
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="name"
+                                                        className="input input-bordered w-full input-sm"
+                                                        value={variablesPath[param.key] || ''}
+                                                        onChange={(e) => {
+                                                            handleVariablePathChange(param.key, e.target.value);
+                                                        }}
+                                                    />
+                                                </td>
                                             </tr>
                                         );
                                     })}

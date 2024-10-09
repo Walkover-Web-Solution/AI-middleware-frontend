@@ -17,11 +17,11 @@ export const authDataReducer = createSlice({
     addAuthData : (state, action) => {
         state.authData = [action.payload.data , ...state.authData]
     },
-    removeAuthData : (state , action) => {
-      const cloneData =  cloneDeep(state.authData)
-      cloneData.splice(cloneData[action.payload] , 1)
-      state.authData = [...cloneData]
+    removeAuthData: (state, action) => {
+      const id = action.payload; 
+      state.authData = state.authData.filter(item => item.id !== id); 
     }
+    
   },
 });
 
