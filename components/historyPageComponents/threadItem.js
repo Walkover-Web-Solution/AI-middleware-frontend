@@ -1,16 +1,17 @@
-// components/ThreadItem.js
 import { updateContentHistory } from "@/store/action/historyAction";
-import { Bot, MessageCircleCode, Pencil, User, Info } from "lucide-react";
-import React, { useRef, useState, useEffect } from "react";
+import { Bot, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, User } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useDispatch } from "react-redux";
 import CodeBlock from "../codeBlock/codeBlock";
+import ToolsDataModal from "./toolsDataModal";
 
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params }) => {
   const dispatch = useDispatch();
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
-
+  const [toolsData, setToolsData] = useState([]); // Track the selected tool call data
+  const toolsDataModalRef = useRef(null);
   const [modalInput, setModalInput] = useState("");
   const [isDropupOpen, setIsDropupOpen] = useState(false);
   const modalRef = useRef(null);
@@ -19,6 +20,11 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   useEffect(() => {
     setMessageType(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   }, [item]);
+
+
+  const handleToggle = () => {
+    setShowNormalMessage((prevState) => !prevState);
+  };
 
   const handleEdit = () => {
     setModalInput(item.updated_message || item.content);
@@ -60,9 +66,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
 
   const getMessageToDisplay = () => {
     if (messageType === 0) return item.chatbot_message;
-    if(messageType===1)return  item.content;
+    if (messageType === 1) return item.content;
     if (messageType === 2) return item.updated_message;
-    
+
   };
 
   const selectMessageType = (type) => {
@@ -74,8 +80,8 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        dropupRef.current &&
-        !dropupRef.current.contains(event.target) &&
+        dropupRef?.current &&
+        !dropupRef?.current?.contains(event.target) &&
         !event.target.closest('.bot-icon')
       ) {
         setIsDropupOpen(false);
@@ -93,19 +99,78 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     };
   }, [isDropupOpen]);
 
+  const handleCloseToolsDataModal = () => {
+    setToolsData([]);
+    if (toolsDataModalRef.current) {
+      toolsDataModalRef.current.close();
+    }
+  };
+  // Truncate function
+  function truncate(string = "", maxLength) {
+    if (string.length > maxLength) {
+      return string.substring(0, maxLength - 3) + '...';
+    }
+    return string;
+  }
+
   return (
-    <div key={`item-id-${item?.id}`} >
+    <div key={`item-id-${item?.id}`} className="">
       {item?.role === "tools_call" ? (
-        <div className="w-full flex overflow-y-scroll align-center justify-center gap-2">
-          {Object.keys(item.function).map((funcName, index) => (
-            <div key={index} role="alert" className="alert w-1/3 transition-colors duration-200">
-              <Info size={16} />
-              <div onClick={() => openViasocket(funcName, { flowHitId: JSON.parse(item.function[funcName])?.metadata?.flowHitId })} className="cursor-pointer">
-                <h3 className="font-bold">Functions Executed</h3>
-                <div className="text-xs">Function "{integrationData?.[funcName]?.title || funcName}" executed successfully.</div>
-              </div>
-            </div>
-          ))}
+        <div className="mb-2 flex flex-col justify-center items-center">
+          <h1 className="p-1">
+            <span className="flex justify-center items-center gap-2 font-semibold"><Parentheses size={16} />Functions Executed Successfully</span>
+          </h1>
+          <div className="flex h-full gap-2 justify-center items-center flex-wrap">
+            {item?.tools_call_data ?
+              item?.tools_call_data?.map((toolData, index) =>
+                Object.entries(toolData)?.map(([key, tool]) => (
+                  <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 shadow-sm">
+                    <div onClick={() => openViasocket(tool?.name, { flowHitId: tool?.metadata?.flowHitId })}
+                      className="cursor-pointer flex items-center justify-center py-4 pl-2">
+                      <div className="text-center">
+                        {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="tooltip tooltip-top relative" data-tip="function logs">
+                        <SquareFunction size={22}
+                          onClick={() => openViasocket(tool.name, { flowHitId: tool?.metadata?.flowHitId })}
+                          className="opacity-80 cursor-pointer" />
+                      </div>
+                      <div className="tooltip tooltip-top pr-2 relative" data-tip="function data">
+                        <FileClock
+                          size={22}
+                          onClick={() => {
+                            setToolsData(tool?.tool_call);
+                            toolsDataModalRef.current?.showModal();
+                          }}
+                          className="opacity-80 bg-inherit cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )
+              :
+              Object.keys(item.function).map((funcName, index) => (
+                <div key={index} className="bg-base-200 rounded-lg  flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
+                  <div onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId })}
+                    className="cursor-pointer flex items-center justify-center py-4 pl-2">
+                    <div className="font-semibold text-center">
+                      {truncate(integrationData?.[funcName]?.title || funcName, 20)}
+                    </div>
+                  </div>
+
+                  <div className="tooltip tooltip-top pr-2" data-tip="function logs">
+                    <SquareFunction size={22}
+                      onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId })}
+                      className="opacity-80 cursor-pointer" />
+                  </div>
+
+                </div>
+              ))
+            }
+          </div>
         </div>
       ) : (
         <div>
@@ -116,25 +181,25 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                   {item.role === "user" ? (
                     <User size={20} />
                   ) : (
-                   <div> 
-                   <Bot
-                      className=" cursor-pointer bot-icon"
-                      size={20}
-                      onClick={() => setIsDropupOpen(!isDropupOpen)}
-                    /></div>
+                    <div>
+                      <Bot
+                        className=" cursor-pointer bot-icon"
+                        size={20}
+                        onClick={() => setIsDropupOpen(!isDropupOpen)}
+                      /></div>
                   )}
                 </div>
                 {isDropupOpen && item.role !== "user" && (
                   <div
                     ref={dropupRef}
                     className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-inherit rounded-md shadow-lg "
-                    style={{ zIndex:9 }}
+                    style={{ zIndex: 9 }}
                   >
                     <ul className="flex justify-center flex-col items-center gap-2">
                       {item.chatbot_message && (
                         <li className={`${item.chatbot_message ? "" : "hidden"}`}>
                           <button
-                           className={`px-2 py-1 ${messageType === 0 ? "bg-primary text-white rounded-md" : ""
+                            className={`px-2 py-1 ${messageType === 0 ? "bg-primary text-white rounded-md" : ""
                               }`}
                             onClick={() => selectMessageType(0)}
                           >
@@ -173,10 +238,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 )}
               </div>
             </div>
-            <div className="chat-header flex gap-4 items-center mb-1">    
-            {messageType===2 ? <p className="text-xs opacity-50">Edited</p> : ""}
+            <div className="chat-header flex gap-4 items-center mb-1">
+              {messageType === 2 ? <p className="text-xs opacity-50">Edited</p> : ""}
             </div>
-            <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>       
+            <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
               <ReactMarkdown components={{
                 code: ({ node, inline, className, children, ...props }) => (
                   <CodeBlock
@@ -188,7 +253,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                   </CodeBlock>
                 )
               }}>
-                  {getMessageToDisplay()}
+                {getMessageToDisplay()}
               </ReactMarkdown>
               {item?.role === 'assistant' && (
                 <div className="tooltip absolute top-2  right-2 text-sm cursor-pointer" data-tip="Edit response">
@@ -201,22 +266,32 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             </div>
             {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
+          {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div class="flex justify-center items-center my-4">
+            <p class="border-t border-base-300 w-full"></p>
+            <p class="bg-error text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+              History cleared
+            </p>
+            <p class="border-t border-base-300 w-full"></p>
+          </div>}
           {
             item?.error && (
               <div className="chat chat-end">
-                <div className="flex-1 chat-bubble bg-base-200 text-error">
+                <div className="flex-1 chat-bubble bg-base-200 text-error mb-3">
                   <span className="font-bold">Error</span>
-                  <p>{item.error}</p>
+                  <p>{item?.error}</p>
                 </div>
                 <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
-                  <Bot size={20}/>
+                  <Bot size={20} />
                 </div>
               </div>
             )
           }
-          
+
         </div>
       )}
+
+      <ToolsDataModal toolsData={toolsData} handleClose={handleCloseToolsDataModal} toolsDataModalRef={toolsDataModalRef} integrationData={integrationData} />
+
       {/* Modal */}
       <dialog className="modal modal-bottom sm:modal-middle" ref={modalRef}>
         <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6">

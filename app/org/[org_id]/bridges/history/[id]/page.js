@@ -208,15 +208,15 @@ function Page({ params }) {
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex flex-col items-center overflow-scroll justify-center">
-          <div className="w-full min-h-auto">       
+        <div className="drawer-content flex flex-col items-center justify-center">
+          <div className="w-full min-h-auto overflow-x-hidden">       
             <div
               ref={containerRef}
-              className="w-full text-start flex flex-col overflow-y-auto h-screen"
+              className="w-full text-start flex flex-col h-screen overflow-y-auto"
             >
-              <div className="pb-16 px-3 pt-4">
+              <div className="pb-16 px-3 pt-4 ">
                 {thread &&
-                  [...thread].map((item, index) => (
+                  [...thread]?.map((item, index) => (
                   <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
                 ))}
               </div>
