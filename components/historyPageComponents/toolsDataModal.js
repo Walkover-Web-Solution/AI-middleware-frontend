@@ -4,17 +4,17 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
   return (
     <dialog className="modal modal-bottom sm:modal-middle" ref={toolsDataModalRef}>
       <div className="relative bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6 max-h-[80%]">
-        <h2 className="text-xl font-bold mb-4 ">Function Data:</h2>
+        <h2 className="font-bold mb-1">Function Data:</h2>
         <div className="overflow-y-auto max-h-[50vh]">
           {toolsData && toolsData.function ? ( 
             <>
               <div className="mt-4">
-                {Object?.entries(toolsData.function|| {})?.map(([key, value], index) => (
+                {Object?.entries(toolsData.function || {})?.map(([key, value], index) => (
                   <div key={index} className="flex items-start gap-2 mb-2">
-                    <span className="font-semibold">{key}:</span>
-                    <span className="w-full">
+                    <span className="w-28 capitalize">{key}:</span>
+                    <span className="flex-1">
                       {typeof value === "string" && value?.startsWith("{") ? (
-                        <pre className="w-full text-sm bg-gray-100 p-2 rounded">
+                        <pre className="text-sm bg-gray-100 p-2 rounded">
                           {JSON.stringify(JSON?.parse(value), null, 2)}
                         </pre>
                       ) : (
