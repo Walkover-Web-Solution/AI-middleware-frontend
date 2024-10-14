@@ -32,7 +32,7 @@ function FunctionParameterModal({ functionId, params }) {
 
     useEffect(() => {
         setVariablesPath(variables_path[functionName] || {});
-    }, [variables_path])
+    }, [variables_path,functionName])
 
     useEffect(() => {
         setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
