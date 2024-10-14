@@ -207,15 +207,15 @@ export function flattenParameters(parameters, prefix = '') {
         const currentKey = prefix ? `${prefix}.${key}` : key;
         flat.push({
             key: currentKey,
-            type: value.type,
-            description: value.description,
+            type: value?.type,
+            description: value?.description,
             enum: value.enum,
-            required_params: value.required_params,
-            parameter: value.parameter,
-            items:value.items
+            required_params: value?.required_params,
+            parameter: value?.parameter,
+            items:value?.items
         });
-        if (Object?.keys(value?.parameter || value?.items || value?.properties || {})?.length > 0) {
-            flat = flat?.concat(flattenParameters(value?.parameter || value?.items || value?.properties, currentKey));
+        if (Object?.keys(value?.parameter || value?.items || {})?.length > 0) {
+            flat = flat?.concat(flattenParameters(value?.parameter || value?.items || {}, currentKey));
         }
     });
     return flat;

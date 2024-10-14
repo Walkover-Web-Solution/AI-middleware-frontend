@@ -136,14 +136,14 @@ function FunctionParameterModal({ functionId, params }) {
     const handleTypeChange = (key, newType) => {
         let updatedField;
         if (newType === 'array') {
-            updatedField = updateField(toolData.fields, key.split('.'), (field) => ({
+            updatedField = updateField(toolData?.fields, key?.split('.'), (field) => ({
                 ...field,
                 type: newType,
-                items: field.parameter || {},
-                ...(field.parameter ? { parameter: undefined } : {})
+                items: field?.parameter || {},
+                ...(field?.parameter ? { parameter: undefined } : {})
             }));
         } else {
-            updatedField = updateField(toolData.fields, key.split('.'), (field) => {
+            updatedField = updateField(toolData?.fields, key.split('.'), (field) => {
                 const { items, parameter, ...rest } = field;
                 const isParameterOrItemsPresent = items || parameter;
                 return {
@@ -238,13 +238,13 @@ function FunctionParameterModal({ functionId, params }) {
     };
 
     const getNestedFieldValue = (fields, keyParts) => {
-        return keyParts.reduce((currentField, key) => {
+        return keyParts?.reduce((currentField, key) => {
             if (!currentField) return {};
             // Use 'items' if the current field is 'array', else 'parameter'
-            if (currentField.type === 'array') {
-                return currentField.items?.[key] || {};
+            if (currentField?.type === 'array') {
+                return currentField?.items?.[key] || {};
             }   
-            return currentField.parameter?.[key] || currentField?.[key] || {}; // Ensure fallback to an empty object
+            return currentField?.parameter?.[key] || currentField?.[key] || {}; // Ensure fallback to an empty object
         }, fields);
     };
 
@@ -478,7 +478,7 @@ function FunctionParameterModal({ functionId, params }) {
                                  &&
                                <textarea 
                                 type="text"
-                                value = {JSON.stringify(toolData["old_fields"], undefined, 4)}
+                                value = {toolData?.old_fields ? (JSON.stringify(toolData["old_fields"], undefined, 4)):""}
                                 className='textarea textarea-bordered border w-full min-h-96 resize-y z-[1]'
                                />
                               
