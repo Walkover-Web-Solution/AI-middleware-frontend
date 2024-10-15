@@ -32,7 +32,7 @@ function FunctionParameterModal({ functionId, params }) {
 
     useEffect(() => {
         setVariablesPath(variables_path[functionName] || {});
-    }, [variables_path])
+    }, [variables_path,functionName])
 
     useEffect(() => {
         setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
@@ -150,10 +150,10 @@ function FunctionParameterModal({ functionId, params }) {
         try {
             if (!newEnum.trim()) {
                 setToolData(prevToolData => {
-                    const updatedFields = updateField(prevToolData.fields, key.split('.'), (field) => {
-                        const { enum: _, ...rest } = field;
-                        return rest;
-                    });
+                    const updatedFields = updateField(prevToolData.fields, key.split('.'), (field) => ({
+                        ...field,
+                        enum: [] 
+                    }));
                     return {
                         ...prevToolData,
                         fields: updatedFields
@@ -178,7 +178,7 @@ function FunctionParameterModal({ functionId, params }) {
             setToolData(prevToolData => {
                 const updatedFields = updateField(prevToolData.fields, key.split('.'), (field) => ({
                     ...field,
-                    enum: parsedEnum
+                    enum: parsedEnum.length === 0 ? [] : parsedEnum 
                 }));
                 return {
                     ...prevToolData,
