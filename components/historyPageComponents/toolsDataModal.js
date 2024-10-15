@@ -21,13 +21,13 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
           {toolsData ? (
             <>
               <div className="mt-4">
-                {Object.entries(toolsData).map(([key, value], index) => (
+                {Object.entries(toolsData || {})?.map(([key, value], index) => (
                   <div key={index} className="flex items-start gap-2 mb-2 overflow-x-auto">
                     <span className="w-28 capitalize">{key}:</span>
                     <span className="flex-1">
                       {key === "name" && integrationData[value] ? (
                         <p>
-                          {integrationData[value]?.title} <span>({value})</span>
+                          {integrationData[value]?.title}<span>({value})</span>
                         </p>
                       ) : (
                         <div className="max-w-full ">
