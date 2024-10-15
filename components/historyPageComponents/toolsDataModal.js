@@ -1,30 +1,40 @@
 import { CircleX } from "lucide-react";
 
 const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integrationData }) => {
+  const formatValue = (value) => {
+    if (typeof value === "string" && (value.startsWith("{") || value.startsWith("["))) {
+      try {
+        const parsedValue = JSON.parse(value);
+        return JSON.stringify(parsedValue, null, 2); 
+      } catch (error) {
+        return value; 
+      }
+    }
+    return JSON.stringify(value, null, 2);
+  };
+
   return (
-    <dialog className="modal modal-bottom sm:modal-middle" ref={toolsDataModalRef}>
-      <div className="relative bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6 max-h-[80%]">
+    <dialog className="modal modal-middle mx-auto outline-none" ref={toolsDataModalRef}>
+      <div className="relative bg-white rounded-lg shadow-lg p-6 w-[80%] max-w-[80vw] overscroll-none">
         <h2 className="font-bold mb-1">Function Data:</h2>
-        <div className="overflow-y-auto max-h-[50vh]">
-          {toolsData && toolsData.function ? ( 
+        <div className="overflow-y-scroll max-h-[70vh] max-w-auto overflow-x-hidden">
+          {toolsData ? (
             <>
               <div className="mt-4">
-                {Object?.entries(toolsData.function || {})?.map(([key, value], index) => (
-                  <div key={index} className="flex items-start gap-2 mb-2">
+                {Object.entries(toolsData || {})?.map(([key, value], index) => (
+                  <div key={index} className="flex items-start gap-2 mb-2 overflow-x-auto">
                     <span className="w-28 capitalize">{key}:</span>
                     <span className="flex-1">
-                      {typeof value === "string" && value?.startsWith("{") ? (
-                        <pre className="text-sm bg-gray-100 p-2 rounded">
-                          {JSON.stringify(JSON?.parse(value), null, 2)}
-                        </pre>
+                      {key === "name" && integrationData[value] ? (
+                        <p>
+                          {integrationData[value]?.title}<span>({value})</span>
+                        </p>
                       ) : (
-                        key === 'name' ? (
-                          <p>
-                            {integrationData[value]?.title} <span>({value})</span>
-                          </p>
-                        ) : (
-                          value.toString()
-                        )
+                        <div className="max-w-full ">
+                          <pre className="text-sm bg-gray-100 p-2 rounded ">
+                            {formatValue(value)}
+                          </pre>
+                        </div>
                       )}
                     </span>
                   </div>
