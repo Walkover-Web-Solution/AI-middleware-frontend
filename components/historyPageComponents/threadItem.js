@@ -141,7 +141,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                         <FileClock
                           size={22}
                           onClick={() => {
-                            setToolsData(tool?.tool_call);
+                            setToolsData(tool);
                             toolsDataModalRef.current?.showModal();
                           }}
                           className="opacity-80 bg-inherit cursor-pointer"
