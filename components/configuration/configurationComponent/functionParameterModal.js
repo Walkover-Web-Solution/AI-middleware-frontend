@@ -23,7 +23,8 @@ function FunctionParameterModal({ functionId, params }) {
     const [isModified, setIsModified] = useState(false);
     const [objectFieldValue, setObjectFieldValue] = useState('');
     const [isTextareaVisible, setIsTextareaVisible] = useState(false);
-    const flattenedParameters = flattenParameters(properties);
+    const flattenedParameters = flattenParameters(toolData?.fields);
+    const [isOldFieldViewTrue,setIsOldFieldViewTrue] = useState(false);
 
     useEffect(() => {
         setToolData(function_details);
@@ -102,18 +103,20 @@ function FunctionParameterModal({ functionId, params }) {
     const updateField = (fields, keyParts, updateFn) => {
         const fieldClone = JSON.parse(JSON.stringify(fields)); // Deep clone the fields
 
-        const _updateField = (fields, keyParts) => {
-            if (keyParts.length === 1) {
+        const _updateField = (currentFields, remainingKeyParts) => {
+            if (remainingKeyParts.length === 1) {
                 // When we've reached the last key, apply the update function
-                fields[keyParts[0]] = updateFn(fields[keyParts[0]]);
+                currentFields[remainingKeyParts[0]] = updateFn(currentFields[remainingKeyParts[0]]);
             } else {
-                const [head, ...tail] = keyParts;
-                if (fields[head] && fields[head].parameter) {
-                    // Continue to recursively traverse nested fields
-                    fields[head].parameter = _updateField(fields[head].parameter, tail);
+                const [head, ...tail] = remainingKeyParts;
+                if (currentFields[head]) {
+                    // Determine whether to use 'items' or 'parameter' based on the current type
+                    const isArray = currentFields[head].type === 'array';
+                    const nestedKey = isArray ? 'items' : 'parameter';
+                    currentFields[head][nestedKey] = _updateField(currentFields[head][nestedKey] || {}, tail);
                 }
             }
-            return fields;
+            return currentFields;
         };
 
         return _updateField(fieldClone, keyParts);
@@ -131,16 +134,31 @@ function FunctionParameterModal({ functionId, params }) {
     };
 
     const handleTypeChange = (key, newType) => {
-        const updatedFields = updateField(toolData.fields, key.split('.'), (field) => ({
-            ...field,
-            type: newType,
-            ...(newType === 'object' ? { enum: "", description: '' } : {}),
-        }));
-
+        let updatedField;
+        if (newType === 'array') {
+            updatedField = updateField(toolData?.fields, key?.split('.'), (field) => ({
+                ...field,
+                type: newType,
+                items: { "type": "string" },
+                required_params: [],
+                ...(field?.parameter ? { parameter: undefined } : {})
+            }));
+        } else {
+            updatedField = updateField(toolData?.fields, key.split('.'), (field) => {
+                const { items, parameter, ...rest } = field;
+                const isParameterOrItemsPresent = parameter;
+                return {
+                    ...rest,
+                    type: newType,
+                    parameter: newType === 'string' ? undefined : isParameterOrItemsPresent || {},
+                    ...(newType === 'object' ? { enum: [], description: '' } : {}),
+                };
+            });
+        }
 
         setToolData(prevToolData => ({
             ...prevToolData,
-            fields: updatedFields,
+            fields: updatedField,
         }));
 
 
@@ -221,7 +239,12 @@ function FunctionParameterModal({ functionId, params }) {
     };
 
     const getNestedFieldValue = (fields, keyParts) => {
-        return keyParts.reduce((currentField, key) => {
+        return keyParts?.reduce((currentField, key) => {
+            if (!currentField) return {};
+            // Use 'items' if the current field is 'array', else 'parameter'
+            if (currentField?.type === 'array') {
+                return currentField?.items?.[key] || {};
+            }   
             return currentField?.parameter?.[key] || currentField?.[key] || {}; // Ensure fallback to an empty object
         }, fields);
     };
@@ -296,6 +319,7 @@ function FunctionParameterModal({ functionId, params }) {
                         <Trash2 size={16} /> Remove function
                     </button>
                 </div>
+                <div className='flex justify-between items-center'>
                 {isDataAvailable && <div className='flex items-center text-sm gap-3 mb-4'>
                     <p>Raw JSON format</p>
                     <input
@@ -305,7 +329,24 @@ function FunctionParameterModal({ functionId, params }) {
                         onChange={handleToggleChange}
                         title="Toggle to edit object parameter"
                     />
-                </div>}
+                </div>
+                }
+                <div>
+                { toolData.old_fields && isTextareaVisible &&
+                 <div className='flex items-center text-sm gap-3'>
+                 <p>Check for old data</p>
+                  <input
+                        type="checkbox"
+                        className="toggle"
+                        checked={isOldFieldViewTrue}
+                        onChange={()=>{setIsOldFieldViewTrue(prev=>!prev)}}
+                        title="Toggle to edit object parameter"
+                    />
+                 </div>
+                  
+                }
+                </div>
+                </div>
 
                 <p colSpan="3" className='flex items-center gap-1 whitespace-nowrap text-xs mb-2'><InfoIcon size={16} /> You can change the data in raw json format </p>
                 {!isDataAvailable ? (
@@ -328,10 +369,10 @@ function FunctionParameterModal({ functionId, params }) {
                                 </thead>
                                 <tbody>
                                     {flattenedParameters.map((param, index) => {
-                                        const currentType = getNestedFieldValue(toolData.fields, param.key.split('.'))?.type || param.type || "";
-                                        const currentDesc = getNestedFieldValue(toolData.fields, param.key.split('.'))?.description || "";
-                                        const currentEnum = getNestedFieldValue(toolData.fields, param.key.split('.'))?.enum || [];
-
+                                        const currentField = getNestedFieldValue(toolData.fields, param.key.split('.'));
+                                        const currentType = currentField?.type || param.type || "";
+                                        const currentDesc = currentField?.description || "";
+                                        const currentEnum = currentField?.enum || [];
                                         return (
                                             <tr key={param.key}>
                                                 <td>{index}</td>
@@ -424,7 +465,7 @@ function FunctionParameterModal({ functionId, params }) {
                             </table>
                         </div>
                     ) : (
-                        <div className="mt-4">
+                        <div className={isOldFieldViewTrue?"flex items-center gap-2":""}>
                             <textarea
                                 type="input"
                                 value={objectFieldValue}
@@ -433,6 +474,16 @@ function FunctionParameterModal({ functionId, params }) {
                                 onBlur={handleTextFieldChange}
                                 placeholder="Enter valid JSON object here..."
                             />
+                            {
+                                isOldFieldViewTrue
+                                 &&
+                               <textarea 
+                                type="text"
+                                value = {toolData?.old_fields ? (JSON.stringify(toolData["old_fields"], undefined, 4)):""}
+                                className='textarea textarea-bordered border w-full min-h-96 resize-y z-[1]'
+                               />
+                              
+                            }
                         </div>
                     )
                 )}
