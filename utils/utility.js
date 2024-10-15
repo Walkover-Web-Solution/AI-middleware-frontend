@@ -215,7 +215,7 @@ export function flattenParameters(parameters, prefix = '') {
             items:value?.items
         });
         if (Object?.keys(value?.parameter || value?.items || {})?.length > 0) {
-            flat = flat?.concat(flattenParameters(value?.parameter || value?.items || {}, currentKey));
+            flat = flat?.concat(flattenParameters(value?.parameter || value?.items?.properties || {}, currentKey));
         }
     });
     return flat;

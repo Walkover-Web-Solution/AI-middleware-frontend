@@ -23,7 +23,7 @@ function FunctionParameterModal({ functionId, params }) {
     const [isModified, setIsModified] = useState(false);
     const [objectFieldValue, setObjectFieldValue] = useState('');
     const [isTextareaVisible, setIsTextareaVisible] = useState(false);
-    const flattenedParameters = flattenParameters(properties);
+    const flattenedParameters = flattenParameters(toolData?.fields);
     const [isOldFieldViewTrue,setIsOldFieldViewTrue] = useState(false);
 
     useEffect(() => {
@@ -139,17 +139,18 @@ function FunctionParameterModal({ functionId, params }) {
             updatedField = updateField(toolData?.fields, key?.split('.'), (field) => ({
                 ...field,
                 type: newType,
-                items: field?.parameter || {},
+                items: { "type": "string" },
+                required_params: [],
                 ...(field?.parameter ? { parameter: undefined } : {})
             }));
         } else {
             updatedField = updateField(toolData?.fields, key.split('.'), (field) => {
                 const { items, parameter, ...rest } = field;
-                const isParameterOrItemsPresent = items || parameter;
+                const isParameterOrItemsPresent = parameter;
                 return {
                     ...rest,
                     type: newType,
-                    parameter: isParameterOrItemsPresent || {},
+                    parameter: newType === 'string' ? undefined : isParameterOrItemsPresent || {},
                     ...(newType === 'object' ? { enum: [], description: '' } : {}),
                 };
             });
