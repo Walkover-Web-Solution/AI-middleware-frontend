@@ -98,26 +98,45 @@ const AddVariable = ({ params }) => {
 
   // Function to handle textarea blur event
   const onBlurHandler = (text) => {
-    const pairs = text
+    let data = text;
+    try {
+      const parsedData = JSON.parse(text);
+      const keyValueArray = Object.entries(parsedData)?.map(([key, value]) => {
+        if (typeof value === "object" && value !== null) {
+          return `${key}: ${JSON.stringify(value)}`; 
+        } else {
+          return `${key}: ${value}`; 
+        }
+      });
+      data = keyValueArray?.join("\n");
+    } catch (error) {}
+    const pairs = data
       .trim()
       .split("\n")
       .map((line) => {
-        const [key, value] = line.split(":").map((part) => part.trim());
+        const separatorIndex = line.indexOf(":");
+        if (separatorIndex === -1) {
+          return null; 
+        }
+        const key = line?.substring(0, separatorIndex).trim();
+        const value = line?.substring(separatorIndex + 1).trim();
+  
+        // Ensure both key and value are present
         return key && value ? { key, value, checked: true } : null;
       })
       .filter(Boolean);
 
-    // if (pairs.length > 0) {
+    if (pairs.length > 0) {
       setKeyValuePairs(pairs);
       dispatch(updateVariables({ data: pairs, bridgeId: params.id }));
-
-      // Reset error if all pairs are valid
       if (areAllPairsValid(pairs)) {
         setError(false);
       } else {
         setError(true);
       }
-    // }
+    } else {
+      setError(true);
+    }
   };
 
   // Function to toggle accordion open/close state
