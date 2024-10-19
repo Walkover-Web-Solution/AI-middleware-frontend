@@ -32,14 +32,8 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
   // Removed useHandleClickOutside
 
   const copyToClipboard = (content) => {
-       const keyValueArray = Object?.entries(content)?.map(([key, value]) => {
-      return `${key}:${value}`;
-    });
-
-    const data = keyValueArray.join("\n");
-
     navigator.clipboard
-      .writeText(data)
+      .writeText(JSON.stringify(content))
       .then(() => {
         toast.success(`Copied to clipboard`);
       })
