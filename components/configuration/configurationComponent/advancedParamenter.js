@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const AdvancedParameters = ({ params }) => {
+const AdvancedParameters = ({ params,currentView }) => {
     const [isAccordionOpen, setIsAccordionOpen] = useState(false);
     const dispatch = useDispatch();
     const { service, model, type, bridge, configuration } = useCustomSelector((state) => ({
@@ -64,7 +64,10 @@ const AdvancedParameters = ({ params }) => {
 
     };
     return (
-        <div className="collapse text-base-content" tabIndex={0}>
+        <>
+            {
+                currentView !== 'chatbotConfig' ? 
+                <div className="collapse text-base-content" tabIndex={0}>
             <input type="radio" name="my-accordion-1" onClick={toggleAccordion} className='cursor-pointer'/>
             <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
                 <span className="mr-2 cursor-pointer">
@@ -174,6 +177,46 @@ const AdvancedParameters = ({ params }) => {
                 })}
             </div>}
         </div>
+        :
+        <div>
+        {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, options }]) => {
+                    if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
+                    const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
+                    const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
+                    return (
+                        <div key={key} className="form-control">
+                        {field === 'select' && <label className="label">
+                                <div className='flex gap-2'>
+                                <div className='flex flex-row gap-2 items-center'>
+                                    <span className="label-text capitalize">{name || key}</span>
+                                    {description && <div className="tooltip tooltip-right" data-tip={description}>
+                                        <Info size={12} />
+                                    </div>}
+                                    {configuration?.[key]?.type !=='json_object' ? <span className='text-error text-xs '>* Select Response type json_object</span> : ""}
+                                </div>
+                            </div>
+                        </label>}
+                            {field === 'select' && (
+                            <div>
+                            
+                            <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+                                <select value={JSON.stringify(configuration?.[key])} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
+                                        <option disabled>Select response mode</option>
+                                        {options?.map((service, index) => (
+                                            <option key={index} value={JSON.stringify(service)}>{service?.type}</option>
+                                        ))}
+                                </select>
+                                
+                            </label>
+                        </div>
+                                
+                            )}
+                        </div>
+                    );
+                })}
+         </div>
+            }
+        </>
     );
 };
 

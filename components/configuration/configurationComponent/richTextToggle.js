@@ -1,5 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { Info } from 'lucide-react';
 import React from 'react'
 import { useDispatch } from 'react-redux';
 
@@ -31,6 +32,12 @@ function RichTextToggle({params}) {
                     defaultChecked={is_rich_text}
                     onChange={(e) => handleInputChange(e, "bridgeType")}
                 />
+            </div>
+            <div>
+                {is_rich_text && <div role="alert" className="alert p-2">
+                    <Info size={16} />
+                    <span className='label-text-alt'>Only supports models which have JSON support. &#40; like gpt-4o &#41;</span>
+                </div>}
             </div>
         </label>
     )
