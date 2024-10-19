@@ -110,7 +110,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
         </div>
       ) : (
         <InfiniteScroll dataLength={historyData.length} next={fetchMoreData} hasMore={hasMore} loader={<h4></h4>} scrollableTarget="sidebar">
-          <div className="slider-container w-[fixed-width] overflow-x-auto">
+          <div className="slider-container w-[fixed-width] overflow-x-auto mb-16">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData.map((item) => (
                 <div className="flex">
@@ -141,17 +141,17 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
           </div>
         </InfiniteScroll>
       )}
-      <div className="fixed bottom-2 left-16">
-        {!isThreadSelectable && <button onClick={() => { setIsThreadSelectable(true) }} className="btn">
+      <div className="fixed bottom-2 left-12">
+        {!isThreadSelectable && <button onClick={() => { setIsThreadSelectable(true) }} className="btn btn-primary">
           Generate Fine tunning file
         </button>}
         {
           isThreadSelectable && (
-            <div >
-              <button onClick={handleDownload} className="btn">
+            <div className="flex gap-3">
+              <button onClick={handleDownload} className="btn btn-primary">
                 Download <Download size={16} />
               </button>
-              <button onClick={() => setIsThreadSelectable(false)} className="btn">
+              <button onClick={() => setIsThreadSelectable(false)} className="btn bg-base-300">
                 Cancel
               </button>
             </div>
