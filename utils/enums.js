@@ -130,3 +130,183 @@ export const DOCUMENT_SECTIONS = [
       "Appends additional text to the input before generating the response. It can be used to provide extra context or direct the model's output.",
   },
 ];
+
+ export const JSONFORMATDATA = [
+  {
+    title: "String, Number, Boolean",
+    description: "This structure is used to define a simple data representation that includes a string, a number, and a boolean value.",
+    json: `{
+      "data": {
+        "type": "string",
+        "description": "Your description",
+        "enum": [
+          "your Enum value like 'a', 'b', 'c' for string and for number 1, 2, 3"
+        ],
+        "required_params": []
+      },
+      "data1": {
+        "type": "number",
+        "description": "Your description",
+        "enum": [
+          "your Enum value like 'a', 'b', 'c' for string and for number 1, 2, 3"
+        ],
+        "required_params": []
+      },
+      "data2": {
+        "type": "boolean",
+        "description": "Your description",
+        "enum": [
+          "your Enum value like 'a', 'b', 'c' for string and for number 1, 2, 3"
+        ],
+        "required_params": []
+      }
+    }`
+  },
+  {
+    title: "Object of Object",
+    description: "This structure defines an object containing another object, often used for nested data representation.",
+    json: `{
+      "data": {
+        "type": "object",
+        "description": "Your description",
+        "enum": [
+          "your Enum value like 'a', 'b', 'c' for string and for number 1, 2, 3"
+        ],
+        "required_params": [
+          "data1"
+        ],
+        "parameters": {
+          "data1": {
+            "type": "object",
+            "description": "Your description",
+            "enum": [
+              "your Enum value like 'a', 'b', 'c' for string and for number 1, 2, 3"
+            ],
+            "required_params": [
+              "order_id"
+            ],
+            "parameter": {
+              "order_id": {
+                "type": "string",
+                "description": "The customer's order ID."
+              }
+            }
+          }
+        }
+      }
+    }`
+  },
+  {
+    title: "Array of Array",
+    description: "This structure defines an array that contains other arrays, useful for representing complex relationships.",
+    json: `{
+      "data": {
+        "type": "array",
+        "description": "Your description",
+        "items": {
+          "type": "array",
+          "description": "Your description",
+          "items": {
+            "type": "object",
+            "description": "Your description",
+            "required_params": ["data1"],
+            "properties": {
+              "data1": {
+                "type": "object",
+                "description": "Your description",
+                "enum": [
+                  "your Enum value like 'a', 'b', 'c' for string and for number 1, 2, 3"
+                ],
+                "required_params": [
+                  "order_id"
+                ],
+                "parameter": {
+                  "order_id": {
+                    "type": "string",
+                    "description": "The customer's order ID."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }`
+  },
+  {
+    title: "Array of Object",
+    description: "This structure defines an array of objects, suitable for collections of related data.",
+    json: `{
+      "data": {
+        "type": "array",
+        "description": "Your description",
+        "items": {
+          "type": "object",
+          "required_params": ["data1"],
+          "properties": {
+            "data1": {
+              "type": "object",
+              "description": "Your description",
+              "enum": [
+                "your Enum value like 'a', 'b', 'c' for string and for number 1, 2, 3"
+              ],
+              "required_params": [
+                "order_id"
+              ],
+              "parameter": {
+                "order_id": {
+                  "type": "string",
+                  "description": "The customer's order ID."
+                }
+              }
+            }
+          }
+        }
+      }
+    }`
+  },
+  {
+    title: "Object of Array",
+    description: "This structure defines an object that contains an array, suitable for collections of related data.",
+    json: `{
+      "data": {
+        "type": "object",
+        "description": "Your description",
+        "enum": [
+          "your Enum value like 'a', 'b', 'c' for string and for number 1, 2, 3"
+        ],
+        "parameter": {
+          "type": "array",
+          "required_params": [
+            "data1"
+          ],
+          "items": {
+            "type": "object",
+            "description": "Your Description",
+            "required_params": [
+              "data1"
+            ],
+            "properties": {
+              "data1": {
+                "type": "object",
+                "description": "Your description",
+                "enum": [
+                  "your Enum value like 'a', 'b', 'c' for string and for number 1, 2, 3"
+                ],
+                "required_params": [
+                  "order_id"
+                ],
+                "parameter": {
+                  "order_id": {
+                    "type": "string",
+                    "description": "The customer's order ID."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }`
+  }
+];
