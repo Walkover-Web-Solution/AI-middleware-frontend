@@ -113,9 +113,9 @@ const AdvancedParameters = ({ params }) => {
                                         step={step || 1}
                                         key={configuration?.[key]}
                                         defaultValue={
-                                            (configuration?.[key] === 'min' || configuration?.[key] === 'max') ?
-                                                modelInfoData?.[key]?.[configuration?.[key]] || 0 :
-                                                configuration?.[key] || 0
+                                            (configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key]=='default') ?
+                                                modelInfoData?.[key]?.[configuration?.[key]]:
+                                                configuration?.[key]
                                         }
                                         onBlur={(e) => handleInputChange(e, key, true)}
                                         onInput={(e) => {
