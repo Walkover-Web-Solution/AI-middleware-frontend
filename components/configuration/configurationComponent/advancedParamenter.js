@@ -32,7 +32,9 @@ const AdvancedParameters = ({ params }) => {
                 [key]: isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue,
             }
         };
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+        if ( (isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue) !== configuration[key]) {
+            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+        }
     };
 
     const handleSelectChange = (e, key) => {
@@ -47,16 +49,29 @@ const AdvancedParameters = ({ params }) => {
                 [key]: newValue,
             }
         };
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+        if (newValue !== configuration[key]) {
+            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+        }
     };
 
     const toggleAccordion = () => {
         setIsAccordionOpen((prevState) => !prevState);
     };
 
+    const setSliderValue = (value, key) => {
+        let updatedDataToSend = {
+            configuration: {
+                [key]: value
+            }
+        };
+        if (value !== configuration[key]) {
+            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: updatedDataToSend }));
+        }
+    };
+
     return (
         <div className="collapse text-base-content" tabIndex={0}>
-            <input type="radio" name="my-accordion-1" onClick={toggleAccordion} className='cursor-pointer'/>
+            <input type="radio" name="my-accordion-1" onClick={toggleAccordion} className='cursor-pointer' />
             <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
                 <span className="mr-2 cursor-pointer">
                     Advanced Parameters
@@ -64,7 +79,7 @@ const AdvancedParameters = ({ params }) => {
 
                 {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
-            
+
             {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
                 {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
                     if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
@@ -74,14 +89,26 @@ const AdvancedParameters = ({ params }) => {
                     return (
                         <div key={key} className="form-control">
                             <label className="label">
-                                <div className='flex flex-row gap-2 items-center'>
-                                    <span className="label-text capitalize">{name || key}</span>
-                                    {description && <div className="tooltip tooltip-right" data-tip={description}>
-                                        <Info size={12} />
-                                    </div>}
+                                <div className='flex gap-2'>
+                                    <div className='flex flex-row gap-2 items-center'>
+                                        <span className="label-text capitalize">{name || key}</span>
+                                        {description && <div className="tooltip tooltip-right" data-tip={description}>
+                                            <Info size={12} />
+                                        </div>}
+                                    </div>
+                                    <div>
+                                        <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
+                                            {field === 'slider' && (<li><a onClick={() => setSliderValue("min", key)} className={configuration?.[key] === "min" ? 'bg-base-content text-base-100' : ''}>Min</a></li>)}
+                                            <div className="tooltip" data-tip="If you set default, this key will not be send"><li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li></div>
+                                            {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
+                                        </ul>
+                                    </div>
+
+
                                 </div>
-                                {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (error = true)}
-                                {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{configuration?.[key]}</p>}
+                                {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
+                                {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
+                                    modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
                             </label>
                             {field === 'slider' && (
                                 <div>
@@ -91,7 +118,11 @@ const AdvancedParameters = ({ params }) => {
                                         max={max || 100}
                                         step={step || 1}
                                         key={configuration?.[key]}
-                                        defaultValue={configuration?.[key] || 0}
+                                        defaultValue={
+                                            (configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] == 'default') ?
+                                                modelInfoData?.[key]?.[configuration?.[key]] :
+                                                configuration?.[key]
+                                        }
                                         onBlur={(e) => handleInputChange(e, key, true)}
                                         onInput={(e) => {
                                             document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
@@ -104,7 +135,7 @@ const AdvancedParameters = ({ params }) => {
                             {field === 'text' && (
                                 <input
                                     type="text"
-                                    defaultValue={configuration?.[key] || ''}
+                                    defaultValue={configuration?.[key] === 'default' ? '' : configuration?.[key] || ''}
                                     onBlur={(e) => handleInputChange(e, key)}
                                     className="input input-bordered input-sm w-full"
                                     name={key}
@@ -129,7 +160,7 @@ const AdvancedParameters = ({ params }) => {
                                         type="checkbox"
                                         key={bridge?.bridgeType}
                                         className="toggle"
-                                        defaultChecked={configuration?.[key]}
+                                        defaultChecked={configuration?.[key] || false}
                                         onChange={(e) => handleInputChange(e, key)}
                                     />
                                 </label>
