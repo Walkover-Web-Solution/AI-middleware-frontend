@@ -142,7 +142,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
         </InfiniteScroll>
       )}
       <div className="fixed bottom-2 left-12">
-        {!isThreadSelectable && <button onClick={() => { setIsThreadSelectable(true) }} className="btn btn-primary">
+        {!isThreadSelectable && historyData.length > 0  && <button onClick={() => { setIsThreadSelectable(true) }} className="btn btn-primary">
           Generate Fine tunning file
         </button>}
         {
