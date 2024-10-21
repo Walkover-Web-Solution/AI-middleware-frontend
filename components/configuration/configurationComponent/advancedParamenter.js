@@ -60,6 +60,7 @@ const AdvancedParameters = ({ params }) => {
                 [key]: value
             }
         };
+        if(value !== configuration[key])
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: updatedDataToSend }));
 
     };
@@ -93,7 +94,7 @@ const AdvancedParameters = ({ params }) => {
                                     <div>
                                         <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
                                             {field === 'slider' && (<li><a onClick={() => setSliderValue("min", key)} className={configuration?.[key] === "min" ? 'bg-base-content text-base-100' : ''}>Min</a></li>)}
-                                            <li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li>
+                                            <div className="tooltip" data-tip="If you set default, this key will not be send"><li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li></div>
                                             {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
                                         </ul>
                                     </div>
@@ -101,7 +102,7 @@ const AdvancedParameters = ({ params }) => {
 
                                 </div>
                                 {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
-                                {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max') ?
+                                {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key]==='default') ?
                                     modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
                             </label>
                             {field === 'slider' && (
@@ -129,7 +130,7 @@ const AdvancedParameters = ({ params }) => {
                             {field === 'text' && (
                                 <input
                                     type="text"
-                                    defaultValue={configuration?.[key] || ''}
+                                    defaultValue={configuration?.[key] ==='default' ? '' : configuration?.[key] || ''}
                                     onBlur={(e) => handleInputChange(e, key)}
                                     className="input input-bordered input-sm w-full"
                                     name={key}
