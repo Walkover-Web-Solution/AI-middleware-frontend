@@ -62,7 +62,7 @@ const Page = ({ params }) => {
           <div className="flex flex-col md:flex-row w-full">
             <div className="w-full md:w-2/3 overflow-auto p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
               <ConfigurationPage params={params} />
-              <div className='h-[70px]' />
+              <div/>
             </div>
             <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
             <div className="w-full md:w-1/3 flex-1 chatPage min-w-[450px]">
