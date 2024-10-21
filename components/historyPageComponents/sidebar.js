@@ -142,13 +142,13 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
         </InfiniteScroll>
       )}
       <div className="fixed bottom-2 left-12">
-        {!isThreadSelectable && historyData.length > 0  && <button onClick={() => { setIsThreadSelectable(true) }} className="btn btn-primary">
+        {!isThreadSelectable && historyData.length > 0 && <button onClick={() => { setIsThreadSelectable(true) }} className="btn btn-primary btn-sm">
           Generate Fine tunning file
         </button>}
         {
           isThreadSelectable && (
             <div className="flex gap-3">
-              <button onClick={handleDownload} className="btn btn-primary">
+              <button onClick={handleDownload} className="btn btn-primary" disabled={selectedThreadIds?.length === 0}>
                 Download <Download size={16} />
               </button>
               <button onClick={() => setIsThreadSelectable(false)} className="btn bg-base-300">
