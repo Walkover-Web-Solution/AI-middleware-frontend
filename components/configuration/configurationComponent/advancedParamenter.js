@@ -102,7 +102,7 @@ const AdvancedParameters = ({ params }) => {
 
                                 </div>
                                 {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
-                                {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max') ?
+                                {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key]==='default') ?
                                     modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
                             </label>
                             {field === 'slider' && (
