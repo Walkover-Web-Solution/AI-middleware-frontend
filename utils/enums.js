@@ -134,7 +134,6 @@ export const DOCUMENT_SECTIONS = [
  export const JSONFORMATDATA = [
   {
     title: "String, Number, Boolean",
-    description: "This structure is used to define a simple data representation that includes a string, a number, and a boolean value.",
     json: `{
       "data": {
         "type": "string",
@@ -164,7 +163,6 @@ export const DOCUMENT_SECTIONS = [
   },
   {
     title: "Object of Object",
-    description: "This structure defines an object containing another object, often used for nested data representation.",
     json: `{
       "data": {
         "type": "object",
@@ -198,7 +196,6 @@ export const DOCUMENT_SECTIONS = [
   },
   {
     title: "Array of Array",
-    description: "This structure defines an array that contains other arrays, useful for representing complex relationships.",
     json: `{
       "data": {
         "type": "array",
@@ -235,7 +232,6 @@ export const DOCUMENT_SECTIONS = [
   },
   {
     title: "Array of Object",
-    description: "This structure defines an array of objects, suitable for collections of related data.",
     json: `{
       "data": {
         "type": "array",
@@ -267,7 +263,6 @@ export const DOCUMENT_SECTIONS = [
   },
   {
     title: "Object of Array",
-    description: "This structure defines an object that contains an array, suitable for collections of related data.",
     json: `{
       "data": {
         "type": "object",

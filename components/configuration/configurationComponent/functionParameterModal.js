@@ -329,6 +329,7 @@ function FunctionParameterModal({ functionId, params }) {
                         onChange={handleToggleChange}
                         title="Toggle to edit object parameter"
                     />
+                    {isTextareaVisible &&  <p className="">For more info click{' '}<a href="/faq/jsonformatdoc" target="_blank" rel="noopener noreferrer" className="text-info-content underline cursor-pointer">here</a></p>}
                 </div>
                 }
                 <div>
