@@ -563,8 +563,8 @@ export const deleteWebhookAlert = async (id) => {
   }
 };
 
-export const downloadFineTuneData = async (bridge_id, threadIds) => {
-  const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`, { thread_ids: threadIds });
+export const downloadFineTuneData = async (bridge_id, threadIds, status = [0]) => {
+  const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`, { thread_ids: threadIds, user_feedback: status });
   return response?.data;
 }
 
