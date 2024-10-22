@@ -1,3 +1,4 @@
+import CreateVariableModal from '@/components/modals/createVariableModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -10,6 +11,8 @@ const InputConfigComponent = ({ params }) => {
         service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service || "",
         variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || []
     }));
+
+    const [keyName, setKeyName] = useState('');
 
     const suggestionListRef = useRef(null);
     const textareaRef = useRef(null);
@@ -114,17 +117,54 @@ const InputConfigComponent = ({ params }) => {
         const textarea = textareaRef.current;
         const cursorPosition = textarea.selectionStart;
 
-        const isDoubleBrace = prompt.slice(cursorPosition - 2, cursorPosition) === '{{';
-        const beforeCursor = isDoubleBrace ? prompt.slice(0, cursorPosition - 2) : prompt.slice(0, cursorPosition - 1);
-        const afterCursor = prompt.slice(cursorPosition);
-        const newPrompt = `${beforeCursor}{{${suggestion}}}${afterCursor}`;
+        let newPrompt;
+        let newCursorPosition;
+
+        if (suggestion === 'add_variable') {
+            const variableModal = document.getElementById('create_variable_modal');
+            const handleTabKey = (e) => {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    // Find the last `{{` before the cursor position
+                    const start = textarea.value.lastIndexOf('{{', cursorPosition);
+                    // Find the first `}}` after the cursor position
+                    const end = textarea.value.indexOf('}}', cursorPosition);
+
+                    // Ensure both `{{` and `}}` exist
+                    if (start !== -1 && end !== -1) {
+                        // Extract the text between `{{` and `}}`
+                        const textBetweenBraces = textarea.value.slice(start + 2, end);
+
+                        setKeyName(textBetweenBraces);
+                        if (variableModal) {
+                            variableModal.showModal();
+                        }
+                    }
+                    // Remove event listener after showing modal
+                    textarea.removeEventListener('keydown', handleTabKey);
+                }
+            };
+
+            textarea.addEventListener('keydown', handleTabKey);
+            const isDoubleBrace = prompt.slice(cursorPosition - 2, cursorPosition) === '{{';
+            const beforeCursor = isDoubleBrace ? prompt.slice(0, cursorPosition - 2) : prompt.slice(0, cursorPosition - 1);
+            const afterCursor = prompt.slice(cursorPosition);
+            newPrompt = `${beforeCursor}{{}}${afterCursor}`;
+            // newCursorPosition = cursorPosition + 1; // Position cursor between the brackets
+            newCursorPosition = isDoubleBrace ? cursorPosition : cursorPosition + 1;
+        } else {
+            const isDoubleBrace = prompt.slice(cursorPosition - 2, cursorPosition) === '{{';
+            const beforeCursor = isDoubleBrace ? prompt.slice(0, cursorPosition - 2) : prompt.slice(0, cursorPosition - 1);
+            const afterCursor = prompt.slice(cursorPosition);
+            newPrompt = `${beforeCursor}{{${suggestion}}}${afterCursor}`;
+            newCursorPosition = beforeCursor.length + suggestion.length + 4; // Adjust for `{{}}`
+        }
 
         setPrompt(newPrompt);
         setShowSuggestions(false);
         setActiveSuggestionIndex(0);
 
         textarea.focus();
-        const newCursorPosition = beforeCursor.length + suggestion.length + 4; // Adjust for `{{}}`
 
         setTimeout(() => {
             textarea.setSelectionRange(newCursorPosition, newCursorPosition);
@@ -166,6 +206,18 @@ const InputConfigComponent = ({ params }) => {
                                 </a>
                             </li>
                         ))}
+                        <li
+
+                            tabIndex={-1}
+                            className={`list-item ${variablesKeyValue?.length === activeSuggestionIndex ? 'bg-blue-100' : ''} `}
+                            onMouseDown={handleMouseDownOnSuggestion}
+                            onClick={() => handleSuggestionClick('add_variable')}
+                        >
+                            <a className='flex flex-col items-start'>
+                                <span>+ Add New variable</span>
+                                {variablesKeyValue?.length === activeSuggestionIndex && <p className='text-xs'>Press Tab after writing key name</p>}
+                            </a>
+                        </li>
                     </div>
                 </ul>
             </div>
@@ -190,6 +242,7 @@ const InputConfigComponent = ({ params }) => {
                 />
                 {showSuggestions && renderSuggestions()}
             </div>
+            <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
         </div>
     );
 };
