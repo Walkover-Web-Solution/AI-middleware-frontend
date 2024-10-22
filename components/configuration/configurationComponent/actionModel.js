@@ -129,7 +129,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
                         </label>
                     )}
                     <div className="modal-action">
-                        <button className="btn" onClick={() => {
+                        <button className="btn btn-primary" onClick={() => {
                             document.getElementById('actionModel').close();
                             setActionId(null);
                             clearInputFields();

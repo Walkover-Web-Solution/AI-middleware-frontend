@@ -77,13 +77,15 @@ const PreEmbedList = ({ params }) => {
     return (bridge_pre_tools?.length > 0 ?
         <div>
             <div className="form-control inline-block">
-                <label className='label-text font-medium'>Pre functions</label>
+                <div className='flex gap-5 items-center ml-2 '>
+                    <label className='label-text font-medium whitespace-nowrap'>Pre functions</label>
+                    <p role='alert' className='label-text-alt alert p-2'><Info size={16} />Use pre_function variable to use this function data. &#123;&#123;pre_function&#125;&#125;</p>
+                </div>
                 <div className="label flex-col items-start">
                     <div className="flex flex-wrap gap-4">
                         {renderEmbed}
                     </div>
                 </div>
-                <p role='alert' className='label-text-alt mt-2 alert p-2'><Info size={16} />Use pre_function variable to use this function data. &#123;&#123;pre_function&#125;&#125;</p>
             </div>
         </div> :
         (
