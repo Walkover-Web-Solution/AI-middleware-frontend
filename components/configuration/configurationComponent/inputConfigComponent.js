@@ -80,18 +80,16 @@ const InputConfigComponent = ({ params }) => {
         const value = e.target.value;
         setPrompt(value);
 
-        if (variablesKeyValue.length > 0) {
-            const cursorPos = e.target.selectionStart;
-            const lastChar = value.slice(cursorPos - 1, cursorPos);
-            const lastTwoChars = value.slice(cursorPos - 2, cursorPos);
+        const cursorPos = e.target.selectionStart;
+        const lastChar = value.slice(cursorPos - 1, cursorPos);
+        const lastTwoChars = value.slice(cursorPos - 2, cursorPos);
 
-            if (lastChar === '{' || lastTwoChars === '{{') {
-                setShowSuggestions(true);
-            } else {
-                setShowSuggestions(false);
-            }
+        if (lastChar === '{' || lastTwoChars === '{{') {
+            setShowSuggestions(true);
+        } else {
+            setShowSuggestions(false);
         }
-    }, [variablesKeyValue]);
+    }, []);
 
     const handleKeyDown = useCallback((e) => {
         if (!suggestionListRef.current) return;
