@@ -39,7 +39,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   }
 
   return (
-    <div className="drawer-side bg-base-200 border-r relative" id="sidebar">
+    <div className="drawer-side justify-items-stretch bg-base-200 border-r relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds}/>
       <div className="p-4 gap-3 flex flex-col">
         <div className="collapse collapse-arrow join-item border border-base-300">
