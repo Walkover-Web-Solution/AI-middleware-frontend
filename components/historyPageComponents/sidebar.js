@@ -1,10 +1,10 @@
-import InfiniteScroll from "react-infinite-scroll-component";
-import DateRangePicker from "./dateRangePicker.js";
-import { useDispatch } from "react-redux";
 import { getHistoryAction } from "@/store/action/historyAction.js";
-import { useRef, useState } from "react";
 import { Download } from "lucide-react";
-import { downloadFineTuneData } from "@/config/index.js";
+import { useRef, useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { useDispatch } from "react-redux";
+import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
+import DateRangePicker from "./dateRangePicker.js";
 
 const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params }) => {
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
@@ -27,33 +27,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   }
 
   const handleDownload = async () => {
-    try {
-      const response = await downloadFineTuneData(params.id, selectedThreadIds)
-
-      const blob = new Blob([typeof response == 'object' ? JSON.stringify(response) : response], { type: 'application/jsonl;charset=utf-8;' });
-
-      // Create a link element
-      const link = document.createElement('a');
-      if (link.download !== undefined) {
-        // Set the href and download attributes for the link
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'data.jsonl');
-        link.style.visibility = 'hidden';
-
-        // Append the link to the body
-        document.body.appendChild(link);
-
-        // Programmatically click the link to trigger the download
-        link.click();
-
-        // Clean up and remove the link
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
+    document.getElementById('fine-tune-modal')?.showModal()
   };
 
   const handleThreadIds = (id) => {
@@ -65,7 +39,8 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   }
 
   return (
-    <div className="drawer-side bg-base-200 border-r relative" id="sidebar">
+    <div className="drawer-side justify-items-stretch bg-base-200 border-r relative" id="sidebar">
+      <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds}/>
       <div className="p-4 gap-3 flex flex-col">
         <div className="collapse collapse-arrow join-item border border-base-300">
           <input type="checkbox" className="peer" />
@@ -110,7 +85,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
         </div>
       ) : (
         <InfiniteScroll dataLength={historyData.length} next={fetchMoreData} hasMore={hasMore} loader={<h4></h4>} scrollableTarget="sidebar">
-          <div className="slider-container w-[fixed-width] overflow-x-auto">
+          <div className="slider-container w-[fixed-width] overflow-x-auto mb-16">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData.map((item) => (
                 <div className="flex">
@@ -141,17 +116,17 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
           </div>
         </InfiniteScroll>
       )}
-      <div className="fixed bottom-2 left-16">
-        {!isThreadSelectable && <button onClick={() => { setIsThreadSelectable(true) }} className="btn">
+      <div className="fixed bottom-2 left-12">
+        {!isThreadSelectable && historyData.length > 0 && <button onClick={() => { setIsThreadSelectable(true) }} className="btn btn-primary btn-sm">
           Generate Fine tunning file
         </button>}
         {
           isThreadSelectable && (
-            <div >
-              <button onClick={handleDownload} className="btn">
+            <div className="flex gap-3">
+              <button onClick={handleDownload} className="btn btn-primary" disabled={selectedThreadIds?.length === 0}>
                 Download <Download size={16} />
               </button>
-              <button onClick={() => setIsThreadSelectable(false)} className="btn">
+              <button onClick={() => setIsThreadSelectable(false)} className="btn bg-base-300">
                 Cancel
               </button>
             </div>
