@@ -172,10 +172,10 @@ export const duplicateBridgeAction = (bridge_id) => async (dispatch) => {
   }
 }
 
-export const archiveBridgeAction = (bridge_id) => async (dispatch) => {
+export const archiveBridgeAction = (bridge_id, newStatus=1) => async (dispatch) => {
   try {
     dispatch(isPending());
-    const response = await archiveBridgeApi(bridge_id);
+    const response = await archiveBridgeApi(bridge_id, newStatus);
     dispatch(updateBridgeReducer({bridges: response.data, functionData:  null}))
     return response?.data?.status;
   } catch (error) {
