@@ -18,11 +18,12 @@ function BridgeSlider() {
     };
 
     const filteredBridgesList = bridgesList.filter(
-        (item) => 
+        (item) =>
             item?.name?.toLowerCase()?.includes(bridgeSearchQuery?.toLowerCase()) ||
-            item?.slugName?.toLowerCase()?.includes(bridgeSearchQuery?.toLowerCase())
+            item?.slugName?.toLowerCase()?.includes(bridgeSearchQuery?.toLowerCase()) ||
+            item?.service?.toLowerCase().includes(bridgeSearchQuery.toLowerCase()) ||
+            item._id.toLowerCase().includes(bridgeSearchQuery.toLowerCase())
     );
-    
 
     const handleNavigation = (id) => {
         router.push(`/org/${path[2]}/bridges/configure/${id}`);
