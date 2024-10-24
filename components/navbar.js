@@ -22,7 +22,7 @@ function Navbar() {
     bridge: state.bridgeReducer.allBridgesMap[path[5]] || []
   }));
 
-  const handleDeleteBridge = async (item) => {
+  const handleDeleteBridge = async (item, newStatus = 0) => {
     const bridgeId = path[5];
     const orgId = path[2];
 
@@ -61,8 +61,8 @@ function Navbar() {
 
       case "archive":
         try {
-          dispatch(archiveBridgeAction(bridgeId)).then((bridgeStatus) => {
-            if (bridgeStatus === 0) {
+          dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
+            if (bridgeStatus === 1) {
               toast.success('Bridge Unarchived Successfully');
             } else {
               toast.success('Bridge Archived Successfully');
@@ -126,8 +126,8 @@ function Navbar() {
                   </li>
                 ))} */}
                 {['Duplicate', 'Archive'].map((item) => (
-                  <li key={item} onClick={() => handleDeleteBridge(item)}>
-                    <a className={path[3] === item ? "active" : ""}>{item === 'Archive' ? (bridge.status && bridge.status === 1 ? 'Unarchive' : 'Archive') : item.charAt(0).toUpperCase() + item.slice(1)}</a>
+                  <li key={item} onClick={() => handleDeleteBridge(item, bridge.status !== undefined ? Number(!bridge.status) : undefined)}>
+                    <a className={path[3] === item ? "active" : ""}>{item === 'Archive' ? (bridge.status === 0 ? 'Unarchive' : 'Archive') : item.charAt(0).toUpperCase() + item.slice(1)}</a>
                   </li>
                 ))}
               </ul>

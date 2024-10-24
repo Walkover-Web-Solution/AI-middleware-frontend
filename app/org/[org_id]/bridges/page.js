@@ -31,8 +31,8 @@ function Home({ params }) {
     item._id.toLowerCase().includes(searchTerm.toLowerCase()) // Add this line
   );
 
-  const filteredArchivedBridges = filteredBridges.filter((item) => item.status === 1);
-  const filteredUnArchivedBridges = filteredBridges.filter((item) => item.status === 0 || item.status === undefined);
+  const filteredArchivedBridges = filteredBridges.filter((item) => item.status === 0);
+  const filteredUnArchivedBridges = filteredBridges.filter((item) => item.status === 1 || item.status === undefined);
 
   const onClickConfigure = (id) => {
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
@@ -87,17 +87,17 @@ function Home({ params }) {
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
           <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
             <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li>
-            <li><a onClick={(e) => { e.preventDefault(); archiveBridge(item._id) }}>{item?.status && item?.status === 1 ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
+            <li><a onClick={(e) => { e.preventDefault(); archiveBridge(item._id, item.status != undefined ? Number(!item?.status) : undefined) }}>{(item?.status === 0) ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
           </ul>
         </div>
       </div>
     )
   }
 
-  const archiveBridge = (bridgeId) => {
+  const archiveBridge = (bridgeId, newStatus = 0) => {
     try {
-      dispatch(archiveBridgeAction(bridgeId)).then((bridgeStatus) => {
-        if (bridgeStatus === 0) {
+      dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
+        if (bridgeStatus === 1) {
           toast.success('Bridge Unarchived Successfully');
         } else {
           toast.success('Bridge Archived Successfully');
