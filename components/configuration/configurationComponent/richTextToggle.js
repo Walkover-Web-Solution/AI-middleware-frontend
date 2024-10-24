@@ -5,9 +5,10 @@ import { useDispatch } from 'react-redux';
 
 function RichTextToggle({params}) {
     const dispatch = useDispatch();
-    const { is_rich_text } = useCustomSelector((state) => ({
-        is_rich_text: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text || false,
+    const { is_rich_text = true } = useCustomSelector((state) => ({
+        is_rich_text: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text,
     }));
+    const isRichText = is_rich_text === "" ? true : is_rich_text;
 
     const handleInputChange = (e) => {
         let newCheckedValue = e.target.checked
@@ -28,7 +29,7 @@ function RichTextToggle({params}) {
                     type="checkbox"
                     key={is_rich_text}
                     className="toggle"
-                    defaultChecked={is_rich_text}
+                    defaultChecked={isRichText}
                     onChange={(e) => handleInputChange(e, "bridgeType")}
                 />
             </div>
