@@ -3,7 +3,7 @@ import CreateNewBridge from "@/components/createNewBridge";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { duplicateBridgeAction } from "@/store/action/bridgeAction";
+import { archiveBridgeAction, duplicateBridgeAction } from "@/store/action/bridgeAction";
 import { getIconOfService } from "@/utils/utility";
 import { Ellipsis } from "lucide-react";
 import { useRouter } from 'next/navigation';
@@ -15,22 +15,24 @@ export const runtime = 'edge';
 
 function Home({ params }) {
   const dispatch = useDispatch();
+  const router = useRouter();
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
 
   const { isLoading } = useCustomSelector((state) => ({
     isLoading: state.bridgeReducer.loading,
   }));
 
-  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const filteredBridges = allBridges.filter((item) =>
-
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item?.slugName?.toLowerCase()?.includes(searchTerm.toLocaleLowerCase()) ||
     item?.service?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
     item._id.toLowerCase().includes(searchTerm.toLowerCase()) // Add this line
   );
+
+  const filteredArchivedBridges = filteredBridges.filter((item) => item.status === 0);
+  const filteredUnArchivedBridges = filteredBridges.filter((item) => item.status === 1 || item.status === undefined);
 
   const onClickConfigure = (id) => {
     router.push(`/org/${params.org_id}/bridges/configure/${id}`);
@@ -50,12 +52,69 @@ function Home({ params }) {
     }
   }
 
+  const renderBridgeCard = (item) => {
+    return (
+      <div className="flex rounded-md border cursor-pointer hover:shadow-lg bg-base-100 p-4 relative w-full">
+        <div key={item._id} className="flex flex-col items-center w-full" onClick={() => onClickConfigure(item._id)}>
+          <div className="flex flex-col h-[200px] gap-2 w-full">
+            <h1 className="flex items-center overflow-hidden gap-2 text-lg leading-5 font-semibold text-base-content mr-2">
+              {getIconOfService(item.service)}
+              {item.name}
+            </h1>
+            <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
+              {item.slugName && <span>SlugName: {item.slugName}</span>}
+              {item.configuration?.prompt && (
+                Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
+                  <div key={index}>
+                    <p>Role: {promptItem.role}</p>
+                    <p>Content: {promptItem.content}</p>
+                  </div>
+                )) : <p>Prompt: {item.configuration.prompt}</p>
+              )}
+              {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
+            </p>
+            <div className="mt-auto">
+              <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-xs font-semibold">
+                {item.service}
+              </span>
+              <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-xs font-semibold">
+                {item.configuration?.model || ""}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="dropdown bg-transparent absolute right-3 top-2">
+          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
+          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+            <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li>
+            <li><a onClick={(e) => { e.preventDefault(); archiveBridge(item._id, item.status != undefined ? Number(!item?.status) : undefined) }}>{(item?.status === 0) ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
+  const archiveBridge = (bridgeId, newStatus = 0) => {
+    try {
+      dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
+        if (bridgeStatus === 1) {
+          toast.success('Bridge Unarchived Successfully');
+        } else {
+          toast.success('Bridge Archived Successfully');
+        }
+        router.push(`/org/${params.org_id}/bridges`);
+      });
+    } catch (error) {
+      console.error('Failed to archive/unarchive bridge', error);
+    }
+  }
+
   return (
     <div className="drawer lg:drawer-open">
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col items-start justify-start">
+      <div className="drawer-content flex flex-col items-start justify-start m-4">
         <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
           <div className="w-full">
             {allBridges.length === 0 ? (
@@ -70,7 +129,7 @@ function Home({ params }) {
               </div>
             ) : (
               <div className="flex flex-col">
-                <div className="relative flex flex-col md:flex-row items-center justify-between m-4">
+                <div className="relative flex flex-col md:flex-row items-center justify-between mx-4">
                   <input
                     type="text"
                     placeholder="Search for bridges"
@@ -80,45 +139,24 @@ function Home({ params }) {
                   />
                 </div>
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
-                  {filteredBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
-                    <div className="flex rounded-md border cursor-pointer hover:shadow-lg bg-base-100 p-4 relative w-full">
-                      <div key={item._id} className="flex flex-col items-center w-full" onClick={() => onClickConfigure(item._id)}>
-                        <div className="flex flex-col h-[200px] gap-2 w-full">
-                          <h1 className="flex items-center overflow-hidden gap-2 text-lg leading-5 font-semibold text-base-content mr-2">
-                            {getIconOfService(item.service)}
-                            {item.name}
-                          </h1>
-                          <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
-                            {item.slugName && <span>SlugName: {item.slugName}</span>}
-                            {item.configuration?.prompt && (
-                              Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
-                                <div key={index}>
-                                  <p>Role: {promptItem.role}</p>
-                                  <p>Content: {promptItem.content}</p>
-                                </div>
-                              )) : <p>Prompt: {item.configuration.prompt}</p>
-                            )}
-                            {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
-                          </p>
-                          <div className="mt-auto">
-                            <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-xs font-semibold">
-                              {item.service}
-                            </span>
-                            <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-xs font-semibold">
-                              {item.configuration?.model || ""}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="dropdown bg-transparent absolute right-3 top-2">
-                        <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
-                        <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                          <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li>
-                        </ul>
-                      </div>
-                    </div>
+                  {filteredUnArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                    renderBridgeCard(item)
                   ))}
                 </div>
+                {filteredArchivedBridges?.length > 0 && <div className="">
+                  <div class="flex justify-center items-center my-4">
+                    <p class="border-t border-base-300 w-full"></p>
+                    <p class="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+                      Archived Bridges
+                    </p>
+                    <p class="border-t border-base-300 w-full"></p>
+                  </div>
+                  <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    {filteredArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                      renderBridgeCard(item)
+                    ))}
+                  </div>
+                </div>}
               </div>
             )}
           </div>

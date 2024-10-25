@@ -1,6 +1,6 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
+import { archiveBridgeAction, deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
 import { getIconOfService, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -15,11 +15,14 @@ function Navbar() {
   const dispatch = useDispatch();
   const pathName = usePathname()
   const path = pathName.split('?')[0].split('/')
-  const organizations = useCustomSelector((state) => state.userDetailsReducer.organizations);
-  const bridgeData = useCustomSelector((state) => state.bridgeReducer.allBridgesMap[path[5]]);
-  const chatbotData = useCustomSelector((state) => state.ChatBot.ChatBotMap[path[5]])
+  const { organizations, bridgeData, chatbotData, bridge } = useCustomSelector((state) => ({
+    organizations: state.userDetailsReducer.organizations,
+    bridgeData: state.bridgeReducer.allBridgesMap[path[5]],
+    chatbotData: state.ChatBot.ChatBotMap[path[5]],
+    bridge: state.bridgeReducer.allBridgesMap[path[5]] || []
+  }));
 
-  const handleDeleteBridge = async (item) => {
+  const handleDeleteBridge = async (item, newStatus = 0) => {
     const bridgeId = path[5];
     const orgId = path[2];
 
@@ -53,6 +56,21 @@ function Navbar() {
             console.error('Failed to delete bridge:', error);
             toast.error('Error deleting bridge');
           }
+        }
+        break;
+
+      case "archive":
+        try {
+          dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
+            if (bridgeStatus === 1) {
+              toast.success('Bridge Unarchived Successfully');
+            } else {
+              toast.success('Bridge Archived Successfully');
+            }
+            router.push(`/org/${orgId}/bridges`);
+          });
+        } catch (error) {
+          console.error('Failed to archive/unarchive bridge', error);
         }
         break;
       default:
@@ -102,9 +120,14 @@ function Navbar() {
                 <Ellipsis />
               </div>
               <ul tabIndex={0} className="dropdown-content z-[9999999999] menu p-2 shadow bg-base-100 rounded-box w-52 custom-dropdown">
-                {['Duplicate', 'Delete'].map((item) => (
+                {/* {['Duplicate', 'Delete'].map((item) => (
                   <li key={item} onClick={() => handleDeleteBridge(item)}>
                     <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
+                  </li>
+                ))} */}
+                {['Duplicate', 'Archive'].map((item) => (
+                  <li key={item} onClick={() => handleDeleteBridge(item, bridge.status !== undefined ? Number(!bridge.status) : undefined)}>
+                    <a className={path[3] === item ? "active" : ""}>{item === 'Archive' ? (bridge.status === 0 ? 'Unarchive' : 'Archive') : item.charAt(0).toUpperCase() + item.slice(1)}</a>
                   </li>
                 ))}
               </ul>
