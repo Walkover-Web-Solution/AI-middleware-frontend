@@ -72,7 +72,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         onChange={handleInputChange} // Update search query on input change
                         className='input input-bordered w-full input-sm'
                     />
-                    {renderEmbedSuggestions.length > 0 ? (
+                    {Object.values(function_data || {})?.length > 0 ? (
                         renderEmbedSuggestions
                     ) : (
                         <li className="text-center mt-2">No functions found</li>
