@@ -24,7 +24,7 @@ function FunctionParameterModal({ functionId, params }) {
     const [objectFieldValue, setObjectFieldValue] = useState('');
     const [isTextareaVisible, setIsTextareaVisible] = useState(false);
     const flattenedParameters = flattenParameters(toolData?.fields);
-    const [isOldFieldViewTrue,setIsOldFieldViewTrue] = useState(false);
+    const [isOldFieldViewTrue, setIsOldFieldViewTrue] = useState(false);
 
     useEffect(() => {
         setToolData(function_details);
@@ -33,7 +33,7 @@ function FunctionParameterModal({ functionId, params }) {
 
     useEffect(() => {
         setVariablesPath(variables_path[functionName] || {});
-    }, [variables_path,functionName])
+    }, [variables_path, functionName])
 
     useEffect(() => {
         setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
@@ -170,7 +170,7 @@ function FunctionParameterModal({ functionId, params }) {
                 setToolData(prevToolData => {
                     const updatedFields = updateField(prevToolData.fields, key.split('.'), (field) => ({
                         ...field,
-                        enum: [] 
+                        enum: []
                     }));
                     return {
                         ...prevToolData,
@@ -196,7 +196,7 @@ function FunctionParameterModal({ functionId, params }) {
             setToolData(prevToolData => {
                 const updatedFields = updateField(prevToolData.fields, key.split('.'), (field) => ({
                     ...field,
-                    enum: parsedEnum.length === 0 ? [] : parsedEnum 
+                    enum: parsedEnum.length === 0 ? [] : parsedEnum
                 }));
                 return {
                     ...prevToolData,
@@ -244,7 +244,7 @@ function FunctionParameterModal({ functionId, params }) {
             // Use 'items' if the current field is 'array', else 'parameter'
             if (currentField?.type === 'array') {
                 return currentField?.items?.[key] || {};
-            }   
+            }
             return currentField?.parameter?.[key] || currentField?.[key] || {}; // Ensure fallback to an empty object
         }, fields);
     };
@@ -320,35 +320,35 @@ function FunctionParameterModal({ functionId, params }) {
                     </button>
                 </div>
                 <div className='flex justify-between items-center'>
-                {isDataAvailable && <div className='flex items-center text-sm gap-3 mb-4'>
-                    <p>Raw JSON format</p>
-                    <input
-                        type="checkbox"
-                        className="toggle"
-                        checked={isTextareaVisible}
-                        onChange={handleToggleChange}
-                        title="Toggle to edit object parameter"
-                    />
-                </div>
-                }
-                <div>
-                { toolData.old_fields && isTextareaVisible &&
-                 <div className='flex items-center text-sm gap-3'>
-                 <p>Check for old data</p>
-                  <input
-                        type="checkbox"
-                        className="toggle"
-                        checked={isOldFieldViewTrue}
-                        onChange={()=>{setIsOldFieldViewTrue(prev=>!prev)}}
-                        title="Toggle to edit object parameter"
-                    />
-                 </div>
-                  
-                }
-                </div>
+                    {isDataAvailable && <div className='flex items-center text-sm gap-3 mb-4'>
+                        <p>Raw JSON format</p>
+                        <input
+                            type="checkbox"
+                            className="toggle"
+                            checked={isTextareaVisible}
+                            onChange={handleToggleChange}
+                            title="Toggle to edit object parameter"
+                        />
+                    </div>
+                    }
+                    <div>
+                        {toolData.old_fields && isTextareaVisible &&
+                            <div className='flex items-center text-sm gap-3'>
+                                <p>Check for old data</p>
+                                <input
+                                    type="checkbox"
+                                    className="toggle"
+                                    checked={isOldFieldViewTrue}
+                                    onChange={() => { setIsOldFieldViewTrue(prev => !prev) }}
+                                    title="Toggle to edit object parameter"
+                                />
+                            </div>
+
+                        }
+                    </div>
                 </div>
 
-                <p colSpan="3" className='flex items-center gap-1 whitespace-nowrap text-xs mb-2'><InfoIcon size={16} /> You can change the data in raw json format </p>
+                <p colSpan="3" className='flex items-center gap-1 whitespace-nowrap text-xs mb-2'><InfoIcon size={16} /> You can change the data in raw json format. For more info click{' '}<a href="/faq/jsonformatdoc" target="_blank" rel="noopener noreferrer" className=" link link-primary underline cursor-pointer">here</a> </p>
                 {!isDataAvailable ? (
                     <p>No Parameters used in the function</p>
                 ) : (
@@ -465,7 +465,7 @@ function FunctionParameterModal({ functionId, params }) {
                             </table>
                         </div>
                     ) : (
-                        <div className={isOldFieldViewTrue?"flex items-center gap-2":""}>
+                        <div className={isOldFieldViewTrue ? "flex items-center gap-2" : ""}>
                             <textarea
                                 type="input"
                                 value={objectFieldValue}
@@ -476,13 +476,13 @@ function FunctionParameterModal({ functionId, params }) {
                             />
                             {
                                 isOldFieldViewTrue
-                                 &&
-                               <textarea 
-                                type="text"
-                                value = {toolData?.old_fields ? (JSON.stringify(toolData["old_fields"], undefined, 4)):""}
-                                className='textarea textarea-bordered border w-full min-h-96 resize-y z-[1]'
-                               />
-                              
+                                &&
+                                <textarea
+                                    type="text"
+                                    value={toolData?.old_fields ? (JSON.stringify(toolData["old_fields"], undefined, 4)) : ""}
+                                    className='textarea textarea-bordered border w-full min-h-96 resize-y z-[1]'
+                                />
+
                             }
                         </div>
                     )
