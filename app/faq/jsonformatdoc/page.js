@@ -1,11 +1,8 @@
-'use client'
+'use server';
+import { JSONFORMATDATA } from '@/utils/enums';
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import { JSONFORMATDATA } from '@/utils/enums'; 
-export const runtime = 'edge';
-const JsonFomatDocGuide = () => {
-    const router = useRouter();
 
+const JsonFomatDocGuide = async () => {
     return (
         <div className="max-w-[80%] mx-auto p-6 relative">
             <div>
