@@ -117,9 +117,9 @@ const AdvancedParameters = ({ params }) => {
                                         min={min || 0}
                                         max={max || 100}
                                         step={step || 1}
-                                        key={configuration?.[key]}
+                                        key={`${key}-${configuration?.[key]}-${service}-${model}`}
                                         defaultValue={
-                                            (configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] == 'default') ?
+                                            (configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
                                                 modelInfoData?.[key]?.[configuration?.[key]] :
                                                 configuration?.[key]
                                         }
