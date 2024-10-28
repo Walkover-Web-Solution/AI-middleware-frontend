@@ -1,4 +1,4 @@
-import { addorRemoveResponseIdInBridge, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateFunctionApi, updateapi } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateFunctionApi, updateapi } from "@/config";
 import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer, updateBridgeToolsReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { toast } from "react-toastify";
@@ -168,6 +168,19 @@ export const duplicateBridgeAction = (bridge_id) => async (dispatch) => {
   } catch (error) {
     dispatch(isError());
     toast.error('Failed to duplicate the bridge');
+    console.error("Failed to duplicate the bridge: ", error);
+  }
+}
+
+export const archiveBridgeAction = (bridge_id, newStatus=1) => async (dispatch) => {
+  try {
+    dispatch(isPending());
+    const response = await archiveBridgeApi(bridge_id, newStatus);
+    dispatch(updateBridgeReducer({bridges: response.data, functionData:  null}))
+    return response?.data?.status;
+  } catch (error) {
+    dispatch(isError());
+    toast.error('Failed to Archive the bridge');
     console.error("Failed to duplicate the bridge: ", error);
   }
 }

@@ -136,7 +136,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
                             setIsCreateButtonDisabled(true);
                         }}>Close</button>
                         <button
-                            className="btn ml-2"
+                            className="btn ml-2 btn-primary"
                             disabled={isCreateButtonDisabled}
                             onClick={() => {
                                 handleActionSubmit(selectedAction, descriptionRef.current.value, dataRef.current?.value);
