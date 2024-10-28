@@ -1,7 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { Bot, Cog } from "lucide-react";
+import { Bot, Cog, FileSliders } from "lucide-react";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
@@ -25,7 +25,7 @@ export default function ConfigurationPage({ params }) {
     const searchParams = useSearchParams();
     const view = searchParams.get('view');
     const [currentView, setCurrentView] = useState(view || 'setup')
-    const { bridgeType,is_rich_text} = useCustomSelector((state) => ({
+    const { bridgeType, is_rich_text } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
         is_rich_text: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text || false,
     }));
@@ -34,6 +34,12 @@ export default function ConfigurationPage({ params }) {
         setCurrentView(target)
         router.push(`/org/${params.org_id}/bridges/configure/${params.id}?view=${target}`);
     };
+
+    useEffect(() => {
+        if (bridgeType == 'api') {
+            handleNavigation("setup");
+        }
+    }, [bridgeType])
 
     return (
         <div className="flex flex-col gap-3 relative">
@@ -48,6 +54,16 @@ export default function ConfigurationPage({ params }) {
                     { }
                     <Cog size={16} />Setup
                 </button>
+                {
+                    bridgeType === "chatbot" &&
+                    <button
+                        onClick={() => handleNavigation('chatbotConfig')}
+                        className={` ${currentView === 'chatbotConfig' ? "btn-primary" : ""} btn join-item `}
+                    >
+                        { }
+                        <FileSliders size={16} />Chatbot config
+                    </button>
+                }
                 <button
                     onClick={() => handleNavigation('guide')}
                     className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
@@ -58,21 +74,20 @@ export default function ConfigurationPage({ params }) {
             {
                 currentView === 'setup' ?
                     <>
-                        {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
                         <PreEmbedList params={params} />
                         <InputConfigComponent params={params} />
                         <EmbedList params={params} />
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
-                        {bridgeType === 'chatbot' && <RichTextToggle params={params} />}
                         <AdvancedParameters params={params} />
-                        <AddVariable params={params}/>
-                        {bridgeType==="chatbot" && is_rich_text && <UserRefernceForRichText params={params}/>}
-                        <ActionList params={params} />
+                        <AddVariable params={params} />
                         {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
                     </>
                     :
+                    currentView == 'guide' ?
+                        <>
+                            {
                     bridgeType === 'api' ?
                         <div className="flex flex-col w-100 overflow-auto gap-3">
                             <h1 className="text-xl font-semibold">API Configuration</h1>
@@ -83,9 +98,23 @@ export default function ConfigurationPage({ params }) {
                         <div className="flex  flex-col w-100 overflow-auto gap-3">
                             <h1 className="text-xl font-semibold">Chatbot Configuration</h1>
                             <div className="flex flex-col gap-4">
-                                <ChatbotGuide params={params}/>
+                                <ChatbotGuide params={params} />
                             </div>
                         </div>
+                            }
+                        </>
+                        :
+                        <>
+                            {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
+                            {bridgeType === 'chatbot' && <RichTextToggle params={params} />}
+                            {bridgeType === "chatbot" && is_rich_text && <UserRefernceForRichText params={params} />}
+                            {is_rich_text && <AdvancedParameters params={params} currentView={currentView} />}
+                            {is_rich_text && <ActionList params={params} />}
+
+
+                        </>
+
+
             }
 
         </div>

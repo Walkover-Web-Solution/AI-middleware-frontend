@@ -36,12 +36,6 @@ const BridgeTypeToggle = ({ params }) => {
                     <span className="label-text">ChatBot</span>
                 </div>
             </div>
-            <div>
-                {bridgeType?.toString()?.toLowerCase() === "chatbot" && <div role="alert" className="alert p-2">
-                    <Info size={16} />
-                    <span className='label-text-alt'>Only supports models which have JSON support. &#40; like gpt-4o &#41;</span>
-                </div>}
-            </div>
         </label>
     );
 };
