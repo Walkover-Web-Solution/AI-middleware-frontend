@@ -107,9 +107,13 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
 
 
 
-export const getSingleThreadData = async (threadId, bridgeId) => {
+export const getSingleThreadData = async (threadId, bridgeId, user_feedback) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}`)
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}`, {
+      params: {
+        user_feedback: user_feedback
+      }
+    });
     return getSingleThreadData
   } catch (error) {
     console.error(error)

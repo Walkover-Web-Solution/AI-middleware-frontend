@@ -13,9 +13,9 @@ export const getHistoryAction = (id, start, end, page = 1, keyword = '') => asyn
   }
 };
 
-export const getThread = (thread_id, id) => async (dispatch) => {
+export const getThread = (thread_id, id,user_feedback) => async (dispatch) => {
   try {
-    const data = await getSingleThreadData(thread_id, id);
+    const data = await getSingleThreadData(thread_id, id,user_feedback);
     dispatch(fetchThreadReducer(data.data));
   } catch (error) {
     console.error(error);

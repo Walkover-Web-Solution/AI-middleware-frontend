@@ -1,6 +1,6 @@
-import { getHistoryAction } from "@/store/action/historyAction.js";
-import { Download } from "lucide-react";
-import { useRef, useState } from "react";
+import { getHistoryAction, getThread } from "@/store/action/historyAction.js";
+import { Download, ThumbsDown, ThumbsUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
@@ -10,11 +10,15 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterOption, setFilterOption] = useState('all'); 
   const dispatch = useDispatch();
   const searchRef = useRef();
   const handleChange = (e) => {
     setSearchQuery(e.target?.value);
   };
+  useEffect(()=>{
+    setFilterOption("all")
+  },[selectedThread])
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -38,10 +42,53 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     }
   }
 
+  const handleFilterChange = (user_feedback) => {
+    setFilterOption(user_feedback);
+     dispatch(getThread(selectedThread,params.id,user_feedback))
+  };
+
   return (
     <div className="drawer-side justify-items-stretch bg-base-200 border-r relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds}/>
-      <div className="p-4 gap-3 flex flex-col">
+      <div className="p-2 gap-3 flex flex-col">
+        <div className="p-2 bg-base-300 rounded-md text-center">
+          <p className="text-center m-2 font-semibold">Filter Response</p>
+          <div className="flex items-center justify-center mb-2 gap-4">
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="filterOption"
+                value="all"
+                checked={filterOption === 'all'}
+                onChange={() => handleFilterChange('all')}
+                className="radio radio-primary"
+              />
+              <span>All</span>
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="filterOption"
+                value="1"
+                checked={filterOption === '1'}
+                onChange={() => handleFilterChange('1')}
+                className="radio radio-success"
+              />
+              <ThumbsUp size={16} />
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="filterOption"
+                value="2"
+                checked={filterOption === '2'}
+                onChange={() => handleFilterChange('2')}
+                className="radio radio-error"
+              />
+              <ThumbsDown size={16}/>
+            </label>
+          </div>
+        </div>
         <div className="collapse collapse-arrow join-item border border-base-300">
           <input type="checkbox" className="peer" />
           <div className="collapse-title text-md font-medium peer-checked:bg-base-300 peer-checked:text-base-content">
@@ -122,14 +169,14 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
         </button>}
         {
           isThreadSelectable && (
-            <div className="flex gap-3">
-              <button onClick={handleDownload} className="btn btn-primary" disabled={selectedThreadIds?.length === 0}>
-                Download <Download size={16} />
-              </button>
-              <button onClick={() => setIsThreadSelectable(false)} className="btn bg-base-300">
-                Cancel
-              </button>
-            </div>
+          <div className="flex gap-3">
+            <button onClick={handleDownload} className="btn btn-primary" disabled={selectedThreadIds?.length === 0}>
+              Download <Download size={16} />
+            </button>
+            <button onClick={() => setIsThreadSelectable(false)} className="btn bg-base-300">
+              Cancel
+            </button>
+          </div>
           )
         }
       </div>
