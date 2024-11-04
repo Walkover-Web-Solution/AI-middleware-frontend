@@ -1,6 +1,7 @@
 import CreateVariableModal from '@/components/modals/createVariableModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -11,6 +12,7 @@ const InputConfigComponent = ({ params }) => {
         service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service || "",
         variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || []
     }));
+    const router = useRouter();
 
     const [keyName, setKeyName] = useState('');
 
@@ -224,10 +226,16 @@ const InputConfigComponent = ({ params }) => {
 
     if (service === "google" && serviceType === "chat") return null;
 
+    const handleOptimizePrompt = () => {
+        const { org_id, id } = params;
+        router.push(`/org/${org_id}/bridges/configure/${id}/optimize`)
+    }
+
     return (
         <div>
             <div className="label">
                 <span className="label-text capitalize font-medium">Prompt</span>
+                <span role='button' onClick={handleOptimizePrompt} className="label-text btn capitalize font-medium">Optimize</span>
             </div>
             <div className="form-control h-full">
                 <textarea

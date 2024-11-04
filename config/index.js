@@ -593,3 +593,27 @@ export const archiveBridgeApi = async (bridge_id, newStatus) => {
     throw new Error(error);
   }
 };
+
+export async function sendMessageApi({ message, variables = {}, theadId = "" }) {
+  try {
+    const response = await axios.post(
+      'https://proxy.viasocket.com/proxy/api/1258584/29gjrmh24/api/v2/model/chat/completion',
+      {
+        user: message,
+        bridge_id: process.env.NEXT_PUBLIC_PROMPT_OPTIMIZATION_BRIDGE,
+        variables: variables,
+        thread_id: theadId
+      },
+      {
+        headers: {
+          'pauthkey': process.env.NEXT_PUBLIC_PAUTHKEY,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response?.data?.response?.data?.content;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
