@@ -18,8 +18,6 @@ const ModelDropdown = ({ params }) => {
         const selectedModelType = e.target.selectedOptions[0].parentNode.label;
 
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { model: selectedModel, type: selectedModelType } } }));
-        const updatedParams = getDefaultValues(modelsList?.[selectedModelType]?.[selectedModel]?.configuration?.['additional_parameters'], ADVANCED_BRIDGE_PARAMETERS)
-        updatedParams && dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: updatedParams } }));
     };
 
     const handleFinetuneModelChange = (e) => {
