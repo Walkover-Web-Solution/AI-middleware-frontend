@@ -25,9 +25,10 @@ export default function ConfigurationPage({ params }) {
     const searchParams = useSearchParams();
     const view = searchParams.get('view');
     const [currentView, setCurrentView] = useState(view || 'setup')
-    const { bridgeType,is_rich_text} = useCustomSelector((state) => ({
+    const { bridgeType, is_rich_text, modelType } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
         is_rich_text: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text || false,
+        modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type?.toLowerCase(),
     }));
 
     const handleNavigation = (target) => {
@@ -59,16 +60,16 @@ export default function ConfigurationPage({ params }) {
                 currentView === 'setup' ?
                     <>
                         {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
-                        <PreEmbedList params={params} />
-                        <InputConfigComponent params={params} />
-                        <EmbedList params={params} />
+                        {(modelType == 'chat' || modelType == 'fine-tune') && <PreEmbedList params={params} />}
+                        {(modelType == 'chat' || modelType == 'fine-tune') && <InputConfigComponent params={params} />}
+                        {(modelType == 'chat' || modelType == 'fine-tune') && <EmbedList params={params} />}
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
                         {bridgeType === 'chatbot' && <RichTextToggle params={params} />}
                         <AdvancedParameters params={params} />
-                        <AddVariable params={params}/>
-                        {bridgeType==="chatbot" && is_rich_text && <UserRefernceForRichText params={params}/>}
+                        {(modelType == 'chat' || modelType == 'fine-tune') && <AddVariable params={params} />}
+                        {bridgeType === "chatbot" && is_rich_text && <UserRefernceForRichText params={params} />}
                         <ActionList params={params} />
                         {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
                     </>
@@ -83,7 +84,7 @@ export default function ConfigurationPage({ params }) {
                         <div className="flex  flex-col w-100 overflow-auto gap-3">
                             <h1 className="text-xl font-semibold">Chatbot Configuration</h1>
                             <div className="flex flex-col gap-4">
-                                <ChatbotGuide params={params}/>
+                                <ChatbotGuide params={params} />
                             </div>
                         </div>
             }
