@@ -5,11 +5,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const InputConfigComponent = ({ params }) => {
-    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
+    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, modelType } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type || "",
         service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service || "",
-        variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || []
+        variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
     }));
 
     const [keyName, setKeyName] = useState('');

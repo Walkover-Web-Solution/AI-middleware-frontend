@@ -131,10 +131,10 @@ export const dryRun = async ({ localDataToSend, bridge_id }) => {
   try {
     let dryRun
     const modelType = localDataToSend.configuration.type
-    if (modelType === "chat" || modelType === "fine-tune") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
+    if (modelType !== 'completion' && modelType !== 'embedding') dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
     if (modelType === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
     if (modelType === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings/${bridge_id}`, localDataToSend)
-    if (modelType === "chat" || modelType === "fine-tune") {
+    if (modelType !== 'completion' && modelType !== 'embedding') {
       return dryRun.data;
     }
     return { success: true, data: dryRun.data }

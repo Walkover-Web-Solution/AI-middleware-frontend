@@ -45,12 +45,12 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
     }, [variablesKeyValue]);
 
     const handleSendMessage = async (e) => {
-        if (prompt?.trim() === "" && (modelType === "chat" || modelType == 'fine-tune')) {
+        if (prompt?.trim() === "" && (modelType !== 'completion' && modelType !== 'embedding')) {
             setErrorMessage("Prompt is required");
             return;
         }
         const newMessage = inputRef?.current?.value;
-        if (modelType === "chat" || modelType == 'fine-tune') if (newMessage?.trim() === "") return;
+        if (modelType !== 'completion' && modelType !== 'embedding') if (newMessage?.trim() === "") return;
         setErrorMessage("");
         if (modelType !== "completion" && modelType !== "embedding") inputRef.current.value = "";
         // setNewMessage("");
@@ -68,7 +68,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             };
             let response, responseData;
             let data;
-            if (modelType === "chat" || modelType === 'fine-tune') {
+            if (modelType !== 'completion' && modelType !== 'embedding') {
                 data = {
                     role: "user",
                     content: ""
@@ -114,7 +114,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                 });
             }
             if (!responseData.success) {
-                if (modelType === "chat" || modelType == 'fine-tune') {
+                if (modelType !== 'completion' && modelType !== 'embedding') {
                     inputRef.current.value = data.content;
                     setMessages(prevMessages => prevMessages.slice(0, -1)); // Remove the last message
                     // setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
@@ -136,7 +136,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             }
             // }
             // Update localDataToSend with assistant conversation
-            if (modelType === "chat" || modelType == 'fine-tune') {
+            if (modelType !== 'completion' && modelType !== 'embedding') {
                 setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
             }
             const newChatAssist = {
@@ -148,7 +148,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                 }),
                 content: Array.isArray(content) ? content.join(", ") : content.toString(),
             };
-
+            
             // Add assistant chat to messages
             setMessages(prevMessages => [...prevMessages, newChatAssist]);
         } catch (error) {
