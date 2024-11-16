@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   allBridgesMap: {},
   org: {},
-  apikeys:{},
+  apikeys: {},
   loading: false,
 };
 
@@ -48,11 +48,10 @@ export const bridgeReducer = createSlice({
       state.org = { ...state.org, [orgId]: { ...state.org?.[orgId], functionData } };
       state.loading = false;
     },
-    updateFunctionReducer:(state,action)=>{
-      const {org_id,data} =action.payload;
+    updateFunctionReducer: (state, action) => {
+      const { org_id, data } = action.payload;
       const id = data._id;
-      if(state.org[org_id].functionData)
-      {
+      if (state.org[org_id].functionData) {
         state.org[org_id].functionData[id] = data
       }
     },
@@ -85,7 +84,7 @@ export const bridgeReducer = createSlice({
       }
       if (functionData) {
         const existingBridgeIds = state.org[bridges.org_id].functionData[functionData.function_id]?.bridge_ids || [];
-    
+
         if (functionData?.function_operation) {
           // Create a new array with the added bridge_id
           state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = [...existingBridgeIds, _id];
@@ -124,7 +123,7 @@ export const bridgeReducer = createSlice({
       state.loading = false;
     },
     apikeyDataReducer: (state, action) => {
-      const { org_id,data } = action.payload;
+      const { org_id, data } = action.payload;
       if (!state.apikeys) {
         state.apikeys = {};
       }
@@ -143,24 +142,28 @@ export const bridgeReducer = createSlice({
       }
     },
     apikeyUpdateReducer: (state, action) => {
-      const { org_id, id, data,name,comment } = action.payload;
+      const { org_id, id, data, name, comment } = action.payload;
       if (state.apikeys[org_id]) {
-      const index = state.apikeys[org_id].findIndex(apikey => apikey._id === id);
-      if (index !== -1) {
+        const index = state.apikeys[org_id].findIndex(apikey => apikey._id === id);
+        if (index !== -1) {
           state.apikeys[org_id][index].name = name || state.apikeys[org_id][index].name;
           state.apikeys[org_id][index].apikey = data || state.apikeys[org_id][index].apikey;
-          state.apikeys[org_id][index].comment = comment ||state.apikeys[org_id][index].comment;
+          state.apikeys[org_id][index].comment = comment || state.apikeys[org_id][index].comment;
         }
       }
     },
-      apikeyDeleteReducer: (state, action) => {
-      const {org_id,name} = action.payload;
+    apikeyDeleteReducer: (state, action) => {
+      const { org_id, name } = action.payload;
       if (state.apikeys[org_id]) {
-            state.apikeys[org_id] = state.apikeys[org_id].filter(apiKey => apiKey.name !== name);
-          }
-        }
-        
-      },
+        state.apikeys[org_id] = state.apikeys[org_id].filter(apiKey => apiKey.name !== name);
+      }
+    },
+    optimizePromptReducer: (state, action) => {
+      const { bridgeId, prompt = "No optimized prompt" } = action.payload;
+      state.allBridgesMap[bridgeId]['optimizePromptHistory'] = [...(state.allBridgesMap?.[bridgeId]?.['optimizePromptHistory'] || []), prompt];
+    }
+
+  },
 });
 
 export const {
@@ -181,7 +184,8 @@ export const {
   createApiKeyReducer,
   apikeyDeleteReducer,
   updateBridgeActionReducer,
-  updateFunctionReducer
+  updateFunctionReducer,
+  optimizePromptReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
