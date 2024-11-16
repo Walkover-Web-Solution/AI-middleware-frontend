@@ -595,9 +595,9 @@ export const archiveBridgeApi = async (bridge_id, newStatus) => {
 };
 
 
-export const optimizePromptApi = async ({bridge_id}) => {
+export const optimizePromptApi = async ({ bridge_id, data = {} }) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`);
+    const response = await axios.post(`${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`, data);
     return response.data.result;
   } catch (error) {
     console.error(error);
