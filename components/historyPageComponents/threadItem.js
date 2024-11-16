@@ -276,13 +276,14 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           {
             item?.error && (
               <div className="chat chat-end">
-                <div className="flex-1 chat-bubble bg-base-200 text-error mb-3">
+                <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
                   <span className="font-bold">Error</span>
                   <p>{item?.error}</p>
                 </div>
                 <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
                   <Bot size={20} />
                 </div>
+                {item?.role === "user" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item?.createdAt)}</time>}
               </div>
             )
           }

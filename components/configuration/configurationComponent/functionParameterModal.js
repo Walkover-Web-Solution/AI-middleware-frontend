@@ -364,7 +364,7 @@ function FunctionParameterModal({ functionId, params }) {
                                         <th>Description</th>
                                         <th>Enum: comma separated</th>
                                         <th>Fill with AI</th>
-                                        <th>Value Path: variables.your_path</th>
+                                        <th>Value Path: your_path</th>
                                     </tr>
                                 </thead>
                                 <tbody>
