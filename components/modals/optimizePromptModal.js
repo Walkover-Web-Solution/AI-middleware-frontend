@@ -82,6 +82,7 @@ function OptmizePromptModal({ params }) {
                             defaultValue={promptRequirement}
                             onBlur={(e) => setPromptRequirement(e.target.value)}
                             autoFocus={false}
+                            readOnly
                         />
                     </div>
                     <div className='w-full'>
