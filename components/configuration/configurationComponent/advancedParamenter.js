@@ -167,10 +167,21 @@ const AdvancedParameters = ({ params }) => {
                             )}
                             {field === 'select' && (
                                 <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
-                                    <select value={JSON.stringify(configuration?.[key])} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
+                                    <select
+                                        value={
+                                            configuration?.[key] === 'default'
+                                                ? modelInfoData?.[key]?.[configuration?.[key]]?.type
+                                                : configuration?.[key].type
+                                        }
+                                        key={`-${configuration[key]}-${service}-${model}`}
+                                        onChange={(e) => handleSelectChange(e, key)}
+                                        className="select select-sm max-w-xs select-bordered capitalize"
+                                    >
                                         <option disabled>Select response mode</option>
-                                        {options?.map((service, index) => (
-                                            <option key={index} value={JSON.stringify(service)}>{service?.type}</option>
+                                        {options?.map((serviceOption, index) => (
+                                            <option key={index} value={serviceOption?.type}>
+                                                {serviceOption?.type}
+                                            </option>
                                         ))}
                                     </select>
                                 </label>
