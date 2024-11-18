@@ -1,6 +1,8 @@
 import CreateVariableModal from '@/components/modals/createVariableModal';
+import OptimizePromptModal from '@/components/modals/optimizePromptModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { MODAL_TYPE } from '@/utils/enums';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -222,12 +224,22 @@ const InputConfigComponent = ({ params }) => {
         );
     };
 
+    const handleOptimizePrompt = () => {
+        document.getElementById(MODAL_TYPE.OPTIMIZE_PROMPT).showModal();
+    }
+
     if (service === "google" && serviceType === "chat") return null;
 
     return (
         <div>
-            <div className="label">
-                <span className="label-text capitalize font-medium">Prompt</span>
+            <div className='flex justify-between align-bottom'>
+                <div className="label">
+                    <span className="label-text capitalize font-medium">Prompt</span>
+                </div>
+                <div className="label cursor-pointer" onClick={handleOptimizePrompt}>
+                    <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">Optimize Prompt</span>
+                </div>
+
             </div>
             <div className="form-control h-full">
                 <textarea
@@ -241,6 +253,7 @@ const InputConfigComponent = ({ params }) => {
                 {showSuggestions && renderSuggestions()}
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
+            <OptimizePromptModal params={params} />
         </div>
     );
 };
