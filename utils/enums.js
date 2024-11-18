@@ -305,3 +305,10 @@ export const DOCUMENT_SECTIONS = [
     }`
   }
 ];
+
+export const MODAL_TYPE  =  {
+  CREATE_VARIABLE: 'CREATE_VARIABLE',
+  CREATE_BRIDGE: 'CREATE_BRIDGE',
+  CREATE_API_KEY: 'CREATE_API',
+  OPTIMIZE_PROMPT: 'optmize_prompt_modal',
+}
