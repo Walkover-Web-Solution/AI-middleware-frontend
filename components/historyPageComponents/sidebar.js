@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 
-const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params }) => {
+const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params,setSearchMessageId }) => {
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,6 +36,12 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     } else {
       setSelectedThreadIds([...selectedThreadIds, id]);
     }
+  }
+  function truncate(string = "", maxLength) {
+    if (string.length > maxLength) {
+      return string.substring(0, maxLength - 3) + '...';
+    }
+    return string;
   }
 
   return (
@@ -88,7 +94,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
           <div className="slider-container w-[fixed-width] overflow-x-auto mb-16">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData.map((item) => (
-                <div className="flex">
+                <div className="flex flex-col ">
                   {isThreadSelectable && <div onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
@@ -109,6 +115,19 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                       {item.thread_id}
                     </a>
                   </li>
+                  {item?.message && item?.message.length > 0 && (
+                    <div className="pl-10 pb-2 text-gray-600 text-sm">
+                      {item.message.map((msg, index) => (
+                        <div
+                          key={index}
+                          onClick={() => setSearchMessageId(msg?.message_id)}  
+                          className="cursor-pointer hover:bg-gray-100 hover:text-gray-800 p-2 rounded-md transition-all duration-200"
+                        >
+                          {truncate(msg?.message,45)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
               ))}

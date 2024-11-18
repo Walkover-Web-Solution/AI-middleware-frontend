@@ -36,6 +36,8 @@ function Page({ params }) {
   const [hasMore, setHasMore] = useState(true); // Track if more data is available
   const [loading, setLoading] = useState(false); // Track loading state
   const [isAtBottom, setIsAtBottom] = useState(true); // New state variable
+  const [searchMessageId,setSearchMessageId] = useState()
+  const threadRefs = useRef({})
 
   const closeSliderOnEsc = (event) => {
     if (event.key === "Escape") {
@@ -204,6 +206,26 @@ function Page({ params }) {
     }
   }, [thread, isAtBottom]);
 
+  useEffect(() => {
+    if (searchMessageId && thread) {
+      // Find the message with the searchMessageId
+      const message = thread.find(msg => msg.message_id === searchMessageId)
+
+      if (message) {
+        // Scroll to that specific message by using the reference stored in threadRefs
+        const messageElement = threadRefs.current[searchMessageId];
+        if (messageElement) {
+          messageElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
+      }
+    }
+  }, [searchMessageId, thread]);
+
+  
+
   return (
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
@@ -217,7 +239,7 @@ function Page({ params }) {
               <div className="pb-16 px-3 pt-4 ">
                 {thread &&
                   [...thread]?.map((item, index) => (
-                  <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
+                  <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} threadRefs={threadRefs} searchMessageId={searchMessageId}/>
                 ))}
               </div>
             </div>
@@ -239,7 +261,7 @@ function Page({ params }) {
             </button>
           )}
         </div>
-        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} />
+        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setSearchMessageId={setSearchMessageId}/>
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>
