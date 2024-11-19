@@ -1,5 +1,5 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateFunctionApi, updateapi } from "@/config";
-import { createBridgeReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, integrationReducer, isError, isPending, updateBridgeReducer, updateBridgeToolsReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateFunctionApi, updateapi } from "@/config";
+import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, integrationReducer, isError, isPending, updateBridgeReducer, updateBridgeToolsReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { toast } from "react-toastify";
 
@@ -9,6 +9,17 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
     dispatch(isPending())
     const data = await getSingleBridge(id);
     dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge }));
+  } catch (error) {
+    dispatch(isError())
+    console.error(error);
+  }
+};
+
+export const getBridgeVersionAction = ({ versionId }) => async (dispatch) => {
+  try {
+    dispatch(isPending())
+    const data = await getBridgeVersionApi({ bridgeVersionId: versionId });
+    dispatch(fetchSingleBridgeVersionReducer({ bridge: data?.bridge }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -31,6 +42,27 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
   }
 };
 
+export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, getState) => {
+  try {
+    const dataToSend = {
+      version_id: data?.parentVersionId
+    }
+    const result = await createBridgeVersionApi(dataToSend);
+    if (result?.success) {
+      onSuccess(result);
+      dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId }));
+    }
+  } catch (error) {
+    if (error?.response?.data?.message?.includes("duplicate key")) {
+      toast.error("Bridge Name can't be duplicate");
+    } else {
+      toast.error("Something went wrong");
+    }
+    console.error(error);
+    throw error
+  }
+};
+
 export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
   try {
     dispatch(isPending())
@@ -41,7 +73,7 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
       obj[item.id] = item;
       return obj;
     }, {});
-    if(onSuccess) onSuccess(response?.data?.bridge?.length)
+    if (onSuccess) onSuccess(response?.data?.bridge?.length)
     dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, integrationData: flowObject, embed_token }));
   } catch (error) {
     dispatch(isError())
@@ -65,14 +97,14 @@ export const getAllFunctions = () => async (dispatch) => {
   }
 };
 
-export const updateFuntionApiAction = ({function_id,dataToSend}) => async(dispatch)=>{
+export const updateFuntionApiAction = ({ function_id, dataToSend }) => async (dispatch) => {
   try {
-    const response = await updateFunctionApi({function_id,dataToSend});
-    dispatch(updateFunctionReducer({ org_id: response.data.data.org_id, data: response.data.data}))
+    const response = await updateFunctionApi({ function_id, dataToSend });
+    dispatch(updateFunctionReducer({ org_id: response.data.data.org_id, data: response.data.data }))
   } catch (error) {
     dispatch(isError())
     console.error(error);
-    
+
   }
 }
 
@@ -172,11 +204,11 @@ export const duplicateBridgeAction = (bridge_id) => async (dispatch) => {
   }
 }
 
-export const archiveBridgeAction = (bridge_id, newStatus=1) => async (dispatch) => {
+export const archiveBridgeAction = (bridge_id, newStatus = 1) => async (dispatch) => {
   try {
     dispatch(isPending());
     const response = await archiveBridgeApi(bridge_id, newStatus);
-    dispatch(updateBridgeReducer({bridges: response.data, functionData:  null}))
+    dispatch(updateBridgeReducer({ bridges: response.data, functionData: null }))
     return response?.data?.status;
   } catch (error) {
     dispatch(isError());

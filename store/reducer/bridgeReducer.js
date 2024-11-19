@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   allBridgesMap: {},
+  bridgeVersionMapping: {},
   org: {},
   apikeys: {},
   loading: false,
@@ -21,21 +22,18 @@ export const bridgeReducer = createSlice({
       const { response } = action.payload;
       state.allBridgesMap[response.bridge_id] = { ...state.allBridgesMap[response.bridge_id], ...response };
     },
-    // fetchSingleBridgeReducer: (state, action) => {
-    //   const { bridges, integrationData } = action.payload;
-    //   const responseFormat = handleResponseFormat(bridges);
-    //   const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;
-    //   const obj2 = modelInfo[service][modelDefault];
-    //   const response = updatedData(bridges, obj2, type);
-    //   state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...response, integrationData, responseFormat };
-    //   state.loading = false;
-    // },
 
     // new format
     fetchSingleBridgeReducer: (state, action) => {
       const { bridge } = action.payload;
       const { _id } = bridge;
       state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge };
+      state.loading = false;
+    },
+    fetchSingleBridgeVersionReducer: (state, action) => {
+      const { bridge } = action.payload;
+      const { _id, parent_id } = bridge;
+      state.bridgeVersionMapping[parent_id] = { ...(state.bridgeVersionMapping[parent_id] || {}), [_id]: { ...(state.bridgeVersionMapping[parent_id]?.[_id] || {}), ...bridge } };
       state.loading = false;
     },
     fetchAllBridgeReducer: (state, action) => {
@@ -57,6 +55,16 @@ export const bridgeReducer = createSlice({
     },
     createBridgeReducer: (state, action) => {
       state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.bridge);
+    },
+    createBridgeVersionReducer: (state, action) => {
+      const { newVersionId, parentVersionId, bridgeId } = action.payload;
+      if (!state.bridgeVersionMapping[bridgeId]) {
+        state.bridgeVersionMapping[bridgeId] = {};
+      }
+      state.bridgeVersionMapping[bridgeId][newVersionId] = {
+        ...(state.bridgeVersionMapping[bridgeId][parentVersionId] || {}),
+        _id: newVersionId
+      };
     },
     updateBridgeReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
@@ -172,6 +180,8 @@ export const {
   fetchAllBridgeReducer,
   fetchAllFunctionsReducer,
   fetchSingleBridgeReducer,
+  fetchSingleBridgeVersionReducer,
+  createBridgeVersionReducer,
   createBridgeReducer,
   updateBridgeReducer,
   updateBridgeToolsReducer,

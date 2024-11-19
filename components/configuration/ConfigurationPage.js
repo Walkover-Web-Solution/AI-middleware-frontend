@@ -19,6 +19,7 @@ import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import AddVariable from "../addVariable";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
+import BridgeVersionDropdown from "./configurationComponent/bridgeVersionDropdown";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -41,20 +42,23 @@ export default function ConfigurationPage({ params }) {
             <BridgeNameInput params={params} />
 
             <BridgeTypeToggle params={params} />
-            <div className="join absolute right-0 top-0">
-                <button
-                    onClick={() => handleNavigation('setup')}
-                    className={` ${currentView === 'setup' ? "btn-primary" : ""} btn join-item `}
-                >
-                    { }
-                    <Cog size={16} />Setup
-                </button>
-                <button
-                    onClick={() => handleNavigation('guide')}
-                    className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
-                >
-                    <Bot size={16} />Guide
-                </button>
+            <div className="absolute right-0 top-0">
+                <BridgeVersionDropdown params={params}/>
+                <div className="join">
+                    <button
+                        onClick={() => handleNavigation('setup')}
+                        className={` ${currentView === 'setup' ? "btn-primary" : ""} btn join-item `}
+                    >
+                        { }
+                        <Cog size={16} />Setup
+                    </button>
+                    <button
+                        onClick={() => handleNavigation('guide')}
+                        className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
+                    >
+                        <Bot size={16} />Guide
+                    </button>
+                </div>
             </div>
             {
                 currentView === 'setup' ?

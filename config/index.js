@@ -39,6 +39,16 @@ export const getSingleBridge = async (bridgeId) => {
   }
 }
 
+export const getBridgeVersionApi = async ({ bridgeVersionId = null }) => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/bridge/versions/get/${bridgeVersionId}`)
+    return response?.data;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error)
+  }
+}
+
 export const deleteBridge = async (bridgeId) => {
   try {
     const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`);
@@ -55,6 +65,15 @@ export const deleteBridge = async (bridgeId) => {
 export const createBridge = async (dataToSend) => {
   try {
     return await axios.post(`${PYTHON_URL}/api/v1/config/create_bridge`, dataToSend)
+  } catch (error) {
+    toast.error(error.response.data.error)
+    throw error
+  }
+}
+export const createBridgeVersionApi = async (dataToSend) => {
+  try {
+    const result = await axios.post(`${PYTHON_URL}/bridge/versions/create`, dataToSend)
+    return result?.data;
   } catch (error) {
     toast.error(error.response.data.error)
     throw error

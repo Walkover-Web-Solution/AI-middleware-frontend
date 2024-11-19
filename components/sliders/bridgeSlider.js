@@ -64,7 +64,7 @@ function BridgeSlider() {
                         </div>
                     ) : (
                         filteredBridgesList.slice() // Create a copy of the array to avoid mutating the original
-                            .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically based on title
+                            .sort((a, b) => a.name?.localeCompare(b.name)) // Sort alphabetically based on title
                             .map((item) => (
                                 <li key={item._id} className='max-w-full'>
                                     <a
