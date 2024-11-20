@@ -27,7 +27,9 @@ export const bridgeReducer = createSlice({
     fetchSingleBridgeReducer: (state, action) => {
       const { bridge } = action.payload;
       const { _id } = bridge;
+      const versionId = bridge?.versions?.[0]
       state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge };
+      state.bridgeVersionMapping[_id] = { ...state.bridgeVersionMapping[_id], [versionId]: { ...bridge, _id: versionId } };
       state.loading = false;
     },
     fetchSingleBridgeVersionReducer: (state, action) => {
@@ -65,6 +67,7 @@ export const bridgeReducer = createSlice({
         ...(state.bridgeVersionMapping[bridgeId][parentVersionId] || {}),
         _id: newVersionId
       };
+      state.allBridgesMap[bridgeId].versions.push(newVersionId);
     },
     updateBridgeReducer: (state, action) => {
       const { bridges, functionData } = action.payload;

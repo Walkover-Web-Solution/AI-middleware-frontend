@@ -3,7 +3,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { archiveBridgeAction, deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
 import { getIconOfService, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import BridgeSlider from './sliders/bridgeSlider';
@@ -12,8 +12,11 @@ import OrgSlider from './sliders/orgSlider';
 
 function Navbar() {
   const router = useRouter();
+  const searchParams = useSearchParams()
+  const versionId = searchParams.get('version')
+
   const dispatch = useDispatch();
-  const pathName = usePathname()
+  const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
   const { organizations, bridgeData, chatbotData, bridge } = useCustomSelector((state) => ({
     organizations: state.userDetailsReducer.organizations,
@@ -81,7 +84,6 @@ function Navbar() {
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleBridgeSidebar = () => toggleSidebar('default-bridge-sidebar');
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
-
   return (
     <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[100] max-h-[4rem] bg-base-100`}>
       <div className='flex items-center w-full justify-start gap-2'>
@@ -109,8 +111,8 @@ function Navbar() {
         {path.length === 6 && path[3] === 'bridges' ? (
           <>
             <div className="join">
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${path[5]}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${path[5]}`)} className={` ${path[4] === 'history' ? "btn-primary" : ""}   btn join-item `}><History size={16} /> History</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${path[5]}?version=${versionId}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${path[5]}?version=${versionId}`)} className={` ${path[4] === 'history' ? "btn-primary" : ""}   btn join-item `}><History size={16} /> History</button>
             </div>
             <div className='ml-2'>
             </div>

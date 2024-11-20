@@ -12,7 +12,6 @@ function BridgeVersionDropdown({ params }) {
     const handleVersionChange = (version) => {
         dispatch(getBridgeVersionAction({ versionId: version }));
     }
-    console.log(params,234)
     const handleCreateNewVersion = () => {
         // create new version
         dispatch(createBridgeVersionAction({parentVersionId: bridgeVersionsArray[0], bridgeId: params.id}, (data)=>{
