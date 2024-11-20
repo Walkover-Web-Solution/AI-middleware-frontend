@@ -38,9 +38,14 @@ function BridgeVersionDropdown({ params }) {
     return (
         <div className='flex items-center gap-2'>
             <div className="dropdown dropdown-bottom dropdown-end mr-2">
-                <div tabIndex={0} role="button" className="btn m-1">
+                <div tabIndex={0} role="button" className="btn">
                     Version {bridgeVersionsArray.indexOf(params.version) + 1 || 'Select'}
-                    {params.version === publishedVersion && <span className="text-green-600 ml-1">●</span>}
+                    {params.version === publishedVersion &&
+                        <span className="relative inline-flex items-center ml-2">
+                            <span className="text-green-600 ml-1">●</span>
+                            <span className="animate-ping absolute inline-flex h-5 w-5 rounded-full bg-green-500 opacity-75"></span>
+                        </span>
+                    }
                 </div>
                 <ul tabIndex={0} className="dropdown-content menu rounded-box z-[9999999] w-52 p-2 shadow bg-base-100">
                     {bridgeVersionsArray?.map((version, index) => (
