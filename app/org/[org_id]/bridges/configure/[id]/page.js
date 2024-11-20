@@ -16,11 +16,15 @@ const Page = ({ searchParams }) => {
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const { bridgeType, service, isServiceModelsAvailable } = useCustomSelector((state) => ({
-    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-    service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
-    isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service],
-  }));
+  const { bridgeType, service, isServiceModelsAvailable } = useCustomSelector((state) => {
+    const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+    return {
+      bridgeType: bridgeData?.bridgeType,
+      service: versionData?.service,
+      isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[versionData?.service],
+    };
+  });
 
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));

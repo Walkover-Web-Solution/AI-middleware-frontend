@@ -7,10 +7,9 @@ import { useDispatch } from 'react-redux';
 function BridgeVersionDropdown({ params }) {
     const router = useRouter();
     const dispatch = useDispatch();
-    const { bridgeVersionsArray, isdrafted, publishedVersion } = useCustomSelector((state) => ({
+    const { bridgeVersionsArray, publishedVersion } = useCustomSelector((state) => ({
         bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
         publishedVersion: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.published_version_id || [],
-        isdrafted: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.is_drafted,
     }));
 
     useEffect(() => {
@@ -38,7 +37,6 @@ function BridgeVersionDropdown({ params }) {
     }
     return (
         <div className='flex items-center gap-2'>
-            {(isdrafted && publishedVersion === params.version) && <div className="text-red-500">Changes Drafted</div>}
             <div className="dropdown dropdown-bottom dropdown-end mr-2">
                 <div tabIndex={0} role="button" className="btn m-1">
                     Version {bridgeVersionsArray.indexOf(params.version) + 1 || 'Select'}

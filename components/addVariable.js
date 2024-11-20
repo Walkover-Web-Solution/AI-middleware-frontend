@@ -6,9 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
 const AddVariable = ({ params }) => {
+  const versionId = params.version;
   const { variablesKeyValue } = useCustomSelector((state) => ({
     variablesKeyValue:
-      state?.bridgeReducer?.allBridgesMap?.[params.id]?.variables || [],
+      // state?.bridgeReducer?.allBridgesMap?.[params.id]?.variables || [],
+      state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
   }));
 
   const [keyValuePairs, setKeyValuePairs] = useState([]);
@@ -39,7 +41,7 @@ const AddVariable = ({ params }) => {
       setError(false);
       const updatedPairs = [...keyValuePairs, newPair];
       setKeyValuePairs(updatedPairs);
-      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }));
+      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId  }));
     } else {
       setError(true);
     }
@@ -49,7 +51,7 @@ const AddVariable = ({ params }) => {
   const handleRemoveKeyValuePair = (index) => {
     const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
     setKeyValuePairs(updatedPairs);
-    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }));
+    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
 
     // Reset error if after removal all remaining pairs are valid
     if (areAllPairsValid(updatedPairs)) {
@@ -65,7 +67,7 @@ const AddVariable = ({ params }) => {
 
     // Dispatch update if the current pair is valid
     if (updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
-      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }));
+      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
     }
 
     setError(false);
@@ -82,7 +84,7 @@ const AddVariable = ({ params }) => {
     setKeyValuePairs(updatedPairs);
 
     if (updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
-      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }));
+      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
     }
   };
 
@@ -128,7 +130,7 @@ const AddVariable = ({ params }) => {
 
     if (pairs.length > 0) {
       setKeyValuePairs(pairs);
-      dispatch(updateVariables({ data: pairs, bridgeId: params.id }));
+      dispatch(updateVariables({ data: pairs, bridgeId: params.id, versionId }));
       if (areAllPairsValid(pairs)) {
         setError(false);
       } else {

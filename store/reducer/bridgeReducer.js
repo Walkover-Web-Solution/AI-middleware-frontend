@@ -29,7 +29,7 @@ export const bridgeReducer = createSlice({
       const { _id } = bridge;
       const versionId = bridge?.versions?.[0]
       state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge };
-      state.bridgeVersionMapping[_id] = { ...state.bridgeVersionMapping[_id], [versionId]: { ...bridge, ...state.bridgeVersionMapping?.[_id]?.[versionId] ,_id: versionId } };
+      state.bridgeVersionMapping[_id] = { ...state.bridgeVersionMapping[_id], [versionId]: { ...bridge, ...state.bridgeVersionMapping?.[_id]?.[versionId], _id: versionId } };
       state.loading = false;
     },
     fetchSingleBridgeVersionReducer: (state, action) => {
@@ -150,8 +150,12 @@ export const bridgeReducer = createSlice({
       state.org[orgId].integrationData[dataToSend.id] = dataToSend
     },
     updateVariables: (state, action) => {
-      const { data, bridgeId } = action.payload;
-      state.allBridgesMap[bridgeId].variables = data;
+      const { data, bridgeId, versionId = "" } = action.payload;
+      if (versionId) {
+        state.bridgeVersionMapping[bridgeId][versionId].variables = data;
+      } else {
+        state.allBridgesMap[bridgeId].variables = data;
+      }
     },
     publishBrigeVersionReducer: (state, action) => {
       const { bridgeId, versionId } = action.payload;

@@ -11,7 +11,7 @@ const InputConfigComponent = ({ params }) => {
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type || "",
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service || "",
-        variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
+        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     }));
     
     const [keyName, setKeyName] = useState('');

@@ -27,7 +27,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
     const dispatch = useDispatch();
 
     const { actions } = useCustomSelector((state) => ({
-        actions: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.actions?.[actionId]
+        actions: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.actions?.[actionId]
     }));
 
     const clearInputFields = useClearInputFields(descriptionRef, dataRef);

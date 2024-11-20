@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 function CreateVariableModal({ keyName, setKeyName, params }) {
     const dispatch = useDispatch();
     const { variablesKeyValue } = useCustomSelector((state) => ({
-        variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
+        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     }));
 
     const [keyValue, setKeyValue] = useState(keyName);
@@ -26,7 +26,7 @@ function CreateVariableModal({ keyName, setKeyName, params }) {
         if (keyValue && valueValue) {
             let updatedPairs = [...variablesKeyValue, { "key": keyValue, "value": valueValue }];
             // Dispatch the update action to the store
-            dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id }));
+            dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId: params.version }));
             // Clear the inputs after creating
             setKeyName('');
             setKeyValue('');

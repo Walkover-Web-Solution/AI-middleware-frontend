@@ -6,7 +6,6 @@ import { useDispatch } from 'react-redux';
 function RichTextToggle({ params }) {
     const dispatch = useDispatch();
     const { is_rich_text = true } = useCustomSelector((state) => ({
-        // is_rich_text: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text,
         is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.is_rich_text,
     }));
     const isRichText = is_rich_text === "" ? true : is_rich_text;

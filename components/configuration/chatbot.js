@@ -2,13 +2,12 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEffect, useMemo } from "react";
 
 const Chatbot = ({ params }) => {
-
     const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue } = useCustomSelector((state) => ({
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
         bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         chatbot_token: state?.ChatBot?.chatbot_token || '',
-        variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
+        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     }));
 
     const variables = useMemo(() => {

@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import OrgSlider from './sliders/orgSlider';
+import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 
 function Navbar() {
   const router = useRouter();
@@ -18,12 +19,13 @@ function Navbar() {
   const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
   const bridgeId = path[5];
-  const { organizations, bridgeData, chatbotData, bridge, publishedVersion } = useCustomSelector((state) => ({
+  const { organizations, bridgeData, chatbotData, bridge, publishedVersion, isdrafted } = useCustomSelector((state) => ({
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
     chatbotData: state.ChatBot.ChatBotMap[bridgeId],
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || [],
     publishedVersion: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || [],
+    isdrafted: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted,
   }));
 
   const handleDeleteBridge = async (item, newStatus = 0) => {
@@ -85,6 +87,10 @@ function Navbar() {
     dispatch(publishBridgeVersionAction({ bridgeId: bridgeId, versionId }));
   }
 
+  const handleDiscardChanges = async () => {
+    dispatch(updateBridgeVersionReducer({ bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false } }));
+  }
+
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleBridgeSidebar = () => toggleSidebar('default-bridge-sidebar');
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
@@ -115,12 +121,26 @@ function Navbar() {
         {path.length === 6 && path[3] === 'bridges' ? (
           <>
             {path[4] === 'configure' && (
-              <button
-                className="btn btn-primary m-1"
-                onClick={handlePublishBridge}
-              >
-                Publish
-              </button>
+              <div className='flex items-center'>
+                {(isdrafted && publishedVersion === versionId) && (
+                  <div className='flex items-center gap-2'>
+                    {/* <div className="text-red-500">Changes Drafted</div> */}
+                    <button
+                      className="btn btn-error m-1"
+                      onClick={handleDiscardChanges}
+                    >
+                      <span className='text-white'>Discard Changes</span>
+                    </button>
+                  </div>
+                )}
+                <button
+                  className="btn btn-primary"
+                  onClick={handlePublishBridge}
+                >
+                  Publish Version
+                </button>
+                <div className="divider divider-horizontal mx-1"></div>
+              </div>
             )}
             <div className="join">
               <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${bridgeId}?version=${versionId}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>

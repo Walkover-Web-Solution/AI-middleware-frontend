@@ -7,7 +7,7 @@ import ActionModel from './actionModel';
 
 function ActionList({ params }) {
     const { action, bridgeType } = useCustomSelector((state) => ({
-        action: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.actions,
+        action: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.actions,
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
     }));
 

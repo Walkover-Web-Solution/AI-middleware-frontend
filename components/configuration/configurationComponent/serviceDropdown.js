@@ -6,7 +6,6 @@ import { useDispatch } from 'react-redux';
 
 function ServiceDropdown({ params }) {
     const { service } = useCustomSelector((state) => ({
-        // service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
     }));
     const [selectedService, setSelectedService] = useState(service);

@@ -9,11 +9,11 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
     const inputRef = useRef(null);
     const versionId = params?.version;
     const { bridge, modelType, modelName, variablesKeyValue, prompt } = useCustomSelector((state) => ({
-        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
-        modelName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.model?.toLowerCase(),
-        modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type?.toLowerCase(),
-        prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt,
-        variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
+        bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version],
+        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model?.toLowerCase(),
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
+        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt,
+        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     }));
 
     const dataToSend = {
