@@ -103,10 +103,11 @@ function page() {
             <footer className="absolute bottom-0 w-full">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
                 <path fill="#232B2B" fill-opacity="1" d="M0,64L34.3,69.3C68.6,75,137,85,206,128C274.3,171,343,245,411,250.7C480,256,549,192,617,165.3C685.7,139,754,149,823,160C891.4,171,960,181,1029,160C1097.1,139,1166,85,1234,80C1302.9,75,1371,117,1406,138.7L1440,160L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z"></path>
-                <text x="50%" y="98%" dominant-baseline="middle" text-anchor="middle" fill="none" stroke="white" stroke-width=".2" font-size="80" letter-spacing="0.4em" >DO IT FOR YOU</text>
+                <text x="50%" y="98%" dominant-baseline="middle" text-anchor="middle" fill="none" stroke="#d479f2" stroke-width=".4" font-size="80" letter-spacing="0.4em" >DO IT FOR YOU</text>
               </svg>
             </footer>
           </main>
+          <div class="absolute top-0 z-[-2] h-screen w-screen bg-white bg-[radial-gradient(100%_50%_at_50%_0%,rgba(0,163,255,0.13)_0,rgba(0,163,255,0)_50%,rgba(0,163,255,0)_100%)]"></div>
         </div>
       }
     </div>
