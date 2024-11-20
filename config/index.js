@@ -111,8 +111,6 @@ export const getAllResponseTypesApi = async (orgId) => {
   }
 }
 
-
-
 export const updateBridge = async ({ bridgeId, dataToSend }) => {
   try {
     const response = await axios.post(`${PYTHON_URL}/api/v1/config/update_bridge/${bridgeId}`, dataToSend);
@@ -124,7 +122,15 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
   }
 }
 
-
+export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
+  try {
+    const response = await axios.put(`${PYTHON_URL}/bridge/versions/update/${versionId}`, dataToSend);
+    return response?.data
+  } catch (error) {
+    console.error(error)
+    toast.error(error?.response?.data?.error);
+  }
+}
 
 export const getSingleThreadData = async (threadId, bridgeId) => {
   try {
@@ -320,6 +326,16 @@ export const updateapi = async (bridge_id, dataFromEmbed) => {
   try {
     const response = await axios.post(`${PYTHON_URL}/api/v1/config/updateapi/${bridge_id}`, dataFromEmbed);
     return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const publishBridgeVersionApi = async ({versionId}) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/bridge/versions/publish/${versionId}`);
+    return response?.data;
   } catch (error) {
     console.error(error);
     return error;

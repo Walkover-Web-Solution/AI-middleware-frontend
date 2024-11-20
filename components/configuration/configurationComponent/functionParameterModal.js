@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { parameterTypes } from '@/jsonFiles/bridgeParameter';
-import { updateBridgeAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
+import { updateBridgeVersionAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
 import { flattenParameters } from '@/utils/utility';
 import { isEqual } from 'lodash';
 import { Info, InfoIcon, Trash2 } from 'lucide-react';
@@ -12,7 +12,7 @@ function FunctionParameterModal({ functionId, params }) {
     const dispatch = useDispatch();
     const { function_details, variables_path } = useCustomSelector((state) => ({
         function_details: state?.bridgeReducer?.org?.[params?.org_id]?.functionData?.[functionId] || {},
-        variables_path: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables_path || {},
+        variables_path: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables_path || {},
     }));
 
     const functionName = useMemo(() => function_details['endpoint'] || function_details['function_name'], [function_details]);
@@ -219,21 +219,33 @@ function FunctionParameterModal({ functionId, params }) {
             setToolData("");
         }
         if (!isEqual(variablesPath, variables_path[functionName])) {
-            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
+            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
+            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
         }
         resetModalData();
     };
 
     const handleRemoveFunctionFromBridge = () => {
-        dispatch(updateBridgeAction({
+        // dispatch(updateBridgeAction({
+        //     bridgeId: params.id,
+        //     dataToSend: {
+        //         functionData: {
+        //             function_id: functionId,
+        //             function_name: functionName,
+        //         }
+        //     }
+        // })
+        dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
+            versionId: params.version,
             dataToSend: {
                 functionData: {
                     function_id: functionId,
                     function_name: functionName,
                 }
             }
-        })).then(() => {
+        })
+        ).then(() => {
             document.getElementById('function-parameter-modal').close();
         });
     };
@@ -273,9 +285,6 @@ function FunctionParameterModal({ functionId, params }) {
         else {
             toast.error("Must be valid json");
         }
-
-
-
     };
 
     const handleTextFieldChange = () => {

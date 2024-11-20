@@ -29,13 +29,16 @@ export const bridgeReducer = createSlice({
       const { _id } = bridge;
       const versionId = bridge?.versions?.[0]
       state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge };
-      state.bridgeVersionMapping[_id] = { ...state.bridgeVersionMapping[_id], [versionId]: { ...bridge, _id: versionId } };
+      state.bridgeVersionMapping[_id] = { ...state.bridgeVersionMapping[_id], [versionId]: { ...bridge, ...state.bridgeVersionMapping?.[_id]?.[versionId] ,_id: versionId } };
       state.loading = false;
     },
     fetchSingleBridgeVersionReducer: (state, action) => {
       const { bridge } = action.payload;
       const { _id, parent_id } = bridge;
-      state.bridgeVersionMapping[parent_id] = { ...(state.bridgeVersionMapping[parent_id] || {}), [_id]: { ...(state.bridgeVersionMapping[parent_id]?.[_id] || {}), ...bridge } };
+      if (!state.bridgeVersionMapping[parent_id]) {
+        state.bridgeVersionMapping[parent_id] = {};
+      }
+      state.bridgeVersionMapping[parent_id][_id] = { ...(state.bridgeVersionMapping[parent_id][_id] || {}), ...bridge };
       state.loading = false;
     },
     fetchAllBridgeReducer: (state, action) => {
@@ -106,6 +109,28 @@ export const bridgeReducer = createSlice({
       }
       state.loading = false;
     },
+    updateBridgeVersionReducer: (state, action) => {
+      const { bridges, functionData } = action.payload;
+      const { _id, configuration, ...extraData } = bridges;
+      state.bridgeVersionMapping[bridges.parent_id][bridges._id] = {
+        ...state.bridgeVersionMapping[bridges.parent_id][bridges._id],
+        ...extraData,
+        configuration: { ...configuration }
+      };
+      if (functionData) {
+        const existingBridgeIds = state.org[bridges.org_id].functionData[functionData.function_id]?.bridge_ids || [];
+
+        if (functionData?.function_operation) {
+          // Create a new array with the added bridge_id
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = [...existingBridgeIds, _id];
+        } else {
+          // Create a new array without the removed bridge_id
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(id => id !== _id);
+        }
+      }
+      state.loading = false;
+    },
+
     updateBridgeActionReducer: (state, action) => {
       const { bridgeId, actionData } = action.payload;
       state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], actions: actionData };
@@ -127,6 +152,11 @@ export const bridgeReducer = createSlice({
     updateVariables: (state, action) => {
       const { data, bridgeId } = action.payload;
       state.allBridgesMap[bridgeId].variables = data;
+    },
+    publishBrigeVersionReducer: (state, action) => {
+      const { bridgeId, versionId } = action.payload;
+      state.allBridgesMap[bridgeId].published_version_id = versionId;
+      state.bridgeVersionMapping[bridgeId][versionId].is_drafted = false;
     },
     duplicateBridgeReducer: (state, action) => {
       state.allBridgesMap[action.payload.result._id] = action.payload.result;
@@ -172,8 +202,7 @@ export const bridgeReducer = createSlice({
     optimizePromptReducer: (state, action) => {
       const { bridgeId, prompt = "No optimized prompt" } = action.payload;
       state.allBridgesMap[bridgeId]['optimizePromptHistory'] = [...(state.allBridgesMap?.[bridgeId]?.['optimizePromptHistory'] || []), prompt];
-    }
-
+    },
   },
 });
 
@@ -187,6 +216,8 @@ export const {
   createBridgeVersionReducer,
   createBridgeReducer,
   updateBridgeReducer,
+  updateBridgeVersionReducer,
+  publishBrigeVersionReducer,
   updateBridgeToolsReducer,
   deleteBridgeReducer,
   integrationReducer,

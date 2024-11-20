@@ -1,12 +1,13 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { DEFAULT_MODEL, SERVICES } from "@/jsonFiles/bridgeParameter";
-import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 
 function ServiceDropdown({ params }) {
     const { service } = useCustomSelector((state) => ({
-        service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
+        // service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service,
+        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
     }));
     const [selectedService, setSelectedService] = useState(service);
     const dispatch = useDispatch();
@@ -21,11 +22,16 @@ function ServiceDropdown({ params }) {
         const newService = e.target.value;
         const defaultModel = DEFAULT_MODEL?.[newService];
         setSelectedService(newService);
-        dispatch(updateBridgeAction({
+        // dispatch(updateBridgeAction({
+        //     bridgeId: params.id,
+        //     dataToSend: { service: newService, configuration: { model: defaultModel } }
+        // }));
+        dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
+            versionId : params.version,
             dataToSend: { service: newService, configuration: { model: defaultModel } }
         }));
-    }, [dispatch, params.id]);
+    }, [dispatch, params.id, params.version]);
 
     return (
         <div>

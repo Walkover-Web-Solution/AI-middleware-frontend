@@ -1,5 +1,5 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, integration, updateBridge, updateFunctionApi, updateapi } from "@/config";
-import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, integrationReducer, isError, isPending, updateBridgeReducer, updateBridgeToolsReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi } from "@/config";
+import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { toast } from "react-toastify";
 
@@ -130,6 +130,19 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
   }
 };
 
+export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (dispatch) => {
+  try {
+    dispatch(isPending());
+    const data = await updateBridgeVersionApi({ versionId, dataToSend });
+    if (data.success) {
+      dispatch(updateBridgeVersionReducer({ bridges: data.bridge, functionData: dataToSend?.functionData || null }));
+    }
+  } catch (error) {
+    console.error(error);
+    dispatch(isError());
+  }
+};
+
 
 
 export const deleteBridgeAction = ({ bridgeId, orgId }) => async (dispatch) => {
@@ -165,7 +178,19 @@ export const createApiAction = (org_id, dataFromEmbed) => async (dispatch) => {
 export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) => {
   try {
     const data = await updateapi(bridge_id, dataFromEmbed);
-    dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
+    // dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
+    dispatch(updateBridgeVersionReducer({ bridges: data?.data?.bridge }));
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export const publishBridgeVersionAction = ({ bridgeId, versionId }) => async (dispatch) => {
+  try {
+    const data = await publishBridgeVersionApi({ versionId });
+    if (data?.success) {
+      dispatch(publishBrigeVersionReducer({ versionId: data?.version_id, bridgeId }));
+    }
   } catch (error) {
     console.error(error)
   }

@@ -1,28 +1,28 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { ADVANCED_BRIDGE_PARAMETERS, getDefaultValues } from '@/jsonFiles/bridgeParameter';
-import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
 const ModelDropdown = ({ params }) => {
     const dispatch = useDispatch();
     const { model, fineTuneModel, modelType, modelsList } = useCustomSelector((state) => ({
-        model: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.model,
-        fineTuneModel: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.fine_tune_model?.current_model,
-        modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type,
-        modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service],
+        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
+        fineTuneModel: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.fine_tune_model?.current_model,
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
+        modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service],
     }));
 
     const handleModel = (e) => {
         const selectedModel = e.target.value.split('|')[1];
         const selectedModelType = e.target.selectedOptions[0].parentNode.label;
-
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { model: selectedModel, type: selectedModelType } } }));
+        // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { model: selectedModel, type: selectedModelType } } }));
+        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { configuration: { model: selectedModel, type: selectedModelType } } }));
     };
 
     const handleFinetuneModelChange = (e) => {
         const selectedFineTunedModel = e.target.value;
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { fine_tune_model: { current_model: selectedFineTunedModel } } } }));
+        // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { fine_tune_model: { current_model: selectedFineTunedModel } } } }));
+        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { configuration: { fine_tune_model: { current_model: selectedFineTunedModel } } } }));
     }
 
     return (

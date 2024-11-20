@@ -1,6 +1,6 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { archiveBridgeAction, deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
+import { archiveBridgeAction, deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction, publishBridgeVersionAction } from '@/store/action/bridgeAction';
 import { getIconOfService, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -14,19 +14,19 @@ function Navbar() {
   const router = useRouter();
   const searchParams = useSearchParams()
   const versionId = searchParams.get('version')
-
   const dispatch = useDispatch();
   const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
-  const { organizations, bridgeData, chatbotData, bridge } = useCustomSelector((state) => ({
+  const bridgeId = path[5];
+  const { organizations, bridgeData, chatbotData, bridge, publishedVersion } = useCustomSelector((state) => ({
     organizations: state.userDetailsReducer.organizations,
-    bridgeData: state.bridgeReducer.allBridgesMap[path[5]],
-    chatbotData: state.ChatBot.ChatBotMap[path[5]],
-    bridge: state.bridgeReducer.allBridgesMap[path[5]] || []
+    bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
+    chatbotData: state.ChatBot.ChatBotMap[bridgeId],
+    bridge: state.bridgeReducer.allBridgesMap[bridgeId] || [],
+    publishedVersion: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || [],
   }));
 
   const handleDeleteBridge = async (item, newStatus = 0) => {
-    const bridgeId = path[5];
     const orgId = path[2];
 
     switch (item.trim().toLowerCase()) {
@@ -81,6 +81,10 @@ function Navbar() {
     }
   };
 
+  const handlePublishBridge = async () => {
+    dispatch(publishBridgeVersionAction({ bridgeId: bridgeId, versionId }));
+  }
+
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleBridgeSidebar = () => toggleSidebar('default-bridge-sidebar');
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
@@ -110,9 +114,17 @@ function Navbar() {
       <div className="justify-end w-full" >
         {path.length === 6 && path[3] === 'bridges' ? (
           <>
+            {path[4] === 'configure' && (
+              <button
+                className="btn btn-primary m-1"
+                onClick={handlePublishBridge}
+              >
+                Publish
+              </button>
+            )}
             <div className="join">
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${path[5]}?version=${versionId}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${path[5]}?version=${versionId}`)} className={` ${path[4] === 'history' ? "btn-primary" : ""}   btn join-item `}><History size={16} /> History</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${bridgeId}?version=${versionId}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${bridgeId}?version=${versionId}`)} className={` ${path[4] === 'history' ? "btn-primary" : ""}   btn join-item `}><History size={16} /> History</button>
             </div>
             <div className='ml-2'>
             </div>
@@ -122,11 +134,6 @@ function Navbar() {
                 <Ellipsis />
               </div>
               <ul tabIndex={0} className="dropdown-content z-[9999999999] menu p-2 shadow bg-base-100 rounded-box w-52 custom-dropdown">
-                {/* {['Duplicate', 'Delete'].map((item) => (
-                  <li key={item} onClick={() => handleDeleteBridge(item)}>
-                    <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
-                  </li>
-                ))} */}
                 {['Duplicate', 'Archive'].map((item) => (
                   <li key={item} onClick={() => handleDeleteBridge(item, bridge.status !== undefined ? Number(!bridge.status) : undefined)}>
                     <a className={path[3] === item ? "active" : ""}>{item === 'Archive' ? (bridge.status === 0 ? 'Unarchive' : 'Archive') : item.charAt(0).toUpperCase() + item.slice(1)}</a>

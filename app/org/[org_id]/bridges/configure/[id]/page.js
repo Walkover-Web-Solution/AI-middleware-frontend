@@ -12,7 +12,8 @@ import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
-const Page = ({ params }) => {
+const Page = ({ searchParams }) => {
+  const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
   const { bridgeType, service, isServiceModelsAvailable } = useCustomSelector((state) => ({

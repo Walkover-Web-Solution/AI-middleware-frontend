@@ -1,12 +1,13 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction } from '@/store/action/bridgeAction';
-import React from 'react'
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 
-function RichTextToggle({params}) {
+function RichTextToggle({ params }) {
     const dispatch = useDispatch();
     const { is_rich_text = true } = useCustomSelector((state) => ({
-        is_rich_text: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text,
+        // is_rich_text: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text,
+        is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.is_rich_text,
     }));
     const isRichText = is_rich_text === "" ? true : is_rich_text;
 
@@ -17,7 +18,8 @@ function RichTextToggle({params}) {
                 is_rich_text: newCheckedValue
             }
         };
-        dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { ...updatedDataToSend } }));
+        // dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { ...updatedDataToSend } }));
+        dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params.version, dataToSend: { ...updatedDataToSend } }));
     };
     return (
         <label className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
