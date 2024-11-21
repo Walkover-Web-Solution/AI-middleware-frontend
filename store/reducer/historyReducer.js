@@ -24,7 +24,7 @@ export const historyReducer = createSlice({
         state.thread = action.payload.data.data; 
       }
       else {
-        state.thread = [...action.payload.data.data, ...state.thread];
+        state.thread['conversations'] = [...action.payload.data.data.conversations, ...state.thread.conversations];
       }
     },
     

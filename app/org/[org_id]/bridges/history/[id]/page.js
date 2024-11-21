@@ -26,7 +26,7 @@ function Page({ params }) {
 
   const { historyData, thread, integrationData } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
-    thread: state?.historyReducer?.thread,
+    thread: state?.historyReducer?.thread?.conversations,
     integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
   }));
 
@@ -250,7 +250,7 @@ function Page({ params }) {
                 dataLength={thread?.length}
                 next={fetchMoreThreadData}
                 hasMore={hasMoreThreadData}
-                loader={<p>Loading</p>}
+                loader={<p></p>}
                 scrollThreshold="250px" // Fetch data when 20% of the scrollable area remains
                 inverse={flexDirection === "column-reverse"} // Inverse only when flexDirection is column-reverse
                 scrollableTarget="scrollableDiv"
