@@ -9,7 +9,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData,
     }));
     const [searchQuery, setSearchQuery] = useState('');
-
+    
     const handleInputChange = (e) => {
         setSearchQuery(e.target?.value || ""); // Update search query when the input changes
     };
@@ -56,7 +56,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 )
             }
             )
-    ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions]);
+    ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, params.version]);
 
     return (
         <div className="dropdown dropdown-right">
