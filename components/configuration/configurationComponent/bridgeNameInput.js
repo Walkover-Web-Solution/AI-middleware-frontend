@@ -22,7 +22,7 @@ function BridgeNameInput({ params }) {
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { name: newValue } }));
         if (newValue && window?.SendDataToChatbot) {
             SendDataToChatbot({
-                threadId: newValue
+                "threadId": newValue
             });
         }
     }, [dispatch, params.id]);

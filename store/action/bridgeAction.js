@@ -1,4 +1,4 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, discardBridgeVersionApi, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi } from "@/config";
 import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 import { toast } from "react-toastify";
@@ -9,6 +9,7 @@ export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
     dispatch(isPending())
     const data = await getSingleBridge(id);
     dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge }));
+    getBridgeVersionAction({ versionId: data.data?.bridge?.published_version_id || data.data?.bridge?.versions?.[0] })(dispatch);
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -239,5 +240,13 @@ export const archiveBridgeAction = (bridge_id, newStatus = 1) => async (dispatch
     dispatch(isError());
     toast.error('Failed to Archive the bridge');
     console.error("Failed to duplicate the bridge: ", error);
+  }
+}
+
+export const dicardBridgeVersionAction = ({ bridgeId, versionId }) => async (dispatch) => {
+  try {
+    await discardBridgeVersionApi({ bridgeId, versionId });
+  } catch (error) {
+    console.error(error)
   }
 }

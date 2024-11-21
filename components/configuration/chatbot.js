@@ -22,7 +22,7 @@ const Chatbot = ({ params }) => {
     useEffect(() => {
         if (bridgeSlugName && window?.SendDataToChatbot) {
             SendDataToChatbot({
-                bridgeName: bridgeSlugName
+                "bridgeName": bridgeSlugName
             });
         }
     }, [bridgeSlugName]);
@@ -30,7 +30,7 @@ const Chatbot = ({ params }) => {
     useEffect(() => {
         if (variables && window?.SendDataToChatbot) {
             window.SendDataToChatbot({
-                variables: variables
+                "variables": variables
             });
         }
     }, [variables])
@@ -39,13 +39,13 @@ const Chatbot = ({ params }) => {
         const intervalId = setInterval(() => {
             if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeName && bridgeType) {
                 window.SendDataToChatbot({
-                    bridgeName: bridgeSlugName,
-                    threadId: bridgeName?.replaceAll(" ", ""),
-                    parentId: 'parentChatbot',
-                    fullScreen: true,
-                    hideCloseButton: true,
-                    hideIcon: true,
-                    variables: variables || {}
+                    "bridgeName": bridgeSlugName,
+                    "threadId": bridgeName?.replaceAll(" ", ""),
+                    "parentId": 'parentChatbot',
+                    "fullScreen": true,
+                    "hideCloseButton": true,
+                    "hideIcon": true,
+                    "variables": variables || {}
                 });
                 if (bridgeType === 'chatbot') window.openChatbot();
                 clearInterval(intervalId);
@@ -55,13 +55,13 @@ const Chatbot = ({ params }) => {
         return () => {
             clearInterval(intervalId);
             if (typeof window.closeChatbot === "function") {
-                // SendDataToChatbot({
-                //     parentId: '',
-                //     fullScreen: false,
-                // });
-                // setTimeout(() => {
+                SendDataToChatbot({
+                    parentId: '',
+                    fullScreen: false,
+                });
+                setTimeout(() => {
                     closeChatbot();
-                // }, 0);
+                }, 0);
             }
         };
     }, [chatbot_token]);

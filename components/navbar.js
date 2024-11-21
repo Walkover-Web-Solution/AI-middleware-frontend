@@ -1,6 +1,6 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { archiveBridgeAction, deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction, publishBridgeVersionAction } from '@/store/action/bridgeAction';
+import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction, publishBridgeVersionAction } from '@/store/action/bridgeAction';
 import { getIconOfService, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -90,6 +90,7 @@ function Navbar() {
 
   const handleDiscardChanges = async () => {
     dispatch(updateBridgeVersionReducer({ bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false } }));
+    dispatch(dicardBridgeVersionAction({ bridgeId, versionId }));
   }
 
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
@@ -125,18 +126,18 @@ function Navbar() {
               <div className='flex items-center'>
                 {(isdrafted && publishedVersion === versionId) && (
                   <div className='flex items-center gap-2'>
-                    {/* <div className="text-red-500">Changes Drafted</div> */}
                     <button
-                      className="btn btn-error m-1"
+                      className="btn bg-red-200 m-1"
                       onClick={handleDiscardChanges}
                     >
-                      <span className='text-white'>Discard Changes</span>
+                      <span className='text-black'>Discard Changes</span>
                     </button>
                   </div>
                 )}
                 <button
-                  className="btn btn-primary"
+                  className="btn bg-green-200"
                   onClick={handlePublishBridge}
+                  disabled={!isdrafted && publishedVersion === versionId}
                 >
                   Publish Version
                 </button>

@@ -14,7 +14,8 @@ import { CircleChevronDown, Info } from "lucide-react"; // Import the component
 
 export const runtime = "edge";
 
-function Page({ params }) {
+function Page({ searchParams }) {
+  const params = searchParams;
   const search = useSearchParams();
   const router = useRouter();
   const pathName = usePathname();
@@ -27,7 +28,6 @@ function Page({ params }) {
     thread: state?.historyReducer?.thread,
     integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData
   }));
-  const searchParams = useSearchParams();
 
   const [selectedThread, setSelectedThread] = useState("");
   const [isSliderOpen, setIsSliderOpen] = useState(false);
@@ -59,17 +59,6 @@ function Page({ params }) {
     };
   }, []);
 
-  // useEffect(() => {
-  //   const fetchInitialData = async () => {
-  //     setLoading(true);
-  //     await dispatch(getHistoryAction(params.id));
-  //     dispatch(clearThreadData());
-  //     setLoading(false);
-  //   };
-  //   fetchInitialData();
-  // }, [params.id, dispatch]);
-
-
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
@@ -95,16 +84,13 @@ function Page({ params }) {
       setSelectedThread(firstThreadId);
       dispatch(getThread(firstThreadId, params.id));
 
-      let url = `${pathName}?thread_id=${firstThreadId}`;
+      let url = `${pathName}?version=${params.version}&thread_id=${firstThreadId}`;
       if (startDate && endDate) {
         url += `&start=${startDate}&end=${endDate}`;
       }
       router.push(url, undefined, { shallow: true });
     }
   }, [search, historyData, params.id, pathName]);
-
-  const start = searchParams.get('start');
-  const end = searchParams.get('end');
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
@@ -119,15 +105,9 @@ function Page({ params }) {
         }
       } else {
         setSelectedThread(thread_id);
-        // if (start && end) {
-        //   router.push(`${pathName}?thread_id=${thread_id}&start=${start}&end=${end}`, undefined, {
-        //     shallow: true,
-        //   });
-        // } else {
-        router.push(`${pathName}?thread_id=${thread_id}`, undefined, {
+        router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}`, undefined, {
           shallow: true,
         });
-        // }
       }
     },
     [params.id, pathName]
@@ -209,7 +189,7 @@ function Page({ params }) {
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center justify-center">
-          <div className="w-full min-h-auto overflow-x-hidden">       
+          <div className="w-full min-h-auto overflow-x-hidden">
             <div
               ref={containerRef}
               className="w-full text-start flex flex-col h-screen overflow-y-auto"
@@ -217,8 +197,8 @@ function Page({ params }) {
               <div className="pb-16 px-3 pt-4 ">
                 {thread &&
                   [...thread]?.map((item, index) => (
-                  <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
-                ))}
+                    <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} />
+                  ))}
               </div>
             </div>
           </div>

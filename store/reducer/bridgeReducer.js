@@ -27,16 +27,7 @@ export const bridgeReducer = createSlice({
     fetchSingleBridgeReducer: (state, action) => {
       const { bridge } = action.payload;
       const { _id } = bridge;
-      const versionId = bridge?.published_version_id || bridge?.versions?.[0]
       state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge };
-      state.bridgeVersionMapping[_id] = {
-        ...(state.bridgeVersionMapping[_id] || {}),
-        [versionId]: {
-          ...state.bridgeVersionMapping[_id]?.[versionId],
-          ...bridge,
-          _id: versionId
-        }
-      };
       state.loading = false;
     },
     fetchSingleBridgeVersionReducer: (state, action) => {

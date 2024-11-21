@@ -639,3 +639,13 @@ export const optimizePromptApi = async ({ bridge_id, data = {} }) => {
     return error
   }
 };
+
+export const discardBridgeVersionApi = async ({ bridgeId, versionId }) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/bridge/versions/discard/${versionId}`, { bridge_id: bridgeId });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error
+  }
+};
