@@ -6,8 +6,9 @@ const ComplitionApi = (bridgeId) => {
   return `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\
   --header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
   --header 'Content-Type: application/json' \\
-  --data '{ 
-    "user": YOUR_USER_QUESTION,
+  --data '{
+    "is_text": false,
+    "user": "YOUR_USER_PROMPT",
     "bridge_id": "${bridgeId}",
     "variables": {
       // ...VARIABLES_USED_IN_BRIDGE
@@ -62,6 +63,8 @@ const ApiGuide = ({ params }) => {
             </code>
           </pre>
         </div>
+        <p className=" text-sm"><strong>Note:</strong> The "is_text" key is a boolean. If <strong>false</strong> or undefined, the output is "json_object". If <strong>true</strong>, it will be "text".
+        </p>
       </div>
       <div className="flex flex-col gap-4 bg-white rounded-lg shadow-lg p-4">
         <Section title="Response Format" />
