@@ -50,6 +50,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
         dispatch(createOrRemoveActionBridge({
             orgId: params?.org_id,
             bridgeId: params?.id,
+            versionId: params?.version,
             type: "add",
             dataToSend
         }));

@@ -27,9 +27,16 @@ export const bridgeReducer = createSlice({
     fetchSingleBridgeReducer: (state, action) => {
       const { bridge } = action.payload;
       const { _id } = bridge;
-      const versionId = bridge?.versions?.[0]
+      const versionId = bridge?.published_version_id || bridge?.versions?.[0]
       state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge };
-      state.bridgeVersionMapping[_id] = { ...state.bridgeVersionMapping[_id], [versionId]: { ...bridge, ...state.bridgeVersionMapping?.[_id]?.[versionId], _id: versionId } };
+      state.bridgeVersionMapping[_id] = {
+        ...(state.bridgeVersionMapping[_id] || {}),
+        [versionId]: {
+          ...state.bridgeVersionMapping[_id]?.[versionId],
+          ...bridge,
+          _id: versionId
+        }
+      };
       state.loading = false;
     },
     fetchSingleBridgeVersionReducer: (state, action) => {
@@ -132,8 +139,9 @@ export const bridgeReducer = createSlice({
     },
 
     updateBridgeActionReducer: (state, action) => {
-      const { bridgeId, actionData } = action.payload;
-      state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], actions: actionData };
+      const { bridgeId, actionData, versionId } = action.payload;
+      // state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], actions: actionData };
+      state.bridgeVersionMapping[bridgeId][versionId].actions = actionData;
     },
     updateBridgeToolsReducer: (state, action) => {
       const { orgId, functionData = {} } = action.payload;

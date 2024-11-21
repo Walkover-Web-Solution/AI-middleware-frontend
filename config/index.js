@@ -332,7 +332,7 @@ export const updateapi = async (bridge_id, dataFromEmbed) => {
   }
 }
 
-export const publishBridgeVersionApi = async ({versionId}) => {
+export const publishBridgeVersionApi = async ({ versionId }) => {
   try {
     const response = await axios.post(`${PYTHON_URL}/bridge/versions/publish/${versionId}`);
     return response?.data;
@@ -477,9 +477,9 @@ export const switchUser = async (dataToSend) => {
   }
 }
 
-export const createOrRemoveAction = async ({ orgId, bridgeId, type, dataToSend }) => {
+export const createOrRemoveAction = async ({ orgId, bridgeId, versionId, type, dataToSend }) => {
   try {
-    const response = await axios.post(`${URL}/chatbot/${orgId}/bridge/${bridgeId}/action?type=${type}`, dataToSend);
+    const response = await axios.post(`${URL}/chatbot/${orgId}/bridge/${bridgeId}/action?type=${type}`, { ...dataToSend, version_id: versionId });
     return response.data;
   } catch (error) {
     console.error(error);

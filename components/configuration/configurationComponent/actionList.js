@@ -28,6 +28,7 @@ function ActionList({ params }) {
         dispatch(createOrRemoveActionBridge({
             orgId: params?.org_id,
             bridgeId: params?.id,
+            versionId: params?.version,
             type: "remove",
             dataToSend
         }));

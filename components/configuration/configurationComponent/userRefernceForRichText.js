@@ -24,6 +24,7 @@ const UserReferenceForRichText = ({ params }) => {
                 placeholder="Type here"
                 className="textarea textarea-bordered w-full min-h-[10rem] input-sm"
                 defaultValue={user_reference}
+                key={user_reference}
                 onBlur={handleUserReferenceChange}
             />
         </label>
