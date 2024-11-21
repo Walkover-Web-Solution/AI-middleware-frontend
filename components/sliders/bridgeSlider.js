@@ -25,8 +25,8 @@ function BridgeSlider() {
             item._id.toLowerCase().includes(bridgeSearchQuery.toLowerCase())
     );
 
-    const handleNavigation = (id) => {
-        router.push(`/org/${path[2]}/bridges/configure/${id}`);
+    const handleNavigation = (id, versionId) => {
+        router.push(`/org/${path[2]}/bridges/configure/${id}?version=${versionId}`);
         toggleSidebar('default-bridge-sidebar');
     }
 
@@ -69,7 +69,7 @@ function BridgeSlider() {
                                 <li key={item._id} className='max-w-full'>
                                     <a
                                         className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md truncate max-w-full`}
-                                        onClick={() => handleNavigation(item._id)}
+                                        onClick={() => handleNavigation(item._id, item?.published_version_id || item?.versions?.[0])}
                                     >
                                         {getIconOfService(item.service)}
                                         {item.name}

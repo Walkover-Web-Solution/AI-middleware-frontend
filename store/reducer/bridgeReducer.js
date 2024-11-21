@@ -158,9 +158,15 @@ export const bridgeReducer = createSlice({
       }
     },
     publishBrigeVersionReducer: (state, action) => {
-      const { bridgeId, versionId } = action.payload;
+      const { bridgeId = null, versionId = null, orgId = null } = action.payload;
       state.allBridgesMap[bridgeId].published_version_id = versionId;
       state.bridgeVersionMapping[bridgeId][versionId].is_drafted = false;
+      state.org[orgId].orgs = state.org[orgId].orgs.map(bridge => {
+        if (bridge._id === bridgeId) {
+          return { ...bridge, published_version_id: versionId };
+        }
+        return bridge;
+      });
     },
     duplicateBridgeReducer: (state, action) => {
       state.allBridgesMap[action.payload.result._id] = action.payload.result;

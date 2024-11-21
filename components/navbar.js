@@ -19,6 +19,7 @@ function Navbar() {
   const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
   const bridgeId = path[5];
+  const orgId = path[2];
   const { organizations, bridgeData, chatbotData, bridge, publishedVersion, isdrafted } = useCustomSelector((state) => ({
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
@@ -84,7 +85,7 @@ function Navbar() {
   };
 
   const handlePublishBridge = async () => {
-    dispatch(publishBridgeVersionAction({ bridgeId: bridgeId, versionId }));
+    dispatch(publishBridgeVersionAction({ bridgeId: bridgeId, versionId, orgId }));
   }
 
   const handleDiscardChanges = async () => {

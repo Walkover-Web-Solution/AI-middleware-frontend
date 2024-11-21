@@ -185,11 +185,11 @@ export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) =>
   }
 }
 
-export const publishBridgeVersionAction = ({ bridgeId, versionId }) => async (dispatch) => {
+export const publishBridgeVersionAction = ({ bridgeId, versionId, orgId }) => async (dispatch) => {
   try {
     const data = await publishBridgeVersionApi({ versionId });
     if (data?.success) {
-      dispatch(publishBrigeVersionReducer({ versionId: data?.version_id, bridgeId }));
+      dispatch(publishBrigeVersionReducer({ versionId: data?.version_id, bridgeId, orgId }));
     }
   } catch (error) {
     console.error(error)

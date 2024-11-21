@@ -31,8 +31,8 @@ function BridgeVersionDropdown({ params }) {
 
     const handleCreateNewVersion = () => {
         // create new version
-        dispatch(createBridgeVersionAction({ parentVersionId: bridgeVersionsArray[0], bridgeId: params.id }, (data) => {
-
+        dispatch(createBridgeVersionAction({ parentVersionId: params?.version, bridgeId: params.id }, (data) => {
+            router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${data.version_id}`);
         }))
     }
     return (
