@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 
-const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params,setSearchMessageId }) => {
+const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId }) => {
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');

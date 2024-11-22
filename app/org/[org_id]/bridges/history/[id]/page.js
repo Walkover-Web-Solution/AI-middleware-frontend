@@ -239,7 +239,7 @@ function Page({ params }) {
               <div className="pb-16 px-3 pt-4 ">
                 {thread &&
                   [...thread]?.map((item, index) => (
-                  <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} threadRefs={threadRefs} searchMessageId={searchMessageId}/>
+                  <ThreadItem key={index} params={params} index={index} item={item} threadHandler={threadHandler} formatDateAndTime={formatDateAndTime} integrationData={integrationData} threadRefs={threadRefs} searchMessageId={searchMessageId} setSearchMessageId={setSearchMessageId}/>
                 ))}
               </div>
             </div>

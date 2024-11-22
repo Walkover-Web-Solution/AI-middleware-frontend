@@ -7,7 +7,7 @@ import CodeBlock from "../codeBlock/codeBlock";
 import ToolsDataModal from "./toolsDataModal";
 
 
-const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params,threadRefs,searchMessageId }) => {
+const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params,threadRefs, searchMessageId, setSearchMessageId }) => {
   const dispatch = useDispatch();
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]); // Track the selected tool call data
@@ -125,6 +125,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     setTimeout(() => {
       messageElement.classList.remove('bg-base-300', 'rounded-md');
     }, 2000);
+    setSearchMessageId(null)
   }
   }, [messageId, threadRefs,searchMessageId]);
 
