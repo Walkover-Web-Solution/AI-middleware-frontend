@@ -12,9 +12,21 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const searchRef = useRef();
-  const handleChange = (e) => {
-    setSearchQuery(e.target?.value);
+
+  const debounce = (func, delay) => {
+    let timeoutId;
+    return (...args) => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
   };
+
+  const handleChange = debounce((e) => {
+    setSearchQuery(e.target?.value);
+    handleSearch(e);
+  }, 500);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -23,6 +35,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
 
   const clearInput = () => {
     setSearchQuery('');
+    searchRef.current.value = '';
     dispatch(getHistoryAction(params.id, null, null, 1, ""));
   }
 
@@ -40,7 +53,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
 
   return (
     <div className="drawer-side justify-items-stretch bg-base-200 border-r relative" id="sidebar">
-      <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds}/>
+      <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
       <div className="p-4 gap-3 flex flex-col">
         <div className="collapse collapse-arrow join-item border border-base-300">
           <input type="checkbox" className="peer" />
@@ -56,7 +69,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
             type="text"
             ref={searchRef}
             placeholder="Search..."
-            value={searchQuery}
+            // value={searchQuery}
             onChange={handleChange}
             className="border border-gray-300 rounded p-2 w-full pr-10"
           />
