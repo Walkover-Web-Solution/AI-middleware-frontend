@@ -52,6 +52,7 @@ export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, g
     if (result?.success) {
       onSuccess(result);
       dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId }));
+      toast.success('New version created successfully');
     }
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
@@ -191,6 +192,7 @@ export const publishBridgeVersionAction = ({ bridgeId, versionId, orgId }) => as
     const data = await publishBridgeVersionApi({ versionId });
     if (data?.success) {
       dispatch(publishBrigeVersionReducer({ versionId: data?.version_id, bridgeId, orgId }));
+      toast.success('Bridge Version published successfully');
     }
   } catch (error) {
     console.error(error)

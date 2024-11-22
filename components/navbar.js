@@ -10,6 +10,7 @@ import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import OrgSlider from './sliders/orgSlider';
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
+import { MODAL_TYPE } from '@/utils/enums';
 
 function Navbar() {
   const router = useRouter();
@@ -19,7 +20,6 @@ function Navbar() {
   const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
   const bridgeId = path[5];
-  const orgId = path[2];
   const { organizations, bridgeData, chatbotData, bridge, publishedVersion, isdrafted } = useCustomSelector((state) => ({
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
@@ -85,7 +85,7 @@ function Navbar() {
   };
 
   const handlePublishBridge = async () => {
-    dispatch(publishBridgeVersionAction({ bridgeId: bridgeId, versionId, orgId }));
+    document.getElementById(MODAL_TYPE.PUBLISH_BRIDGE_VERSION).showModal();
   }
 
   const handleDiscardChanges = async () => {
@@ -125,17 +125,19 @@ function Navbar() {
             {path[4] === 'configure' && (
               <div className='flex items-center'>
                 {(isdrafted && publishedVersion === versionId) && (
-                  <div className='flex items-center gap-2'>
-                    <button
-                      className="btn bg-red-200 m-1"
-                      onClick={handleDiscardChanges}
-                    >
-                      <span className='text-black'>Discard Changes</span>
-                    </button>
+                  <div className="tooltip tooltip-left" data-tip="Your changes are discarded & will be synced by publish version.">
+                    <div className='flex items-center gap-2'>
+                      <button
+                        className="btn bg-red-200 m-1 hover:bg-red-300"
+                        onClick={handleDiscardChanges}
+                      >
+                        <span className='text-black'>Discard Changes</span>
+                      </button>
+                    </div>
                   </div>
                 )}
                 <button
-                  className="btn bg-green-200"
+                  className="btn bg-green-200 hover:bg-green-300"
                   onClick={handlePublishBridge}
                   disabled={!isdrafted && publishedVersion === versionId}
                 >

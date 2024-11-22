@@ -311,4 +311,5 @@ export const MODAL_TYPE  =  {
   CREATE_BRIDGE: 'CREATE_BRIDGE',
   CREATE_API_KEY: 'CREATE_API',
   OPTIMIZE_PROMPT: 'optmize_prompt_modal',
+  PUBLISH_BRIDGE_VERSION: 'publish_bridge_version_modal',
 }
