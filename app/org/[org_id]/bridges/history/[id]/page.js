@@ -253,7 +253,7 @@ function Page({ searchParams }) {
               }}
             >
               <InfiniteScroll
-                dataLength={thread?.length}
+                dataLength={thread?.length || 0}
                 next={fetchMoreThreadData}
                 hasMore={hasMoreThreadData}
                 loader={<p></p>}
