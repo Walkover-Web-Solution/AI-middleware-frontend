@@ -71,7 +71,7 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     const response = await getAllBridges();
     const embed_token = response?.data?.embed_token;
     const integrationData = await integration(embed_token);
-    const flowObject = integrationData.flows.reduce((obj, item) => {
+    const flowObject = integrationData?.flows?.reduce((obj, item) => {
       obj[item.id] = item;
       return obj;
     }, {});
