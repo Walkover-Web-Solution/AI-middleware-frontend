@@ -52,18 +52,18 @@ function Page({ searchParams }) {
   };
 
   const handleClickOutside = (event) => {
-    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+    if (sidebarRef?.current && !sidebarRef.current.contains(event.target)) {
       setIsSliderOpen(false);
     }
   };
 
   useEffect(() => {
-    document.addEventListener("keydown", closeSliderOnEsc);
-    document.addEventListener("mousedown", handleClickOutside);
+    document?.addEventListener("keydown", closeSliderOnEsc);
+    document?.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener("keydown", closeSliderOnEsc);
-      document.removeEventListener("mousedown", handleClickOutside);
+      document?.removeEventListener("keydown", closeSliderOnEsc);
+      document?.removeEventListener("mousedown", handleClickOutside);
     };
   }, [closeSliderOnEsc, handleClickOutside]);
 
@@ -72,12 +72,12 @@ function Page({ searchParams }) {
       setLoading(true);
       const startDate = search.get("start");
       const endDate = search.get("end");
-      await dispatch(getHistoryAction(params.id, startDate, endDate, 1));  // paramaters are id , starting date , end date , page number
+      await dispatch(getHistoryAction(params?.id, startDate, endDate, 1));  // paramaters are id , starting date , end date , page number
       dispatch(clearThreadData());
       setLoading(false);
     };
     fetchInitialData();
-  }, [params.id]);
+  }, [params?.id]);
 
   useEffect(() => {
     const thread_id = search.get("thread_id");
@@ -87,8 +87,8 @@ function Page({ searchParams }) {
     if (thread_id) {
       setSelectedThread(thread_id);
       dispatch(getThread(thread_id, params?.id, 1));
-    } else if (historyData.length > 0) {
-      const firstThreadId = historyData[0].thread_id;
+    } else if (historyData?.length > 0) {
+      const firstThreadId = historyData[0]?.thread_id;
       setSelectedThread(firstThreadId);
       dispatch(getThread(firstThreadId, params?.id,1));
     }
@@ -128,7 +128,7 @@ function Page({ searchParams }) {
     const startDate = search.get("start");
     const endDate = search.get("end");
     const result = await dispatch(getHistoryAction(params.id, startDate, endDate, nextPage));
-    if (result.length < 40) {
+    if (result?.length < 40) {
       setHasMore(false);
     }
   };
@@ -145,7 +145,7 @@ function Page({ searchParams }) {
     };
     return isNaN(date.getTime())
       ? "Invalid Date"
-      : date.toLocaleDateString("en-US", options);
+      : date?.toLocaleDateString("en-US", options);
   };
 
   // Fetch more thread data for infinite scroll
@@ -188,9 +188,9 @@ function Page({ searchParams }) {
 
   // Adjust flexDirection based on content height
   useEffect(() => {
-    if (historyRef.current && contentRef.current) {
-      const containerHeight = historyRef.current.clientHeight;
-      const contentHeight = contentRef.current.clientHeight;
+    if (historyRef?.current && contentRef?.current) {
+      const containerHeight = historyRef?.current.clientHeight;
+      const contentHeight = contentRef?.current.clientHeight;
       if (contentHeight < containerHeight) {
         setFlexDirection("column"); // Start from top
       } else {
@@ -201,20 +201,20 @@ function Page({ searchParams }) {
 
   // Scroll event handler to show/hide the Scroll to Bottom button
   const handleScroll = useCallback(() => {
-    if (!historyRef.current) return;
+    if (!historyRef?.current) return;
     const { scrollTop, clientHeight } = historyRef.current;
     setShowScrollToBottom(scrollTop + clientHeight < clientHeight);
   }, []);
 
   useEffect(() => {
-    if (historyRef.current) {
-      historyRef.current.addEventListener("scroll", handleScroll);
+    if (historyRef?.current) {
+      historyRef?.current.addEventListener("scroll", handleScroll);
       handleScroll();
     }
 
     return () => {
-      if (historyRef.current) {
-        historyRef.current.removeEventListener("scroll", handleScroll);
+      if (historyRef?.current) {
+        historyRef?.current.removeEventListener("scroll", handleScroll);
       }
     };
   }, [handleScroll]);
@@ -239,8 +239,8 @@ function Page({ searchParams }) {
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex flex-col items-center justify-center">
-          <div className="w-full min-h-auto overflow-x-hidden">
+        <div className="drawer-content flex flex-col items-center overflow-scroll justify-center">
+        <div className="w-full min-h-screen ">
             <div
               id="scrollableDiv"
               ref={historyRef}
@@ -267,7 +267,7 @@ function Page({ searchParams }) {
                   style={{ width: "100%" }}
                 >
                   {thread &&
-                    thread.map((item, index) => (
+                    thread?.map((item, index) => (
                       <ThreadItem
                         key={index}
                         params={params}
