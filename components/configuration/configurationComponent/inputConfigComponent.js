@@ -1,21 +1,20 @@
 import CreateVariableModal from '@/components/modals/createVariableModal';
 import OptimizePromptModal from '@/components/modals/optimizePromptModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const InputConfigComponent = ({ params }) => {
-    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, modelType } = useCustomSelector((state) => ({
-        prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt || "",
-        serviceType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type || "",
-        service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service || "",
-        variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
+    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
+        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+        serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type || "",
+        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service || "",
+        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     }));
-
+    
     const [keyName, setKeyName] = useState('');
-
     const suggestionListRef = useRef(null);
     const textareaRef = useRef(null);
     const [prompt, setPrompt] = useState(reduxPrompt);
@@ -30,8 +29,9 @@ const InputConfigComponent = ({ params }) => {
     const savePrompt = useCallback((e) => {
         const newValue = e.target?.value || "";
         setShowSuggestions(false);
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { prompt: newValue } } }));
-    }, [dispatch, params.id]);
+        // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { prompt: newValue } } }));
+        dispatch(updateBridgeVersionAction({ versionId: params.version, dataToSend: { configuration: { prompt: newValue } } }));
+    }, [dispatch, params.id, params.version]);
 
     const getCaretCoordinatesAdjusted = () => {
         if (textareaRef.current) {

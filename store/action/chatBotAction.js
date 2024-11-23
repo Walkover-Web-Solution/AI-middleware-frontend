@@ -67,8 +67,10 @@ export const updateChatBotConfigAction = (botId, dataToSend) => async (dispatch,
 
 export const createOrRemoveActionBridge = (dataToSend) => async (dispatch) => {
     try {
-        const response = await createOrRemoveAction(dataToSend)
-        dispatch(updateBridgeActionReducer({ bridgeId: response.data?.['_id'], actionData: response.data?.actions }))
+        const response = await createOrRemoveAction(dataToSend);
+        if (response?.success) {
+            dispatch(updateBridgeActionReducer({ bridgeId: response.data?.['parent_id'], actionData: response.data?.actions, versionId: response.data?.['_id'] }))
+        }
     } catch (error) {
         console.error(error)
     }

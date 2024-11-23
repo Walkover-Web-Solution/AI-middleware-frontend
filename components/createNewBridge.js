@@ -63,7 +63,7 @@ function CreateNewBridge({ orgid }) {
             };
             dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
                 // setShowFileUploadModal(false);
-                route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}`);
+                route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
                 document.getElementById('my_modal_1').close();
                 setIsLoading(false);
                 cleanState();

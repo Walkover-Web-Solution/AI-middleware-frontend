@@ -20,7 +20,7 @@ const BridgeTypeToggle = ({ params }) => {
     };
 
     return (
-        <label className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
+        <div className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
             <div className='flex flex-row items-center gap-2'>
                 <div className="label">
                     <span className="label-text">API</span>
@@ -42,7 +42,7 @@ const BridgeTypeToggle = ({ params }) => {
                     <span className='label-text-alt'>Only supports models which have JSON support. &#40; like gpt-4o &#41;</span>
                 </div>}
             </div>
-        </label>
+        </div>
     );
 };
 

@@ -19,6 +19,7 @@ import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import AddVariable from "../addVariable";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
+import BridgeVersionDropdown from "./configurationComponent/bridgeVersionDropdown";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -27,41 +28,47 @@ export default function ConfigurationPage({ params }) {
     const [currentView, setCurrentView] = useState(view || 'setup')
     const { bridgeType, is_rich_text, modelType } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
-        is_rich_text: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text || false,
-        modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type?.toLowerCase(),
+        is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.is_rich_text || false,
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
     }));
 
     const handleNavigation = (target) => {
         setCurrentView(target)
-        router.push(`/org/${params.org_id}/bridges/configure/${params.id}?view=${target}`);
+        router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${params.version}&view=${target}`);
     };
 
     return (
         <div className="flex flex-col gap-3 relative">
             <BridgeNameInput params={params} />
-
             <BridgeTypeToggle params={params} />
-            <div className="join absolute right-0 top-0">
-                <button
-                    onClick={() => handleNavigation('setup')}
-                    className={` ${currentView === 'setup' ? "btn-primary" : ""} btn join-item `}
-                >
-                    { }
-                    <Cog size={16} />Setup
-                </button>
-                <button
-                    onClick={() => handleNavigation('guide')}
-                    className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
-                >
-                    <Bot size={16} />Guide
-                </button>
+            <div className="absolute right-0 top-0">
+                <div className="flex items-center">
+                <BridgeVersionDropdown params={params} />
+                <div className="join">
+                    <button
+                        onClick={() => handleNavigation('setup')}
+                        className={` ${currentView === 'setup' ? "btn-primary" : ""} btn join-item `}
+                    >
+                        { }
+                        <Cog size={16} />Setup
+                    </button>
+                    <button
+                        onClick={() => handleNavigation('guide')}
+                        className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
+                    >
+                        <Bot size={16} />Guide
+                    </button>
+                </div>
+                </div>
             </div>
             {
                 currentView === 'setup' ?
                     <>
                         {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
+                        {/* todo */}
                         {(modelType == 'chat' || modelType == 'fine-tune') && <PreEmbedList params={params} />}
                         {(modelType == 'chat' || modelType == 'fine-tune') && <InputConfigComponent params={params} />}
+                        {/* todo */}
                         {(modelType == 'chat' || modelType == 'fine-tune') && <EmbedList params={params} />}
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
@@ -70,6 +77,7 @@ export default function ConfigurationPage({ params }) {
                         <AdvancedParameters params={params} />
                         {(modelType == 'chat' || modelType == 'fine-tune') && <AddVariable params={params} />}
                         {bridgeType === "chatbot" && is_rich_text && <UserRefernceForRichText params={params} />}
+                        {/* todo  */}
                         <ActionList params={params} />
                         {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
                     </>

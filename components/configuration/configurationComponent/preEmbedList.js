@@ -9,11 +9,10 @@ import { getStatusClass } from '@/utils/utility';
 const PreEmbedList = ({ params }) => {
     const { integrationData, bridge_pre_tools, function_data } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
-        bridge_pre_tools: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.pre_tools || [],
+        bridge_pre_tools: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.pre_tools || [],
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData || {},
     }));
     const dispatch = useDispatch();
-
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data]);
 
     const renderEmbed = useMemo(() => (
@@ -62,24 +61,27 @@ const PreEmbedList = ({ params }) => {
 
     const onFunctionSelect = (id) => {
         dispatch(updateApiAction(params.id, {
-            pre_tools: [id]
+            pre_tools: [id],
+            version_id: params.version
         }))
     }
     const removePreFunction = () => {
         dispatch(updateApiAction(params.id, {
-            pre_tools: []
+            pre_tools: [],
+            version_id: params.version
         }))
     }
 
     if (Object.keys(function_data).length === 0) {
         return null;
     }
+
     return (bridge_pre_tools?.length > 0 ?
         <div>
             <div className="form-control inline-block">
                 <div className='flex gap-5 items-center ml-2 '>
-                <label className='label-text font-medium whitespace-nowrap'>Pre functions</label>
-                <p role='alert' className='label-text-alt alert p-2'><Info size={16} />Use pre_function variable to use this function data. &#123;&#123;pre_function&#125;&#125;</p>
+                    <label className='label-text font-medium whitespace-nowrap'>Pre functions</label>
+                    <p role='alert' className='label-text-alt alert p-2'><Info size={16} />Use pre_function variable in prompt to use this function data. &#123;&#123;pre_function&#125;&#125;</p>
                 </div>
                 <div className="label flex-col items-start">
                     <div className="flex flex-wrap gap-4">

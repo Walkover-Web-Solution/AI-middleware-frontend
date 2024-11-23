@@ -1,29 +1,35 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { archiveBridgeAction, deleteBridgeAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
+import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction, publishBridgeVersionAction } from '@/store/action/bridgeAction';
 import { getIconOfService, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import OrgSlider from './sliders/orgSlider';
+import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
+import { MODAL_TYPE } from '@/utils/enums';
 
 function Navbar() {
   const router = useRouter();
+  const searchParams = useSearchParams()
+  const versionId = searchParams.get('version')
   const dispatch = useDispatch();
-  const pathName = usePathname()
+  const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
-  const { organizations, bridgeData, chatbotData, bridge } = useCustomSelector((state) => ({
+  const bridgeId = path[5];
+  const { organizations, bridgeData, chatbotData, bridge, publishedVersion, isdrafted } = useCustomSelector((state) => ({
     organizations: state.userDetailsReducer.organizations,
-    bridgeData: state.bridgeReducer.allBridgesMap[path[5]],
-    chatbotData: state.ChatBot.ChatBotMap[path[5]],
-    bridge: state.bridgeReducer.allBridgesMap[path[5]] || []
+    bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
+    chatbotData: state.ChatBot.ChatBotMap[bridgeId],
+    bridge: state.bridgeReducer.allBridgesMap[bridgeId] || [],
+    publishedVersion: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || [],
+    isdrafted: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted,
   }));
 
   const handleDeleteBridge = async (item, newStatus = 0) => {
-    const bridgeId = path[5];
     const orgId = path[2];
 
     switch (item.trim().toLowerCase()) {
@@ -78,10 +84,18 @@ function Navbar() {
     }
   };
 
+  const handlePublishBridge = async () => {
+    document.getElementById(MODAL_TYPE.PUBLISH_BRIDGE_VERSION).showModal();
+  }
+
+  const handleDiscardChanges = async () => {
+    dispatch(updateBridgeVersionReducer({ bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false } }));
+    dispatch(dicardBridgeVersionAction({ bridgeId, versionId }));
+  }
+
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleBridgeSidebar = () => toggleSidebar('default-bridge-sidebar');
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
-
   return (
     <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[100] max-h-[4rem] bg-base-100`}>
       <div className='flex items-center w-full justify-start gap-2'>
@@ -108,9 +122,33 @@ function Navbar() {
       <div className="justify-end w-full" >
         {path.length === 6 && path[3] === 'bridges' ? (
           <>
+            {path[4] === 'configure' && (
+              <div className='flex items-center'>
+                {(isdrafted && publishedVersion === versionId) && (
+                  <div className="tooltip tooltip-left" data-tip="Your changes are discarded & will be synced by publish version.">
+                    <div className='flex items-center gap-2'>
+                      <button
+                        className="btn bg-red-200 m-1 hover:bg-red-300"
+                        onClick={handleDiscardChanges}
+                      >
+                        <span className='text-black'>Discard Changes</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <button
+                  className="btn bg-green-200 hover:bg-green-300"
+                  onClick={handlePublishBridge}
+                  disabled={!isdrafted && publishedVersion === versionId}
+                >
+                  Publish Version
+                </button>
+                <div className="divider divider-horizontal mx-1"></div>
+              </div>
+            )}
             <div className="join">
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${path[5]}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${path[5]}`)} className={` ${path[4] === 'history' ? "btn-primary" : ""}   btn join-item `}><History size={16} /> History</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${bridgeId}?version=${versionId}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${bridgeId}?version=${versionId}`)} className={` ${path[4] === 'history' ? "btn-primary" : ""}   btn join-item `}><History size={16} /> History</button>
             </div>
             <div className='ml-2'>
             </div>
@@ -120,12 +158,7 @@ function Navbar() {
                 <Ellipsis />
               </div>
               <ul tabIndex={0} className="dropdown-content z-[9999999999] menu p-2 shadow bg-base-100 rounded-box w-52 custom-dropdown">
-                {/* {['Duplicate', 'Delete'].map((item) => (
-                  <li key={item} onClick={() => handleDeleteBridge(item)}>
-                    <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
-                  </li>
-                ))} */}
-                {['Duplicate', 'Archive'].map((item) => (
+                {['Archive'].map((item) => (
                   <li key={item} onClick={() => handleDeleteBridge(item, bridge.status !== undefined ? Number(!bridge.status) : undefined)}>
                     <a className={path[3] === item ? "active" : ""}>{item === 'Archive' ? (bridge.status === 0 ? 'Unarchive' : 'Archive') : item.charAt(0).toUpperCase() + item.slice(1)}</a>
                   </li>
