@@ -26,6 +26,7 @@ function BridgeVersionDropdown({ params }) {
     }, [params.version])
 
     const handleVersionChange = (version) => {
+        if(params.version === version) return;
         router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${version}`);
         dispatch(getBridgeVersionAction({ versionId: version }));
     }
@@ -50,14 +51,14 @@ function BridgeVersionDropdown({ params }) {
                 </div>
                 <ul tabIndex={0} className="dropdown-content menu rounded-box z-[9999999] w-52 p-2 shadow bg-base-100">
                     {bridgeVersionsArray?.map((version, index) => (
-                        <li key={version} onClick={() => handleVersionChange(version)}>
-                            <a className='flex justify-between'>
+                        <li key={version} onClick={() => handleVersionChange(version)} >
+                            <a className={`flex justify-between ${params.version === version ? 'active' : ''}`}>
                                 Version {index + 1}
                                 {version === publishedVersion && <span className="text-green-600 ml-1">●</span>}
                             </a>
                         </li>
                     ))}
-                    <button class="btn" onClick={handleCreateNewVersion}>Create New Version <span className='ml-1'> &rarr;</span></button>
+                    <button class="btn mt-3" onClick={handleCreateNewVersion}>Create New Version <span className='ml-1'> &rarr;</span></button>
                 </ul>
             </div>
             <PublishBridgeVersionModal params={params} />
