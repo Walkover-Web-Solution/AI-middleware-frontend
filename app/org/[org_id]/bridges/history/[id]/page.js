@@ -7,7 +7,7 @@ import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getHistoryAction, getThread } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
-import { CircleChevronDown } from "lucide-react"; // Corrected import
+import { CircleChevronDown } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -22,9 +22,10 @@ function Page({ searchParams }) {
   const pathName = usePathname();
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
-  const historyRef = useRef(null); // Ref for the scrollable div
-  const contentRef = useRef(null); // Ref for the content container
-  const containerRef = useRef(null);
+  const historyRef = useRef(null);
+  const contentRef = useRef(null);
+  const previousScrollHeightRef = useRef(0);
+  const threadRefs = useRef({});
 
   const { historyData, thread, integrationData } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
@@ -35,15 +36,16 @@ function Page({ searchParams }) {
   const [selectedThread, setSelectedThread] = useState("");
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [page, setPage] = useState(1); // Track the current page of data
+  const [page, setPage] = useState(1);
   const [threadPage, setThreadPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [hasMoreThreadData, setHasMoreThreadData] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const previousScrollHeightRef = useRef(0);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [flexDirection, setFlexDirection] = useState("column"); 
+  const [flexDirection, setFlexDirection] = useState("column");
+  const [searchMessageId, setSearchMessageId] = useState(null);
+  
 
   const closeSliderOnEsc = (event) => {
     if (event.key === "Escape") {
@@ -72,7 +74,7 @@ function Page({ searchParams }) {
       setLoading(true);
       const startDate = search.get("start");
       const endDate = search.get("end");
-      await dispatch(getHistoryAction(params?.id, startDate, endDate, 1));  // paramaters are id , starting date , end date , page number
+      await dispatch(getHistoryAction(params?.id, startDate, endDate, 1));
       dispatch(clearThreadData());
       setLoading(false);
     };
@@ -146,7 +148,6 @@ function Page({ searchParams }) {
       : date?.toLocaleDateString("en-US", options);
   };
 
-  // Fetch more thread data for infinite scroll
   const fetchMoreThreadData = useCallback(async () => {
     if (isFetchingMore) return;
     
@@ -157,10 +158,8 @@ function Page({ searchParams }) {
     previousScrollHeightRef.current = currentScrollHeight;
   
     const nextPage = threadPage + 1;
-    setThreadPage(nextPage);
-    
     const result = await dispatch(getThread(selectedThread, params.id, nextPage));
-    
+    setThreadPage(nextPage);
     if (!result || result.length < 40) {
       setHasMoreThreadData(false);
     }
@@ -177,14 +176,12 @@ function Page({ searchParams }) {
     }
   }, [thread, isFetchingMore]);
 
-  // Scroll to bottom on initial render
   useEffect(() => {
     if (historyRef.current && threadPage === 1) {
       historyRef.current.scrollTop = historyRef.current.scrollHeight;
     }
-  }, [thread, threadPage]);
+  }, [thread,threadPage]);
 
-  // Adjust flexDirection based on content height
   useEffect(() => {
     if (historyRef?.current && contentRef?.current) {
       const containerHeight = historyRef?.current.clientHeight;
@@ -226,7 +223,47 @@ function Page({ searchParams }) {
     }
   }, []);
 
-  // Auto-scroll to bottom when new messages arrive and user is at bottom
+  const scrollToTop = useCallback(() => {
+    if (historyRef.current) {
+      historyRef.current.scrollTo({
+        top: -historyRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, []);
+
+  const scrollToSearchedMessage = async (messageId) => {
+    const container = historyRef.current;
+    if (!container) {
+      console.warn("No container available for scrolling.");
+      return;
+    }
+
+    const findMessageAndScroll = async () => {
+      let messageElement = threadRefs.current[messageId];
+
+      if (messageElement) {
+        messageElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        return;
+      } else {
+        scrollToTop();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        findMessageAndScroll();
+      }
+    };
+
+    findMessageAndScroll();
+  };
+
+  useEffect(() => {
+    if (searchMessageId) {
+      scrollToSearchedMessage(searchMessageId);
+    }
+  }, [searchMessageId, scrollToTop]);
+  
   useEffect(() => {
     if (!showScrollToBottom) {
       scrollToBottom()
@@ -247,7 +284,7 @@ function Page({ searchParams }) {
                 height: "90vh",
                 overflowY: "auto",
                 display: "flex",
-                flexDirection: flexDirection, // Use dynamic flexDirection
+                flexDirection: flexDirection,
               }}
             >
               <InfiniteScroll
@@ -255,8 +292,8 @@ function Page({ searchParams }) {
                 next={fetchMoreThreadData}
                 hasMore={hasMoreThreadData}
                 loader={<p></p>}
-                scrollThreshold="250px" // Fetch data when 20% of the scrollable area remains
-                inverse={flexDirection === "column-reverse"} // Inverse only when flexDirection is column-reverse
+                scrollThreshold="250px"
+                inverse={flexDirection === "column-reverse"}
                 scrollableTarget="scrollableDiv"
               >
                 <div
@@ -274,13 +311,15 @@ function Page({ searchParams }) {
                         threadHandler={threadHandler}
                         formatDateAndTime={formatDateAndTime}
                         integrationData={integrationData}
+                        threadRefs={threadRefs}
+                        searchMessageId={searchMessageId}
+                        setSearchMessageId={setSearchMessageId}
                       />
                     ))}
                 </div>
               </InfiniteScroll>
             </div>
 
-            {/* Scroll to Bottom Button */}
             {showScrollToBottom && (
               <button
                 onClick={scrollToBottom}
@@ -291,7 +330,7 @@ function Page({ searchParams }) {
             )}
           </div>
         </div>
-        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setPage={setPage} setHasMore={setHasMore}/>
+        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params}  setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore}/>
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>
