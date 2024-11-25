@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   allBridgesMap: {},
+  bridgeVersionMapping: {},
   org: {},
   apikeys: {},
   loading: false,
@@ -21,21 +22,21 @@ export const bridgeReducer = createSlice({
       const { response } = action.payload;
       state.allBridgesMap[response.bridge_id] = { ...state.allBridgesMap[response.bridge_id], ...response };
     },
-    // fetchSingleBridgeReducer: (state, action) => {
-    //   const { bridges, integrationData } = action.payload;
-    //   const responseFormat = handleResponseFormat(bridges);
-    //   const { _id, configuration: { model: { default: modelDefault } }, service, type } = bridges;
-    //   const obj2 = modelInfo[service][modelDefault];
-    //   const response = updatedData(bridges, obj2, type);
-    //   state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...response, integrationData, responseFormat };
-    //   state.loading = false;
-    // },
 
     // new format
     fetchSingleBridgeReducer: (state, action) => {
       const { bridge } = action.payload;
       const { _id } = bridge;
       state.allBridgesMap[_id] = { ...(state.allBridgesMap[_id] || {}), ...bridge };
+      state.loading = false;
+    },
+    fetchSingleBridgeVersionReducer: (state, action) => {
+      const { bridge } = action.payload;
+      const { _id, parent_id } = bridge;
+      if (!state.bridgeVersionMapping[parent_id]) {
+        state.bridgeVersionMapping[parent_id] = {};
+      }
+      state.bridgeVersionMapping[parent_id][_id] = { ...(state.bridgeVersionMapping[parent_id][_id] || {}), ...bridge };
       state.loading = false;
     },
     fetchAllBridgeReducer: (state, action) => {
@@ -57,6 +58,17 @@ export const bridgeReducer = createSlice({
     },
     createBridgeReducer: (state, action) => {
       state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.bridge);
+    },
+    createBridgeVersionReducer: (state, action) => {
+      const { newVersionId, parentVersionId, bridgeId } = action.payload;
+      if (!state.bridgeVersionMapping[bridgeId]) {
+        state.bridgeVersionMapping[bridgeId] = {};
+      }
+      state.bridgeVersionMapping[bridgeId][newVersionId] = {
+        ...(state.bridgeVersionMapping[bridgeId][parentVersionId] || {}),
+        _id: newVersionId
+      };
+      state.allBridgesMap[bridgeId].versions.push(newVersionId);
     },
     updateBridgeReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
@@ -95,9 +107,32 @@ export const bridgeReducer = createSlice({
       }
       state.loading = false;
     },
+    updateBridgeVersionReducer: (state, action) => {
+      const { bridges, functionData } = action.payload;
+      const { _id, configuration, ...extraData } = bridges;
+      state.bridgeVersionMapping[bridges.parent_id][bridges._id] = {
+        ...state.bridgeVersionMapping[bridges.parent_id][bridges._id],
+        ...extraData,
+        configuration: { ...configuration }
+      };
+      if (functionData) {
+        const existingBridgeIds = state.org[bridges.org_id].functionData[functionData.function_id]?.bridge_ids || [];
+
+        if (functionData?.function_operation) {
+          // Create a new array with the added bridge_id
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = [...existingBridgeIds, _id];
+        } else {
+          // Create a new array without the removed bridge_id
+          state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(id => id !== _id);
+        }
+      }
+      state.loading = false;
+    },
+
     updateBridgeActionReducer: (state, action) => {
-      const { bridgeId, actionData } = action.payload;
-      state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], actions: actionData };
+      const { bridgeId, actionData, versionId } = action.payload;
+      // state.allBridgesMap[bridgeId] = { ...state.allBridgesMap[bridgeId], actions: actionData };
+      state.bridgeVersionMapping[bridgeId][versionId].actions = actionData;
     },
     updateBridgeToolsReducer: (state, action) => {
       const { orgId, functionData = {} } = action.payload;
@@ -114,8 +149,23 @@ export const bridgeReducer = createSlice({
       state.org[orgId].integrationData[dataToSend.id] = dataToSend
     },
     updateVariables: (state, action) => {
-      const { data, bridgeId } = action.payload;
-      state.allBridgesMap[bridgeId].variables = data;
+      const { data, bridgeId, versionId = "" } = action.payload;
+      if (versionId) {
+        state.bridgeVersionMapping[bridgeId][versionId].variables = data;
+      } else {
+        state.allBridgesMap[bridgeId].variables = data;
+      }
+    },
+    publishBrigeVersionReducer: (state, action) => {
+      const { bridgeId = null, versionId = null, orgId = null } = action.payload;
+      state.allBridgesMap[bridgeId].published_version_id = versionId;
+      state.bridgeVersionMapping[bridgeId][versionId].is_drafted = false;
+      state.org[orgId].orgs = state.org[orgId].orgs.map(bridge => {
+        if (bridge._id === bridgeId) {
+          return { ...bridge, published_version_id: versionId };
+        }
+        return bridge;
+      });
     },
     duplicateBridgeReducer: (state, action) => {
       state.allBridgesMap[action.payload.result._id] = action.payload.result;
@@ -161,8 +211,7 @@ export const bridgeReducer = createSlice({
     optimizePromptReducer: (state, action) => {
       const { bridgeId, prompt = "No optimized prompt" } = action.payload;
       state.allBridgesMap[bridgeId]['optimizePromptHistory'] = [...(state.allBridgesMap?.[bridgeId]?.['optimizePromptHistory'] || []), prompt];
-    }
-
+    },
   },
 });
 
@@ -172,8 +221,12 @@ export const {
   fetchAllBridgeReducer,
   fetchAllFunctionsReducer,
   fetchSingleBridgeReducer,
+  fetchSingleBridgeVersionReducer,
+  createBridgeVersionReducer,
   createBridgeReducer,
   updateBridgeReducer,
+  updateBridgeVersionReducer,
+  publishBrigeVersionReducer,
   updateBridgeToolsReducer,
   deleteBridgeReducer,
   integrationReducer,

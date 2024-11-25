@@ -2,13 +2,12 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEffect, useMemo } from "react";
 
 const Chatbot = ({ params }) => {
-
     const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue } = useCustomSelector((state) => ({
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
         bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         chatbot_token: state?.ChatBot?.chatbot_token || '',
-        variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
+        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     }));
 
     const variables = useMemo(() => {
@@ -23,7 +22,7 @@ const Chatbot = ({ params }) => {
     useEffect(() => {
         if (bridgeSlugName && window?.SendDataToChatbot) {
             SendDataToChatbot({
-                bridgeName: bridgeSlugName
+                "bridgeName": bridgeSlugName
             });
         }
     }, [bridgeSlugName]);
@@ -31,7 +30,7 @@ const Chatbot = ({ params }) => {
     useEffect(() => {
         if (variables && window?.SendDataToChatbot) {
             window.SendDataToChatbot({
-                variables: variables
+                "variables": variables
             });
         }
     }, [variables])
@@ -40,13 +39,13 @@ const Chatbot = ({ params }) => {
         const intervalId = setInterval(() => {
             if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeName && bridgeType) {
                 window.SendDataToChatbot({
-                    bridgeName: bridgeSlugName,
-                    threadId: bridgeName?.replaceAll(" ", ""),
-                    parentId: 'parentChatbot',
-                    fullScreen: true,
-                    hideCloseButton: true,
-                    hideIcon: true,
-                    variables: variables || {}
+                    "bridgeName": bridgeSlugName,
+                    "threadId": bridgeName?.replaceAll(" ", ""),
+                    "parentId": 'parentChatbot',
+                    "fullScreen": true,
+                    "hideCloseButton": true,
+                    "hideIcon": true,
+                    "variables": variables || {}
                 });
                 if (bridgeType === 'chatbot') window.openChatbot();
                 clearInterval(intervalId);

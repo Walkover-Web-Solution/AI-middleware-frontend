@@ -7,13 +7,13 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
     const [loading, setLoading] = useState(false);
     const [conversation, setConversation] = useState([]);
     const inputRef = useRef(null);
-
+    const versionId = params?.version;
     const { bridge, modelType, modelName, variablesKeyValue, prompt } = useCustomSelector((state) => ({
-        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
-        modelName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.model?.toLowerCase(),
-        modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type?.toLowerCase(),
-        prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt,
-        variablesKeyValue: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.variables || [],
+        bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version],
+        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model?.toLowerCase(),
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
+        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt,
+        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     }));
 
     const dataToSend = {
@@ -73,12 +73,11 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                     role: "user",
                     content: ""
                 }
-                // data = modelInfo[localDataToSend.service].chatmessage.chat;
-                // const chatPath = modelInfo[localDataToSend.service].chatmessage.chatpath;
                 _.set(data, "content", newMessage);
                 setMessages(prevMessages => [...prevMessages, newChat]);
                 responseData = await dryRun({
                     localDataToSend: {
+                        version_id: versionId,
                         configuration: {
                             conversation: conversation,
                             type: modelType
@@ -86,13 +85,14 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                         user: newMessage,
                         variables // Include variables in the request data
                     },
-                    bridge_id: params?.id
+                    bridge_id: params?.id,
                 });
             }
             else if (modelType === "completion") {
                 responseData = await dryRun({
                     localDataToSend: {
                         ...localDataToSend,
+                        version_id: versionId,
                         configuration: {
                             ...localDataToSend.configuration
                         },
@@ -105,6 +105,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                 responseData = await dryRun({
                     localDataToSend: {
                         ...localDataToSend,
+                        version_id: versionId,
                         configuration: {
                             ...localDataToSend.configuration
                         },
@@ -117,24 +118,17 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                 if (modelType !== 'completion' && modelType !== 'embedding') {
                     inputRef.current.value = data.content;
                     setMessages(prevMessages => prevMessages.slice(0, -1)); // Remove the last message
-                    // setConversation(prevConversation => [...prevConversation, _.cloneDeep(data)].slice(-6));
                 }
                 toast.error(responseData.error);
                 setLoading(false);
                 return;
             }
             response = responseData.response?.data;
-            // const outputPath = outputConfig.message;
-            // const assistPath = outputConfig.assistant;
-            // const content = _.get(response.response, outputPath, "");
             const content = response?.content || "";
-            // let assistConversation = _.get(response.response, assistPath, ""); // in anthropic assistant
-            // if(typeof assistConversation  != 'object'){
             const assistConversation = {
                 role: response?.role || "assistant",
                 content: content
             }
-            // }
             // Update localDataToSend with assistant conversation
             if (modelType !== 'completion' && modelType !== 'embedding') {
                 setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));

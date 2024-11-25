@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { CircleAlert, Settings } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -29,7 +29,7 @@ const EmbedList = ({ params }) => {
     const { integrationData, bridge_functions, function_data } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {},
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData || {},
-        bridge_functions: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.function_ids || [],
+        bridge_functions: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.function_ids || [],
     }));
 
     const handleOpenModal = (functionId) => {
@@ -92,8 +92,18 @@ const EmbedList = ({ params }) => {
 
     const handleSelectFunction = (functionId) => {
         if (functionId) {
-            dispatch(updateBridgeAction({
+            // dispatch(updateBridgeAction({
+            //     bridgeId: params.id,
+            //     dataToSend: {
+            //         functionData: {
+            //             function_id: functionId,
+            //             function_operation: "1"
+            //         }
+            //     }
+            // }))
+            dispatch(updateBridgeVersionAction({
                 bridgeId: params.id,
+                versionId: params.version,
                 dataToSend: {
                     functionData: {
                         function_id: functionId,

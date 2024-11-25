@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 function OptmizePromptModal({ params }) {
     const dispatch = useDispatch();
     const { prompt, optimizePromptHistory } = useCustomSelector((state) => ({
-        prompt: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.prompt || "",
+        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
         optimizePromptHistory: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.optimizePromptHistory || [],
     }));
     const [promptRequirement, setPromptRequirement] = useState(prompt);

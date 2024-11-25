@@ -2,6 +2,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { Bot, Cog } from "lucide-react";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import AddVariable from "../addVariable";
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
@@ -9,6 +10,7 @@ import AdvancedParameters from "./configurationComponent/advancedParamenter";
 import ApiKeyInput from "./configurationComponent/apiKeyInput";
 import BridgeNameInput from "./configurationComponent/bridgeNameInput";
 import BridgeTypeToggle from "./configurationComponent/bridgeTypeToggle";
+import BridgeVersionDropdown from "./configurationComponent/bridgeVersionDropdown";
 import EmbedList from "./configurationComponent/embedList";
 import InputConfigComponent from "./configurationComponent/inputConfigComponent";
 import ModelDropdown from "./configurationComponent/modelDropdown";
@@ -17,7 +19,6 @@ import ResponseFormatSelector from "./configurationComponent/responseFormatSelec
 import RichTextToggle from "./configurationComponent/richTextToggle";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
-import AddVariable from "../addVariable";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 
 export default function ConfigurationPage({ params }) {
@@ -27,34 +28,38 @@ export default function ConfigurationPage({ params }) {
     const [currentView, setCurrentView] = useState(view || 'setup')
     const { bridgeType, is_rich_text, modelType } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
-        is_rich_text: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.is_rich_text || false,
-        modelType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type?.toLowerCase(),
+        is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.is_rich_text || false,
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
     }));
 
     const handleNavigation = (target) => {
         setCurrentView(target)
-        router.push(`/org/${params.org_id}/bridges/configure/${params.id}?view=${target}`);
+        router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${params.version}&view=${target}`);
     };
 
     return (
         <div className="flex flex-col gap-3 relative">
             <BridgeNameInput params={params} />
-
             <BridgeTypeToggle params={params} />
-            <div className="join absolute right-0 top-0">
-                <button
-                    onClick={() => handleNavigation('setup')}
-                    className={` ${currentView === 'setup' ? "btn-primary" : ""} btn join-item `}
-                >
-                    { }
-                    <Cog size={16} />Setup
-                </button>
-                <button
-                    onClick={() => handleNavigation('guide')}
-                    className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
-                >
-                    <Bot size={16} />Guide
-                </button>
+            <div className="absolute right-0 top-0">
+                <div className="flex items-center">
+                    <BridgeVersionDropdown params={params} />
+                    <div className="join">
+                        <button
+                            onClick={() => handleNavigation('setup')}
+                            className={` ${currentView === 'setup' ? "btn-primary" : ""} btn join-item `}
+                        >
+                            { }
+                            <Cog size={16} />Setup
+                        </button>
+                        <button
+                            onClick={() => handleNavigation('guide')}
+                            className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
+                        >
+                            <Bot size={16} />Guide
+                        </button>
+                    </div>
+                </div>
             </div>
             {
                 currentView === 'setup' ?

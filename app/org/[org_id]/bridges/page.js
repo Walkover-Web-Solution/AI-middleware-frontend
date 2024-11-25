@@ -34,8 +34,8 @@ function Home({ params }) {
   const filteredArchivedBridges = filteredBridges.filter((item) => item.status === 0);
   const filteredUnArchivedBridges = filteredBridges.filter((item) => item.status === 1 || item.status === undefined);
 
-  const onClickConfigure = (id) => {
-    router.push(`/org/${params.org_id}/bridges/configure/${id}`);
+  const onClickConfigure = (id, versionId) => {
+    router.push(`/org/${params.org_id}/bridges/configure/${id}?version=${versionId}`);
   };
 
   const handleDuplicateBridge = (bridgeId) => {
@@ -55,7 +55,7 @@ function Home({ params }) {
   const renderBridgeCard = (item) => {
     return (
       <div className="flex rounded-md border cursor-pointer hover:shadow-lg bg-base-100 p-4 relative w-full">
-        <div key={item._id} className="flex flex-col items-center w-full" onClick={() => onClickConfigure(item._id)}>
+        <div key={item._id} className="flex flex-col items-center w-full" onClick={() => onClickConfigure(item._id, item?.published_version_id || item?.versions?.[0])}>
           <div className="flex flex-col h-[200px] gap-2 w-full">
             <h1 className="flex items-center overflow-hidden gap-2 text-lg leading-5 font-semibold text-base-content mr-2">
               {getIconOfService(item.service)}
@@ -86,7 +86,7 @@ function Home({ params }) {
         <div className="dropdown bg-transparent absolute right-3 top-2">
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
           <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-            <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li>
+            {/* <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li> */}
             <li><a onClick={(e) => { e.preventDefault(); archiveBridge(item._id, item.status != undefined ? Number(!item?.status) : undefined) }}>{(item?.status === 0) ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
           </ul>
         </div>

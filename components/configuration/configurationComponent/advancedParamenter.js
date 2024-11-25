@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
-import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -8,14 +8,13 @@ import { useDispatch } from 'react-redux';
 const AdvancedParameters = ({ params }) => {
     const [isAccordionOpen, setIsAccordionOpen] = useState(false);
     const dispatch = useDispatch();
-    const { service, model, type, bridge, configuration } = useCustomSelector((state) => ({
-        service: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.service?.toLowerCase(),
-        model: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.model,
-        type: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration?.type,
-        bridge: state?.bridgeReducer?.allBridgesMap?.[params?.id],
-        configuration: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.configuration,
-
+    const { service, model, type, configuration } = useCustomSelector((state) => ({
+        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service?.toLowerCase(),
+        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
+        type: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
+        configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
     }));
+
     const { modelInfoData } = useCustomSelector((state) => ({
         modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters,
     }));
@@ -33,7 +32,8 @@ const AdvancedParameters = ({ params }) => {
             }
         };
         if ((isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue) !== configuration[key]) {
-            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { ...updatedDataToSend } }));
         }
     };
 
@@ -50,7 +50,8 @@ const AdvancedParameters = ({ params }) => {
             }
         };
         if (newValue !== configuration[key]) {
-            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
+            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { ...updatedDataToSend } }));
         }
     };
 
@@ -65,7 +66,8 @@ const AdvancedParameters = ({ params }) => {
             }
         };
         if (value !== configuration[key]) {
-            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: updatedDataToSend }));
+            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: updatedDataToSend }));
+            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: updatedDataToSend }));
         }
     };
 
@@ -158,7 +160,6 @@ const AdvancedParameters = ({ params }) => {
                                     <input
                                         name={key}
                                         type="checkbox"
-                                        key={bridge?.bridgeType}
                                         className="toggle"
                                         defaultChecked={configuration?.[key] || false}
                                         onChange={(e) => handleInputChange(e, key)}
