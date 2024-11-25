@@ -13,7 +13,7 @@ const InputConfigComponent = ({ params }) => {
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service || "",
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     }));
-    
+
     const [keyName, setKeyName] = useState('');
     const suggestionListRef = useRef(null);
     const textareaRef = useRef(null);

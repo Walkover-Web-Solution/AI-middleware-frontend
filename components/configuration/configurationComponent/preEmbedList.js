@@ -1,10 +1,10 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateApiAction } from '@/store/action/bridgeAction';
+import { getStatusClass } from '@/utils/utility';
 import { CircleAlert, Info, Trash2 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
-import { getStatusClass } from '@/utils/utility';
 
 const PreEmbedList = ({ params }) => {
     const { integrationData, bridge_pre_tools, function_data } = useCustomSelector((state) => ({

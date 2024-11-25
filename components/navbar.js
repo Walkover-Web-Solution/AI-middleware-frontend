@@ -1,6 +1,8 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction, publishBridgeVersionAction } from '@/store/action/bridgeAction';
+import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
+import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
+import { MODAL_TYPE } from '@/utils/enums';
 import { getIconOfService, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -9,8 +11,6 @@ import { toast } from 'react-toastify';
 import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import OrgSlider from './sliders/orgSlider';
-import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
-import { MODAL_TYPE } from '@/utils/enums';
 
 function Navbar() {
   const router = useRouter();

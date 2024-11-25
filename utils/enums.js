@@ -1,7 +1,7 @@
 export const PAUTH_KEY_COLUMNS = ["name", "authkey", "created_at"];
 export const API_KEY_COLUMNS = ["name", "apikey", "comment", "service"];
-export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers','alertType', 'bridges'];
-export const ALERT_TYPE = ['Error','Variable'];
+export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers', 'alertType', 'bridges'];
+export const ALERT_TYPE = ['Error', 'Variable'];
 export const DOCUMENT_SECTIONS = [
   {
     id: "model",
@@ -131,7 +131,7 @@ export const DOCUMENT_SECTIONS = [
   },
 ];
 
- export const JSONFORMATDATA = [
+export const JSONFORMATDATA = [
   {
     title: "String, Number, Boolean",
     json: `{
@@ -306,7 +306,7 @@ export const DOCUMENT_SECTIONS = [
   }
 ];
 
-export const MODAL_TYPE  =  {
+export const MODAL_TYPE = {
   CREATE_VARIABLE: 'CREATE_VARIABLE',
   CREATE_BRIDGE: 'CREATE_BRIDGE',
   CREATE_API_KEY: 'CREATE_API',

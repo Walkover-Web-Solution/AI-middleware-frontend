@@ -142,7 +142,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                 }),
                 content: Array.isArray(content) ? content.join(", ") : content.toString(),
             };
-
+            
             // Add assistant chat to messages
             setMessages(prevMessages => [...prevMessages, newChatAssist]);
         } catch (error) {

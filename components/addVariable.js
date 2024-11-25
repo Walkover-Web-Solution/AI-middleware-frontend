@@ -41,7 +41,7 @@ const AddVariable = ({ params }) => {
       setError(false);
       const updatedPairs = [...keyValuePairs, newPair];
       setKeyValuePairs(updatedPairs);
-      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId  }));
+      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
     } else {
       setError(true);
     }
@@ -105,24 +105,24 @@ const AddVariable = ({ params }) => {
       const parsedData = JSON.parse(text);
       const keyValueArray = Object.entries(parsedData)?.map(([key, value]) => {
         if (typeof value === "object" && value !== null) {
-          return `${key}: ${JSON.stringify(value)}`; 
+          return `${key}: ${JSON.stringify(value)}`;
         } else {
-          return `${key}: ${value}`; 
+          return `${key}: ${value}`;
         }
       });
       data = keyValueArray?.join("\n");
-    } catch (error) {}
+    } catch (error) { }
     const pairs = data
       .trim()
       .split("\n")
       .map((line) => {
         const separatorIndex = line.indexOf(":");
         if (separatorIndex === -1) {
-          return null; 
+          return null;
         }
         const key = line?.substring(0, separatorIndex).trim();
         const value = line?.substring(separatorIndex + 1).trim();
-  
+
         // Ensure both key and value are present
         return key && value ? { key, value, checked: true } : null;
       })
