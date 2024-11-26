@@ -53,8 +53,10 @@ function Page() {
   }, []);
 
   const filteredOrganizations = Object.values(organizations).filter(
-    item => item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    (item) => 
+      item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) || 
+      item?.id?.toString()?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+  )
   const renderedOrganizations = useMemo(() => (
     filteredOrganizations.slice().reverse().map((org, index) => (
       <div
