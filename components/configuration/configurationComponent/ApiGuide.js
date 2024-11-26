@@ -7,7 +7,7 @@ const ComplitionApi = (bridgeId) => {
   --header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
   --header 'Content-Type: application/json' \\
   --data '{
-    "user": "YOUR_USER_PROMPT",
+    "user": "YOUR_USER_QUESTION",
     "bridge_id": "${bridgeId}",
     "response_type": "text", // optional
     "variables": {
