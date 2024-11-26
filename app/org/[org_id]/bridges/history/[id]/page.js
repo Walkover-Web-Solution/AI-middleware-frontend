@@ -5,7 +5,7 @@ import ThreadItem from "@/components/historyPageComponents/threadItem";
 import Protected from "@/components/protected";
 import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getHistoryAction, getThread } from "@/store/action/historyAction";
+import { getHistoryAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
 import { CircleChevronDown } from "lucide-react"; // Corrected import
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -44,6 +44,7 @@ function Page({ searchParams }) {
   const previousScrollHeightRef = useRef(0);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [flexDirection, setFlexDirection] = useState("column"); 
+  const [filterOption, setFilterOption] = useState("all");
 
   const closeSliderOnEsc = (event) => {
     if (event.key === "Escape") {
@@ -84,14 +85,16 @@ function Page({ searchParams }) {
     const startDate = search.get("start");
     const endDate = search.get("end");
     setThreadPage(1);
+    setFilterOption("all");
     if (thread_id) {
       setSelectedThread(thread_id);
-      dispatch(getThread(thread_id, params?.id, 1));
-    } else if (historyData?.length > 0) {
+      dispatch(getThread(thread_id, params?.id, 1, "all"));
+    } else if (historyData?.length > 0 && !thread_id) {
       const firstThreadId = historyData[0]?.thread_id;
       setSelectedThread(firstThreadId);
-      dispatch(getThread(firstThreadId, params?.id,1));
+      dispatch(getThread(firstThreadId, params?.id, 1, "all"));
     }
+      dispatch(userFeedbackCountAction({bridge_id:params.id,user_feedback: filterOption,startDate,endDate}));
       setLoading(false);
       let url = `${pathName}?version=${params.version}&thread_id=${selectedThread}`;
       if (startDate && endDate) {
@@ -161,14 +164,14 @@ function Page({ searchParams }) {
     const nextPage = threadPage + 1;
     setThreadPage(nextPage);
     
-    const result = await dispatch(getThread(selectedThread, params.id, nextPage));
+    const result = await dispatch(getThread(selectedThread, params.id, nextPage, filterOption));
     
     if (!result || result.length < 40) {
       setHasMoreThreadData(false);
     }
     
     setIsFetchingMore(false);
-  }, [isFetchingMore, threadPage, selectedThread,hasMoreThreadData]);
+  }, [isFetchingMore, threadPage, selectedThread]);
 
   // Adjust scroll position when thread updates
   useLayoutEffect(() => {
@@ -231,9 +234,9 @@ function Page({ searchParams }) {
   // Auto-scroll to bottom when new messages arrive and user is at bottom
   useEffect(() => {
     if (!showScrollToBottom) {
-      scrollToBottom()
+      scrollToBottom();
     }
-  }, [thread, showScrollToBottom, scrollToBottom]);
+  }, [thread, showScrollToBottom, scrollToBottom,filterOption]);
 
   return (
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
@@ -258,7 +261,7 @@ function Page({ searchParams }) {
                 hasMore={hasMoreThreadData}
                 loader={<p></p>}
                 scrollThreshold="250px" // Fetch data when 20% of the scrollable area remains
-                inverse={flexDirection === "column-reverse"} // Inverse only when flexDirection is column-reverse
+                inverse
                 scrollableTarget="scrollableDiv"
               >
                 <div
@@ -293,7 +296,7 @@ function Page({ searchParams }) {
             )}
           </div>
         </div>
-        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} />
+        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} filterOption={filterOption} setFilterOption={setFilterOption} setThreadPage={setThreadPage}/>
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>
