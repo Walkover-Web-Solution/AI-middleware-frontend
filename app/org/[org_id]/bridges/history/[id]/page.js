@@ -164,14 +164,14 @@ function Page({ searchParams }) {
     const nextPage = threadPage + 1;
     setThreadPage(nextPage);
     
-    const result = await dispatch(getThread(selectedThread, params.id, nextPage, filterOption));
+    const result = await dispatch(getThread(selectedThread, params?.id, nextPage, filterOption));
     
     if (!result || result.length < 40) {
       setHasMoreThreadData(false);
     }
     
     setIsFetchingMore(false);
-  }, [isFetchingMore, threadPage, selectedThread]);
+  }, [isFetchingMore, threadPage, selectedThread,filterOption]);
 
   // Adjust scroll position when thread updates
   useLayoutEffect(() => {

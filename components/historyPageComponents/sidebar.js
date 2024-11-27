@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 import { useCustomSelector } from "@/customHooks/customSelector.js";
-import { useSearchParams } from "next/navigation.js";
+
 
 const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setThreadPage, filterOption, setFilterOption}) => {
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
@@ -14,7 +14,6 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const searchRef = useRef();
-  const search = useSearchParams();
   const { userFeedbackCount } = useCustomSelector((state) => ({
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
   }));
@@ -57,13 +56,11 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     }
   }
 
-  const handleFilterChange = (user_feedback) => {
-    const startDate = search.get("start");
-    const endDate = search.get("end");
+  const handleFilterChange = async (user_feedback) => {
     setFilterOption(user_feedback);
     setThreadPage(1);
-    dispatch(getThread(selectedThread, params.id, 1, user_feedback))
-    dispatch(userFeedbackCountAction({bridge_id:params.id,user_feedback}));
+    await dispatch(userFeedbackCountAction({bridge_id:params?.id,user_feedback}));
+    await dispatch(getThread(selectedThread, params?.id, 1, user_feedback)); 
   };
 
   return (
