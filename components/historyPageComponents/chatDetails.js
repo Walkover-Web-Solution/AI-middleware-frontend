@@ -46,7 +46,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
   return (
     <div
       ref={sidebarRef}
-      className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
+      className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/3 opacity-100" : "w-0"
         } overflow-y-auto bg-base-200 transition-all duration-200 z-50`}
     >
       {selectedItem && (
@@ -60,31 +60,33 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
                 <CircleX size={18} />
               </button>
             </div>
-            <ul className="mt-4 space-y-2">
-              {Object.entries(selectedItem).map(([key, value]) => (
-                <li key={key} className="overflow-hidden relative">
-                  <strong className="font-medium text-gray-700 capitalize">{key}:</strong>
-                  <span className="ml-2 text-gray-600">
-                    {typeof value === "object" ? (
-                      <div className="relative">
-                      <pre className="bg-gray-200 p-2 rounded text-sm overflow-auto flex items-start justify-start">{JSON.stringify(value, null, 2)}</pre>
-                        {key=== "variables" && (
-                          <div
-                            className="absolute top-2 right-2 tooltip tooltip-primary tooltip-left bg-gray-200 p-1 rounded cursor-pointer"
-                            onClick={() => copyToClipboard(value)}
-                            data-tip="Copy variables"
-                          >
-                            <Copy size={20} />
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      value?.toString()
-                    )}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <table className="mt-4 w-full">
+              <tbody>
+                {Object.entries(selectedItem).map(([key, value]) => (
+                  <tr key={key} className="border-b">
+                    <td className="text-sm capitalize p-2 font-medium">{key}:</td>
+                    <td className="text-gray-600 p-2">
+                      {typeof value === "object" ? (
+                        <div className="relative">
+                          <pre className="bg-gray-200 p-2 rounded text-sm overflow-auto">{JSON.stringify(value, null, 2)}</pre>
+                          {key === "variables" && (
+                            <div
+                              className="absolute top-1 right-2 tooltip tooltip-primary tooltip-left bg-gray-200 p-1 rounded cursor-pointer"
+                              onClick={() => copyToClipboard(value)}
+                              data-tip="Copy variables"
+                            >
+                              <Copy size={20} />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        value?.toString()
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </aside>
       )}
