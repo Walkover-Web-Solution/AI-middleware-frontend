@@ -7,9 +7,9 @@ const ComplitionApi = (bridgeId) => {
   --header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
   --header 'Content-Type: application/json' \\
   --data '{
-    "user": YOUR_USER_QUESTION,
+    "user": "YOUR_USER_QUESTION",
     "bridge_id": "${bridgeId}",
-    "is_text": false, // optional
+    "response_type": "text", // optional
     "variables": {
       // ...VARIABLES_USED_IN_BRIDGE
     }
@@ -63,7 +63,7 @@ const ApiGuide = ({ params }) => {
             </code>
           </pre>
         </div>
-        <p className=" text-sm"><strong>Note:</strong> The 'is_text' key is a boolean. If <strong>false</strong> or undefined, the output will be in JSON format. If <strong>true</strong>, the output will be in text format.
+        <p className=" text-sm"><strong>Note:</strong> The 'response_type' key determines output format. If the value is <strong>json_object</strong> (or undefined), the output will be in JSON format. If <strong>text</strong>, the output will be in text format.
         </p>
       </div>
       <div className="flex flex-col gap-4 bg-white rounded-lg shadow-lg p-4">
