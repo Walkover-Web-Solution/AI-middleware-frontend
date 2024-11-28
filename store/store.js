@@ -30,7 +30,7 @@ const createNoopStorage = () => {
 
 const storage = typeof window !== "undefined" ? createWebStorage("local") : createNoopStorage();
 
-const persistConfig = { key: 'root', storage };
+const persistConfig = { key: 'root', storage, version: 1 };
 
 const rootReducer = combineReducers({
     bridgeReducer,
