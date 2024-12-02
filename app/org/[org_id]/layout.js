@@ -4,7 +4,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, getAllBridgesAction, getAllFunctions, integrationAction } from "@/store/action/bridgeAction";
-import { getAllChatBotAction } from "@/store/action/chatBotAction";
+// import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
@@ -31,30 +31,30 @@ export default function layoutOrgPage({ children, params }) {
     }
   }, [dispatch, params?.org_id]);
 
-  const scriptId = "chatbot-main-script";
-  const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
+  // const scriptId = "chatbot-main-script";
+  // const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
 
-  useEffect(() => {
-    if (chatbot_token && !document.getElementById(scriptId)) {
-      const script = document.createElement("script");
-      script.setAttribute("embedToken", chatbot_token);
-      script.setAttribute("hideIcon", true);
-      script.id = scriptId;
-      // script.src = scriptSrc;
-      document.head.appendChild(script);
-      script.src = scriptSrc
-    }
-    return () => {
-      const existingScript = document.getElementById(scriptId);
-      if (existingScript) {
-        document.head.removeChild(existingScript);
-      }
-    };
-  }, [chatbot_token]);
+  // useEffect(() => {
+  //   if (chatbot_token && !document.getElementById(scriptId)) {
+  //     const script = document.createElement("script");
+  //     script.setAttribute("embedToken", chatbot_token);
+  //     script.setAttribute("hideIcon", true);
+  //     script.id = scriptId;
+  //     // script.src = scriptSrc;
+  //     document.head.appendChild(script);
+  //     script.src = scriptSrc
+  //   }
+  //   return () => {
+  //     const existingScript = document.getElementById(scriptId);
+  //     if (existingScript) {
+  //       document.head.removeChild(existingScript);
+  //     }
+  //   };
+  // }, [chatbot_token]);
 
-  useEffect(() => {
-    dispatch(getAllChatBotAction(params.org_id))
-  }, []);
+  // useEffect(() => {
+  //   dispatch(getAllChatBotAction(params.org_id))
+  // }, []);
 
   // useEffect(() => {
   //   if (embedToken) {
