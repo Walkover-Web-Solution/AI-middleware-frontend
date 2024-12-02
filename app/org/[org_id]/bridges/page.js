@@ -165,4 +165,4 @@ function Home({ params }) {
     </div>
   );
 }
-export default Protected(Home);
+export default Home;
