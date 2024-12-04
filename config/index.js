@@ -132,9 +132,13 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   }
 }
 
-export const getSingleThreadData = async (threadId, bridgeId, nextPage, pagelimit = 40) => {
+export const getSingleThreadData = async (threadId, bridgeId, nextPage,user_feedback, pagelimit = 40) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?pageNo=${nextPage}&limit=${pagelimit}`)
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?pageNo=${nextPage}&limit=${pagelimit}`,{
+      params:{
+        user_feedback
+      }
+    })
     return getSingleThreadData
   } catch (error) {
     console.error(error)
@@ -649,3 +653,17 @@ export const discardBridgeVersionApi = async ({ bridgeId, versionId }) => {
     return error
   }
 };
+
+export const userFeedbackCount = async ({ bridge_id, user_feedback}) => {
+  try {
+    const response = await axios.get(`${URL}/api/v1/config/userfeedbackcount/${bridge_id}`, {
+      params: {
+        user_feedback
+      }
+    });
+    return response
+  } catch (error) {
+    console.error(error);
+    return error
+  }
+}
