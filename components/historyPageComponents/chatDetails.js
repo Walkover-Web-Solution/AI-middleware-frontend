@@ -1,3 +1,4 @@
+'use client';
 import { CircleX, Copy } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useCloseSliderOnEsc } from "./assistFile";

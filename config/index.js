@@ -132,9 +132,9 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   }
 }
 
-export const getSingleThreadData = async (threadId, bridgeId) => {
+export const getSingleThreadData = async (threadId, bridgeId, nextPage, pagelimit = 40) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}`)
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?pageNo=${nextPage}&limit=${pagelimit}`)
     return getSingleThreadData
   } catch (error) {
     console.error(error)
