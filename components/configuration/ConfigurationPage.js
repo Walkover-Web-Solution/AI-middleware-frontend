@@ -65,15 +65,15 @@ export default function ConfigurationPage({ params }) {
                 currentView === 'setup' ?
                     <>
                         {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
-                        {(modelType == 'chat' || modelType == 'fine-tune') && <PreEmbedList params={params} />}
-                        {(modelType == 'chat' || modelType == 'fine-tune') && <InputConfigComponent params={params} />}
+                        <PreEmbedList params={params} />
+                        <InputConfigComponent params={params} />
                         {(modelType == 'chat' || modelType == 'fine-tune') && <EmbedList params={params} />}
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
                         {bridgeType === 'chatbot' && <RichTextToggle params={params} />}
                         <AdvancedParameters params={params} />
-                        {(modelType == 'chat' || modelType == 'fine-tune') && <AddVariable params={params} />}
+                        <AddVariable params={params} />
                         {bridgeType === "chatbot" && is_rich_text && <UserRefernceForRichText params={params} />}
                         <ActionList params={params} />
                         {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
