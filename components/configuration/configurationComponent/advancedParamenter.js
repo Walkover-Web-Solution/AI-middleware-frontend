@@ -4,9 +4,11 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
 
 const AdvancedParameters = ({ params }) => {
     const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+    const [objectFieldValue, setObjectFieldValue] = useState();
     const dispatch = useDispatch();
     const { service, model, type, configuration } = useCustomSelector((state) => ({
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service?.toLowerCase(),
@@ -39,8 +41,10 @@ const AdvancedParameters = ({ params }) => {
 
     const handleSelectChange = (e, key) => {
         let newValue;
+        let is_json = false
         try {
             newValue = JSON.parse(e.target.value);
+            is_json =true
         } catch (error) {
             newValue = e.target.value;
         }
@@ -49,8 +53,27 @@ const AdvancedParameters = ({ params }) => {
                 [key]: newValue,
             }
         };
+        if(key=== 'json_schema'){
+            if(!is_json) return toast.error('Json schema is not parsable JSON');
+            updatedDataToSend = {
+                configuration: {
+                    "response_type":{
+                        "type":'json_schema',
+                    [key]: newValue
+                    }
+                }
+            }
+        }
+        if(key=== 'response_type'){
+            updatedDataToSend = {
+                configuration: {
+                    "response_type":{
+                        "type":newValue,
+                    }
+                }
+            }
+        }
         if (newValue !== configuration[key]) {
-            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
             dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { ...updatedDataToSend } }));
         }
     };
@@ -66,7 +89,6 @@ const AdvancedParameters = ({ params }) => {
             }
         };
         if (value !== configuration[key]) {
-            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: updatedDataToSend }));
             dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: updatedDataToSend }));
         }
     };
@@ -83,6 +105,7 @@ const AdvancedParameters = ({ params }) => {
             </div>
 
             {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
+
                 {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
                     if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
                     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
@@ -167,13 +190,21 @@ const AdvancedParameters = ({ params }) => {
                                 </label>
                             )}
                             {field === 'select' && (
-                                <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
-                                    <select value={JSON.stringify(configuration?.[key])} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
+                                <label className='items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+                                    <select value={configuration?.[key]?.type} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
                                         <option disabled>Select response mode</option>
                                         {options?.map((service, index) => (
-                                            <option key={index} value={JSON.stringify(service)}>{service?.type}</option>
+                                            <option key={index} value={service?.type}>{service?.type}</option>
                                         ))}
                                     </select>
+                                    {configuration?.[key]?.type === 'json_schema' && <textarea
+                                        type="input"
+                                        value={objectFieldValue || JSON.stringify(configuration?.[key]?.json_schema, undefined, 4)}
+                                        className='mt-5 textarea textarea-bordered border w-full min-h-96 resize-y z-[1]'
+                                        onChange={(e)=>{setObjectFieldValue(e.target.value)}}
+                                        onBlur={(e) => handleSelectChange(e, 'json_schema')}
+                                        placeholder="Enter valid JSON object here..."
+                                    />}
                                 </label>
                             )}
                         </div>

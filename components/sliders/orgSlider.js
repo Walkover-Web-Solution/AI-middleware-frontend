@@ -17,8 +17,10 @@ function OrgSlider() {
     const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
 
     const filteredOrganizations = Object.values(organizations).filter(
-        (item) => item.name.toLowerCase()?.includes(searchQuery.toLowerCase())
-    );
+        (item) => 
+          item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) || 
+          item?.id?.toString()?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+     )
 
     const handleOpenCreateOrgModal = useCallback(() => {
         setShowCreateOrgModal(true);

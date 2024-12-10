@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 
-const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params }) => {
+const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setPage, setHasMore}) => {
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,15 +28,25 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     handleSearch(e);
   }, 500);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    dispatch(getHistoryAction(params.id, null, null, 1, searchRef.current.value || ""));
+    setPage(1);
+    setHasMore(true);
+    const result = await dispatch(getHistoryAction(params.id, null, null, 1, searchRef.current.value || ""));
+    if (result?.length < 40) {
+      setHasMore(false);
+    }
   }
 
-  const clearInput = () => {
+  const clearInput = async () => {
     setSearchQuery('');
     searchRef.current.value = '';
-    dispatch(getHistoryAction(params.id, null, null, 1, ""));
+    setPage(1);
+    setHasMore(true);
+    const result = await dispatch(getHistoryAction(params.id, null, null, 1, searchRef.current.value || ""));
+    if (result?.length < 40) {
+      setHasMore(false);
+    }
   }
 
   const handleDownload = async () => {
@@ -69,7 +79,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
             type="text"
             ref={searchRef}
             placeholder="Search..."
-            // value={searchQuery}
+            //  value={searchQuery}
             onChange={handleChange}
             className="border border-gray-300 rounded p-2 w-full pr-10"
           />
@@ -97,7 +107,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
           {/* Loading... */}
         </div>
       ) : (
-        <InfiniteScroll dataLength={historyData.length} next={fetchMoreData} hasMore={hasMore} loader={<h4></h4>} scrollableTarget="sidebar">
+        <InfiniteScroll dataLength={historyData.length} next={fetchMoreData} hasMore={!searchQuery && hasMore} loader={<h4></h4>} scrollableTarget="sidebar" >
           <div className="slider-container w-[fixed-width] overflow-x-auto mb-16">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData.map((item) => (
