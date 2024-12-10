@@ -83,22 +83,20 @@ function Page({ searchParams }) {
     const thread_id = search.get("thread_id");
     const startDate = search.get("start");
     const endDate = search.get("end");
+    const threadId = thread_id !== null && thread_id ? thread_id : historyData[0]?.thread_id;
+    if(thread_id){
+    setSelectedThread(threadId);
+    dispatch(getThread(threadId, params?.id, 1));
+    setLoading(false);
     setThreadPage(1);
-    if (thread_id) {
-      setSelectedThread(thread_id);
-      dispatch(getThread(thread_id, params?.id, 1));
-    } else if (historyData?.length > 0) {
-      const firstThreadId = historyData[0]?.thread_id;
-      setSelectedThread(firstThreadId);
-      dispatch(getThread(firstThreadId, params?.id,1));
+  }
+
+    let url = `${pathName}?version=${params.version}&thread_id=${threadId}`;
+    if (startDate && endDate) {
+      url += `&start=${startDate}&end=${endDate}`;
     }
-      setLoading(false);
-      let url = `${pathName}?version=${params.version}&thread_id=${selectedThread}`;
-      if (startDate && endDate) {
-        url += `&start=${startDate}&end=${endDate}`;
-      }
-      router.push(url, undefined, { shallow: true });
-    
+    router.push(url, undefined, { shallow: true });
+
   }, [search, historyData, params.id, pathName]);
 
   const threadHandler = useCallback(
@@ -122,7 +120,7 @@ function Page({ searchParams }) {
     [params.id, pathName]
   );
 
-  const fetchMoreData = async () => {
+  const fetchMoreData = useCallback(async () => {
     const nextPage = page + 1;
     setPage(nextPage);
     const startDate = search.get("start");
@@ -131,7 +129,7 @@ function Page({ searchParams }) {
     if (result?.length < 40) {
       setHasMore(false);
     }
-  };
+  }, [page, search, dispatch, params.id,historyData]);
 
   const formatDateAndTime = (created_at) => {
     const date = new Date(created_at);
@@ -293,7 +291,7 @@ function Page({ searchParams }) {
             )}
           </div>
         </div>
-        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} />
+        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setPage={setPage} setHasMore={setHasMore}/>
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>
