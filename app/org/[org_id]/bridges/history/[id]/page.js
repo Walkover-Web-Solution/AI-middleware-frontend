@@ -29,7 +29,7 @@ function Page({ searchParams }) {
 
   const { historyData, thread, integrationData } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
-    thread: state?.historyReducer?.thread?.conversations,
+    thread: state?.historyReducer?.thread || [],
     integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
   }));
 
