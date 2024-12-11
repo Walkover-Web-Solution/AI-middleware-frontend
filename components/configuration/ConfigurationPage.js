@@ -16,19 +16,18 @@ import InputConfigComponent from "./configurationComponent/inputConfigComponent"
 import ModelDropdown from "./configurationComponent/modelDropdown";
 import PreEmbedList from "./configurationComponent/preEmbedList";
 import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
-import RichTextToggle from "./configurationComponent/richTextToggle";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
+import GptMemory from "./configurationComponent/gptmemory";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const view = searchParams.get('view');
     const [currentView, setCurrentView] = useState(view || 'setup')
-    const { bridgeType, is_rich_text, modelType } = useCustomSelector((state) => ({
+    const { bridgeType, modelType } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
-        is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.is_rich_text || false,
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
     }));
 
@@ -49,14 +48,13 @@ export default function ConfigurationPage({ params }) {
                             onClick={() => handleNavigation('setup')}
                             className={` ${currentView === 'setup' ? "btn-primary" : ""} btn join-item `}
                         >
-                            { }
-                            <Cog size={16} />Setup
+                            <Cog size={16} /> Setup
                         </button>
                         <button
                             onClick={() => handleNavigation('guide')}
                             className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
                         >
-                            <Bot size={16} />Guide
+                            <Bot size={16} /> Guide
                         </button>
                     </div>
                 </div>
@@ -71,10 +69,10 @@ export default function ConfigurationPage({ params }) {
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
-                        {bridgeType === 'chatbot' && <RichTextToggle params={params} />}
                         <AdvancedParameters params={params} />
                         <AddVariable params={params} />
-                        {bridgeType === "chatbot" && is_rich_text && <UserRefernceForRichText params={params} />}
+                        <GptMemory params={params} />
+                        {bridgeType === "chatbot" && <UserRefernceForRichText params={params} />}
                         <ActionList params={params} />
                         {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
                     </>
