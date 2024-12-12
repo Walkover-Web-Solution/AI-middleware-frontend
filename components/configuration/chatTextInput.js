@@ -163,7 +163,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
 
     return (
         <div className="input-group flex gap-2 w-full">
-            {(modelType !== "completion") && (modelType !== "embedding") && (
+            {(modelType !== "completion") && (modelType !== "embedding") && (modelType !== 'image')&& (
                 <input
                     ref={inputRef}
                     type="text"
@@ -178,7 +178,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             <button
                 className="btn"
                 onClick={handleSendMessage}
-                disabled={loading}
+                disabled={loading || ((modelType === 'image'))}
             >
                 {loading ? (
                     <span className="loading loading-dots loading-lg"></span>
