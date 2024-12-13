@@ -1,18 +1,22 @@
-import { getHistoryAction } from "@/store/action/historyAction.js";
-import { Download } from "lucide-react";
+import { getHistoryAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction.js";
+import { Download, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 import { toast } from "react-toastify";
+import { useCustomSelector } from "@/customHooks/customSelector.js";
 
-const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore}) => {
+const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, setThreadPage, filterOption, setFilterOption }) => {
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const searchRef = useRef();
+  const { userFeedbackCount } = useCustomSelector((state) => ({
+    userFeedbackCount: state?.historyReducer?.userFeedbackCount,
+  }));
 
   const debounce = (func, delay) => {
     let timeoutId;
@@ -44,7 +48,10 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     searchRef.current.value = '';
     setPage(1);
     setHasMore(true);
+    setThreadPage(1);
+    setFilterOption('all')
     const result = await dispatch(getHistoryAction(params.id, null, null, 1, searchRef.current.value || ""));
+    await dispatch(getThread(selectedThread, params?.id, 1, "all"));
     if (result?.length < 40) {
       setHasMore(false);
     }
@@ -75,10 +82,59 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     toast.error("message id null or not found")
   } 
 
+  const handleFilterChange = async (user_feedback) => {
+    setFilterOption(user_feedback);
+    setThreadPage(1);
+    dispatch(getThread(selectedThread, params?.id, 1, user_feedback));
+    dispatch(getHistoryAction(params.id, null, null, 1, null, user_feedback));
+    dispatch(userFeedbackCountAction({ bridge_id: params?.id, user_feedback }));
+  };
+
   return (
     <div className="drawer-side justify-items-stretch bg-base-200 border-r relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
       <div className="p-4 gap-3 flex flex-col">
+        <div className="p-2 bg-base-300 rounded-md text-center">
+          <p className="text-center m-2 font-semibold">Filter Response</p>
+          <div className="flex items-center justify-center mb-2 gap-4">
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="filterOption"
+                value="all"
+                checked={filterOption === 'all'}
+                onChange={() => handleFilterChange('all')}
+                className="radio radio-primary"
+              />
+              <span>All</span>
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="filterOption"
+                value="1"
+                checked={filterOption === '1'}
+                onChange={() => handleFilterChange('1')}
+                className="radio radio-success"
+              />
+              <ThumbsUp size={16} />
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="filterOption"
+                value="2"
+                checked={filterOption === '2'}
+                onChange={() => handleFilterChange('2')}
+                className="radio radio-error"
+              />
+              <ThumbsDown size={16} />
+            </label>
+          </div>
+          <p className={`text-xs text-base-content`}>
+            {`The ${filterOption === 'all' ? 'All' : filterOption === '1' ? 'Good' : 'Bad'} User feedback for the bridge is ${userFeedbackCount}`}
+          </p>
+        </div>
         <div className="collapse collapse-arrow join-item border border-base-300">
           <input type="checkbox" className="peer" />
           <div className="collapse-title text-md font-medium peer-checked:bg-base-300 peer-checked:text-base-content">

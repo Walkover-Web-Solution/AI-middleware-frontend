@@ -5,7 +5,7 @@ import ThreadItem from "@/components/historyPageComponents/threadItem";
 import Protected from "@/components/protected";
 import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getHistoryAction, getThread } from "@/store/action/historyAction";
+import { getHistoryAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
 import { CircleChevronDown } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -45,13 +45,17 @@ function Page({ searchParams }) {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [flexDirection, setFlexDirection] = useState("column");
   const [searchMessageId, setSearchMessageId] = useState(null);
-  
+  const [filterOption, setFilterOption] = useState();
 
   const closeSliderOnEsc = (event) => {
     if (event.key === "Escape") {
       setIsSliderOpen(false);
     }
   };
+
+  useEffect(()=>{
+    setFilterOption("all");
+  },[])
 
   const handleClickOutside = (event) => {
     if (sidebarRef?.current && !sidebarRef.current.contains(event.target)) {
@@ -74,7 +78,7 @@ function Page({ searchParams }) {
       setLoading(true);
       const startDate = search.get("start");
       const endDate = search.get("end");
-      await dispatch(getHistoryAction(params?.id, startDate, endDate, 1));
+      await dispatch(getHistoryAction(params?.id, startDate, endDate, 1,null,filterOption));
       dispatch(clearThreadData());
       setLoading(false);
     };
@@ -88,10 +92,11 @@ function Page({ searchParams }) {
     const threadId = thread_id !== null && thread_id ? thread_id : historyData[0]?.thread_id;
     if(thread_id){
     setSelectedThread(threadId);
-    dispatch(getThread(threadId, params?.id, 1));
+    dispatch(getThread(threadId, params?.id, 1, filterOption));
     setLoading(false);
     setThreadPage(1);
-  }
+    dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback:filterOption, startDate, endDate }));
+    }
 
     let url = `${pathName}?version=${params.version}&thread_id=${threadId}`;
     if (startDate && endDate) {
@@ -99,7 +104,7 @@ function Page({ searchParams }) {
     }
     router.push(url, undefined, { shallow: true });
 
-  }, [search, historyData, params.id, pathName]);
+  }, [search, params.id, pathName]);
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
@@ -158,14 +163,14 @@ function Page({ searchParams }) {
     previousScrollHeightRef.current = currentScrollHeight;
   
     const nextPage = threadPage + 1;
-    const result = await dispatch(getThread(selectedThread, params.id, nextPage));
+    const result = await dispatch(getThread(selectedThread, params?.id, nextPage, filterOption));
     setThreadPage(nextPage);
     if (!result || result.length < 40) {
       setHasMoreThreadData(false);
     }
     
     setIsFetchingMore(false);
-  }, [isFetchingMore, threadPage, selectedThread,hasMoreThreadData]);
+  }, [isFetchingMore,hasMoreThreadData,thread]);
 
   // Adjust scroll position when thread updates
   useLayoutEffect(() => {
@@ -180,7 +185,7 @@ function Page({ searchParams }) {
     if (historyRef.current && threadPage === 1) {
       historyRef.current.scrollTop = historyRef.current.scrollHeight;
     }
-  }, [thread,threadPage]);
+  }, [threadPage]);
 
   useEffect(() => {
     if (historyRef?.current && contentRef?.current) {
@@ -293,7 +298,7 @@ function Page({ searchParams }) {
                 hasMore={hasMoreThreadData}
                 loader={<p></p>}
                 scrollThreshold="250px"
-                inverse={flexDirection === "column-reverse"}
+                inverse
                 scrollableTarget="scrollableDiv"
               >
                 <div
@@ -330,7 +335,7 @@ function Page({ searchParams }) {
             )}
           </div>
         </div>
-        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params}  setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore}/>
+        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params}  setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore} filterOption={filterOption} setFilterOption={setFilterOption} setThreadPage={setThreadPage}/>
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>
