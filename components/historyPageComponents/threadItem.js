@@ -6,8 +6,7 @@ import { useDispatch } from "react-redux";
 import CodeBlock from "../codeBlock/codeBlock";
 import ToolsDataModal from "./toolsDataModal";
 
-
-const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params,threadRefs, searchMessageId, setSearchMessageId }) => {
+const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId }) => {
   const dispatch = useDispatch();
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]); // Track the selected tool call data
@@ -20,11 +19,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   useEffect(() => {
     setMessageType(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   }, [item]);
-
-
-  const handleToggle = () => {
-    setShowNormalMessage((prevState) => !prevState);
-  };
 
   const handleEdit = () => {
     setModalInput(item.updated_message || item.content);
@@ -68,7 +62,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     if (messageType === 0) return item.chatbot_message;
     if (messageType === 1) return item.content;
     if (messageType === 2) return item.updated_message;
-
   };
 
   const selectMessageType = (type) => {
@@ -105,6 +98,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       toolsDataModalRef.current.close();
     }
   };
+
   // Truncate function
   function truncate(string = "", maxLength) {
     if (string.length > maxLength) {
@@ -112,21 +106,22 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     }
     return string;
   }
+
   const messageId = item.message_id;
   useEffect(() => {
     if (messageId && !threadRefs.current[messageId]) {
       threadRefs.current[messageId] = document.getElementById(`message-${messageId}`);
     }
-  const messageElement = document.getElementById(`message-${searchMessageId}`);
+    const messageElement = document.getElementById(`message-${searchMessageId}`);
 
-  if (messageElement && searchMessageId) {
-    messageElement.classList.add('bg-base-300', 'rounded-md'); 
-    setTimeout(() => {
-      messageElement.classList.remove('bg-base-300', 'rounded-md');
-    }, 2000);
-    setSearchMessageId(null)
-  }
-  }, [messageId,searchMessageId]);
+    if (messageElement && searchMessageId) {
+      messageElement.classList.add('bg-base-300', 'rounded-md');
+      setTimeout(() => {
+        messageElement.classList.remove('bg-base-300', 'rounded-md');
+      }, 2000);
+      setSearchMessageId(null);
+    }
+  }, [messageId, searchMessageId]);
 
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
@@ -212,7 +207,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                   >
                     <ul className="flex justify-center flex-col items-center gap-2">
                       {item.chatbot_message && (
-                        <li className={`${item.chatbot_message ? "" : "hidden"}`}>
+                        <li>
                           <button
                             className={`px-2 py-1 ${messageType === 0 ? "bg-primary text-white rounded-md" : ""
                               }`}
@@ -230,7 +225,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                             }`}
                           onClick={() => selectMessageType(1)}
                         >
-                          <div className="tooltip tooltip-left" data-tip="Normal Reponse">
+                          <div className="tooltip tooltip-left" data-tip="Normal Response">
                             <MessageCircleCode className="" size={16} />
                           </div>
                         </button>
@@ -257,6 +252,13 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               {messageType === 2 ? <p className="text-xs opacity-50">Edited</p> : ""}
             </div>
             <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
+              {item?.image_url && (
+                <div className="chat chat-end">
+                  <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
+                    <img src={item.image_url} alt="Attached" className="max-w-full max-h-96 w-auto h-auto rounded-md" loading="lazy"/>
+                  </div>
+                </div>
+              )}
               <ReactMarkdown components={{
                 code: ({ node, inline, className, children, ...props }) => (
                   <CodeBlock
@@ -268,9 +270,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                   </CodeBlock>
                 )
               }}>
-                {getMessageToDisplay()}
+                {!item.image_url && getMessageToDisplay()}
               </ReactMarkdown>
-              {item?.role === 'assistant' && (
+              {!item.image_url && item?.role === 'assistant' && (
                 <div className="tooltip absolute top-2  right-2 text-sm cursor-pointer" data-tip="Edit response">
                   <Pencil
                     size={16}
@@ -281,12 +283,12 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             </div>
             {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
-          {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div class="flex justify-center items-center my-4">
-            <p class="border-t border-base-300 w-full"></p>
-            <p class="bg-error text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+          {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div className="flex justify-center items-center my-4">
+            <p className="border-t border-base-300 w-full"></p>
+            <p className="bg-error text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
               History cleared
             </p>
-            <p class="border-t border-base-300 w-full"></p>
+            <p className="border-t border-base-300 w-full"></p>
           </div>}
           {
             item?.error && (
@@ -302,7 +304,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             )
           }
-
         </div>
       )}
 
@@ -317,7 +318,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               <span className="label-text">Enter your input:</span>
             </label>
             <textarea
-              type="text"
               className="input input-bordered textarea min-h-[200px]"
               value={modalInput}
               onChange={(e) => setModalInput(e.target.value)}
