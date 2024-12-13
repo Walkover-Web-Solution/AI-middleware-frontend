@@ -63,18 +63,18 @@ export default function ConfigurationPage({ params }) {
                 currentView === 'setup' ?
                     <>
                         {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
-                        {(modelType == 'chat' || modelType == 'fine-tune') && <PreEmbedList params={params} />}
-                        {(modelType == 'chat' || modelType == 'fine-tune') && <InputConfigComponent params={params} />}
-                        {(modelType == 'chat' || modelType == 'fine-tune') && <EmbedList params={params} />}
+                        {(modelType === 'chat' || modelType === 'fine-tune') && modelType !== "image" && <PreEmbedList params={params} />}
+                        {(modelType === 'chat' || modelType === 'fine-tune') && modelType !== 'image' && <InputConfigComponent params={params} />}
+                        {(modelType === 'chat' || modelType === 'fine-tune') && <EmbedList params={params} />}
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
                         <AdvancedParameters params={params} />
-                        {(modelType == 'chat' || modelType == 'fine-tune') && <AddVariable params={params} />}
-                        <GptMemory params={params} />
-                        {bridgeType === "chatbot" && <UserRefernceForRichText params={params} />}
-                        <ActionList params={params} />
-                        {bridgeType === 'api' && <ResponseFormatSelector params={params} />}
+                        {(modelType === 'chat' || modelType === 'fine-tune') && modelType !== "image"  && <AddVariable params={params} />}
+                        {modelType !== 'image' && <GptMemory params={params} /> }
+                        {bridgeType === "chatbot" && modelType !== 'image' &&  <UserRefernceForRichText params={params} />}
+                        { modelType !== 'image' && <ActionList params={params} />}
+                        {bridgeType === 'api' && modelType !== 'image' && <ResponseFormatSelector params={params} />}
                     </>
                     :
                     bridgeType === 'api' ?
