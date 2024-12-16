@@ -120,8 +120,8 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   const handleFilterChange = async (user_feedback) => {
     setFilterOption(user_feedback);
     setThreadPage(1);
-    dispatch(getThread({threadId:selectedThread, bridgeId:params?.id, nextPage:1, user_feedback}));
-    dispatch(getHistoryAction(params.id, null, null, 1, null, user_feedback));
+    // dispatch(getThread({threadId:selectedThread, bridgeId:params?.id, nextPage:1, user_feedback}));
+    // dispatch(getHistoryAction(params.id, null, null, 1, null, user_feedback));
     dispatch(userFeedbackCountAction({ bridge_id: params?.id, user_feedback }));
   };
 

@@ -55,6 +55,7 @@ function Page({ searchParams }) {
 
   useEffect(()=>{
     setFilterOption("all");
+    dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: "all"}));
   },[])
 
   const handleClickOutside = (event) => {
@@ -62,7 +63,7 @@ function Page({ searchParams }) {
       setIsSliderOpen(false);
     }
   };
-
+console.log(hasMoreThreadData)
   useEffect(() => {
     document?.addEventListener("keydown", closeSliderOnEsc);
     document?.addEventListener("mousedown", handleClickOutside);
@@ -83,7 +84,7 @@ function Page({ searchParams }) {
       setLoading(false);
     };
     fetchInitialData();
-  }, [params?.id, search, dispatch]);
+  }, [params?.id, search,filterOption]);
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
@@ -114,11 +115,11 @@ function Page({ searchParams }) {
 
     if (thread_id) {
       setSelectedThread(threadId);
-      setHasMore(true); // Reset hasMore flag when changing thread
+      setHasMoreThreadData(true); // Reset hasMore flag when changing thread
       setThreadPage(1); // Reset thread page
       dispatch(getThread({threadId, bridgeId:params?.id, nextPage:1, user_feedback:filterOption}));
       setLoading(false);
-      filterOption !== "all" && dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: filterOption, startDate, endDate }));
+      filterOption === "all" && dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: filterOption, startDate, endDate }));
     }
 
     let url = `${pathName}?version=${params.version}&thread_id=${threadId}`;
@@ -127,9 +128,6 @@ function Page({ searchParams }) {
     }
     router.push(url, undefined, { shallow: true });
   }, [search, params.id, filterOption]);
-
-
-  
 
   const fetchMoreData = useCallback(async () => {
     const nextPage = page + 1;
@@ -140,7 +138,7 @@ function Page({ searchParams }) {
     if (result?.length < 40) {
       setHasMore(false);
     }
-  }, [page, search, dispatch, params.id,historyData]);
+  }, [page, search, params.id, historyData,filterOption]);
 
   const formatDateAndTime = (created_at) => {
     const date = new Date(created_at);
@@ -167,15 +165,14 @@ function Page({ searchParams }) {
     previousScrollHeightRef.current = currentScrollHeight;
   
     const nextPage = threadPage + 1;
-    const result = await dispatch(getThread({threadId:selectedThread, bridgeId:params?.id, nextPage, filterOption}));
+    const result = await dispatch(getThread({threadId:selectedThread, bridgeId:params?.id, nextPage, user_feedback:filterOption}));
     setThreadPage(nextPage);
     if (!result || result.data.length < 40) {
-      debugger
       setHasMoreThreadData(false);
     }
     
     setIsFetchingMore(false);
-  }, [isFetchingMore, threadPage, threadHandler, router]);
+  }, [isFetchingMore, threadPage, selectedThread, params.id, filterOption]);
 
   // Adjust scroll position when thread updates
   useLayoutEffect(() => {
