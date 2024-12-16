@@ -158,8 +158,19 @@ export const bridgeReducer = createSlice({
     },
     publishBrigeVersionReducer: (state, action) => {
       const { bridgeId = null, versionId = null, orgId = null } = action.payload;
-      state.allBridgesMap[bridgeId].published_version_id = versionId;
+      const publishedVersionData = state.bridgeVersionMapping[bridgeId][versionId];
+      
+      // Update the allBridgesMap with the data from the published version
+      state.allBridgesMap[bridgeId] = {
+        ...state.allBridgesMap[bridgeId],
+        ...publishedVersionData,
+        published_version_id: versionId
+      };
+
+      // Mark the version as not drafted
       state.bridgeVersionMapping[bridgeId][versionId].is_drafted = false;
+
+      // Update the orgs array with the new published version id
       state.org[orgId].orgs = state.org[orgId].orgs.map(bridge => {
         if (bridge._id === bridgeId) {
           return { ...bridge, published_version_id: versionId };
