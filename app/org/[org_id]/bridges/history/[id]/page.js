@@ -63,7 +63,6 @@ function Page({ searchParams }) {
       setIsSliderOpen(false);
     }
   };
-console.log(hasMoreThreadData)
   useEffect(() => {
     document?.addEventListener("keydown", closeSliderOnEsc);
     document?.addEventListener("mousedown", handleClickOutside);
