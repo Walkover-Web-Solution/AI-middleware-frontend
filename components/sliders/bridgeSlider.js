@@ -48,7 +48,7 @@ function BridgeSlider() {
                         </p>
                         <p className="border-t border-base-300 w-full"></p>
                     </div>}
-                    <ul className="menu p-0 w-full truncate text-base-content">
+                    <ul className={`menu p-0 w-full truncate text-base-content ${title === "Archived Bridges" ? "opacity-50" : ""}`}>
                         {bridges.slice()
                             .sort((a, b) => a.name?.localeCompare(b.name))
                             .map((item) => (
