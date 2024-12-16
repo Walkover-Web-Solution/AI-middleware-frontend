@@ -29,9 +29,11 @@ const InputConfigComponent = ({ params }) => {
     const savePrompt = useCallback((e) => {
         const newValue = e.target?.value || "";
         setShowSuggestions(false);
-        // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { prompt: newValue } } }));
-        dispatch(updateBridgeVersionAction({ versionId: params.version, dataToSend: { configuration: { prompt: newValue } } }));
-    }, [dispatch, params.id, params.version]);
+        if (newValue !== reduxPrompt) {
+            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { prompt: newValue } } }));
+            dispatch(updateBridgeVersionAction({ versionId: params.version, dataToSend: { configuration: { prompt: newValue } } }));
+        }
+    }, [dispatch, params.version, reduxPrompt]);
 
     const getCaretCoordinatesAdjusted = () => {
         if (textareaRef.current) {

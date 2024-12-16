@@ -25,8 +25,9 @@ const UserReferenceForRichText = ({ params }) => {
 
     const handleUserReferenceChange = (e) => {
         const newValue = e.target.value;
-        // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { user_reference: newValue } }));
-        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { user_reference: newValue } }));
+        if (newValue !== user_reference) {
+            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { user_reference: newValue } }));
+        }
     };
 
 
