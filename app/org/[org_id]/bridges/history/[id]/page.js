@@ -55,6 +55,7 @@ function Page({ searchParams }) {
 
   useEffect(()=>{
     setFilterOption("all");
+    dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: "all"}));
   },[])
 
   const handleClickOutside = (event) => {
@@ -62,7 +63,6 @@ function Page({ searchParams }) {
       setIsSliderOpen(false);
     }
   };
-
   useEffect(() => {
     document?.addEventListener("keydown", closeSliderOnEsc);
     document?.addEventListener("mousedown", handleClickOutside);
@@ -78,33 +78,12 @@ function Page({ searchParams }) {
       setLoading(true);
       const startDate = search.get("start");
       const endDate = search.get("end");
-      await dispatch(getHistoryAction(params?.id, startDate, endDate, 1,null,filterOption));
+      await dispatch(getHistoryAction(params?.id, startDate, endDate, 1, null, filterOption));
       dispatch(clearThreadData());
       setLoading(false);
     };
     fetchInitialData();
-  }, [params?.id]);
-
-  useEffect(() => {
-    const thread_id = search.get("thread_id");
-    const startDate = search.get("start");
-    const endDate = search.get("end");
-    const threadId = thread_id !== null && thread_id ? thread_id : historyData[0]?.thread_id;
-    if(thread_id){
-    setSelectedThread(threadId);
-    dispatch(getThread(threadId, params?.id, 1, filterOption));
-    setLoading(false);
-    setThreadPage(1);
-    dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback:filterOption, startDate, endDate }));
-    }
-
-    let url = `${pathName}?version=${params.version}&thread_id=${threadId}`;
-    if (startDate && endDate) {
-      url += `&start=${startDate}&end=${endDate}`;
-    }
-    router.push(url, undefined, { shallow: true });
-
-  }, [search, params.id, pathName]);
+  }, [params?.id, search,filterOption]);
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
@@ -127,6 +106,28 @@ function Page({ searchParams }) {
     [params.id, pathName]
   );
 
+  useEffect(() => {
+    const thread_id = search.get("thread_id");
+    const startDate = search.get("start");
+    const endDate = search.get("end");
+    const threadId = thread_id !== null && thread_id ? thread_id : historyData[0]?.thread_id;
+
+    if (thread_id) {
+      setSelectedThread(threadId);
+      setHasMoreThreadData(true); // Reset hasMore flag when changing thread
+      setThreadPage(1); // Reset thread page
+      dispatch(getThread({threadId, bridgeId:params?.id, nextPage:1, user_feedback:filterOption}));
+      setLoading(false);
+      filterOption === "all" && dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: filterOption, startDate, endDate }));
+    }
+
+    let url = `${pathName}?version=${params.version}&thread_id=${threadId}`;
+    if (startDate && endDate) {
+      url += `&start=${startDate}&end=${endDate}`;
+    }
+    router.push(url, undefined, { shallow: true });
+  }, [search, params.id, filterOption]);
+
   const fetchMoreData = useCallback(async () => {
     const nextPage = page + 1;
     setPage(nextPage);
@@ -136,7 +137,7 @@ function Page({ searchParams }) {
     if (result?.length < 40) {
       setHasMore(false);
     }
-  }, [page, search, dispatch, params.id,historyData]);
+  }, [page, search, params.id, historyData,filterOption]);
 
   const formatDateAndTime = (created_at) => {
     const date = new Date(created_at);
@@ -163,14 +164,14 @@ function Page({ searchParams }) {
     previousScrollHeightRef.current = currentScrollHeight;
   
     const nextPage = threadPage + 1;
-    const result = await dispatch(getThread(selectedThread, params?.id, nextPage, filterOption));
+    const result = await dispatch(getThread({threadId:selectedThread, bridgeId:params?.id, nextPage, user_feedback:filterOption}));
     setThreadPage(nextPage);
-    if (!result || result.length < 40) {
+    if (!result || result.data.length < 40) {
       setHasMoreThreadData(false);
     }
     
     setIsFetchingMore(false);
-  }, [isFetchingMore,hasMoreThreadData,thread]);
+  }, [isFetchingMore, threadPage, selectedThread, params.id, filterOption]);
 
   // Adjust scroll position when thread updates
   useLayoutEffect(() => {
@@ -280,7 +281,7 @@ function Page({ searchParams }) {
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center overflow-scroll justify-center">
-        <div className="w-full min-h-screen ">
+          <div className="w-full min-h-screen">
             <div
               id="scrollableDiv"
               ref={historyRef}
@@ -293,7 +294,7 @@ function Page({ searchParams }) {
               }}
             >
               <InfiniteScroll
-                dataLength={thread?.length || 0}
+                dataLength={thread?.length}
                 next={fetchMoreThreadData}
                 hasMore={hasMoreThreadData}
                 loader={<p></p>}
@@ -335,7 +336,7 @@ function Page({ searchParams }) {
             )}
           </div>
         </div>
-        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params}  setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore} filterOption={filterOption} setFilterOption={setFilterOption} setThreadPage={setThreadPage}/>
+        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore} filterOption={filterOption} setFilterOption={setFilterOption} setThreadPage={setThreadPage} />
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>
