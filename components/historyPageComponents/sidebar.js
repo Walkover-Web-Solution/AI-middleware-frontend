@@ -9,10 +9,10 @@ import { toast } from "react-toastify";
 import { useCustomSelector } from "@/customHooks/customSelector.js";
 
 
-const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, setThreadPage, filterOption, setFilterOption}) => {
+const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, setThreadPage, filterOption, setFilterOption, searchRef}) => {
 
   const {subThreads} = useCustomSelector((state) => ({
-    subThreads:state?.historyReducer.subThreads || {},
+    subThreads:state?.historyReducer.subThreads || [],
   }))
   
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
@@ -21,7 +21,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedThreads, setExpandedThreads] = useState([]); // Track expanded threads
   const dispatch = useDispatch();
-  const searchRef = useRef();
+  
   const { userFeedbackCount } = useCustomSelector((state) => ({
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
   }));
@@ -213,7 +213,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
         </div>
       ) : (
         <InfiniteScroll dataLength={historyData.length} next={fetchMoreData} hasMore={!searchQuery && hasMore} loader={<h4></h4>} scrollableTarget="sidebar" >
-          <div className="slider-container w-[fixed-width] overflow-x-auto mb-16">
+          <div className="slider-container w-auto overflow-x-auto mb-16">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData.map((item) => (
                 <div key={item.id} className="flex flex-col">
@@ -234,15 +234,15 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                   >
                     <a className="w-full h-full flex items-center justify-between">
                       <span>{item.thread_id}</span>
-                      {searchQuery.length === 0 && selectedThread === item.thread_id && (
+                      {!searchQuery && selectedThread === item?.thread_id && (
                         <div 
                           onClick={(e) => { 
-                            // e.stopPropagation();  // Prevent click event from propagating to the list item
-                            handleToggleThread(item.thread_id); 
+                            e.stopPropagation();  // Prevent click event from propagating to the list item
+                            handleToggleThread(item?.thread_id); 
                           }} 
                           className="ml-2 cursor-pointer"
                         >
-                          {  expandedThreads.includes(item.thread_id) ? (
+                          {expandedThreads?.includes(item?.thread_id) ? (
                             <ChevronUp size={16} />
                           ) : (
                             <ChevronDown size={16} />
@@ -256,13 +256,13 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                   {selectedThread === item.thread_id && expandedThreads.includes(item.thread_id) && (
                     <div className="pl-10 p-2 text-gray-600 text-sm">
                       <ul>
-                        {subThreads.length === 0 ? (
+                        {subThreads.length === 0 || !subThreads ? (
                           <li>No sub thread available</li>
                         ) : (
-                          subThreads.map((subThreadId, index) => (
+                          subThreads && subThreads?.map((subThreadId, index) => (
                             <li key={index} 
                                 className={`cursor-pointer ${selectedSubThreadId === subThreadId.display_name ? "hover:bg-base-primary hover:text-base-100" : "hover:bg-base-300 hover:text-gray-800"}  p-2 rounded-md transition-all duration-200 ${selectedSubThreadId === subThreadId.display_name ? "bg-primary text-base-100" : ""}`} 
-                                onClick={() => handleSelectSubThread(subThreadId.display_name,selectedThread)}>
+                                onClick={() => handleSelectSubThread(subThreadId.display_name, selectedThread)}>
                               {subThreadId?.display_name}
                             </li>
                           ))
