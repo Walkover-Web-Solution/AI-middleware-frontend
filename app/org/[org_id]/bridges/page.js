@@ -151,7 +151,7 @@ function Home({ params }) {
                     </p>
                     <p class="border-t border-base-300 w-full"></p>
                   </div>
-                  <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 opacity-50">
                     {filteredArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
                       renderBridgeCard(item)
                     ))}

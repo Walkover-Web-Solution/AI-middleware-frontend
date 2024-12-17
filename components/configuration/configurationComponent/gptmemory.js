@@ -17,7 +17,9 @@ const GptMemory = ({ params }) => {
 
     const handleUserReferenceChange = (e) => {
         const newValue = e.target.value;
-        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { gpt_memory_context: newValue } }));
+        if (newValue !== gpt_memory_context) {
+            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { gpt_memory_context: newValue } }));
+        }
     };
 
     return (
