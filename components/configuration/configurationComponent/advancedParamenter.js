@@ -27,7 +27,6 @@ const AdvancedParameters = ({ params }) => {
         if (e.target.type === 'number') {
             newValue = String(newValue)?.includes('.') ? parseFloat(newValue) : parseInt(newValue, 10);
         }
-
         let updatedDataToSend = {
             configuration: {
                 [key]: isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue,
