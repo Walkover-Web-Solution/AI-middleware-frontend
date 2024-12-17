@@ -26,6 +26,7 @@ function Page({ searchParams }) {
   const contentRef = useRef(null);
   const previousScrollHeightRef = useRef(0);
   const threadRefs = useRef({});
+  const searchRef = useRef();
 
   const { historyData, thread, integrationData } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
@@ -82,8 +83,8 @@ function Page({ searchParams }) {
       dispatch(clearThreadData());
       setLoading(false);
     };
-    fetchInitialData();
-  }, [params?.id, search,filterOption]);
+    !searchRef.current.value &&  fetchInitialData();
+  }, [params?.id,filterOption]);
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
@@ -137,7 +138,7 @@ function Page({ searchParams }) {
     if (result?.length < 40) {
       setHasMore(false);
     }
-  }, [page, search, params.id, historyData,filterOption]);
+  }, [page, search, params.id, historyData,filterOption, selectedThread]);
 
   const formatDateAndTime = (created_at) => {
     const date = new Date(created_at);
@@ -168,6 +169,7 @@ function Page({ searchParams }) {
     setThreadPage(nextPage);
     if (!result || result.data.length < 40) {
       setHasMoreThreadData(false);
+      setSearchMessageId(null);
     }
     
     setIsFetchingMore(false);
@@ -230,13 +232,13 @@ function Page({ searchParams }) {
   }, []);
 
   const scrollToTop = useCallback(() => {
-    if (historyRef.current) {
+    if (historyRef.current && searchMessageId) {
       historyRef.current.scrollTo({
         top: -historyRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
-  }, []);
+  }, [searchMessageId]);
 
   const scrollToSearchedMessage = async (messageId) => {
     const container = historyRef.current;
@@ -255,9 +257,9 @@ function Page({ searchParams }) {
         });
         return;
       } else {
-        scrollToTop();
+        searchMessageId && scrollToTop();
         await new Promise((resolve) => setTimeout(resolve, 100));
-        findMessageAndScroll();
+        searchMessageId && findMessageAndScroll();
       }
     };
 
@@ -268,7 +270,7 @@ function Page({ searchParams }) {
     if (searchMessageId) {
       scrollToSearchedMessage(searchMessageId);
     }
-  }, [searchMessageId, scrollToTop]);
+  }, [searchMessageId]);
   
   useEffect(() => {
     if (!showScrollToBottom) {
@@ -336,7 +338,7 @@ function Page({ searchParams }) {
             )}
           </div>
         </div>
-        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore} filterOption={filterOption} setFilterOption={setFilterOption} setThreadPage={setThreadPage} />
+        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore} filterOption={filterOption} setFilterOption={setFilterOption} setThreadPage={setThreadPage} searchRef={searchRef}/>
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>
