@@ -338,7 +338,7 @@ function Page({ searchParams }) {
             )}
           </div>
         </div>
-        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore} filterOption={filterOption} setFilterOption={setFilterOption} setThreadPage={setThreadPage} searchRef={searchRef}/>
+        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore} filterOption={filterOption} setFilterOption={setFilterOption} setThreadPage={setThreadPage} searchRef={searchRef} setIsFetchingMore={setIsFetchingMore}/>
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>

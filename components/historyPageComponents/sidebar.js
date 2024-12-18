@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import { useCustomSelector } from "@/customHooks/customSelector.js";
 
 
-const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, setThreadPage, filterOption, setFilterOption, searchRef}) => {
+const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, setThreadPage, filterOption, setFilterOption, searchRef, setIsFetchingMore}) => {
 
   const {subThreads} = useCustomSelector((state) => ({
     subThreads:state?.historyReducer.subThreads || [],
@@ -111,10 +111,15 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
       toast.error("Message ID null or not found");
   };
 
-  const handleSelectSubThread = (subThreadId,threadId) => {
+  const handleSelectSubThread = async (subThreadId, threadId) => {
     setThreadPage(1);
+    setIsFetchingMore(true);
     setSelectedSubThreadId(subThreadId); 
-    dispatch(getThread({threadId, subThreadId, bridgeId:params.id, nextPage:1})); 
+    const result = await dispatch(getThread({threadId, subThreadId, bridgeId:params.id, nextPage:1})); 
+  
+    if (result.data.length === 40) {
+      setIsFetchingMore(false);
+    }
   };
 
   const handleFilterChange = async (user_feedback) => {
