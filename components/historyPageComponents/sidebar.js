@@ -216,7 +216,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
           <div className="slider-container w-auto overflow-x-auto mb-16">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData.map((item) => (
-                <div key={item.id} className="flex flex-col">
+              <div  className={`${isThreadSelectable ? "flex" : "flex-col"}`}>
                   {isThreadSelectable && <div onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"

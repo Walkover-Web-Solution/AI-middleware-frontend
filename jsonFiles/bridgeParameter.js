@@ -28,7 +28,7 @@ export const SERVICES = ['openai', 'anthropic', 'groq'];
 export const DEFAULT_MODEL = {
     'openai': "gpt-4o",
     'google': 'gemini-pro',
-    'anthropic': "claude-3-5-sonnet-20240620",
+    'anthropic': "claude-3-5-sonnet-latest",
     'groq': "llama3-8b-8192"
 }
 
