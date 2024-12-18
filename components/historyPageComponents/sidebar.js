@@ -118,7 +118,6 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     const result = await dispatch(getThread({threadId, subThreadId, bridgeId:params.id, nextPage:1})); 
   
     if (result.data.length === 40) {
-      debugger
       setIsFetchingMore(false);
     }
   };
