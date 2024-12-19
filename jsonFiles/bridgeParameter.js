@@ -16,7 +16,9 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
     seed: { name: 'Seed', description: 'Ensures consistent responses by setting a fixed value.' },
     tool_choice: { name: 'Tool Choice', description: 'Decides whether to use tools or just the model for generating responses.' },
     stream: { name: 'Stream', description: 'Sends the response in real-time as it\'s being generated.' },
-    stop: { name: 'Stop', description: 'This parameter tells the model to stop generating text when it reaches any of the specified sequences (like a word or punctuation)' }
+    stop: { name: 'Stop', description: 'This parameter tells the model to stop generating text when it reaches any of the specified sequences (like a word or punctuation)' },
+    top_p : {name:'Top_p', description: 'Anthropic Claude computes the cumulative distribution over all the options for each subsequent token in decreasing probability order and cuts it off once it reaches a particular probability specified by top_p. You should alter either temperature or top_p, but not both.'},
+    top_k: {name:'Top_k', description: 'Use top_k to remove long tail low probability responses.'}
 };
 
 export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format', 'stream'];
@@ -26,7 +28,7 @@ export const SERVICES = ['openai', 'anthropic', 'groq'];
 export const DEFAULT_MODEL = {
     'openai': "gpt-4o",
     'google': 'gemini-pro',
-    'anthropic': "claude-3-5-sonnet-20240620",
+    'anthropic': "claude-3-5-sonnet-latest",
     'groq': "llama3-8b-8192"
 }
 

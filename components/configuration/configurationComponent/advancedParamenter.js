@@ -123,6 +123,7 @@ const AdvancedParameters = ({ params }) => {
             </div>
 
             {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
+
                 {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
                     if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
                     const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;

@@ -25,6 +25,9 @@ function BridgeSlider() {
             item._id.toLowerCase().includes(bridgeSearchQuery.toLowerCase())
     );
 
+    const filteredArchivedBridges = filteredBridgesList.filter((item) => item.status === 0);
+    const filteredUnArchivedBridges = filteredBridgesList.filter((item) => item.status === 1 || item.status === undefined);
+
     const handleNavigation = (id, versionId) => {
         router.push(`/org/${path[2]}/bridges/configure/${id}?version=${versionId}`);
         toggleSidebar('default-bridge-sidebar');
@@ -33,6 +36,37 @@ function BridgeSlider() {
     const handlCloseBridgeSlider = useCallback(() => {
         toggleSidebar('default-bridge-sidebar');
     }, [])
+
+    const renderBridges = (bridges, title) => (
+        <>
+            {bridges.length > 0 && (
+                <>
+                    {title === "Archived Bridges" && <div className="flex justify-center items-center my-4">
+                        <p className="border-t border-base-300 w-full"></p>
+                       <p className="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-xs">
+                            {title}
+                        </p>
+                        <p className="border-t border-base-300 w-full"></p>
+                    </div>}
+                    <ul className={`menu p-0 w-full truncate text-base-content ${title === "Archived Bridges" ? "opacity-50" : ""}`}>
+                        {bridges.slice()
+                            .sort((a, b) => a.name?.localeCompare(b.name))
+                            .map((item) => (
+                                <li key={item._id} className='max-w-full'>
+                                    <a
+                                        className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md truncate max-w-full`}
+                                        onClick={() => handleNavigation(item._id, item?.published_version_id || item?.versions?.[0])}
+                                    >
+                                        {getIconOfService(item.service)}
+                                        {item.name}
+                                    </a>
+                                </li>
+                            ))}
+                    </ul>
+                </>
+            )}
+        </>
+    );
 
     return (
         <aside
@@ -45,7 +79,6 @@ function BridgeSlider() {
                     <p className='text-xl font-semibold'> Bridges </p>
                     <X className="block md:hidden" onClick={handlCloseBridgeSlider} />
                 </div>
-                {/* Input field for bridge search */}
                 <input
                     type="text"
                     placeholder="Search..."
@@ -56,28 +89,16 @@ function BridgeSlider() {
                 <button className="bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() => document.getElementById('my_modal_1').showModal()}>
                     + Create new bridge
                 </button>
-                {/* Render filtered bridge list */}
-                <ul className="menu p-0 w-full truncate text-base-content">
-                    {filteredBridgesList.length === 0 ? (
-                        <div className='max-w-full'>
-                            <p className="py-2 px-2 rounded-md truncate max-w-full">No bridges found</p>
-                        </div>
-                    ) : (
-                        filteredBridgesList.slice() // Create a copy of the array to avoid mutating the original
-                            .sort((a, b) => a.name?.localeCompare(b.name)) // Sort alphabetically based on title
-                            .map((item) => (
-                                <li key={item._id} className='max-w-full'>
-                                    <a
-                                        className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md truncate max-w-full`}
-                                        onClick={() => handleNavigation(item._id, item?.published_version_id || item?.versions?.[0])}
-                                    >
-                                        {getIconOfService(item.service)}
-                                        {item.name}
-                                    </a>
-                                </li>
-                            ))
-                    )}
-                </ul>
+                {filteredBridgesList.length === 0 ? (
+                    <div className='max-w-full'>
+                        <p className="py-2 px-2 rounded-md truncate max-w-full">No bridges found</p>
+                    </div>
+                ) : (
+                    <>
+                        {renderBridges(filteredUnArchivedBridges)}
+                        {renderBridges(filteredArchivedBridges, "Archived Bridges")}
+                    </>
+                )}
             </div>
             <CreateNewBridge orgid={path[2]} Heading="Create New Bridge" />
         </aside>

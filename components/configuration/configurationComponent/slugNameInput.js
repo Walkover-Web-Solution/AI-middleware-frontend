@@ -11,7 +11,9 @@ const SlugNameInput = ({ params }) => {
     const dispatch = useDispatch();
     const handleSlugNameChange = (e) => {
         let newValue = e.target.value;
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { slugName : newValue} }));
+        if (newValue !== slugName) {
+            dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { slugName: newValue } }));
+        }
     };
 
     return (

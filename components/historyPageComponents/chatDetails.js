@@ -1,3 +1,4 @@
+'use client';
 import { CircleX, Copy } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useCloseSliderOnEsc } from "./assistFile";
@@ -47,7 +48,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
     <div
       ref={sidebarRef}
       className={`fixed inset-y-0 right-0 border-l-2 ${isSliderOpen ? "w-full md:w-1/2 lg:w-1/3 opacity-100" : "w-0"
-        } overflow-y-auto bg-base-200 transition-all duration-200 z-50`}
+        } overflow-y-auto bg-base-200 transition-all duration-200 z-[999]`}
     >
       {selectedItem && (
         <aside className="flex flex-col h-screen overflow-y-auto">

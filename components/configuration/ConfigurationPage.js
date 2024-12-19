@@ -65,7 +65,7 @@ export default function ConfigurationPage({ params }) {
                         {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
                         {modelType !== "image" && <PreEmbedList params={params} />}
                         {modelType !== 'image' && <InputConfigComponent params={params} />}
-                        {(modelType == 'chat' || modelType == 'fine-tune') && <EmbedList params={params} />}
+                        {(modelType !== 'image' && modelType !== 'reasoning') && <EmbedList params={params} />}
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />

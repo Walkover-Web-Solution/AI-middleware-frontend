@@ -131,9 +131,13 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   }
 }
 
-export const getSingleThreadData = async (threadId, bridgeId) => {
+export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage,user_feedback, pagelimit = 40) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}`)
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}`,{
+      params:{
+        user_feedback
+      }
+    })
     return getSingleThreadData
   } catch (error) {
     console.error(error)
@@ -141,10 +145,19 @@ export const getSingleThreadData = async (threadId, bridgeId) => {
 }
 
 
-export const getHistory = async (bridgeId, page = 1, start, end, keyword = '') => {
+export const getHistory = async (bridgeId, page = 1, start, end, keyword = '',user_feedback) => {
   try {
 
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}?pageNo=${page}&limit=40&startTime=${start}&endTime=${end}&keyword_search=${keyword}`);
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`, {
+      params: {
+        pageNo: page,
+        limit: 40,
+        startTime: start,
+        endTime: end,
+        keyword_search: keyword,
+        user_feedback: user_feedback
+      }
+    });
     return getSingleThreadData.data;
   } catch (error) {
     console.error(error);
@@ -648,3 +661,27 @@ export const discardBridgeVersionApi = async ({ bridgeId, versionId }) => {
     return error
   }
 };
+
+export const userFeedbackCount = async ({ bridge_id, user_feedback}) => {
+  try {
+    const response = await axios.get(`${URL}/api/v1/config/userfeedbackcount/${bridge_id}`, {
+      params: {
+        user_feedback
+      }
+    });
+    return response
+  } catch (error) {
+    console.error(error);
+    return error
+  }
+}
+
+export const getSubThreadIds = async({thread_id}) =>{
+  try {
+    const response = await axios.get(`${URL}/api/v1/config/history/sub-thread/${thread_id}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error
+  }
+}

@@ -20,14 +20,28 @@ export const historyReducer = createSlice({
       state.success = true;
     },
     fetchThreadReducer: (state, action) => {
-      state.thread = action.payload.data;
+      if (action.payload.nextPage == 1) { 
+        state.thread = action.payload.data.data; 
+      }
+      else {
+        state.thread = [...action.payload.data.data, ...state.thread];
+      }
     },
+    
     clearThreadData: (state) => {
       state.thread = [];
     },
     updateHistoryMessageReducer: (state, action) => {
       const { index, data } = action.payload
       state.thread[index] = {...state.thread[index], ...data};
+    },
+    userFeedbackCountReducer:(state,action) =>{
+      const {data} = action.payload;
+      state.userFeedbackCount = data;
+    },
+    fetchSubThreadReducer: (state,action) =>{
+      const {data} = action.payload;
+      state.subThreads = data;
     }
   },
 });
@@ -37,6 +51,8 @@ export const {
   fetchAllHistoryReducer,
   fetchThreadReducer,
   clearThreadData,
-  updateHistoryMessageReducer
+  updateHistoryMessageReducer,
+  userFeedbackCountReducer,
+  fetchSubThreadReducer
 } = historyReducer.actions;
 export default historyReducer.reducer;
