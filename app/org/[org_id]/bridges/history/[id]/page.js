@@ -108,25 +108,33 @@ function Page({ searchParams }) {
   );
 
   useEffect(() => {
-    const thread_id = search.get("thread_id");
-    const startDate = search.get("start");
-    const endDate = search.get("end");
-    const threadId = thread_id !== null && thread_id ? thread_id : historyData[0]?.thread_id;
+    const fetchData = async () => {
+      const thread_id = search.get("thread_id");
+      const startDate = search.get("start");
+      const endDate = search.get("end");
+      const threadId = thread_id !== null && thread_id ? thread_id : historyData[0]?.thread_id;
 
-    if (thread_id) {
-      setSelectedThread(threadId);
-      setHasMoreThreadData(true); // Reset hasMore flag when changing thread
-      setThreadPage(1); // Reset thread page
-      dispatch(getThread({threadId, bridgeId:params?.id, nextPage:1, user_feedback:filterOption}));
-      setLoading(false);
-      filterOption === "all" && dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: filterOption, startDate, endDate }));
-    }
+      if (thread_id) {
+        setSelectedThread(threadId);
+        setHasMoreThreadData(true); 
+        setThreadPage(1); 
+        const result = await dispatch(getThread({threadId, bridgeId:params?.id, nextPage:1, user_feedback:filterOption}));
+        if(result?.data?.length === 40)
+          setIsFetchingMore(false);
+        setLoading(false);
+        if (filterOption === "all") {
+          await dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: filterOption, startDate, endDate }));
+        }
+      }
 
-    let url = `${pathName}?version=${params.version}&thread_id=${threadId}`;
-    if (startDate && endDate) {
-      url += `&start=${startDate}&end=${endDate}`;
-    }
-    router.push(url, undefined, { shallow: true });
+      let url = `${pathName}?version=${params.version}&thread_id=${threadId}`;
+      if (startDate && endDate) {
+        url += `&start=${startDate}&end=${endDate}`;
+      }
+      router.push(url, undefined, { shallow: true });
+    };
+
+    fetchData();
   }, [search, params.id, filterOption]);
 
   const fetchMoreData = useCallback(async () => {
