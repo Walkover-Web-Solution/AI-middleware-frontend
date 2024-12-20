@@ -220,3 +220,22 @@ export function flattenParameters(parameters, prefix = '') {
     });
     return flat;
 }
+
+
+export function filterBridges(bridgesList, bridgeSearchQuery) {
+    return bridgesList.filter(
+        (item) =>
+            item?.name?.toLowerCase()?.includes(bridgeSearchQuery.toLowerCase()) ||
+            item?.slugName?.toLowerCase()?.includes(bridgeSearchQuery.toLowerCase()) ||
+            item?.service?.toLowerCase()?.includes(bridgeSearchQuery.toLowerCase()) ||
+            item?._id?.toLowerCase()?.includes(bridgeSearchQuery.toLowerCase())
+    );
+}
+
+export function filterOrganizations(orgList, orgSearchQuery) {
+    return Object.values(orgList).filter(
+        (item) => 
+            item?.name?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase()) || 
+            item?.id?.toString()?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase())
+    );
+}

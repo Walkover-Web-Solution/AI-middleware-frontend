@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { getIconOfService, toggleSidebar } from '@/utils/utility';
+import { filterBridges, getIconOfService, toggleSidebar } from '@/utils/utility';
 import { X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
@@ -17,13 +17,7 @@ function BridgeSlider() {
         setBridgeSearchQuery(e.target.value);
     };
 
-    const filteredBridgesList = bridgesList.filter(
-        (item) =>
-            item?.name?.toLowerCase()?.includes(bridgeSearchQuery?.toLowerCase()) ||
-            item?.slugName?.toLowerCase()?.includes(bridgeSearchQuery?.toLowerCase()) ||
-            item?.service?.toLowerCase().includes(bridgeSearchQuery.toLowerCase()) ||
-            item._id.toLowerCase().includes(bridgeSearchQuery.toLowerCase())
-    );
+    const filteredBridgesList = filterBridges(bridgesList,bridgeSearchQuery);
 
     const filteredArchivedBridges = filteredBridgesList.filter((item) => item.status === 0);
     const filteredUnArchivedBridges = filteredBridgesList.filter((item) => item.status === 1 || item.status === undefined);
