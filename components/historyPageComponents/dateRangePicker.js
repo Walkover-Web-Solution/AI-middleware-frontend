@@ -12,7 +12,7 @@ import { useSearchParams } from 'next/navigation';
     return date.toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
   };
 
-const DateRangePicker = ({ params }) => {
+const DateRangePicker = ({ params, setFilterOption}) => {
   const dispatch = useDispatch();
   const [startingDate, setStartingDate] = useState(getDefaultDate());
   const [endingDate, setEndingDate] = useState(getDefaultDate());
@@ -39,7 +39,7 @@ const DateRangePicker = ({ params }) => {
     // const start = searchParams.get('start');
     // const end = searchParams.get('end');
     // if (!start && !end) return; // Do nothing if 'start' and 'end' are not in the URL
-  
+    setFilterOption('all');
     setStartingDate(getDefaultDate()); 
     setEndingDate(getDefaultDate());
     const newSearchParams = new URLSearchParams(searchParams);

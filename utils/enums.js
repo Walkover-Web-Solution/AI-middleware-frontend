@@ -313,3 +313,5 @@ export const MODAL_TYPE = {
   OPTIMIZE_PROMPT: 'optmize_prompt_modal',
   PUBLISH_BRIDGE_VERSION: 'publish_bridge_version_modal',
 }
+
+export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
