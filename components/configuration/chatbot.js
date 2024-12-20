@@ -57,14 +57,6 @@ const Chatbot = ({ params }) => {
     }, [variables]);
 
     useEffect(() => {
-        if (service && configuration && window?.SendDataToChatbot) {
-            window.SendDataToChatbot({
-                "configuration": configuration
-            });
-        }
-    }, [service, configuration,model]);
-
-    useEffect(() => {
         const intervalId = setInterval(() => {
             if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeName && bridgeType) {
                 window.SendDataToChatbot({
