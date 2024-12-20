@@ -42,7 +42,10 @@ export const historyReducer = createSlice({
     fetchSubThreadReducer: (state,action) =>{
       const {data} = action.payload;
       state.subThreads = data;
-    }
+    },
+    clearSubThreadData: (state) => {
+      state.subThreads = [];
+    },
   },
 });
 
@@ -53,6 +56,7 @@ export const {
   clearThreadData,
   updateHistoryMessageReducer,
   userFeedbackCountReducer,
-  fetchSubThreadReducer
+  fetchSubThreadReducer,
+  clearSubThreadData
 } = historyReducer.actions;
 export default historyReducer.reducer;
