@@ -1,4 +1,4 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, discardBridgeVersionApi, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, discardBridgeVersionApi, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
 import { toast } from "react-toastify";
 import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
@@ -250,5 +250,17 @@ export const dicardBridgeVersionAction = ({ bridgeId, versionId }) => async (dis
     await discardBridgeVersionApi({ bridgeId, versionId });
   } catch (error) {
     console.error(error)
+  }
+}
+
+export const uploadImageAction = (formData) => async (dispatch) => {
+  try {
+    // debugger
+    console.log(formData)
+    const response = await uploadImage(formData);
+    return response;
+    // dispatch(updateBridgeReducer(response.data));
+  } catch (error) {
+    console.error('Error uploading image:', error);
   }
 }
