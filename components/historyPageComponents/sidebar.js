@@ -1,13 +1,14 @@
-import { getHistoryAction, getThread, userFeedbackCountAction, getSubThreadsAction} from "@/store/action/historyAction.js";
-import { Download, ThumbsDown, ThumbsUp, ChevronDown, ChevronUp } from "lucide-react"; // Import chevron icons
-import { useRef, useState, useEffect } from "react";
+import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction.js";
+import { Download, ThumbsDown, ThumbsUp, ChevronDown, ChevronUp } from "lucide-react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 import { toast } from "react-toastify";
 import { useCustomSelector } from "@/customHooks/customSelector.js";
-
+import { clearSubThreadData } from "@/store/reducer/historyReducer.js";
+import { USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 
 const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, setThreadPage, filterOption, setFilterOption, searchRef, setIsFetchingMore}) => {
 
@@ -28,7 +29,6 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   
   useEffect(() => {
     setExpandedThreads([]);
-    // setThreadPage(1);
   }, [selectedThread]);
 
   const debounce = (func, delay) => {
@@ -50,6 +50,9 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     e.preventDefault();
     setPage(1);
     setHasMore(true);
+    setFilterOption('all')
+    setExpandedThreads([]);
+    dispatch(clearSubThreadData());
     const result = await dispatch(getHistoryAction(params.id, null, null, 1, searchRef.current.value || ""));
     if (result?.length < 40) {
       setHasMore(false);
@@ -115,7 +118,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     setThreadPage(1);
     setIsFetchingMore(true);
     setSelectedSubThreadId(subThreadId); 
-    const result = await dispatch(getThread({threadId, subThreadId, bridgeId:params.id, nextPage:1})); 
+    const result = await dispatch(getThread({threadId, subThreadId, bridgeId:params.id, nextPage:1, user_feedback:filterOption})); 
   
     if (result.data.length === 40) {
       setIsFetchingMore(false);
@@ -125,8 +128,6 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   const handleFilterChange = async (user_feedback) => {
     setFilterOption(user_feedback);
     setThreadPage(1);
-    // dispatch(getThread({threadId:selectedThread, bridgeId:params?.id, nextPage:1, user_feedback}));
-    // dispatch(getHistoryAction(params.id, null, null, 1, null, user_feedback));
     dispatch(userFeedbackCountAction({ bridge_id: params?.id, user_feedback }));
   };
 
@@ -137,42 +138,22 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
         <div className="p-2 bg-base-300 rounded-md text-center">
           <p className="text-center m-2 font-semibold">Filter Response</p>
           <div className="flex items-center justify-center mb-2 gap-4">
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input
-                type="radio"
-                name="filterOption"
-                value="all"
-                checked={filterOption === 'all'}
-                onChange={() => handleFilterChange('all')}
-                className="radio radio-primary"
-              />
-              <span>All</span>
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input
-                type="radio"
-                name="filterOption"
-                value="1"
-                checked={filterOption === '1'}
-                onChange={() => handleFilterChange('1')}
-                className="radio radio-success"
-              />
-              <ThumbsUp size={16} />
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input
-                type="radio"
-                name="filterOption"
-                value="2"
-                checked={filterOption === '2'}
-                onChange={() => handleFilterChange('2')}
-                className="radio radio-error"
-              />
-              <ThumbsDown size={16} />
-            </label>
+            {USER_FEEDBACK_FILTER_OPTIONS.map((value, index) => (
+              <label key={index} className="flex items-center gap-1 cursor-pointer">
+                <input
+                  type="radio"
+                  name="filterOption"
+                  value={value}
+                  checked={filterOption === value}
+                  onChange={() => handleFilterChange(value)}
+                  className={`radio ${value === "all" ? "radio-primary" : value === "1" ? "radio-success" : "radio-error"}`}
+                />
+                {value === "all" ? <span>All</span> : value === "1" ? <ThumbsUp size={16} /> : <ThumbsDown size={16} />}
+              </label>
+            ))}
           </div>
-          <p className={`text-xs text-base-content`}>
-            {`The ${filterOption === 'all' ? 'All' : filterOption === '1' ? 'Good' : 'Bad'} User feedback for the bridge is ${userFeedbackCount}`}
+          <p className="text-xs text-base-content">
+            {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the bridge is ${userFeedbackCount}`}
           </p>
         </div>
         <div className="collapse collapse-arrow join-item border border-base-300">
@@ -181,7 +162,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
             Advance Filter
           </div>
           <div className="collapse-content">
-            <DateRangePicker params={params} />
+            <DateRangePicker params={params} setFilterOption={setFilterOption}/>
           </div>
         </div>
         <form onSubmit={handleSearch} className="relative">
@@ -204,7 +185,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
               xmlns="http://www.w3.org/2000/svg"
               className="absolute right-3 top-3 cursor-pointer"
               onClick={clearInput}
-              style={{ fill: 'none', stroke: 'rgb(0, 0, 0)', strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2 }}
+              style={{ fill: "none", stroke: "rgb(0, 0, 0)", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2 }}
             >
               <path id="primary" d="M19,19,5,5M19,5,5,19"></path>
             </svg>
@@ -247,21 +228,15 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                           }} 
                           className="ml-2 cursor-pointer"
                         >
-                          {expandedThreads?.includes(item?.thread_id) ? (
-                            <ChevronUp size={16} />
-                          ) : (
-                            <ChevronDown size={16} />
-                          )}
+                          {!searchQuery && expandedThreads.includes(item.thread_id) ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </div>
                       )}
                     </a>
                   </li>
-
-                  {/* Show subThreadIds or any other content when the thread is selected and expanded */}
                   {selectedThread === item.thread_id && expandedThreads.includes(item.thread_id) && (
                     <div className="pl-10 p-2 text-gray-600 text-sm">
                       <ul>
-                        {subThreads.length === 0 || !subThreads ? (
+                        {subThreads.length === 0 ? (
                           <li>No sub thread available</li>
                         ) : (
                           subThreads && subThreads?.map((subThreadId, index) => (

@@ -5,7 +5,7 @@ import ThreadItem from "@/components/historyPageComponents/threadItem";
 import Protected from "@/components/protected";
 import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getHistoryAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction";
+import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
 import { CircleChevronDown } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -104,7 +104,7 @@ function Page({ searchParams }) {
         });
       }
     },
-    [params.id, pathName]
+    [params.id,pathName,router]
   );
 
   useEffect(() => {
@@ -112,30 +112,35 @@ function Page({ searchParams }) {
       const thread_id = search.get("thread_id");
       const startDate = search.get("start");
       const endDate = search.get("end");
-      const threadId = thread_id !== null && thread_id ? thread_id : historyData[0]?.thread_id;
-
+      let result;
       if (thread_id) {
-        setSelectedThread(threadId);
-        setHasMoreThreadData(true); 
-        setThreadPage(1); 
-        const result = await dispatch(getThread({threadId, bridgeId:params?.id, nextPage:1, user_feedback:filterOption}));
-        if(result?.data?.length === 40)
-          setIsFetchingMore(false);
-        setLoading(false);
-        if (filterOption === "all") {
-          await dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: filterOption, startDate, endDate }));
-        }
-      }
+        setSelectedThread(thread_id);
+        result = await dispatch(getThread({threadId:thread_id, bridgeId:params.id,nextPage:1,user_feedback:filterOption}));
+      } else if (historyData.length > 0) {
+        const firstThreadId = historyData[0].thread_id;
+        setSelectedThread(firstThreadId);
+        result = await dispatch(getThread({threadId:firstThreadId,bridgeId: params.id, nextPage:1,user_feedback:filterOption}));
 
-      let url = `${pathName}?version=${params.version}&thread_id=${threadId}`;
-      if (startDate && endDate) {
-        url += `&start=${startDate}&end=${endDate}`;
+        let url = `${pathName}?version=${params.version}&thread_id=${firstThreadId}`;
+        if (startDate && endDate) {
+          url += `&start=${startDate}&end=${endDate}`;
+        }
+        router.push(url, undefined, { shallow: true });
       }
-      router.push(url, undefined, { shallow: true });
+      setThreadPage(1);
+      if (result?.data?.length === 40) {
+        setIsFetchingMore(false)
+        setHasMoreThreadData(true);
+      }
+      setLoading(false);
+      if (filterOption !== "all") {
+        await dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: filterOption, startDate, endDate }));
+      }
     };
 
     fetchData();
-  }, [search, params.id, filterOption]);
+  }, [search, historyData, params.id, pathName, filterOption]);
+
 
   const fetchMoreData = useCallback(async () => {
     const nextPage = page + 1;
@@ -309,7 +314,7 @@ function Page({ searchParams }) {
                 hasMore={hasMoreThreadData}
                 loader={<p></p>}
                 scrollThreshold="250px"
-                inverse
+                inverse = {flexDirection === "column-reverse"}
                 scrollableTarget="scrollableDiv"
               >
                 <div
