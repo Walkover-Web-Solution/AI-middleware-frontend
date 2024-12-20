@@ -1,7 +1,7 @@
 import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { toggleSidebar } from '@/utils/utility';
+import { filterOrganizations, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, KeyRound, LogOut, Mail, Settings2, X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
@@ -16,11 +16,7 @@ function OrgSlider() {
     const userdetails = useCustomSelector((state) => state?.userDetailsReducer?.userDetails);
     const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
 
-    const filteredOrganizations = Object.values(organizations).filter(
-        (item) => 
-          item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) || 
-          item?.id?.toString()?.toLowerCase()?.includes(searchQuery?.toLowerCase())
-     )
+    const filteredOrganizations = filterOrganizations(organizations,searchQuery);
 
     const handleOpenCreateOrgModal = useCallback(() => {
         setShowCreateOrgModal(true);

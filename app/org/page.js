@@ -5,6 +5,7 @@ import { switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { userDetails } from '@/store/action/userDetailsAction';
+import { filterOrganizations } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
@@ -52,11 +53,8 @@ function Page() {
     dispatch(userDetails());
   }, []);
 
-  const filteredOrganizations = Object.values(organizations).filter(
-    (item) => 
-      item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) || 
-      item?.id?.toString()?.toLowerCase()?.includes(searchQuery?.toLowerCase())
-  )
+  const filteredOrganizations = filterOrganizations(organizations,searchQuery);
+  
   const renderedOrganizations = useMemo(() => (
     filteredOrganizations.slice().reverse().map((org, index) => (
       <div
