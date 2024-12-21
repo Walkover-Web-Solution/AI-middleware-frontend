@@ -2,16 +2,15 @@ import { dryRun } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { uploadImageAction } from '@/store/action/bridgeAction';
 import _ from 'lodash';
-import { ImageUp, ImageUpIcon } from 'lucide-react';
+import { CircleX, ImageUp, ImageUpIcon } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-function ChatTextInput({ setMessages, setErrorMessage, params }) {
+function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploadedImages, setUploadedImages }) {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [conversation, setConversation] = useState([]);
-    const [uploadedImages, setUploadedImages] = useState([]);
     const dispatch = useDispatch();
     const inputRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -77,13 +76,16 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                     minute: "2-digit",
                 }),
                 content: newMessage,
+                image_urls: uploadedImages // Store images in the user role
             };
+            setUploadedImages([]);
             let response, responseData;
             let data;
             if (modelType !== 'completion' && modelType !== 'embedding') {
                 data = {
                     role: "user",
-                    content: newMessage
+                    content: newMessage,
+                    image_urls: uploadedImages // Include images in the data
                 };
                 setMessages(prevMessages => [...prevMessages, newChat]);
                 responseData = await dryRun({
@@ -194,11 +196,22 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
     };
 
     return (
-        <div className="input-group flex gap-2 w-full relative">
+        <div className="input-group flex gap-1 w-full relative">
             {uploadedImages.length > 0 && (
-                <div className="absolute bottom-16 left-0 flex bg-base-300 w-auto p-2 rounded-lg">
+                <div className="absolute bottom-16 left-0 gap-2 flex w-auto rounded-lg">
                     {uploadedImages.map((url, index) => (
-                        <img key={index} src={url} alt={`Uploaded Preview ${index + 1}`} className="w-16 h-16 object-cover mb-2 m-3" />
+                        <div key={index} className="relative">
+                            <img src={url} alt={`Uploaded Preview ${index + 1}`} className="w-16 h-16 object-cover mb-2 bg-base-300 p-2 rounded-lg" />
+                            <button
+                                className="absolute top-[-3px] right-[-3px]  text-white rounded-full p-1"
+                                onClick={() => {
+                                    const newImages = uploadedImages.filter((_, i) => i !== index);
+                                    setUploadedImages(newImages);
+                                }}
+                            >
+                                <CircleX className='text-base-content bg-base-200 rounded-full' size={20}/>
+                            </button>
+                        </div>
                     ))}
                 </div>
             )}

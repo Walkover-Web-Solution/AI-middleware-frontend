@@ -255,11 +255,8 @@ export const dicardBridgeVersionAction = ({ bridgeId, versionId }) => async (dis
 
 export const uploadImageAction = (formData) => async (dispatch) => {
   try {
-    // debugger
-    console.log(formData)
     const response = await uploadImage(formData);
     return response;
-    // dispatch(updateBridgeReducer(response.data));
   } catch (error) {
     console.error('Error uploading image:', error);
   }
