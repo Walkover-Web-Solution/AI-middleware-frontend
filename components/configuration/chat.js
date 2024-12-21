@@ -7,6 +7,7 @@ function Chat({ params }) {
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [uploadedImages, setUploadedImages] = useState([]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -36,6 +37,13 @@ function Chat({ params }) {
                   <time className="text-xs opacity-50 pl-2">{message.time}</time>
                 </div>
                 <div className="chat-bubble break-keep">
+                {message?.image_urls && message?.image_urls?.length > 0 && (
+                    <div className="flex flex-wrap mt-2">
+                      {message?.image_urls.map((url, imgIndex) => (
+                        <img key={imgIndex} src={url} alt={`Message Image ${imgIndex + 1}`} className="w-16 h-16 object-cover m-1 rounded-lg" />
+                      ))}
+                    </div>
+                  )}
                   <ReactMarkdown components={{
                     code: ({ node, inline, className, children, ...props }) => (
                       <CodeBlock
@@ -47,16 +55,18 @@ function Chat({ params }) {
                         {children}
                       </CodeBlock>
                     )
-                  }}>{message.content}</ReactMarkdown></div>
+                  }}>{message.content}</ReactMarkdown>
+                </div>
               </div>
             )
           })}
         </div>
 
+
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-10">
           <div className="relative flex flex-col gap-4 w-full">
             <div className="flex flex-row gap-2">
-              <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} params={params} />
+              <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} message={messages} params={params} uploadedImages={uploadedImages} setUploadedImages={setUploadedImages} />
             </div>
           </div>
           {errorMessage && (
