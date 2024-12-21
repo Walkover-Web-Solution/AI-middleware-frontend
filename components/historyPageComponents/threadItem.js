@@ -252,7 +252,18 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               {messageType === 2 ? <p className="text-xs opacity-50">Edited</p> : ""}
             </div>
             <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
-              {item?.image_url && (
+              {item?.role === "user" && (
+                <div className="flex flex-wrap">
+                  {item?.urls?.map((url, index) => (
+                    <div key={index} className="chat chat-end flex-grow-1">
+                      <div className="">
+                        <img src={url} alt="Attached" className="max-w-full max-h-16 w-auto h-auto rounded-md" loading="lazy"/>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {item?.role === "assistant" && item?.image_url && (
                 <div className="chat chat-end">
                   <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
                     <img src={item.image_url} alt="Attached" className="max-w-full max-h-96 w-auto h-auto rounded-md" loading="lazy"/>
