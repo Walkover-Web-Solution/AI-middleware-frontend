@@ -685,3 +685,19 @@ export const getSubThreadIds = async({thread_id}) =>{
     return error
   }
 }
+
+export const uploadImage = async (formData) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/image/processing/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data; // Return the response data for further handling
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    // Extract error message if available
+    const errorMessage = error.response?.data?.message || error.message || 'File upload failed.';
+    throw new Error(errorMessage);
+  }
+};
