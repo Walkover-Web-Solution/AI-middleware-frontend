@@ -44,7 +44,7 @@ const Chatbot = ({ params }) => {
                 "bridgeName": bridgeSlugName
             });
         }
-    }, [bridgeSlugName]);
+    }, [bridgeName]);
 
     useEffect(() => {
         if (params?.version && window?.SendDataToChatbot) {
