@@ -169,7 +169,7 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
 
     const handleKeyPress = useCallback(
         event => {
-            if (event.key === "Enter") {
+            if (event.key === "Enter" && !loading) {
                 handleSendMessage(event);
             }
         },
