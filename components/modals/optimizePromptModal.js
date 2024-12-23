@@ -32,7 +32,7 @@ function OptmizePromptModal({ params }) {
         e.preventDefault(); // Prevent default form submission behavior
         setLoading(true)
         // Create a new key-value pair
-        const result = await optimizePromptApi({ bridge_id: params.id });
+        const result = await optimizePromptApi({ bridge_id: params.id, version_id: params.version  });
         setNewPrompt(result)
         dispatch(optimizePromptReducer({ bridgeId: params.id, prompt: result }));
         setLoading(false)
