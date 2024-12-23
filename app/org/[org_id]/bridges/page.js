@@ -4,7 +4,7 @@ import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { archiveBridgeAction, duplicateBridgeAction } from "@/store/action/bridgeAction";
-import { getIconOfService } from "@/utils/utility";
+import { filterBridges, getIconOfService } from "@/utils/utility";
 import { Ellipsis } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
@@ -23,14 +23,7 @@ function Home({ params }) {
   }));
 
   const [searchTerm, setSearchTerm] = useState('');
-  const filteredBridges = allBridges.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item?.slugName?.toLowerCase()?.includes(searchTerm.toLocaleLowerCase()) ||
-    item?.service?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (item.configuration?.model && item.configuration.model.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    item._id.toLowerCase().includes(searchTerm.toLowerCase()) // Add this line
-  );
-
+  const filteredBridges = filterBridges(allBridges,searchTerm);
   const filteredArchivedBridges = filteredBridges.filter((item) => item.status === 0);
   const filteredUnArchivedBridges = filteredBridges.filter((item) => item.status === 1 || item.status === undefined);
 
