@@ -21,7 +21,7 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
     top_k: {name:'Top_k', description: 'Use top_k to remove long tail low probability responses.'}
 };
 
-export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format', 'stream'];
+export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format', 'stream', 'vision'];
 
 export const SERVICES = ['openai', 'anthropic', 'groq'];
 
