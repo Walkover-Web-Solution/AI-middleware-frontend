@@ -1,19 +1,27 @@
 import { dryRun } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import { uploadImageAction } from '@/store/action/bridgeAction';
 import _ from 'lodash';
+import { CircleX, ImageUp, ImageUpIcon } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
 
-function ChatTextInput({ setMessages, setErrorMessage, params }) {
+function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploadedImages, setUploadedImages }) {
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [conversation, setConversation] = useState([]);
+    const dispatch = useDispatch();
     const inputRef = useRef(null);
+    const fileInputRef = useRef(null);
     const versionId = params?.version;
-    const { bridge, modelType, modelName, variablesKeyValue, prompt } = useCustomSelector((state) => ({
+    const { bridge, modelType, modelName, variablesKeyValue, prompt, configuration } = useCustomSelector((state) => ({
         bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version],
         modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model?.toLowerCase(),
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt,
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
+        configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
     }));
 
     const dataToSend = {
@@ -50,30 +58,35 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             return;
         }
         const newMessage = inputRef?.current?.value;
-        if (modelType !== 'completion' && modelType !== 'embedding') if (newMessage?.trim() === "") return;
+        if (modelType !== 'completion' && modelType !== 'embedding') {
+            if (newMessage?.trim() === "") {
+                setErrorMessage("Message cannot be empty");
+                return;
+            }
+        }
         setErrorMessage("");
         if (modelType !== "completion" && modelType !== "embedding") inputRef.current.value = "";
-        // setNewMessage("");
         setLoading(true);
         try {
-            // Create user chat
             const newChat = {
-                id: messages.length + 1,
+                id: conversation.length + 1,
                 sender: "user",
                 time: new Date().toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                 }),
                 content: newMessage,
+                image_urls: uploadedImages // Store images in the user role
             };
+            setUploadedImages([]);
             let response, responseData;
             let data;
             if (modelType !== 'completion' && modelType !== 'embedding') {
                 data = {
                     role: "user",
-                    content: ""
-                }
-                _.set(data, "content", newMessage);
+                    content: newMessage,
+                    image_urls: uploadedImages // Include images in the data
+                };
                 setMessages(prevMessages => [...prevMessages, newChat]);
                 responseData = await dryRun({
                     localDataToSend: {
@@ -82,13 +95,13 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                             conversation: conversation,
                             type: modelType
                         },
-                        user: newMessage,
-                        variables // Include variables in the request data
+                        user: data.content,
+                        images: uploadedImages,
+                        variables
                     },
                     bridge_id: params?.id,
                 });
-            }
-            else if (modelType === "completion") {
+            } else if (modelType === "completion") {
                 responseData = await dryRun({
                     localDataToSend: {
                         ...localDataToSend,
@@ -100,8 +113,7 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                     },
                     bridge_id: params?.id
                 });
-            }
-            else if (modelType === "embedding") {
+            } else if (modelType === "embedding") {
                 responseData = await dryRun({
                     localDataToSend: {
                         ...localDataToSend,
@@ -114,12 +126,12 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
                     bridge_id: params?.id
                 });
             }
-            if (!responseData.success) {
+            if (!responseData || !responseData.success) {
                 if (modelType !== 'completion' && modelType !== 'embedding') {
                     inputRef.current.value = data.content;
-                    setMessages(prevMessages => prevMessages.slice(0, -1)); // Remove the last message
+                    setMessages(prevMessages => prevMessages.slice(0, -1));
                 }
-                toast.error(responseData.error);
+                toast.error(responseData?.error || "An error occurred");
                 setLoading(false);
                 return;
             }
@@ -127,28 +139,31 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
             const content = response?.content || "";
             const assistConversation = {
                 role: response?.role || "assistant",
-                content: content
-            }
-            // Update localDataToSend with assistant conversation
+                content: content,
+                image_urls: response?.image_urls || []
+            };
+
             if (modelType !== 'completion' && modelType !== 'embedding') {
                 setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
             }
             const newChatAssist = {
-                id: messages.length + 2,
+                id: conversation.length + 2,
                 sender: "Assist",
                 time: new Date().toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                 }),
                 content: Array.isArray(content) ? content.join(", ") : content.toString(),
+                image_urls: assistConversation.image_urls
             };
             
-            // Add assistant chat to messages
             setMessages(prevMessages => [...prevMessages, newChatAssist]);
         } catch (error) {
+            console.log(error);
             setErrorMessage("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
+            setUploadedImages([]);
         }
     };
 
@@ -160,27 +175,76 @@ function ChatTextInput({ setMessages, setErrorMessage, params }) {
         },
         [handleSendMessage]
     );
+    const handleFileChange = async (e) => {
+        const files = fileInputRef.current.files;
+        if (files.length > 4 || uploadedImages.length > 4) {
+            toast.error('Only four images are allowed.');
+            return;
+        }
+        if (files.length > 0) {
+            setUploading(true);
+            for (let i = 0; i < files.length; i++) {
+                const formData = new FormData();
+                formData.append('image', files[i]);
+                const result = await dispatch(uploadImageAction(formData));
+                if (result.success) {
+                    setUploadedImages(prevImages => [...prevImages, result.image_url]);
+                }
+            }
+            setUploading(false);
+        }
+    };
 
     return (
-        <div className="input-group flex gap-2 w-full">
-            {(modelType !== "completion") && (modelType !== "embedding") && (modelType !== 'image')&& (
+        <div className="input-group flex gap-1 w-full relative">
+            {uploadedImages.length > 0 && (
+                <div className="absolute bottom-16 left-0 gap-2 flex w-auto rounded-lg">
+                    {uploadedImages.map((url, index) => (
+                        <div key={index} className="relative">
+                            <img src={url} alt={`Uploaded Preview ${index + 1}`} className="w-16 h-16 object-cover mb-2 bg-base-300 p-2 rounded-lg" />
+                            <button
+                                className="absolute top-[-3px] right-[-3px]  text-white rounded-full p-1"
+                                onClick={() => {
+                                    const newImages = uploadedImages.filter((_, i) => i !== index);
+                                    setUploadedImages(newImages);
+                                }}
+                            >
+                                <CircleX className='text-base-content bg-base-200 rounded-full' size={20}/>
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+            {(modelType !== "completion") && (modelType !== "embedding") && (modelType !== 'image') && (
                 <input
                     ref={inputRef}
                     type="text"
                     placeholder="Type here"
                     className="input input-bordered w-full focus:border-primary"
-                    // value={newMessage}
-                    // onChange={e => setNewMessage(e.target.value)}
-                    // onBlur={e => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                 />
             )}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+            />
+            {configuration && configuration?.vision && configuration['vision'] &&<button
+                className="btn"
+                onClick={() => fileInputRef.current.click()}
+                disabled={loading || uploading}
+            >
+                <ImageUpIcon />
+            </button>}
             <button
                 className="btn"
                 onClick={handleSendMessage}
-                disabled={loading || ((modelType === 'image'))}
+                disabled={loading || uploading || (modelType === 'image')}
             >
-                {loading ? (
+                {(loading || uploading) ? (
                     <span className="loading loading-dots loading-lg"></span>
                 ) : (
                     <svg
