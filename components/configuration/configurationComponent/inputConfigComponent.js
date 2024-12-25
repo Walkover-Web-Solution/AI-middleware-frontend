@@ -26,6 +26,19 @@ const InputConfigComponent = ({ params }) => {
         setPrompt(reduxPrompt);
     }, [reduxPrompt]);
 
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            if (prompt !== reduxPrompt) {
+                event.preventDefault();
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [prompt, reduxPrompt]);
+
     const savePrompt = useCallback((e) => {
         const newValue = e.target?.value || "";
         setShowSuggestions(false);
