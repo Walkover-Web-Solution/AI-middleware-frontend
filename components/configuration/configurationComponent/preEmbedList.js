@@ -13,7 +13,7 @@ const PreEmbedList = ({ params }) => {
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData || {},
     }));
     const dispatch = useDispatch();
-    const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data]);
+    const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
 
     const renderEmbed = useMemo(() => (
         bridgePreFunctions && bridgePreFunctions
@@ -57,7 +57,7 @@ const PreEmbedList = ({ params }) => {
                 )
             }
             )
-    ), [bridgePreFunctions, integrationData, getStatusClass]);
+    ), [bridgePreFunctions, integrationData, getStatusClass, params]);
 
     const onFunctionSelect = (id) => {
         dispatch(updateApiAction(params.id, {
