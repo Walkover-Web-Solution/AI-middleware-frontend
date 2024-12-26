@@ -280,120 +280,160 @@ const lineChartData = [
     ]
   }
 ];
+// const data = [
+//   {
+//     "country": "AD",
+//     "hot dog": 25,
+//     "burger": 0,
+//     "sandwich": 174,
+//     "kebab": 65,
+//     "fries": 159,
+//     "donut": 22
+//   },
+//   {
+//     "country": "AE",
+//     "hot dog": 49,
+//     "burger": 35,
+//     "sandwich": 20,
+//     "kebab": 163,
+//     "fries": 117,
+//     "donut": 179
+//   },
+//   {
+//     "country": "AF",
+//     "hot dog": 24,
+//     "burger": 148,
+//     "sandwich": 141,
+//     "kebab": 44,
+//     "fries": 46,
+//     "donut": 81
+//   },
+//   {
+//     "country": "AG",
+//     "hot dog": 113,
+//     "burger": 199,
+//     "sandwich": 181,
+//     "kebab": 143,
+//     "fries": 130,
+//     "donut": 97
+//   },
+//   {
+//     "country": "AI",
+//     "hot dog": 191,
+//     "burger": 33,
+//     "sandwich": 42,
+//     "kebab": 182,
+//     "fries": 101,
+//     "donut": 155
+//   },
+//   {
+//     "country": "AL",
+//     "hot dog": 49,
+//     "burger": 48,
+//     "sandwich": 88,
+//     "kebab": 43,
+//     "fries": 135,
+//     "donut": 118
+//   },
+//   {
+//     "country": "AM",
+//     "hot dog": 77,
+//     "burger": 125,
+//     "sandwich": 36,
+//     "kebab": 24,
+//     "fries": 32,
+//     "donut": 137
+//   }
+// ]
 const data = [
   {
-    "country": "AD",
-    "hot dog": 25,
-    "hot dogColor": "hsl(172, 70%, 50%)",
-    "burger": 0,
-    "burgerColor": "hsl(346, 70%, 50%)",
-    "sandwich": 174,
-    "sandwichColor": "hsl(100, 70%, 50%)",
-    "kebab": 65,
-    "kebabColor": "hsl(107, 70%, 50%)",
-    "fries": 159,
-    "friesColor": "hsl(239, 70%, 50%)",
-    "donut": 22,
-    "donutColor": "hsl(20, 70%, 50%)"
+    "id": 1,
+    "org_id": "11643",
+    "bridge_id": "6749665428c0a0cfed3a375e1",
+    "version_id": "675be2047473749f8beac632",
+    "thread_id": "husain",
+    "apikey_id": "67596f305c010a893ea94287",
+    "latency_sum": 1.1557340621948242,
+    "service": null,
+    "model": "gpt-4o",
+    "success_count": 1,
+    "total_token_count": 133,
+    "cost_sum": 5,
+    "record_count": 1,
+    "created_at": "2024-12-26T07:30:00.000Z",
+    "time_zone": "Asia/Kolkata"
   },
   {
-    "country": "AE",
-    "hot dog": 49,
-    "hot dogColor": "hsl(225, 70%, 50%)",
-    "burger": 35,
-    "burgerColor": "hsl(57, 70%, 50%)",
-    "sandwich": 20,
-    "sandwichColor": "hsl(26, 70%, 50%)",
-    "kebab": 163,
-    "kebabColor": "hsl(109, 70%, 50%)",
-    "fries": 117,
-    "friesColor": "hsl(325, 70%, 50%)",
-    "donut": 179,
-    "donutColor": "hsl(201, 70%, 50%)"
+    "id": 3,
+    "org_id": "11643",
+    "bridge_id": "6749665428c0a0cfed3a375e3",
+    "version_id": "675be2047473749f8beac632",
+    "thread_id": "husain",
+    "apikey_id": "67596f305c010a893ea94287",
+    "latency_sum": 2.9645979404449463,
+    "service": null,
+    "model": "gpt-4o-mini",
+    "success_count": 2,
+    "total_token_count": 280,
+    "cost_sum": 10,
+    "record_count": 2,
+    "created_at": "2024-12-26T07:30:00.000Z",
+    "time_zone": "Asia/Kolkata"
   },
   {
-    "country": "AF",
-    "hot dog": 24,
-    "hot dogColor": "hsl(285, 70%, 50%)",
-    "burger": 148,
-    "burgerColor": "hsl(210, 70%, 50%)",
-    "sandwich": 141,
-    "sandwichColor": "hsl(147, 70%, 50%)",
-    "kebab": 44,
-    "kebabColor": "hsl(326, 70%, 50%)",
-    "fries": 46,
-    "friesColor": "hsl(308, 70%, 50%)",
-    "donut": 81,
-    "donutColor": "hsl(242, 70%, 50%)"
+    "id": 4,
+    "org_id": "11643",
+    "bridge_id": "6749665428c0a0cfed3a375e",
+    "version_id": "675be2047473749f8beac632",
+    "thread_id": "husain",
+    "apikey_id": "67596f305c010a893ea94287",
+    "latency_sum": 14.154173135757446,
+    "service": null,
+    "model": "o1-preview",
+    "success_count": 1,
+    "total_token_count": 1112,
+    "cost_sum": 5,
+    "record_count": 1,
+    "created_at": "2024-12-26T07:30:00.000Z",
+    "time_zone": "Asia/Kolkata"
   },
   {
-    "country": "AG",
-    "hot dog": 113,
-    "hot dogColor": "hsl(73, 70%, 50%)",
-    "burger": 199,
-    "burgerColor": "hsl(32, 70%, 50%)",
-    "sandwich": 181,
-    "sandwichColor": "hsl(12, 70%, 50%)",
-    "kebab": 143,
-    "kebabColor": "hsl(136, 70%, 50%)",
-    "fries": 130,
-    "friesColor": "hsl(118, 70%, 50%)",
-    "donut": 97,
-    "donutColor": "hsl(139, 70%, 50%)"
-  },
-  {
-    "country": "AI",
-    "hot dog": 191,
-    "hot dogColor": "hsl(251, 70%, 50%)",
-    "burger": 33,
-    "burgerColor": "hsl(54, 70%, 50%)",
-    "sandwich": 42,
-    "sandwichColor": "hsl(248, 70%, 50%)",
-    "kebab": 182,
-    "kebabColor": "hsl(70, 70%, 50%)",
-    "fries": 101,
-    "friesColor": "hsl(308, 70%, 50%)",
-    "donut": 155,
-    "donutColor": "hsl(29, 70%, 50%)"
-  },
-  {
-    "country": "AL",
-    "hot dog": 49,
-    "hot dogColor": "hsl(146, 70%, 50%)",
-    "burger": 48,
-    "burgerColor": "hsl(131, 70%, 50%)",
-    "sandwich": 88,
-    "sandwichColor": "hsl(355, 70%, 50%)",
-    "kebab": 43,
-    "kebabColor": "hsl(235, 70%, 50%)",
-    "fries": 135,
-    "friesColor": "hsl(332, 70%, 50%)",
-    "donut": 118,
-    "donutColor": "hsl(314, 70%, 50%)"
-  },
-  {
-    "country": "AM",
-    "hot dog": 77,
-    "hot dogColor": "hsl(209, 70%, 50%)",
-    "burger": 125,
-    "burgerColor": "hsl(101, 70%, 50%)",
-    "sandwich": 36,
-    "sandwichColor": "hsl(77, 70%, 50%)",
-    "kebab": 24,
-    "kebabColor": "hsl(179, 70%, 50%)",
-    "fries": 32,
-    "friesColor": "hsl(31, 70%, 50%)",
-    "donut": 137,
-    "donutColor": "hsl(146, 70%, 50%)"
+    "id": 2,
+    "org_id": "11643",
+    "bridge_id": "6749665428c0a0cfed3a375e",
+    "version_id": "675be2047473749f8beac632",
+    "thread_id": "husains",
+    "apikey_id": "67596f305c010a893ea94287",
+    "latency_sum": 4.359128475189209,
+    "service": null,
+    "model": "gpt-4o",
+    "success_count": 3,
+    "total_token_count": 409,
+    "cost_sum": 15,
+    "record_count": 3,
+    "created_at": "2024-12-26T07:30:00.000Z",
+    "time_zone": "Asia/Kolkata"
   }
 ]
+
+const transformDataForLineChart = (data) => {
+  const metrics = ["latency_sum", "cost_sum", "success_count", "total_token_count"];
+
+  // Map metrics to line chart format
+  return metrics.map((metric) => ({
+    id: metric,
+    data: data.map((item) => ({
+      x: item.bridge_id,
+      y: item[metric],
+    })),
+  }));
+};
 
 function Page({ params }) {
   const today = new Date().toISOString().split('T')[0];
   const [metricsData, setMetricsData] = useState([]);
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
-
   const adjustTimeForUTC = (date, includeEndTime) => {
     const localDate = new Date(date);
     if (includeEndTime) {
@@ -484,14 +524,14 @@ function Page({ params }) {
           <h2 className="text-lg font-bold mb-4">Line Chart</h2>
           <div className="h-96">
             <ResponsiveLine
-              data={lineChartData}
+              data={transformDataForLineChart(data)}
               margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
               xScale={{ type: 'point' }}
               yScale={{
                 type: 'linear',
                 min: 'auto',
                 max: 'auto',
-                stacked: true,
+                stacked: false,
                 reverse: false
               }}
               yFormat=" >-.2f"
@@ -557,15 +597,9 @@ function Page({ params }) {
           <div className="h-96">
             <ResponsiveBar
               data={data}
-              keys={[
-                'hot dog',
-                'burger',
-                'sandwich',
-                'kebab',
-                'fries',
-                'donut'
-              ]}
-              indexBy="country"
+              groupMode="grouped"
+              keys={['total_token_count', 'cost_sum']}
+              indexBy="bridge_id"
               margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
               padding={0.3}
               valueScale={{ type: 'linear' }}
@@ -591,20 +625,20 @@ function Page({ params }) {
                   spacing: 10
                 }
               ]}
-              fill={[
-                {
-                  match: {
-                    id: 'fries'
-                  },
-                  id: 'dots'
-                },
-                {
-                  match: {
-                    id: 'sandwich'
-                  },
-                  id: 'lines'
-                }
-              ]}
+              // fill={[
+              //   {
+              //     match: {
+              //       id: 'fries'
+              //     },
+              //     id: 'dots'
+              //   },
+              //   {
+              //     match: {
+              //       id: 'sandwich'
+              //     },
+              //     id: 'lines'
+              //   }
+              // ]}
               borderColor={{
                 from: 'color',
                 modifiers: [
@@ -620,7 +654,7 @@ function Page({ params }) {
                 tickSize: 5,
                 tickPadding: 5,
                 tickRotation: 0,
-                legend: 'country',
+                legend: 'bridge_id',
                 legendPosition: 'middle',
                 legendOffset: 32,
                 truncateTickAt: 0
