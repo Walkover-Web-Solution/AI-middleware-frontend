@@ -179,7 +179,7 @@ function Page({ params }) {
   }, []); // React to changes in dates or organization ID
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen p-6">
       {/* Page Header */}
       <header className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Metrics Dashboard</h1>
@@ -199,7 +199,7 @@ function Page({ params }) {
           </ul>
         </div>
 
-        <div className="join">
+        <div className="join border">
           <button className="btn join-item btn-primary">Bridges</button>
           <button className="btn join-item">API Keys</button>
           <button className="btn join-item">Models</button>
@@ -210,7 +210,7 @@ function Page({ params }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-white shadow-lg rounded-lg p-4">
           <h2 className="text-lg font-bold mb-4">Line Chart</h2>
-          <div className="h-64">
+          <div className="h-96">
             <ResponsiveBar
               data={data}
               keys={[
@@ -333,7 +333,7 @@ function Page({ params }) {
         </div>
         <div className="bg-white shadow-md rounded-lg p-4">
           <h2 className="text-lg font-bold mb-4">Bar Chart</h2>
-          <div className="h-64">
+          <div className="h-96">
             <ResponsiveBar
               data={data}
               keys={[
