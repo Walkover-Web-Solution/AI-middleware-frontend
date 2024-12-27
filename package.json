@@ -10,8 +10,6 @@
     "build:pages": "npx @cloudflare/next-on-pages"
   },
   "dependencies": {
-    "@nivo/bar": "^0.88.0",
-    "@nivo/line": "^0.88.0",
     "@reduxjs/toolkit": "^2.2.0",
     "axios": "^1.6.7",
     "debounce": "^2.0.0",
@@ -21,6 +19,7 @@
     "lucide-react": "^0.378.0",
     "next": "14.1.0",
     "react": "^18",
+    "react-apexcharts": "^1.7.0",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
     "react-infinite-scroll-component": "^6.1.0",

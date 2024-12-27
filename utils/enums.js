@@ -315,3 +315,5 @@ export const MODAL_TYPE = {
 }
 
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
+export const TIME_RANGE_OPTIONS = ['Today', 'Last 3 Days', 'Last Week', 'Last Month'];
+export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
