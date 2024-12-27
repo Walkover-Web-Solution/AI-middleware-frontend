@@ -5,6 +5,8 @@ import ReactMarkdown from "react-markdown";
 import { useDispatch } from "react-redux";
 import CodeBlock from "../codeBlock/codeBlock";
 import ToolsDataModal from "./toolsDataModal";
+import EditMessageModal from "../modals/EditMessageModal";
+import { truncate } from "./assistFile";
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId }) => {
   const dispatch = useDispatch();
@@ -98,14 +100,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       toolsDataModalRef.current.close();
     }
   };
-
-  // Truncate function
-  function truncate(string = "", maxLength) {
-    if (string.length > maxLength) {
-      return string.substring(0, maxLength - 3) + '...';
-    }
-    return string;
-  }
 
   const messageId = item.message_id;
   useEffect(() => {
@@ -319,31 +313,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       )}
 
       <ToolsDataModal toolsData={toolsData} handleClose={handleCloseToolsDataModal} toolsDataModalRef={toolsDataModalRef} integrationData={integrationData} />
-
-      {/* Modal */}
-      <dialog className="modal modal-bottom sm:modal-middle" ref={modalRef}>
-        <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6">
-          <h2 className="text-xl font-semibold mb-4">Edit Message</h2>
-          <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Enter your input:</span>
-            </label>
-            <textarea
-              className="input input-bordered textarea min-h-[200px]"
-              value={modalInput}
-              onChange={(e) => setModalInput(e.target.value)}
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <button className="btn" onClick={handleClose}>
-              Cancel
-            </button>
-            <button className="btn" onClick={handleSave}>
-              Save
-            </button>
-          </div>
-        </div>
-      </dialog>
+      <EditMessageModal modalRef={modalRef} setModalInput={setModalInput} handleClose={handleClose} handleSave={handleSave} modalInput={modalInput} />
     </div>
   );
 };

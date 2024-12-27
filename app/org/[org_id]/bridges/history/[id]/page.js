@@ -1,16 +1,14 @@
 "use client"
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import Sidebar from "@/components/historyPageComponents/sidebar";
-import ThreadItem from "@/components/historyPageComponents/threadItem";
+import ThreadContainer from "@/components/historyPageComponents/threadContainer";
 import Protected from "@/components/protected";
 import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction";
+import { getHistoryAction, userFeedbackCountAction } from "@/store/action/historyAction";
 import { clearThreadData } from "@/store/reducer/historyReducer";
-import { CircleChevronDown } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
 export const runtime = "edge";
@@ -22,31 +20,23 @@ function Page({ searchParams }) {
   const pathName = usePathname();
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
-  const historyRef = useRef(null);
-  const contentRef = useRef(null);
-  const previousScrollHeightRef = useRef(0);
-  const threadRefs = useRef({});
   const searchRef = useRef();
 
-  const { historyData, thread, integrationData } = useCustomSelector((state) => ({
+  const { historyData, thread } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
-    integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
   }));
 
   const [selectedThread, setSelectedThread] = useState("");
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [page, setPage] = useState(1);
-  const [threadPage, setThreadPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [hasMoreThreadData, setHasMoreThreadData] = useState(true);
+  
   const [loading, setLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [flexDirection, setFlexDirection] = useState("column");
   const [searchMessageId, setSearchMessageId] = useState(null);
-  const [filterOption, setFilterOption] = useState();
+  const [filterOption, setFilterOption] = useState("all");
 
   const closeSliderOnEsc = (event) => {
     if (event.key === "Escape") {
@@ -55,7 +45,6 @@ function Page({ searchParams }) {
   };
 
   useEffect(()=>{
-    setFilterOption("all");
     dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: "all"}));
   },[])
 
@@ -84,7 +73,7 @@ function Page({ searchParams }) {
       setLoading(false);
     };
     !searchRef.current.value &&  fetchInitialData();
-  }, [params?.id,filterOption]);
+  }, [params?.id, filterOption]);
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
@@ -104,43 +93,10 @@ function Page({ searchParams }) {
         });
       }
     },
-    [params.id,pathName,router]
+    [pathName, router]
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const thread_id = search.get("thread_id");
-      const startDate = search.get("start");
-      const endDate = search.get("end");
-      let result;
-      if (thread_id) {
-        setSelectedThread(thread_id);
-        result = await dispatch(getThread({threadId:thread_id, bridgeId:params.id,nextPage:1,user_feedback:filterOption}));
-      } else if (historyData.length > 0) {
-        const firstThreadId = historyData[0].thread_id;
-        setSelectedThread(firstThreadId);
-        result = await dispatch(getThread({threadId:firstThreadId,bridgeId: params.id, nextPage:1,user_feedback:filterOption}));
-
-        let url = `${pathName}?version=${params.version}&thread_id=${firstThreadId}`;
-        if (startDate && endDate) {
-          url += `&start=${startDate}&end=${endDate}`;
-        }
-        router.push(url, undefined, { shallow: true });
-      }
-      setThreadPage(1);
-      if (result?.data?.length === 40) {
-        setIsFetchingMore(false)
-        setHasMoreThreadData(true);
-      }
-      setLoading(false);
-      if (filterOption !== "all") {
-        await dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: filterOption, startDate, endDate }));
-      }
-    };
-
-    fetchData();
-  }, [search, historyData, params.id, pathName, filterOption]);
-
+  
 
   const fetchMoreData = useCallback(async () => {
     const nextPage = page + 1;
@@ -151,207 +107,32 @@ function Page({ searchParams }) {
     if (result?.length < 40) {
       setHasMore(false);
     }
-  }, [page, search, params.id, historyData,filterOption, selectedThread]);
-
-  const formatDateAndTime = (created_at) => {
-    const date = new Date(created_at);
-    const options = {
-      year: "numeric",
-      month: "numeric",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    };
-    return isNaN(date.getTime())
-      ? "Invalid Date"
-      : date?.toLocaleDateString("en-US", options);
-  };
-
-  const fetchMoreThreadData = useCallback(async () => {
-    if (isFetchingMore) return;
-    
-    setIsFetchingMore(true);
-  
-    // Capture the current scroll position and height
-    const currentScrollHeight = historyRef.current.scrollHeight;
-    previousScrollHeightRef.current = currentScrollHeight;
-  
-    const nextPage = threadPage + 1;
-    const result = await dispatch(getThread({threadId:selectedThread, bridgeId:params?.id, nextPage, user_feedback:filterOption}));
-    setThreadPage(nextPage);
-    if (!result || result.data.length < 40) {
-      setHasMoreThreadData(false);
-      setSearchMessageId(null);
-    }
-    
-    setIsFetchingMore(false);
-  }, [isFetchingMore, threadPage, selectedThread, params.id, filterOption]);
-
-  // Adjust scroll position when thread updates
-  useLayoutEffect(() => {
-    if (isFetchingMore && historyRef.current) {
-      const newScrollHeight = historyRef.current.scrollHeight;
-      const scrollDifference = newScrollHeight - previousScrollHeightRef.current;
-      historyRef.current.scrollTop += scrollDifference;
-    }
-  }, [thread, isFetchingMore]);
-
-  useEffect(() => {
-    if (historyRef.current && threadPage === 1) {
-      historyRef.current.scrollTop = historyRef.current.scrollHeight;
-    }
-  }, [threadPage]);
-
-  useEffect(() => {
-    if (historyRef?.current && contentRef?.current) {
-      const containerHeight = historyRef?.current.clientHeight;
-      const contentHeight = contentRef?.current.clientHeight;
-      if (contentHeight < containerHeight) {
-        setFlexDirection("column"); // Start from top
-      } else {
-        setFlexDirection("column-reverse"); // Start from bottom
-      }
-    }
-  }, [thread]);
-
-  // Scroll event handler to show/hide the Scroll to Bottom button
-  const handleScroll = useCallback(() => {
-    if (!historyRef?.current) return;
-    const { scrollTop, clientHeight } = historyRef.current;
-    setShowScrollToBottom(scrollTop + clientHeight < clientHeight);
-  }, []);
-
-  useEffect(() => {
-    if (historyRef?.current) {
-      historyRef?.current.addEventListener("scroll", handleScroll);
-      handleScroll();
-    }
-
-    return () => {
-      if (historyRef?.current) {
-        historyRef?.current.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [handleScroll]);
-
-  const scrollToBottom = useCallback(() => {
-    if (historyRef.current) {
-      historyRef.current.scrollTo({
-        top: historyRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, []);
-
-  const scrollToTop = useCallback(() => {
-    if (historyRef.current && searchMessageId) {
-      historyRef.current.scrollTo({
-        top: -historyRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [searchMessageId]);
-
-  const scrollToSearchedMessage = async (messageId) => {
-    const container = historyRef.current;
-    if (!container) {
-      console.warn("No container available for scrolling.");
-      return;
-    }
-
-    const findMessageAndScroll = async () => {
-      let messageElement = threadRefs.current[messageId];
-
-      if (messageElement) {
-        messageElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-        return;
-      } else {
-        searchMessageId && scrollToTop();
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        searchMessageId && findMessageAndScroll();
-      }
-    };
-
-    findMessageAndScroll();
-  };
-
-  useEffect(() => {
-    if (searchMessageId) {
-      scrollToSearchedMessage(searchMessageId);
-    }
-  }, [searchMessageId]);
-  
-  useEffect(() => {
-    if (!showScrollToBottom) {
-      scrollToBottom()
-    }
-  }, [thread, showScrollToBottom, scrollToBottom]);
+  }, [page, hasMore]);
 
   return (
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex flex-col items-center overflow-scroll justify-center">
-          <div className="w-full min-h-screen">
-            <div
-              id="scrollableDiv"
-              ref={historyRef}
-              className="w-full text-start flex flex-col h-screen overflow-y-auto"
-              style={{
-                height: "90vh",
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: flexDirection,
-              }}
-            >
-              <InfiniteScroll
-                dataLength={thread?.length}
-                next={fetchMoreThreadData}
-                hasMore={hasMoreThreadData}
-                loader={<p></p>}
-                scrollThreshold="250px"
-                inverse = {flexDirection === "column-reverse"}
-                scrollableTarget="scrollableDiv"
-              >
-                <div
-                  ref={contentRef}
-                  className="pb-16 px-3 pt-4"
-                  style={{ width: "100%" }}
-                >
-                  {thread &&
-                    thread?.map((item, index) => (
-                      <ThreadItem
-                        key={index}
-                        params={params}
-                        index={index}
-                        item={item}
-                        threadHandler={threadHandler}
-                        formatDateAndTime={formatDateAndTime}
-                        integrationData={integrationData}
-                        threadRefs={threadRefs}
-                        searchMessageId={searchMessageId}
-                        setSearchMessageId={setSearchMessageId}
-                      />
-                    ))}
-                </div>
-              </InfiniteScroll>
-            </div>
-
-            {showScrollToBottom && (
-              <button
-                onClick={scrollToBottom}
-                className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-10"
-              >
-                <CircleChevronDown size={24} />
-              </button>
-            )}
-          </div>
-        </div>
-        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore} filterOption={filterOption} setFilterOption={setFilterOption} setThreadPage={setThreadPage} searchRef={searchRef} setIsFetchingMore={setIsFetchingMore}/>
+        <ThreadContainer 
+        thread={thread}
+        // threadPage={threadPage}
+        // setThreadPage={setThreadPage}
+        filterOption={filterOption}
+        setFilterOption={setFilterOption}
+        isFetchingMore={isFetchingMore}
+        setIsFetchingMore={setIsFetchingMore}
+        setLoading={setLoading}
+        searchMessageId={searchMessageId}
+        setSearchMessageId={setSearchMessageId}
+        params={params}
+        pathName={pathName}
+        search={search}
+        historyData={historyData}
+        selectedThread={selectedThread}
+        setSelectedThread={setSelectedThread}
+        threadHandler={threadHandler}
+        />
+        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore} filterOption={filterOption} setFilterOption={setFilterOption} searchRef={searchRef} setIsFetchingMore={setIsFetchingMore}/>
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>
