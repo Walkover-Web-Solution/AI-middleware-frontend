@@ -79,7 +79,7 @@ const Chatbot = ({ params }) => {
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeName && bridgeType) {
+            if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeName && bridgeSlugName && bridgeType) {
                 window.SendDataToChatbot({
                     "bridgeName": bridgeSlugName,
                     "threadId": bridgeName?.replaceAll(" ", ""),
