@@ -17,8 +17,8 @@ const transformDataForApexCharts = (data, factor) => {
   const groupedData = data.reduce(
     (acc, item) => {
       // acc.latency.push(item?.latency_sum || item.latency);
-      acc.cost.push(item?.cost_sum || item.cost);
-      acc.success.push(item?.success_count || item.record_count);
+      acc.cost.push(item?.cost_sum || item.cost || 0);
+      acc.success.push(item?.success_count || item.record_count || 0);
       return acc;
     },
     { cost: [], success: [] }
@@ -139,7 +139,7 @@ function Page({ params }) {
       <div className="flex justify-end items-center mb-6 gap-3">
         <span className={`${loading ? 'loading loading-ring loading-lg' : ""}`}></span>
         {loading && <span className="text-gray-600">Loading...</span>}
-        <div className="dropdown border rounded-lg">
+        <div className="dropdown border rounded-lg z-[99]">
           <label tabIndex="0" role="button" className="btn">{TIME_RANGE_OPTIONS?.[range]}</label>
           <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
             {TIME_RANGE_OPTIONS.map((item, index) => (
