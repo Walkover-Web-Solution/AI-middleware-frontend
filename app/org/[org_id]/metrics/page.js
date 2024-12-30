@@ -111,7 +111,7 @@ function Page({ params }) {
         <p className="text-gray-600">Monitor your application's key metrics at a glance.</p>
       </header>
 
-      <div className='flex gap-3 justify-end'>
+      <div className='flex gap-8 justify-center'>
         <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Level:</label>
           <div className="dropdown dropdown-end z-[999] border rounded-lg">
