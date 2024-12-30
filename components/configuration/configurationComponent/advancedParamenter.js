@@ -42,7 +42,8 @@ const AdvancedParameters = ({ params }) => {
         let newValue;
         let is_json = false
         try {
-            newValue = JSON.parse(e.target.value);
+            newValue =e.target.value ? JSON.parse(e.target.value) : JSON.parse("{}");
+            setObjectFieldValue(JSON.stringify(newValue, undefined, 4));
             is_json =true
         } catch (error) {
             newValue = e.target.value;
@@ -216,10 +217,10 @@ const AdvancedParameters = ({ params }) => {
                                         ))}
                                     </select>
                                     {configuration?.[key]?.type === 'json_schema' && <textarea
+                                        key={`${key}-${configuration?.[key]}-${objectFieldValue}`}
                                         type="input"
-                                        value={objectFieldValue || JSON.stringify(configuration?.[key]?.json_schema, undefined, 4)}
+                                        defaultValue={objectFieldValue || JSON.stringify(configuration?.[key]?.json_schema, undefined, 4)}
                                         className='mt-5 textarea textarea-bordered border w-full min-h-96 resize-y z-[1]'
-                                        onChange={(e)=>{setObjectFieldValue(e.target.value)}}
                                         onBlur={(e) => handleSelectChange(e, 'json_schema')}
                                         placeholder="Enter valid JSON object here..."
                                     />}
