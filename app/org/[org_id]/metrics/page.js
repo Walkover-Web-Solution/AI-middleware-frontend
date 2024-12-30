@@ -159,6 +159,11 @@ function Page({ params }) {
                 yaxis: {
                   title: {
                     text: 'Cost ( in $ )'
+                  },
+                  labels: {
+                    formatter: function (value) {
+                      return value.toFixed(2);
+                    }
                   }
                 },
                 fill: {
@@ -171,7 +176,7 @@ function Page({ params }) {
                       if (seriesIndex === 1) { // Cost
                         return "$ " + val;
                       } else { // Latency and Success Count
-                        return ": " + val;
+                        return ": " + val.toFixed(5);
                       }
                     }
                   }
