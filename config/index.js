@@ -131,10 +131,10 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   }
 }
 
-export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage,user_feedback, pagelimit = 40) => {
+export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, pagelimit = 40) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}`,{
-      params:{
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}`, {
+      params: {
         user_feedback
       }
     })
@@ -145,7 +145,7 @@ export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextP
 }
 
 
-export const getHistory = async (bridgeId, page = 1, start, end, keyword = '',user_feedback) => {
+export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback) => {
   try {
 
     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`, {
@@ -662,7 +662,7 @@ export const discardBridgeVersionApi = async ({ bridgeId, versionId }) => {
   }
 };
 
-export const userFeedbackCount = async ({ bridge_id, user_feedback}) => {
+export const userFeedbackCount = async ({ bridge_id, user_feedback }) => {
   try {
     const response = await axios.get(`${URL}/api/v1/config/userfeedbackcount/${bridge_id}`, {
       params: {
@@ -676,7 +676,7 @@ export const userFeedbackCount = async ({ bridge_id, user_feedback}) => {
   }
 }
 
-export const getSubThreadIds = async({thread_id}) =>{
+export const getSubThreadIds = async ({ thread_id }) => {
   try {
     const response = await axios.get(`${URL}/api/v1/config/history/sub-thread/${thread_id}`);
     return response.data;
@@ -701,3 +701,13 @@ export const uploadImage = async (formData) => {
     throw new Error(errorMessage);
   }
 };
+
+export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, bridge_id, version_id, range, factor }) => {
+  try {
+    const response = await axios.post(`${URL}/metrics`, { apikey_id, service, model, thread_id, bridge_id, version_id, range, factor });
+    return response.data?.data || [];
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
