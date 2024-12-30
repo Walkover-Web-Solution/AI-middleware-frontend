@@ -47,6 +47,8 @@ function Page({ params }) {
   const { org_id } = params;
   const [factor, setFactor] = useState(0);
   const [range, setRange] = useState(0);
+  const [level, setLevel] = useState('Organization');
+  const [bridge, setBridge] = useState(null);
   const [loading, setLoading] = useState(false);
   const [metricsBarChartData, setMetricsBarChartData] = useState({ series: [], categories: [] });
   const { allBridges, apikeyData } = useCustomSelector((state) => ({
@@ -79,7 +81,7 @@ function Page({ params }) {
   }
   const fetchMetricsData = async (range) => {
     setLoading(true);
-    const result = await getMetricsDataApi({ range: range + 1, org_id, factor: METRICS_FACTOR_OPTIONS[factor] });
+    const result = await getMetricsDataApi({ range: range + 1, org_id, factor: METRICS_FACTOR_OPTIONS[factor], bridge_id: bridge?.['bridge_id'] });
     const data = transformDataForApexCharts(result, factor);
     const structured_category = structureCategory([...data.categories], factor);
     setMetricsBarChartData({ series: data.series, categories: structured_category });
@@ -88,7 +90,18 @@ function Page({ params }) {
 
   useEffect(() => {
     fetchMetricsData(range);
-  }, [factor, range]);
+  }, [factor, range, bridge?.['bridge_id']]);
+
+  const handleLevelChange = (index) => {
+    setLevel(index === 0 ? 'Organization' : 'Bridge');
+    if (index === 0) {
+      setBridge(null);
+    }
+  }
+
+  const handleBridgeChange = (bridge_id, bridge_name) => {
+    setBridge({ bridge_id, bridge_name });
+  }
 
   return (
     <div className="p-10 bg-blue-50 min-h-screen">
@@ -98,11 +111,35 @@ function Page({ params }) {
         <p className="text-gray-600">Monitor your application's key metrics at a glance.</p>
       </header>
 
+      <div className='flex gap-3 justify-end'>
+        <div className='flex justify-end mb-3 items-center'>
+          <label className="mr-1">Level:</label>
+          <div className="dropdown dropdown-end z-[999] border rounded-lg">
+            <label tabIndex="0" role="button" className="btn capitalize">{level} level</label>
+            <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+              {['Organization', 'Bridge'].map((item, index) => (
+                <li key={index}><a onClick={() => handleLevelChange(index)} className={level === item ? 'active' : ''}>{item} Level</a></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className='flex justify-end mb-3 items-center'>
+          <label className="mr-1">Select Bridge:</label>
+          <div className={`dropdown dropdown-end z-[99] border rounded-lg ${level !== 'Bridge' ? 'opacity-50 pointer-events-none' : ''}`}>
+            <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] || 'Select Bridge'}</label>
+            <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+              {allBridges.map((item, index) => (
+                <li key={index}><a onClick={() => handleBridgeChange(item?._id, item?.name)} className={bridge?.['bridge_id'] === item?._id ? 'active' : ''}>{item.name}</a></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
       {/* Top Controls */}
       <div className="flex justify-end items-center mb-6 gap-3">
         <span className={`${loading ? 'loading loading-ring loading-lg' : ""}`}></span>
         {loading && <span className="text-gray-600">Loading...</span>}
-        <div className="dropdown z-[99] border rounded-lg">
+        <div className="dropdown border rounded-lg">
           <label tabIndex="0" role="button" className="btn">{TIME_RANGE_OPTIONS?.[range]}</label>
           <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
             {TIME_RANGE_OPTIONS.map((item, index) => (
