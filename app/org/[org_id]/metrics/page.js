@@ -16,20 +16,20 @@ const transformDataForApexCharts = (data, factor) => {
   // Group data by metrics
   const groupedData = data.reduce(
     (acc, item) => {
-      acc.latency.push(item?.latency_sum || item.latency);
+      // acc.latency.push(item?.latency_sum || item.latency);
       acc.cost.push(item?.cost_sum || item.cost);
       acc.success.push(item?.success_count || item.record_count);
       return acc;
     },
-    { latency: [], cost: [], success: [] }
+    { cost: [], success: [] }
   );
 
   // Create series array for ApexCharts
   const series = [
-    {
-      name: "Latency",
-      data: groupedData.latency,
-    },
+    // {
+    //   name: "Latency",
+    //   data: groupedData.latency,
+    // },
     {
       name: "Cost",
       data: groupedData.cost,
@@ -209,11 +209,10 @@ function Page({ params }) {
                 tooltip: {
                   y: {
                     formatter: function (val, { seriesIndex }) {
-                      const labels = ["Latency", "Cost", "Success Count"];
-                      if (seriesIndex === 1) { // Cost
+                      if (seriesIndex === 0) { // Cost
                         return "$ " + val;
                       } else { // Latency and Success Count
-                        return ": " + val.toFixed(5);
+                        return ": " + val.toFixed(2);
                       }
                     }
                   }
