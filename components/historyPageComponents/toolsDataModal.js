@@ -25,7 +25,7 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
                   <div key={index} className="flex items-start gap-2 mb-2 overflow-x-auto">
                     <span className="w-28 capitalize">{key}:</span>
                     <span className="flex-1">
-                      {key === "name" && integrationData[value] ? (
+                      {key === "name" && integrationData?.[value] ? (
                         <p>
                           {integrationData[value]?.title}<span>({value})</span>
                         </p>

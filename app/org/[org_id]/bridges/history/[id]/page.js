@@ -32,34 +32,35 @@ function Page({ searchParams }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  
   const [loading, setLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [searchMessageId, setSearchMessageId] = useState(null);
   const [filterOption, setFilterOption] = useState("all");
+   const [threadPage, setThreadPage] = useState(1);
 
-  const closeSliderOnEsc = (event) => {
+  const closeSliderOnEsc = useCallback((event) => {
     if (event.key === "Escape") {
       setIsSliderOpen(false);
     }
-  };
+  }, []);
 
-  useEffect(()=>{
-    dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: "all"}));
-  },[])
-
-  const handleClickOutside = (event) => {
+  const handleClickOutside = useCallback((event) => {
     if (sidebarRef?.current && !sidebarRef.current.contains(event.target)) {
       setIsSliderOpen(false);
     }
-  };
+  }, []);
+
   useEffect(() => {
-    document?.addEventListener("keydown", closeSliderOnEsc);
-    document?.addEventListener("mousedown", handleClickOutside);
+    dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: "all" }));
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("keydown", closeSliderOnEsc);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document?.removeEventListener("keydown", closeSliderOnEsc);
-      document?.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", closeSliderOnEsc);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [closeSliderOnEsc, handleClickOutside]);
 
@@ -68,7 +69,7 @@ function Page({ searchParams }) {
       setLoading(true);
       const startDate = search.get("start");
       const endDate = search.get("end");
-      await dispatch(getHistoryAction(params?.id, startDate, endDate, 1, null, filterOption));
+      await dispatch(getHistoryAction(params.id, startDate, endDate, 1, null, filterOption));
       dispatch(clearThreadData());
       setLoading(false);
     };
@@ -77,8 +78,8 @@ function Page({ searchParams }) {
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
-      if (item?.role === "assistant") return ""
-      if (item?.role === "user" || item?.role === "tools_call" && !thread_id) {
+      if (item?.role === "assistant") return;
+      if ((item?.role === "user" || item?.role === "tools_call") && !thread_id) {
         try {
           const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
           setSelectedItem({ variables: item.variables, "System Prompt": systemPromptResponse, ...item });
@@ -96,8 +97,6 @@ function Page({ searchParams }) {
     [pathName, router]
   );
 
-  
-
   const fetchMoreData = useCallback(async () => {
     const nextPage = page + 1;
     setPage(nextPage);
@@ -107,32 +106,49 @@ function Page({ searchParams }) {
     if (result?.length < 40) {
       setHasMore(false);
     }
-  }, [page, hasMore]);
+  }, [dispatch, page, params.id, search]);
 
   return (
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <ThreadContainer 
-        thread={thread}
-        // threadPage={threadPage}
-        // setThreadPage={setThreadPage}
-        filterOption={filterOption}
-        setFilterOption={setFilterOption}
-        isFetchingMore={isFetchingMore}
-        setIsFetchingMore={setIsFetchingMore}
-        setLoading={setLoading}
-        searchMessageId={searchMessageId}
-        setSearchMessageId={setSearchMessageId}
-        params={params}
-        pathName={pathName}
-        search={search}
-        historyData={historyData}
-        selectedThread={selectedThread}
-        setSelectedThread={setSelectedThread}
-        threadHandler={threadHandler}
+          thread={thread}
+          filterOption={filterOption}
+          setFilterOption={setFilterOption}
+          isFetchingMore={isFetchingMore}
+          setIsFetchingMore={setIsFetchingMore}
+          setLoading={setLoading}
+          searchMessageId={searchMessageId}
+          setSearchMessageId={setSearchMessageId}
+          params={params}
+          pathName={pathName}
+          search={search}
+          historyData={historyData}
+          selectedThread={selectedThread}
+          setSelectedThread={setSelectedThread}
+          threadHandler={threadHandler}
+          threadPage={threadPage}
+          setThreadPage={setThreadPage}
         />
-        <Sidebar historyData={historyData} selectedThread={selectedThread} threadHandler={threadHandler} fetchMoreData={fetchMoreData} hasMore={hasMore} loading={loading} params={params} setSearchMessageId={setSearchMessageId} setPage={setPage} setHasMore={setHasMore} filterOption={filterOption} setFilterOption={setFilterOption} searchRef={searchRef} setIsFetchingMore={setIsFetchingMore}/>
+        <Sidebar 
+          historyData={historyData} 
+          selectedThread={selectedThread} 
+          threadHandler={threadHandler} 
+          fetchMoreData={fetchMoreData} 
+          hasMore={hasMore} 
+          loading={loading} 
+          params={params} 
+          setSearchMessageId={setSearchMessageId} 
+          setPage={setPage} 
+          setHasMore={setHasMore} 
+          filterOption={filterOption} 
+          setFilterOption={setFilterOption} 
+          searchRef={searchRef} 
+          setIsFetchingMore={setIsFetchingMore}
+          setThreadPage={setThreadPage}
+          threadPage={threadPage}
+        />
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
     </div>

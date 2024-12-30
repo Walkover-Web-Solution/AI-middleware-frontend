@@ -1,14 +1,14 @@
 import { CircleChevronDown } from 'lucide-react';
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ThreadItem from './threadItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { scrollToBottom, scrollToTop } from './assistFile';
 import { useDispatch } from 'react-redux';
-import { getThread  } from '@/store/action/historyAction';
+import { getThread } from '@/store/action/historyAction';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useRouter } from "next/navigation";
 
-const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, setSelectedThread, threadHandler, setLoading }) => {
+const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, setSelectedThread, threadHandler, setLoading, threadPage, setThreadPage }) => {
 
   const { integrationData } = useCustomSelector(state => state?.bridgeReducer?.org?.[params?.org_id]?.integrationData) || {};
   const historyRef = useRef(null);
@@ -21,7 +21,6 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
   const [flexDirection, setFlexDirection] = useState("column");
   const [hasMoreThreadData, setHasMoreThreadData] = useState(true);
   const [threadMessageState, setThreadMessageState] = useState();
-  const [threadPage, setThreadPage] = useState(1);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -31,29 +30,28 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
       let result;
       let url;
       setThreadPage(1);
+
+      const fetchThread = async (threadId) => {
+        setSelectedThread(threadId);
+        result = await dispatch(getThread({ threadId, bridgeId: params?.id, nextPage: 1, user_feedback: filterOption }));
+        return result;
+      };
+
       if (thread_id && historyData?.some(history => history?.thread_id === thread_id)) {
-        setSelectedThread(thread_id);
-        result = await dispatch(getThread({ threadId: thread_id, bridgeId: params?.id, nextPage: 1, user_feedback: filterOption }));
+        await fetchThread(thread_id);
       } else if (historyData?.length > 0) {
         const firstThreadId = historyData?.[0]?.thread_id;
-        setSelectedThread(firstThreadId);
-        result = await dispatch(getThread({ threadId: firstThreadId, bridgeId: params?.id, nextPage: 1, user_feedback: filterOption }));
+        await fetchThread(firstThreadId);
         url = `${pathName}?version=${params?.version}&thread_id=${firstThreadId}`;
         if (startDate && endDate) {
           url += `&start=${startDate}&end=${endDate}`;
         }
         router.push(url, undefined, { shallow: true });
       }
-      setThreadMessageState({ totalPages: result?.totalPages, totalEntries: result?.totalEnteries });
 
-      if (result?.data?.length < 40) {
-         setIsFetchingMore(false);
-         setHasMoreThreadData(false);
-      }
-      else{
-        setHasMoreThreadData(true)
-      }
-      
+      setThreadMessageState({ totalPages: result?.totalPages, totalEntries: result?.totalEnteries });
+      setHasMoreThreadData(result?.data?.length >= 40);
+      setIsFetchingMore(false);
       setLoading(false);
     };
 
@@ -63,24 +61,21 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
   const fetchMoreThreadData = useCallback(async () => {
     if (isFetchingMore || threadPage < 1 || !hasMoreThreadData) return;
     setIsFetchingMore(true);
-    const currentScrollHeight = historyRef?.current?.scrollHeight;
-    previousScrollHeightRef.current = currentScrollHeight;
+    previousScrollHeightRef.current = historyRef?.current?.scrollHeight;
 
     const nextPage = threadPage + 1;
     const result = await dispatch(getThread({ threadId: selectedThread, bridgeId: params?.id, nextPage, user_feedback: filterOption }));
     setThreadPage(nextPage);
+    setHasMoreThreadData(result?.data?.length >= 40);
     if (!result || result?.data?.length < 40) {
-       setHasMoreThreadData(false);
       setSearchMessageId(null);
     }
-
     setIsFetchingMore(false);
   }, [filterOption, hasMoreThreadData, isFetchingMore, threadPage]);
 
   useLayoutEffect(() => {
     if (isFetchingMore && historyRef?.current) {
-      const newScrollHeight = historyRef?.current?.scrollHeight;
-      const scrollDifference = newScrollHeight - previousScrollHeightRef?.current;
+      const scrollDifference = historyRef?.current?.scrollHeight - previousScrollHeightRef?.current;
       historyRef.current.scrollTop += scrollDifference;
     }
   }, [thread]);
@@ -93,13 +88,7 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
 
   useEffect(() => {
     if (historyRef?.current && contentRef?.current) {
-      const containerHeight = historyRef?.current?.clientHeight;
-      const contentHeight = contentRef?.current?.clientHeight;
-      if (contentHeight < containerHeight) {
-        setFlexDirection("column"); 
-      } else {
-        setFlexDirection("column-reverse"); 
-      }
+      setFlexDirection(contentRef?.current?.clientHeight < historyRef?.current?.clientHeight ? "column" : "column-reverse");
     }
   }, [thread]);
 
@@ -116,9 +105,7 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
     }
 
     return () => {
-      if (historyRef?.current) {
-        historyRef?.current?.removeEventListener("scroll", handleScroll);
-      }
+      historyRef?.current?.removeEventListener("scroll", handleScroll);
     };
   }, [handleScroll]);
 
@@ -127,19 +114,18 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
       console.warn("Invalid messageId provided. Aborting scroll.");
       return;
     }
-  
+
     const container = historyRef?.current;
     if (!container) {
       console.warn("No container available for scrolling.");
       return;
     }
-    const MAX_ATTEMPTS = threadMessageState?.totalEntries / threadMessageState?.totalPages; // Maximum number of attempts to find the message
-    console.log(MAX_ATTEMPTS);
-    const DELAY_MS = 100; // Delay between attempts in milliseconds
-  
+    const MAX_ATTEMPTS = threadMessageState?.totalEntries / threadMessageState?.totalPages;
+    const DELAY_MS = 100;
+
     const findMessageAndScroll = async (attempt = 1) => {
       const messageElement = threadRefs?.current?.[messageId];
-  
+
       if (messageElement) {
         messageElement.scrollIntoView({
           behavior: "smooth",
@@ -151,14 +137,12 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
         await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
         await findMessageAndScroll(attempt + 1);
       } else {
-        console.warn(
-          `Message with ID ${messageId} not found after ${MAX_ATTEMPTS} attempts.`
-        );
+        console.warn(`Message with ID ${messageId} not found after ${MAX_ATTEMPTS} attempts.`);
       }
     };
     findMessageAndScroll();
   };
-  
+
   useEffect(() => {
     if (searchMessageId) {
       scrollToSearchedMessage(searchMessageId);
@@ -169,7 +153,7 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
     if (!showScrollToBottom) {
       scrollToBottom(historyRef);
     }
-  }, [thread, showScrollToBottom, scrollToBottom]);
+  }, [thread, showScrollToBottom]);
 
   const formatDateAndTime = (created_at) => {
     const date = new Date(created_at);
@@ -181,9 +165,7 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
       minute: "2-digit",
       second: "2-digit",
     };
-    return isNaN(date.getTime())
-      ? "Invalid Date"
-      : date?.toLocaleDateString("en-US", options);
+    return isNaN(date.getTime()) ? "Invalid Date" : date.toLocaleDateString("en-US", options);
   };
 
   return (
@@ -243,7 +225,7 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ThreadContainer
+export default ThreadContainer;
