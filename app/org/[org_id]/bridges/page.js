@@ -1,8 +1,10 @@
 "use client"
 import CreateNewBridge from "@/components/createNewBridge";
+import TableReact from "@/components/customTable/customTable";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
+import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction, duplicateBridgeAction } from "@/store/action/bridgeAction";
 import { filterBridges, getIconOfService } from "@/utils/utility";
 import { Ellipsis } from "lucide-react";
@@ -26,6 +28,16 @@ function Home({ params }) {
   const filteredBridges = filterBridges(allBridges,searchTerm);
   const filteredArchivedBridges = filteredBridges.filter((item) => item.status === 0);
   const filteredUnArchivedBridges = filteredBridges.filter((item) => item.status === 1 || item.status === undefined);
+  const UnArchivedBridges = filteredBridges.filter((item) => item.status === 1).map((item) => ({
+    _id: item._id,
+    model: item.configuration?.model || "",
+    name: item.name,
+    slugName: item.slugName,
+    service: item.service === 'openai' ? <OpenAiIcon /> : item.service,
+    bridgeType: item.bridgeType,
+    status: item.status,
+
+  }));
 
   const onClickConfigure = (id, versionId) => {
     router.push(`/org/${params.org_id}/bridges/configure/${id}?version=${versionId}`);
@@ -105,8 +117,9 @@ function Home({ params }) {
   return (
     <div className="drawer lg:drawer-open">
       <CreateNewBridge />
+      <TableReact data={UnArchivedBridges} sorting columnsToShow={['name', 'service', 'model', 'slugName', 'bridgeType']}/>
       {!allBridges.length && isLoading && <LoadingSpinner />}
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+      {/* <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col items-start justify-start m-4">
         <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
           <div className="w-full">
@@ -154,7 +167,7 @@ function Home({ params }) {
             )}
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
