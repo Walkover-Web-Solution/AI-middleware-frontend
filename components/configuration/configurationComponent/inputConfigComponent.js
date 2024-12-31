@@ -137,7 +137,6 @@ const InputConfigComponent = ({ params }) => {
         let newCursorPosition;
 
         if (suggestion === 'add_variable') {
-            // const variableModal = document.getElementById(MODAL_TYPE.CREATE_VARIABLE);
             const handleTabKey = (e) => {
                 if (e.key === 'Tab') {
                     e.preventDefault();
