@@ -239,3 +239,22 @@ export function filterOrganizations(orgList, orgSearchQuery) {
             item?.id?.toString()?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase())
     );
 }
+
+
+export function openModal(modalName) {
+    const modalElement = document.getElementById(modalName);
+    if (modalElement) {
+        modalElement.showModal();
+    } else {
+        console.error(`Modal with name ${modalName} not found`);
+    }
+}
+
+export function closeModal(modalName) {
+    const modalElement = document.getElementById(modalName);
+    if (modalElement) {
+        modalElement.close();
+    } else {
+        console.error(`Modal with name ${modalName} not found`);
+    }
+}

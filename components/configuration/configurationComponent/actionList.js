@@ -4,6 +4,8 @@ import { Trash } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import ActionModel from './actionModel';
+import { openModal } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
 
 function ActionList({ params }) {
     const { action, bridgeType } = useCustomSelector((state) => ({
@@ -45,7 +47,7 @@ function ActionList({ params }) {
                             className="flex w-[250px] flex-col items-start rounded-md border hover:bg-base-200 md:flex-row cursor-pointer"
                             onClick={() => {
                                 setSelectedKey(key);
-                                document.getElementById('actionModel').showModal();
+                                openModal(MODAL_TYPE.ACTION_MODAL)
                             }}
                         >
                             <div className="p-4 w-full">

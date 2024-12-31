@@ -3,7 +3,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
-import { getIconOfService, toggleSidebar } from '@/utils/utility';
+import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
@@ -84,10 +84,6 @@ function Navbar() {
     }
   };
 
-  const handlePublishBridge = async () => {
-    document.getElementById(MODAL_TYPE.PUBLISH_BRIDGE_VERSION).showModal();
-  }
-
   const handleDiscardChanges = async () => {
     dispatch(updateBridgeVersionReducer({ bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false } }));
     dispatch(dicardBridgeVersionAction({ bridgeId, versionId }));
@@ -138,7 +134,7 @@ function Navbar() {
                 )}
                 <button
                   className="btn bg-green-200 hover:bg-green-300"
-                  onClick={handlePublishBridge}
+                  onClick={()=>openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
                   disabled={!isdrafted && publishedVersion === versionId}
                 >
                   Publish Version
@@ -168,20 +164,20 @@ function Navbar() {
           </>
         ) : (
           path[3] === 'apikeys' ?
-            <button className="btn  btn-primary" onClick={() => document.getElementById('my_modal_6').showModal()}>+ create new Api key</button>
+            <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>+ create new Api key</button>
             : path[3] === 'pauthkey' ?
-              <button className="btn  btn-primary" onClick={() => document.getElementById('my_modal_5').showModal()}>+ create new Pauth Key</button>
+              <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new Pauth Key</button>
               :
               path[3] === 'alerts' ?
-                <button className="btn  btn-primary" onClick={() => document.getElementById('my_modal_7').showModal()}>+ create new Alert</button>
+                <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.WEBHOOK_MODAL)}>+ create new Alert</button>
                 :
                 path[3] === 'bridges' ?
                   <div>
-                    <button className="btn btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>
+                    <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>
                       + create new bridge
                     </button>
                   </div> : (path[3] === 'chatbot' && path.length === 4) ?
-                    <button className="btn btn-primary" onClick={() => document.getElementById('chatBot_model').showModal()}>
+                    <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CHATBOT_MODAL)}>
                       + create new chatbot
                     </button> : ""
         )}
