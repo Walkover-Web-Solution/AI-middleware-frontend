@@ -1,5 +1,7 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateVariables } from '@/store/reducer/bridgeReducer';
+import { MODAL_TYPE } from '@/utils/enums';
+import { closeModal } from '@/utils/utility';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -31,7 +33,7 @@ function CreateVariableModal({ keyName, setKeyName, params }) {
             setKeyName('');
             setKeyValue('');
             setValueValue('');
-            document.getElementById('create_variable_modal').close(); // Close the modal after creation
+            closeModal(MODAL_TYPE.CREATE_VARIABLE); // Close the modal after creation
         }
     };
 
@@ -40,11 +42,11 @@ function CreateVariableModal({ keyName, setKeyName, params }) {
         setKeyName('');
         setKeyValue('');
         setValueValue('');
-        document.getElementById('create_variable_modal').close();
+        closeModal(MODAL_TYPE.CREATE_VARIABLE)
     }
 
     return (
-        <dialog id="create_variable_modal" className="modal">
+        <dialog id={MODAL_TYPE.CREATE_VARIABLE} className="modal">
             <div className="modal-box" key={keyName}>
                 <h3 className="font-bold text-lg">Create New Variable</h3>
                 {/* <form> */}

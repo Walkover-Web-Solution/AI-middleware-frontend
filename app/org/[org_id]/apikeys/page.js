@@ -1,8 +1,8 @@
 'use client';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, getAllApikeyAction, saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
-import { API_KEY_COLUMNS } from '@/utils/enums';
-import { getIconOfService } from '@/utils/utility';
+import { API_KEY_COLUMNS, API_KEY_MODAL_INPUT, MODAL_TYPE } from '@/utils/enums';
+import { closeModal, getIconOfService, openModal } from '@/utils/utility';
 import { SquarePen, Trash2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -32,11 +32,8 @@ const Page = () => {
     const handleUpdateClick = useCallback((item) => {
         setSelectedApiKey(item);
         setIsEditing(true);
-        const modal = document.getElementById('my_modal_6');
-        if (modal) {
-            modal.showModal();
-        }
-    }, []);
+        openModal(MODAL_TYPE.API_KEY_MODAL)
+    }, [MODAL_TYPE,openModal]);
 
     const deleteApikey = useCallback((item) => {
         if (window.confirm("Are you sure you want to delete this API key?")) {
@@ -76,21 +73,14 @@ const Page = () => {
         event.target.reset();
         setSelectedApiKey(null);
         setIsEditing(false);
-
-        const modal = document.getElementById('my_modal_6');
-        if (modal) {
-            modal.close();
-        }
+        closeModal(MODAL_TYPE.API_KEY_MODAL)
     }, [dispatch, orgId, isEditing, selectedApiKey, apikeyData]);
 
     const handleClose = useCallback(() => {
-        const modal = document.getElementById('my_modal_6');
-        if (modal) {
-            modal.close();
-        }
+        closeModal(MODAL_TYPE.API_KEY_MODAL)
         setSelectedApiKey(null);
         setIsEditing(false);
-    }, []);
+    }, [MODAL_TYPE, closeModal]);
 
     const columns = API_KEY_COLUMNS || [];
     return (
@@ -133,12 +123,12 @@ const Page = () => {
                     )}
                 </tbody>
             </table>
-            <dialog id="my_modal_6" className="modal modal-bottom sm:modal-middle">
+            <dialog id={MODAL_TYPE?.API_KEY_MODAL} className="modal modal-bottom sm:modal-middle">
                 <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
                     <h3 className="font-bold text-lg">
                         {isEditing ? 'Update API Key' : 'Create New API Key'}
                     </h3>
-                    {['name', 'apikey', 'comment'].map((field) => (
+                    {API_KEY_MODAL_INPUT.map((field) => (
                         <div key={field} className="flex flex-col gap-2">
                             <label htmlFor={field} className="label-text">
                                 {field.charAt(0).toUpperCase() + field.slice(1)}:

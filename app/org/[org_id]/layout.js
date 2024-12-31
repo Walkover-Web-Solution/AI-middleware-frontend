@@ -5,6 +5,8 @@ import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, getAllBridgesAction, getAllFunctions, integrationAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
+import { MODAL_TYPE } from "@/utils/enums";
+import { openModal } from "@/utils/utility";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
@@ -19,7 +21,7 @@ export default function layoutOrgPage({ children, params }) {
   useEffect(() => {
     dispatch(getAllBridgesAction((data) => {
       if (data === 0) {
-        document.getElementById('my_modal_1') && document.getElementById('my_modal_1')?.showModal()
+        openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
       }
     }))
     dispatch(getAllFunctions())

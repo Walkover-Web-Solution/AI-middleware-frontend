@@ -3,6 +3,7 @@ import OptimizePromptModal from '@/components/modals/optimizePromptModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
+import { openModal } from '@/utils/utility';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -136,7 +137,7 @@ const InputConfigComponent = ({ params }) => {
         let newCursorPosition;
 
         if (suggestion === 'add_variable') {
-            const variableModal = document.getElementById('create_variable_modal');
+            // const variableModal = document.getElementById(MODAL_TYPE.CREATE_VARIABLE);
             const handleTabKey = (e) => {
                 if (e.key === 'Tab') {
                     e.preventDefault();
@@ -151,9 +152,7 @@ const InputConfigComponent = ({ params }) => {
                         const textBetweenBraces = textarea.value.slice(start + 2, end);
 
                         setKeyName(textBetweenBraces);
-                        if (variableModal) {
-                            variableModal.showModal();
-                        }
+                        openModal(MODAL_TYPE.CREATE_VARIABLE)
                     }
                     // Remove event listener after showing modal
                     textarea.removeEventListener('keydown', handleTabKey);
@@ -239,10 +238,6 @@ const InputConfigComponent = ({ params }) => {
         );
     };
 
-    const handleOptimizePrompt = () => {
-        document.getElementById(MODAL_TYPE.OPTIMIZE_PROMPT).showModal();
-    }
-
     if (service === "google" && serviceType === "chat") return null;
 
     return (
@@ -251,7 +246,7 @@ const InputConfigComponent = ({ params }) => {
                 <div className="label">
                     <span className="label-text capitalize font-medium">Prompt</span>
                 </div>
-                <div className="label cursor-pointer" onClick={handleOptimizePrompt}>
+                <div className="label cursor-pointer" onClick={()=> openModal(MODAL_TYPE.OPTIMIZE_PROMPT)}>
                     <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">Optimize Prompt</span>
                 </div>
 

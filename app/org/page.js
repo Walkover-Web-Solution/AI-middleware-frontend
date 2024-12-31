@@ -5,7 +5,8 @@ import { switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { userDetails } from '@/store/action/userDetailsAction';
-import { filterOrganizations } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
+import { filterOrganizations, openModal } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
@@ -15,8 +16,6 @@ import { useDispatch } from "react-redux";
  * the current user is a member of.
  */
 function Page() {
-
-  const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const route = useRouter()
@@ -40,14 +39,6 @@ function Page() {
       console.error("Error switching organization", error);
     }
   }, [dispatch, route]);
-
-  const handleOpenCreateOrgModal = useCallback(() => {
-    setShowCreateOrgModal(true);
-  }, []);
-
-  const handleCloseCreateOrgModal = useCallback(() => {
-    setShowCreateOrgModal(false);
-  }, []);
 
   useEffect(() => {
     dispatch(userDetails());
@@ -75,7 +66,7 @@ function Page() {
         <div className='flex flex-row justify-between items-center'>
           <h2 className="text-2xl font-semibold text-gray-800">Existing Organizations</h2>
           <button
-            onClick={handleOpenCreateOrgModal}
+            onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)}
             className="px-6 py-3 my-5 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
           >
             + Create New Organization
@@ -91,7 +82,7 @@ function Page() {
         <div className="grid grid-rows-1 md:grid-rows-2 lg:grid-rows-3 gap-4 mb-8 cursor-pointer">
           {renderedOrganizations}
         </div>
-        {showCreateOrgModal && <CreateOrg onClose={handleCloseCreateOrgModal} handleSwitchOrg={handleSwitchOrg} />}
+        {<CreateOrg handleSwitchOrg={handleSwitchOrg} />}
       </div>
     </div>
   );
