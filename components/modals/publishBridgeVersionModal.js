@@ -1,5 +1,6 @@
 import { publishBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums'
+import { closeModal } from '@/utils/utility';
 import React from 'react'
 import { useDispatch } from 'react-redux';
 
@@ -8,11 +9,11 @@ function PublishBridgeVersionModal({ params }) {
 
     const handleCloseModal = (e) => {
         e.preventDefault();
-        document.getElementById(MODAL_TYPE.PUBLISH_BRIDGE_VERSION).close();
+        closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)
     }
     const handlePublishBridge = async () => {
         dispatch(publishBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, orgId: params?.org_id }));
-        document.getElementById(MODAL_TYPE.PUBLISH_BRIDGE_VERSION).close();
+        closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)
     }
     return (
         <dialog id={MODAL_TYPE.PUBLISH_BRIDGE_VERSION} className="modal">

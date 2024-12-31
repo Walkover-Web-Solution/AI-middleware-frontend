@@ -5,13 +5,13 @@ import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { archiveBridgeAction, duplicateBridgeAction } from "@/store/action/bridgeAction";
-import { filterBridges, getIconOfService } from "@/utils/utility";
-import { Ellipsis, LayoutGrid, Table } from "lucide-react";
+import { MODAL_TYPE } from "@/utils/enums";
+import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
+import { Ellipsis } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
- // Assuming this is the component for table view
 
 export const runtime = 'edge';
 
@@ -120,7 +120,7 @@ function Home({ params }) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                   <p className="text-lg font-semibold text-base-content">Create Your First Bridge</p>
-                  <button className="btn mt-2 btn-primary" onClick={() => document.getElementById('my_modal_1').showModal()}>+ create new bridge</button>
+                  <button className="btn mt-2 btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ create new bridge</button>
                 </div>
               </div>
             ) : (

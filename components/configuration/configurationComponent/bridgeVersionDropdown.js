@@ -2,6 +2,8 @@ import PublishBridgeVersionModal from '@/components/modals/publishBridgeVersionM
 import VersionDescriptionModal from '@/components/modals/versionDescriptionModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { createBridgeVersionAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
+import { MODAL_TYPE } from '@/utils/enums';
+import { closeModal, openModal } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
@@ -32,20 +34,8 @@ function BridgeVersionDropdown({ params }) {
         router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${version}`);
         dispatch(getBridgeVersionAction({ versionId: version, version_description:versionDescriptionRef }));
     };
-    const openVersionModal = () => {
-        const modal = document?.getElementById('version_description_modal');
-        if (modal) {
-            modal.showModal();
-        }
-    };
 
-    const handleCloseModal = () => {
-        const modal = document?.getElementById('version_description_modal');
-        if (modal) {
-            modal.close();
-        }
-        versionDescriptionRef.current.value = '';
-    }
+    
 
     const handleCreateNewVersion = () => {
         // create new version
@@ -78,7 +68,7 @@ function BridgeVersionDropdown({ params }) {
                     <li>
                         <button
                             className="btn mt-3 w-full text-left"
-                            onClick={openVersionModal}
+                            onClick={()=>openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
                         >
                             Create New Version <span className='ml-1'>&rarr;</span>
                         </button>
@@ -86,7 +76,7 @@ function BridgeVersionDropdown({ params }) {
                 </ul>
             </div>
             <PublishBridgeVersionModal params={params} />
-            <VersionDescriptionModal handleCloseModal={handleCloseModal} versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion}/>
+            <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion}/>
         </div>
     );
 }

@@ -2,6 +2,7 @@ import { optimizePromptApi } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { optimizePromptReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
+import { closeModal } from '@/utils/utility';
 import { Copy, Redo, Undo } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -41,7 +42,7 @@ function OptmizePromptModal({ params }) {
     const handleCloseModal = (e) => {
         e.preventDefault();
         setNewPrompt("");
-        document.getElementById(MODAL_TYPE.OPTIMIZE_PROMPT).close();
+        closeModal(MODAL_TYPE.OPTIMIZE_PROMPT)
     }
 
     const handleUndo = () => {
