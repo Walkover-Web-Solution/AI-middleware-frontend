@@ -1,15 +1,17 @@
 "use client"
+import TableViewComponent from "@/components/configuration/configurationComponent/TableViewComponent";
 import CreateNewBridge from "@/components/createNewBridge";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { archiveBridgeAction, duplicateBridgeAction } from "@/store/action/bridgeAction";
 import { filterBridges, getIconOfService } from "@/utils/utility";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, LayoutGrid, Table } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+ // Assuming this is the component for table view
 
 export const runtime = 'edge';
 
@@ -23,7 +25,8 @@ function Home({ params }) {
   }));
 
   const [searchTerm, setSearchTerm] = useState('');
-  const filteredBridges = filterBridges(allBridges,searchTerm);
+  const [viewMode, setViewMode] = useState('grid'); // State to manage view mode
+  const filteredBridges = filterBridges(allBridges, searchTerm);
   const filteredArchivedBridges = filteredBridges.filter((item) => item.status === 0);
   const filteredUnArchivedBridges = filteredBridges.filter((item) => item.status === 1 || item.status === undefined);
 
@@ -130,25 +133,47 @@ function Home({ params }) {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                </div>
-                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
-                  {filteredUnArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
-                    renderBridgeCard(item)
-                  ))}
-                </div>
-                {filteredArchivedBridges?.length > 0 && <div className="">
-                  <div class="flex justify-center items-center my-4">
-                    <p class="border-t border-base-300 w-full"></p>
-                    <p class="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
-                      Archived Bridges
-                    </p>
-                    <p class="border-t border-base-300 w-full"></p>
+                  <div className="dropdown dropdown-end">
+                    <ul className="menu menu-horizontal bg-base-200 rounded-box">
+                      <li>
+                        <a onClick={() => setViewMode('grid')} className={viewMode === 'grid' ? 'bg-primary text-base-100' : ''}>
+                          <LayoutGrid className="h-5 w-5" />
+                        </a>
+                      </li>
+                      <li>
+                        <a onClick={() => setViewMode('table')} className={viewMode === 'table' ? 'bg-primary text-base-100' : ''}>
+                          <Table className="h-5 w-5" />
+                        </a>
+                      </li>
+                    </ul>
                   </div>
-                  <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 opacity-50">
-                    {filteredArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                </div>
+                {viewMode === 'grid' ? (
+                  <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
+                    {filteredUnArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
                       renderBridgeCard(item)
                     ))}
                   </div>
+                ) : (
+                  <TableViewComponent bridges={filteredUnArchivedBridges} archiveBridge={archiveBridge} onClickConfigure={onClickConfigure}/>
+                )}
+                {filteredArchivedBridges?.length > 0 && <div className="">
+                  <div className="flex justify-center items-center my-4">
+                    <p className="border-t border-base-300 w-full"></p>
+                    <p className="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+                      Archived Bridges
+                    </p>
+                    <p className="border-t border-base-300 w-full"></p>
+                  </div>
+                  {viewMode === 'grid' ? (
+                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 opacity-50">
+                      {filteredArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                        renderBridgeCard(item)
+                      ))}
+                    </div>
+                  ) : (
+                    <TableViewComponent bridges={filteredArchivedBridges} archiveBridge={archiveBridge} onClickConfigure={onClickConfigure}/>
+                  )}
                 </div>}
               </div>
             )}

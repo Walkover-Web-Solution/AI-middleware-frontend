@@ -43,3 +43,10 @@ export function getDefaultValues(additionalParams, bridgeParams) {
 }
 
 export const parameterTypes = ['string', 'number', 'boolean','object','array'];
+
+export const BRIDGE_TABLE_COMPONENT_COLUMNS = [
+    { name: 'Name', className: 'py-3 px-6 text-left cursor-pointer flex items-center', sortable: true },
+    { name: 'Prompt', className: 'py-3 px-6 text-left hidden md:table-cell' },
+    { name: 'Model', className: 'py-3 px-6 text-left hidden sm:table-cell' },
+    { name: 'Status', className: 'py-3 px-6 text-left' }
+];
