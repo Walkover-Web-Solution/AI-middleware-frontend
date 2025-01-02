@@ -10,23 +10,21 @@ import { useCustomSelector } from "@/customHooks/customSelector.js";
 import { clearSubThreadData } from "@/store/reducer/historyReducer.js";
 import { USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 
-const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setIsFetchingMore, setThreadPage}) => {
+const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedSubThreadId, setSelectedSubThreadId }) => {
+  const { subThreads } = useCustomSelector(state => ({
+    subThreads: state?.historyReducer.subThreads || [],
+  }));
 
-  const {subThreads} = useCustomSelector((state) => ({
-    subThreads:state?.historyReducer.subThreads || [],
-  }))
-  
   const [isThreadSelectable, setIsThreadSelectable] = useState(false);
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
-  const [selectedSubThreadId, setSelectedSubThreadId] = useState(null); // State to track selected sub thread
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedThreads, setExpandedThreads] = useState([]); // Track expanded threads
+  const [expandedThreads, setExpandedThreads] = useState([]);
   const dispatch = useDispatch();
-  
-  const { userFeedbackCount } = useCustomSelector((state) => ({
+
+  const { userFeedbackCount } = useCustomSelector(state => ({
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
   }));
-  
+
   useEffect(() => {
     setExpandedThreads([]);
   }, [selectedThread]);
@@ -34,99 +32,75 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   const debounce = (func, delay) => {
     let timeoutId;
     return (...args) => {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        func(...args);
-      }, delay);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
     };
   };
 
-  const handleChange = debounce((e) => {
+  const handleChange = debounce(e => {
     setSearchQuery(e.target?.value);
     handleSearch(e);
   }, 500);
 
-  const handleSearch = async (e) => {
+  const handleSearch = async e => {
     e.preventDefault();
     setPage(1);
     setHasMore(true);
-    setFilterOption('all')
+    setFilterOption('all');
     dispatch(clearSubThreadData());
     const result = await dispatch(getHistoryAction(params.id, null, null, 1, searchRef.current.value || ""));
-    if (result?.length < 40) {
-      setHasMore(false);
-    }
-  }
+    if (result?.length < 40) setHasMore(false);
+  };
 
   const clearInput = async () => {
     setSearchQuery('');
     searchRef.current.value = '';
     setPage(1);
     setHasMore(true);
-    setFilterOption('all')
+    setFilterOption('all');
     const result = await dispatch(getHistoryAction(params.id, null, null, 1, searchRef.current.value || ""));
     await dispatch(getThread(selectedThread, params?.id, 1, "all"));
-    if (result?.length < 40) {
-      setHasMore(false);
-    }
-  }
-
-  const handleDownload = async () => {
-    document.getElementById('fine-tune-modal')?.showModal()
+    if (result?.length < 40) setHasMore(false);
   };
 
-  const handleThreadIds = (id) => {
-    if (selectedThreadIds && selectedThreadIds.includes(id)) {
-      setSelectedThreadIds(selectedThreadIds.filter((threadId) => threadId !== id));
-    } else {
-      setSelectedThreadIds([...selectedThreadIds, id]);
-    }
-    
+  const handleDownload = () => {
+    document.getElementById('fine-tune-modal')?.showModal();
   };
 
-  const handleToggleThread = (threadId) => {
+  const handleThreadIds = id => {
+    setSelectedThreadIds(prevIds => prevIds.includes(id) ? prevIds.filter(threadId => threadId !== id) : [...prevIds, id]);
+  };
+
+  const handleToggleThread = async (threadId) => {
     const isExpanded = expandedThreads.includes(threadId);
     if (isExpanded) {
-       setThreadPage(1);
-      dispatch(getThread({threadId, bridgeId:params.id, nextPage:1})); 
-      dispatch(getHistoryAction(params.id, null, null, 1, null, "all"));
-      setExpandedThreads(expandedThreads.filter(id => id !== threadId));
-      dispatch(clearSubThreadData());
+      setThreadPage(1);
+      const result = await dispatch(getThread({ threadId, bridgeId: params.id, nextPage: 1 }));
+      setHasMoreThreadData(result.data.length >= 40);
+      await dispatch(getHistoryAction(params.id, null, null, 1, null, "all"));
       setExpandedThreads([]);
-     
-    setSelectedSubThreadId(null);
+      await dispatch(clearSubThreadData());
+      setSelectedSubThreadId(null);
     } else {
-      setExpandedThreads([...expandedThreads, threadId]);
-      dispatch(getSubThreadsAction({thread_id: threadId}));
+      setExpandedThreads(prev => [...prev, threadId]);
+      await dispatch(getSubThreadsAction({ thread_id: threadId }));
     }
   };
 
-  function truncate(string = "", maxLength) {
-    if (string.length > maxLength) {
-      return string.substring(0, maxLength - 3) + '...';
-    }
-    return string;
-  }
+  const truncate = (string = "", maxLength) => string.length > maxLength ? string.substring(0, maxLength - 3) + '...' : string;
 
-  const handleSetMessageId = (messageId) => {
-    if (messageId)
-      setSearchMessageId(messageId);
-    else
-      toast.error("Message ID null or not found");
+  const handleSetMessageId = messageId => {
+    messageId ? setSearchMessageId(messageId) : toast.error("Message ID null or not found");
   };
 
   const handleSelectSubThread = async (subThreadId, threadId) => {
     setThreadPage(1);
-    setIsFetchingMore(true);
-    setSelectedSubThreadId(subThreadId); 
-    const result = await dispatch(getThread({threadId, subThreadId, bridgeId:params.id, nextPage:1, user_feedback:filterOption})); 
-  
-    if (result.data.length === 40) {
-      setIsFetchingMore(false);
-    }
+    setSelectedSubThreadId(subThreadId);
+    const result = await dispatch(getThread({ threadId, subThreadId, bridgeId: params.id, nextPage: 1, user_feedback: filterOption }));
+    setHasMoreThreadData(result.data.length >= 40);
   };
 
-  const handleFilterChange = async (user_feedback) => {
+  const handleFilterChange = async user_feedback => {
     setFilterOption(user_feedback);
     setThreadPage(1);
     dispatch(userFeedbackCountAction({ bridge_id: params?.id, user_feedback }));
@@ -163,7 +137,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
             Advance Filter
           </div>
           <div className="collapse-content">
-            <DateRangePicker params={params} setFilterOption={setFilterOption}/>
+            <DateRangePicker params={params} setFilterOption={setFilterOption} />
           </div>
         </div>
         <form onSubmit={handleSearch} className="relative">
@@ -171,7 +145,6 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
             type="text"
             ref={searchRef}
             placeholder="Search..."
-            //  value={searchQuery}
             onChange={handleChange}
             className="border border-gray-300 rounded p-2 w-full pr-10"
           />
@@ -199,34 +172,33 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
           {/* Loading... */}
         </div>
       ) : (
-        <InfiniteScroll dataLength={historyData.length} next={fetchMoreData} hasMore={!searchQuery && hasMore} loader={<h4></h4>} scrollableTarget="sidebar" >
+        <InfiniteScroll dataLength={historyData.length} next={fetchMoreData} hasMore={!searchQuery && hasMore} loader={<h4></h4>} scrollableTarget="sidebar">
           <div className="slider-container min-w-[40%] overflow-x-auto mb-16">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
-              {historyData.map((item) => (
-              <div  className={`${isThreadSelectable ? "flex" : "flex-col"}`}>
-                  {isThreadSelectable && <div onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-lg mr-2 bg-white"
-                      checked={selectedThreadIds?.includes(item?.thread_id)}
-                      onChange={() => handleThreadIds(item?.thread_id)}
-                    />
-                  </div>}
+              {historyData.map(item => (
+                <div className={`${isThreadSelectable ? "flex" : "flex-col"}`}>
+                  {isThreadSelectable && (
+                    <div onClick={e => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-lg mr-2 bg-white"
+                        checked={selectedThreadIds?.includes(item?.thread_id)}
+                        onChange={() => handleThreadIds(item?.thread_id)}
+                      />
+                    </div>
+                  )}
                   <li
-                    className={`${selectedThread === item.thread_id
-                      ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
-                      : ""
-                      } flex-grow cursor-pointer`} 
+                    className={`${selectedThread === item.thread_id ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md" : ""} flex-grow cursor-pointer`}
                     onClick={() => threadHandler(item.thread_id)}
                   >
                     <a className="w-full h-full flex items-center justify-between">
                       <span>{item.thread_id}</span>
                       {!searchQuery && selectedThread === item?.thread_id && (
-                        <div 
-                          onClick={(e) => { 
-                            e.stopPropagation();  // Prevent click event from propagating to the list item
-                            handleToggleThread(item?.thread_id); 
-                          }} 
+                        <div
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleToggleThread(item?.thread_id);
+                          }}
                           className="ml-2 cursor-pointer"
                         >
                           {!searchQuery && expandedThreads.includes(item.thread_id) ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -240,10 +212,12 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                         {subThreads.length === 0 ? (
                           <li>No sub thread available</li>
                         ) : (
-                          subThreads && subThreads?.map((subThreadId, index) => (
-                            <li key={index} 
-                                className={`cursor-pointer ${selectedSubThreadId === subThreadId.display_name ? "hover:bg-base-primary hover:text-base-100" : "hover:bg-base-300 hover:text-gray-800"}  p-2 rounded-md transition-all duration-200 ${selectedSubThreadId === subThreadId.display_name ? "bg-primary text-base-100" : ""}`} 
-                                onClick={() => handleSelectSubThread(subThreadId.display_name, selectedThread)}>
+                          subThreads.map((subThreadId, index) => (
+                            <li
+                              key={index}
+                              className={`cursor-pointer ${selectedSubThreadId === subThreadId.display_name ? "hover:bg-base-primary hover:text-base-100" : "hover:bg-base-300 hover:text-gray-800"} p-2 rounded-md transition-all duration-200 ${selectedSubThreadId === subThreadId.display_name ? "bg-primary text-base-100" : ""}`}
+                              onClick={() => handleSelectSubThread(subThreadId.display_name, selectedThread)}
+                            >
                               {subThreadId?.display_name}
                             </li>
                           ))
@@ -251,45 +225,44 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                       </ul>
                     </div>
                   )}
-                   {item?.message && item?.message.length > 0 && (
+                  {item?.message && item?.message.length > 0 && (
                     <div className="pl-10 pb-2 text-gray-600 text-sm">
                       {item.message.map((msg, index) => (
                         <div
                           key={index}
-                          onClick={()=>handleSetMessageId(msg.message_id)}  
+                          onClick={() => handleSetMessageId(msg.message_id)}
                           className="cursor-pointer hover:bg-gray-100 hover:text-gray-800 p-2 rounded-md transition-all duration-200"
                         >
-                          {truncate(msg?.message,45)}
+                          {truncate(msg?.message, 45)}
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
-
               ))}
             </ul>
           </div>
         </InfiniteScroll>
       )}
       <div className="fixed bottom-2 left-12">
-        {!isThreadSelectable && historyData.length > 0 && <button onClick={() => { setIsThreadSelectable(true) }} className="btn btn-primary btn-sm">
-          Generate Fine tunning file
-        </button>}
-        {
-          isThreadSelectable && (
-            <div className="flex gap-3">
-              <button onClick={handleDownload} className="btn btn-primary" disabled={selectedThreadIds?.length === 0}>
-                Download <Download size={16} />
-              </button>
-              <button onClick={() => setIsThreadSelectable(false)} className="btn bg-base-300">
-                Cancel
-              </button>
-            </div>
-          )
-        }
+        {!isThreadSelectable && historyData.length > 0 && (
+          <button onClick={() => setIsThreadSelectable(true)} className="btn btn-primary btn-sm">
+            Generate Fine tunning file
+          </button>
+        )}
+        {isThreadSelectable && (
+          <div className="flex gap-3">
+            <button onClick={handleDownload} className="btn btn-primary" disabled={selectedThreadIds?.length === 0}>
+              Download <Download size={16} />
+            </button>
+            <button onClick={() => setIsThreadSelectable(false)} className="btn bg-base-300">
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
 };
 
 export default Sidebar;

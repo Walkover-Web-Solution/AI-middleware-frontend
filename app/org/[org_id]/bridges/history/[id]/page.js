@@ -36,32 +36,31 @@ function Page({ searchParams }) {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [searchMessageId, setSearchMessageId] = useState(null);
   const [filterOption, setFilterOption] = useState("all");
-   const [threadPage, setThreadPage] = useState(1);
+  const [threadPage, setThreadPage] = useState(1);
+  const [hasMoreThreadData, setHasMoreThreadData] = useState(true);
+  const [selectedSubThreadId, setSelectedSubThreadId] = useState(null);
 
   const closeSliderOnEsc = useCallback((event) => {
-    if (event.key === "Escape") {
-      setIsSliderOpen(false);
-    }
+    if (event.key === "Escape") setIsSliderOpen(false);
   }, []);
 
   const handleClickOutside = useCallback((event) => {
-    if (sidebarRef?.current && !sidebarRef.current.contains(event.target)) {
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
       setIsSliderOpen(false);
     }
   }, []);
 
   useEffect(() => {
     dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: "all" }));
-  }, []);
+  }, [dispatch, params.id]);
 
   useEffect(() => {
-    document.addEventListener("keydown", closeSliderOnEsc);
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("keydown", closeSliderOnEsc);
-      document.removeEventListener("mousedown", handleClickOutside);
+    const handleEvents = (action) => {
+      document[`${action}EventListener`]("keydown", closeSliderOnEsc);
+      document[`${action}EventListener`]("mousedown", handleClickOutside);
     };
+    handleEvents("add");
+    return () => handleEvents("remove");
   }, [closeSliderOnEsc, handleClickOutside]);
 
   useEffect(() => {
@@ -73,8 +72,8 @@ function Page({ searchParams }) {
       dispatch(clearThreadData());
       setLoading(false);
     };
-    !searchRef.current.value &&  fetchInitialData();
-  }, [params?.id, filterOption]);
+    if (!searchRef.current.value) fetchInitialData();
+  }, [dispatch, params.id, filterOption, search]);
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
@@ -89,12 +88,10 @@ function Page({ searchParams }) {
         }
       } else {
         setSelectedThread(thread_id);
-        router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}`, undefined, {
-          shallow: true,
-        });
+        router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}`, undefined, { shallow: true });
       }
     },
-    [pathName, router]
+    [pathName, router, params.id, params.version]
   );
 
   const fetchMoreData = useCallback(async () => {
@@ -103,9 +100,7 @@ function Page({ searchParams }) {
     const startDate = search.get("start");
     const endDate = search.get("end");
     const result = await dispatch(getHistoryAction(params.id, startDate, endDate, nextPage));
-    if (result?.length < 40) {
-      setHasMore(false);
-    }
+    if (result?.length < 40) setHasMore(false);
   }, [dispatch, page, params.id, search]);
 
   return (
@@ -130,6 +125,9 @@ function Page({ searchParams }) {
           threadHandler={threadHandler}
           threadPage={threadPage}
           setThreadPage={setThreadPage}
+          hasMoreThreadData={hasMoreThreadData}
+          setHasMoreThreadData={setHasMoreThreadData}
+          selectedSubThreadId={selectedSubThreadId}
         />
         <Sidebar 
           historyData={historyData} 
@@ -148,6 +146,10 @@ function Page({ searchParams }) {
           setIsFetchingMore={setIsFetchingMore}
           setThreadPage={setThreadPage}
           threadPage={threadPage}
+          hasMoreThreadData={hasMoreThreadData}
+          setHasMoreThreadData={setHasMoreThreadData}
+          setSelectedSubThreadId={setSelectedSubThreadId}
+          selectedSubThreadId={selectedSubThreadId}
         />
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />

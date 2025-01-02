@@ -8,7 +8,7 @@ import { getThread } from '@/store/action/historyAction';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useRouter } from "next/navigation";
 
-const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, setSelectedThread, threadHandler, setLoading, threadPage, setThreadPage }) => {
+const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, setSelectedThread, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedSubThreadId}) => {
 
   const { integrationData } = useCustomSelector(state => state?.bridgeReducer?.org?.[params?.org_id]?.integrationData) || {};
   const historyRef = useRef(null);
@@ -19,7 +19,6 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
   const threadRefs = useRef({});
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [flexDirection, setFlexDirection] = useState("column");
-  const [hasMoreThreadData, setHasMoreThreadData] = useState(true);
   const [threadMessageState, setThreadMessageState] = useState();
   
   useEffect(() => {
@@ -59,19 +58,18 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
   }, [historyData, pathName, filterOption, search]);
 
   const fetchMoreThreadData = useCallback(async () => {
-    if (isFetchingMore || threadPage < 1 || !hasMoreThreadData) return;
+    if (isFetchingMore) return;
     setIsFetchingMore(true);
     previousScrollHeightRef.current = historyRef?.current?.scrollHeight;
-
     const nextPage = threadPage + 1;
-    const result = await dispatch(getThread({ threadId: selectedThread, bridgeId: params?.id, nextPage, user_feedback: filterOption }));
+    const result = await dispatch(getThread({ threadId: selectedThread, bridgeId: params?.id,subThreadId:selectedSubThreadId, nextPage, user_feedback: filterOption }));
     setThreadPage(nextPage);
     setHasMoreThreadData(result?.data?.length >= 40);
     if (!result || result?.data?.length < 40) {
       setSearchMessageId(null);
     }
     setIsFetchingMore(false);
-  }, [filterOption, hasMoreThreadData, isFetchingMore, threadPage]);
+  }, [filterOption, hasMoreThreadData, isFetchingMore, threadPage, selectedThread, selectedSubThreadId]);
 
   useLayoutEffect(() => {
     if (isFetchingMore && historyRef?.current) {
