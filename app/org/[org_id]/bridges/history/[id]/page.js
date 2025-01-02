@@ -73,7 +73,7 @@ function Page({ searchParams }) {
       setLoading(false);
     };
     if (!searchRef.current.value) fetchInitialData();
-  }, [dispatch, params.id, filterOption, search]);
+  }, [params.id, filterOption]);
 
   const threadHandler = useCallback(
     async (thread_id, item) => {
