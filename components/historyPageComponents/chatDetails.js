@@ -1,5 +1,5 @@
 'use client';
-import { CircleX, Copy } from "lucide-react";
+import { CircleX, Copy, View } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useCloseSliderOnEsc } from "./assistFile";
 import { toast } from "react-toastify";
@@ -70,7 +70,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
               <tbody>
                 {Object.entries(selectedItem).map(([key, value]) => (
                   <tr key={key} className="border-b">
-                    <td className="text-sm capitalize p-2 font-medium">{key}:</td>
+                    <td className="text-sm capitalize font-medium">{key}:</td>
                     <td className="text-gray-600 p-2">
                       {typeof value === "object" ? (
                         <div className="relative">
@@ -86,10 +86,10 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
                           )}
                           {key === "AiConfig" && (
                             <button
-                              className="absolute top-1 right-0 bg-base-content text-white p-1 rounded cursor-pointer"
+                              className="absolute text-sm top-1 right-1 bg-base-content text-white p-1 rounded cursor-pointer"
                               onClick={() => { setModalContent(value); openModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL); }}
                             >
-                              View in Details
+                             <p className="flex gap-1 items-center"> <View size={14}/> View</p>
                             </button>
                           )}
                         </div>
