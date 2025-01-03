@@ -7,7 +7,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { archiveBridgeAction, duplicateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, LayoutGrid, Table } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import { useDispatch } from "react-redux";
