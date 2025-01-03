@@ -4,8 +4,12 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import EditorComponent from './tipatpEditor';
+import * as Y from 'yjs';
+import { HocuspocusProvider } from '@hocuspocus/provider';
+
 
 const InputConfigComponent = ({ params }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -238,6 +242,18 @@ const InputConfigComponent = ({ params }) => {
     };
 
     if (service === "google" && serviceType === "chat") return null;
+    const { ydoc, provider } = useMemo(() => {
+  
+        const ydoc = new Y.Doc();
+        const provider = new HocuspocusProvider({
+          url: `http://localhost:1234`,
+          name: params?.version,
+          parameters:{version_id:params.version},
+          document: ydoc,
+        });
+        return { ydoc, provider };
+      }, [params?.id, params, params.version]);
+    
 
     return (
         <div>
@@ -251,9 +267,12 @@ const InputConfigComponent = ({ params }) => {
 
             </div>
             <div className="form-control h-full">
+            <div className='tiptap-editor textarea textarea-bordered border w-full  min-h-96 max-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2'>
+            <EditorComponent params={params} ydoc={ydoc} provider={provider} key={params.version}/>
+            </div>
                 <textarea
                     ref={textareaRef}
-                    className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2"
+                    className="textarea textarea-bordered border w-full max-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2"
                     value={prompt}
                     onChange={handlePromptChange}
                     onKeyDown={handleKeyDown}
