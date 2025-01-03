@@ -1,7 +1,7 @@
 'use client';
-import { CircleX, Copy, View } from "lucide-react";
+import { CircleX, Copy, Eye } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useCloseSliderOnEsc } from "./assistFile";
+import { truncate, useCloseSliderOnEsc } from "./assistFile";
 import { toast } from "react-toastify";
 import { openModal } from "@/utils/utility";
 import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
@@ -74,22 +74,22 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
                     <td className="text-gray-600 p-2">
                       {typeof value === "object" ? (
                         <div className="relative">
-                          <pre className="bg-gray-200 p-2 rounded text-sm overflow-auto whitespace-pre-wrap">{JSON.stringify(value, null, 2)}</pre>
-                          {key === "variables" && (
+                          <pre className="bg-gray-200 p-2 rounded text-sm overflow-auto whitespace-pre-wrap">{truncate(JSON.stringify(value, null, 2), 60)}</pre>
+                          {key === "variables" && value && (
                             <div
-                              className="absolute top-1 right-2 tooltip tooltip-primary tooltip-left bg-gray-200 p-1 rounded cursor-pointer"
+                              className="absolute top-1 right-[5rem] tooltip tooltip-primary tooltip-left bg-gray-200 p-1 rounded cursor-pointer"
                               onClick={() => copyToClipboard(value)}
                               data-tip="Copy variables"
                             >
                               <Copy size={20} />
                             </div>
                           )}
-                          {key === "AiConfig" && (
+                          {(key === "AiConfig" || key === 'variables') && value !== null && (
                             <button
-                              className="absolute text-sm top-1 right-1 bg-base-content text-white p-1 rounded cursor-pointer"
+                              className="absolute text-sm top-1 right-1 bg-base-content text-white p-1 rounded cursor-pointer bg-none"
                               onClick={() => { setModalContent(value); openModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL); }}
                             >
-                             <p className="flex gap-1 items-center"> <View size={14}/> View</p>
+                             <p className="flex gap-1 items-center tooltip tooltip-primary bg-none" data-tip="See in detail"> <Eye className="bg-none" size={20} /> view</p>
                             </button>
                           )}
                         </div>
