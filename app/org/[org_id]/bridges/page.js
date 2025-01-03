@@ -1,10 +1,11 @@
 "use client"
-import TableViewComponent from "@/components/configuration/configurationComponent/TableViewComponent";
 import CreateNewBridge from "@/components/createNewBridge";
+import CustomTable from "@/components/customTable/customTable";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { archiveBridgeAction, duplicateBridgeAction } from "@/store/action/bridgeAction";
+import OpenAiIcon from "@/icons/OpenAiIcon";
+import { archiveBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
 import { Ellipsis, LayoutGrid, Table } from "lucide-react";
@@ -25,28 +26,40 @@ function Home({ params }) {
   }));
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // State to manage view mode
+  const [viewMode, setViewMode] = useState('table'); // State to manage view mode
   const filteredBridges = filterBridges(allBridges, searchTerm);
-  const filteredArchivedBridges = filteredBridges.filter((item) => item.status === 0);
-  const filteredUnArchivedBridges = filteredBridges.filter((item) => item.status === 1 || item.status === undefined);
+  const filteredArchivedBridges = filteredBridges?.filter((item) => item.status === 0);
+  const filteredUnArchivedBridges = filteredBridges?.filter((item) => item.status === 1 || item.status === undefined);
+
+
+  const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
+    _id: item._id,
+    model: item.configuration?.model || "",
+    name: <div className="flex gap-2 items-center">{getIconOfService(item.service)} {item.name}</div>,
+    actualName: item?.name,
+    slugName: item?.slugName || "",
+    prompt: item.configuration?.prompt,
+    service: getIconOfService(item.service),
+    bridgeType: item.bridgeType,
+    status: item.status,
+    versionId: item?.published_version_id || item?.versions?.[0],
+  }));
+  const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
+    _id: item._id,
+    model: item.configuration?.model || "",
+    name: <div className="flex gap-2 items-center ">{getIconOfService(item.service)} {item.name}</div>,
+    actualName: item.name,
+    slugName: item.slugName,
+    prompt: item.configuration?.prompt,
+    service: item.service === 'openai' ? <OpenAiIcon /> : item.service,
+    bridgeType: item.bridgeType,
+    status: item.status,
+    versionId: item?.published_version_id || item?.versions?.[0],
+  }));
 
   const onClickConfigure = (id, versionId) => {
     router.push(`/org/${params.org_id}/bridges/configure/${id}?version=${versionId}`);
   };
-
-  const handleDuplicateBridge = (bridgeId) => {
-    try {
-      dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId) => {
-        if (newBridgeId) {
-          router.push(`/org/${params?.org_id}/bridges/configure/${newBridgeId}`)
-          toast.success('Bridge duplicate successfully');
-        }
-      });
-    } catch (error) {
-      console.error('Failed to duplicate bridge:', error);
-      toast.error('Error duplicating bridge');
-    }
-  }
 
   const renderBridgeCard = (item) => {
     return (
@@ -105,6 +118,19 @@ function Home({ params }) {
     }
   }
 
+  const EndComponent = ({row}) => {
+    console.log(row,232)
+    return (
+      <div className="dropdown dropdown-left bg-transparent absolute right-3 top-2 bg-black">
+        <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
+        <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+          {/* <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li> */}
+          <li><a onClick={(e) => { e.preventDefault(); e.stopPropagation(); archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined) }}>{(row?.status === 0) ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
+        </ul>
+      </div>
+    )
+  }
+
   return (
     <div className="drawer lg:drawer-open">
       <CreateNewBridge />
@@ -155,7 +181,8 @@ function Home({ params }) {
                     ))}
                   </div>
                 ) : (
-                  <TableViewComponent bridges={filteredUnArchivedBridges} archiveBridge={archiveBridge} onClickConfigure={onClickConfigure}/>
+                  // <TableViewComponent bridges={filteredUnArchivedBridges} archiveBridge={archiveBridge} onClickConfigure={onClickConfigure} />
+                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'slugName', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model', 'slugName']}  endComponent={EndComponent}/>
                 )}
                 {filteredArchivedBridges?.length > 0 && <div className="">
                   <div className="flex justify-center items-center my-4">
@@ -172,7 +199,8 @@ function Home({ params }) {
                       ))}
                     </div>
                   ) : (
-                    <TableViewComponent bridges={filteredArchivedBridges} archiveBridge={archiveBridge} onClickConfigure={onClickConfigure}/>
+                    // <TableViewComponent bridges={filteredArchivedBridges} archiveBridge={archiveBridge} onClickConfigure={onClickConfigure} />
+                    <CustomTable data={ArchivedBridges} columnsToShow={['name', 'slugName', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model', 'slugName']} endComponent={EndComponent}/>
                   )}
                 </div>}
               </div>
