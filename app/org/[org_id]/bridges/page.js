@@ -27,7 +27,22 @@ function Home({ params }) {
   }));
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('table'); // State to manage view mode
+  const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
+
+  useEffect(() => {
+    const updateScreenSize = () => {
+      if (window.matchMedia('(max-width: 640px)').matches) {
+        setViewMode('grid');
+      } else {
+        setViewMode('table');
+      }
+    };
+    updateScreenSize(); // Run on mount
+    window.addEventListener('resize', updateScreenSize);
+
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
+
   const filteredBridges = filterBridges(allBridges, searchTerm);
   const filteredArchivedBridges = filteredBridges?.filter((item) => item.status === 0);
   const filteredUnArchivedBridges = filteredBridges?.filter((item) => item.status === 1 || item.status === undefined);
@@ -55,6 +70,7 @@ function Home({ params }) {
     status: item.status,
     versionId: item?.published_version_id || item?.versions?.[0],
   }));
+
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
     _id: item._id,
     model: item.configuration?.model || "",
@@ -185,7 +201,7 @@ function Home({ params }) {
                 </div>
               </div>
             ) : (
-              <div className={`flex flex-col ${viewMode !== 'grid' ? 'mx-40' : ''}`}>
+              <div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-40' : ''}`}>
                 <div className="relative flex flex-col md:flex-row items-center justify-between mx-4">
                   <input
                     ref={inputRef}
@@ -195,7 +211,7 @@ function Home({ params }) {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <div class="join">
+                  <div className="join hidden sm:block">
                     <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
                       <LayoutGrid className="h-4 w-4" />
                     </a>
