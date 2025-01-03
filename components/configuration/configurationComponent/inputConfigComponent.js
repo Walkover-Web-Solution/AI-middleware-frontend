@@ -267,9 +267,7 @@ const InputConfigComponent = ({ params }) => {
 
             </div>
             <div className="form-control h-full">
-            <div className='tiptap-editor textarea textarea-bordered border w-full  min-h-96 max-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2'>
             <EditorComponent params={params} ydoc={ydoc} provider={provider} key={params.version}/>
-            </div>
                 <textarea
                     ref={textareaRef}
                     className="textarea textarea-bordered border w-full max-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2"
