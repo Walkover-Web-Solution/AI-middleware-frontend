@@ -164,7 +164,7 @@ function Navbar() {
           </>
         ) : (
           path[3] === 'apikeys' ?
-            <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>+ create new Api key</button>
+            <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>+ Add new Api key</button>
             : path[3] === 'pauthkey' ?
               <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new Pauth Key</button>
               :

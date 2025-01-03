@@ -1,4 +1,5 @@
 'use client';
+import ApiKeyModal from '@/components/modals/ApiKeyModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, getAllApikeyAction, saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, API_KEY_MODAL_INPUT, MODAL_TYPE } from '@/utils/enums';
@@ -41,46 +42,7 @@ const Page = () => {
         }
     }, [dispatch]);
 
-    const handleSubmit = useCallback((event) => {
-        event.preventDefault();
-        const formData = new FormData(event.target);
 
-        const data = {
-            name: formData.get('name').trim().replace(/\s+/g, ''),
-            service: formData.get('service'),
-            apikey: formData.get('apikey'),
-            comment: formData.get('comment'),
-            _id: selectedApiKey ? selectedApiKey._id : null
-        };
-
-        if (isEditing) {
-            const isIdChange = apikeyData.some(item => item.apikey === data.apikey);
-            const isNameChange = apikeyData.some(item => item.name === data.name);
-            const isCommentChange = apikeyData.some(item => item.comment === data.comment);
-
-            if (!isIdChange) {
-                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, apikey: data.apikey, comment: data.comment };
-                dispatch(updateApikeyAction(dataToSend));
-            }
-            if (!isNameChange || !isCommentChange) {
-                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, comment: data.comment };
-                dispatch(updateApikeyAction(dataToSend));
-            }
-        } else {
-            dispatch(saveApiKeysAction(data, orgId));
-        }
-
-        event.target.reset();
-        setSelectedApiKey(null);
-        setIsEditing(false);
-        closeModal(MODAL_TYPE.API_KEY_MODAL)
-    }, [dispatch, orgId, isEditing, selectedApiKey, apikeyData]);
-
-    const handleClose = useCallback(() => {
-        closeModal(MODAL_TYPE.API_KEY_MODAL)
-        setSelectedApiKey(null);
-        setIsEditing(false);
-    }, [MODAL_TYPE, closeModal]);
 
     const columns = API_KEY_COLUMNS || [];
     return (
@@ -123,51 +85,7 @@ const Page = () => {
                     )}
                 </tbody>
             </table>
-            <dialog id={MODAL_TYPE?.API_KEY_MODAL} className="modal modal-bottom sm:modal-middle">
-                <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
-                    <h3 className="font-bold text-lg">
-                        {isEditing ? 'Update API Key' : 'Create New API Key'}
-                    </h3>
-                    {API_KEY_MODAL_INPUT.map((field) => (
-                        <div key={field} className="flex flex-col gap-2">
-                            <label htmlFor={field} className="label-text">
-                                {field.charAt(0).toUpperCase() + field.slice(1)}:
-                            </label>
-                            <input
-                                id={field}
-                                type={field === 'apikey' && isEditing ? 'password' : 'text'}
-                                className="input input-bordered"
-                                name={field}
-                                placeholder={`Enter ${field}`}
-                                defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
-                                required
-                            />
-                        </div>
-                    ))}
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="service" className="label-text">
-                            Service:
-                        </label>
-                        <select
-                            id="service"
-                            name="service"
-                            className="select select-bordered"
-                            key={selectedApiKey?.service}
-                            defaultValue={selectedApiKey ? selectedApiKey.service : ''}
-                            disabled={selectedApiKey && selectedApiKey.service}
-                            required
-                        >
-                            <option value="openai">OpenAI</option>
-                            <option value="groq">Groq</option>
-                            <option value="anthropic">Anthropic</option>
-                        </select>
-                    </div>
-                    <div className="modal-action">
-                        <button type="button" className="btn" onClick={handleClose}>Cancel</button>
-                        <button type="submit" className="btn btn-primary">{isEditing ? 'Update' : 'Create'}</button>
-                    </div>
-                </form>
-            </dialog>
+            <ApiKeyModal orgId={orgId}  isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} />
         </div>
     );
 };
