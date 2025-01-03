@@ -10,7 +10,7 @@ import { MODAL_TYPE } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
 import { Ellipsis, LayoutGrid, Table } from "lucide-react";
 import { useRouter } from 'next/navigation';
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -18,6 +18,7 @@ export const runtime = 'edge';
 
 function Home({ params }) {
   const dispatch = useDispatch();
+  const inputRef = useRef(null);
   const router = useRouter();
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
 
@@ -35,10 +36,20 @@ function Home({ params }) {
   const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
     _id: item._id,
     model: item.configuration?.model || "",
-    name: <div className="flex gap-2 items-center">{getIconOfService(item.service)} {item.name}</div>,
-    actualName: item?.name,
+    name: <div className="flex gap-3">
+      <div className="flex gap-2 items-center">
+        {getIconOfService(item.service, 30, 30)}
+      </div>
+      <div className="flex-col">
+        {item.name}
+        <p className="opacity-60 text-xs">
+          {item?.slugName || ""}
+        </p>
+      </div>
+    </div>,
+    actualName: item?.name || "",
     slugName: item?.slugName || "",
-    prompt: item.configuration?.prompt,
+    prompt: item.configuration?.prompt || "",
     service: getIconOfService(item.service),
     bridgeType: item.bridgeType,
     status: item.status,
@@ -47,10 +58,20 @@ function Home({ params }) {
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
     _id: item._id,
     model: item.configuration?.model || "",
-    name: <div className="flex gap-2 items-center ">{getIconOfService(item.service)} {item.name}</div>,
-    actualName: item.name,
-    slugName: item.slugName,
-    prompt: item.configuration?.prompt,
+    name: <div className="flex gap-3">
+      <div className="flex gap-2 items-center">
+        {getIconOfService(item.service, 30, 30)}
+      </div>
+      <div className="flex-col">
+        {item.name}
+        <p className="opacity-60 text-xs">
+          {item?.slugName || ""}
+        </p>
+      </div>
+    </div>,
+    actualName: item?.name || "",
+    slugName: item?.slugName || "",
+    prompt: item.configuration?.prompt || "",
     service: item.service === 'openai' ? <OpenAiIcon /> : item.service,
     bridgeType: item.bridgeType,
     status: item.status,
@@ -118,10 +139,9 @@ function Home({ params }) {
     }
   }
 
-  const EndComponent = ({row}) => {
-    console.log(row,232)
+  const EndComponent = ({ row }) => {
     return (
-      <div className="dropdown dropdown-left bg-transparent absolute right-3 top-2 bg-black">
+      <div className="dropdown dropdown-end bg-transparent absolute right-3 top-3 bg-black">
         <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
         <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
           {/* <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li> */}
@@ -130,6 +150,21 @@ function Home({ params }) {
       </div>
     )
   }
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        inputRef.current?.focus(); // Focus on the input field
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
     <div className="drawer lg:drawer-open">
@@ -150,28 +185,23 @@ function Home({ params }) {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col">
+              <div className={`flex flex-col ${viewMode !== 'grid' ? 'mx-40' : ''}`}>
                 <div className="relative flex flex-col md:flex-row items-center justify-between mx-4">
                   <input
+                    ref={inputRef}
                     type="text"
-                    placeholder="Search for bridges"
+                    placeholder="Search for bridges (Ctrl/Cmd + K)"
                     className="input input-bordered md:max-w-sm input-md w-full mb-4 md:mb-0"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <div className="dropdown dropdown-end">
-                    <ul className="menu menu-horizontal bg-base-200 rounded-box">
-                      <li>
-                        <a onClick={() => setViewMode('grid')} className={viewMode === 'grid' ? 'bg-primary text-base-100' : ''}>
-                          <LayoutGrid className="h-5 w-5" />
-                        </a>
-                      </li>
-                      <li>
-                        <a onClick={() => setViewMode('table')} className={viewMode === 'table' ? 'bg-primary text-base-100' : ''}>
-                          <Table className="h-5 w-5" />
-                        </a>
-                      </li>
-                    </ul>
+                  <div class="join">
+                    <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
+                      <LayoutGrid className="h-4 w-4" />
+                    </a>
+                    <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
+                      <Table className="h-4 w-4" />
+                    </a>
                   </div>
                 </div>
                 {viewMode === 'grid' ? (
@@ -181,8 +211,7 @@ function Home({ params }) {
                     ))}
                   </div>
                 ) : (
-                  // <TableViewComponent bridges={filteredUnArchivedBridges} archiveBridge={archiveBridge} onClickConfigure={onClickConfigure} />
-                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'slugName', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model', 'slugName']}  endComponent={EndComponent}/>
+                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
                 )}
                 {filteredArchivedBridges?.length > 0 && <div className="">
                   <div className="flex justify-center items-center my-4">
@@ -199,8 +228,9 @@ function Home({ params }) {
                       ))}
                     </div>
                   ) : (
-                    // <TableViewComponent bridges={filteredArchivedBridges} archiveBridge={archiveBridge} onClickConfigure={onClickConfigure} />
-                    <CustomTable data={ArchivedBridges} columnsToShow={['name', 'slugName', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model', 'slugName']} endComponent={EndComponent}/>
+                    <div className="opacity-60">
+                      <CustomTable data={ArchivedBridges} columnsToShow={['name', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
+                    </div>
                   )}
                 </div>}
               </div>

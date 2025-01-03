@@ -31,6 +31,9 @@ const CustomTable = ({
             return [...data].sort((a, b) => {
                 const valueA = activeColumn === 'name' ? a.actualName : a[activeColumn];
                 const valueB = activeColumn === 'name' ? b.actualName : b[activeColumn];
+                if (typeof valueA === 'string' && typeof valueB === 'string') {
+                    return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+                }
                 if (valueA < valueB) return ascending ? -1 : 1;
                 if (valueA > valueB) return ascending ? 1 : -1;
                 return 0;
@@ -133,7 +136,7 @@ const CustomTable = ({
                                 {visibleColumns?.map((column) => (
                                     <td
                                         key={column}
-                                        className="py-4 px-4 table-cell w-60"
+                                        className="py-3 px-4 table-cell w-60"
                                     >
                                         {keysToWrap.includes(column) && row[column] && typeof row[column] === 'string' ? (
                                             row[column].length > 30
@@ -145,7 +148,7 @@ const CustomTable = ({
                                     </td>
                                 ))}
                                 {endComponent && (
-                                    <td className="py-4 px-4 table-cell w-0">
+                                    <td className="py-3 px-4 table-cell w-0">
                                         {endComponent({row: row})}
                                     </td>
                                 )}
