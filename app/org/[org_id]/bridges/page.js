@@ -1,14 +1,16 @@
 "use client"
 import CreateNewBridge from "@/components/createNewBridge";
+import CustomTable from "@/components/customTable/customTable";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { archiveBridgeAction, duplicateBridgeAction } from "@/store/action/bridgeAction";
+import OpenAiIcon from "@/icons/OpenAiIcon";
+import { archiveBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, LayoutGrid, Table } from "lucide-react";
 import { useRouter } from 'next/navigation';
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -16,6 +18,7 @@ export const runtime = 'edge';
 
 function Home({ params }) {
   const dispatch = useDispatch();
+  const inputRef = useRef(null);
   const router = useRouter();
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
 
@@ -24,27 +27,76 @@ function Home({ params }) {
   }));
 
   const [searchTerm, setSearchTerm] = useState('');
-  const filteredBridges = filterBridges(allBridges,searchTerm);
-  const filteredArchivedBridges = filteredBridges.filter((item) => item.status === 0);
-  const filteredUnArchivedBridges = filteredBridges.filter((item) => item.status === 1 || item.status === undefined);
+  const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
+
+  useEffect(() => {
+    const updateScreenSize = () => {
+      if (window.matchMedia('(max-width: 640px)').matches) {
+        setViewMode('grid');
+      } else {
+        setViewMode('table');
+      }
+    };
+    updateScreenSize(); // Run on mount
+    window.addEventListener('resize', updateScreenSize);
+
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
+
+  const filteredBridges = filterBridges(allBridges, searchTerm);
+  const filteredArchivedBridges = filteredBridges?.filter((item) => item.status === 0);
+  const filteredUnArchivedBridges = filteredBridges?.filter((item) => item.status === 1 || item.status === undefined);
+
+
+  const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
+    _id: item._id,
+    model: item.configuration?.model || "",
+    name: <div className="flex gap-3">
+      <div className="flex gap-2 items-center">
+        {getIconOfService(item.service, 30, 30)}
+      </div>
+      <div className="flex-col">
+        {item.name}
+        <p className="opacity-60 text-xs">
+          {item?.slugName || ""}
+        </p>
+      </div>
+    </div>,
+    actualName: item?.name || "",
+    slugName: item?.slugName || "",
+    prompt: item.configuration?.prompt || "",
+    service: getIconOfService(item.service),
+    bridgeType: item.bridgeType,
+    status: item.status,
+    versionId: item?.published_version_id || item?.versions?.[0],
+  }));
+
+  const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
+    _id: item._id,
+    model: item.configuration?.model || "",
+    name: <div className="flex gap-3">
+      <div className="flex gap-2 items-center">
+        {getIconOfService(item.service, 30, 30)}
+      </div>
+      <div className="flex-col">
+        {item.name}
+        <p className="opacity-60 text-xs">
+          {item?.slugName || ""}
+        </p>
+      </div>
+    </div>,
+    actualName: item?.name || "",
+    slugName: item?.slugName || "",
+    prompt: item.configuration?.prompt || "",
+    service: item.service === 'openai' ? <OpenAiIcon /> : item.service,
+    bridgeType: item.bridgeType,
+    status: item.status,
+    versionId: item?.published_version_id || item?.versions?.[0],
+  }));
 
   const onClickConfigure = (id, versionId) => {
     router.push(`/org/${params.org_id}/bridges/configure/${id}?version=${versionId}`);
   };
-
-  const handleDuplicateBridge = (bridgeId) => {
-    try {
-      dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId) => {
-        if (newBridgeId) {
-          router.push(`/org/${params?.org_id}/bridges/configure/${newBridgeId}`)
-          toast.success('Bridge duplicate successfully');
-        }
-      });
-    } catch (error) {
-      console.error('Failed to duplicate bridge:', error);
-      toast.error('Error duplicating bridge');
-    }
-  }
 
   const renderBridgeCard = (item) => {
     return (
@@ -103,6 +155,33 @@ function Home({ params }) {
     }
   }
 
+  const EndComponent = ({ row }) => {
+    return (
+      <div className="dropdown dropdown-left bg-transparent absolute right-3 top-3 bg-black">
+        <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
+        <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+          {/* <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li> */}
+          <li><a onClick={(e) => { e.preventDefault(); e.stopPropagation(); archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined) }}>{(row?.status === 0) ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
+        </ul>
+      </div>
+    )
+  }
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        inputRef.current?.focus(); // Focus on the input field
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
     <div className="drawer lg:drawer-open">
       <CreateNewBridge />
@@ -122,34 +201,53 @@ function Home({ params }) {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col">
+              <div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-40' : ''}`}>
                 <div className="relative flex flex-col md:flex-row items-center justify-between mx-4">
                   <input
+                    ref={inputRef}
                     type="text"
-                    placeholder="Search for bridges"
+                    placeholder="Search for bridges (Ctrl/Cmd + K)"
                     className="input input-bordered md:max-w-sm input-md w-full mb-4 md:mb-0"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                </div>
-                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
-                  {filteredUnArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
-                    renderBridgeCard(item)
-                  ))}
-                </div>
-                {filteredArchivedBridges?.length > 0 && <div className="">
-                  <div class="flex justify-center items-center my-4">
-                    <p class="border-t border-base-300 w-full"></p>
-                    <p class="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
-                      Archived Bridges
-                    </p>
-                    <p class="border-t border-base-300 w-full"></p>
+                  <div className="join hidden sm:block">
+                    <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
+                      <LayoutGrid className="h-4 w-4" />
+                    </a>
+                    <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
+                      <Table className="h-4 w-4" />
+                    </a>
                   </div>
-                  <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 opacity-50">
-                    {filteredArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                </div>
+                {viewMode === 'grid' ? (
+                  <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
+                    {filteredUnArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
                       renderBridgeCard(item)
                     ))}
                   </div>
+                ) : (
+                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
+                )}
+                {filteredArchivedBridges?.length > 0 && <div className="">
+                  <div className="flex justify-center items-center my-4">
+                    <p className="border-t border-base-300 w-full"></p>
+                    <p className="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+                      Archived Bridges
+                    </p>
+                    <p className="border-t border-base-300 w-full"></p>
+                  </div>
+                  {viewMode === 'grid' ? (
+                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 opacity-50">
+                      {filteredArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                        renderBridgeCard(item)
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="opacity-60">
+                      <CustomTable data={ArchivedBridges} columnsToShow={['name', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
+                    </div>
+                  )}
                 </div>}
               </div>
             )}
