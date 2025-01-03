@@ -157,7 +157,7 @@ function Home({ params }) {
 
   const EndComponent = ({ row }) => {
     return (
-      <div className="dropdown dropdown-end bg-transparent absolute right-3 top-3 bg-black">
+      <div className="dropdown dropdown-left bg-transparent absolute right-3 top-3 bg-black">
         <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
         <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
           {/* <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li> */}
