@@ -1,9 +1,10 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { filterBridges, getIconOfService, toggleSidebar } from '@/utils/utility';
+import { filterBridges, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
 import { X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateNewBridge from '../createNewBridge';
+import { MODAL_TYPE } from '@/utils/enums';
 
 function BridgeSlider() {
     const router = useRouter();
@@ -80,7 +81,7 @@ function BridgeSlider() {
                     onChange={handleBridgeSearchChange}
                     className="border border-gray-300 rounded p-2 w-full"
                 />
-                <button className="bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() => document.getElementById('my_modal_1').showModal()}>
+                <button className="bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>
                     + Create new bridge
                 </button>
                 {filteredBridgesList.length === 0 ? (

@@ -20,6 +20,7 @@ import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 import GptMemory from "./configurationComponent/gptmemory";
+import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -39,6 +40,7 @@ export default function ConfigurationPage({ params }) {
     return (
         <div className="flex flex-col gap-3 relative">
             <BridgeNameInput params={params} />
+            <VersionDescriptionInput params={params}/>
             <BridgeTypeToggle params={params} />
             <div className="absolute right-0 top-0">
                 <div className="flex items-center">

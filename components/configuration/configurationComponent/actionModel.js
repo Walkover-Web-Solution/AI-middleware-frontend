@@ -1,5 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { createOrRemoveActionBridge } from "@/store/action/chatBotAction";
+import { MODAL_TYPE } from "@/utils/enums";
+import { closeModal } from "@/utils/utility";
 import { Plus } from "lucide-react";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
@@ -77,7 +79,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
                 <Plus size={16} /> Add a new action
             </button>
 
-            <dialog id="actionModel" className="modal">
+            <dialog id={MODAL_TYPE.ACTION_MODAL} className="modal">
                 <div className="modal-box w-full bg-base-100 text-base-content">
                     <label className="form-control">
                         <div className="label">
@@ -131,7 +133,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
                     )}
                     <div className="modal-action">
                         <button className="btn" onClick={() => {
-                            document.getElementById('actionModel').close();
+                            closeModal(MODAL_TYPE.ACTION_MODAL)
                             setActionId(null);
                             clearInputFields();
                             setIsCreateButtonDisabled(true);
@@ -141,7 +143,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
                             disabled={isCreateButtonDisabled}
                             onClick={() => {
                                 handleActionSubmit(selectedAction, descriptionRef.current.value, dataRef.current?.value);
-                                document.getElementById('actionModel').close();
+                                closeModal(MODAL_TYPE.ACTION_MODAL)
                                 setActionId(null);
                                 setIsCreateButtonDisabled(true);
                             }}

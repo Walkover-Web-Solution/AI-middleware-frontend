@@ -1,5 +1,7 @@
 "use client"
 import { createNewChatbot } from "@/store/action/chatBotAction";
+import { MODAL_TYPE } from "@/utils/enums";
+import { closeModal } from "@/utils/utility";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -20,7 +22,7 @@ function ChatBotModel({ orgid }) {
         setIsLoading(true); // Set loading state to true
         dispatch(createNewChatbot({ title: name, orgId: orgid }, (data) => {
             route.push(`/org/${orgid}/chatbot/configure/${data.data.chatBot._id}`);
-            document.getElementById('my_modal_1').close();
+            closeModal(MODAL_TYPE.CHATBOT_MODAL)
             setIsLoading(false); // Reset loading state after completion
         }))
     }
@@ -28,7 +30,7 @@ function ChatBotModel({ orgid }) {
     return (
         <div>
 
-            < dialog id="chatBot_model" className="modal" >
+            < dialog id={MODAL_TYPE.CHATBOT_MODAL} className="modal" >
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Create a New ChatBot</h3>
                     <div >

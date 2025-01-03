@@ -1,10 +1,15 @@
 'use client';
-import { CircleX, Copy } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { CircleX, Copy, View } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useCloseSliderOnEsc } from "./assistFile";
 import { toast } from "react-toastify";
+import { openModal } from "@/utils/utility";
+import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
+import { MODAL_TYPE } from "@/utils/enums";
 
 const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
+  const [modalContent, setModalContent] = useState(null);
+
   useEffect(() => {
     const closeSliderOnEsc = (event) => {
       if (event.key === "Escape") {
@@ -65,11 +70,11 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
               <tbody>
                 {Object.entries(selectedItem).map(([key, value]) => (
                   <tr key={key} className="border-b">
-                    <td className="text-sm capitalize p-2 font-medium">{key}:</td>
+                    <td className="text-sm capitalize font-medium">{key}:</td>
                     <td className="text-gray-600 p-2">
                       {typeof value === "object" ? (
                         <div className="relative">
-                          <pre className="bg-gray-200 p-2 rounded text-sm overflow-auto">{JSON.stringify(value, null, 2)}</pre>
+                          <pre className="bg-gray-200 p-2 rounded text-sm overflow-auto whitespace-pre-wrap">{JSON.stringify(value, null, 2)}</pre>
                           {key === "variables" && (
                             <div
                               className="absolute top-1 right-2 tooltip tooltip-primary tooltip-left bg-gray-200 p-1 rounded cursor-pointer"
@@ -79,9 +84,17 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
                               <Copy size={20} />
                             </div>
                           )}
+                          {key === "AiConfig" && (
+                            <button
+                              className="absolute text-sm top-1 right-1 bg-base-content text-white p-1 rounded cursor-pointer"
+                              onClick={() => { setModalContent(value); openModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL); }}
+                            >
+                             <p className="flex gap-1 items-center"> <View size={14}/> View</p>
+                            </button>
+                          )}
                         </div>
                       ) : (
-                        value?.toString()
+                        <span className="break-words">{value?.toString()}</span>
                       )}
                     </td>
                   </tr>
@@ -91,6 +104,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
           </div>
         </aside>
       )}
+     <ChatAiConfigDeatilViewModal modalContent={modalContent}/>
     </div>
   );
 };

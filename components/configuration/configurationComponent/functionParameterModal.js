@@ -1,7 +1,8 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { parameterTypes } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
-import { flattenParameters } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
+import { closeModal, flattenParameters } from '@/utils/utility';
 import { isEqual } from 'lodash';
 import { Info, InfoIcon, Trash2 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -130,7 +131,7 @@ function FunctionParameterModal({ functionId, params }) {
 
     const handleCloseModal = () => {
         resetModalData();
-        document.getElementById('function-parameter-modal').close();
+        closeModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL)
     };
 
     const handleTypeChange = (key, newType) => {
@@ -246,7 +247,7 @@ function FunctionParameterModal({ functionId, params }) {
             }
         })
         ).then(() => {
-            document.getElementById('function-parameter-modal').close();
+            closeModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL)
         });
     };
 
@@ -314,7 +315,7 @@ function FunctionParameterModal({ functionId, params }) {
     }
 
     return (
-        <dialog id="function-parameter-modal" className="modal">
+        <dialog id={MODAL_TYPE.FUNCTION_PARAMETER_MODAL} className="modal">
             <div className="modal-box w-11/12 max-w-6xl">
                 <div className='flex flex-row justify-between mb-3'>
                     <span className='flex flex-row items-center gap-4'>

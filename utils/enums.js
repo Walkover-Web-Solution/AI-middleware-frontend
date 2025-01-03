@@ -308,10 +308,24 @@ export const JSONFORMATDATA = [
 
 export const MODAL_TYPE = {
   CREATE_VARIABLE: 'CREATE_VARIABLE',
-  CREATE_BRIDGE: 'CREATE_BRIDGE',
-  CREATE_API_KEY: 'CREATE_API',
+  CREATE_BRIDGE_MODAL: 'CREATE_BRIDGE_MODAL',
   OPTIMIZE_PROMPT: 'optmize_prompt_modal',
   PUBLISH_BRIDGE_VERSION: 'publish_bridge_version_modal',
+  VERSION_DESCRIPTION_MODAL: "version_description_modal",
+  API_KEY_MODAL: "API_KEY_MODAL",
+  PAUTH_KEY_MODAL: "PAUTH_KEY_MODAL",
+  FINE_TUNE_MODAL : "fine-tune-modal",
+  FUNCTION_PARAMETER_MODAL : "function-parameter-modal",
+  ACTION_MODAL : "actionModel",
+  CHATBOT_MODAL : "chatBot_model",
+  CREATE_ORG_MODAL : "create-org-modal",
+  PAUTH_KEY_DELETE_MODAL: "PAUTH_KEY_DELETE_MODAL",
+  WEBHOOK_MODAL: "WEBHOOK_MODAL",
+  CHAT_DETAILS_VIEW_MODAL:"chat_details_view"
+
 }
 
+export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment']
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
+export const TIME_RANGE_OPTIONS = ['Today', 'Last 3 Days', 'Last Week', 'Last Month'];
+export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
