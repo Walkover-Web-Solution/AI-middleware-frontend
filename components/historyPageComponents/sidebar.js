@@ -8,7 +8,8 @@ import DateRangePicker from "./dateRangePicker.js";
 import { toast } from "react-toastify";
 import { useCustomSelector } from "@/customHooks/customSelector.js";
 import { clearSubThreadData } from "@/store/reducer/historyReducer.js";
-import { USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
+import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
+import { openModal } from "@/utils/utility.js";
 
 const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, setThreadPage, filterOption, setFilterOption, searchRef, setIsFetchingMore}) => {
 
@@ -72,10 +73,6 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
       setHasMore(false);
     }
   }
-
-  const handleDownload = async () => {
-    document.getElementById('fine-tune-modal')?.showModal()
-  };
 
   const handleThreadIds = (id) => {
     if (selectedThreadIds && selectedThreadIds.includes(id)) {
@@ -277,7 +274,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
         {
           isThreadSelectable && (
             <div className="flex gap-3">
-              <button onClick={handleDownload} className="btn btn-primary" disabled={selectedThreadIds?.length === 0}>
+              <button onClick={()=> openModal(MODAL_TYPE.FINE_TUNE_MODAL)} className="btn btn-primary" disabled={selectedThreadIds?.length === 0}>
                 Download <Download size={16} />
               </button>
               <button onClick={() => setIsThreadSelectable(false)} className="btn bg-base-300">

@@ -3,7 +3,8 @@ import LoadingSpinner from '@/components/loadingSpinner'
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
-import { PAUTH_KEY_COLUMNS } from '@/utils/enums'
+import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
+import { closeModal, openModal } from '@/utils/utility'
 import { Copy, Trash2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -65,13 +66,13 @@ function Page() {
     } else {
       toast.error("Input field cannot be empty");
     }
-    document.getElementById('my_modal_5').close();
+    closeModal(MODAL_TYPE.PAUTH_KEY_MODAL)
     document.getElementById('authNameInput').value=''
   };
 
   const deleteModel = (authname, authid, index) => {
     setSingleAuthData({ name: authname, id: authid, index })
-    document.getElementById('api-key-modal').showModal()
+    openModal(MODAL_TYPE.PAUTH_KEY_DELETE_MODAL)
     document.getElementById('authNameInput').value = ''
   }
 
@@ -80,7 +81,7 @@ function Page() {
       toast.success("Auth Key Deleted Successfully")
       // Optionally, you can show a success message to the user
     })
-    document.getElementById('api-key-modal').close()
+    closeModal(MODAL_TYPE.PAUTH_KEY_DELETE_MODAL)
   }
   return (
     <div className="drawer lg:drawer-open p-5">
@@ -118,7 +119,7 @@ function Page() {
                 ))}
               </tbody>
             </table>
-            <dialog id="my_modal_5" className="modal modal-bottom sm:modal-middle">
+            <dialog id={MODAL_TYPE.PAUTH_KEY_MODAL} className="modal modal-bottom sm:modal-middle">
               <div className="modal-box">
                 <h3 className="font-bold text-lg mb-2">Create New Auth</h3>
                 <label className="input input-bordered flex items-center gap-2">
@@ -154,7 +155,7 @@ function Page() {
               </div>
             </dialog>
 
-            <dialog id="api-key-modal" className="modal">
+            <dialog id={MODAL_TYPE.PAUTH_KEY_DELETE_MODAL} className="modal">
               <div className="modal-box">
                 <h3 className="font-bold text-lg">Do you want to delete {singleAuthData.name} ?</h3>
                 {/* <p className="py-4">Do you want to delete {singleAuthData.name } ?</p> */}
