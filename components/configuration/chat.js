@@ -22,28 +22,36 @@ function Chat({ params }) {
       <div className="sm:p-2 mt-4 justify-between flex flex-col h-[86vh] border rounded-md w-full z-10">
         <div
           id="messages"
-          className="flex flex-col w-full overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2"
+          className="flex flex-col w-full overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2"
         >
           {messages.map((message, index) => {
             return (
               <div
                 key={message.id}
                 ref={index === messages.length - 1 ? messagesEndRef : null}
-                className={`chat ${message.sender === "user" ? "chat-end" : "chat-start"}`}
+                className={`chat ${message.sender === "user" ? "chat-end flex flex-col" : "chat-start"}`}
               >
                 <div className="chat-image avatar"></div>
                 <div className="chat-header">
                   {message.sender}
                   <time className="text-xs opacity-50 pl-2">{message.time}</time>
                 </div>
-                <div className="chat-bubble break-keep">
+                <div>
                 {message?.image_urls && message?.image_urls?.length > 0 && (
-                    <div className="flex flex-wrap mt-2">
+                    <div className="flex flex-wrap mt-2 items-end justify-end">
                       {message?.image_urls.map((url, imgIndex) => (
-                        <img key={imgIndex} src={url} alt={`Message Image ${imgIndex + 1}`} className="w-16 h-16 object-cover m-1 rounded-lg" />
+                        <img 
+                          key={imgIndex} 
+                          src={url} 
+                          alt={`Message Image ${imgIndex + 1}`} 
+                          className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer" 
+                          onClick={() => window.open(url, '_blank')}
+                        />
                       ))}
                     </div>
                   )}
+                </div>
+                <div className="chat-bubble break-keep">
                   <ReactMarkdown components={{
                     code: ({ node, inline, className, children, ...props }) => (
                       <CodeBlock
