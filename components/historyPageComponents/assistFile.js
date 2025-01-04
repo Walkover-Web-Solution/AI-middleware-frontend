@@ -31,3 +31,10 @@ export const useHandleClickOutside = (sidebarRef, setIsSliderOpen) => {
     };
   }, [sidebarRef, setIsSliderOpen]);
 };
+
+export const truncate = (string = "", maxLength) => {
+  return string.length > maxLength
+    ? `${string.substring(0, maxLength - 3)}...`
+    : string;
+};
+
