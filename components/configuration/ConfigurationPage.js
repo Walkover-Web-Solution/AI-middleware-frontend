@@ -77,6 +77,7 @@ export default function ConfigurationPage({ params }) {
                         {modelType !== "image"  && <AddVariable params={params} />}
                         {modelType !== 'image' && <GptMemory params={params} /> }
                         {bridgeType === "chatbot" && modelType !== 'image' &&  <UserRefernceForRichText params={params} />}
+                        {(modelType !== 'image' && modelType !== 'reasoning') && <ToolCallCount params={params} />}
                         { modelType !== 'image' && <ActionList params={params} />}
                         {bridgeType === 'api' && modelType !== 'image' && <ResponseFormatSelector params={params} />}
                     </>
