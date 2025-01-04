@@ -85,7 +85,7 @@ const Page = () => {
                     )}
                 </tbody>
             </table>
-            <ApiKeyModal orgId={orgId}  isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} />
+            <ApiKeyModal orgId={orgId}  isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} />
         </div>
     );
 };

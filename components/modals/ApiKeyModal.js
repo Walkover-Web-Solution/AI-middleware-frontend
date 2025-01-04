@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import React, { useCallback } from 'react'
 import { useDispatch } from 'react-redux';
 
-const ApiKeyModal = ({ isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { } }) => {
+const ApiKeyModal = ({ isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { } , apikeyData}) => {
     const pathName = usePathname();
     const path = pathName?.split('?')[0].split('/');
     const orgId = path[2] || '';
