@@ -5,6 +5,8 @@ import ChatBotCardHome from "@/components/chatbotHome/chatbotCard";
 import Protected from "@/components/protected";
 export const runtime = 'edge';
 import { useCustomSelector } from "@/customHooks/customSelector";
+import { MODAL_TYPE } from "@/utils/enums";
+import { openModal } from "@/utils/utility";
 import { Bot } from "lucide-react";
 
 function ChatbotPage({ params }) {
@@ -18,7 +20,7 @@ function ChatbotPage({ params }) {
                 <div className="flex flex-col items-center justify-center space-y-4">
                     <Bot color="blue" size={96} />
                     <p className="text-lg font-semibold text-gray-800">Create Your First Chatbot</p>
-                    <button className="btn  mt-2  mr-3 btn-primary" onClick={() => document.getElementById('chatBot_model').showModal()}>+ create new chatbot</button>
+                    <button className="btn  mt-2  mr-3 btn-primary" onClick={() => openModal(MODAL_TYPE.CHATBOT_MODAL)}>+ create new chatbot</button>
 
                 </div>
             </div>

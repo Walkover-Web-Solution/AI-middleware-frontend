@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { createWebhookAlertAction, deleteWebhookAlertAction, getAllWebhookAlertAction, updateWebhookAlertAction } from '@/store/action/webhookAlertAction';
 import { ChevronDown, Info, SquarePen, Trash2 } from 'lucide-react';
-import { ALERT_TYPE, WEBHOOKALERT_COLUMNS } from '@/utils/enums';
+import { ALERT_TYPE, MODAL_TYPE, WEBHOOKALERT_COLUMNS } from '@/utils/enums';
 import { validateUrl } from '@/utils/utility';
 
 export const runtime = 'edge';
@@ -208,7 +208,7 @@ const WebhookPage = ({ params }) => {
     );
 
     const renderForm = () => (
-        <dialog ref={modalRef} id="my_modal_7" className='w-[60%] h-[80%] p-6 rounded-lg '>
+        <dialog ref={modalRef} id={MODAL_TYPE?.WEBHOOK_MODAL} className='w-[60%] h-[80%] p-6 rounded-lg '>
             <form ref={formRef} onSubmit={handleSubmit} className="">
                 <input type="hidden" name="id" />
                 <div className="space-y-2">

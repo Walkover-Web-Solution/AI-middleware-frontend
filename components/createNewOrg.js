@@ -5,8 +5,10 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import LoadingSpinner from './loadingSpinner';
+import { MODAL_TYPE } from '@/utils/enums';
+import { closeModal } from '@/utils/utility';
 
-const CreateOrg = ({ onClose, handleSwitchOrg }) => {
+const CreateOrg = ({handleSwitchOrg }) => {
     const [orgDetails, setOrgDetails] = useState({ name: '', about: '' });
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
@@ -33,7 +35,6 @@ const CreateOrg = ({ onClose, handleSwitchOrg }) => {
             };
 
             dispatch(createOrgAction(dataToSend, (data) => {
-                onClose();
                 dispatch(userDetails());
                 handleSwitchOrg(data.id, data.name);
                 toast.success('Organization created successfully');
@@ -44,14 +45,15 @@ const CreateOrg = ({ onClose, handleSwitchOrg }) => {
             console.error(error);
         } finally {
             setIsLoading(false);
+            closeModal(MODAL_TYPE.CREATE_ORG_MODAL)
         }
-    }, [orgDetails, dispatch, onClose, route]);
+    }, [orgDetails, dispatch, route]);
 
     return (
         <div>
             {isLoading && <LoadingSpinner />}
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-            <dialog id="create-org-modal" className="modal fixed z-50 inset-0 overflow-y-auto" open>
+            <div className=""></div>
+            <dialog id={MODAL_TYPE.CREATE_ORG_MODAL} className="modal">
                 <div className="flex items-center justify-center min-h-screen">
                     <form className="modal-box relative p-5 bg-white rounded-lg shadow-xl mx-4" onSubmit={createOrgHandler}>
                         <h3 className="font-bold text-lg mb-2">Create Organization</h3>
@@ -81,7 +83,7 @@ const CreateOrg = ({ onClose, handleSwitchOrg }) => {
                             required
                         />
                         <div className="modal-action">
-                            <button type="button" onClick={onClose} className="btn">Close</button>
+                            <button type="button" onClick={()=>closeModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="btn">Close</button>
                             <button type="submit" className="btn btn-primary">Create</button>
                         </div>
                     </form>

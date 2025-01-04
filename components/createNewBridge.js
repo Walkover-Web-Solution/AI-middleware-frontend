@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import LoadingSpinner from "./loadingSpinner";
+import { closeModal } from "@/utils/utility";
+import { MODAL_TYPE } from "@/utils/enums";
 
 function CreateNewBridge({ orgid }) {
     const [selectedService, setSelectedService] = useState('openai');
@@ -64,7 +66,7 @@ function CreateNewBridge({ orgid }) {
             dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
                 // setShowFileUploadModal(false);
                 route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
-                document.getElementById('my_modal_1').close();
+                closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
                 setIsLoading(false);
                 cleanState();
             })).catch(() => {
@@ -83,7 +85,7 @@ function CreateNewBridge({ orgid }) {
         // setUploadedFile(null);
         document.getElementById('bridge-name').value = "";
         if (document.getElementById('slug-name')) document.getElementById('slug-name').value = "";
-        document.getElementById('my_modal_1').close();
+       closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
     };
 
     const handleCreateBridge = e => {
@@ -94,7 +96,7 @@ function CreateNewBridge({ orgid }) {
     return (
         <div>
             {isLoading && <LoadingSpinner />}
-            <dialog id="my_modal_1" className="modal">
+            <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">Create Bridge</h3>
                     <form onSubmit={handleCreateBridge}>
