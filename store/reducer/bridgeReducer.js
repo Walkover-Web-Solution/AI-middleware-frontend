@@ -60,13 +60,14 @@ export const bridgeReducer = createSlice({
       state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.bridge);
     },
     createBridgeVersionReducer: (state, action) => {
-      const { newVersionId, parentVersionId, bridgeId } = action.payload;
+      const { newVersionId, parentVersionId, bridgeId, version_description } = action.payload;
       if (!state.bridgeVersionMapping[bridgeId]) {
         state.bridgeVersionMapping[bridgeId] = {};
       }
       state.bridgeVersionMapping[bridgeId][newVersionId] = {
         ...(state.bridgeVersionMapping[bridgeId][parentVersionId] || {}),
-        _id: newVersionId
+        _id: newVersionId,
+        version_description
       };
       state.allBridgesMap[bridgeId].versions.push(newVersionId);
     },

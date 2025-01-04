@@ -1,13 +1,15 @@
 import PublishBridgeVersionModal from '@/components/modals/publishBridgeVersionModal';
+import VersionDescriptionModal from '@/components/modals/versionDescriptionModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { createBridgeVersionAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react'
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 function BridgeVersionDropdown({ params }) {
     const router = useRouter();
     const dispatch = useDispatch();
+    const versionDescriptionRef = React?.useRef('');
     const { bridgeVersionsArray, publishedVersion } = useCustomSelector((state) => ({
         bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
         publishedVersion: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.published_version_id || [],
@@ -28,14 +30,29 @@ function BridgeVersionDropdown({ params }) {
     const handleVersionChange = (version) => {
         if(params.version === version) return;
         router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${version}`);
-        dispatch(getBridgeVersionAction({ versionId: version }));
+        dispatch(getBridgeVersionAction({ versionId: version, version_description:versionDescriptionRef }));
+    };
+    const openVersionModal = () => {
+        const modal = document?.getElementById('version_description_modal');
+        if (modal) {
+            modal.showModal();
+        }
+    };
+
+    const handleCloseModal = () => {
+        const modal = document?.getElementById('version_description_modal');
+        if (modal) {
+            modal.close();
+        }
+        versionDescriptionRef.current.value = '';
     }
 
     const handleCreateNewVersion = () => {
         // create new version
-        dispatch(createBridgeVersionAction({ parentVersionId: params?.version, bridgeId: params.id }, (data) => {
+        dispatch(createBridgeVersionAction({ parentVersionId: params?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value }, (data) => {
             router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${data.version_id}`);
         }))
+        versionDescriptionRef.current.value = ''
     }
     return (
         <div className='flex items-center gap-2'>
@@ -58,11 +75,20 @@ function BridgeVersionDropdown({ params }) {
                             </a>
                         </li>
                     ))}
-                    <button class="btn mt-3" onClick={handleCreateNewVersion}>Create New Version <span className='ml-1'> &rarr;</span></button>
+                    <li>
+                        <button
+                            className="btn mt-3 w-full text-left"
+                            onClick={openVersionModal}
+                        >
+                            Create New Version <span className='ml-1'>&rarr;</span>
+                        </button>
+                    </li>
                 </ul>
             </div>
             <PublishBridgeVersionModal params={params} />
+            <VersionDescriptionModal handleCloseModal={handleCloseModal} versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion}/>
         </div>
-    )
+    );
 }
+
 export default BridgeVersionDropdown
