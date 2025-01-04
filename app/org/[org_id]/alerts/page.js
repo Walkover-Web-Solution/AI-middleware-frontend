@@ -344,7 +344,7 @@ const WebhookPage = ({ params }) => {
     );
 
     return (
-        <div>
+        <div className='w-full'>
             {renderForm()}
             {renderTable()}
         </div>

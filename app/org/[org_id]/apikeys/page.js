@@ -46,7 +46,7 @@ const Page = () => {
 
     const columns = API_KEY_COLUMNS || [];
     return (
-        <div className='p-5'>
+        <div className='w-full'>
             <table className="table">
                 <thead>
                     <tr>

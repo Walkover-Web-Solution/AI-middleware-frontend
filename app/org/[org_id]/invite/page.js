@@ -25,16 +25,16 @@ function InvitePage({ params }) {
   const fetchInvitedMembers = async () => {
     try {
       const response = await getInvitedUsers();
-      
-     // If the request is successful and API returns an array of invited members
+
+      // If the request is successful and API returns an array of invited members
       if (response.status === 200 && response.data) {
         setInvitedMembers(response.data.data.data);
       } else {
-         // If the request failed or API returns something other than an array
+        // If the request failed or API returns something other than an array
         toast.error('Failed to fetch invited members.');
       }
     } catch (error) {
-       // If there is an error in the request
+      // If there is an error in the request
       console.error('Error fetching invited members:', error);
       toast.error('An error occurred while fetching invited members.');
     }
@@ -53,16 +53,16 @@ function InvitePage({ params }) {
     setIsModalOpen(false);
   };
 
-/**
-   * Handles the invite submit event
-   *
-   * Sends an invitation to the user with the given email address.
-   * If the request is successful, the invitation is sent successfully
-   * and the list of invited members is refreshed.
-   *
-   * @returns {Promise<void>} Returns a promise that resolves when the invitation
-   * is sent successfully or an error is thrown
-   */
+  /**
+     * Handles the invite submit event
+     *
+     * Sends an invitation to the user with the given email address.
+     * If the request is successful, the invitation is sent successfully
+     * and the list of invited members is refreshed.
+     *
+     * @returns {Promise<void>} Returns a promise that resolves when the invitation
+     * is sent successfully or an error is thrown
+     */
   const isEmailValid = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -105,74 +105,162 @@ function InvitePage({ params }) {
       handleInviteSubmit();
     }
   };
-    useEffect(() => {
-      const handleKeyDown = (event) => {
-        if (event.key === 'Escape') {
-          setIsModalOpen(false);
-        }
-      };
-
-      if (isModalOpen) {
-        document.addEventListener('keydown', handleKeyDown);
-      } else {
-        document.removeEventListener('keydown', handleKeyDown);
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsModalOpen(false);
       }
+    };
 
-      return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-      };
-    }, [isModalOpen]);
+    if (isModalOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.removeEventListener('keydown', handleKeyDown);
+    }
 
-  return (<div className="drawer lg:drawer-open">
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isModalOpen]);
+  return (
+    <div className="h-full flex items-start justify-center w-full">
+      <div className="bg-white shadow-lg rounded-lg w-full max-w-4xl p-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Invite Team Members</h1>
+          <p className="text-gray-600">Easily invite your team to collaborate and manage tasks efficiently.</p>
+        </div>
 
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex pl-2 flex-col items-start justify-start">
-        <div className="flex w-full justify-start gap-16 items-start">
-          <div className="flex-1 flex flex-col items-center justify-start pt-6">
-            <button onClick={handleInviteClick} className="btn btn-primary mb-8">
-              + Invite Member
-            </button>
-            {isModalOpen && (
-              <>
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-                <dialog className="modal z-50" open>
-                  <div className="modal-box">
-                    <h3 className="font-bold text-lg">Invite Member</h3>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={handleEmailChange}
-                      onKeyPress={handleKeyPress} // Trigger invite on Enter key press
-                      placeholder="Member's email"
-                      className="input input-bordered w-full"
-                    />
-                    <div className="modal-action">
-                      <button onClick={handleCloseModal} className="btn">Cancel</button>
-                      <button onClick={handleInviteSubmit} className="btn btn-primary">
-                        Send Invite
-                      </button>
-                    </div>
+        {/* Invite Form Section */}
+        <div className="flex gap-4 items-center mb-10">
+          <input
+            type="email"
+            value={email}
+            onChange={handleEmailChange}
+            onKeyPress={handleKeyPress}
+            placeholder="Enter team member's email"
+            className="input input-bordered flex-1 px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={handleInviteSubmit}
+            className="btn btn-primary px-6 py-3 rounded-lg text-white font-semibold shadow-md hover:bg-blue-600 transition-all"
+          >
+            Send Invite
+          </button>
+        </div>
+
+        {/* Members List */}
+        <div className="bg-gray-50 p-6 rounded-lg shadow-inner">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Team Members</h2>
+          {invitedMembers.length > 0 ? (
+            <div className="space-y-4">
+              {invitedMembers.map((member, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <CircleUser className="text-blue-500 text-2xl" />
+                    <span className="text-lg font-medium text-gray-700">{member.name}</span>
                   </div>
-                </dialog>
-              </>
-            )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-600 text-center">No members invited yet. Start by inviting your team.</p>
+          )}
+        </div>
 
-            <div className="w-full max-w-lg mx-auto text-center mt-10">
-              <h4 className="text-xl font-semibold mb-6 text-gray-800">Members:</h4>
-              <div className="space-y-4 my-4">
-                {invitedMembers.map((member, index) => (
-                  <div key={index} className="flex items-center justify-start space-x-4 bg-white p-4 rounded-lg shadow border border-gray-200">
-                    <CircleUser />
-                    <span className="text-md font-medium text-gray-700">{member.name}</span>
-                  </div>
-                ))}
+        {/* Modal for Confirmation */}
+        {isModalOpen && (
+          <>
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+            <dialog className="modal z-50 open">
+              <div className="modal-box rounded-lg shadow-lg">
+                <h3 className="font-bold text-lg">Invite Member</h3>
+                <p className="text-sm text-gray-600 mb-4">Confirm sending an invite to {email}?</p>
+                <div className="modal-action flex justify-end gap-4">
+                  <button
+                    onClick={handleCloseModal}
+                    className="btn bg-gray-300 text-gray-800 hover:bg-gray-400 rounded-lg px-6 py-2"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleInviteSubmit}
+                    className="btn btn-primary rounded-lg px-6 py-2"
+                  >
+                    Confirm
+                  </button>
+                </div>
               </div>
+            </dialog>
+          </>
+        )}
+      </div>
+    </div>
+
+  )
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-200 flex items-center justify-center">
+      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+      <div className="drawer-content flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-2xl bg-white shadow-lg rounded-lg p-8">
+          <button
+            onClick={handleInviteClick}
+            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-2 px-4 rounded-full mb-8 hover:from-blue-600 hover:to-purple-600 transition duration-300"
+          >
+            + Invite Member
+          </button>
+          {isModalOpen && (
+            <>
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+              <dialog className="modal z-50" open>
+                <div className="modal-box bg-white rounded-lg shadow-lg p-6">
+                  <h3 className="font-bold text-2xl text-gray-800 mb-4">Invite Member</h3>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={handleEmailChange}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Member's email"
+                    className="input input-bordered w-full mb-4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <div className="modal-action flex justify-end space-x-2">
+                    <button
+                      onClick={handleCloseModal}
+                      className="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition duration-300"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleInviteSubmit}
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-2 px-4 rounded-lg hover:from-blue-600 hover:to-purple-600 transition duration-300"
+                    >
+                      Send Invite
+                    </button>
+                  </div>
+                </div>
+              </dialog>
+            </>
+          )}
+
+          <div className="w-full text-center mt-10">
+            <h4 className="text-2xl font-semibold mb-6 text-gray-800">Members:</h4>
+            <div className="space-y-4">
+              {invitedMembers.map((member, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-start space-x-4 bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition duration-300"
+                >
+                  <CircleUser className="text-blue-500" />
+                  <span className="text-lg font-medium text-gray-700">{member.name}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-
       </div>
-      {/* <Sidebar orgid={params.org_id} /> */}
     </div>
   );
 }

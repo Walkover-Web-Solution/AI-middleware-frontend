@@ -1,5 +1,6 @@
 "use client";
 import Navbar from "@/components/navbar";
+import MainSlider from "@/components/sliders/mainSlider";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
@@ -16,7 +17,7 @@ export default function layoutOrgPage({ children, params }) {
     chatbot_token: state?.ChatBot?.chatbot_token || '',
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
   }));
-  useEmbedScriptLoader(embedToken); 
+  useEmbedScriptLoader(embedToken);
 
   useEffect(() => {
     dispatch(getAllBridgesAction((data) => {
@@ -89,7 +90,7 @@ export default function layoutOrgPage({ children, params }) {
         status: e?.data?.action
       }
       dispatch(integrationAction(dataToSend, params?.org_id));
-      if (( e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
+      if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created") && e?.data?.description?.length > 0) {
         const dataFromEmbed = {
           url: e?.data?.webhookurl,
           payload: e?.data?.payload,
@@ -104,9 +105,16 @@ export default function layoutOrgPage({ children, params }) {
   }
 
   return (
-    <>
-      <Navbar />
-      {children}
-    </>
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <div className="w-6 flex flex-col fixed h-full">
+        <MainSlider />
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 ml-64 p-5 overflow-y-auto">
+        <main className="p-4">{children}</main>
+      </div>
+    </div>
   );
 }
