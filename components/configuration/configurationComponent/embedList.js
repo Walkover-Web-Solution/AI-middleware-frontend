@@ -5,6 +5,8 @@ import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
+import { openModal } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -34,10 +36,7 @@ const EmbedList = ({ params }) => {
 
     const handleOpenModal = (functionId) => {
         setFunctionId(functionId);
-        const modal = document.getElementById('function-parameter-modal');
-        if (modal) {
-            modal.showModal();
-        }
+        openModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL)
     }
 
     const bridgeFunctions = useMemo(() => bridge_functions.map((id) => function_data?.[id]), [bridge_functions, function_data]);

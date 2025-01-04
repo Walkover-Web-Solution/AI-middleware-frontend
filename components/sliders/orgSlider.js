@@ -1,11 +1,12 @@
 import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { filterOrganizations, toggleSidebar } from '@/utils/utility';
+import { filterOrganizations, openModal, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, KeyRound, LogOut, Mail, Settings2, X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateOrg from '../createNewOrg';
+import { MODAL_TYPE } from '@/utils/enums';
 
 function OrgSlider() {
     const router = useRouter();
@@ -14,18 +15,8 @@ function OrgSlider() {
     const [searchQuery, setSearchQuery] = useState('');
     const organizations = useCustomSelector((state) => state.userDetailsReducer.organizations);
     const userdetails = useCustomSelector((state) => state?.userDetailsReducer?.userDetails);
-    const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
 
     const filteredOrganizations = filterOrganizations(organizations,searchQuery);
-
-    const handleOpenCreateOrgModal = useCallback(() => {
-        setShowCreateOrgModal(true);
-    }, []);
-
-    const handleCloseCreateOrgModal = useCallback(() => {
-        setShowCreateOrgModal(false);
-    }, []);
-
 
     const logoutHandler = async () => {
         try {
@@ -84,7 +75,7 @@ function OrgSlider() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="border border-gray-300 rounded p-2 w-full"
                 />
-                <button onClick={handleOpenCreateOrgModal} className="  bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50 "><span className='flex justify-center items-center gap-2 text-gray font-semibold'>+ Create New Org<Building2 size={16} /></span></button>
+                <button onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="  bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50 "><span className='flex justify-center items-center gap-2 text-gray font-semibold'>+ Create New Org<Building2 size={16} /></span></button>
                 <ul className="menu p-0 w-full text-base-content">
                     {filteredOrganizations.length === 0 ? (
                         <div className='max-w-full'>
@@ -128,7 +119,7 @@ function OrgSlider() {
 
                 </details>
             </div>
-            {showCreateOrgModal && <CreateOrg onClose={handleCloseCreateOrgModal} handleSwitchOrg={handleSwitchOrg} />}
+             <CreateOrg handleSwitchOrg={handleSwitchOrg} />
         </aside>
     )
 }
