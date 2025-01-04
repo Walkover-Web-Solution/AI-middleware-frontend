@@ -21,6 +21,7 @@ import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
+import ToolCallCount from "./configurationComponent/toolCallCount";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -75,6 +76,7 @@ export default function ConfigurationPage({ params }) {
                         {modelType !== "image"  && <AddVariable params={params} />}
                         {modelType !== 'image' && <GptMemory params={params} /> }
                         {bridgeType === "chatbot" && modelType !== 'image' &&  <UserRefernceForRichText params={params} />}
+                        {(modelType !== 'image' && modelType !== 'reasoning') && <ToolCallCount params={params} />}
                         { modelType !== 'image' && <ActionList params={params} />}
                         {bridgeType === 'api' && modelType !== 'image' && <ResponseFormatSelector params={params} />}
                     </>
