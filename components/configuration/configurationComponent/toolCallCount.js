@@ -1,5 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { Info } from 'lucide-react';
 import React from 'react'
 import { useDispatch } from 'react-redux';
 
@@ -16,8 +17,11 @@ function ToolCallCount({ params }) {
 
     return (
         <div className='form-control'>
-            <div className="label">
-                <span className="label-text font-medium">Number of function calls</span>
+            <div className="label items-center flex justify-start">
+                <span className="label-text font-medium">Maximum Function Call Limit</span>
+                <div className="tooltip tooltip-right" data-tip={"This feature sets a limit on function calls. By default, functions are called one at a time, but with 'Parallel Tools' enabled, multiple functions can be called simultaneously within a single function call."}>
+                    <Info size={12} className='ml-2' />
+                </div>
             </div>
             <input
                 type="number"
