@@ -27,7 +27,7 @@ function Page({ searchParams }) {
     thread: state?.historyReducer?.thread || [],
   }));
 
-  const [selectedThread, setSelectedThread] = useState("");
+  const [selectedThread, setSelectedThread] = useState(null);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [page, setPage] = useState(1);
@@ -108,6 +108,7 @@ function Page({ searchParams }) {
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <ThreadContainer 
+          key={`thread-container-${params.id}-${params.version}`}
           thread={thread}
           filterOption={filterOption}
           setFilterOption={setFilterOption}
