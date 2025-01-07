@@ -320,7 +320,8 @@ export const MODAL_TYPE = {
   CHATBOT_MODAL : "chatBot_model",
   CREATE_ORG_MODAL : "create-org-modal",
   PAUTH_KEY_DELETE_MODAL: "PAUTH_KEY_DELETE_MODAL",
-  WEBHOOK_MODAL: "WEBHOOK_MODAL"
+  WEBHOOK_MODAL: "WEBHOOK_MODAL",
+  CHAT_DETAILS_VIEW_MODAL:"chat_details_view"
 
 }
 
