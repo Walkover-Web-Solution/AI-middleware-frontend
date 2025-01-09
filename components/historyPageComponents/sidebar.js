@@ -1,15 +1,15 @@
-import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction.js";
-import { Download, ThumbsDown, ThumbsUp, ChevronDown, ChevronUp } from "lucide-react";
-import { useRef, useState, useEffect, useCallback } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { useDispatch } from "react-redux";
-import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
-import DateRangePicker from "./dateRangePicker.js";
-import { toast } from "react-toastify";
 import { useCustomSelector } from "@/customHooks/customSelector.js";
+import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction.js";
 import { clearSubThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { openModal } from "@/utils/utility.js";
+import { ChevronDown, ChevronUp, Download, ThumbsDown, ThumbsUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
+import DateRangePicker from "./dateRangePicker.js";
 
 const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedSubThreadId, setSelectedSubThreadId }) => {
   const { subThreads } = useCustomSelector(state => ({

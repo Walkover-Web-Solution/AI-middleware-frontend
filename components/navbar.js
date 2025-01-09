@@ -134,7 +134,7 @@ function Navbar() {
                 )}
                 <button
                   className="btn bg-green-200 hover:bg-green-300"
-                  onClick={()=>openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
+                  onClick={() => openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
                   disabled={!isdrafted && publishedVersion === versionId}
                 >
                   Publish Version
