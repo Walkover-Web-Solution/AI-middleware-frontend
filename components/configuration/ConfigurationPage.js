@@ -69,7 +69,6 @@ export default function ConfigurationPage({ params }) {
                         {modelType !== "image" && <PreEmbedList params={params} />}
                         {modelType !== 'image' && <InputConfigComponent params={params} />}
                         {(modelType !== 'image' && modelType !== 'reasoning') && <EmbedList params={params} />}
-                        {(modelType !== 'image' && modelType !== 'reasoning') && <ToolCallCount params={params} />}
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
