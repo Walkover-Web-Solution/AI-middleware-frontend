@@ -6,7 +6,7 @@ import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import EditorComponent from './tipatpEditor';
+import EditorComponent from '../../TiptapEditor/tipatpEditor';
 import * as Y from 'yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 
@@ -242,17 +242,19 @@ const InputConfigComponent = ({ params }) => {
     };
 
     if (service === "google" && serviceType === "chat") return null;
+
+    const localToken = useMemo(() => localStorage.getItem('local_token'), []);
+
     const { ydoc, provider } = useMemo(() => {
-  
         const ydoc = new Y.Doc();
         const provider = new HocuspocusProvider({
-          url: `http://localhost:1234`,
+          url: `http://localhost:1234/`,
           name: params?.version,
-          parameters:{version_id:params.version},
+          parameters: {version_id: params.version, localToken: localToken, service: "ai-middleware" },
           document: ydoc,
         });
         return { ydoc, provider };
-      }, [params?.id, params, params.version]);
+      }, [params?.id, params, params.version, localToken]);
     
 
     return (
@@ -268,7 +270,7 @@ const InputConfigComponent = ({ params }) => {
             </div>
             <div className="form-control h-full">
             <EditorComponent params={params} ydoc={ydoc} provider={provider} key={params.version}/>
-                <textarea
+                {/* <textarea
                     ref={textareaRef}
                     className="textarea textarea-bordered border w-full max-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2"
                     value={prompt}
@@ -276,7 +278,7 @@ const InputConfigComponent = ({ params }) => {
                     onKeyDown={handleKeyDown}
                     onBlur={savePrompt}
                 />
-                {showSuggestions && renderSuggestions()}
+                {showSuggestions && renderSuggestions()} */}
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
             <OptimizePromptModal params={params} />

@@ -106,11 +106,6 @@ html {
   border-color: #007BFF; /* Change border color on focus */
 }
 
-/* Remove focus outline and border */
-/* .editor-content:focus {
-  outline: none;
-  border: none; /* Remove any border */
-
 
 tiptap {
   :first-child {
@@ -124,36 +119,42 @@ tiptap {
   border: none;
 }
 
-.mention-popup {
-  border: 1px solid #ccc;
-  background: white;
-  z-index: 1000;
+.mention-list {
+  background: rgb(240, 237, 237);
+  /* border: 1px solid #ddd; */
+  border-radius: 4px;
+  max-height: auto;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .mention-item {
-  padding: 5px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
   cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+  color: black;
 }
 
-.mention-item:hover {
-  background: #f0f0f0;
+.mention-item:hover,
+.mention-item.is-selected {
+  background-color: #c4cad8;
 }
 
-.mention-suggestions {
-  position: absolute;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 1000;
+.variables {
+  /* Style for the mention nodes in the editor */
+  /* background-color: #a0bfe5; */
+  /* padding: 2px 4px; */
+  /* border-radius: 10px; */
 }
-
-.mention-suggestions div {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.mention-suggestions div:hover {
-  background-color: #f0f0f0;
+tippy-content {
+  position: relative;
+  padding: 5px 9px;
+  z-index: 1;
 }
