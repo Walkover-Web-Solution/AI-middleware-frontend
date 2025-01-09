@@ -1,7 +1,10 @@
+import ApiKeyModal from '@/components/modals/ApiKeyModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { SERVICES } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import { MODAL_TYPE } from '@/utils/enums';
+import { openModal } from '@/utils/utility';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const ApiKeyInput = ({ params }) => {
@@ -77,13 +80,17 @@ const ApiKeyInput = ({ params }) => {
 
     const handleDropdownChange = useCallback((e) => {
         const selectedApiKeyId = e.target.value;
-        setSelectedApiKeys(prev => {
-            const updated = { ...prev, [bridge?.service]: selectedApiKeyId };
-             // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
-            dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
-            return updated;
-        });
-    }, [dispatch, params?.id, params?.version, bridge?.service]);
+        if (selectedApiKeyId === 'add_new') {
+            openModal(MODAL_TYPE.API_KEY_MODAL);
+        } else {
+            setSelectedApiKeys(prev => {
+                const updated = { ...prev, [bridge?.service]: selectedApiKeyId };
+                 // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
+                dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
+                return updated;
+            });
+        }
+    }, [dispatch, params.id, params.version, bridge?.service]);
 
     // Determine the currently selected value
     const selectedValue = useMemo(() => {
@@ -105,7 +112,7 @@ const ApiKeyInput = ({ params }) => {
                 <span className="label-text font-medium">Service's API Key</span>
             </div>
             <div className=''>
-                <div >
+                <div  className='relative'>
                     <select
                         className="select select-bordered select-sm w-full"
                         onChange={handleDropdownChange}
@@ -135,6 +142,7 @@ const ApiKeyInput = ({ params }) => {
                                 No API keys available for this service
                             </option>
                         )}
+                         <option value="add_new" className="add-new-option">+  Add new API Key </option>
                     </select>
                     <div className='text-[10px] text-end '>
                         <button
@@ -175,6 +183,7 @@ const ApiKeyInput = ({ params }) => {
                     )}
                 </div>
             </div>
+            <ApiKeyModal/>
         </div>
     );
 };

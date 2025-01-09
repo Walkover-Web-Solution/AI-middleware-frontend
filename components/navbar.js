@@ -104,7 +104,7 @@ function Navbar() {
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDown size={16} /></div>
           <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
-            {['bridges', "chatbot", 'pauthkey', 'apikeys', 'alerts', 'invite'].map((item) => (
+            {['bridges', "chatbot", 'pauthkey', 'apikeys', 'alerts', 'invite', 'metrics'].map((item) => (
               <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
                 <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
               </li>
@@ -134,7 +134,7 @@ function Navbar() {
                 )}
                 <button
                   className="btn bg-green-200 hover:bg-green-300"
-                  onClick={()=>openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
+                  onClick={() => openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
                   disabled={!isdrafted && publishedVersion === versionId}
                 >
                   Publish Version
@@ -164,7 +164,7 @@ function Navbar() {
           </>
         ) : (
           path[3] === 'apikeys' ?
-            <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>+ create new Api key</button>
+            <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>+ Add new Api key</button>
             : path[3] === 'pauthkey' ?
               <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new Pauth Key</button>
               :

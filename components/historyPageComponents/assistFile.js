@@ -31,3 +31,37 @@ export const useHandleClickOutside = (sidebarRef, setIsSliderOpen) => {
     };
   }, [sidebarRef, setIsSliderOpen]);
 };
+ 
+export const scrollToBottom = (historyRef) => {
+  if (historyRef.current) {
+    historyRef.current.scrollTo({
+      top: historyRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }
+};
+
+export const scrollToTop = (historyRef,searchMessageId) => {
+  if (historyRef.current && searchMessageId) {
+    historyRef.current.scrollTo({
+      top: -historyRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }
+};
+
+export const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
+
+export const truncate = (string = "", maxLength) => {
+  return string.length > maxLength
+    ? `${string.substring(0, maxLength - 3)}...`
+    : string;
+};
