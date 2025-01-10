@@ -2,113 +2,96 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEffect, useMemo } from "react";
 
 const Chatbot = ({ params }) => {
-    const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration} = useCustomSelector((state) => ({
-        bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
-        bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-        chatbot_token: state?.ChatBot?.chatbot_token || '',
-        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
-        configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration
-    }));
-    
-    const variables = useMemo(() => {
-        return variablesKeyValue.reduce((acc, pair) => {
-            if (pair.key && pair.value && pair.checked) {
-                acc[pair.key] = pair.value;
-            }
-            return acc;
-        }, {});
-    }, [variablesKeyValue]);
+  const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration } = useCustomSelector((state) => ({
+    bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
+    bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
+    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+    chatbot_token: state?.ChatBot?.chatbot_token || '',
+    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
+    configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration
+  }));
 
-    useEffect(() => { //todo change the appoarch
-        const sendWithDelay = () => {
-            if (bridgeSlugName && window?.SendDataToChatbot) {
-                SendDataToChatbot({
-                    "threadId": bridgeName?.replaceAll(" ", "_")
-                });
-            }
-        };
+  const variables = useMemo(() => {
+    return variablesKeyValue.reduce((acc, pair) => {
+      if (pair.key && pair.value && pair.checked) {
+        acc[pair.key] = pair.value;
+      }
+      return acc;
+    }, {});
+  }, [variablesKeyValue]);
 
-        sendWithDelay(); // Send on refresh
+  useEffect(() => {
+    if (bridgeName && window?.SendDataToChatbot) {
+      SendDataToChatbot({
+        "threadId": bridgeName
+      });
+    }
+  }, [bridgeName]);
 
-        const delayTimeout = setTimeout(() => {
-            sendWithDelay(); // Send with delay
-        }, 1000); // Delay of 1000ms or 1 second
+  useEffect(() => {
+    if (bridgeSlugName && window?.SendDataToChatbot) {
+      SendDataToChatbot({
+        "bridgeName": bridgeSlugName
+      });
+    }
+  }, [bridgeSlugName]);
 
-        return () => clearTimeout(delayTimeout);
-    }, [bridgeSlugName, bridgeName]);
+  useEffect(() => { //todo change the appoarch
+    if (configuration?.vision && window?.SendDataToChatbot) {
+      SendDataToChatbot({
+        "vision": { "vision": true }
+      })
+    }
+    else if (window?.SendDataToChatbot) {
+      SendDataToChatbot({
+        "vision": { "vision": false }
+      })
+    }
+  }, [configuration]);
 
-    useEffect(() => {
-        if (bridgeName && window?.SendDataToChatbot) {
-            SendDataToChatbot({
-                "bridgeName": bridgeSlugName
-            });
-        }
-    }, [bridgeName]);
+  useEffect(() => {
+    if (variables && window?.SendDataToChatbot) {
+      window.SendDataToChatbot({
+        "variables": variables
+      });
+    }
+  }, [variables]);
 
-    useEffect(() => {
-        if (params?.version && window?.SendDataToChatbot) {
-            SendDataToChatbot({
-                "versionId": params.version
-            });
-        }
-    }, [params]);
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeName && bridgeSlugName && bridgeType && params?.version) {
+        window.SendDataToChatbot({
+          "bridgeName": bridgeSlugName,
+          "threadId": bridgeName?.replaceAll(" ", "_"),
+          "parentId": 'parentChatbot',
+          "fullScreen": true,
+          "hideCloseButton": true,
+          "hideIcon": true,
+          "version_id": params?.version,
+          "variables": variables || {}
+        });
+        setTimeout(() => {
+          if (bridgeType === 'chatbot') window.openChatbot();
+        }, 200);
+        clearInterval(intervalId);
+      }
+    }, 300); // Check every 100ms
 
-    useEffect(() => { //todo change the appoarch
-        if(configuration?.vision && window?.SendDataToChatbot)
-        {
-            SendDataToChatbot({
-                "vision": {"vision":true}
-            })
-        }
-        else if(window?.SendDataToChatbot)
-            {
-                SendDataToChatbot({
-                    "vision":{"vision":false}
-                })
-            }
-    }, [configuration]);
+    return () => {
+      clearInterval(intervalId);
+      // if (typeof window.closeChatbot === "function") {
+      //     SendDataToChatbot({
+      //         parentId: '',
+      //         fullScreen: false,
+      //     });
+      //     setTimeout(() => {
+      //         closeChatbot();
+      //     }, 0);
+      // }
+    };
+  }, [chatbot_token]);
 
-    useEffect(() => {
-        if (variables && window?.SendDataToChatbot) {
-            window.SendDataToChatbot({
-                "variables": variables
-            });
-        }
-    }, [variables]);
-
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeName && bridgeSlugName && bridgeType) {
-                window.SendDataToChatbot({
-                    "bridgeName": bridgeSlugName,
-                    "threadId": bridgeName?.replaceAll(" ", "_"),
-                    "parentId": 'parentChatbot',
-                    "fullScreen": true,
-                    "hideCloseButton": true,
-                    "hideIcon": true,
-                    "variables": variables || {}
-                });
-                if (bridgeType === 'chatbot') window.openChatbot();
-                clearInterval(intervalId);
-            }
-        }, 100); // Check every 100ms
-
-        return () => {
-            clearInterval(intervalId);
-            if (typeof window.closeChatbot === "function") {
-                SendDataToChatbot({
-                    parentId: '',
-                    fullScreen: false,
-                });
-                setTimeout(() => {
-                    closeChatbot();
-                }, 0);
-            }
-        };
-    }, [chatbot_token]);
-
-    return null;
+  return null;
 };
 
 export default Chatbot;
