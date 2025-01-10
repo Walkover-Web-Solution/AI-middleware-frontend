@@ -24,7 +24,7 @@ const Chatbot = ({ params }) => {
         const sendWithDelay = () => {
             if (bridgeSlugName && window?.SendDataToChatbot) {
                 SendDataToChatbot({
-                    "threadId": bridgeName
+                    "threadId": bridgeName?.replaceAll(" ", "_")
                 });
             }
         };
@@ -82,7 +82,7 @@ const Chatbot = ({ params }) => {
             if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeName && bridgeSlugName && bridgeType) {
                 window.SendDataToChatbot({
                     "bridgeName": bridgeSlugName,
-                    "threadId": bridgeName?.replaceAll(" ", ""),
+                    "threadId": bridgeName?.replaceAll(" ", "_"),
                     "parentId": 'parentChatbot',
                     "fullScreen": true,
                     "hideCloseButton": true,
