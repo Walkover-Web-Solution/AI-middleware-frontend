@@ -19,7 +19,7 @@ function BridgeVersionDropdown({ params }) {
 
     useEffect(() => {
         const timer = setInterval(() => {
-            if (typeof SendDataToChatbot !== 'undefined') {
+            if (typeof SendDataToChatbot !== 'undefined' && params.version) {
                 SendDataToChatbot({ "version_id": params.version });
                 clearInterval(timer);
             }
