@@ -54,7 +54,7 @@ export default function layoutOrgPage({ children, params }) {
 
     setTimeout(() => {
         updateScript();
-    }, 150); // Delay of 1000ms or 1 second
+    }, 150); // Delay of 150ms
 
     return () => {
       const existingScript = document.getElementById(scriptId);

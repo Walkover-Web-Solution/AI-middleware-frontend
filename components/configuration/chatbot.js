@@ -1,5 +1,5 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 const Chatbot = ({ params }) => {
   const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration } = useCustomSelector((state) => ({
@@ -11,33 +11,47 @@ const Chatbot = ({ params }) => {
     configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration
   }));
 
+  const bridgeNameRef = useRef(bridgeName);
+  const bridgeSlugNameRef = useRef(bridgeSlugName);
+  const bridgeTypeRef = useRef(bridgeType);
+  const variablesKeyValueRef = useRef(variablesKeyValue);
+  const configurationRef = useRef(configuration);
+
+  useEffect(() => {
+    bridgeNameRef.current = bridgeName;
+    bridgeSlugNameRef.current = bridgeSlugName;
+    bridgeTypeRef.current = bridgeType;
+    variablesKeyValueRef.current = variablesKeyValue;
+    configurationRef.current = configuration;
+  }, [bridgeName, bridgeSlugName, bridgeType, variablesKeyValue, configuration]);
+
   const variables = useMemo(() => {
-    return variablesKeyValue.reduce((acc, pair) => {
+    return variablesKeyValueRef.current.reduce((acc, pair) => {
       if (pair.key && pair.value && pair.checked) {
         acc[pair.key] = pair.value;
       }
       return acc;
     }, {});
-  }, [variablesKeyValue]);
+  }, [variablesKeyValueRef.current]);
 
   useEffect(() => {
-    if (bridgeName && window?.SendDataToChatbot) {
+    if (bridgeNameRef.current && window?.SendDataToChatbot) {
       SendDataToChatbot({
-        "threadId": bridgeName
+        "threadId": bridgeNameRef.current
       });
     }
-  }, [bridgeName]);
+  }, [bridgeNameRef.current]);
 
   useEffect(() => {
-    if (bridgeSlugName && window?.SendDataToChatbot) {
+    if (bridgeSlugNameRef.current && window?.SendDataToChatbot) {
       SendDataToChatbot({
-        "bridgeName": bridgeSlugName
+        "bridgeName": bridgeSlugNameRef.current
       });
     }
-  }, [bridgeSlugName]);
+  }, [bridgeSlugNameRef.current]);
 
-  useEffect(() => { //todo change the appoarch
-    if (configuration?.vision && window?.SendDataToChatbot) {
+  useEffect(() => {
+    if (configurationRef.current?.vision && window?.SendDataToChatbot) {
       SendDataToChatbot({
         "vision": { "vision": true }
       })
@@ -47,7 +61,7 @@ const Chatbot = ({ params }) => {
         "vision": { "vision": false }
       })
     }
-  }, [configuration]);
+  }, [configurationRef.current]);
 
   useEffect(() => {
     if (variables && window?.SendDataToChatbot) {
@@ -59,10 +73,10 @@ const Chatbot = ({ params }) => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeName && bridgeSlugName && bridgeType && params?.version) {
+      if (window?.SendDataToChatbot && window.openChatbot && document.getElementById('parentChatbot') && bridgeNameRef.current && bridgeSlugNameRef.current && bridgeTypeRef.current && params?.version) {
         window.SendDataToChatbot({
-          "bridgeName": bridgeSlugName,
-          "threadId": bridgeName?.replaceAll(" ", "_"),
+          "bridgeName": bridgeSlugNameRef.current,
+          "threadId": bridgeNameRef.current?.replaceAll(" ", "_"),
           "parentId": 'parentChatbot',
           "fullScreen": true,
           "hideCloseButton": true,
@@ -71,11 +85,11 @@ const Chatbot = ({ params }) => {
           "variables": variables || {}
         });
         setTimeout(() => {
-          if (bridgeType === 'chatbot') window.openChatbot();
+          if (bridgeTypeRef.current === 'chatbot') window?.openChatbot();
         }, 200);
         clearInterval(intervalId);
       }
-    }, 300); // Check every 100ms
+    }, 300);
 
     return () => {
       clearInterval(intervalId);

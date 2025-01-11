@@ -29,8 +29,13 @@ const Page = ({ searchParams }) => {
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
     return () => {
-      if (handleclose)
-        handleclose();
+      try {
+        if (handleclose) {
+          handleclose();
+        }
+      } catch (error) {
+        console.error("Error in handleclose:", error);
+      }
     }
   }, []);
 
@@ -47,7 +52,7 @@ const Page = ({ searchParams }) => {
   useEffect(() => {
     if (mountRef.current) {
       if (bridgeType === 'chatbot') {
-        if (typeof openChatbot !== 'undefined') {
+        if (typeof openChatbot !== 'undefined' && document.getElementById('parentChatbot')) {
           openChatbot()
         }
       } else {
@@ -73,7 +78,7 @@ const Page = ({ searchParams }) => {
             <div className="w-full md:w-1/3 flex-1 chatPage min-w-[450px]">
               <div className="p-4 m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
                 {/* {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />} */}
-                <Chatbot params={params} />
+                <Chatbot params={params} key={params}/>
                 <Chat params={params} />
               </div>
             </div>
