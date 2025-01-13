@@ -4,7 +4,7 @@ import { updateBridgeVersionAction, updateFuntionApiAction } from '@/store/actio
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal, flattenParameters } from '@/utils/utility';
 import { isEqual } from 'lodash';
-import { Info, InfoIcon, Trash2 } from 'lucide-react';
+import { Copy, Info, InfoIcon, Trash2 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -44,6 +44,35 @@ function FunctionParameterModal({ functionId, params }) {
         setIsModified(!isEqual(variablesPath, variables_path[functionName]));
     }, [variablesPath])
 
+    const copyToClipboard = (content) => {
+        navigator.clipboard.writeText(content)
+            .then(() => {
+                toast.success("Content copied to clipboard");
+                // Optionally, you can show a success message to the user
+            })
+            .catch((error) => {
+                console.error('Error copying content to clipboard:', error);
+                // Optionally, you can show an error message to the user
+            });
+    };
+
+    const copyToolCallFormat = () => {
+        const toolCallFormat = {
+            "type": "function",
+            "function": {
+                "name": function_details?.['function_name'],
+                "description": (function_details?.['endpoint_name'] ? "Name: " + function_details['endpoint_name'] + ', ' : '') + 'Description: ' + function_details?.['description'],
+                "parameters": {
+                    "type": "object",
+                    "properties": JSON.parse(objectFieldValue) || {},
+                    "required_params": function_details?.['required_params'] || [],
+                    "additionalProperties": false
+                }
+            }
+        }
+        copyToClipboard(JSON.stringify(toolCallFormat, undefined, 4));
+
+    }
     const handleRequiredChange = (key) => {
         const keyParts = key.split('.');
         if (keyParts.length === 1) {
@@ -339,6 +368,10 @@ function FunctionParameterModal({ functionId, params }) {
                             onChange={handleToggleChange}
                             title="Toggle to edit object parameter"
                         />
+                        {isTextareaVisible && <div className='flex items-center gap-2'>
+                            <p>Copy tool call format: </p>
+                            <Copy size={16} onClick={copyToolCallFormat} className='cursor-pointer' />
+                        </div>}
                     </div>
                     }
                     <div>
