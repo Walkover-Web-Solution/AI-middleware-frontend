@@ -84,10 +84,10 @@ function Page() {
     closeModal(MODAL_TYPE.PAUTH_KEY_DELETE_MODAL)
   }
   return (
-    <div className="drawer lg:drawer-open p-5">
+    <div className="">
       {isCreating && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex pl-2 flex-col items-start justify-start">
+      <div className="drawer-content flex flex-col items-start justify-start">
         <div className="flex w-full justify-start gap-16 items-start">
           <div className="w-full">
 

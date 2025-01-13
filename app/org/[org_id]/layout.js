@@ -8,11 +8,15 @@ import { createApiAction, getAllBridgesAction, getAllFunctions, integrationActio
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 
 export default function layoutOrgPage({ children, params }) {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const pathName = usePathname();
+  const path = pathName.split('?')[0].split('/')
+
   const { chatbot_token, embedToken } = useCustomSelector((state) => ({
     chatbot_token: state?.ChatBot?.chatbot_token || '',
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
@@ -43,7 +47,6 @@ export default function layoutOrgPage({ children, params }) {
       script.setAttribute("embedToken", chatbot_token);
       script.setAttribute("hideIcon", true);
       script.id = scriptId;
-      // script.src = scriptSrc;
       document.head.appendChild(script);
       script.src = scriptSrc
     }
@@ -58,21 +61,6 @@ export default function layoutOrgPage({ children, params }) {
   useEffect(() => {
     dispatch(getAllChatBotAction(params.org_id))
   }, []);
-
-  // useEffect(() => {
-  //   if (embedToken) {
-  //     const script = document.createElement("script");
-  //     script.setAttribute("embedToken", embedToken);
-  //     script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
-  //     script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC;
-  //     document.body.appendChild(script);
-
-  //     return () => {
-  //       console.log('embedToken script')
-  //       document.body.removeChild(document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID));
-  //     };
-  //   }
-  // }, [embedToken]);
 
   useEffect(() => {
     window.addEventListener("message", handleMessage);
@@ -104,17 +92,28 @@ export default function layoutOrgPage({ children, params }) {
     }
   }
 
-  return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <div className="w-6 flex flex-col fixed h-full">
-        <MainSlider />
-      </div>
+  const isHomePage = useMemo(() => path?.length < 5, [path]);
 
-      {/* Main Content */}
-      <div className="flex-1 ml-64 p-5 overflow-y-auto">
-        <main className="p-4">{children}</main>
+  if (isHomePage) {
+    return (
+      <div className="flex h-screen">
+        <div className="w-6 flex flex-col fixed h-full">
+          <MainSlider />
+        </div>
+        <div className='flex-1 ml-72 overflow-y-auto'>
+          <Navbar />
+          <main className="px-2">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
-  );
+    );
+  } else {
+    return (
+      <div className="h-screen">
+        <Navbar />
+        {children}
+      </div>
+    );
+  }
 }

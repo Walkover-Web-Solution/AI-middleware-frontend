@@ -1,5 +1,7 @@
+import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { Building2, ChevronDown, Home, TriangleAlert, Key, KeyRound, UserPlus, LineChart, Bot, PlugZap, LogOut, Mail, Settings2 } from 'lucide-react';
+import { toggleSidebar } from '@/utils/utility';
+import { Bot, Building2, ChevronDown, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TriangleAlert, UserPlus } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 
@@ -7,7 +9,10 @@ function MainSlider() {
     const pathName = usePathname();
     const router = useRouter();
     const path = pathName.split('?')[0].split('/')
-    const userdetails = useCustomSelector((state) => state?.userDetailsReducer?.userDetails);
+    const { userdetails, organizations } = useCustomSelector((state) => ({
+        userdetails: state?.userDetailsReducer?.userDetails,
+        organizations: state.userDetailsReducer.organizations,
+    }));
 
     const Icons = {
         org: <Building2 />,
@@ -19,14 +24,37 @@ function MainSlider() {
         invite: <UserPlus />,
         metrics: <LineChart />
     }
+
+    const logoutHandler = async () => {
+        try {
+            await logoutUserFromMsg91({
+                headers: {
+                    proxy_auth_token: localStorage.getItem('proxy_token'),
+                },
+            });
+            localStorage.clear();
+            sessionStorage.clear();
+            router.replace('/');
+        } catch (e) {
+            console.error(e);
+        }
+    };
+    const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
     return (
-        <div className="flex flex-col h-screen w-72 bg-base-100 border-r pt-6 relative drawer lg:drawer-open">
-            <div className="flex-grow overflow-y-auto">
-                <h2 className="text-xl font-bold text-center mb-3">AI Middleware</h2>
-                <ul className="menu p-4 space-y-2">
-                    {['bridges', 'chatbot', 'pauthkey', 'apikeys', 'alerts', 'invite', 'metrics'].map((item) => (
+        <div className="flex flex-col h-screen w-72 bg-base-100 border-r py-4 relative drawer lg:drawer-open">
+            <div className="flex-grow overflow-y-auto px-4">
+                <div className='mb-4 flex-col gap-2'>
+                    <h2 className="text-xl font-bold text-start">
+                        {organizations[path[2]]?.name.length > 15
+                            ? organizations[path[2]]?.name.substring(0, 15) + '...'
+                            : organizations[path[2]]?.name}
+                    </h2>
+                    <a href="#" onClick={toggleOrgSidebar} className="text-sm text-blue-500 hover:underline">Switch Organization</a>
+                </div>
+                <ul className="menu space-y-2 p-0">
+                    {['bridges', 'pauthkey', 'apikeys', 'alerts', 'invite', 'metrics'].map((item) => (
                         <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)} className="transition-transform transform hover:scale-105 flex items-center">
-                            <a className={` w-full font-medium ml-2 ${path[3] === item ? "active text-primary" : "text-gray-700"} `}>
+                            <a className={` w-full font-medium ${path[3] === item ? "active text-primary" : "text-gray-700"} `}>
                                 {Icons[item]}
                                 {item.charAt(0).toUpperCase() + item.slice(1)}
                             </a>
@@ -51,7 +79,7 @@ function MainSlider() {
                     <div className="border-t border-gray-200 bg-white">
                         <ul className="menu w-full   text-base-content">
                             <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
-                            <li ><a className='py-2 px-2 rounded-md'> <LogOut size={16} />  logout</a></li>
+                            <li ><a className='py-2 px-2 rounded-md' onClick={logoutHandler}> <LogOut size={16} />  logout</a></li>
                         </ul>
                     </div>
 
