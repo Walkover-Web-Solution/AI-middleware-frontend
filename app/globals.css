@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root::-webkit-scrollbar {
   display: none;
 }
@@ -50,7 +49,8 @@
 }
 
 body {
-  overflow: visible !important;
+  /* overflow: visible !important; */
+  overflow-x: hidden;
 }
 
 .line-clamp-5 {

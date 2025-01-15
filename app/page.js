@@ -1,12 +1,20 @@
 "use client";
 
-import Header from "@/components/header";
-import HeroPage from "@/components/heroPage";
+import Group1 from "@/components/Group1";
+import Header from "@/components/Header";
+import HeroPage from "@/components/HeroPage";
 import LoadingSpinner from "@/components/loadingSpinner";
+import Group2 from "@/components/Group2";
 import WithAuth from "@/components/withauth";
 import { loginUser } from "@/config";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useLayoutEffect, useState } from "react";
+import Group3 from "@/components/Group3";
+import Group4 from "@/components/Group4";
+import Group5 from "@/components/Group5";
+import Group6 from "@/components/Group6";
+import Footer from "@/components/Footer";
 
 /**
  * This page is the entry point for the user to start the login process.
@@ -81,20 +89,35 @@ function page() {
   // }, []);
 
   return (
-    <div
-      style={{ width: "100vw", height: "100vh" }}
-      className="bg-black text-white relative"
-    >
-      <div className="absolute ">
-        <img
-          src="./Elipse.svg"
-          alt="Background"
-          // className="w-full h-full object-cover pointer-events-none"
-        />
-      </div>
+    <div className="bg-black h-full w-full text-white ">
+      <div
+        style={{ width: "100vw", height: "100vh" }}
+        className="bg-black h-full w-full text-white relative overflow-hidden "
+      >
+        <div className="absolute top-0 left-0 w-full h-2/3 z-0">
+          <Image
+            src="/Ellipse.svg"
+            alt="Background"
+            className="w-full h-full object-cover pointer-events-none"
+            style={{ objectPosition: "bottom" }}
+            width={500}
+            height={1000}
+            priority
+          />
+        </div>
 
-      <Header />
-      <HeroPage />
+        <div className="relative">
+          <Header />
+          <HeroPage />
+        </div>
+      </div>
+      <Group1 />
+      <Group2 />
+      <Group3 />
+      <Group4 />
+      <Group5 />
+      <Group6 />
+      <Footer />
     </div>
   );
 }
