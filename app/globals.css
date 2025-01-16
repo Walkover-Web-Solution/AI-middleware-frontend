@@ -64,3 +64,25 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+@layer utilities {
+  .bg-zoom {
+    background: linear-gradient(to left, #002eae, #3c30b9, #942ed4);
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 20s linear infinite;
+  animation-fill-mode: forwards; /* Ensures smooth start */
+  white-space: nowrap; /* Keeps content in a single line */
+  display: flex; /* Aligns content horizontally */
+}

@@ -19,9 +19,11 @@ const Header = () => {
       </div>
 
       <div className="flex space-x-8">
-        <button className="px-6 py-2 bg-transparent border border-white text-white rounded">
-          Login
-        </button>
+        <Link href="/login">
+          <button className="px-6 py-2 bg-transparent border border-white text-white rounded">
+            Login
+          </button>
+        </Link>
         {/* <button className="px-6 py-2 bg-custom-blue text-white rounded ">
           Start for free
         </button> */}
