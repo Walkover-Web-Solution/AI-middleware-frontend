@@ -241,7 +241,7 @@ export const createOrg = async (dataToSend) => {
     const data = await axios.post(`${PROXY_URL}/api/c/createCompany`, dataToSend)
     return data;
   } catch (error) {
-    toast.error(error.response.data.error)
+    toast.error(error.response.data.message)
   }
 }
 
