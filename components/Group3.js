@@ -29,8 +29,8 @@ const Group3 = () => {
   ];
 
   return (
-    <div className="flex flex-row items-stretch justify-between w-3/4 mx-auto mt-20 gap-4 z-10">
-      <div className="flex-1 max-w-[48%] rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:bg-zoom">
+    <div className="flex flex-col md:flex-row items-stretch justify-between w-3/4 mx-auto mt-20 gap-4 z-10">
+      <div className="flex-1 w-full md:max-w-[48%] rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:bg-zoom">
         <div className="flex items-center mb-2 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4 ">
           <Image
             src="/Settings.svg"
@@ -73,13 +73,12 @@ const Group3 = () => {
           they enable seamless collaboration, streamline workflows, and elevate
           the way you do business.
         </p>
-        <div className="flex justify-center mt-auto transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4  relative">
+        <div className="flex justify-center mt-auto  relative">
           <Image
             src="/Onboarding.svg"
             alt="Onboarding Logo"
             width={320}
             height={430}
-            className="transform group-hover:scale-105 transition-transform duration-300"
           />
         </div>
       </div>

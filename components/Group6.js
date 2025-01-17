@@ -5,7 +5,7 @@ const Group6 = () => {
   return (
     <div className="w-full min-h-full flex justify-center ">
       <div className="flex justify-center ">
-        <div className="w-3/5 text-center ">
+        <div className="w-full px-6 md:w-3/5 text-center ">
           <div className="flex items-center mb-2 justify-center">
             <Image
               src="/questions.svg"
