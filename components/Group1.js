@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const Group1 = () => {
   return (
-    <div className="w-full mt-12 flex justify-center bg-black">
+    <div className="w-full flex justify-center bg-black">
       <Image
         src="/Group1.svg"
         alt="Background"

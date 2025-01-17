@@ -86,3 +86,31 @@ html {
   white-space: nowrap; /* Keeps content in a single line */
   display: flex; /* Aligns content horizontally */
 }
+
+@layer utilities {
+  .hero-bg {
+    background-color: hsl(0, 0%, 0%);
+    background-image: radial-gradient(
+      circle farthest-side at center top,
+      hsl(276, 100%, 50%) 0%,
+      hsl(0, 0%, 0%) 70%
+    );
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center top;
+  }
+}
+@layer utilities {
+  .hero-bg-center {
+    background-color: hsl(0, 0%, 0%);
+    background-image: radial-gradient(
+      circle farthest-corner at center,
+      hsl(263, 100%, 70%) 0%,
+      hsl(0, 0%, 0%) 100%
+    );
+
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+  }
+}

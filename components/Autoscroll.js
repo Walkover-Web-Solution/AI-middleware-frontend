@@ -1,24 +1,19 @@
 import React from "react";
 
-const AutoScroll = ({ items = [] }) => {
+const Autoscroll = ({ items }) => {
   return (
-    <div className="flex w-full overflow-hidden p-0">
-      <div
-        className="flex animate-scroll justify-center items-center"
-        style={{ animationDuration: "30s" }}
-      >
-        {[...items, ...items].map((item, index) => (
-          <div
-            key={index}
-            className="m-4 flex flex-col justify-center items-center text-center text-white px-5 py-2 rounded-md transition duration-500 hover:bg-zoom cursor-pointer text-xl"
-          >
-            <item.icon width="25px" height="25px" />
-            <span className="mt-1">{item.label}</span>
-          </div>
-        ))}
-      </div>
+    <div className="grid grid-cols-4 gap-4 p-4">
+      {items.map((item, index) => (
+        <div
+          key={index}
+          className="flex flex-col items-center p-4 text-white rounded-md hover:bg-black transition-all ease-in-out duration-300"
+        >
+          <item.icon className="w-10 h-10 mb-2" />
+          <span className="text-xl font-medium">{item.label}</span>
+        </div>
+      ))}
     </div>
   );
 };
 
-export default AutoScroll;
+export default Autoscroll;

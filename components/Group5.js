@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const Group5 = () => {
   return (
-    <div className="w-full mx-auto flex-row justify-center items-center text-center text-2xl">
+    <div className="w-full mx-auto flex-row justify-center items-center text-center text-2xl pt-10">
       <p className="mb-6">Here's what people are saying about us</p>
       <Image
         src="/testimonials.svg"

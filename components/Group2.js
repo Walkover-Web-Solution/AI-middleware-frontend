@@ -16,7 +16,7 @@ const Group2 = () => {
   ];
   return (
     <>
-      <div className="flex-row justify-center items-center text-center">
+      <div className="flex-row justify-center w-3/4 mx-auto items-center text-center">
         <p className={`${inter.className} mb-10`}>Trusted by</p>
         <div className="flex justify-around pb-4">
           {logos.map((src, index) => (

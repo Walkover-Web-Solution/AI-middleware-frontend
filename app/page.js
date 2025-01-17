@@ -1,15 +1,11 @@
-"use client";
-
 import Group1 from "@/components/Group1";
-import Header from "@/components/Header";
 import HeroPage from "@/components/HeroPage";
-import LoadingSpinner from "@/components/loadingSpinner";
+// import LoadingSpinner from "@/components/loadingSpinner";
 import Group2 from "@/components/Group2";
 import WithAuth from "@/components/withauth";
-import { loginUser } from "@/config";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { useLayoutEffect, useState } from "react";
+// import { loginUser } from "@/config";
+// import { useRouter, useSearchParams } from "next/navigation";
+// import React, { useLayoutEffect, useState } from "react";
 import Group3 from "@/components/Group3";
 import Group4 from "@/components/Group4";
 import Group5 from "@/components/Group5";
@@ -24,10 +20,10 @@ import Footer from "@/components/Footer";
  */
 function page() {
   // Get the Next.js router instanc
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const proxy_auth_token = searchParams.get("proxy_auth_token");
+  // const [loading, setLoading] = useState(false);
+  // const router = useRouter();
+  // const searchParams = useSearchParams();
+  // const proxy_auth_token = searchParams.get("proxy_auth_token");
   // This effect is called only once when the component is mounted
   // It checks if the user has already logged in or not
   // If the user has logged in, it will redirect the user to the bridges page
@@ -89,28 +85,8 @@ function page() {
   // }, []);
 
   return (
-    <div className="bg-black h-full w-full text-white ">
-      <div
-        style={{ width: "100vw", height: "100vh" }}
-        className="bg-black h-full w-full text-white relative overflow-hidden "
-      >
-        <div className="absolute top-0 left-0 w-full h-2/3 z-0">
-          <Image
-            src="/Ellipse.svg"
-            alt="Background"
-            className="w-full h-full object-cover pointer-events-none"
-            style={{ objectPosition: "bottom" }}
-            width={500}
-            height={1000}
-            priority
-          />
-        </div>
-
-        <div className="relative">
-          <Header />
-          <HeroPage />
-        </div>
-      </div>
+    <div className="bg-black h-full w-full text-white">
+      <HeroPage />
       <Group1 />
       <Group2 />
       <Group3 />
@@ -122,4 +98,5 @@ function page() {
   );
 }
 
-export default WithAuth(page);
+// export default WithAuth(page);
+export default page;

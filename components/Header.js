@@ -18,9 +18,9 @@ const Header = () => {
         <p className=" font-medium cursor-pointer">Pricing</p>
       </div>
 
-      <div className="flex space-x-8">
+      <div className="flex gap-4">
         <Link href="/login">
-          <button className="px-6 py-2 bg-transparent border border-white text-white rounded">
+          <button className="btn px-6 py-2 bg-transparent border border-white text-white rounded hover:text-black">
             Login
           </button>
         </Link>
