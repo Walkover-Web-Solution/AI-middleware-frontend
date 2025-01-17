@@ -6,6 +6,7 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import AnthropicIcon from "@/icons/AnthropicIcon";
 import GemmaIcon from "@/icons/GemmaIcon";
 import OllamaIcon from "@/icons/OllamaIcon";
+import HuggingFaceIcon from "@/icons/HuggingFaceIcon";
 
 const Group3 = () => {
   // const items1 = [
@@ -38,12 +39,8 @@ const Group3 = () => {
   // ];
   // const items3 = [
 
-  //   "Gemma",
-
-  //   "Ollama",
   //   "Llama2",
   //   "Azure",
-  //   "Hugging Face",
 
   //   "langchain",
   //   "vision",----
@@ -57,6 +54,7 @@ const Group3 = () => {
     { icon: OpenAiIcon, label: "DALL-E" },
     { icon: GemmaIcon, label: "Gemma" },
     { icon: OllamaIcon, label: "Ollama" },
+    { icon: HuggingFaceIcon, label: "HugginFace" },
   ];
   return (
     <div className="flex flex-row items-stretch justify-between h-screen w-3/4 mx-auto mt-20 gap-4 ">
