@@ -1,16 +1,11 @@
-import Group1 from "@/components/Group1";
 import HeroPage from "@/components/HeroPage";
-// import LoadingSpinner from "@/components/loadingSpinner";
-import Group2 from "@/components/Group2";
-import WithAuth from "@/components/withauth";
-// import { loginUser } from "@/config";
-// import { useRouter, useSearchParams } from "next/navigation";
-// import React, { useLayoutEffect, useState } from "react";
-import Group3 from "@/components/Group3";
-import Group4 from "@/components/Group4";
-import Group5 from "@/components/Group5";
-import Group6 from "@/components/Group6";
 import Footer from "@/components/Footer";
+import PlatformImage from "@/components/PlatformImage";
+import TrustedBy from "@/components/TrustedBy";
+import DisplayCards from "@/components/DisplayCards";
+import PromptTemplates from "@/components/PromptTemplates";
+import CommentsCards from "@/components/CommentsCards";
+import Questions from "@/components/Questions";
 
 /**
  * This page is the entry point for the user to start the login process.
@@ -85,14 +80,14 @@ function page() {
   // }, []);
 
   return (
-    <div className="bg-black h-full w-full text-white">
+    <div className="bg-black h-full w-full text-white overflow-hidden">
       <HeroPage />
-      <Group1 />
-      <Group2 />
-      <Group3 />
-      <Group4 />
-      <Group5 />
-      <Group6 />
+      <PlatformImage />
+      <TrustedBy />
+      <DisplayCards />
+      <PromptTemplates />
+      <CommentsCards />
+      <Questions />
       <Footer />
     </div>
   );

@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import { Roboto } from "next/font/google";
 import Image from "next/image";
 import Header from "./Header";
+import Link from "next/link";
 
 // Load the font outside the component function
 const inter = Inter({
@@ -16,7 +17,7 @@ const roboto = Roboto({
 });
 const HeroPage = () => {
   return (
-    <div className="hero-bg flex flex-col w-full">
+    <div className="hero-bg flex flex-col h-screen w-full">
       <Header />
       <div className="flex flex-grow flex-col items-center justify-center gap-6">
         <div className="flex flex-col items-center text-center space-y-4 w-full max-w-screen-xl">
@@ -36,12 +37,16 @@ const HeroPage = () => {
         </div>
 
         <div className="flex gap-4 mt-6">
-          <button role="button" className="btn btn-primary">
-            Start for free
-          </button>
-          <button className=" btn px-6 py-3 bg-transparent border border-white text-white rounded-lg w-auto text-center hover:text-black">
-            Get demo
-          </button>
+          <Link href="/login">
+            <button role="button" className="btn btn-primary">
+              Start for free
+            </button>
+          </Link>
+          <Link href="/showcase">
+            <button className=" btn px-6 py-3 bg-transparent border border-white text-white rounded-lg w-auto text-center hover:text-black">
+              Get demo
+            </button>
+          </Link>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -8,7 +9,8 @@ const page = () => {
         <div className="w-2/3 mx-auto pl-8">
           <Link href="/">
             <button className="text-xl flex justify-center items-center p-2">
-              <Image src="left.svg" alt="left logo" width={20} height={20} />{" "}
+              {/* <Image src="left.svg" alt="left logo" width={20} height={20} />{" "} */}
+              <ChevronLeft />
               Back
             </button>
           </Link>
@@ -42,10 +44,10 @@ const page = () => {
               id="email"
               type="email"
               placeholder="work-name@company.com"
-              className="rounded-2xl border-2 font-bold border-black w-full p-4"
+              className="input input-bordered w-full"
             />
           </div>
-          <button className="rounded-full font-bold border-black w-full p-4 mt-5 text-gray-700 bg-gray-500">
+          <button className="btn rounded-full font-bold border-black w-full p-4 mt-5 text-gray-700 bg-gray-500">
             Continue
           </button>
           <h5 className="text-gray-500 mt-4">
@@ -57,13 +59,13 @@ const page = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex justify-center items-center">
+      <div className="flex-1 flex justify-center items-center ">
         <Image
           src="/container.svg"
           alt="container"
-          width={600}
+          width={0}
           height={0}
-          className="object-cover"
+          style={{ height: "100vh", width: "auto" }}
         />
       </div>
     </div>

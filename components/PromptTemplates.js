@@ -1,6 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 
-const Group4 = () => {
+const PromptTemplates = () => {
   return (
     <div className="relative flex w-3/4 mx-auto py-20 ">
       <div className="w-full md:w-1/2 z-10 ">
@@ -14,19 +15,21 @@ const Group4 = () => {
             priority
           />
         </div>
-        <h1 className="text-4xl font-bold mb-4">AI Playground:</h1>
+
         <h1 className="text-4xl font-bold mb-4">
-          Test, Compare, and Perfect Your Models
+          Get Started Fast with Prompt Templates
         </h1>
         <p className="text-md">
-          Get hands-on experience on our Experiment Playground - where your team
-          can easily test different prompts and models side by side. It's the
-          perfect space to compare performance, experiment with ideas and
-          fine-tune your AI for the best results.
+          Prompt templates help you interact with AI effortlessly. Just pick a
+          template, add your inputs, and get accurate results. They’re perfect
+          for tasks like content creation, customer support, and data analysis,
+          saving you time and effort.
         </p>
-        <button role="button" className="btn btn-primary mt-3">
-          Start Building
-        </button>
+        <Link href="/login">
+          <button role="button" className="btn btn-primary mt-3">
+            Start Building
+          </button>
+        </Link>
       </div>
       <div className="absolute inset-0 flex justify-center items-center overflow-visible z-0">
         <Image
@@ -44,4 +47,4 @@ const Group4 = () => {
   );
 };
 
-export default Group4;
+export default PromptTemplates;

@@ -10,10 +10,11 @@ const Footer = () => {
         </div>
         <div className="flex items-center gap-4">
           <input
-            type="email"
+            type="text"
             placeholder="Enter your Email"
-            className="px-4 py-2 border rounded-lg w-full"
+            className="input input-bordered w-full max-w-xs text-black"
           />
+
           <button role="button" className="btn btn-primary">
             Subscribe
           </button>

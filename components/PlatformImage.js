@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-const Group1 = () => {
+const PlatformImage = () => {
   return (
     <div className="w-full flex justify-center bg-black">
       <Image
@@ -15,4 +15,4 @@ const Group1 = () => {
   );
 };
 
-export default Group1;
+export default PlatformImage;

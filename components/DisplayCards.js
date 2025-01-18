@@ -12,7 +12,7 @@ import AzureIcon from "@/icons/AzureIcon";
 import LongChainIcon from "@/icons/LongChainIcon";
 import VisionIcon from "@/icons/VisionIcon";
 
-const Group3 = () => {
+const DisplayCards = () => {
   const items = [
     { icon: AzureIcon, label: "Azure" },
     { icon: OpenAiIcon, label: "DALL-E" },
@@ -86,4 +86,4 @@ const Group3 = () => {
   );
 };
 
-export default Group3;
+export default DisplayCards;

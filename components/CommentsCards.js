@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-const Group5 = () => {
+const CommentsCards = () => {
   return (
     <div className="w-full mx-auto flex-row justify-center items-center text-center text-2xl pt-10">
       <p className="mb-6">Here's what people are saying about us</p>
@@ -15,4 +15,4 @@ const Group5 = () => {
   );
 };
 
-export default Group5;
+export default CommentsCards;

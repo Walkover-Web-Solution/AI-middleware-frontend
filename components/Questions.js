@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 
-const Group6 = () => {
+const Questions = () => {
   return (
     <div className="w-full min-h-full flex justify-center ">
       <div className="flex justify-center ">
@@ -86,4 +86,4 @@ const Group6 = () => {
   );
 };
 
-export default Group6;
+export default Questions;
