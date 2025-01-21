@@ -30,7 +30,7 @@ const DisplayCards = () => {
 
   return (
     <div className="flex flex-col md:flex-row items-stretch justify-between w-3/4 mx-auto mt-20 gap-4 z-10">
-      <div className="flex-1 w-full md:max-w-[48%] rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:bg-zoom">
+      <div className="flex-1 w-full md:max-w-[48%] rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:bg-zoom z-[10000]">
         <div className="flex items-center mb-2 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4 ">
           <Image
             src="/Settings.svg"
@@ -53,8 +53,8 @@ const DisplayCards = () => {
         </div>
       </div>
 
-      <div className="flex-1 rounded-md pb-0 p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:bg-zoom">
-        <div className="flex items-center mb-2 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4">
+      <div className="flex-1 rounded-md pb-0 p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:bg-zoom z-[10000]">
+        <div className="flex items-center mb-2 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4 ">
           <Image
             src="/Bubble.svg"
             alt="Bubble Logo"

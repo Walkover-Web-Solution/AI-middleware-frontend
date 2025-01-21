@@ -7,7 +7,6 @@ import Link from "next/link";
 import React from "react";
 
 const page = ({ loading }) => {
-  console.log(loading, '23')
   return (
     <div className="flex flex-col md:flex-row h-screen w-screen justify-between items-center px-4 md:px-8 lg:px-16">
       {/* Left Section */}

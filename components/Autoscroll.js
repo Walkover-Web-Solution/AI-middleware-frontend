@@ -6,7 +6,7 @@ const Autoscroll = ({ items }) => {
       {items.map((item, index) => (
         <div
           key={index}
-          className="flex flex-col items-center p-4 text-white rounded-md hover:bg-black transition-all ease-in-out duration-300"
+          className="flex flex-col items-center p-4 text-white rounded-md hover:scale-110 transition-all ease-in-out duration-300"
         >
           <item.icon className="w-10 h-10 mb-2" />
           <span className="text-xl font-medium">{item.label}</span>
