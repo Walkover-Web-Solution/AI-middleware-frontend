@@ -17,7 +17,7 @@ const Header = () => {
             <p className=" font-medium cursor-pointer">AI MIDDLEWARE</p>
           </div>
         </Link>
-        <p className=" font-medium cursor-pointer">Pricing</p>
+        {/* <p className=" font-medium cursor-pointer">Pricing</p> */}
       </div>
 
       <div className="flex gap-4">

@@ -17,14 +17,19 @@ const roboto = Roboto({
 });
 const HeroPage = () => {
   return (
-    <div className="hero-bg flex flex-col h-screen w-full">
+    <div className="hero-bg flex flex-col w-full">
       <Header />
-      <div className="flex flex-grow flex-col items-center justify-center gap-6">
-        <div className="flex flex-col items-center text-center space-y-4 w-full max-w-screen-xl">
+      <div className="flex flex-grow flex-col items-center justify-center gap-6  py-28">
+        <div className="flex flex-col  text-center space-y-4 w-full max-w-screen-xl">
+          <h1
+            className={`${inter.className} text-2xl md:text-3xl px-6 font-medium bg-gradient-to-r from-green-200 to-blue-500 bg-clip-text text-transparent`}
+          >
+            The Only Platform To
+          </h1>
           <h1
             className={`${inter.className} text-5xl md:text-8xl px-6 font-medium`}
           >
-            The Only Platform to Integrate AI into Your Product
+            Integrate AI into Your Product
           </h1>
 
           <div className="w-full max-w-4xl mx-auto px-6">

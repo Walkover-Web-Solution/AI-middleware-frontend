@@ -26,7 +26,6 @@ function page() {
       <CommentsCards />
       <Questions />
       <Footer />
-      <WithAuth />
     </div>
   );
 }
