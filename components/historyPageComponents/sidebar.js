@@ -76,7 +76,6 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
       setThreadPage(1);
       const result = await dispatch(getThread({ threadId, bridgeId: params.id, nextPage: 1 }));
       setHasMoreThreadData(result.data.length >= 40);
-      await dispatch(getHistoryAction(params.id, null, null, 1, null, "all"));
       setExpandedThreads([]);
       await dispatch(clearSubThreadData());
       setSelectedSubThreadId(null);
@@ -107,7 +106,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   };
 
   return (
-    <div className="drawer-side justify-items-stretch bg-base-200 min-w-[380px] border-r relative" id="sidebar">
+    <div className="drawer-side justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
       <div className="p-4 gap-3 flex flex-col">
         <div className="p-2 bg-base-300 rounded-md text-center">
@@ -199,15 +198,15 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                     } flex-grow cursor-pointer`}
                     onClick={() => threadHandler(item.thread_id)}
                   >
-                    <a className="w-full h-full flex items-center justify-between">
-                      <span>{item.thread_id}</span>
+                    <a className={`w-full h-full flex items-center justify-between relative ${item.thread_id.length > 35 ? 'tooltip' : ''}`} data-tip={item.thread_id.length > 35 ? item.thread_id : ''}>
+                      <span>{truncate(`${item.thread_id}`, 35)}</span>
                       {!searchQuery && selectedThread === item?.thread_id && (
                         <div
                           onClick={(e) => {
                             e.stopPropagation();
                             handleToggleThread(item?.thread_id);
                           }}
-                          className="ml-2 cursor-pointer"
+                          className="absolute right-4 cursor-pointer"
                         >
                           {!searchQuery && expandedThreads.includes(item.thread_id) ? (
                             <ChevronUp size={16} />
