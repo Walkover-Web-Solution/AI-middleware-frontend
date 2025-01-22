@@ -120,50 +120,6 @@ const EditorComponent = ({ params, provider, ydoc }) => {
     }
   }, [variables, editor]);
 
-  useEffect(() => {
-    if (!editor) return;
-
-    const editorElement = editor.view.dom;
-
-    const handleBlur = () => {
-      saveDocument();
-    };
-
-    editorElement.addEventListener("blur", handleBlur);
-
-    return () => {
-      editorElement.removeEventListener("blur", handleBlur);
-    };
-  }, [editor]);
-
-  const saveDocument = async () => {
-    if (!editor) return;
-
-    const ydocState = Y.encodeStateAsUpdate(ydoc);
-
-    try {
-      const response = await fetch(
-        `http://localhost:1234/api/save-document/${params?.version}?localtoken=${localStorage.getItem(
-          "local_token"
-        )}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/octet-stream",
-          },
-          body: ydocState,
-        }
-      );
-
-      if (response.ok) {
-        console.log("Document saved successfully on blur.");
-      } else {
-        console.error("Failed to save document on blur:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error saving document on blur:", error);
-    }
-  };
 
   return (
     <>
