@@ -68,7 +68,7 @@ export default function ConfigurationPage({ params }) {
                         {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
                         {modelType !== "image" && <PreEmbedList params={params} />}
                         {modelType !== 'image' && <InputConfigComponent params={params} />}
-                        {(modelType !== 'image' && modelType !== 'reasoning') && <EmbedList params={params} />}
+                        {(modelType !== 'image') && <EmbedList params={params} />}
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
@@ -76,7 +76,7 @@ export default function ConfigurationPage({ params }) {
                         {modelType !== "image"  && <AddVariable params={params} />}
                         {modelType !== 'image' && <GptMemory params={params} /> }
                         {bridgeType === "chatbot" && modelType !== 'image' &&  <UserRefernceForRichText params={params} />}
-                        {(modelType !== 'image' && modelType !== 'reasoning') && <ToolCallCount params={params} />}
+                        {modelType !== 'image' && <ToolCallCount params={params} />}
                         { modelType !== 'image' && <ActionList params={params} />}
                         {bridgeType === 'api' && modelType !== 'image' && <ResponseFormatSelector params={params} />}
                     </>
