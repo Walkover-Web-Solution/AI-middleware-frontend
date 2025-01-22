@@ -34,6 +34,7 @@ console.log(modelType !== 'reasoning' || model === 'o1' , modelType !== 'reasoni
                         class="input input-sm input-bordered w-full max-w-xs"
                         min={1}
                         max={30}
+                        key={tool_call_count}
                         defaultValue={tool_call_count || 3}
                         onInput={(e) => {
                             const value = parseInt(e.target.value, 10);

@@ -18,7 +18,7 @@ const ChatAiConfigDeatilViewModal = ({modalContent}) => {
           <div className="bg-gray-200 p-4 rounded text-sm overflow-auto h-auto max-h-[80vh] ">
             {Object.entries(modalContent || {}).map(([key, value]) => (
               <div key={key} className="mb-2">
-                <strong className="capitalize">{key}:</strong>
+                <strong className="">{key}:</strong>
                 {Array?.isArray(value) ? (
                   <ul className="list-disc list-inside ml-4">
                     {value?.map((item, index) => (
