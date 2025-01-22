@@ -7,7 +7,10 @@ import { openModal } from "@/utils/utility";
 import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
 import { MODAL_TYPE } from "@/utils/enums";
 
-const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
+const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) => {
+  if (selectedItem) 
+    selectedItem['Revised System Prompt'] = selectedItem['System Prompt'];
+  const variablesKeyValue = selectedItem && selectedItem['variables'] ? selectedItem['variables'] : {};
   const [modalContent, setModalContent] = useState(null);
 
   useEffect(() => {
@@ -49,6 +52,16 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
       });
   };
 
+  const replaceVariablesInPrompt = (prompt) => {
+    return prompt.replace(/{{(.*?)}}/g, (_, variableName) => {
+      const value = variablesKeyValue[variableName];
+      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        return value;
+      }
+      return `{{${variableName}}}`;
+    });
+  };
+
   return (
     <div
       ref={sidebarRef}
@@ -68,7 +81,11 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
             </div>
             <table className="mt-4 w-full">
               <tbody>
-                {Object.entries(selectedItem).map(([key, value]) => (
+                {Object.entries(selectedItem).map(([key, value]) => {
+                if (key === "Revised System Prompt" && typeof value === "string") {
+                  value = replaceVariablesInPrompt(value);
+                }
+                return (
                   <tr key={key} className="border-b">
                     <td className="text-sm capitalize font-medium">{key}:</td>
                     <td className="text-gray-600 p-2">
@@ -86,6 +103,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
                               <Copy size={20} />
                             </div>
                           )}
+
                           {value !== null && JSON.stringify(value).length > 200 && (
                             <button
                               className="absolute text-sm top-1 right-1 bg-base-content text-white p-1 rounded cursor-pointer bg-none"
@@ -101,17 +119,18 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
                           )}
                         </div>
                       ) : (
-                        <span className="break-words">{value?.toString()}</span>
+                        <span className="break-words">{(value?.toString())}</span>
                       )}
                     </td>
                   </tr>
-                ))}
+                );
+              })}
               </tbody>
             </table>
           </div>
         </aside>
       )}
-     <ChatAiConfigDeatilViewModal modalContent={modalContent}/>
+      <ChatAiConfigDeatilViewModal modalContent={modalContent} />
     </div>
   );
 };
