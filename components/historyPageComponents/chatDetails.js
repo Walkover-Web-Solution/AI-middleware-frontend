@@ -74,22 +74,29 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen }) => {
                     <td className="text-gray-600 p-2">
                       {typeof value === "object" ? (
                         <div className="relative">
-                          <pre className="bg-gray-200 p-2 rounded text-sm overflow-auto whitespace-pre-wrap">{truncate(JSON.stringify(value, null, 2), 60)}</pre>
+                          <pre className="bg-gray-200 p-2 rounded text-sm overflow-auto whitespace-pre-wrap">
+                            {truncate(JSON.stringify(value, null, 2), 200)}
+                          </pre>
                           {key === "variables" && value && (
                             <div
-                              className="absolute top-1 right-[5rem] tooltip tooltip-primary tooltip-left bg-gray-200 p-1 rounded cursor-pointer"
+                              className={`absolute top-1 ${JSON.stringify(value).length > 200 ? 'right-[5rem]' : 'right-0'} tooltip tooltip-primary tooltip-left bg-gray-200 p-1 rounded cursor-pointer`}
                               onClick={() => copyToClipboard(value)}
                               data-tip="Copy variables"
                             >
                               <Copy size={20} />
                             </div>
                           )}
-                          {(key === "AiConfig" || key === 'variables') && value !== null && (
+                          {value !== null && JSON.stringify(value).length > 200 && (
                             <button
                               className="absolute text-sm top-1 right-1 bg-base-content text-white p-1 rounded cursor-pointer bg-none"
-                              onClick={() => { setModalContent(value); openModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL); }}
+                              onClick={() => {
+                                setModalContent(value);
+                                openModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL);
+                              }}
                             >
-                             <p className="flex gap-1 items-center tooltip tooltip-primary bg-none" data-tip="See in detail"> <Eye className="bg-none" size={20} /> view</p>
+                              <p className="flex gap-1 items-center tooltip tooltip-primary bg-none" data-tip="See in detail">
+                                <Eye className="bg-none" size={20} /> view
+                              </p>
                             </button>
                           )}
                         </div>
