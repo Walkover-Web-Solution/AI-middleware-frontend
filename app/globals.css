@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root::-webkit-scrollbar {
   display: none;
 }
@@ -50,7 +49,8 @@
 }
 
 body {
-  overflow: visible !important;
+  /* overflow: visible !important; */
+  overflow-x: hidden;
 }
 
 .line-clamp-5 {
@@ -63,4 +63,54 @@ body {
 
 html {
   scroll-behavior: smooth;
+}
+
+@layer utilities {
+  .bg-zoom {
+    background: linear-gradient(to left, #002eae, #3c30b9, #942ed4);
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 20s linear infinite;
+  animation-fill-mode: forwards; /* Ensures smooth start */
+  white-space: nowrap; /* Keeps content in a single line */
+  display: flex; /* Aligns content horizontally */
+}
+
+@layer utilities {
+  .hero-bg {
+    background-color: hsl(0, 0%, 0%);
+    background-image: radial-gradient(
+      circle farthest-side at center top,
+      hsl(276, 100%, 50%) 0%,
+      hsl(0, 0%, 0%) 70%
+    );
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center top;
+  }
+}
+@layer utilities {
+  .hero-bg-center {
+    background-color: hsl(0, 0%, 0%);
+    background-image: radial-gradient(
+      circle farthest-corner at center,
+      hsl(263, 100%, 70%) 0%,
+      hsl(0, 0%, 0%) 100%
+    );
+
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+  }
 }

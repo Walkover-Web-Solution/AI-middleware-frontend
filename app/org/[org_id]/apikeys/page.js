@@ -1,9 +1,9 @@
 'use client';
 import ApiKeyModal from '@/components/modals/ApiKeyModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { deleteApikeyAction, getAllApikeyAction, saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
-import { API_KEY_COLUMNS, API_KEY_MODAL_INPUT, MODAL_TYPE } from '@/utils/enums';
-import { closeModal, getIconOfService, openModal } from '@/utils/utility';
+import { deleteApikeyAction, getAllApikeyAction } from '@/store/action/apiKeyAction';
+import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
+import { getIconOfService, openModal } from '@/utils/utility';
 import { SquarePen, Trash2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -34,15 +34,13 @@ const Page = () => {
         setSelectedApiKey(item);
         setIsEditing(true);
         openModal(MODAL_TYPE.API_KEY_MODAL)
-    }, [MODAL_TYPE,openModal]);
+    }, [MODAL_TYPE, openModal]);
 
     const deleteApikey = useCallback((item) => {
         if (window.confirm("Are you sure you want to delete this API key?")) {
             dispatch(deleteApikeyAction({ org_id: item.org_id, name: item.name, id: item._id }));
         }
     }, [dispatch]);
-
-
 
     const columns = API_KEY_COLUMNS || [];
     return (
@@ -85,7 +83,7 @@ const Page = () => {
                     )}
                 </tbody>
             </table>
-            <ApiKeyModal orgId={orgId}  isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} />
+            <ApiKeyModal orgId={orgId} isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} />
         </div>
     );
 };

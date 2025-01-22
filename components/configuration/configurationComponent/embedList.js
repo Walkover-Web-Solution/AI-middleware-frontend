@@ -28,12 +28,16 @@ function getStatusClass(status) {
 const EmbedList = ({ params }) => {
     const [functionId, setFunctionId] = useState(null);
     const dispatch = useDispatch();
-    const { integrationData, bridge_functions, function_data } = useCustomSelector((state) => ({
+    const { integrationData, bridge_functions, function_data, modelType, model } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {},
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData || {},
         bridge_functions: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.function_ids || [],
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
+        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
     }));
-
+    if (modelType === 'reasoning' && model !== 'o1' ) {
+        return <></>;
+    }
     const handleOpenModal = (functionId) => {
         setFunctionId(functionId);
         openModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL)

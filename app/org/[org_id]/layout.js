@@ -37,15 +37,25 @@ export default function layoutOrgPage({ children, params }) {
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
 
   useEffect(() => {
-    if (chatbot_token && !document.getElementById(scriptId)) {
-      const script = document.createElement("script");
-      script.setAttribute("embedToken", chatbot_token);
-      script.setAttribute("hideIcon", true);
-      script.id = scriptId;
-      // script.src = scriptSrc;
-      document.head.appendChild(script);
-      script.src = scriptSrc
-    }
+    const updateScript = () => {
+      const existingScript = document.getElementById(scriptId);
+      if (existingScript) {
+        document.head.removeChild(existingScript);
+      }
+      if (chatbot_token) {
+        const script = document.createElement("script");
+        script.setAttribute("embedToken", chatbot_token);
+        script.setAttribute("hideIcon", true);
+        script.id = scriptId;
+        script.src = scriptSrc;
+        document.head.appendChild(script);
+      }
+    };
+
+    setTimeout(() => {
+        updateScript();
+    }, 150); // Delay of 150ms
+
     return () => {
       const existingScript = document.getElementById(scriptId);
       if (existingScript) {

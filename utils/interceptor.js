@@ -21,7 +21,7 @@ axios.interceptors.response.use(
     async function (error) {
         if (error?.response?.status === 401) {
             localStorage.clear();
-            window.location.href = "/";
+            window.location.href = "/login";
         }
         return Promise.reject(error);
     }

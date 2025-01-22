@@ -103,7 +103,8 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                               <Copy size={20} />
                             </div>
                           )}
-                          {(key === "AiConfig" || key === "variables" || key === "System Prompt") && value !== null && JSON.stringify(value).length > 200 && (
+
+                          {value !== null && JSON.stringify(value).length > 200 && (
                             <button
                               className="absolute text-sm top-1 right-1 bg-base-content text-white p-1 rounded cursor-pointer bg-none"
                               onClick={() => {

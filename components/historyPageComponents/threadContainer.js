@@ -55,7 +55,7 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
     };
 
     fetchData();
-  }, [historyData, pathName, filterOption, search]);
+  }, [filterOption, search]);
 
   const fetchMoreThreadData = useCallback(async () => {
     if (isFetchingMore) return;
@@ -72,7 +72,7 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
   }, [filterOption, hasMoreThreadData, isFetchingMore, threadPage, selectedThread, selectedSubThreadId]);
 
   useLayoutEffect(() => {
-    if (isFetchingMore && historyRef?.current) {
+    if (isFetchingMore && historyRef?.current && hasMoreThreadData) {
       const scrollDifference = historyRef?.current?.scrollHeight - previousScrollHeightRef?.current;
       historyRef.current.scrollTop += scrollDifference;
     }

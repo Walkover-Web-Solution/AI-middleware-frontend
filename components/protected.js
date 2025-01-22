@@ -9,12 +9,12 @@ const Protected = (WrappedComponent) => {
     const router = useRouter();
 
     useEffect(() => {
-localStorageGet()
+      localStorageGet()
     }, []);
 
-    const localStorageGet = () =>{
+    const localStorageGet = () => {
       if (typeof window !== 'undefined' && !localStorage.getItem("proxy_token")) {
-        router.replace('/');
+        router.replace('/login');
         return null;
       }
     }
