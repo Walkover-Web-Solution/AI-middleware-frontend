@@ -20,11 +20,25 @@ export const historyReducer = createSlice({
       state.success = true;
     },
     fetchThreadReducer: (state, action) => {
+      if (action.payload.data?.version_id) {
+        state.thread = state.thread.map(item => {
+          if (item.role === "user" && item.Id === action.payload.data.Id) {
+            return {
+              ...item,
+              previous_version_id: action.payload.data.version_id
+            };
+          }
+          return item;
+        });
+      }
+      else{
+
       if (action.payload.nextPage == 1) { 
         state.thread = action.payload.data.data; 
       }
       else {
         state.thread = [...action.payload.data.data, ...state.thread];
+      }
       }
     },
     

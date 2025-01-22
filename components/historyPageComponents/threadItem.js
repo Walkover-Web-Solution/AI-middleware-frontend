@@ -7,8 +7,9 @@ import CodeBlock from "../codeBlock/codeBlock";
 import ToolsDataModal from "./toolsDataModal";
 import EditMessageModal from "../modals/EditMessageModal";
 import { truncate } from "./assistFile";
+import { fetchThreadReducer } from "@/store/reducer/historyReducer";
 
-const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId }) => {
+const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId,prevVersionIdRef}) => {
   const dispatch = useDispatch();
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]);
@@ -17,6 +18,16 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   const [isDropupOpen, setIsDropupOpen] = useState(false);
   const modalRef = useRef(null);
   const dropupRef = useRef(null);
+
+  useEffect(() => {
+    if (item.role === "user" && item.version_id) {
+      const isNewVersion = item.version_id !== prevVersionIdRef.current;
+      if (isNewVersion && item.version_id !== prevVersionIdRef.current) {
+        dispatch(fetchThreadReducer({data:{version_id:item.version_id, Id: item.Id}}))
+        prevVersionIdRef.current = item.version_id;
+      }
+    }
+  }, [item]);
 
   useEffect(() => {
     setMessageType(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
@@ -148,6 +159,16 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
 
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
+    {item?.previous_version_id && (
+        <div className="flex justify-center items-center my-4">
+          <p className="border-t border-base-300 w-full"></p>
+          <p className="bg-primary text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+            Version {item?.previous_version_id}
+          </p>
+          <p className="border-t border-base-300 w-full"></p>
+        </div>
+      )}
+      
       {item?.role === "tools_call" ? (
         <div className="mb-2 flex flex-col justify-center items-center">
           <h1 className="p-1">

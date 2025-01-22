@@ -20,6 +20,7 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [flexDirection, setFlexDirection] = useState("column");
   const [threadMessageState, setThreadMessageState] = useState();
+  const prevVersionIdRef = useRef(null);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -207,6 +208,7 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
                     threadRefs={threadRefs}
                     searchMessageId={searchMessageId}
                     setSearchMessageId={setSearchMessageId}
+                    prevVersionIdRef={prevVersionIdRef}
                   />
                 ))}
             </div>
