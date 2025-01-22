@@ -13,7 +13,7 @@ const ApiKeyInput = ({ params }) => {
     const [selectedApiKeys, setSelectedApiKeys] = useState({});
     const dropdownRef = useRef(null);
 
-    const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id } = useCustomSelector((state) => {
+    const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
         const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version] || {};
         const apikeys = state?.bridgeReducer?.apikeys || {};
 
@@ -22,6 +22,7 @@ const ApiKeyInput = ({ params }) => {
             bridge_apiKey: bridgeMap?.apikey,
             apikeydata: apikeys[params?.org_id] || [], // Ensure apikeydata is an array
             bridgeApikey_object_id: bridgeMap?.apikey_object_id,
+            currentService: bridgeMap?.service,
         };
     });
     // Memoize filtered API keys
@@ -183,7 +184,7 @@ const ApiKeyInput = ({ params }) => {
                     )}
                 </div>
             </div>
-            <ApiKeyModal/>
+            <ApiKeyModal params={params} service={currentService} bridgeApikey_object_id={bridgeApikey_object_id} />
         </div>
     );
 };

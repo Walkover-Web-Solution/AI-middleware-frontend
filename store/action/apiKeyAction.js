@@ -9,6 +9,7 @@ export const saveApiKeysAction = (data, orgId) => async (dispatch) => {
     if (response.data?.success) {
       dispatch(createApiKeyReducer({ org_id: orgId, data: response?.data?.api }))
     }
+    return response.data.api;
   } catch (error) {
     console.error(error);
   }

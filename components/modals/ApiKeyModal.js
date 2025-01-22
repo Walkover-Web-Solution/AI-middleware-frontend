@@ -1,12 +1,12 @@
-
 import { saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { API_KEY_MODAL_INPUT, MODAL_TYPE } from '@/utils/enums'
 import { closeModal } from '@/utils/utility'
 import { usePathname } from 'next/navigation';
 import React, { useCallback } from 'react'
 import { useDispatch } from 'react-redux';
 
-const ApiKeyModal = ({ isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { } , apikeyData}) => {
+const ApiKeyModal = ({params, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id }) => {
     const pathName = usePathname();
     const path = pathName?.split('?')[0].split('/');
     const orgId = path[2] || '';
@@ -17,13 +17,13 @@ const ApiKeyModal = ({ isEditing, selectedApiKey, setSelectedApiKey = () => { },
         setIsEditing(false);
     }, [setSelectedApiKey, setIsEditing]);
 
-    const handleSubmit = useCallback((event) => {
+    const handleSubmit = useCallback(async (event) => {
         event.preventDefault();
         const formData = new FormData(event.target);
 
         const data = {
             name: formData.get('name').trim().replace(/\s+/g, ''),
-            service: formData.get('service'),
+            service: service || formData.get('service'),
             apikey: formData.get('apikey'),
             comment: formData.get('comment'),
             _id: selectedApiKey ? selectedApiKey._id : null
@@ -43,14 +43,24 @@ const ApiKeyModal = ({ isEditing, selectedApiKey, setSelectedApiKey = () => { },
                 dispatch(updateApikeyAction(dataToSend));
             }
         } else {
-            dispatch(saveApiKeysAction(data, orgId));
+            const response = await dispatch(saveApiKeysAction(data, orgId));
+            console.log(response);
+            
+            if (service && response?._id) {
+                const updated = {...bridgeApikey_object_id, [service]: response._id };
+                dispatch(updateBridgeVersionAction({ 
+                    bridgeId: params?.id, 
+                    versionId: params?.version, 
+                    dataToSend: { apikey_object_id: updated }
+                }));
+            }
         }
 
         event.target.reset();
         setSelectedApiKey(null);
         setIsEditing(false);
         closeModal(MODAL_TYPE.API_KEY_MODAL)
-    }, [isEditing, selectedApiKey]);
+    }, [isEditing, selectedApiKey, service]);
 
     return (
         <dialog id={MODAL_TYPE?.API_KEY_MODAL} className="modal modal-bottom sm:modal-middle">
@@ -82,9 +92,9 @@ const ApiKeyModal = ({ isEditing, selectedApiKey, setSelectedApiKey = () => { },
                         id="service"
                         name="service"
                         className="select select-bordered"
-                        key={selectedApiKey?.service}
-                        defaultValue={selectedApiKey ? selectedApiKey.service : ''}
-                        disabled={selectedApiKey && selectedApiKey.service}
+                        key={selectedApiKey?.service || service}
+                        defaultValue={service || (selectedApiKey ? selectedApiKey.service : '')}
+                        disabled={service || (selectedApiKey && selectedApiKey.service)}
                         required
                     >
                         <option value="openai">OpenAI</option>

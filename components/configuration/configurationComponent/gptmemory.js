@@ -27,7 +27,7 @@ const GptMemory = ({ params }) => {
             <label className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center gap-2'>
                     <div className="label">
-                        <span className="font-medium ">Enable Gpt-memory</span>
+                        <span className="font-medium text-nowrap ">Enable Gpt-memory</span>
                     </div>
                     <input
                         type="checkbox"
