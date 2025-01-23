@@ -183,11 +183,11 @@ function Home({ params }) {
   }, []);
 
   return (
-    <div className="drawer lg:drawer-open">
+    <div className="w-full">
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col items-start justify-start m-4">
+      <div className="drawer-content flex flex-col items-start justify-start">
         <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
           <div className="w-full">
             {allBridges.length === 0 ? (
@@ -201,7 +201,7 @@ function Home({ params }) {
                 </div>
               </div>
             ) : (
-              <div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-40' : ''}`}>
+              <div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-0' : ''}`}>
                 <div className="relative flex flex-col md:flex-row items-center justify-between mx-4">
                   <input
                     ref={inputRef}

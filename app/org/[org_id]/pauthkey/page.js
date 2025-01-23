@@ -17,7 +17,7 @@ function Page() {
   const authData = useCustomSelector((state) => state?.authDataReducer?.authData || [])
   const [singleAuthData, setSingleAuthData] = useState({})
   const [isCreating, setIsCreating] = useState(false);
- 
+
 
   useEffect(() => {
     dispatch(getAllAuthData())
@@ -56,7 +56,7 @@ function Page() {
           temporary_throttle_time: "30",
         }));
         toast.success("Auth key created successfully");
-        
+
       } catch (error) {
         toast.error("Failed to create pauth key");
         console.error(error);
@@ -67,7 +67,7 @@ function Page() {
       toast.error("Input field cannot be empty");
     }
     closeModal(MODAL_TYPE.PAUTH_KEY_MODAL)
-    document.getElementById('authNameInput').value=''
+    document.getElementById('authNameInput').value = ''
   };
 
   const deleteModel = (authname, authid, index) => {
@@ -87,7 +87,7 @@ function Page() {
     <div className="h-full p-5">
       {isCreating && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex pl-2 flex-col items-start justify-start">
+      <div className="drawer-content flex flex-col items-start justify-start">
         <div className="flex w-full justify-start gap-16 items-start">
           <div className="w-full">
 
