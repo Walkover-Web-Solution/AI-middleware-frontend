@@ -6,6 +6,7 @@ import { METRICS_FACTOR_OPTIONS, TIME_RANGE_OPTIONS } from '@/utils/enums';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
+
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export const runtime = 'edge';
