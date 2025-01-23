@@ -1,7 +1,7 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { Info } from 'lucide-react';
-import React from 'react'
+import React from 'react';
 import { useDispatch } from 'react-redux';
 
 function ToolCallCount({ params }) {
@@ -16,11 +16,10 @@ function ToolCallCount({ params }) {
         const new_value = parseInt(e.target.value, 10);
         dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { tool_call_count: new_value } }));
     }
-console.log(modelType !== 'reasoning' || model === 'o1' , modelType !== 'reasoning', model === 'o1' );
 
     return (
         <>
-            {(modelType !== 'reasoning' || model === 'o1' ) ?
+            {(modelType !== 'reasoning' || model === 'o1') ?
                 <div className='form-control'>
                     <div className="label items-center flex justify-start">
                         <span className="label-text font-medium">Maximum Function Call Limit</span>
@@ -34,6 +33,7 @@ console.log(modelType !== 'reasoning' || model === 'o1' , modelType !== 'reasoni
                         class="input input-sm input-bordered w-full max-w-xs"
                         min={1}
                         max={30}
+                        key={tool_call_count}
                         defaultValue={tool_call_count || 3}
                         onInput={(e) => {
                             const value = parseInt(e.target.value, 10);

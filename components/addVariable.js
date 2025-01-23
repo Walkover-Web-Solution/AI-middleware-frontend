@@ -168,12 +168,12 @@ const AddVariable = ({ params }) => {
     <div className="collapse text-base-content" tabIndex={0}>
       {/* Accordion Toggle Button */}
       <button
-        className="flex items-center font-medium cursor-pointer focus:outline-none"
+        className="flex items-center cursor-pointer focus:outline-none"
         onClick={toggleAccordion}
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
       >
-        <span className="mr-2">
+        <span className="mr-2 text-nowrap font-medium">
           Add Variables
         </span>
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}

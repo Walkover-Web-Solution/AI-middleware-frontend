@@ -3,10 +3,10 @@ import { closeModal } from '@/utils/utility'
 import { CircleX } from 'lucide-react'
 import React from 'react'
 
-const ChatAiConfigDeatilViewModal = ({modalContent}) => {
+const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
   return (
     <dialog id="chat_details_view" className="modal">
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000] overflow-auto min-w-[100vw] h-auto">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000] overflow-auto min-w-[100vw] h-auto">
         <div className="bg-white p-4 rounded shadow-lg max-w-6xl w-[90vw] relative">
           <button
             className="absolute top-6 right-5"
@@ -18,7 +18,7 @@ const ChatAiConfigDeatilViewModal = ({modalContent}) => {
           <div className="bg-gray-200 p-4 rounded text-sm overflow-auto h-auto max-h-[80vh] ">
             {Object.entries(modalContent || {}).map(([key, value]) => (
               <div key={key} className="mb-2">
-                <strong className="capitalize">{key}:</strong>
+                <strong className="">{key}:</strong>
                 {Array?.isArray(value) ? (
                   <ul className="list-disc list-inside ml-4">
                     {value?.map((item, index) => (

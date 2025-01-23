@@ -81,7 +81,6 @@ const PreEmbedList = ({ params }) => {
             <div className="form-control inline-block">
                 <div className='flex gap-5 items-center ml-2 '>
                     <label className='label-text font-medium whitespace-nowrap'>Pre functions</label>
-                    <p role='alert' className='label-text-alt alert p-2'><Info size={16} />Use pre_function variable in prompt to use this function data. &#123;&#123;pre_function&#125;&#125;</p>
                 </div>
                 <div className="label flex-col items-start">
                     <div className="flex flex-wrap gap-4">

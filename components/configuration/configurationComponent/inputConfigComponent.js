@@ -4,6 +4,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
+import { ChevronDown, Info } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -253,13 +254,46 @@ const InputConfigComponent = ({ params }) => {
             <div className="form-control h-full">
                 <textarea
                     ref={textareaRef}
-                    className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2"
+                    className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2 rounded-b-none"
                     value={prompt}
                     onChange={handlePromptChange}
                     onKeyDown={handleKeyDown}
                     onBlur={savePrompt}
                 />
                 {showSuggestions && renderSuggestions()}
+                <div className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 border-t-0 border border-base-300 rounded-t-none">
+                    <input type="checkbox" className="min-h-[0.75rem]"/>
+                    <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
+                        <div className="flex items-center gap-2">
+                            <span className='text-nowrap'>Default Variables</span>
+                            <p role='alert' className='label-text-alt alert p-2'><Info size={16} className="" />Use these variables in prompt to get their functionality</p>
+                        </div>
+                        <div className="ml-auto">
+                            <ChevronDown className="collapse-arrow" size={12} />
+                        </div>
+                    </div>
+                    <div className="collapse-content">
+                        <div className="text-xs">
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
+                                    <span className="">&#123;&#123;current_time_and_date&#125;&#125;</span>
+                                    <span className=" ml-2">- To access the current date and time</span>
+                                </div>
+                                {/* <div className="flex items-center gap-1">
+                                    <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
+                                    <span className="">&#123;&#123;memory&#125;&#125;</span>
+                                    <span className="">- Access GPT memory context when enabled</span>
+                                </div> */}
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
+                                    <span className="">&#123;&#123;pre_function&#125;&#125;</span>
+                                    <span className="">- Use this variable if you are using the pre_function</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
             <OptimizePromptModal params={params} />

@@ -13,7 +13,7 @@ const ApiKeyInput = ({ params }) => {
     const [selectedApiKeys, setSelectedApiKeys] = useState({});
     const dropdownRef = useRef(null);
 
-    const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id } = useCustomSelector((state) => {
+    const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
         const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version] || {};
         const apikeys = state?.bridgeReducer?.apikeys || {};
 
@@ -22,6 +22,7 @@ const ApiKeyInput = ({ params }) => {
             bridge_apiKey: bridgeMap?.apikey,
             apikeydata: apikeys[params?.org_id] || [], // Ensure apikeydata is an array
             bridgeApikey_object_id: bridgeMap?.apikey_object_id,
+            currentService: bridgeMap?.service,
         };
     });
     // Memoize filtered API keys
@@ -55,7 +56,7 @@ const ApiKeyInput = ({ params }) => {
     const handleSelectionChange = useCallback((service, apiKeyId) => {
         setSelectedApiKeys(prev => {
             const updated = { ...prev, [service]: apiKeyId };
-             // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
+            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
             return updated;
         });
@@ -85,7 +86,7 @@ const ApiKeyInput = ({ params }) => {
         } else {
             setSelectedApiKeys(prev => {
                 const updated = { ...prev, [bridge?.service]: selectedApiKeyId };
-                 // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
+                // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
                 dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
                 return updated;
             });
@@ -112,7 +113,7 @@ const ApiKeyInput = ({ params }) => {
                 <span className="label-text font-medium">Service's API Key</span>
             </div>
             <div className=''>
-                <div  className='relative'>
+                <div className='relative'>
                     <select
                         className="select select-bordered select-sm w-full"
                         onChange={handleDropdownChange}
@@ -142,7 +143,7 @@ const ApiKeyInput = ({ params }) => {
                                 No API keys available for this service
                             </option>
                         )}
-                         <option value="add_new" className="add-new-option">+  Add new API Key </option>
+                        <option value="add_new" className="add-new-option">+  Add new API Key </option>
                     </select>
                     <div className='text-[10px] text-end '>
                         <button
@@ -183,7 +184,7 @@ const ApiKeyInput = ({ params }) => {
                     )}
                 </div>
             </div>
-            <ApiKeyModal/>
+            <ApiKeyModal params={params} service={currentService} bridgeApikey_object_id={bridgeApikey_object_id} />
         </div>
     );
 };
