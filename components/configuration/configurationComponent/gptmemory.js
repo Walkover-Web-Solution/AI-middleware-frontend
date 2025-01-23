@@ -2,6 +2,7 @@ import React from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
+import { Info } from 'lucide-react';
 
 const GptMemory = ({ params }) => {
     const dispatch = useDispatch();
@@ -28,11 +29,14 @@ const GptMemory = ({ params }) => {
                 <div className='flex flex-row items-center gap-2'>
                     <div className="label">
                         <span className="font-medium text-nowrap ">Enable Gpt-memory</span>
+                        <div className="tooltip tooltip-right" data-tip={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
+                            <Info size={12} className='ml-2' />
+                        </div>
                     </div>
                     <input
                         type="checkbox"
-                        checked={gpt_memory} 
-                        onChange={handleCheckboxChange} 
+                        checked={gpt_memory}
+                        onChange={handleCheckboxChange}
                         className="toggle"
                     />
                 </div>

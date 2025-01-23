@@ -280,11 +280,11 @@ const InputConfigComponent = ({ params }) => {
                                     <span className="">&#123;&#123;current_time_and_date&#125;&#125;</span>
                                     <span className=" ml-2">- To access the current date and time</span>
                                 </div>
-                                <div className="flex items-center gap-1">
+                                {/* <div className="flex items-center gap-1">
                                     <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
                                     <span className="">&#123;&#123;memory&#125;&#125;</span>
                                     <span className="">- Access GPT memory context when enabled</span>
-                                </div>
+                                </div> */}
                                 <div className="flex items-center gap-1">
                                     <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
                                     <span className="">&#123;&#123;pre_function&#125;&#125;</span>
