@@ -1,12 +1,12 @@
 import { saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { API_KEY_MODAL_INPUT, MODAL_TYPE } from '@/utils/enums'
-import { closeModal } from '@/utils/utility'
+import { API_KEY_MODAL_INPUT, MODAL_TYPE } from '@/utils/enums';
+import { closeModal } from '@/utils/utility';
 import { usePathname } from 'next/navigation';
-import React, { useCallback } from 'react'
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-const ApiKeyModal = ({params, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id }) => {
+const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id }) => {
     const pathName = usePathname();
     const path = pathName?.split('?')[0].split('/');
     const orgId = path[2] || '';
@@ -45,12 +45,12 @@ const ApiKeyModal = ({params, isEditing, selectedApiKey, setSelectedApiKey = () 
         } else {
             const response = await dispatch(saveApiKeysAction(data, orgId));
             console.log(response);
-            
+
             if (service && response?._id) {
-                const updated = {...bridgeApikey_object_id, [service]: response._id };
-                dispatch(updateBridgeVersionAction({ 
-                    bridgeId: params?.id, 
-                    versionId: params?.version, 
+                const updated = { ...bridgeApikey_object_id, [service]: response._id };
+                dispatch(updateBridgeVersionAction({
+                    bridgeId: params?.id,
+                    versionId: params?.version,
                     dataToSend: { apikey_object_id: updated }
                 }));
             }

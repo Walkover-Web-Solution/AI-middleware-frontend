@@ -191,11 +191,10 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                     </div>
                   )}
                   <li
-                    className={`${
-                      selectedThread === item?.thread_id
+                    className={`${selectedThread === item?.thread_id
                         ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
                         : ""
-                    } flex-grow cursor-pointer`}
+                      } flex-grow cursor-pointer`}
                     onClick={() => threadHandler(item?.thread_id)}
                   >
                     <a className={`w-full h-full flex items-center justify-between relative ${item?.thread_id?.length > 35 ? 'tooltip' : ''}`} data-tip={item?.thread_id?.length > 35 ? item?.thread_id : ''}>
@@ -226,15 +225,13 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                           subThreads?.map((subThreadId, index) => (
                             <li
                               key={index}
-                              className={`cursor-pointer ${
-                                selectedSubThreadId === subThreadId?.display_name
+                              className={`cursor-pointer ${selectedSubThreadId === subThreadId?.display_name
                                   ? "hover:bg-base-primary hover:text-base-100"
                                   : "hover:bg-base-300 hover:text-gray-800"
-                              } p-2 rounded-md transition-all duration-200 ${
-                                selectedSubThreadId === subThreadId?.display_name
+                                } p-2 rounded-md transition-all duration-200 ${selectedSubThreadId === subThreadId?.display_name
                                   ? "bg-primary text-base-100"
                                   : ""
-                              }`}
+                                }`}
                               onClick={() => handleSelectSubThread(subThreadId?.display_name, selectedThread)}
                             >
                               {subThreadId?.display_name}

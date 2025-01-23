@@ -3,10 +3,10 @@ import { closeModal } from '@/utils/utility'
 import { CircleX } from 'lucide-react'
 import React from 'react'
 
-const ChatAiConfigDeatilViewModal = ({modalContent}) => {
+const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
   return (
     <dialog id="chat_details_view" className="modal">
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000] overflow-auto min-w-[100vw] h-auto">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000] overflow-auto min-w-[100vw] h-auto">
         <div className="bg-white p-4 rounded shadow-lg max-w-6xl w-[90vw] relative">
           <button
             className="absolute top-6 right-5"

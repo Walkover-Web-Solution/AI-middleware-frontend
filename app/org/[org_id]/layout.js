@@ -68,21 +68,6 @@ export default function layoutOrgPage({ children, params }) {
     dispatch(getAllChatBotAction(params.org_id))
   }, []);
 
-  // useEffect(() => {
-  //   if (embedToken) {
-  //     const script = document.createElement("script");
-  //     script.setAttribute("embedToken", embedToken);
-  //     script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
-  //     script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC;
-  //     document.body.appendChild(script);
-
-  //     return () => {
-  //       console.log('embedToken script')
-  //       document.body.removeChild(document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID));
-  //     };
-  //   }
-  // }, [embedToken]);
-
   useEffect(() => {
     window.addEventListener("message", handleMessage);
 

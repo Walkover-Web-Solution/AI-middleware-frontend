@@ -56,7 +56,7 @@ const ApiKeyInput = ({ params }) => {
     const handleSelectionChange = useCallback((service, apiKeyId) => {
         setSelectedApiKeys(prev => {
             const updated = { ...prev, [service]: apiKeyId };
-             // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
+            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
             return updated;
         });
@@ -86,7 +86,7 @@ const ApiKeyInput = ({ params }) => {
         } else {
             setSelectedApiKeys(prev => {
                 const updated = { ...prev, [bridge?.service]: selectedApiKeyId };
-                 // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
+                // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
                 dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
                 return updated;
             });
@@ -113,7 +113,7 @@ const ApiKeyInput = ({ params }) => {
                 <span className="label-text font-medium">Service's API Key</span>
             </div>
             <div className=''>
-                <div  className='relative'>
+                <div className='relative'>
                     <select
                         className="select select-bordered select-sm w-full"
                         onChange={handleDropdownChange}
@@ -143,7 +143,7 @@ const ApiKeyInput = ({ params }) => {
                                 No API keys available for this service
                             </option>
                         )}
-                         <option value="add_new" className="add-new-option">+  Add new API Key </option>
+                        <option value="add_new" className="add-new-option">+  Add new API Key </option>
                     </select>
                     <div className='text-[10px] text-end '>
                         <button
