@@ -117,7 +117,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                                 }`}
                                 onClick={() => handleObjectClick(key, displayValue)}
                               >
-                                {truncate(JSON.stringify(displayValue, null, 2), 197)}
+                                {truncate(JSON.stringify(displayValue, null, 2), 210)}
                               </pre>
                               {key === "variables" && displayValue && (
                                 <div
