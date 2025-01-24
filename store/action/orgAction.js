@@ -1,4 +1,4 @@
-import { createOrg, getAllOrg } from "@/config";
+import { createOrg, getAllOrg, updateOrganizationData } from "@/config";
 import { organizationCreated, organizationsFetched, setCurrentOrgId } from "../reducer/orgReducer";
 
 export const createOrgAction = (dataToSend, onSuccess) => async (dispatch) => {
@@ -29,3 +29,12 @@ export const setCurrentOrgIdAction = (orgId) => (dispatch) => {
 
   }
 };
+
+export const updateOrgTimeZone = (orgId, orgDetails) => (dispatch) =>{
+  
+  try {
+    dispatch(updateOrganizationData(orgId, orgDetails))
+  } catch (error) {
+    console.error(error)
+  }
+}

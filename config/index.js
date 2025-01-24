@@ -711,3 +711,18 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
     return error;
   }
 }
+
+export async function updateOrganizationData(orgId, orgDetails) {
+  const updateObject = {
+    company_id: orgId,
+    company: orgDetails,
+  };
+  try {
+    const response = await axios.put(`${URL}/user/updateDetails`, updateObject);
+    const data = response?.data;
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error.message);
+    throw error; // Re-throw the error for the caller to handle
+  }
+}
