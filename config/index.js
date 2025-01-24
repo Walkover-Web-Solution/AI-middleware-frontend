@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import axios from "@/utils/interceptor";
 import { toast } from "react-toastify";
@@ -7,51 +7,59 @@ const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
 
-export const runtime = 'edge';
+export const runtime = "edge";
 
 export const getSingleModels = async () => {
   try {
-    const getSingleModels = await axios.get(`${URL}/api/v1/config/models`)
-    return getSingleModels
+    const getSingleModels = await axios.get(`${URL}/api/v1/config/models`);
+    return getSingleModels;
   } catch (error) {
-    console.error(error)
-    throw new Error(error)
+    console.error(error);
+    throw new Error(error);
   }
-}
+};
 
 export const getSingleMessage = async ({ bridge_id, message_id }) => {
   try {
-    const messageData = await axios.get(`${URL}/api/v1/config/systemprompt/gethistory/${bridge_id}/${message_id}`)
-    return messageData.data.system_prompt
+    const messageData = await axios.get(
+      `${URL}/api/v1/config/systemprompt/gethistory/${bridge_id}/${message_id}`
+    );
+    return messageData.data.system_prompt;
   } catch (error) {
-    console.error(error)
-    throw new Error(error)
+    console.error(error);
+    throw new Error(error);
   }
-}
+};
 
 export const getSingleBridge = async (bridgeId) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/${bridgeId}`)
-    return response
+    const response = await axios.get(
+      `${PYTHON_URL}/api/v1/config/getbridges/${bridgeId}`
+    );
+    return response;
   } catch (error) {
-    console.error(error)
-    throw new Error(error)
+    console.error(error);
+    throw new Error(error);
   }
-}
+};
 
 export const getBridgeVersionApi = async ({ bridgeVersionId = null }) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/bridge/versions/get/${bridgeVersionId}`)
+    const response = await axios.get(
+      `${PYTHON_URL}/bridge/versions/get/${bridgeVersionId}`
+    );
     return response?.data;
   } catch (error) {
-    console.error(error)
-    throw new Error(error)
+    console.error(error);
+    throw new Error(error);
   }
-}
+};
 
 export const deleteBridge = async (bridgeId) => {
   try {
-    const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`);
+    const response = await axios.delete(
+      `${URL}/api/v1/config/deletebridges/${bridgeId}`
+    );
     return response;
   } catch (error) {
     console.error(error);
@@ -60,104 +68,136 @@ export const deleteBridge = async (bridgeId) => {
   }
 };
 
-
-
 export const createBridge = async (dataToSend) => {
   try {
-    return await axios.post(`${PYTHON_URL}/api/v1/config/create_bridge`, dataToSend)
+    return await axios.post(
+      `${PYTHON_URL}/api/v1/config/create_bridge`,
+      dataToSend
+    );
   } catch (error) {
-    toast.error(error.response.data.error)
-    throw error
+    toast.error(error.response.data.error);
+    throw error;
   }
-}
+};
 export const createBridgeVersionApi = async (dataToSend) => {
   try {
-    const result = await axios.post(`${PYTHON_URL}/bridge/versions/create`, dataToSend)
+    const result = await axios.post(
+      `${PYTHON_URL}/bridge/versions/create`,
+      dataToSend
+    );
     return result?.data;
   } catch (error) {
-    toast.error(error.response.data.error)
-    throw error
+    toast.error(error.response.data.error);
+    throw error;
   }
-}
-
+};
 
 export const getAllBridges = async (org_id) => {
   try {
-    const data = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/all`, org_id)
+    const data = await axios.get(
+      `${PYTHON_URL}/api/v1/config/getbridges/all`,
+      org_id
+    );
     return data;
   } catch (error) {
-    console.error(error)
-    throw new Error(error)
+    console.error(error);
+    throw new Error(error);
   }
-}
+};
 
 export const getAllFunctionsApi = async (org_id) => {
   try {
-    const data = await axios.get(`${PYTHON_URL}/functions/all`, org_id)
+    const data = await axios.get(`${PYTHON_URL}/functions/all`, org_id);
     return data;
   } catch (error) {
-    console.error(error)
-    throw new Error(error)
+    console.error(error);
+    throw new Error(error);
   }
-}
+};
 
 export const getAllResponseTypesApi = async (orgId) => {
   try {
-    const data = await axios.get(`${URL}/chatbot/${orgId}/getAllResponse`)
+    const data = await axios.get(`${URL}/chatbot/${orgId}/getAllResponse`);
     return data;
   } catch (error) {
-    console.error(error)
-    throw new Error(error)
+    console.error(error);
+    throw new Error(error);
   }
-}
+};
 
 export const updateBridge = async ({ bridgeId, dataToSend }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/api/v1/config/update_bridge/${bridgeId}`, dataToSend);
-    return response
+    const response = await axios.post(
+      `${PYTHON_URL}/api/v1/config/update_bridge/${bridgeId}`,
+      dataToSend
+    );
+    return response;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     toast.error(error?.response?.data?.error);
   }
-}
+};
 
 export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   try {
-    const response = await axios.put(`${PYTHON_URL}/bridge/versions/update/${versionId}`, dataToSend);
-    return response?.data
+    const response = await axios.put(
+      `${PYTHON_URL}/bridge/versions/update/${versionId}`,
+      dataToSend
+    );
+    return response?.data;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     toast.error(error?.response?.data?.error);
   }
-}
+};
 
-export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, pagelimit = 40) => {
+export const getSingleThreadData = async (
+  threadId,
+  bridgeId,
+  subThreadId,
+  nextPage,
+  user_feedback,
+  pagelimit = 40
+) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}`, {
-      params: {
-        user_feedback
+    const getSingleThreadData = await axios.get(
+      `${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${
+        subThreadId || threadId
+      }&pageNo=${nextPage}&limit=${pagelimit}`,
+      {
+        params: {
+          user_feedback,
+        },
       }
-    })
-    return getSingleThreadData
+    );
+    return getSingleThreadData;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
-
-export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback) => {
+export const getHistory = async (
+  bridgeId,
+  page = 1,
+  start,
+  end,
+  keyword = "",
+  user_feedback
+) => {
   try {
-
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`, {
-      params: {
-        pageNo: page,
-        limit: 40,
-        startTime: start,
-        endTime: end,
-        keyword_search: keyword,
-        user_feedback: user_feedback
+    const getSingleThreadData = await axios.get(
+      `${URL}/api/v1/config/history/${bridgeId}`,
+      {
+        params: {
+          pageNo: page,
+          limit: 40,
+          startTime: start,
+          endTime: end,
+          keyword_search: keyword,
+          user_feedback: user_feedback,
+        },
       }
-    });
+    );
     return getSingleThreadData.data;
   } catch (error) {
     console.error(error);
@@ -166,99 +206,110 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
 
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
   try {
-    let dryRun
-    const modelType = localDataToSend.configuration.type
-    if (modelType !== 'completion' && modelType !== 'embedding') dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
-    if (modelType === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
-    if (modelType === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings/${bridge_id}`, localDataToSend)
-    if (modelType !== 'completion' && modelType !== 'embedding') {
+    let dryRun;
+    const modelType = localDataToSend.configuration.type;
+    if (modelType !== "completion" && modelType !== "embedding")
+      dryRun = await axios.post(
+        `${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`,
+        localDataToSend
+      );
+    if (modelType === "completion")
+      dryRun = await axios.post(
+        `${URL}/api/v1/model/playground/completion/${bridge_id}`,
+        localDataToSend
+      );
+    if (modelType === "embedding")
+      dryRun = await axios.post(
+        `${URL}/api/v1/model/playground/embeddings/${bridge_id}`,
+        localDataToSend
+      );
+    if (modelType !== "completion" && modelType !== "embedding") {
       return dryRun.data;
     }
-    return { success: true, data: dryRun.data }
+    return { success: true, data: dryRun.data };
   } catch (error) {
     console.error("dry run error", error, error.response.data.error);
     toast.error(error?.response?.data?.error);
-    return { success: false, error: error.response.data.error }
+    return { success: false, error: error.response.data.error };
   }
-}
+};
 
-// api keys api 
+// api keys api
 
 export const userdetails = async () => {
   try {
-    const details = await axios.get(`${PROXY_URL}/api/c/getDetails`)
-    return details
+    const details = await axios.get(`${PROXY_URL}/api/c/getDetails`);
+    return details;
+  } catch (error) {
+    console.error(error);
   }
-  catch (error) {
-    console.error(error)
-  }
-}
+};
 
 export const logout = async () => {
   try {
-    await axois.delete(`${PROXY_URL}/{featureId}/deleteCCompany/{cCompanyId}`)
-
+    await axois.delete(`${PROXY_URL}/{featureId}/deleteCCompany/{cCompanyId}`);
   } catch {
-    console.error("problem in logout ")
+    console.error("problem in logout ");
   }
-}
+};
 
 export const allAuthKey = async () => {
   try {
-
-    const response = await axios(`${PROXY_URL}/api/c/authkey`)
-    return response?.data?.data
+    const response = await axios(`${PROXY_URL}/api/c/authkey`);
+    return response?.data?.data;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
 export const logoutUserFromMsg91 = async (headers) => {
-  const User = await axios.delete(`${PROXY_URL}/api/c/logout`, headers)
-  return User
-}
+  const User = await axios.delete(`${PROXY_URL}/api/c/logout`, headers);
+  return User;
+};
 
 export const createAuthKey = async (dataToSend) => {
   try {
-    return await axios.post(`${PROXY_URL}/api/c/authkey`, dataToSend)
-
+    return await axios.post(`${PROXY_URL}/api/c/authkey`, dataToSend);
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
 export const deleteAuthkey = async (id) => {
-
   try {
-    await axios.delete(`${PROXY_URL}/api/c/authkey/${id}`)
+    await axios.delete(`${PROXY_URL}/api/c/authkey/${id}`);
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
 export const createOrg = async (dataToSend) => {
   try {
-    const data = await axios.post(`${PROXY_URL}/api/c/createCompany`, dataToSend)
+    const data = await axios.post(
+      `${PROXY_URL}/api/c/createCompany`,
+      dataToSend
+    );
     return data;
   } catch (error) {
-    toast.error(error.response.data.message)
+    toast.error(error.response.data.message);
   }
-}
+};
 
 export const getAllOrg = async () => {
   try {
-    const data = await axios.get(`${PROXY_URL}/api/c/getCompanies`)
+    const data = await axios.get(`${PROXY_URL}/api/c/getCompanies`);
     return data;
   } catch (error) {
-    console.error(error)
-    throw new Error(error)
+    console.error(error);
+    throw new Error(error);
   }
-}
-
+};
 
 export const switchOrg = async (company_ref_id) => {
   try {
-    const data = await axios.post(`${PROXY_URL}/api/c/switchCompany`, { company_ref_id });
+    const data = await axios.post(`${PROXY_URL}/api/c/switchCompany`, {
+      company_ref_id,
+    });
 
     return data;
   } catch (error) {
@@ -267,16 +318,15 @@ export const switchOrg = async (company_ref_id) => {
   }
 };
 
-
 export const inviteUser = async (email) => {
   try {
-    const response = await axios.post(`${PROXY_URL}/api/c/addUser`, email)
+    const response = await axios.post(`${PROXY_URL}/api/c/addUser`, email);
     return response.data;
   } catch (error) {
     console.error(error);
     return error;
   }
-}
+};
 
 export const getInvitedUsers = async () => {
   try {
@@ -286,107 +336,114 @@ export const getInvitedUsers = async () => {
     console.error(error);
     return error;
   }
-}
-
+};
 
 export const getMetricsData = async (org_id, startDate, endDate) => {
   try {
     const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`, {
       params: {
         startTime: startDate,
-        endTime: endDate
-      }
+        endTime: endDate,
+      },
     });
     return response.data;
   } catch (error) {
     console.error(error);
     return error;
   }
-}
-
+};
 
 export const integration = async (embed_token) => {
-
   try {
-    const response = await fetch("https://flow-api.viasocket.com/projects/projXzlaXL3n/integrations", {
-      method: "GET",
-      headers: {
-        Authorization: embed_token
+    const response = await fetch(
+      "https://flow-api.viasocket.com/projects/projXzlaXL3n/integrations",
+      {
+        method: "GET",
+        headers: {
+          Authorization: embed_token,
+        },
       }
-    });
+    );
     const data = await response.json();
     return data.data;
-
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return error;
   }
-}
-
+};
 
 export const createapi = async (dataFromEmbed) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/api/v1/config/createapi`, dataFromEmbed);
+    const response = await axios.post(
+      `${PYTHON_URL}/api/v1/config/createapi`,
+      dataFromEmbed
+    );
     return response?.data;
   } catch (error) {
     console.error(error);
     return error;
   }
-}
+};
 
 export const updateapi = async (bridge_id, dataFromEmbed) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/api/v1/config/updateapi/${bridge_id}`, dataFromEmbed);
+    const response = await axios.post(
+      `${PYTHON_URL}/api/v1/config/updateapi/${bridge_id}`,
+      dataFromEmbed
+    );
     return response;
   } catch (error) {
     console.error(error);
     return error;
   }
-}
+};
 
 export const publishBridgeVersionApi = async ({ versionId }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/versions/publish/${versionId}`);
+    const response = await axios.post(
+      `${PYTHON_URL}/bridge/versions/publish/${versionId}`
+    );
     return response?.data;
   } catch (error) {
     console.error(error);
     return error;
   }
-}
+};
 
 export const createReponseTypeInOrg = async (orgId) => {
   try {
-    const data = await axios.post(`${URL}/chatbot/${orgId}/createResponse`)
+    const data = await axios.post(`${URL}/chatbot/${orgId}/createResponse`);
     return data;
   } catch (error) {
-    toast.error(error.response.data.error)
+    toast.error(error.response.data.error);
   }
-}
-
+};
 
 export const createOrgToken = async (orgId) => {
   try {
-    const data = await axios.post(`${URL}/chatbot/${orgId}/createtoken`)
+    const data = await axios.post(`${URL}/chatbot/${orgId}/createtoken`);
     return data;
   } catch (error) {
-    toast.error(error.response.data.error)
+    toast.error(error.response.data.error);
   }
-}
+};
 
-
-
-
-export const addorRemoveResponseIdInBridge = async (bridge_id, orgId, responseObj) => {
+export const addorRemoveResponseIdInBridge = async (
+  bridge_id,
+  orgId,
+  responseObj
+) => {
   try {
-
-    const response = await axios.post(`${URL}/chatbot/${orgId}/addresponseid/bridge/${bridge_id}`, { ...responseObj });
+    const response = await axios.post(
+      `${URL}/chatbot/${orgId}/addresponseid/bridge/${bridge_id}`,
+      { ...responseObj }
+    );
     return response;
   } catch (error) {
     console.error(error);
     return error;
   }
-}
-
+};
 
 export const getAllChatBot = async (orgId) => {
   try {
@@ -396,20 +453,17 @@ export const getAllChatBot = async (orgId) => {
     console.error(error);
     return error;
   }
-}
-
+};
 
 export const createChatBot = async (dataToSend) => {
   try {
-
     const response = await axios.post(`${URL}/chatbot/`, dataToSend);
     return response;
   } catch (error) {
     console.error(error);
     return error;
   }
-}
-
+};
 
 export const getChatBotDetails = async (botId) => {
   try {
@@ -419,8 +473,7 @@ export const getChatBotDetails = async (botId) => {
     console.error(error);
     return error;
   }
-}
-
+};
 
 export const getChatBotOfBridge = async (orgId, bridgeId) => {
   try {
@@ -430,21 +483,26 @@ export const getChatBotOfBridge = async (orgId, bridgeId) => {
     console.error(error);
     return error;
   }
-}
-
+};
 
 // routes.route('/:orgId/:botId/bridge/:bridgeId').put(addorRemoveBridgeInChatBot); // update chatbot actions
 
-export const addorRemoveBridgeInChatBot = async (orgId, botId, bridgeId, type) => {
+export const addorRemoveBridgeInChatBot = async (
+  orgId,
+  botId,
+  bridgeId,
+  type
+) => {
   try {
-    const response = await axios.put(`${URL}/chatbot/${orgId}/${botId}/bridge/${bridgeId}?type=${type}`);
+    const response = await axios.put(
+      `${URL}/chatbot/${orgId}/${botId}/bridge/${bridgeId}?type=${type}`
+    );
     return response;
   } catch (error) {
     console.error(error);
     return error;
   }
-}
-
+};
 
 // routes.route('/:botId').put(updateChatBot); // update chatbot
 
@@ -456,18 +514,20 @@ export const updateChatBot = async (botId, dataToSend) => {
     console.error(error);
     return error;
   }
-}
-
+};
 
 export const updateChatBotConfig = async (botId, dataToSend) => {
   try {
-    const response = await axios.post(`${URL}/chatbot/${botId}/updateconfig`, dataToSend);
+    const response = await axios.post(
+      `${URL}/chatbot/${botId}/updateconfig`,
+      dataToSend
+    );
     return response;
   } catch (error) {
     console.error(error);
     return error;
   }
-}
+};
 
 export const loginUser = async (dataToSend) => {
   try {
@@ -477,7 +537,7 @@ export const loginUser = async (dataToSend) => {
     console.error(error);
     return error;
   }
-}
+};
 
 export const switchUser = async (dataToSend) => {
   try {
@@ -487,24 +547,32 @@ export const switchUser = async (dataToSend) => {
     console.error(error);
     return error;
   }
-}
+};
 
-export const createOrRemoveAction = async ({ orgId, bridgeId, versionId, type, dataToSend }) => {
+export const createOrRemoveAction = async ({
+  orgId,
+  bridgeId,
+  versionId,
+  type,
+  dataToSend,
+}) => {
   try {
-    const response = await axios.post(`${URL}/chatbot/${orgId}/bridge/${bridgeId}/action?type=${type}`, { ...dataToSend, version_id: versionId });
+    const response = await axios.post(
+      `${URL}/chatbot/${orgId}/bridge/${bridgeId}/action?type=${type}`,
+      { ...dataToSend, version_id: versionId }
+    );
     return response.data;
   } catch (error) {
     console.error(error);
     return error;
   }
-}
+};
 
 export const createDuplicateBridge = async (bridge_id) => {
   try {
-    const response = await axios.post(
-      `${PYTHON_URL}/bridge/duplicate`,
-      { bridge_id }
-    );
+    const response = await axios.post(`${PYTHON_URL}/bridge/duplicate`, {
+      bridge_id,
+    });
 
     return response.data;
   } catch (error) {
@@ -515,7 +583,9 @@ export const createDuplicateBridge = async (bridge_id) => {
 
 export const getAllModels = async (service) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/api/v1/config/service/models/${service}`);
+    const response = await axios.get(
+      `${PYTHON_URL}/api/v1/config/service/models/${service}`
+    );
     return response.data;
   } catch (error) {
     console.error(error);
@@ -532,18 +602,21 @@ export const saveApiKeys = async (data) => {
     toast.error(error?.response?.data?.error);
     return error;
   }
-}
+};
 
 export const updateApikey = async (dataToSend) => {
   try {
-    const response = await axios.put(`${URL}/apikeys/${dataToSend.apikey_object_id}`, dataToSend)
+    const response = await axios.put(
+      `${URL}/apikeys/${dataToSend.apikey_object_id}`,
+      dataToSend
+    );
 
     return response;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return error;
   }
-}
+};
 
 export const deleteApikey = async (id) => {
   try {
@@ -557,16 +630,15 @@ export const deleteApikey = async (id) => {
   }
 };
 
-
 export const getAllApikey = async (org_id) => {
   try {
-    const response = await axios.get(`${URL}/apikeys`, org_id)
+    const response = await axios.get(`${URL}/apikeys`, org_id);
     return response;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return error;
   }
-}
+};
 
 export const createWebhookAlert = async (dataToSend) => {
   try {
@@ -610,20 +682,31 @@ export const deleteWebhookAlert = async (id) => {
   }
 };
 
-export const downloadFineTuneData = async (bridge_id, threadIds, status = [0]) => {
-  const response = await axios.post(`${URL}/api/v1/config/getFineTuneData/${bridge_id}`, { thread_ids: threadIds, user_feedback: status });
+export const downloadFineTuneData = async (
+  bridge_id,
+  threadIds,
+  status = [0]
+) => {
+  const response = await axios.post(
+    `${URL}/api/v1/config/getFineTuneData/${bridge_id}`,
+    { thread_ids: threadIds, user_feedback: status }
+  );
   return response?.data;
-}
-
+};
 
 export const updateHistoryMessage = async ({ id, bridge_id, message }) => {
-  const response = await axios.put(`${URL}/api/v1/config/gethistory/${bridge_id}`, { id: id, message: message })
+  const response = await axios.put(
+    `${URL}/api/v1/config/gethistory/${bridge_id}`,
+    { id: id, message: message }
+  );
   return response?.data;
-}
+};
 
 export const updateFunctionApi = async ({ function_id, dataToSend }) => {
   try {
-    const response = await axios.put(`${PYTHON_URL}/functions/${function_id}`, { dataToSend });
+    const response = await axios.put(`${PYTHON_URL}/functions/${function_id}`, {
+      dataToSend,
+    });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -633,7 +716,10 @@ export const updateFunctionApi = async ({ function_id, dataToSend }) => {
 
 export const archiveBridgeApi = async (bridge_id, newStatus) => {
   try {
-    const response = await axios.put(`${URL}/api/v1/config/bridge-status/${bridge_id}`, { status: newStatus });
+    const response = await axios.put(
+      `${URL}/api/v1/config/bridge-status/${bridge_id}`,
+      { status: newStatus }
+    );
     return response.data;
   } catch (error) {
     console.error(error);
@@ -641,73 +727,124 @@ export const archiveBridgeApi = async (bridge_id, newStatus) => {
   }
 };
 
-
-export const optimizePromptApi = async ({ bridge_id, version_id, data = {version_id} }) => {
+export const optimizePromptApi = async ({
+  bridge_id,
+  version_id,
+  data = { version_id },
+}) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`, data);
+    const response = await axios.post(
+      `${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`,
+      data
+    );
     return response.data.result;
   } catch (error) {
     console.error(error);
-    return error
+    return error;
+  }
+};
+
+export const optimizeSchemaApi = async ({ data }) => {
+
+  try {
+    const response = await axios.post(
+      `${PYTHON_URL}/utility/structured_output`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
   }
 };
 
 export const discardBridgeVersionApi = async ({ bridgeId, versionId }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/versions/discard/${versionId}`, { bridge_id: bridgeId });
+    const response = await axios.post(
+      `${PYTHON_URL}/bridge/versions/discard/${versionId}`,
+      { bridge_id: bridgeId }
+    );
     return response.data;
   } catch (error) {
     console.error(error);
-    return error
+    return error;
   }
 };
 
 export const userFeedbackCount = async ({ bridge_id, user_feedback }) => {
   try {
-    const response = await axios.get(`${URL}/api/v1/config/userfeedbackcount/${bridge_id}`, {
-      params: {
-        user_feedback
+    const response = await axios.get(
+      `${URL}/api/v1/config/userfeedbackcount/${bridge_id}`,
+      {
+        params: {
+          user_feedback,
+        },
       }
-    });
-    return response
+    );
+    return response;
   } catch (error) {
     console.error(error);
-    return error
+    return error;
   }
-}
+};
 
 export const getSubThreadIds = async ({ thread_id }) => {
   try {
-    const response = await axios.get(`${URL}/api/v1/config/history/sub-thread/${thread_id}`);
+    const response = await axios.get(
+      `${URL}/api/v1/config/history/sub-thread/${thread_id}`
+    );
     return response.data;
   } catch (error) {
     console.error(error);
-    return error
+    return error;
   }
-}
+};
 
 export const uploadImage = async (formData) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/image/processing/`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await axios.post(
+      `${PYTHON_URL}/image/processing/`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     return response.data; // Return the response data for further handling
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error("Error uploading image:", error);
     // Extract error message if available
-    const errorMessage = error.response?.data?.message || error.message || 'File upload failed.';
+    const errorMessage =
+      error.response?.data?.message || error.message || "File upload failed.";
     throw new Error(errorMessage);
   }
 };
 
-export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, bridge_id, version_id, range, factor }) => {
+export const getMetricsDataApi = async ({
+  apikey_id,
+  service,
+  model,
+  thread_id,
+  bridge_id,
+  version_id,
+  range,
+  factor,
+}) => {
   try {
-    const response = await axios.post(`${URL}/metrics`, { apikey_id, service, model, thread_id, bridge_id, version_id, range, factor });
+    const response = await axios.post(`${URL}/metrics`, {
+      apikey_id,
+      service,
+      model,
+      thread_id,
+      bridge_id,
+      version_id,
+      range,
+      factor,
+    });
     return response.data?.data || [];
   } catch (error) {
     console.error(error);
     return error;
   }
-}
+};

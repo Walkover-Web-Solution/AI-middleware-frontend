@@ -11,20 +11,26 @@ import { getModelAction } from "@/store/action/modelAction";
 import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 
-export const runtime = 'edge';
+export const runtime = "edge";
 const Page = ({ searchParams }) => {
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const { bridgeType, service, isServiceModelsAvailable } = useCustomSelector((state) => {
-    const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
-    return {
-      bridgeType: bridgeData?.bridgeType,
-      service: versionData?.service,
-      isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[versionData?.service],
-    };
-  });
+  const { bridgeType, service, isServiceModelsAvailable } = useCustomSelector(
+    (state) => {
+      const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+      const versionData =
+        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
+          params?.version
+        ];
+      return {
+        bridgeType: bridgeData?.bridgeType,
+        service: versionData?.service,
+        isServiceModelsAvailable:
+          state?.modelReducer?.serviceModels?.[versionData?.service],
+      };
+    }
+  );
 
   useEffect(() => {
     dispatch(getSingleBridgesAction(params.id));
@@ -36,12 +42,12 @@ const Page = ({ searchParams }) => {
       } catch (error) {
         console.error("Error in handleclose:", error);
       }
-    }
+    };
   }, []);
 
   useEffect(() => {
     if (service && !isServiceModelsAvailable) {
-      dispatch(getModelAction({ service }))
+      dispatch(getModelAction({ service }));
     }
   }, [service]);
 
@@ -51,18 +57,21 @@ const Page = ({ searchParams }) => {
 
   useEffect(() => {
     if (mountRef.current) {
-      if (bridgeType === 'chatbot') {
-        if (typeof openChatbot !== 'undefined' && document.getElementById('parentChatbot')) {
-          openChatbot()
+      if (bridgeType === "chatbot") {
+        if (
+          typeof openChatbot !== "undefined" &&
+          document.getElementById("parentChatbot")
+        ) {
+          openChatbot();
         }
       } else {
-        if (typeof closeChatbot !== 'undefined') {
-          closeChatbot()
+        if (typeof closeChatbot !== "undefined") {
+          closeChatbot();
         }
       }
     }
     mountRef.current = true;
-  }, [bridgeType])
+  }, [bridgeType]);
 
   return (
     <>
@@ -72,20 +81,23 @@ const Page = ({ searchParams }) => {
           <div className="flex flex-col md:flex-row w-full">
             <div className="w-full md:w-2/3 overflow-auto p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
               <ConfigurationPage params={params} />
-              <div/>
+              <div />
             </div>
             <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
             <div className="w-full md:w-1/3 flex-1 chatPage min-w-[450px]">
-              <div className="p-4 m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
+              <div
+                className="p-4 m-10 md:m-0 h-auto lg:h-full"
+                id="parentChatbot"
+                style={{ minHeight: "85vh" }}
+              >
                 {/* {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />} */}
-                <Chatbot params={params} key={params}/>
+                <Chatbot params={params} key={params} />
                 <Chat params={params} />
               </div>
             </div>
           </div>
         </div>
       </div>
-
     </>
   );
 };

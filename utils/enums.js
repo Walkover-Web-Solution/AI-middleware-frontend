@@ -1,7 +1,13 @@
 export const PAUTH_KEY_COLUMNS = ["name", "authkey", "created_at"];
 export const API_KEY_COLUMNS = ["name", "apikey", "comment", "service"];
-export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers', 'alertType', 'bridges'];
-export const ALERT_TYPE = ['Error', 'Variable'];
+export const WEBHOOKALERT_COLUMNS = [
+  "name",
+  "url",
+  "headers",
+  "alertType",
+  "bridges",
+];
+export const ALERT_TYPE = ["Error", "Variable"];
 export const DOCUMENT_SECTIONS = [
   {
     id: "model",
@@ -159,7 +165,7 @@ export const JSONFORMATDATA = [
         ],
         "required_params": []
       }
-    }`
+    }`,
   },
   {
     title: "Object of Object",
@@ -192,7 +198,7 @@ export const JSONFORMATDATA = [
           }
         }
       }
-    }`
+    }`,
   },
   {
     title: "Array of Array",
@@ -228,7 +234,7 @@ export const JSONFORMATDATA = [
           }
         }
       }
-    }`
+    }`,
   },
   {
     title: "Array of Object",
@@ -259,7 +265,7 @@ export const JSONFORMATDATA = [
           }
         }
       }
-    }`
+    }`,
   },
   {
     title: "Object of Array",
@@ -302,30 +308,35 @@ export const JSONFORMATDATA = [
           }
         }
       }
-    }`
-  }
+    }`,
+  },
 ];
 
 export const MODAL_TYPE = {
-  CREATE_VARIABLE: 'CREATE_VARIABLE',
-  CREATE_BRIDGE_MODAL: 'CREATE_BRIDGE_MODAL',
-  OPTIMIZE_PROMPT: 'optmize_prompt_modal',
-  PUBLISH_BRIDGE_VERSION: 'publish_bridge_version_modal',
+  CREATE_VARIABLE: "CREATE_VARIABLE",
+  CREATE_BRIDGE_MODAL: "CREATE_BRIDGE_MODAL",
+  OPTIMIZE_PROMPT: "optmize_prompt_modal",
+  PUBLISH_BRIDGE_VERSION: "publish_bridge_version_modal",
   VERSION_DESCRIPTION_MODAL: "version_description_modal",
   API_KEY_MODAL: "API_KEY_MODAL",
   PAUTH_KEY_MODAL: "PAUTH_KEY_MODAL",
-  FINE_TUNE_MODAL : "fine-tune-modal",
-  FUNCTION_PARAMETER_MODAL : "function-parameter-modal",
-  ACTION_MODAL : "actionModel",
-  CHATBOT_MODAL : "chatBot_model",
-  CREATE_ORG_MODAL : "create-org-modal",
+  FINE_TUNE_MODAL: "fine-tune-modal",
+  FUNCTION_PARAMETER_MODAL: "function-parameter-modal",
+  ACTION_MODAL: "actionModel",
+  CHATBOT_MODAL: "chatBot_model",
+  CREATE_ORG_MODAL: "create-org-modal",
   PAUTH_KEY_DELETE_MODAL: "PAUTH_KEY_DELETE_MODAL",
   WEBHOOK_MODAL: "WEBHOOK_MODAL",
-  CHAT_DETAILS_VIEW_MODAL:"chat_details_view"
+  CHAT_DETAILS_VIEW_MODAL: "chat_details_view",
+  JSON_SCHEMA: "JSON_SCHEMA",
+};
 
-}
-
-export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment']
+export const API_KEY_MODAL_INPUT = ["name", "apikey", "comment"];
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
-export const TIME_RANGE_OPTIONS = ['Today', 'Last 3 Days', 'Last Week', 'Last Month'];
-export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
+export const TIME_RANGE_OPTIONS = [
+  "Today",
+  "Last 3 Days",
+  "Last Week",
+  "Last Month",
+];
+export const METRICS_FACTOR_OPTIONS = ["bridge_id", "apikey_id", "model"];
