@@ -35,9 +35,6 @@ const EmbedList = ({ params }) => {
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
         model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
     }));
-    if (modelType === 'reasoning' && model !== 'o1' ) {
-        return <></>;
-    }
     const handleOpenModal = (functionId) => {
         setFunctionId(functionId);
         openModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL)
@@ -115,6 +112,11 @@ const EmbedList = ({ params }) => {
                 }
             }))
         }
+    };
+
+    // Conditional rendering moved after all hooks
+    if (modelType === 'reasoning' && model !== 'o1') {
+        return <></>;
     }
 
     return (bridge_functions &&
