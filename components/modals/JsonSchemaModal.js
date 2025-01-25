@@ -67,14 +67,13 @@ function JsonSchemaModal({ params }) {
             configuration: {
               response_type: {
                 type: "json_schema",
-                json_schema: JSON.parse(newJsonSchema), // Use newJsonSchema here
+                json_schema: JSON.parse(newJsonSchema),
               },
             },
           },
         })
       );
       setLoading(false);
-      handleCloseModal();
     } catch (error) {
       console.error("Error:", error);
       setLoading(false);
@@ -101,8 +100,15 @@ function JsonSchemaModal({ params }) {
           <div className="w-full">
             <div className="label">
               <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
-                AI generated Schema
+                AI Generated Schema
               </span>
+              <button
+                className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
+                onClick={handleFinalize}
+                disabled={!newJsonSchema.trim()}
+              >
+                Apply
+              </button>
             </div>
             <textarea
               className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary caret-black p-2"
@@ -124,9 +130,6 @@ function JsonSchemaModal({ params }) {
             >
               {loading && <span className="loading loading-spinner"></span>}
               Optimize
-            </button>
-            <button className="btn btn-primary ml-2" onClick={handleFinalize}>
-              Finalize
             </button>
           </form>
         </div>
