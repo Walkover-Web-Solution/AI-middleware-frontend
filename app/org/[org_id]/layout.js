@@ -25,9 +25,9 @@ export default function layoutOrgPage({ children, params }) {
 
   useEffect(() => {
     dispatch(getAllBridgesAction((data) => {
-      if (data === 0) {
+        if (data === 0) {
         openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-      }
+        }
     }))
     dispatch(getAllFunctions())
   }, []);
@@ -108,14 +108,12 @@ export default function layoutOrgPage({ children, params }) {
   if (isHomePage) {
     return (
       <div className="flex h-screen">
-        <div className="w-6 flex flex-col fixed h-full">
+        <div className=" flex flex-col  h-full">
           <MainSlider />
         </div>
-        <div className='flex-1 ml-72 overflow-y-auto'>
+        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto">
           <Navbar />
-          <main className="px-2">
-            {children}
-          </main>
+          <main className="px-2">{children}</main>
         </div>
       </div>
     );
