@@ -6,6 +6,8 @@ import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import { openModal } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);

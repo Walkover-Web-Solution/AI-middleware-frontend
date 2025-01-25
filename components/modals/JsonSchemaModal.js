@@ -36,14 +36,28 @@ function JsonSchemaModal({ params }) {
     e.preventDefault();
     setLoading(true);
 
-    const result = await optimizeSchemaApi({
-      data: {
-        json_schema: jsonSchemaRequirenments,
-      },
-    });
-    const parsedResult = JSON.stringify(result, undefined, 4);
+    try {
+      const result = await optimizeSchemaApi({
+        data: {
+          json_schema: jsonSchemaRequirenments,
+        },
+      });
+      const parsedResult = JSON.stringify(result, undefined, 4);
+      setNewJsonSchema(parsedResult);
+    } catch (error) {
+      console.error("Optimization Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    setNewJsonSchema(parsedResult);
+  const handleCloseModal = (e) => {
+    e.preventDefault();
+    setNewJsonSchema("");
+    closeModal(MODAL_TYPE.JSON_SCHEMA);
+  };
+
+  const handleFinalize = async () => {
     try {
       await dispatch(
         updateBridgeVersionAction({
@@ -53,7 +67,7 @@ function JsonSchemaModal({ params }) {
             configuration: {
               response_type: {
                 type: "json_schema",
-                json_schema: JSON.parse(parsedResult),
+                json_schema: JSON.parse(newJsonSchema), // Use newJsonSchema here
               },
             },
           },
@@ -65,12 +79,6 @@ function JsonSchemaModal({ params }) {
       console.error("Error:", error);
       setLoading(false);
     }
-  };
-
-  const handleCloseModal = (e) => {
-    e.preventDefault();
-    setNewJsonSchema("");
-    closeModal(MODAL_TYPE.JSON_SCHEMA);
   };
 
   return (
@@ -117,9 +125,9 @@ function JsonSchemaModal({ params }) {
               {loading && <span className="loading loading-spinner"></span>}
               Optimize
             </button>
-            {/* <button className="btn btn-primary ml-2" onClick={handleFinalize}>
+            <button className="btn btn-primary ml-2" onClick={handleFinalize}>
               Finalize
-            </button> */}
+            </button>
           </form>
         </div>
       </div>
