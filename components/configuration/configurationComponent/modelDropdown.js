@@ -5,11 +5,12 @@ import { useDispatch } from 'react-redux';
 
 const ModelDropdown = ({ params }) => {
     const dispatch = useDispatch();
-    const { model, fineTuneModel, modelType, modelsList } = useCustomSelector((state) => ({
+    const { model, fineTuneModel, modelType, modelsList, bridgeType } = useCustomSelector((state) => ({
         model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
         fineTuneModel: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.fine_tune_model?.current_model,
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
         modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service],
+        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     }));
 
     const handleModel = (e) => {
@@ -39,7 +40,7 @@ const ModelDropdown = ({ params }) => {
                 >
                     <option disabled>Select a Model</option>
                     {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
-                        if (group !== 'models') {
+                        if (group !== 'models' && !(bridgeType === 'chatbot' && group === 'embedding')) {
                             return (
                                 <optgroup label={group} key={`group_${groupIndex}`}>
                                     {Object.keys(options || {}).map((option, optionIndex) => {
