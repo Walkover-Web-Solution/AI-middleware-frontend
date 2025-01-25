@@ -11,6 +11,8 @@ export const metadata = {
   description: "Simplified AI & chatbot integration",
 };
 
+
+
 export default function RootLayout({ children }) {
   return (
 
