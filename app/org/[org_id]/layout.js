@@ -1,5 +1,6 @@
 "use client";
 import Navbar from "@/components/navbar";
+import MainSlider from "@/components/sliders/mainSlider";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
@@ -7,16 +8,20 @@ import { createApiAction, getAllBridgesAction, getAllFunctions, integrationActio
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 
 export default function layoutOrgPage({ children, params }) {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const pathName = usePathname();
+  const path = pathName.split('?')[0].split('/')
+
   const { chatbot_token, embedToken } = useCustomSelector((state) => ({
     chatbot_token: state?.ChatBot?.chatbot_token || '',
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
   }));
-  useEmbedScriptLoader(embedToken); 
+  useEmbedScriptLoader(embedToken);
 
   useEffect(() => {
     dispatch(getAllBridgesAction((data) => {
@@ -53,7 +58,7 @@ export default function layoutOrgPage({ children, params }) {
     };
 
     setTimeout(() => {
-        updateScript();
+      updateScript();
     }, 150); // Delay of 150ms
 
     return () => {
@@ -84,7 +89,7 @@ export default function layoutOrgPage({ children, params }) {
         status: e?.data?.action
       }
       dispatch(integrationAction(dataToSend, params?.org_id));
-      if (( e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created" || e?.data?.action === "updated") && e?.data?.description?.length > 0) {
+      if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created" || e?.data?.action === "updated") && e?.data?.description?.length > 0) {
         const dataFromEmbed = {
           url: e?.data?.webhookurl,
           payload: e?.data?.payload,
@@ -98,10 +103,28 @@ export default function layoutOrgPage({ children, params }) {
     }
   }
 
-  return (
-    <>
-      <Navbar />
-      {children}
-    </>
-  );
+  const isHomePage = useMemo(() => path?.length < 5, [path]);
+
+  if (isHomePage) {
+    return (
+      <div className="flex h-screen">
+        <div className="w-6 flex flex-col fixed h-full">
+          <MainSlider />
+        </div>
+        <div className='flex-1 ml-72 overflow-y-auto'>
+          <Navbar />
+          <main className="px-2">
+            {children}
+          </main>
+        </div>
+      </div>
+    );
+  } else {
+    return (
+      <div className="h-screen">
+        <Navbar />
+        {children}
+      </div>
+    );
+  }
 }

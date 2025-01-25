@@ -6,6 +6,7 @@ import { METRICS_FACTOR_OPTIONS, TIME_RANGE_OPTIONS } from '@/utils/enums';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
+
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export const runtime = 'edge';
@@ -104,7 +105,7 @@ function Page({ params }) {
   }
 
   return (
-    <div className="p-10 bg-blue-50 min-h-screen">
+    <div className="p-10 min-h-screen">
       {/* Page Header */}
       <header className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Metrics Dashboard</h1>
