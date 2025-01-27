@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
+const NEXT_PUBLIC_REFERENCEID = process.env.NEXT_PUBLIC_REFERENCEID
 
 export const runtime = 'edge';
 
@@ -718,11 +719,15 @@ export async function updateOrganizationData(orgId, orgDetails) {
     company: orgDetails,
   };
   try {
-    const response = await axios.put(`${URL}/user/updateDetails`, updateObject);
+    const response = await axios.put(`${URL}/user/updateDetails`, updateObject, {
+      headers: {
+        'reference-id': NEXT_PUBLIC_REFERENCEID
+      }
+    });
     const data = response?.data;
     return data;
   } catch (error) {
-    console.error('Error fetching data:', error.message);
-    throw error; // Re-throw the error for the caller to handle
+    console.error('Error updating organization:', error.message);
+    throw error;
   }
 }

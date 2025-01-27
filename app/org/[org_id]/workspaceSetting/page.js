@@ -10,13 +10,13 @@ export default function SettingsPage({ params }) {
   const [isContentOpen, setIsContentOpen] = useState(false);
   const [content, setContent] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTimezone, setSelectedTimezone] = useState('Asia/Kolkata');
+  const [selectedTimezone, setSelectedTimezone] = useState(timezoneData.find(tz => tz.identifier === 'Asia/Kolkata'));
   const dispatch = useDispatch();
 
   const userDetails = useCustomSelector((state) =>
     state?.userDetailsReducer?.organizations?.[params.org_id]
   );
-  console.log(userDetails)
+
   const handleContentOpen = (content) => {
     setContent(content);
     setIsContentOpen(true);
@@ -32,7 +32,8 @@ export default function SettingsPage({ params }) {
       meta: selectedTimezone,
       timezone: selectedTimezone?.offSet
     };
-    dispatch(updateOrgTimeZone(params.org_id, updatedOrgDetails))
+    dispatch(updateOrgTimeZone(params.org_id, updatedOrgDetails));
+    setIsContentOpen(false);
   };
 
   const handleCancel = () => {
@@ -56,7 +57,7 @@ export default function SettingsPage({ params }) {
               </div>
               <div className="flex items-center">
                 <p className="text-md text-muted-foreground cursor-pointer" onClick={() => handleContentOpen('Timezone')}>
-                  <span className='font-medium'>Timezone: </span>{selectedTimezone.identifier}
+                  <span className='font-medium'>Timezone: </span>{selectedTimezone?.identifier} ({selectedTimezone?.offSet})
                 </p>
                 <Pencil size={14} className="ml-2 cursor-pointer" onClick={() => handleContentOpen('Timezone')} />
               </div>
@@ -80,8 +81,8 @@ export default function SettingsPage({ params }) {
                         .map((timezone) => (
                           <div
                             key={timezone.identifier}
-                            className={`p-2 hover:bg-gray-100 cursor-pointer ${timezone.identifier === selectedTimezone.identifier ? 'bg-gray-200' : ''}`}
                             onClick={() => handleTimezoneChange(timezone)}
+                            className={`p-2 hover:bg-gray-100 cursor-pointer ${timezone.identifier === selectedTimezone?.identifier ? 'bg-gray-200' : ''}`}
                           >
                             {timezone.identifier} ({timezone.offSet})
                           </div>

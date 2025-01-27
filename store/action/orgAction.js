@@ -31,7 +31,6 @@ export const setCurrentOrgIdAction = (orgId) => (dispatch) => {
 };
 
 export const updateOrgTimeZone = (orgId, orgDetails) => (dispatch) =>{
-  
   try {
     dispatch(updateOrganizationData(orgId, orgDetails))
   } catch (error) {
