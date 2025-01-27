@@ -51,11 +51,16 @@ function Page({ params }) {
   const [level, setLevel] = useState('Organization');
   const [bridge, setBridge] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [metricsBarChartData, setMetricsBarChartData] = useState({ series: [], categories: [] });
   const { allBridges, apikeyData } = useCustomSelector((state) => ({
     allBridges: state.bridgeReducer.org[params.org_id]?.orgs || [],
     apikeyData: state?.bridgeReducer?.apikeys[org_id] || []
   }));
+
+  const filteredBridges = allBridges.filter(bridge => 
+    bridge.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleFactorChange = (index, changeIn = "factor") => {
     if (changeIn === 'time') {
@@ -102,6 +107,7 @@ function Page({ params }) {
 
   const handleBridgeChange = (bridge_id, bridge_name) => {
     setBridge({ bridge_id, bridge_name });
+    setSearchTerm('');
   }
 
   return (
@@ -127,9 +133,16 @@ function Page({ params }) {
         <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Select Bridge:</label>
           <div className={`dropdown dropdown-end z-[99] border rounded-lg ${level !== 'Bridge' ? 'opacity-50 pointer-events-none' : ''}`}>
-            <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] || 'Select Bridge'}</label>
+          <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Bridge'}</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-row overflow-y-auto max-h-[70vh]">
-              {allBridges.map((item, index) => (
+            <input
+                  type="text"
+                  placeholder="Search bridges..."
+                  className="input input-bordered mb-4 w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              {filteredBridges.map((item, index) => (
                 <li key={index}><a onClick={() => handleBridgeChange(item?._id, item?.name)} className={`w-56 ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}>{item.name}</a></li>
               ))}
             </ul>
