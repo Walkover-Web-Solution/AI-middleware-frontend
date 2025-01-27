@@ -242,7 +242,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                       </ul>
                     </div>
                   )}
-                  {item?.message && item?.message?.length > 0 ? (
+                  {item?.message && item?.message?.length > 0 && (
                     <div className="pl-10 pb-2 text-gray-600 text-sm">
                       {item?.message?.map((msg, index) => (
                         <div
@@ -253,10 +253,6 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                           {truncate(msg?.message, 45)}
                         </div>
                       ))}
-                    </div>
-                  ) : (
-                    <div className="pl-10 pb-2 text-gray-600 text-sm">
-                      No details found
                     </div>
                   )}
                 </div>
