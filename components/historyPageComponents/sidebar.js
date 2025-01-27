@@ -178,7 +178,8 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
         >
           <div className="slider-container min-w-[40%] overflow-x-auto mb-16">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
-              {historyData?.map((item) => (
+            {historyData?.length > 0 ? (
+              historyData?.map((item) => (
                 <div className={`${isThreadSelectable ? "flex" : "flex-col"}`} key={item?.thread_id}>
                   {isThreadSelectable && (
                     <div onClick={(e) => e?.stopPropagation()}>
@@ -241,7 +242,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                       </ul>
                     </div>
                   )}
-                  {item?.message && item?.message?.length > 0 && (
+                  {item?.message && item?.message?.length > 0 ? (
                     <div className="pl-10 pb-2 text-gray-600 text-sm">
                       {item?.message?.map((msg, index) => (
                         <div
@@ -253,9 +254,16 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                         </div>
                       ))}
                     </div>
+                  ) : (
+                    <div className="pl-10 pb-2 text-gray-600 text-sm">
+                      No details found
+                    </div>
                   )}
                 </div>
-              ))}
+              ))
+            ) : (
+              <li>No threads available</li>
+            )}
             </ul>
           </div>
         </InfiniteScroll>
