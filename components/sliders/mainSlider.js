@@ -1,7 +1,7 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import { Bot, Building2, ChevronDown, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TriangleAlert, UserPlus } from 'lucide-react';
+import { AlignJustify, Bot, Building2, ChevronDown, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TriangleAlert, UserPlus } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 
@@ -43,12 +43,8 @@ function MainSlider() {
   const toggleMainSidebar = () => toggleSidebar("main-sidebar");
   return (
     <div className="relative">
-      <label htmlFor="my-drawer-2" className="drawer-button lg:hidden z-0 absolute">
-        <PanelRightClose
-          width="30px"
-          height="30px"
-          onClick={toggleMainSidebar}
-        />
+      <label htmlFor="my-drawer-2" className="drawer-button lg:hidden z-0 absolute top-3 left-1">
+        <AlignJustify size={24} onClick={toggleMainSidebar} />
       </label> <div className={`drawer lg:drawer-open relative z-[101] lg:z-0`}>
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col">
