@@ -642,7 +642,7 @@ export const archiveBridgeApi = async (bridge_id, newStatus) => {
 };
 
 
-export const optimizePromptApi = async ({ bridge_id, version_id, data = {version_id} }) => {
+export const optimizePromptApi = async ({ bridge_id, version_id, data = { version_id } }) => {
   try {
     const response = await axios.post(`${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`, data);
     return response.data.result;
@@ -711,3 +711,16 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
     return error;
   }
 }
+export const optimizeSchemaApi = async ({ data }) => {
+
+  try {
+    const response = await axios.post(
+      `${PYTHON_URL}/utility/structured_output`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
