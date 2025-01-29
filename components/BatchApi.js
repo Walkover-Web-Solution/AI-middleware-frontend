@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { batchApi } from '@/config';
+import { useState, version } from 'react';
 
-const WebhookForm = () => {
+const WebhookForm = ({params}) => {
   const [webhookUrl, setWebhookUrl] = useState('');
   const [headers, setHeaders] = useState('');
   const [messages, setMessages] = useState(['']);
@@ -15,17 +16,13 @@ const WebhookForm = () => {
         webhookUrl,
         headers: headers ? JSON.parse(headers) : {},
         messages,
+        bridge_id:params.id,
+        version_id:params.version
       };
 
       console.log('Submitting payload:', payload);
 
-      const response = await fetch('/api/sendWebhook', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      const data = await batchApi({payload})
 
       if (response.ok) {
         alert('Webhook sent successfully!');
@@ -78,9 +75,7 @@ const WebhookForm = () => {
           <span className="label-text text-lg font-semibold">Messages</span>
         </label>
         <textarea
-          value={messages.join(', ')}
-        //   onChange={(e) => setMessages(e.target.value.split(',').map(msg => msg.trim()).filter(msg => msg !== ''))}
-        //   onBlur={(e) => setMessages(e.target.value.split(',').map(msg => msg.trim()).filter(msg => msg !== ''))}
+          onBlur={(e) => setMessages(e.target.value.split(',').filter(msg => msg !== ''))}
           placeholder="Enter messages separated by commas"
           className="textarea textarea-bordered w-full"
           rows={4}

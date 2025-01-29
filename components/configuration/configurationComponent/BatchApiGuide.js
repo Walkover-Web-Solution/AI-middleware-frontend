@@ -2,20 +2,21 @@ import CopyButton from '@/components/copyButton/copyButton';
 import Link from 'next/link';
 import React from 'react';
 
-const BatchApi = (bridgeId) => {
-  return `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/batch' \\
-  --header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
-  --header 'Content-Type: application/json' \\
-  --data '{
-    "bridge_id": "${bridgeId}",
-    "webhook_url": "YOUR_WEBHOOK_URL",
-    "headers": {
-      // ...YOUR_HEADERS
-    },
-    "messages": [
-      // ...YOUR_MESSAGES
-    ]
-  }'`
+const BatchApi = ({params}) => {    
+  return (
+    `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/batch/chat/completion' \\\n` +
+    `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
+    `--header 'Content-Type: application/json' \\\n` +
+    `--data '{\n` +
+    `    "webhookUrl": "https://flow.sokt.io/func/scriuBOdSvt9",\n` +
+    `    "headers": {},\n` +
+    `    "messages": [\n` +
+    `        "hello"\n` +
+    `    ],\n` +
+    `    "bridge_id": "${params?.id}",\n` +
+    `    "version_id": "${params?.version}"\n` +
+    `}'`
+  );
 }
 
 const BatchResponseFormat = () => {
@@ -36,6 +37,8 @@ const Section = ({ title, caption, children }) => (
 );
 
 const BatchApiGuide = ({ params }) => {
+    console.log(params);
+    
   return (
     <div className="min-h-screen gap-4 flex flex-col">
       <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
@@ -49,9 +52,9 @@ const BatchApiGuide = ({ params }) => {
         <Section title="Step 2" caption="Use the Batch API" />
         <div className="mockup-code relative">
           <CopyButton data={BatchApi(params.id)} />
-          <pre className="break-words whitespace-pre-wrap">
+          <pre className="break-words whitespace-pre-wrap ml-4">
             <code>
-              {BatchApi(params.id)}
+              {BatchApi({params})}
             </code>
           </pre>
         </div>

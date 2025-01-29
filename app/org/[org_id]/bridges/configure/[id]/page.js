@@ -80,7 +80,7 @@ const Page = ({ searchParams }) => {
               <div className="p-4 m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
                 {/* {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />} */}
                 <Chatbot params={params} key={params}/>
-                {bridgeType === 'batch' ? <WebhookForm /> : <Chat params={params} />}
+                {bridgeType === 'batch' ? <WebhookForm params={params}/> : <Chat params={params} />}
               </div>
             </div>
           </div>
