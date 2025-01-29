@@ -43,6 +43,18 @@ function Home({ params }) {
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
+  useEffect(() => {
+    const handleFocusLoss = () => {
+      if (document.activeElement !== inputRef.current) {
+        inputRef.current?.focus();
+      }
+    };
+
+    // Check focus every 300ms temporarily
+    const interval = setInterval(handleFocusLoss, 300);
+    return () => clearInterval(interval);
+  }, []);
+
   const filteredBridges = filterBridges(allBridges, searchTerm);
   const filteredArchivedBridges = filteredBridges?.filter((item) => item.status === 0);
   const filteredUnArchivedBridges = filteredBridges?.filter((item) => item.status === 1 || item.status === undefined);
@@ -208,7 +220,7 @@ function Home({ params }) {
                     type="text"
                     placeholder="Search for bridges (Ctrl/Cmd + K)"
                     className="input input-bordered md:max-w-sm input-md w-full mb-4 md:mb-0"
-                    value={searchTerm}
+                    // value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                   <div className="join hidden sm:block">
