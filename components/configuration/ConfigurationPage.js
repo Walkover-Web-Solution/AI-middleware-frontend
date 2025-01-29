@@ -22,6 +22,7 @@ import UserRefernceForRichText from "./configurationComponent/userRefernceForRic
 import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
 import ToolCallCount from "./configurationComponent/toolCallCount";
+import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -65,35 +66,44 @@ export default function ConfigurationPage({ params }) {
             {
                 currentView === 'setup' ?
                     <>
-                        {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
-                        {modelType !== "image" && <PreEmbedList params={params} />}
-                        {modelType !== 'image' && <InputConfigComponent params={params} />}
-                        {(modelType !== 'image') && <EmbedList params={params} />}
+                        {bridgeType === 'chatbot' && bridgeType !== 'batch' && <SlugNameInput params={params} />}
+                        {modelType !== "image" && bridgeType !== 'batch' && <PreEmbedList params={params} />}
+                        {modelType !== 'image'  && <InputConfigComponent params={params} />}
+                        {(modelType !== 'image') && bridgeType !== 'batch' && <EmbedList params={params} />}
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
                         <AdvancedParameters params={params} />
                         {modelType !== "image"  && <AddVariable params={params} />}
-                        {modelType !== 'image' && <GptMemory params={params} /> }
-                        {bridgeType === "chatbot" && modelType !== 'image' &&  <UserRefernceForRichText params={params} />}
-                        {modelType !== 'image' && <ToolCallCount params={params} />}
-                        { modelType !== 'image' && <ActionList params={params} />}
-                        {bridgeType === 'api' && modelType !== 'image' && <ResponseFormatSelector params={params} />}
+                        {modelType !== 'image' && bridgeType !== 'batch'&& <GptMemory params={params} /> }
+                        {bridgeType === "chatbot" && bridgeType !== 'batch' && modelType !== 'image' &&  <UserRefernceForRichText params={params} />}
+                        {modelType !== 'image' && bridgeType !== 'batch' && <ToolCallCount params={params} />}
+                        { modelType !== 'image' && bridgeType !== 'batch' && <ActionList params={params} />}
+                        {bridgeType === 'api' && bridgeType !== 'batch' && modelType !== 'image' && <ResponseFormatSelector params={params} />}
                     </>
                     :
-                    bridgeType === 'api' ?
+                    bridgeType === 'api' ? (
                         <div className="flex flex-col w-100 overflow-auto gap-3">
                             <h1 className="text-xl font-semibold">API Configuration</h1>
                             <div className="flex flex-col gap-4">
                                 <ApiGuide params={params} />
                             </div>
-                        </div> :
-                        <div className="flex  flex-col w-100 overflow-auto gap-3">
+                        </div>
+                    ) : bridgeType === 'batch' ? (
+                        <div className="flex flex-col w-100 overflow-auto gap-3">
+                            <h1 className="text-xl font-semibold">Batch API Configuration</h1>
+                            <div className="flex flex-col gap-4">
+                                <BatchApiGuide params={params} />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col w-100 overflow-auto gap-3">
                             <h1 className="text-xl font-semibold">Chatbot Configuration</h1>
                             <div className="flex flex-col gap-4">
                                 <ChatbotGuide params={params} />
                             </div>
                         </div>
+                    )
             }
 
         </div>
