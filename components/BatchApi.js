@@ -101,7 +101,7 @@ const WebhookForm = ({ params }) => {
                 <textarea
                     onBlur={(e) => setMessages(e.target.value.split(',').filter(msg => msg !== ''))}
                     placeholder="Enter messages separated by commas"
-                    className="textarea textarea-bordered w-full min-h-80"
+                    className="textarea textarea-bordered w-full min-h-64"
                     rows={4}
                 />
             </div>

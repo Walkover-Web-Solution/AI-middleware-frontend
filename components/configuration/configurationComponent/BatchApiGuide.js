@@ -2,7 +2,7 @@ import CopyButton from '@/components/copyButton/copyButton';
 import Link from 'next/link';
 import React from 'react';
 
-const BatchApi = ({ params }) => {
+const BatchApi = (bridgeId, versionId) => {
     return (
         `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/batch/chat/completion' \\\n` +
         `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
@@ -12,10 +12,11 @@ const BatchApi = ({ params }) => {
         `    "headers": {},\n` +
         `    "batch": [\n` +
         `        "YOUR QUESTION 1",\n` +
-        `        "YOUR QUESTION 2"\n` +
+        `        "YOUR QUESTION 2",\n` +
+        `        "YOUR QUESTION 3"\n` +
         `    ],\n` +
-        `    "bridge_id": "${params?.id}",\n` +
-        `    "version_id": "${params?.version}"\n` +
+        `    "bridge_id": "${bridgeId || ''}",\n` +
+        `    "version_id": "${versionId || ''}"\n` +
         `}'`
     );
 }
@@ -48,10 +49,10 @@ const BatchApiGuide = ({ params }) => {
             <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
                 <Section title="Step 2" caption="Use the Batch API" />
                 <div className="mockup-code relative">
-                    <CopyButton data={BatchApi(params.id)} />
+                    <CopyButton data={BatchApi(params.id, params.version)} />
                     <pre className="break-words whitespace-pre-wrap ml-4">
                         <code>
-                            {BatchApi({ params })}
+                            {BatchApi(params.id, params.version)}
                         </code>
                     </pre>
                 </div>
