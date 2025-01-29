@@ -21,11 +21,11 @@ const BridgeTypeToggle = ({ params }) => {
 
     return (
         <div className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
-            <div className='flex flex-col items-start gap-2'>
+            <div className='flex flex-col items-start gap-1'>
                 <div className="label">
                     <span className="label-text">Select Bridge Type : </span>
                 </div>
-                <div className="flex flex-row items-center gap-2">
+                <div className="flex flex-row items-center gap-4 mb-4">
                     <label className="flex items-center cursor-pointer">
                         <input
                             type="radio"
