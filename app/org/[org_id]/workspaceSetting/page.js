@@ -6,6 +6,8 @@ import { Pencil } from 'lucide-react';
 import React, { useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+export const runtime = 'edge';
+
 export default function SettingsPage({ params }) {
   const dispatch = useDispatch();
   const userDetails = useCustomSelector((state) =>
