@@ -8,8 +8,10 @@ const BatchApi = (bridgeId, versionId) => {
         `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
         `--header 'Content-Type: application/json' \\\n` +
         `--data '{\n` +
-        `    "webhookUrl": "YOUR WEBHOOK URL",\n` +
-        `    "headers": {},\n` +
+        `    "webhook": {\n` +
+        `        "url": "YOUR WEBHOOK URL",\n` +
+        `        "header": {}\n` +
+        `    },\n` +
         `    "batch": [\n` +
         `        "YOUR QUESTION 1",\n` +
         `        "YOUR QUESTION 2",\n` +

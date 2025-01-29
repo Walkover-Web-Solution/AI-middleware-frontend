@@ -225,12 +225,12 @@ export const bridgeReducer = createSlice({
       state.allBridgesMap[bridgeId]['optimizePromptHistory'] = [...(state.allBridgesMap?.[bridgeId]?.['optimizePromptHistory'] || []), prompt];
     },
     webhookURLForBatchAPIReducer: (state, action) => {
-      const {bridge_id, version_id, webhookUrl} = action.payload;
+      const {bridge_id, version_id, webhook} = action.payload;
       if (state.allBridgesMap[bridge_id]) {
         if (!state.allBridgesMap[bridge_id][version_id]) {
           state.allBridgesMap[bridge_id][version_id] = {};
         }
-        state.allBridgesMap[bridge_id][version_id].webhookUrl = webhookUrl;
+        state.allBridgesMap[bridge_id][version_id].webhook = webhook;
       }
     }
   },

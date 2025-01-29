@@ -7,12 +7,12 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 const WebhookForm = ({ params }) => {
-    const { reduxWebhookUrl } = useCustomSelector((state) => ({
-        reduxWebhookUrl: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.[params.version]?.webhookUrl,
+    const { reduxWebhook } = useCustomSelector((state) => ({
+        reduxWebhook: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.[params.version]?.webhook,
     }));
     const dispatch = useDispatch();
-    const [webhookUrl, setWebhookUrl] = useState(reduxWebhookUrl);
-    const [headers, setHeaders] = useState('');
+    const [webhookUrl, setWebhookUrl] = useState(reduxWebhook?.url || "");
+    const [headers, setHeaders] = useState(JSON.stringify(reduxWebhook?.header || {}));
     const [messages, setMessages] = useState(['']);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [responseData, setResponseData] = useState(null);
@@ -38,8 +38,7 @@ const WebhookForm = ({ params }) => {
         setIsSubmitting(true);
 
         const payload = {
-            webhookUrl,
-            headers: headers ? JSON.parse(headers) : {},
+            webhook: { url: webhookUrl, headers: JSON.parse(headers) },
             batch: messages,
             bridge_id: params.id,
             version_id: params.version
