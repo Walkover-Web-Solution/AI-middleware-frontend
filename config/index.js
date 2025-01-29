@@ -713,7 +713,7 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
   }
 }
 
-export async function updateOrganizationData(orgId, orgDetails) {
+export const updateOrganizationData = async (orgId, orgDetails) => {
   const updateObject = {
     company_id: orgId,
     company: orgDetails,
@@ -721,13 +721,13 @@ export async function updateOrganizationData(orgId, orgDetails) {
   try {
     const response = await axios.put(`${URL}/user/updateDetails`, updateObject, {
       headers: {
-        'reference-id': NEXT_PUBLIC_REFERENCEID
+        'reference-id': process.env.NEXT_PUBLIC_REFERENCEID
       }
     });
-    const data = response?.data;
-    return data;
+    return response.data; 
   } catch (error) {
-    console.error('Error updating organization:', error.message);
-    throw error;
+
+    toast.error('Error updating organization:', error);
+    const errorMessage = error.response?.data?.message || error.message || 'Organization update failed.';
   }
-}
+};

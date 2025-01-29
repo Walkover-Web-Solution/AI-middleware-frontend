@@ -35,5 +35,6 @@ export const updateOrgTimeZone = (orgId, orgDetails) => (dispatch) =>{
     dispatch(updateOrganizationData(orgId, orgDetails))
   } catch (error) {
     console.error(error)
+    throw error;
   }
 }
