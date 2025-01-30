@@ -711,3 +711,13 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
     return error;
   }
 }
+
+export const batchApi = async ({ payload }) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/api/v2/model/batch/chat/completion`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error in batch API:', error);
+    throw error;
+  }
+}

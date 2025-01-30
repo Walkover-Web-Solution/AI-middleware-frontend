@@ -22,6 +22,7 @@ import UserRefernceForRichText from "./configurationComponent/userRefernceForRic
 import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
 import ToolCallCount from "./configurationComponent/toolCallCount";
+import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -30,7 +31,7 @@ export default function ConfigurationPage({ params }) {
     const [currentView, setCurrentView] = useState(view);
 
     const { bridgeType, modelType } = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
+        bridgeType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.bridgeType || state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
     }));
 
@@ -39,41 +40,77 @@ export default function ConfigurationPage({ params }) {
         router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${params.version}&view=${target}`);
     };
 
-    const renderSetupView = useMemo(() => () => (
-        <>
-            {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
-            {modelType !== "image" && modelType !== 'embedding' && (
-                <>
-                    <PreEmbedList params={params} />
-                    <InputConfigComponent params={params} />
-                    <EmbedList params={params} />
-                </>
-            )}
-            <ServiceDropdown params={params} />
-            <ModelDropdown params={params} />
-            <ApiKeyInput params={params} />
-            <AdvancedParameters params={params} />
-            {modelType !== "image" && modelType !== 'embedding' && (
-                <>
-                    <AddVariable params={params} />
-                    <GptMemory params={params} />
-                    <UserRefernceForRichText params={params} />
-                    <ToolCallCount params={params} />
-                    <ActionList params={params} />
-                </>
-            )}
-            {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
-        </>
-    ), [bridgeType, modelType, params]);
+    const isImageOrEmbedding = modelType === "image" || modelType === "embedding";
 
-    const renderGuideView = useMemo(() => () => (
-        <div className="flex flex-col w-100 overflow-auto gap-3">
-            <h1 className="text-xl font-semibold">{bridgeType === 'api' ? 'API Configuration' : 'Chatbot Configuration'}</h1>
-            <div className="flex flex-col gap-4">
-                {bridgeType === 'api' ? <ApiGuide params={params} modelType={modelType}/> : <ChatbotGuide params={params} />}
+    const renderSetupView = useMemo(() => () => {
+        const components = [];
+
+        // Add components in the correct order
+        if (bridgeType === 'chatbot') {
+            components.push(<SlugNameInput key="slugName" params={params} />);
+        }
+
+        if (bridgeType === 'batch') {
+            components.push(
+                <InputConfigComponent key="inputConfig" params={params} />,
+                <ServiceDropdown key="service" params={params} />,
+                <ModelDropdown key="model" params={params} />,
+                <ApiKeyInput key="apiKey" params={params} />,
+                <AdvancedParameters key="advancedParams" params={params} />
+            );
+        } else {
+            if (!isImageOrEmbedding) {
+                components.push(
+                    <PreEmbedList key="preEmbed" params={params} />,
+                    <InputConfigComponent key="inputConfig" params={params} />,
+                    <EmbedList key="embed" params={params} />
+                );
+            }
+
+            components.push(
+                <ServiceDropdown key="service" params={params} />,
+                <ModelDropdown key="model" params={params} />,
+                <ApiKeyInput key="apiKey" params={params} />,
+                <AdvancedParameters key="advancedParams" params={params} />
+            );
+
+            if (!isImageOrEmbedding) {
+                components.push(
+                    <AddVariable key="addVariable" params={params} />,
+                    <GptMemory key="gptMemory" params={params} />,
+                    <UserRefernceForRichText key="userRef" params={params} />,
+                    <ToolCallCount key="toolCall" params={params} />,
+                    <ActionList key="actionList" params={params} />
+                );
+            }
+
+            if (bridgeType === 'api' && !isImageOrEmbedding) {
+                components.push(<ResponseFormatSelector key="responseFormat" params={params} />);
+            }
+        }
+
+        return <>{components}</>;
+    }, [bridgeType, modelType, params]);
+
+    const renderGuideView = useMemo(() => () => {
+        const guideComponents = {
+            api: <ApiGuide params={params} modelType={modelType} />,
+            batch: <BatchApiGuide params={params} />,
+            chatbot: <ChatbotGuide params={params} />,
+        };
+
+        return (
+            <div className="flex flex-col w-100 overflow-auto gap-3">
+                <h1 className="text-xl font-semibold">
+                    {bridgeType === 'api' ? 'API Configuration' : 
+                     bridgeType === 'batch' ? 'Batch API Configuration' : 'Chatbot Configuration'}
+                </h1>
+                <div className="flex flex-col gap-4">
+                    {guideComponents[bridgeType]}
+                </div>
             </div>
-        </div>
-    ), [bridgeType, params]);
+        );
+    }, [bridgeType, params, modelType]);
 
     return (
         <div className="flex flex-col gap-3 relative">

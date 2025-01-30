@@ -10,7 +10,7 @@ import { MODAL_TYPE } from '@/utils/enums';
 function ActionList({ params }) {
     const { action, bridgeType } = useCustomSelector((state) => ({
         action: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.actions,
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
+        bridgeType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.bridgeType || state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     }));
 
     const dispatch = useDispatch();

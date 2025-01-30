@@ -10,7 +10,7 @@ const ModelDropdown = ({ params }) => {
         fineTuneModel: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.fine_tune_model?.current_model,
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
         modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service],
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+        bridgeType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.bridgeType || state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     }));
 
     const handleModel = (e) => {
@@ -40,7 +40,12 @@ const ModelDropdown = ({ params }) => {
                 >
                     <option disabled>Select a Model</option>
                     {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
-                        if (group !== 'models' && !(bridgeType === 'chatbot' && group === 'embedding')) {
+                        const isInvalidGroup = 
+                            group === 'models' ||
+                            (bridgeType === 'chatbot' && group === 'embedding') ||
+                            (bridgeType === 'batch' && (group === 'image' || group === 'embedding'));
+                            
+                        if (!isInvalidGroup) {
                             return (
                                 <optgroup label={group} key={`group_${groupIndex}`}>
                                     {Object.keys(options || {}).map((option, optionIndex) => {

@@ -44,8 +44,7 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
             }
         } else {
             const response = await dispatch(saveApiKeysAction(data, orgId));
-            console.log(response);
-
+            
             if (service && response?._id) {
                 const updated = { ...bridgeApikey_object_id, [service]: response._id };
                 dispatch(updateBridgeVersionAction({

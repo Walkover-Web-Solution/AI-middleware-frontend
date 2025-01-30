@@ -1,5 +1,6 @@
 "use client";
 
+import WebhookForm from "@/components/BatchApi";
 import ConfigurationPage from "@/components/configuration/ConfigurationPage";
 import Chat from "@/components/configuration/chat";
 import Chatbot from "@/components/configuration/chatbot";
@@ -20,7 +21,7 @@ const Page = ({ searchParams }) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
-      bridgeType: bridgeData?.bridgeType,
+      bridgeType: versionData?.bridgeType || bridgeData?.bridgeType,
       service: versionData?.service,
       isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[versionData?.service],
     };
@@ -79,7 +80,7 @@ const Page = ({ searchParams }) => {
               <div className="p-4 m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
                 {/* {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />} */}
                 <Chatbot params={params} key={params}/>
-                <Chat params={params} />
+                {bridgeType === 'batch' ? <WebhookForm params={params}/> : <Chat params={params} />}
               </div>
             </div>
           </div>
