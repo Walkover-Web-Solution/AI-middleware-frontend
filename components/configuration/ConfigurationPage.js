@@ -70,7 +70,7 @@ export default function ConfigurationPage({ params }) {
         <div className="flex flex-col w-100 overflow-auto gap-3">
             <h1 className="text-xl font-semibold">{bridgeType === 'api' ? 'API Configuration' : 'Chatbot Configuration'}</h1>
             <div className="flex flex-col gap-4">
-                {bridgeType === 'api' ? <ApiGuide params={params} /> : <ChatbotGuide params={params} />}
+                {bridgeType === 'api' ? <ApiGuide params={params} modelType={modelType}/> : <ChatbotGuide params={params} />}
             </div>
         </div>
     ), [bridgeType, params]);
