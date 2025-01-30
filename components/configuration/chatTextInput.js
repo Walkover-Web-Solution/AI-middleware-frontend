@@ -65,7 +65,7 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
             }
         }
         setErrorMessage("");
-        if (modelType !== "completion" && modelType !== "embedding") inputRef.current.value = "";
+        if (modelType !== "completion") inputRef.current.value = "";
         setLoading(true);
         try {
             const newChat = {
@@ -101,19 +101,24 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
                     },
                     bridge_id: params?.id,
                 });
-            } else if (modelType === "completion") {
+            } else if (modelType === "embedding") {
+                data = {
+                    role: "user",
+                    content: newMessage
+                };
+                setMessages(prevMessages => [...prevMessages, newChat]);
                 responseData = await dryRun({
                     localDataToSend: {
-                        ...localDataToSend,
                         version_id: versionId,
                         configuration: {
-                            ...localDataToSend.configuration
+                            conversation: conversation,
+                            type: modelType
                         },
-                        prompt: bridge?.inputConfig?.prompt?.prompt
+                        text: newMessage
                     },
                     bridge_id: params?.id
                 });
-            } else if (modelType === "embedding") {
+            } else if (modelType !== "image") {
                 responseData = await dryRun({
                     localDataToSend: {
                         ...localDataToSend,
@@ -125,7 +130,7 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
                     },
                     bridge_id: params?.id
                 });
-            }
+            } 
             if (!responseData || !responseData.success) {
                 if (modelType !== 'completion' && modelType !== 'embedding') {
                     inputRef.current.value = data.content;
@@ -135,8 +140,8 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
                 setLoading(false);
                 return;
             }
-            response = responseData.response?.data;
-            const content = response?.content || "";
+            response = modelType === 'embedding' ? responseData.data?.response.data.embedding : responseData.response?.data;
+            const content = modelType === 'embedding' ? response : response?.content || "";
             const assistConversation = {
                 role: response?.role || "assistant",
                 content: content,
@@ -144,6 +149,8 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
             };
 
             if (modelType !== 'completion' && modelType !== 'embedding') {
+                setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
+            } else if (modelType === 'embedding') {
                 setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
             }
             const newChatAssist = {
@@ -215,7 +222,7 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
                     ))}
                 </div>
             )}
-            {(modelType !== "completion") && (modelType !== "embedding") && (modelType !== 'image') && (
+            {(modelType !== "completion") && (modelType !== 'image') && (
                 <input
                     ref={inputRef}
                     type="text"
