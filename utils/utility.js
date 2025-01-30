@@ -258,3 +258,22 @@ export function closeModal(modalName) {
         console.error(`Modal with name ${modalName} not found`);
     }
 }
+
+export const allowedAttributes = {
+  important: [
+    ['variables', 'Variables'],
+    ['system Prompt', 'System Prompt'],
+    ['AiConfig', 'AI Configuration'],
+    ['latency', 'Latency'],
+  ],
+  optional: [
+    ['message_id', 'Message ID'],
+    ['input_tokens', 'Input Tokens'],
+    ['output_tokens', 'Output Tokens'],
+    ['expected_cost', 'Expected Cost'], 
+    ['createdAt', 'Created At'],
+    ['service', 'Service'], 
+    ['model', 'Model'],
+  ]
+};
+
