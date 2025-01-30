@@ -20,15 +20,6 @@ const BridgeTypeToggle = ({ params }) => {
             bridgeType: newCheckedValue ? 'chatbot' : 'api'
         };
 
-        if (modelType === 'embedding' && updatedDataToSend.bridgeType === 'chatbot') {
-            const defaultModel = DEFAULT_MODEL?.[service];
-            dispatch(updateBridgeVersionAction({
-            bridgeId: params.id,
-            versionId : params.version,
-            dataToSend: { service: service, configuration: { model: defaultModel } }
-        }));
-        }
-
         dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { ...updatedDataToSend } }));
     };
 
@@ -44,16 +35,25 @@ const BridgeTypeToggle = ({ params }) => {
                     className="toggle"
                     defaultChecked={bridgeType?.toString()?.toLowerCase() === "chatbot" ? true : false}
                     onChange={(e) => handleInputChange(e, "bridgeType")}
+                    disabled={modelType === 'embedding'}
                 />
                 <div className="label">
                     <span className="label-text">ChatBot</span>
                 </div>
             </div>
             <div>
-                {bridgeType?.toString()?.toLowerCase() === "chatbot" && <div role="alert" className="alert p-2">
-                    <Info size={16} />
-                    <span className='label-text-alt'>Only supports models which have JSON support. &#40; like gpt-4o &#41;</span>
-                </div>}
+                {modelType === 'embedding' && (
+                    <div role="alert" className="alert p-2">
+                        <Info size={16} />
+                        <span className='label-text-alt'>Embedding models do not support ChatBot.</span>
+                    </div>
+                )}
+                {bridgeType?.toString()?.toLowerCase() === "chatbot" && modelType !== 'embedding' && (
+                    <div role="alert" className="alert p-2">
+                        <Info size={16} />
+                        <span className='label-text-alt'>Only supports models which have JSON support. &#40; like gpt-4o &#41;</span>
+                    </div>
+                )}
             </div>
         </div>
     );

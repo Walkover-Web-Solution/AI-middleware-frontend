@@ -104,8 +104,7 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
             } else if (modelType === "embedding") {
                 data = {
                     role: "user",
-                    content: newMessage,
-                    image_urls: uploadedImages // Include images in the data
+                    content: newMessage
                 };
                 setMessages(prevMessages => [...prevMessages, newChat]);
                 responseData = await dryRun({
