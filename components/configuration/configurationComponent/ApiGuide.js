@@ -2,12 +2,12 @@ import CopyButton from '@/components/copyButton/copyButton';
 import Link from 'next/link';
 import React from 'react';
 
-const ComplitionApi = (bridgeId) => {
+const ComplitionApi = (bridgeId, modelType) => {
   return `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\
   --header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
   --header 'Content-Type: application/json' \\
   --data '{
-    "user": "YOUR_USER_QUESTION",
+    ${modelType === 'embedding' ? '"text": "YOUR_TEXT_HERE",' : '"user": "YOUR_USER_QUESTION",'}
     "bridge_id": "${bridgeId}",
     "response_type": "text", // optional
     "variables": {
@@ -43,7 +43,7 @@ const Section = ({ title, caption, children }) => (
   </div>
 );
 
-const ApiGuide = ({ params }) => {
+const ApiGuide = ({ params, modelType }) => {
   return (
     <div className="min-h-screen gap-4 flex flex-col">
       <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
@@ -56,10 +56,10 @@ const ApiGuide = ({ params }) => {
       <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
         <Section title="Step 2" caption="Use the API" />
         <div className="mockup-code relative">
-          <CopyButton data={ComplitionApi(params.id)} />
+          <CopyButton data={ComplitionApi(params.id, modelType)} />
           <pre className="break-words whitespace-pre-wrap">
             <code>
-              {ComplitionApi(params.id)}
+              {ComplitionApi(params.id, modelType)}
             </code>
           </pre>
         </div>
