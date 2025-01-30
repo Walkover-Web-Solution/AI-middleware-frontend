@@ -1,21 +1,34 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { DEFAULT_MODEL } from '@/jsonFiles/bridgeParameter';
+import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { Info } from 'lucide-react';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
 const BridgeTypeToggle = ({ params }) => {
     const dispatch = useDispatch();
-    const { bridgeType } = useCustomSelector((state) => ({
+    const { bridgeType, modelType, service } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
+        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
     }));
 
 
     const handleInputChange = (e) => {
-        let newCheckedValue = e.target.checked
+        let newCheckedValue = e.target.checked;
         let updatedDataToSend = {
             bridgeType: newCheckedValue ? 'chatbot' : 'api'
         };
+
+        if (modelType === 'embedding' && updatedDataToSend.bridgeType === 'chatbot') {
+            const defaultModel = DEFAULT_MODEL?.[service];
+            dispatch(updateBridgeVersionAction({
+            bridgeId: params.id,
+            versionId : params.version,
+            dataToSend: { service: service, configuration: { model: defaultModel } }
+        }));
+        }
+
         dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { ...updatedDataToSend } }));
     };
 

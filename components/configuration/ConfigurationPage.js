@@ -65,20 +65,20 @@ export default function ConfigurationPage({ params }) {
             {
                 currentView === 'setup' ?
                     <>
-                        {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
-                        {modelType !== "image" && <PreEmbedList params={params} />}
-                        {modelType !== 'image' && <InputConfigComponent params={params} />}
-                        {(modelType !== 'image') && <EmbedList params={params} />}
+                        {bridgeType === 'chatbot'&& modelType!=='embedding' && <SlugNameInput params={params} />}
+                        {modelType !== "image" && modelType!=='embedding'&& <PreEmbedList params={params} />}
+                        {modelType !== 'image' && modelType!=='embedding'&& <InputConfigComponent params={params} />}
+                        {(modelType !== 'image') && modelType!=='embedding'  && <EmbedList params={params} />}
                         <ServiceDropdown params={params} />
                         <ModelDropdown params={params} />
                         <ApiKeyInput params={params} />
                         <AdvancedParameters params={params} />
-                        {modelType !== "image"  && <AddVariable params={params} />}
-                        {modelType !== 'image' && <GptMemory params={params} /> }
-                        {bridgeType === "chatbot" && modelType !== 'image' &&  <UserRefernceForRichText params={params} />}
-                        {modelType !== 'image' && <ToolCallCount params={params} />}
-                        { modelType !== 'image' && <ActionList params={params} />}
-                        {bridgeType === 'api' && modelType !== 'image' && <ResponseFormatSelector params={params} />}
+                        {modelType !== "image"  && modelType!=='embedding'&& <AddVariable params={params} />}
+                        {modelType !== 'image' && modelType!=='embedding' && <GptMemory params={params} /> }
+                        {bridgeType === "chatbot" && modelType !== 'image' && modelType!=='embedding' &&  <UserRefernceForRichText params={params} />}
+                        {modelType !== 'image' &&  modelType!=='embedding' && <ToolCallCount params={params} />}
+                        { modelType !== 'image' && modelType!=='embedding'&&  <ActionList params={params} />}
+                        {bridgeType === 'api' && modelType !== 'image' &&  modelType!=='embedding' && <ResponseFormatSelector params={params} />}
                     </>
                     :
                     bridgeType === 'api' ?
