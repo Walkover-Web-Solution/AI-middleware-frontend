@@ -110,7 +110,9 @@ const WebhookForm = ({ params }) => {
                     <label className="label">
                         <span className="label-text text-lg font-semibold">Response Data</span>
                     </label>
-                    <pre className="bg-gray-100 p-2 rounded">{JSON.stringify(responseData, null, 2)}</pre>
+                    <pre className="bg-gray-100 p-2 rounded whitespace-pre-wrap">
+                        {(responseData)}
+                    </pre>
                 </div>
             )}
 
