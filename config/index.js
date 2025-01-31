@@ -731,3 +731,12 @@ export const updateOrganizationData = async (orgId, orgDetails) => {
     const errorMessage = error.response?.data?.message || error.message || 'Organization update failed.';
   }
 };
+
+export const genrateSummary = async (version_id) =>{
+  try {
+    const response = await axios.post(`${PYTHON_URL}/bridge/summary`, { version_id:version_id.versionId })
+    return response.data.result;
+  } catch (error) {
+    toast.error(error)
+  }
+}
