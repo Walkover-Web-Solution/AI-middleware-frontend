@@ -7,10 +7,11 @@ import { useDispatch } from "react-redux";
 
 const AddVariable = ({ params }) => {
   const versionId = params.version;
-  const { variablesKeyValue } = useCustomSelector((state) => ({
+  const { variablesKeyValue, prompt } = useCustomSelector((state) => ({
     variablesKeyValue:
       // state?.bridgeReducer?.allBridgesMap?.[params.id]?.variables || [],
       state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
+      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
   }));
 
   const [keyValuePairs, setKeyValuePairs] = useState([]);
@@ -22,6 +23,41 @@ const AddVariable = ({ params }) => {
   const dispatch = useDispatch();
   const accordionContentRef = useRef(null); // Ref for the accordion content
   const isOpeningRef = useRef(false); // To track if the accordion is opening
+
+  const extractVariablesFromPrompt = () => {
+    const regex = /{{(.*?)}}/g;
+    const matches = [...prompt.matchAll(regex)];
+    const variables = [...new Set(matches.map(match => match[1].trim()))];
+   
+    const existingPairsMap = new Map(variablesKeyValue.map(pair => [pair.key, pair]));
+
+    const newVariables = variables.filter(v => !existingPairsMap.has(v));
+    console.log(newVariables)
+
+    if (newVariables.length === 0) return;
+
+    const updatedPairs = [
+        ...variablesKeyValue,
+        ...newVariables.map(variable => ({
+            key: variable,
+            value: '',
+            checked: true
+        }))
+    ];
+    
+    setKeyValuePairs(updatedPairs);
+    dispatch(updateVariables({ 
+        data: updatedPairs, 
+        bridgeId: params.id, 
+        versionId 
+    }));
+};
+
+  useEffect(() => {
+    if (prompt) {
+      extractVariablesFromPrompt();
+    }
+  }, [prompt]);
 
   // Initialize keyValuePairs from Redux store
   useEffect(() => {
@@ -93,7 +129,7 @@ const AddVariable = ({ params }) => {
     return keyValuePairs
       .filter((pair) => pair.checked)
       .map((pair) =>
-        pair.key && pair.value ? `${pair.key}:${pair.value}` : ""
+        `${pair.key}:${pair.value ? pair.value : ''}`
       )
       .join("\n");
   };
