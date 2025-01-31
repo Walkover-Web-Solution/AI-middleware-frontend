@@ -9,7 +9,7 @@ const ChatBotList = ({ params }) => {
     const router = useRouter();
     const dispatch = useDispatch()
     const { bridgeType, chatbotData, chatBotList } = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.bridgeType || state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         chatbotData: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.chatbotData,
         chatBotList: state?.ChatBot?.org?.[params?.org_id] || []
     }));

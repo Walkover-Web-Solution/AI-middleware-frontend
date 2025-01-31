@@ -17,13 +17,14 @@ const Page = ({ searchParams }) => {
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const { bridgeType, service, isServiceModelsAvailable } = useCustomSelector((state) => {
+  const { bridgeType, service, isServiceModelsAvailable, versionService} = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
-      bridgeType: versionData?.bridgeType || bridgeData?.bridgeType,
+      bridgeType: bridgeData?.bridgeType,
       service: versionData?.service,
       isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[versionData?.service],
+      versionService:versionData?.service
     };
   });
 
@@ -80,7 +81,7 @@ const Page = ({ searchParams }) => {
               <div className="p-4 m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
                 {/* {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />} */}
                 <Chatbot params={params} key={params}/>
-                {bridgeType === 'batch' ? <WebhookForm params={params}/> : <Chat params={params} />}
+                {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params}/> : <Chat params={params} />}
               </div>
             </div>
           </div>

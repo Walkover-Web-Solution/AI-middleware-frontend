@@ -31,7 +31,7 @@ export default function ConfigurationPage({ params }) {
     const [currentView, setCurrentView] = useState(view);
 
     const { bridgeType, modelType } = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.bridgeType || state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
     }));
 

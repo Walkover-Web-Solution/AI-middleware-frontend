@@ -5,7 +5,7 @@ const Chatbot = ({ params }) => {
   const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration } = useCustomSelector((state) => ({
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
     bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
-    bridgeType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.bridgeType || state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+    bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     chatbot_token: state?.ChatBot?.chatbot_token || '',
     variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration

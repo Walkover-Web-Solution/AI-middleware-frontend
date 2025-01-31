@@ -1,13 +1,13 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { updateBridgeAction} from '@/store/action/bridgeAction';
 import { Info } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 const BridgeTypeToggle = ({ params }) => {
     const dispatch = useDispatch();
     const { bridgeType, modelType, service } = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.bridgeType || state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
     }));
@@ -25,12 +25,20 @@ const BridgeTypeToggle = ({ params }) => {
             bridgeType: newCheckedValue
         };
 
-        dispatch(updateBridgeVersionAction({
+        dispatch(updateBridgeAction({
             bridgeId: params.id,
-            versionId: params.version,
             dataToSend: { ...updatedDataToSend }
         }));
     };
+
+    useEffect(() => {
+        if (service !== 'openai' && bridgeType === 'batch') {
+            dispatch(updateBridgeAction({
+                bridgeId: params.id,
+                dataToSend: { bridgeType: 'api' }
+            }));
+        }
+    }, [params.version]);
 
     return (
         <div className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>

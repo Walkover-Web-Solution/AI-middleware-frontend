@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 
 function ServiceDropdown({ params }) {
     const { bridgeType, service } = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.bridgeType || state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
     }));
     const [selectedService, setSelectedService] = useState(service);
@@ -47,14 +47,14 @@ function ServiceDropdown({ params }) {
                                 value={selectedService} 
                                 onChange={handleServiceChange} 
                                 className="select select-sm select-bordered capitalize w-full max-w-xs" 
-                                disabled={bridgeType === 'batch'}
+                                disabled={bridgeType === 'batch' && service === 'openai'}
                             >
                                 <option disabled>Select a Service</option>
                                 {SERVICES.map((service, index) => (
                                     <option key={index} value={service}>{service}</option>
                                 ))}
                             </select>
-                            {bridgeType === 'batch' && (
+                            {bridgeType === 'batch' && service === 'openai' && (
                                 <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
                                     <Info size={16} className="flex-shrink-0 mt-0.5" />
                                     <span className='label-text-alt text-xs leading-tight'>
