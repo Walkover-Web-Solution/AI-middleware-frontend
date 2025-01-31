@@ -19,11 +19,16 @@ export const userDetailsReducer = createSlice({
       });
       state.organizations = org
       state.success = action.payload.success
-    } 
+    },
+    updateUserDetails: (state, action) => {
+      const { orgId, updatedUserDetails } = action.payload;
+      state.organizations[orgId] = updatedUserDetails;
+    }
   },
 });
 
 export const {
-    fetchUserDetails
+    fetchUserDetails,
+    updateUserDetails
 } = userDetailsReducer.actions;
 export default userDetailsReducer.reducer;
