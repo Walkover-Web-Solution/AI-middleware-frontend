@@ -32,7 +32,6 @@ const AddVariable = ({ params }) => {
     const existingPairsMap = new Map(variablesKeyValue.map(pair => [pair.key, pair]));
 
     const newVariables = variables.filter(v => !existingPairsMap.has(v));
-    console.log(newVariables)
 
     if (newVariables.length === 0) return;
 
