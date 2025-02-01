@@ -711,3 +711,12 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
     return error;
   }
 }
+
+export const genrateSummary = async (version_id) =>{
+  try {
+    const response = await axios.post(`${PYTHON_URL}/bridge/summary`, { version_id:version_id.versionId })
+    return response.data.result;
+  } catch (error) {
+    toast.error(error)
+  }
+}
