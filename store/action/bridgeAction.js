@@ -1,4 +1,4 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, discardBridgeVersionApi, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
 import { toast } from "react-toastify";
 import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
@@ -260,5 +260,16 @@ export const uploadImageAction = (formData) => async (dispatch) => {
     return response;
   } catch (error) {
     console.error('Error uploading image:', error);
+  }
+}
+
+export const genrateSummaryAction = ({ bridgeId, versionId, orgId }) => async (dispatch) => {
+  try {
+    const response = await genrateSummary({ bridgeId, versionId, orgId });
+    return response;
+  } catch (error) {
+    dispatch(isError());
+    toast.error('Failed to update summary');
+    console.error("Failed to update summary: ", error);
   }
 }
