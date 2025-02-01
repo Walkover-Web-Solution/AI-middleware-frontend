@@ -5,37 +5,52 @@ import React from 'react'
 
 const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
   return (
-    <dialog id="chat_details_view" className="modal">
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000] overflow-auto min-w-[100vw] h-auto">
-        <div className="bg-white p-4 rounded shadow-lg max-w-6xl w-[90vw] relative">
-          <button
-            className="absolute top-6 right-5"
-            onClick={() => closeModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL)}
-          >
-            <CircleX size={24} />
-          </button>
-          <h3 className="text-lg font-semibold mb-2 p-2">Detailed View</h3>
-          <div className="bg-gray-200 p-4 rounded text-sm overflow-auto h-auto max-h-[80vh] ">
-            {Object.entries(modalContent || {}).map(([key, value]) => (
-              <div key={key} className="mb-2">
-                <strong className="">{key}:</strong>
-                {Array?.isArray(value) ? (
-                  <ul className="list-disc list-inside ml-4">
-                    {value?.map((item, index) => (
-                      <li key={index} className="break-words">
-                        {typeof item === 'object' && item !== null ? (
-                          <pre className="ml-4 bg-gray-100 p-2 rounded break-words whitespace-pre-wrap">{JSON?.stringify(item, null, 2)}</pre>
-                        ) : (
-                          <span className="break-words">{JSON?.stringify(item)}</span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <span className="text-gray-700 ml-2">{JSON?.stringify(value)}</span>
-                )}
-              </div>
-            ))}
+    <dialog id={MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL} className="modal">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-[1000] min-w-[100vw] min-h-[100vh] overflow-auto py-4">
+        <div className="bg-base-100 rounded-lg shadow-2xl max-w-6xl w-[90vw] h-auto overflow-auto relative flex flex-col">
+          <div className="flex items-start justify-between p-6 border-b">
+            <h3 className="text-2xl font-bold">Detailed View</h3>
+            <button
+              className="btn focus:outline:none hover:bg-base-300 transition-colors duration-200 border-0 rounded-full"
+              onClick={() => closeModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL)}
+            >
+              <CircleX size={24} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-auto p-6">
+            <div className="bg-base-200 rounded-lg p-6 h-auto overflow-auto">
+              {modalContent && Object.entries(modalContent).map(([key, value]) => (
+                <div key={key} className="mb-6 last:mb-0">
+                  <h4 className="text-lg font-semibold mb-2">{key}</h4>
+                  {Array.isArray(value) ? (
+                    <ul className="space-y-2 ml-4">
+                      {value.map((item, index) => (
+                        <li key={index} className="break-words">
+                          {typeof item === 'object' && item !== null ? (
+                            <pre className="bg-base-100 p-4 rounded-lg shadow-inner break-words whitespace-pre-wrap text-sm">
+                              {JSON.stringify(item, null, 2)}
+                            </pre>
+                          ) : (
+                            <span className="text-base-content/80">
+                              {String(item)}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="bg-base-100 p-4 rounded-lg shadow-inner">
+                      <pre className="text-base-content/80 break-words whitespace-pre-wrap">
+                        {typeof value === 'object' && value !== null 
+                          ? JSON.stringify(value, null, 2)
+                          : String(value)}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

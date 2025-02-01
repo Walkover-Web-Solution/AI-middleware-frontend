@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
+const NEXT_PUBLIC_REFERENCEID = process.env.NEXT_PUBLIC_REFERENCEID
 
 export const runtime = 'edge';
 
@@ -170,7 +171,7 @@ export const dryRun = async ({ localDataToSend, bridge_id }) => {
     const modelType = localDataToSend.configuration.type
     if (modelType !== 'completion' && modelType !== 'embedding') dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
     if (modelType === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
-    if (modelType === "embedding") dryRun = await axios.post(`${URL}/api/v1/model/playground/embeddings/${bridge_id}`, localDataToSend)
+    if (modelType === "embedding") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
     if (modelType !== 'completion' && modelType !== 'embedding') {
       return dryRun.data;
     }
@@ -711,6 +712,7 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
     return error;
   }
 }
+
 export const optimizeSchemaApi = async ({ data }) => {
 
   try {
@@ -722,5 +724,33 @@ export const optimizeSchemaApi = async ({ data }) => {
   } catch (error) {
     console.error(error);
     return error;
+  }
+};
+
+export const updateOrganizationData = async (orgId, orgDetails) => {
+  const updateObject = {
+    company_id: orgId,
+    company: orgDetails,
+  };
+  try {
+    const response = await axios.put(`${URL}/user/updateDetails`, updateObject, {
+      headers: {
+        'reference-id': NEXT_PUBLIC_REFERENCEID
+      }
+    });
+    return response.data; 
+  } catch (error) {
+
+    toast.error('Error updating organization:', error);
+    const errorMessage = error.response?.data?.message || error.message || 'Organization update failed.';
+  }
+};
+
+export const genrateSummary = async (version_id) =>{
+  try {
+    const response = await axios.post(`${PYTHON_URL}/bridge/summary`, { version_id:version_id.versionId })
+    return response.data.result;
+  } catch (error) {
+    toast.error(error)
   }
 };
