@@ -225,14 +225,14 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                           subThreads?.map((subThreadId, index) => (
                             <li
                               key={index}
-                              className={`cursor-pointer ${selectedSubThreadId === subThreadId?.display_name
+                              className={`cursor-pointer ${selectedSubThreadId === subThreadId?.sub_thread_id
                                   ? "hover:bg-base-primary hover:text-base-100"
                                   : "hover:bg-base-300 hover:text-gray-800"
-                                } p-2 rounded-md transition-all duration-200 ${selectedSubThreadId === subThreadId?.display_name
+                                } p-2 rounded-md transition-all duration-200 ${selectedSubThreadId === subThreadId?.sub_thread_id
                                   ? "bg-primary text-base-100"
                                   : ""
                                 }`}
-                              onClick={() => handleSelectSubThread(subThreadId?.display_name, selectedThread)}
+                              onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, selectedThread)}
                             >
                               {subThreadId?.display_name}
                             </li>
