@@ -115,7 +115,7 @@ const EmbedList = ({ params }) => {
     };
 
     // Conditional rendering moved after all hooks
-    if (modelType === 'reasoning' && model !== 'o1') {
+    if (modelType === 'reasoning' && model !== 'o1-mini' && model !== 'o1' && model !== 'o3-mini') {
         return <></>;
     }
 
