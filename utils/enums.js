@@ -308,6 +308,8 @@ export const JSONFORMATDATA = [
 
 export const AVAILABLE_MODEL_TYPES = {
   API: 'api',
+  CHAT: 'chat',
+  FINETUEN: 'finetune',
   COMPLETION: 'completion',
   IMAGE: 'image',
   EMBEDDING: 'embedding',
