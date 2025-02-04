@@ -60,8 +60,6 @@ export const deleteBridge = async (bridgeId) => {
   }
 };
 
-
-
 export const createBridge = async (dataToSend) => {
   try {
     return await axios.post(`${PYTHON_URL}/api/v1/config/create_bridge`, dataToSend)
@@ -70,6 +68,7 @@ export const createBridge = async (dataToSend) => {
     throw error
   }
 }
+
 export const createBridgeVersionApi = async (dataToSend) => {
   try {
     const result = await axios.post(`${PYTHON_URL}/bridge/versions/create`, dataToSend)
@@ -79,7 +78,6 @@ export const createBridgeVersionApi = async (dataToSend) => {
     throw error
   }
 }
-
 
 export const getAllBridges = async (org_id) => {
   try {
@@ -144,7 +142,6 @@ export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextP
   }
 }
 
-
 export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback) => {
   try {
 
@@ -181,8 +178,6 @@ export const dryRun = async ({ localDataToSend, bridge_id }) => {
     return { success: false, error: error.response.data.error }
   }
 }
-
-// api keys api 
 
 export const userdetails = async () => {
   try {
@@ -255,7 +250,6 @@ export const getAllOrg = async () => {
   }
 }
 
-
 export const switchOrg = async (company_ref_id) => {
   try {
     const data = await axios.post(`${PROXY_URL}/api/c/switchCompany`, { company_ref_id });
@@ -266,7 +260,6 @@ export const switchOrg = async (company_ref_id) => {
     return error;
   }
 };
-
 
 export const inviteUser = async (email) => {
   try {
@@ -288,7 +281,6 @@ export const getInvitedUsers = async () => {
   }
 }
 
-
 export const getMetricsData = async (org_id, startDate, endDate) => {
   try {
     const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`, {
@@ -303,7 +295,6 @@ export const getMetricsData = async (org_id, startDate, endDate) => {
     return error;
   }
 }
-
 
 export const integration = async (embed_token) => {
 
@@ -322,7 +313,6 @@ export const integration = async (embed_token) => {
     return error;
   }
 }
-
 
 export const createapi = async (dataFromEmbed) => {
   try {
@@ -363,7 +353,6 @@ export const createReponseTypeInOrg = async (orgId) => {
   }
 }
 
-
 export const createOrgToken = async (orgId) => {
   try {
     const data = await axios.post(`${URL}/chatbot/${orgId}/createtoken`)
@@ -372,9 +361,6 @@ export const createOrgToken = async (orgId) => {
     toast.error(error.response.data.error)
   }
 }
-
-
-
 
 export const addorRemoveResponseIdInBridge = async (bridge_id, orgId, responseObj) => {
   try {
@@ -387,7 +373,6 @@ export const addorRemoveResponseIdInBridge = async (bridge_id, orgId, responseOb
   }
 }
 
-
 export const getAllChatBot = async (orgId) => {
   try {
     const response = await axios.get(`${URL}/chatbot/${orgId}/all`);
@@ -397,7 +382,6 @@ export const getAllChatBot = async (orgId) => {
     return error;
   }
 }
-
 
 export const createChatBot = async (dataToSend) => {
   try {
@@ -410,7 +394,6 @@ export const createChatBot = async (dataToSend) => {
   }
 }
 
-
 export const getChatBotDetails = async (botId) => {
   try {
     const response = await axios.get(`${URL}/chatbot/${botId}`);
@@ -420,7 +403,6 @@ export const getChatBotDetails = async (botId) => {
     return error;
   }
 }
-
 
 export const getChatBotOfBridge = async (orgId, bridgeId) => {
   try {
@@ -432,9 +414,6 @@ export const getChatBotOfBridge = async (orgId, bridgeId) => {
   }
 }
 
-
-// routes.route('/:orgId/:botId/bridge/:bridgeId').put(addorRemoveBridgeInChatBot); // update chatbot actions
-
 export const addorRemoveBridgeInChatBot = async (orgId, botId, bridgeId, type) => {
   try {
     const response = await axios.put(`${URL}/chatbot/${orgId}/${botId}/bridge/${bridgeId}?type=${type}`);
@@ -445,9 +424,6 @@ export const addorRemoveBridgeInChatBot = async (orgId, botId, bridgeId, type) =
   }
 }
 
-
-// routes.route('/:botId').put(updateChatBot); // update chatbot
-
 export const updateChatBot = async (botId, dataToSend) => {
   try {
     const response = await axios.put(`${URL}/chatbot/${botId}`, dataToSend);
@@ -457,7 +433,6 @@ export const updateChatBot = async (botId, dataToSend) => {
     return error;
   }
 }
-
 
 export const updateChatBotConfig = async (botId, dataToSend) => {
   try {
@@ -557,7 +532,6 @@ export const deleteApikey = async (id) => {
   }
 };
 
-
 export const getAllApikey = async (org_id) => {
   try {
     const response = await axios.get(`${URL}/apikeys`, org_id)
@@ -615,7 +589,6 @@ export const downloadFineTuneData = async (bridge_id, threadIds, status = [0]) =
   return response?.data;
 }
 
-
 export const updateHistoryMessage = async ({ id, bridge_id, message }) => {
   const response = await axios.put(`${URL}/api/v1/config/gethistory/${bridge_id}`, { id: id, message: message })
   return response?.data;
@@ -641,8 +614,7 @@ export const archiveBridgeApi = async (bridge_id, newStatus) => {
   }
 };
 
-
-export const optimizePromptApi = async ({ bridge_id, version_id, data = {version_id} }) => {
+export const optimizePromptApi = async ({ bridge_id, version_id, data = { version_id } }) => {
   try {
     const response = await axios.post(`${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`, data);
     return response.data.result;
@@ -710,13 +682,26 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
     console.error(error);
     return error;
   }
-}
+};
 
-export const genrateSummary = async (version_id) =>{
+export const genrateSummary = async (version_id) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/summary`, { version_id:version_id.versionId })
+    const response = await axios.post(`${PYTHON_URL}/bridge/summary`, { version_id: version_id.versionId })
     return response.data.result;
   } catch (error) {
     toast.error(error)
   }
 }
+
+export const optimizeSchemaApi = async ({ data }) => {
+  try {
+    const response = await axios.post(
+      `${PYTHON_URL}/utility/structured_output`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};

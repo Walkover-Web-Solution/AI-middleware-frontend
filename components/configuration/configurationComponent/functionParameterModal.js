@@ -532,12 +532,12 @@ function FunctionParameterModal({ functionId, params }) {
                 )}
                 <div className="modal-action">
                     <form method="dialog" className='flex flex-row gap-2'>
+                        <button className="btn" onClick={handleCloseModal}>Close</button>
                         {isDataAvailable && (
-                            <button className="btn" onClick={handleSaveFunctionData} disabled={!isModified}>
+                            <button className="btn btn-primary" onClick={handleSaveFunctionData} disabled={!isModified}>
                                 Save
                             </button>
                         )}
-                        <button className="btn" onClick={handleCloseModal}>Close</button>
                     </form>
                 </div>
             </div>
