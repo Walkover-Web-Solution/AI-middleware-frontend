@@ -44,13 +44,15 @@ export default function ConfigurationPage({ params }) {
     const renderSetupView = useMemo(() => () => (
         <>
             {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
-            {(modelType === AVAILABLE_MODEL_TYPES.API || (modelType === AVAILABLE_MODEL_TYPES.REASONING && PROMPT_SUPPORTED_REASIONING_MODELS?.includes(modelName))) && (
-                <>
-                    <PreEmbedList params={params} />
-                    <InputConfigComponent params={params} />
-                    <EmbedList params={params} />
-                </>
-            )}
+            {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING && (modelType === AVAILABLE_MODEL_TYPES.REASONING
+                ? PROMPT_SUPPORTED_REASIONING_MODELS?.includes(modelName)
+                : true)) && (
+                    <>
+                        <PreEmbedList params={params} />
+                        <InputConfigComponent params={params} />
+                        <EmbedList params={params} />
+                    </>
+                )}
             <ServiceDropdown params={params} />
             <ModelDropdown params={params} />
             <ApiKeyInput params={params} />
@@ -72,7 +74,7 @@ export default function ConfigurationPage({ params }) {
         <div className="flex flex-col w-100 overflow-auto gap-3">
             <h1 className="text-xl font-semibold">{bridgeType === 'api' ? 'API Configuration' : 'Chatbot Configuration'}</h1>
             <div className="flex flex-col gap-4">
-                {bridgeType === 'api' ? <ApiGuide params={params} modelType={modelType}/> : <ChatbotGuide params={params} />}
+                {bridgeType === 'api' ? <ApiGuide params={params} modelType={modelType} /> : <ChatbotGuide params={params} />}
             </div>
         </div>
     ), [bridgeType, params]);
