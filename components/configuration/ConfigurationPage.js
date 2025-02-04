@@ -22,6 +22,7 @@ import UserRefernceForRichText from "./configurationComponent/userRefernceForRic
 import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
 import ToolCallCount from "./configurationComponent/toolCallCount";
+import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/utils/enums";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -29,9 +30,10 @@ export default function ConfigurationPage({ params }) {
     const view = searchParams.get('view') || 'setup';
     const [currentView, setCurrentView] = useState(view);
 
-    const { bridgeType, modelType } = useCustomSelector((state) => ({
+    const { bridgeType, modelType, modelName } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
+        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
     }));
 
     const handleNavigation = (target) => {
@@ -42,7 +44,7 @@ export default function ConfigurationPage({ params }) {
     const renderSetupView = useMemo(() => () => (
         <>
             {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
-            {modelType !== "image" && modelType !== 'embedding' && (
+            {(modelType === AVAILABLE_MODEL_TYPES.API || (modelType === AVAILABLE_MODEL_TYPES.REASONING && PROMPT_SUPPORTED_REASIONING_MODELS?.includes(modelName))) && (
                 <>
                     <PreEmbedList params={params} />
                     <InputConfigComponent params={params} />
@@ -64,7 +66,7 @@ export default function ConfigurationPage({ params }) {
             )}
             {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
         </>
-    ), [bridgeType, modelType, params]);
+    ), [bridgeType, modelType, params, modelName]);
 
     const renderGuideView = useMemo(() => () => (
         <div className="flex flex-col w-100 overflow-auto gap-3">
