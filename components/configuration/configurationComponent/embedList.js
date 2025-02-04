@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
 import { openModal } from '@/utils/utility';
-import { MODAL_TYPE } from '@/utils/enums';
+import { MODAL_TYPE, PROMPT_SUPPORTED_REASIONING_MODELS } from '@/utils/enums';
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -114,8 +114,7 @@ const EmbedList = ({ params }) => {
         }
     };
 
-    // Conditional rendering moved after all hooks
-    if (modelType === 'reasoning' && model !== 'o1-mini' && model !== 'o1' && model !== 'o3-mini') {
+    if (modelType === 'reasoning' && !PROMPT_SUPPORTED_REASIONING_MODELS.includes(model)) {
         return <></>;
     }
 
