@@ -1,8 +1,11 @@
+import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { MODAL_TYPE } from '@/utils/enums';
+import { openModal } from '@/utils/utility';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
@@ -10,16 +13,27 @@ const AdvancedParameters = ({ params }) => {
     const [isAccordionOpen, setIsAccordionOpen] = useState(false);
     const [objectFieldValue, setObjectFieldValue] = useState();
     const dispatch = useDispatch();
-    const { service, model, type, configuration } = useCustomSelector((state) => ({
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service?.toLowerCase(),
-        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
-        type: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
-        configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
-    }));
+    const { service, model, type, configuration } = useCustomSelector((state) => {
+        const bridgeVersion = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        return {
+            service: bridgeVersion?.service?.toLowerCase(),
+            model: bridgeVersion?.configuration?.model,
+            type: bridgeVersion?.configuration?.type,
+            configuration: bridgeVersion?.configuration,
+        };
+    });
 
     const { modelInfoData } = useCustomSelector((state) => ({
         modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters,
     }));
+
+    useEffect(() => {
+        if (configuration?.response_type?.json_schema) {
+            setObjectFieldValue(
+                JSON.stringify(configuration?.response_type?.json_schema, undefined, 4)
+            );
+        }
+    }, [configuration]);
 
     const handleInputChange = (e, key, isSlider = false) => {
         let newValue = e.target.value;
@@ -42,9 +56,9 @@ const AdvancedParameters = ({ params }) => {
         let newValue;
         let is_json = false
         try {
-            newValue =e.target.value ? JSON.parse(e.target.value) : JSON.parse("{}");
+            newValue = e.target.value ? JSON.parse(e.target.value) : JSON.parse("{}");
             setObjectFieldValue(JSON.stringify(newValue, undefined, 4));
-            is_json =true
+            is_json = true
         } catch (error) {
             newValue = e.target.value;
         }
@@ -53,41 +67,39 @@ const AdvancedParameters = ({ params }) => {
                 [key]: newValue,
             }
         };
-        if(key=== "size")
-        {
+        if (key === "size") {
             updatedDataToSend = {
                 configuration: {
-                    'size':newValue
+                    'size': newValue
                 }
             }
-          
+
         }
-        if(key === "quality")
-        {
+        if (key === "quality") {
             updatedDataToSend = {
                 configuration: {
-                     'quality' : newValue
-                    }
+                    'quality': newValue
                 }
-            
-          
+            }
+
+
         }
-        if(key=== 'json_schema'){
-            if(!is_json) return toast.error('Json schema is not parsable JSON');
+        if (key === 'json_schema') {
+            if (!is_json) return toast.error('Json schema is not parsable JSON');
             updatedDataToSend = {
                 configuration: {
-                    "response_type":{
-                        "type":'json_schema',
-                    [key]: newValue
+                    "response_type": {
+                        "type": 'json_schema',
+                        [key]: newValue
                     }
                 }
             }
         }
-        if(key=== 'response_type'){
+        if (key === 'response_type') {
             updatedDataToSend = {
                 configuration: {
-                    "response_type":{
-                        "type":newValue,
+                    "response_type": {
+                        "type": newValue,
                     }
                 }
             }
@@ -209,21 +221,44 @@ const AdvancedParameters = ({ params }) => {
                                 </label>
                             )}
                             {field === 'select' && (
-                                <label className='items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+                                <label className='items-center justify-start gap-4 text-base-content w-full'>
                                     <select value={configuration?.[key]?.type ? configuration?.[key]?.type : configuration?.[key] || 'Text'} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
                                         <option disabled>Select response mode</option>
                                         {options?.map((service, index) => (
                                             <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
                                         ))}
                                     </select>
-                                    {configuration?.[key]?.type === 'json_schema' && <textarea
-                                        key={`${key}-${configuration?.[key]}-${objectFieldValue}`}
-                                        type="input"
-                                        defaultValue={objectFieldValue || JSON.stringify(configuration?.[key]?.json_schema, undefined, 4)}
-                                        className='mt-5 textarea textarea-bordered border w-full min-h-96 resize-y z-[1]'
-                                        onBlur={(e) => handleSelectChange(e, 'json_schema')}
-                                        placeholder="Enter valid JSON object here..."
-                                    />}
+                                    {configuration?.[key]?.type === "json_schema" && (
+                                        <div>
+                                            <span
+                                                role="button"
+                                                className="label-text capitalize mb-1 font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text float-right cursor-pointer"
+                                                onClick={() => {
+                                                    openModal(MODAL_TYPE.JSON_SCHEMA);
+                                                }}
+                                            >
+                                                Optimize Schema
+                                            </span>
+                                            <textarea
+                                                key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
+                                                type="input"
+                                                defaultValue={
+                                                    objectFieldValue ||
+                                                    JSON.stringify(
+                                                        configuration?.[key]?.json_schema,
+                                                        undefined,
+                                                        4
+                                                    )
+                                                }
+                                                className="textarea textarea-bordered border w-full min-h-60 resize-y z-[1]"
+                                                onBlur={(e) =>
+                                                    handleSelectChange(e, "json_schema")
+                                                }
+                                                placeholder="Enter valid JSON object here..."
+                                            />
+                                            <JsonSchemaModal params={params} />
+                                        </div>
+                                    )}
                                 </label>
                             )}
                         </div>

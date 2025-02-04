@@ -324,20 +324,23 @@ export const MODAL_TYPE = {
   VERSION_DESCRIPTION_MODAL: "version_description_modal",
   API_KEY_MODAL: "API_KEY_MODAL",
   PAUTH_KEY_MODAL: "PAUTH_KEY_MODAL",
-  FINE_TUNE_MODAL : "fine-tune-modal",
-  FUNCTION_PARAMETER_MODAL : "function-parameter-modal",
-  ACTION_MODAL : "actionModel",
-  CHATBOT_MODAL : "chatBot_model",
-  CREATE_ORG_MODAL : "create-org-modal",
+  FINE_TUNE_MODAL: "fine-tune-modal",
+  FUNCTION_PARAMETER_MODAL: "function-parameter-modal",
+  ACTION_MODAL: "actionModel",
+  CHATBOT_MODAL: "chatBot_model",
+  CREATE_ORG_MODAL: "create-org-modal",
   PAUTH_KEY_DELETE_MODAL: "PAUTH_KEY_DELETE_MODAL",
   WEBHOOK_MODAL: "WEBHOOK_MODAL",
-  CHAT_DETAILS_VIEW_MODAL:"chat_details_view"
-
+  CHAT_DETAILS_VIEW_MODAL: "chat_details_view",
+  JSON_SCHEMA: "JSON_SCHEMA",
 }
 
-export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment']
+export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
+
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
+
 export const TIME_RANGE_OPTIONS = ['Today', 'Last 3 Days', 'Last Week', 'Last Month'];
+
 export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
 
 export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini'];
