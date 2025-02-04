@@ -306,6 +306,14 @@ export const JSONFORMATDATA = [
   }
 ];
 
+export const AVAILABLE_MODEL_TYPES = {
+  API: 'api',
+  COMPLETION: 'completion',
+  IMAGE: 'image',
+  EMBEDDING: 'embedding',
+  REASONING: 'reasoning',
+};
+
 export const MODAL_TYPE = {
   CREATE_VARIABLE: 'CREATE_VARIABLE',
   CREATE_BRIDGE_MODAL: 'CREATE_BRIDGE_MODAL',
@@ -329,3 +337,5 @@ export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment']
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
 export const TIME_RANGE_OPTIONS = ['Today', 'Last 3 Days', 'Last Week', 'Last Month'];
 export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
+
+export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini'];
