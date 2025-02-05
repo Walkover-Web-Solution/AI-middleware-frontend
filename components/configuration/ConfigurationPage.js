@@ -23,6 +23,7 @@ import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
 import ToolCallCount from "./configurationComponent/toolCallCount";
 import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/utils/enums";
+import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
