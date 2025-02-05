@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import CodeBlock from "../codeBlock/codeBlock";
@@ -37,14 +38,16 @@ function Chat({ params }) {
                   <time className="text-xs opacity-50 pl-2">{message.time}</time>
                 </div>
                 <div>
-                {message?.image_urls && message?.image_urls?.length > 0 && (
+                  {message?.image_urls && message?.image_urls?.length > 0 && (
                     <div className="flex flex-wrap mt-2 items-end justify-end">
                       {message?.image_urls.map((url, imgIndex) => (
-                        <img 
-                          key={imgIndex} 
-                          src={url} 
-                          alt={`Message Image ${imgIndex + 1}`} 
-                          className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer" 
+                        <Image
+                          key={imgIndex}
+                          src={url}
+                          alt={`Message Image ${imgIndex + 1}`}
+                          width={80} // Adjust width as needed
+                          height={80} // Adjust height as needed
+                          className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer"
                           onClick={() => window.open(url, '_blank')}
                         />
                       ))}

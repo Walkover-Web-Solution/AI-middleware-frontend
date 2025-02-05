@@ -1,12 +1,13 @@
 import { updateContentHistory } from "@/store/action/historyAction";
 import { Bot, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, User } from "lucide-react";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import Image from "next/image";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useDispatch } from "react-redux";
 import CodeBlock from "../codeBlock/codeBlock";
-import ToolsDataModal from "./toolsDataModal";
 import EditMessageModal from "../modals/EditMessageModal";
 import { truncate } from "./assistFile";
+import ToolsDataModal from "./toolsDataModal";
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId }) => {
   const dispatch = useDispatch();
@@ -232,7 +233,14 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                   {item?.urls?.map((url, index) => (
                     <div key={index} className="chat chat-end flex-grow-1">
                       <div className="">
-                        <img src={url} alt="Attached" className="max-w-full max-h-16 w-auto h-auto rounded-md" loading="lazy"/>
+                        <Image
+                          src={url}
+                          alt="Attached"
+                          width={64} // Adjust width as needed
+                          height={64} // Adjust height as needed
+                          className="max-w-full max-h-16 w-auto h-auto rounded-md"
+                          loading="lazy"
+                        />
                       </div>
                     </div>
                   ))}
@@ -241,7 +249,14 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               {item?.role === "assistant" && item?.image_url && (
                 <div className="chat chat-end">
                   <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
-                    <img src={item.image_url} alt="Attached" className="max-w-full max-h-96 w-auto h-auto rounded-md" loading="lazy"/>
+                    <Image
+                      src={item.image_url}
+                      alt="Attached"
+                      width={300} // Adjust width as needed
+                      height={300} // Adjust height as needed
+                      className="max-w-full max-h-96 w-auto h-auto rounded-md"
+                      loading="lazy"
+                    />
                   </div>
                 </div>
               )}

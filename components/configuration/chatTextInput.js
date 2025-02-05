@@ -2,12 +2,13 @@ import { dryRun } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { uploadImageAction } from '@/store/action/bridgeAction';
 import _ from 'lodash';
-import { CircleX, ImageUp, ImageUpIcon } from 'lucide-react';
+import { CircleX, ImageUpIcon } from 'lucide-react';
+import Image from 'next/image';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploadedImages, setUploadedImages }) {
+function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages }) {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [conversation, setConversation] = useState([]);
@@ -130,7 +131,7 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
                     },
                     bridge_id: params?.id
                 });
-            } 
+            }
             if (!responseData || !responseData.success) {
                 if (modelType !== 'completion' && modelType !== 'embedding') {
                     inputRef.current.value = data.content;
@@ -163,7 +164,7 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
                 content: Array.isArray(content) ? content.join(", ") : content.toString(),
                 image_urls: assistConversation.image_urls
             };
-            
+
             setMessages(prevMessages => [...prevMessages, newChatAssist]);
         } catch (error) {
             console.log(error);
@@ -208,7 +209,13 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
                 <div className="absolute bottom-16 left-0 gap-2 flex w-auto rounded-lg">
                     {uploadedImages.map((url, index) => (
                         <div key={index} className="relative">
-                            <img src={url} alt={`Uploaded Preview ${index + 1}`} className="w-16 h-16 object-cover mb-2 bg-base-300 p-2 rounded-lg" />
+                            <Image
+                                src={url}
+                                alt={`Uploaded Preview ${index + 1}`}
+                                width={64} // Adjust width as needed
+                                height={64} // Adjust height as needed
+                                className="w-16 h-16 object-cover mb-2 bg-base-300 p-2 rounded-lg"
+                            />
                             <button
                                 className="absolute top-[-3px] right-[-3px]  text-white rounded-full p-1"
                                 onClick={() => {
@@ -216,7 +223,7 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
                                     setUploadedImages(newImages);
                                 }}
                             >
-                                <CircleX className='text-base-content bg-base-200 rounded-full' size={20}/>
+                                <CircleX className='text-base-content bg-base-200 rounded-full' size={20} />
                             </button>
                         </div>
                     ))}
@@ -239,7 +246,7 @@ function ChatTextInput({ setMessages, setErrorMessage,messages, params, uploaded
                 onChange={handleFileChange}
                 className="hidden"
             />
-            {configuration && configuration?.vision && configuration['vision'] &&<button
+            {configuration && configuration?.vision && configuration['vision'] && <button
                 className="btn"
                 onClick={() => fileInputRef.current.click()}
                 disabled={loading || uploading}

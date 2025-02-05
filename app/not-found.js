@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import React from 'react'
 
 function ErrorPage() {
@@ -12,7 +13,12 @@ function ErrorPage() {
           <a href="javascript:history.back()" className="px-5 inline py-3 text-sm font-medium leading-5 shadow-2xl text-white transition-all duration-400 border border-transparent rounded-lg focus:outline-none bg-green-600">Go back</a>
         </div>
         <div className="w-full lg:w-1/2 mx-5 my-12 flex justify-center">
-          <img src="https://user-images.githubusercontent.com/43953425/166269493-acd08ccb-4df3-4474-95c7-ad1034d3c070.svg" alt="Page not found" />
+          <Image
+            src="https://user-images.githubusercontent.com/43953425/166269493-acd08ccb-4df3-4474-95c7-ad1034d3c070.svg"
+            alt="Page not found"
+            width={500} // Adjust width as needed
+            height={300} // Adjust height as needed
+          />
         </div>
       </div>
     </div>
