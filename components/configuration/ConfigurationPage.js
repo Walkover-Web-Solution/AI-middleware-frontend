@@ -70,14 +70,25 @@ export default function ConfigurationPage({ params }) {
         </>
     ), [bridgeType, modelType, params, modelName]);
 
-    const renderGuideView = useMemo(() => () => (
-        <div className="flex flex-col w-100 overflow-auto gap-3">
-            <h1 className="text-xl font-semibold">{bridgeType === 'api' ? 'API Configuration' : 'Chatbot Configuration'}</h1>
-            <div className="flex flex-col gap-4">
-                {bridgeType === 'api' ? <ApiGuide params={params} modelType={modelType} /> : <ChatbotGuide params={params} />}
+    const renderGuideView = useMemo(() => () => {
+        const guideComponents = {
+            api: <ApiGuide params={params} modelType={modelType} />,
+            batch: <BatchApiGuide params={params} />,
+            chatbot: <ChatbotGuide params={params} />,
+        };
+
+        return (
+            <div className="flex flex-col w-100 overflow-auto gap-3">
+                <h1 className="text-xl font-semibold">
+                    {bridgeType === 'api' ? 'API Configuration' :
+                        bridgeType === 'batch' ? 'Batch API Configuration' : 'Chatbot Configuration'}
+                </h1>
+                <div className="flex flex-col gap-4">
+                    {guideComponents[bridgeType]}
+                </div>
             </div>
-        </div>
-    ), [bridgeType, params]);
+        );
+    }, [bridgeType, params, modelType]);
 
     return (
         <div className="flex flex-col gap-3 relative">
