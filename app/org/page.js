@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
  */
 function Page() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const dispatch = useDispatch();
   const route = useRouter()
   const organizations = useCustomSelector(state => state.userDetailsReducer.organizations);
@@ -46,19 +47,55 @@ function Page() {
 
   const filteredOrganizations = filterOrganizations(organizations,searchQuery);
   
+  const handleKeyDown = useCallback((e) => {
+    if (filteredOrganizations.length === 0) return;
+    
+    switch (e.key) {
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex((prev) => 
+          prev === 0 ? filteredOrganizations.length - 1 : prev - 1
+        );
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex((prev) => 
+          prev === filteredOrganizations.length - 1 ? 0 : prev + 1
+        );
+        break;
+      case 'Enter':
+        const selectedOrg = filteredOrganizations[filteredOrganizations.length - 1 - selectedIndex];
+        if (selectedOrg) {
+          handleSwitchOrg(selectedOrg.id, selectedOrg.name);
+        }
+        break;
+    }
+  }, [filteredOrganizations, handleSwitchOrg]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [searchQuery]);
+
   const renderedOrganizations = useMemo(() => (
     filteredOrganizations.slice().reverse().map((org, index) => (
       <div
         key={index}
         onClick={() => handleSwitchOrg(org.id, org.name)}
-        className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+        onMouseEnter={() => setSelectedIndex(index)}
+        className={`bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform 
+          ${index === selectedIndex ? '-translate-y-1 scale-105' : 'hover:-translate-y-1 hover:scale-105'}`}
       >
         <div className="px-6 py-4">
           <div className="font-bold text-xl mb-2">{org.name}</div>
         </div>
       </div>
     ))
-  ), [filteredOrganizations, handleSwitchOrg]);
+  ), [filteredOrganizations, handleSwitchOrg, selectedIndex]);
 
   return (
     <div className="flex flex-col justify-start items-center min-h-screen bg-gray-100 px-2 md:px-0">
