@@ -74,11 +74,12 @@ function PublishBridgeVersionModal({ params }) {
 
     const renderSummaryViewer = () => (
         <div className="space-y-2">
-            <div className="bg-base-200 p-4 rounded-lg">
-                <p className="text-base-content">{summary}</p>
+            <div className="bg-base-200 p-4 rounded-lg ">
+                <p className="text-base-content min-h-16 max-h-52 overflow-y-auto">{summary}</p>
             </div>
             <div className="flex items-center justify-between">
                 <div className="flex gap-2">
+
                     <button className="btn btn-ghost btn-sm" onClick={() => setIsEditing(true)}>
                         <Pencil size={16} />
                         Edit
