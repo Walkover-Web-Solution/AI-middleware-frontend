@@ -63,6 +63,7 @@ const DateRangePicker = ({ params, setFilterOption}) => {
           className="w-full p-2 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           placeholder="Select date"
           value={startingDate}
+          max={endingDate}
           onChange={(e) => setStartingDate(e.target.value)}
           onClick={(e) => e.target.showPicker()}
         />
@@ -75,6 +76,7 @@ const DateRangePicker = ({ params, setFilterOption}) => {
           className="w-full p-2 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           placeholder="Select date"
           value={endingDate}
+          min={startingDate}
           onChange={(e) => setEndingDate(e.target.value)}
           onClick={(e) => e.target.showPicker()}
         />
