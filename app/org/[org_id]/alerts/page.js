@@ -137,6 +137,8 @@ const WebhookPage = ({ params }) => {
   const processedWebhookAlertData = useMemo(() => {
     return webhookAlertData.map((item) => ({
       ...item,
+      actualName: item.name,
+      name: item.name,
       headers: truncateText(
         JSON.stringify(item.webhookConfiguration.headers),
         CHAR_LIMIT
@@ -205,6 +207,7 @@ const WebhookPage = ({ params }) => {
   const renderTable = () => (
     <CustomTable
       data={processedWebhookAlertData}
+
       columnsToShow={WEBHOOKALERT_COLUMNS}
       sorting
       sortingColumns={["name"]}
