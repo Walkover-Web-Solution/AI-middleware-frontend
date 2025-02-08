@@ -58,6 +58,7 @@ const Page = () => {
 
   const dataWithIcons = apikeyData.map((item) => ({
     ...item,
+    actualName: item.name,
     service: (
       <div className="flex items-center gap-2">
         {getIconOfService(item.service, 18, 18)}
