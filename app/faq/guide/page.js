@@ -39,13 +39,14 @@ const ModelDocs = () => {
   return (
     <div className="bg-gray-300 min-h-[100vh] overflow-hidden flex gap-0 flex-col">
       <nav className="bg-black w-full p-[20px] flex items-center justify-between px-[4rem]">
-        <h1 className="text-white">AI Middleware</h1>
+        <h1 className="text-white">GTWY AI</h1>
         <input
           type="text"
           ref={searchInputRef}
           placeholder="Search here ..."
           className="w-[50%] p-2 border border-gray-300 rounded-md"
           value={searchQuery}
+
           onChange={(e) => setSearchQuery(e.target.value)}
         />
         <span className="absolute right-[80px] top-8 text-gray-400 text-sm z-9999999">Cmd/Ctrl + K</span>

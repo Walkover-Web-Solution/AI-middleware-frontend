@@ -5,8 +5,9 @@ const CreateJwtToken = () => {
   return (
     <div id="someContent" className="m-14">
       <h1 id="someHeading" className="text-4xl font-bold mb-4">Create JWT Token For ChatBot</h1>
-      <p className="mb-4">This document will guide you through the process of generating a JWT token for integrating AI middleware's ChatBot. The token will be created using your organization's ID (<code>org_id</code>), the ChatBot ID (<code>chatbot_id</code>), and the User ID (<code>user_id</code>). The token will be signed with an access key provided by AI middleware.</p>
+      <p className="mb-4">This document will guide you through the process of generating a JWT token for integrating GTWY AI's ChatBot. The token will be created using your organization's ID (<code>org_id</code>), the ChatBot ID (<code>chatbot_id</code>), and the User ID (<code>user_id</code>). The token will be signed with an access key provided by GTWY AI.</p>
       
+
       <h2 className="text-2xl font-semibold mb-2">
         <strong>Step 1: Gather Required Information</strong>
       </h2>
@@ -15,9 +16,10 @@ const CreateJwtToken = () => {
         <li><strong>org_id</strong>: Your organization's unique identifier.</li>
         <li><strong>chatbot_id</strong>: The ID of the ChatBot you are integrating.</li>
         <li><strong>user_id</strong>: The User ID that will be associated with the token.</li>
-        <li><strong>access key</strong>: A secret key provided by AI middleware, used to sign the JWT token.</li>
+        <li><strong>access key</strong>: A secret key provided by GTWY AI, used to sign the JWT token.</li>
       </ul>
       
+
       <h2 className="text-2xl font-semibold mb-2">
         <strong>Step 2: Create the JWT Token</strong>
       </h2>

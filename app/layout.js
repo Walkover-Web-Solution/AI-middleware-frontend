@@ -7,9 +7,10 @@ import Wrapper from "@/wrapper/Wrapper";
 const inter = Syne({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Ai middleware",
+  title: "GTWY AI",
   description: "Simplified AI & chatbot integration",
 };
+
 
 
 
