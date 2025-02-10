@@ -222,10 +222,11 @@ function Home({ params }) {
                 </div>
                 {viewMode === 'grid' ? (
                   <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
-                    {filteredUnArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                    {filteredUnArchivedBridges.slice().sort((a, b) => a.name?.localeCompare(b.name)).map((item) => (
                       renderBridgeCard(item)
                     ))}
                   </div>
+
                 ) : (
                   <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
                 )}
@@ -239,10 +240,11 @@ function Home({ params }) {
                   </div>
                   {viewMode === 'grid' ? (
                     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 opacity-50">
-                      {filteredArchivedBridges.slice().sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
+                      {filteredArchivedBridges.slice().sort((a, b) => a.name?.localeCompare(b.name)).map((item) => (
                         renderBridgeCard(item)
                       ))}
                     </div>
+
                   ) : (
                     <div className="opacity-60">
                       <CustomTable data={ArchivedBridges} columnsToShow={['name', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
