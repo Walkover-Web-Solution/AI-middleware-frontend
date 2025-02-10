@@ -5,8 +5,12 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
 import { ChevronDown, Info } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import EditorComponent from '../../TiptapEditor/tipatpEditor';
+import * as Y from 'yjs';
+import { HocuspocusProvider } from '@hocuspocus/provider';
+
 
 const InputConfigComponent = ({ params }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -240,6 +244,20 @@ const InputConfigComponent = ({ params }) => {
 
     if (service === "google" && serviceType === "chat") return null;
 
+    const localToken = useMemo(() => localStorage.getItem('local_token'), []);
+
+    const { ydoc, provider } = useMemo(() => {
+        const ydoc = new Y.Doc();
+        const provider = new HocuspocusProvider({
+          url: process.env.NEXT_PUBLIC_DOC_RTC_URL_FOR_TIPTAP,
+          name: params?.version,
+          parameters: {version_id: params.version, localToken: localToken, service: "ai-middleware" },
+          document: ydoc,
+        });
+        return { ydoc, provider };
+      }, [params?.id, params, params.version, localToken]);
+    
+
     return (
         <div>
             <div className='flex justify-between align-bottom'>
@@ -252,16 +270,17 @@ const InputConfigComponent = ({ params }) => {
 
             </div>
             <div className="form-control h-full">
-                <textarea
+            <EditorComponent params={params} ydoc={ydoc} provider={provider} key={params.version}/>
+                {/* <textarea
                     ref={textareaRef}
-                    className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2 rounded-b-none"
+                    className="textarea textarea-bordered border w-full max-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2"
                     value={prompt}
                     onChange={handlePromptChange}
                     onKeyDown={handleKeyDown}
                     onBlur={savePrompt}
                 />
-                {showSuggestions && renderSuggestions()}
-                <div className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 border-t-0 border border-base-300 rounded-t-none">
+                {showSuggestions && renderSuggestions()} */}
+                {/* <div className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 border-t-0 border border-base-300 rounded-t-none">
                     <input type="checkbox" className="min-h-[0.75rem]"/>
                     <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
                         <div className="flex items-center gap-2">
@@ -285,7 +304,7 @@ const InputConfigComponent = ({ params }) => {
                                     <span className="">&#123;&#123;memory&#125;&#125;</span>
                                     <span className="">- Access GPT memory context when enabled</span>
                                 </div> */}
-                                <div className="flex items-center gap-1">
+                                {/* <div className="flex items-center gap-1">
                                     <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
                                     <span className="">&#123;&#123;pre_function&#125;&#125;</span>
                                     <span className="">- Use this variable if you are using the pre_function</span>
@@ -293,7 +312,9 @@ const InputConfigComponent = ({ params }) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>  */}
+
+
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
             <OptimizePromptModal params={params} />
