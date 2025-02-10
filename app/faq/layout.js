@@ -1,6 +1,6 @@
 export const metadata = {
     title: "faq",
-    description: "Find answers for all your questions relates to AI Middleware right here",
+    description: "Find answers for all your questions relates to AI Middleware / Gtwy.ai right here",
 };
 
 
