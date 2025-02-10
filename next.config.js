@@ -7,12 +7,12 @@ module.exports = withSentryConfig(
     },
     reactStrictMode: true, // It's better to keep strict mode enabled
     webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-      if (process.env.NEXT_PUBLIC_ENV === 'production') {
-        if (process.env.NEXT_SENTRY_DSN_URL) {
+      if (process.env.NEXT_PUBLIC_ENV !== 'local') {
+        if (process.env.NEXT_PUBLIC_SENTRY_DSN_URL) {
           // Ensure the Sentry DSN is set and defined in the environment
           config.plugins.push(
             new webpack.DefinePlugin({
-              'process.env.SENTRY_DSN': JSON.stringify(process.env.NEXT_SENTRY_DSN_URL),
+              'process.env.SENTRY_DSN': JSON.stringify(process.env.NEXT_PUBLIC_SENTRY_DSN_URL),
             })
           );
         } else {
@@ -23,7 +23,7 @@ module.exports = withSentryConfig(
     },
     env: {
       // Exporting environment variables to be available throughout the app
-      NEXT_SENTRY_DSN_URL: process.env.NEXT_SENTRY_DSN_URL, // Server-side access
+      NEXT_PUBLIC_SENTRY_DSN_URL: process.env.NEXT_PUBLIC_SENTRY_DSN_URL, // Server-side access
       NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV,         // Client-side access
     },
   },
