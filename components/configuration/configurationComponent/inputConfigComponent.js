@@ -248,7 +248,7 @@ const InputConfigComponent = ({ params }) => {
     const { ydoc, provider } = useMemo(() => {
         const ydoc = new Y.Doc();
         const provider = new HocuspocusProvider({
-          url: `http://localhost:1234/`,
+          url: process.env.NEXT_PUBLIC_DOC_RTC_URL_FOR_TIPTAP,
           name: params?.version,
           parameters: {version_id: params.version, localToken: localToken, service: "ai-middleware" },
           document: ydoc,
