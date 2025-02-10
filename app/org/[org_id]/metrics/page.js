@@ -59,8 +59,9 @@ function Page({ params }) {
   }));
 
   const filteredBridges = allBridges.filter(bridge => 
-    bridge.name.toLowerCase().includes(searchTerm.toLowerCase())
+    bridge.name?.toLowerCase().includes(searchTerm?.toLowerCase())
   );
+
 
   const handleFactorChange = (index, changeIn = "factor") => {
     if (changeIn === 'time') {

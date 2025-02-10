@@ -125,7 +125,7 @@ const WebhookPage = ({ params }) => {
   };
 
   const filteredBridgeList = useMemo(() => filteredBridges.filter(bridge =>
-    bridge.name.toLowerCase().includes(searchQuery.toLowerCase())
+    bridge.name?.toLowerCase().includes(searchQuery?.toLowerCase())
   ), [filteredBridges, searchQuery]);
 
   const truncateText = (text, length) => {
