@@ -5,22 +5,30 @@ module.exports = withSentryConfig(
     experimental: {
       missingSuspenseWithCSRBailout: false,
     },
-    reactStrictMode: false,
+    reactStrictMode: true, // It's better to keep strict mode enabled
     webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
       if (process.env.NEXT_PUBLIC_ENV === 'production') {
-        config.plugins.push(
-          new webpack.DefinePlugin({
-            'process.env.SENTRY_DSN': JSON.stringify('https://3e380f336fb01167df53aa4eba59923e@o4508736624459776.ingest.us.sentry.io/4508737844477952'),
-          }),
-        );
+        if (process.env.NEXT_SENTRY_DSN_URL) {
+          // Ensure the Sentry DSN is set and defined in the environment
+          config.plugins.push(
+            new webpack.DefinePlugin({
+              'process.env.SENTRY_DSN': JSON.stringify(process.env.NEXT_SENTRY_DSN_URL),
+            })
+          );
+        } else {
+          console.warn("SENTRY_DSN is not defined in environment variables.");
+        }
       }
       return config;
     },
+    env: {
+      // Exporting environment variables to be available throughout the app
+      NEXT_SENTRY_DSN_URL: process.env.NEXT_SENTRY_DSN_URL, // Server-side access
+      NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV,         // Client-side access
+    },
   },
   {
-    // For all available options, see:
-    // https://github.com/getsentry/sentry-webpack-plugin#options
-
+    // Sentry configuration options
     org: "walkover-gz",
     project: "ai-middleware",
 
