@@ -10,9 +10,6 @@
     "build:pages": "npx @cloudflare/next-on-pages"
   },
   "dependencies": {
-    "@blocknote/core": "^0.22.0",
-    "@blocknote/mantine": "^0.22.0",
-    "@blocknote/react": "^0.22.0",
     "@hocuspocus/provider": "^2.15.0",
     "@reduxjs/toolkit": "^2.2.0",
     "@tiptap/core": "^2.11.0",
