@@ -182,7 +182,10 @@ function PublishBridgeVersionModal({ params }) {
             <div className="mt-4 bg-base-200 p-4 rounded-lg">
                 <div className="max-h-96 overflow-y-auto space-y-4">
                     {/* Previous Test Cases */}
-                    <div>
+                    {
+                        testCases.length > 0 && (
+                            <>
+                            <div>
                         <h4 className="font-semibold mb-2">Previous Test Cases</h4>
                         <div className="space-y-4">
                             {testCases?.map((testCase, index) => (
@@ -226,6 +229,9 @@ function PublishBridgeVersionModal({ params }) {
                             ))}
                         </div>
                     </div>
+                            </>
+                        )
+                    }
         
                     {/* Separator */}
                     {newTestCaseData.length > 0 && (
@@ -286,22 +292,38 @@ function PublishBridgeVersionModal({ params }) {
                 </div>
         
                 <div className="mt-4 flex justify-between items-center">
-                    <button
-                        className={`btn btn-ghost btn-sm ${isGeneratingScore ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={handleGenerateScore}
-                        disabled={isGenerateButtonDisabled || isGeneratingScore || !isTestCasesEdited}
-                    >
-                        <span className="capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
-                            {isGeneratingScore ? 'Generating...' : 'Generate Test Cases'}
-                        </span>
-                    </button>
-                    <button
-                        className="btn btn-primary btn-sm"
-                        onClick={handleSaveTestCases}
-                        disabled={isGeneratingScore || testCases?.length === 0}
-                    >
-                        Save Test Cases
-                    </button>
+                    {testCases?.length === 0 && newTestCaseData?.length === 0 ? (
+                        <div className="w-full flex justify-center">
+                            <button
+                                className={`btn btn-ghost btn-sm ${isGeneratingScore ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                onClick={handleGenerateScore}
+                                disabled={isGenerateButtonDisabled || isGeneratingScore || !isTestCasesEdited}
+                            >
+                                <span className="capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
+                                    {isGeneratingScore ? 'Generating...' : 'Generate Test Cases'}
+                                </span>
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <button
+                                className={`btn btn-ghost btn-sm ${isGeneratingScore ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                onClick={handleGenerateScore}
+                                disabled={isGenerateButtonDisabled || isGeneratingScore || !isTestCasesEdited}
+                            >
+                                <span className="capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
+                                    {isGeneratingScore ? 'Generating...' : 'Generate Test Cases'}
+                                </span>
+                            </button>
+                            <button
+                                className="btn btn-primary btn-sm"
+                                onClick={handleSaveTestCases}
+                                disabled={isGeneratingScore}
+                            >
+                                Save Test Cases
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         );
