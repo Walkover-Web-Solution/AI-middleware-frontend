@@ -89,11 +89,11 @@ export default function layoutOrgPage({ children, params }) {
         status: e?.data?.action
       }
       dispatch(integrationAction(dataToSend, params?.org_id));
-      if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created" || e?.data?.action === "updated") && e?.data?.description?.length > 0) {
+      if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created" || e?.data?.action === "updated")) {
         const dataFromEmbed = {
           url: e?.data?.webhookurl,
           payload: e?.data?.payload,
-          desc: e?.data?.description,
+          desc: e?.data?.description || e?.data?.title,
           id: e?.data?.id,
           status: e?.data?.action,
           title: e?.data?.title,
