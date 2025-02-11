@@ -1,36 +1,48 @@
+import { getTestcasesScrore } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { genrateSummaryAction, publishBridgeVersionAction, updateBridgeAction } from '@/store/action/bridgeAction';
+import { genrateSummaryAction, getTestcasesScroreAction, publishBridgeVersionAction, updateBridgeAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { Pencil, ChevronDown, ChevronUp } from 'lucide-react';
+import { Pencil, ChevronDown, ChevronUp, Plus, Trash } from 'lucide-react';
 import React, { useState, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 function PublishBridgeVersionModal({ params }) {
     const dispatch = useDispatch();
-    const {bridge_summary } = useCustomSelector((state) => ({
-        bridge_summary : state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary
-    }))
+    const { bridge_summary, bridge_testcases } = useCustomSelector((state) => ({
+        bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
+        bridge_testcases: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.expected_qna
+    }));
+    
     const [summary, setSummary] = useState(bridge_summary || "");
     const [isEditing, setIsEditing] = useState(false);
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+    const [isGeneratingScore, setIsGeneratingScore] = useState(false);
     const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+    const [testCases, setTestCases] = useState(bridge_testcases || []);
+    const [isTestCasesOpen, setIsTestCasesOpen] = useState(false);
+    const [newTestCaseData, setnewTestCaseData] = useState([]);
+    
+    // State to track if there are any changes in test cases or score details
+    const [isTestCasesEdited, setIsTestCasesEdited] = useState(true);
 
-    useEffect(()=>{
-     setSummary(bridge_summary);
-     setIsAccordionOpen(false);
-    },[bridge_summary, params])
+    useEffect(() => {
+        setSummary(bridge_summary || "");
+        setIsAccordionOpen(false);
+        setIsTestCasesOpen(false);
+        setIsTestCasesEdited(true);  // Reset when data is loaded
+    }, [bridge_summary, params, bridge_testcases]);
 
     const handleCloseModal = useCallback((e) => {
-        e.preventDefault();
+        e?.preventDefault();
         closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
     }, []);
 
     const handlePublishBridge = useCallback(async () => {
-        dispatch(publishBridgeVersionAction({ 
-            bridgeId: params?.id, 
-            versionId: params?.version, 
-            orgId: params?.org_id 
+        dispatch(publishBridgeVersionAction({
+            bridgeId: params?.id,
+            versionId: params?.version,
+            orgId: params?.org_id
         }));
         closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
     }, [dispatch, params]);
@@ -48,24 +60,79 @@ function PublishBridgeVersionModal({ params }) {
         }
     }, [dispatch, params]);
 
+    const handleGenerateScore = useCallback(async () => {
+        setIsGeneratingScore(true);
+        try {
+            const totalData = await dispatch(getTestcasesScroreAction(params?.version));
+            setnewTestCaseData(totalData?.comparison_score || []);
+            setIsTestCasesEdited(false)
+        } finally {
+            setIsGeneratingScore(false);
+
+        }
+        
+    }, [dispatch, params?.version]);
+
     const handleSaveSummary = useCallback(() => {
         const dataToSend = { bridge_summary: summary };
-        dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend }));
+        dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend }));
         setIsEditing(false);
-    }, [dispatch, params.id, summary]);
+    }, [dispatch, params?.id, summary]);
+
+    // const handleAddTestCase = () => {
+    //     setTestCases([...(testCases || []), { question: '', expected_answers: '' }]);
+    //     setIsTestCasesEdited(true); // Set the edited flag to true
+    // };
+
+    const handleRemoveTestCase = (index) => {
+        setTestCases((testCases || [])?.filter((_, i) => i !== index));
+        setIsTestCasesEdited(true); // Set the edited flag to true
+    };
+
+    const handleTestCaseChange = (index, field, value) => {
+        setTestCases((testCases || [])?.map((testCase, i) =>
+            i === index ? { ...testCase, [field]: value } : testCase
+        ));
+        // setIsTestCasesEdited(true); // Set the edited flag to true
+    };
+
+    const handleNewTestCaseChange = (index, field, value) => {
+        setTestCases((newTestCaseData || [])?.map((testCase, i) =>
+            i === index ? { ...testCase, [field]: value } : testCase
+        ));
+        setIsTestCasesEdited(true); // Set the edited flag to true
+    };
+
+    const handleSaveTestCases = () => {
+        const cleanedTestCases = newTestCaseData.map(({ question, expected_answers, comparison_score }) => ({
+            question,
+            answer: expected_answers,
+            comparison_score
+        }));
+        const dataToSend = { expected_qna: cleanedTestCases };
+        dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend }));
+    };
 
     const renderSummaryEditor = () => (
         <div className="space-y-2">
             <textarea
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                className="textarea textarea-bordered w-full h-32"
+                value={summary || ""}
+                onChange={(e) => setSummary(e?.target?.value || "")}
+                className="textarea textarea-bordered w-full h-32 overflow-y-auto"
             />
             <div className="flex gap-2">
-                <button className="btn btn-primary btn-sm" onClick={handleSaveSummary}>
+                <button
+                    className="btn btn-primary btn-sm"
+                    onClick={handleSaveSummary}
+                    disabled={isGeneratingSummary || isGeneratingScore}
+                >
                     Save Summary
                 </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => setIsEditing(false)}>
+                <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setIsEditing(false)}
+                    disabled={isGeneratingSummary || isGeneratingScore}
+                >
                     Cancel
                 </button>
             </div>
@@ -75,23 +142,30 @@ function PublishBridgeVersionModal({ params }) {
     const renderSummaryViewer = () => (
         <div className="space-y-2">
             <div className="bg-base-200 p-4 rounded-lg ">
-                <p className="text-base-content min-h-16 max-h-52 overflow-y-auto">{summary}</p>
+                <p className="text-base-content min_h-16 max-h-52 overflow-y-auto">{summary}</p>
             </div>
             <div className="flex items-center justify-between">
                 <div className="flex gap-2">
-
-                    <button className="btn btn-ghost btn-sm" onClick={() => setIsEditing(true)}>
+                    <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setIsEditing(true)}
+                        disabled={isGeneratingSummary || isGeneratingScore}
+                    >
                         <Pencil size={16} />
                         Edit
                     </button>
-                    <button className="btn btn-ghost btn-sm" onClick={handleSaveSummary}>
+                    <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={handleSaveSummary}
+                        disabled={isGeneratingSummary || isGeneratingScore}
+                    >
                         Save
                     </button>
                 </div>
-                <button 
+                <button
                     className={`btn btn-ghost btn-sm ${isGeneratingSummary ? 'opacity-50 cursor-not-allowed' : ''}`}
                     onClick={handleGenerateSummary}
-                    disabled={isGeneratingSummary}
+                    disabled={isGeneratingSummary || isGeneratingScore}
                 >
                     <span className="capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                         {isGeneratingSummary ? 'Generating...' : 'Generate New Summary'}
@@ -100,6 +174,138 @@ function PublishBridgeVersionModal({ params }) {
             </div>
         </div>
     );
+    const renderTestCases = () => {
+        // Disabling the generate button if no data has been added or changed
+        const isGenerateButtonDisabled = !(testCases?.length || newTestCaseData?.length || isTestCasesEdited);
+
+        return (
+            <div className="mt-4 bg-base-200 p-4 rounded-lg">
+                <div className="max-h-96 overflow-y-auto space-y-4">
+                    {/* Previous Test Cases */}
+                    <div>
+                        <h4 className="font-semibold mb-2">Previous Test Cases</h4>
+                        <div className="space-y-4">
+                            {testCases?.map((testCase, index) => (
+                                <div key={index} className="bg-base-100 p-4 rounded-lg">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="font-medium">Test Case #{index + 1}</h4>
+                                        <button
+                                            className="btn btn-ghost btn-xs text-error"
+                                            onClick={() => handleRemoveTestCase(index)}
+                                            disabled={isGeneratingSummary || isGeneratingScore}
+                                        >
+                                            <Trash size={14} />
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-medium">Question</label>
+                                        <input
+                                            type="text"
+                                            value={testCase?.question || ""}
+                                            onChange={(e) => handleTestCaseChange(index, 'question', e?.target?.value || "")}
+                                            className="input input-bordered w-full"
+                                            placeholder="Enter question"
+                                            disabled={isGeneratingSummary || isGeneratingScore}
+                                        />
+                                        <label className="block text-sm font-medium">Answer</label>
+                                        <textarea
+                                            value={testCase?.answer || ""}
+                                            onChange={(e) => handleTestCaseChange(index, 'model_answer', e?.target?.value || "")}
+                                            className="textarea textarea-bordered w-full min-h-28"
+                                            placeholder="Enter model answer"
+                                            disabled={isGeneratingSummary || isGeneratingScore}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-gray-700">Comparison Score</label>
+                                            <div className="text-sm font-medium text-gray-900 bg-gray-100 p-2 rounded-md">
+                                                {testCase?.comparison_score || '--'}
+                                            </div>
+                                        </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+        
+                    {/* Separator */}
+                    {newTestCaseData.length > 0 && (
+                        <>
+                            <div className="my-4 border-t border-gray-300"></div>
+                            {/* New Test Cases (Generated by Score) */}
+                            <div>
+                                <h4 className="font-semibold mb-2">New Test Cases</h4>
+                                {newTestCaseData?.map((testCase, index) => (
+                                    <div key={index} className="bg-base-100 p-4 rounded-lg">
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium">Question</label>
+                                            <input
+                                                type="text"
+                                                value={testCase?.question || ""}
+                                                onChange={(e) => handleNewTestCaseChange(index, 'question', e?.target?.value || "")}
+                                                className="input input-bordered w-full"
+                                                placeholder="Enter question"
+                                                disabled={isGeneratingSummary || isGeneratingScore}
+                                            />
+                                            <label className="block text-sm font-medium">Expected Answer</label>
+                                            <textarea
+                                                value={testCase?.expected_answers || ""}
+                                                onChange={(e) => handleNewTestCaseChange(index, 'expected_answers', e?.target?.value || "")}
+                                                className="textarea textarea-bordered w-full min-h-28"
+                                                placeholder="Enter expected answer"
+                                                disabled={isGeneratingSummary || isGeneratingScore}
+                                            />
+                                            <label className="block text-sm font-medium">Model Answer</label>
+                                            <textarea
+                                                value={testCase?.model_answer || ""}
+                                                onChange={(e) => handleNewTestCaseChange(index, 'model_answer', e?.target?.value || "")}
+                                                className="textarea textarea-bordered w-full min-h-28"
+                                                placeholder="Enter model answer"
+                                                disabled={isGeneratingSummary || isGeneratingScore}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-gray-700">Comparison Score</label>
+                                            <div className="text-sm font-medium text-gray-900 bg-gray-100 p-2 rounded-md">
+                                                {testCase?.comparison_score || '--'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+        
+                    {/* <button
+                        className="btn btn-ghost btn-sm w-full"
+                        onClick={handleAddTestCase}
+                        disabled={isGeneratingSummary || isGeneratingScore}
+                    >
+                        <Plus size={16} />
+                        Add Test Case
+                    </button> */}
+                </div>
+        
+                <div className="mt-4 flex justify-between items-center">
+                    <button
+                        className={`btn btn-ghost btn-sm ${isGeneratingScore ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handleGenerateScore}
+                        disabled={isGenerateButtonDisabled || isGeneratingScore || !isTestCasesEdited}
+                    >
+                        <span className="capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
+                            {isGeneratingScore ? 'Generating...' : 'Generate Test Cases'}
+                        </span>
+                    </button>
+                    <button
+                        className="btn btn-primary btn-sm"
+                        onClick={handleSaveTestCases}
+                        disabled={isGeneratingScore || testCases?.length === 0}
+                    >
+                        Save Test Cases
+                    </button>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <dialog id={MODAL_TYPE.PUBLISH_BRIDGE_VERSION} className="modal">
@@ -113,7 +319,7 @@ function PublishBridgeVersionModal({ params }) {
                 </ul>
 
                 <div className="mt-4">
-                    <div 
+                    <div
                         className="flex items-center justify-between cursor-pointer"
                         onClick={() => setIsAccordionOpen(!isAccordionOpen)}
                     >
@@ -127,7 +333,7 @@ function PublishBridgeVersionModal({ params }) {
                                     {isEditing ? renderSummaryEditor() : renderSummaryViewer()}
                                 </>
                             ) : (
-                                <button 
+                                <button
                                     className={`btn btn-ghost btn-sm w-full ${isGeneratingSummary ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     onClick={handleGenerateSummary}
                                     disabled={isGeneratingSummary}
@@ -141,11 +347,24 @@ function PublishBridgeVersionModal({ params }) {
                     </div>
                 </div>
 
+                <div className="mt-4">
+                    <div
+                        className="flex items-center justify-between cursor-pointer"
+                        onClick={() => setIsTestCasesOpen(!isTestCasesOpen)}
+                    >
+                        <h4 className="font-semibold">Test Cases</h4>
+                        {isTestCasesOpen ? <ChevronUp /> : <ChevronDown />}
+                    </div>
+                    <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isTestCasesOpen ? 'max-h-[800px]' : 'max-h-0'}`}>
+                        {renderTestCases()}
+                    </div>
+                </div>
+
                 <div className="modal-action">
                     <form method="dialog">
                         <button className="btn" onClick={handleCloseModal}>Close</button>
-                        <button 
-                            className="btn btn-primary ml-2" 
+                        <button
+                            className="btn btn-primary ml-2"
                             onClick={handlePublishBridge}
                             disabled={isGeneratingSummary}
                         >
