@@ -105,10 +105,10 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
 
                     return (
                       <div key={key} className="border-b bg-base-100 transition-colors duration-150">
-                        <div className="py-4 px-6 text-sm font-semibold capitalize">
+                        <div className="pt-4 px-4 text-sm font-semibold capitalize">
                           {displayKey}
                         </div>
-                        <div className="py-4 px-6">
+                        <div className="py-4 px-4">
                           {typeof displayValue === "object" ? (
                             <div className="relative">
                               <pre 
