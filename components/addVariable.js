@@ -12,7 +12,7 @@ const AddVariable = ({ params }) => {
     variablesKeyValue:
       // state?.bridgeReducer?.allBridgesMap?.[params.id]?.variables || [],
       state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
-      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+    prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
   }));
 
   const [keyValuePairs, setKeyValuePairs] = useState([]);
@@ -20,17 +20,18 @@ const AddVariable = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
   const [height, setHeight] = useState(0); // Dynamic height state
   const [error, setError] = useState(false);
-  const updateVersionVariable=(updatedPairs)=>{
-    dispatch(updateBridgeVersionAction({
-      versionId: params.version,
-      dataToSend :{
-        'variable': updatedPairs ? updatedPairs :  variablesKeyValue
-      }
-  }));
-  } 
   const dispatch = useDispatch();
   const accordionContentRef = useRef(null); // Ref for the accordion content
   const isOpeningRef = useRef(false); // To track if the accordion is opening
+  
+  const updateVersionVariable = (updatedPairs) => {
+    dispatch(updateBridgeVersionAction({
+      versionId: params.version,
+      dataToSend: {
+        'variables_state': updatedPairs ? updatedPairs : variablesKeyValue
+      }
+    }));
+  }
 
   const extractVariablesFromPrompt = () => {
     const regex = /{{(.*?)}}/g;
@@ -44,22 +45,22 @@ const AddVariable = ({ params }) => {
     if (newVariables.length === 0) return;
 
     const updatedPairs = [
-        ...variablesKeyValue,
-        ...newVariables.map(variable => ({
-            key: variable,
-            value: '',
-            checked: true
-        }))
+      ...variablesKeyValue,
+      ...newVariables.map(variable => ({
+        key: variable,
+        value: '',
+        required: true
+      }))
     ];
     
     setKeyValuePairs(updatedPairs);
-    dispatch(updateVariables({ 
-        data: updatedPairs, 
-        bridgeId: params.id, 
-        versionId 
+    dispatch(updateVariables({
+      data: updatedPairs,
+      bridgeId: params.id,
+      versionId
     }));
     updateVersionVariable(updatedPairs);
-};
+  };
 
   useEffect(() => {
     if (prompt) {
@@ -79,7 +80,7 @@ const AddVariable = ({ params }) => {
 
   // Function to handle adding a new key-value pair
   const handleAddKeyValuePair = () => {
-    const newPair = { key: "", value: "", checked: true };
+    const newPair = { key: "", value: "", required: true };
     const isValid = areAllPairsValid(keyValuePairs);
     if (isValid) {
       setError(false);
@@ -123,12 +124,12 @@ const AddVariable = ({ params }) => {
     const updatedPairs = [...keyValuePairs];
     updatedPairs[index] = {
       ...updatedPairs[index],
-      checked: !updatedPairs[index].checked,
+      required: !updatedPairs[index].required,
     };
     setKeyValuePairs(updatedPairs);
 
     if (updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
-     updateVersionVariable(updatedPairs)
+      updateVersionVariable(updatedPairs)
       dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
     }
   };
@@ -136,7 +137,7 @@ const AddVariable = ({ params }) => {
   // Function to format key-value pairs for the textarea
   const formatPairsForTextarea = () => {
     return keyValuePairs
-      .filter((pair) => pair.checked)
+      .filter((pair) => pair.required)
       .map((pair) =>
         `${pair.key}:${pair.value ? pair.value : ''}`
       )
@@ -169,7 +170,7 @@ const AddVariable = ({ params }) => {
         const value = line?.substring(separatorIndex + 1).trim();
 
         // Ensure both key and value are present
-        return key && value ? { key, value, checked: true } : null;
+        return key && value ? { key, value, required: true } : null;
       })
       .filter(Boolean);
 
@@ -284,7 +285,7 @@ const AddVariable = ({ params }) => {
                     <input
                       type="checkbox"
                       className="checkbox"
-                      checked={pair.checked}
+                      checked={pair.required}
                       onChange={() => handleCheckKeyValuePair(index)}
                     />
                     <input
