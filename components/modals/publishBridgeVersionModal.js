@@ -66,7 +66,7 @@ function PublishBridgeVersionModal({ params }) {
         try {
             const totalData = await dispatch(getTestcasesScroreAction(params?.version));
             setnewTestCaseData(totalData?.comparison_score || []);
-            setIsTestCasesEdited(false)
+            setIsTestCasesEdited(false);
         } finally {
             setIsGeneratingScore(false);
 
@@ -94,7 +94,6 @@ function PublishBridgeVersionModal({ params }) {
         setTestCases((testCases || [])?.map((testCase, i) =>
             i === index ? { ...testCase, [field]: value } : testCase
         ));
-        // setIsTestCasesEdited(true); // Set the edited flag to true
     };
 
     const handleNewTestCaseChange = (index, field, value) => {
@@ -175,70 +174,63 @@ function PublishBridgeVersionModal({ params }) {
             </div>
         </div>
     );
-    const renderTestCases = () => {
-        // Disabling the generate button if no data has been added or changed
-        
 
+    const renderTestCases = () => {
         return (
             <div className="mt-4 bg-base-200 p-4 rounded-lg">
                 <div className="max-h-96 overflow-y-auto space-y-4">
-                    {/* Previous Test Cases */}
-                    {
-                        testCases.length > 0 && (
-                            <>
+                    {testCases?.length > 0 && (
+                        <>
                             <div>
-                        <h4 className="font-semibold mb-2">Previous Test Cases</h4>
-                        <div className="space-y-4">
-                            {testCases?.map((testCase, index) => (
-                                <div key={index} className="bg-base-100 p-4 rounded-lg">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h4 className="font-medium">Test Case #{index + 1}</h4>
-                                        <button
-                                            className="btn btn-ghost btn-xs text-error"
-                                            onClick={() => handleRemoveTestCase(index)}
-                                            disabled={isGeneratingSummary || isGeneratingScore || newTestCaseData.length > 0}
-                                        >
-                                            <Trash size={14} />
-                                        </button>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="block text-sm font-medium">Question</label>
-                                        <input
-                                            type="text"
-                                            value={testCase?.question || ""}
-                                            onChange={(e) => handleTestCaseChange(index, 'question', e?.target?.value || "")}
-                                            className="input input-bordered w-full"
-                                            placeholder="Enter question"
-                                            disabled={isGeneratingSummary || isGeneratingScore || newTestCaseData.length > 0}
-                                        />
-                                        <label className="block text-sm font-medium">Answer</label>
-                                        <textarea
-                                            value={testCase?.answer || ""}
-                                            onChange={(e) => handleTestCaseChange(index, 'model_answer', e?.target?.value || "")}
-                                            className="textarea textarea-bordered w-full min-h-28"
-                                            placeholder="Enter model answer"
-                                            disabled={isGeneratingSummary || isGeneratingScore || newTestCaseData.length > 0}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                            <label className="block text-sm font-medium text-gray-700">Comparison Score</label>
-                                            <div className="text-sm font-medium text-gray-900 bg-gray-100 p-2 rounded-md">
-                                                {testCase?.comparison_score || '--'}
+                                <h4 className="font-semibold mb-2">Previous Test Cases</h4>
+                                <div className="space-y-4">
+                                    {testCases?.map((testCase, index) => (
+                                        <div key={index} className="bg-base-100 p-4 rounded-lg">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <h4 className="font-medium">Test Case #{index + 1}</h4>
+                                                <button
+                                                    className="btn btn-ghost btn-xs text-error"
+                                                    onClick={() => handleRemoveTestCase(index)}
+                                                    disabled={isGeneratingSummary || isGeneratingScore || newTestCaseData.length > 0}
+                                                >
+                                                    <Trash size={14} />
+                                                </button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="block text-sm font-medium">Question</label>
+                                                <input
+                                                    type="text"
+                                                    value={testCase?.question || ""}
+                                                    onChange={(e) => handleTestCaseChange(index, 'question', e?.target?.value || "")}
+                                                    className="input input-bordered w-full"
+                                                    placeholder="Enter question"
+                                                    disabled={isGeneratingSummary || isGeneratingScore || newTestCaseData.length > 0}
+                                                />
+                                                <label className="block text-sm font-medium">Answer</label>
+                                                <textarea
+                                                    value={testCase?.answer || ""}
+                                                    onChange={(e) => handleTestCaseChange(index, 'model_answer', e?.target?.value || "")}
+                                                    className="textarea textarea-bordered w-full min-h-28"
+                                                    placeholder="Enter model answer"
+                                                    disabled={isGeneratingSummary || isGeneratingScore || newTestCaseData.length > 0}
+                                                />
+                                            </div>
+                                            <div className="mt-4 flex gap-6">
+                                                <label className="block text-sm font-medium text-gray-700">Comparison Score :</label>
+                                                <div className="radial-progress text-success text-xs" style={{ "--value": (testCase?.comparison_score || 0) * 100, "--size": "4rem", "--thickness": "8px" }} role="progressbar">
+                                                    {((testCase?.comparison_score || 0) * 100).toFixed(2)}%
+                                                </div>
                                             </div>
                                         </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                            </>
-                        )
-                    }
-        
-                    {/* Separator */}
+                            </div>
+                        </>
+                    )}
+
                     {newTestCaseData.length > 0 && (
                         <>
                             <div className="my-4 border-t border-gray-300"></div>
-                            {/* New Test Cases (Generated by Score) */}
                             <div>
                                 <h4 className="font-semibold mb-2">New Test Cases</h4>
                                 {newTestCaseData?.map((testCase, index) => (
@@ -270,10 +262,10 @@ function PublishBridgeVersionModal({ params }) {
                                                 disabled={isGeneratingSummary || isGeneratingScore}
                                             />
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="block text-sm font-medium text-gray-700">Comparison Score</label>
-                                            <div className="text-sm font-medium text-gray-900 bg-gray-100 p-2 rounded-md">
-                                                {testCase?.comparison_score || '--'}
+                                        <div className="mt-4 flex items-start">
+                                            <label className="block text-sm font-medium text-gray-700">Comparison Score :</label>
+                                            <div className="radial-progress text-success text-xs" style={{ "--value": (testCase?.comparison_score || 0) * 100, "--size": "6rem", "--thickness": "8px" }} role="progressbar">
+                                                {((testCase?.comparison_score || 0) * 100).toFixed(2)}%
                                             </div>
                                         </div>
                                     </div>
@@ -291,9 +283,9 @@ function PublishBridgeVersionModal({ params }) {
                         Add Test Case
                     </button> */}
                 </div>
-        
+
                 <div className="mt-4 flex justify-between items-center">
-                    {testCases?.length === 0 && newTestCaseData?.length === 0 ? (
+                    {(!testCases || testCases?.length === 0) && (!newTestCaseData || newTestCaseData.length === 0) ? (
                         <div className="w-full flex justify-center">
                             <button
                                 className={`btn btn-ghost btn-sm ${isGeneratingScore ? 'opacity-50 cursor-not-allowed' : ''}`}
