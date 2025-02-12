@@ -1,4 +1,3 @@
-import { getTestcasesScrore } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { genrateSummaryAction, getTestcasesScroreAction, publishBridgeVersionAction, updateBridgeAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
@@ -31,6 +30,8 @@ function PublishBridgeVersionModal({ params }) {
         setIsAccordionOpen(false);
         setIsTestCasesOpen(false);
         setIsTestCasesEdited(true);  // Reset when data is loaded
+        setnewTestCaseData([]);
+        setTestCases(bridge_testcases);
     }, [bridge_summary, params, bridge_testcases]);
 
     const handleCloseModal = useCallback((e) => {
@@ -97,7 +98,7 @@ function PublishBridgeVersionModal({ params }) {
     };
 
     const handleNewTestCaseChange = (index, field, value) => {
-        setTestCases((newTestCaseData || [])?.map((testCase, i) =>
+        setnewTestCaseData((newTestCaseData || [])?.map((testCase, i) =>
             i === index ? { ...testCase, [field]: value } : testCase
         ));
         setIsTestCasesEdited(true); // Set the edited flag to true
@@ -176,7 +177,7 @@ function PublishBridgeVersionModal({ params }) {
     );
     const renderTestCases = () => {
         // Disabling the generate button if no data has been added or changed
-        const isGenerateButtonDisabled = !(testCases?.length || newTestCaseData?.length || isTestCasesEdited);
+        
 
         return (
             <div className="mt-4 bg-base-200 p-4 rounded-lg">
@@ -195,7 +196,7 @@ function PublishBridgeVersionModal({ params }) {
                                         <button
                                             className="btn btn-ghost btn-xs text-error"
                                             onClick={() => handleRemoveTestCase(index)}
-                                            disabled={isGeneratingSummary || isGeneratingScore}
+                                            disabled={isGeneratingSummary || isGeneratingScore || newTestCaseData.length > 0}
                                         >
                                             <Trash size={14} />
                                         </button>
@@ -208,7 +209,7 @@ function PublishBridgeVersionModal({ params }) {
                                             onChange={(e) => handleTestCaseChange(index, 'question', e?.target?.value || "")}
                                             className="input input-bordered w-full"
                                             placeholder="Enter question"
-                                            disabled={isGeneratingSummary || isGeneratingScore}
+                                            disabled={isGeneratingSummary || isGeneratingScore || newTestCaseData.length > 0}
                                         />
                                         <label className="block text-sm font-medium">Answer</label>
                                         <textarea
@@ -216,7 +217,7 @@ function PublishBridgeVersionModal({ params }) {
                                             onChange={(e) => handleTestCaseChange(index, 'model_answer', e?.target?.value || "")}
                                             className="textarea textarea-bordered w-full min-h-28"
                                             placeholder="Enter model answer"
-                                            disabled={isGeneratingSummary || isGeneratingScore}
+                                            disabled={isGeneratingSummary || isGeneratingScore || newTestCaseData.length > 0}
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -297,7 +298,7 @@ function PublishBridgeVersionModal({ params }) {
                             <button
                                 className={`btn btn-ghost btn-sm ${isGeneratingScore ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 onClick={handleGenerateScore}
-                                disabled={isGenerateButtonDisabled || isGeneratingScore || !isTestCasesEdited}
+                                disabled={isGeneratingScore || (newTestCaseData?.length > 0 && !isTestCasesEdited)}
                             >
                                 <span className="capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                                     {isGeneratingScore ? 'Generating...' : 'Generate Test Cases'}
@@ -309,7 +310,7 @@ function PublishBridgeVersionModal({ params }) {
                             <button
                                 className={`btn btn-ghost btn-sm ${isGeneratingScore ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 onClick={handleGenerateScore}
-                                disabled={isGenerateButtonDisabled || isGeneratingScore || !isTestCasesEdited}
+                                disabled={isGeneratingScore || !isTestCasesEdited}
                             >
                                 <span className="capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                                     {isGeneratingScore ? 'Generating...' : 'Generate Test Cases'}
