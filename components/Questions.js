@@ -35,31 +35,31 @@ const Questions = () => {
           <div className="relative flex flex-col gap-7 mt-7 hero-bg-center text-black">
             {[
               {
-                question: "What is Gtwy.ai, and how does it work?",
+                question: "What is GTWY AI, and how does it work?",
                 answer:
-                  "Gtwy.ai is a powerful platform that simplifies the integration of AI into your products. It provides tools like model suggestions, web crawling, and database integrations to help businesses easily build and deploy AI-powered workflows and applications.",
+                  "GTWY AI is a powerful platform that simplifies the integration of AI into your products. It provides tools like model suggestions, web crawling, and database integrations to help businesses easily build and deploy AI-powered workflows and applications.",
               },
               {
-                question: "Can I use Gtwy.ai without technical expertise?",
+                question: "Can I use GTWY AI without technical expertise?",
                 answer:
-                  "Yes! Gtwy.ai is designed for both technical and non-technical users. Its intuitive interface and pre-built features make it easy to create and manage AI solutions without requiring deep coding knowledge.",
-              },
-              {
-                question:
-                  "What types of AI models can I use with Gtwy.ai?",
-                answer:
-                  "Gtwy.ai supports a wide variety of AI models, from pre-trained Large Language Models (LLMs) to custom APIs. You can select models tailored to your specific needs, such as content generation, data analysis, or customer service.",
-              },
-              {
-                question: "Is my data secure with Gtwy.ai?",
-                answer:
-                  "Absolutely. Gtwy.ai is built with robust security measures to ensure that all your data integrations and workflows are secure and compliant with industry standards.",
+                  "Yes! GTWY AI is designed for both technical and non-technical users. Its intuitive interface and pre-built features make it easy to create and manage AI solutions without requiring deep coding knowledge.",
               },
               {
                 question:
-                  "How can Gtwy.ai help reduce costs for my business?",
+                  "What types of AI models can I use with GTWY AI?",
                 answer:
-                  "Gtwy.ai reduces costs by offering ready-made AI tools and integrations, removing the need for expensive in-house AI development. It also optimizes workflows, saving time and resources while boosting productivity.",
+                  "GTWY AI supports a wide variety of AI models, from pre-trained Large Language Models (LLMs) to custom APIs. You can select models tailored to your specific needs, such as content generation, data analysis, or customer service.",
+              },
+              {
+                question: "Is my data secure with GTWY AI?",
+                answer:
+                  "Absolutely. GTWY AI is built with robust security measures to ensure that all your data integrations and workflows are secure and compliant with industry standards.",
+              },
+              {
+                question:
+                  "How can GTWY AI help reduce costs for my business?",
+                answer:
+                  "GTWY AI reduces costs by offering ready-made AI tools and integrations, removing the need for expensive in-house AI development. It also optimizes workflows, saving time and resources while boosting productivity.",
               },
             ].map((item, index) => (
               <div key={index} className="collapse collapse-plus bg-base-200">
