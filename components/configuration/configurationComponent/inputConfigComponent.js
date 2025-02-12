@@ -244,7 +244,7 @@ const InputConfigComponent = ({ params }) => {
 
     if (service === "google" && serviceType === "chat") return null;
 
-    const localToken = useMemo(() => localStorage.getItem('local_token'), []);
+    const localToken = useMemo(() => localStorage.getItem('proxy_token'), []);
 
     const { ydoc, provider } = useMemo(() => {
         const ydoc = new Y.Doc();
