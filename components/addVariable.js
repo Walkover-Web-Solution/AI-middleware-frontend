@@ -1,5 +1,6 @@
 "use client";
 import { useCustomSelector } from "@/customHooks/customSelector";
+import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
 import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -19,7 +20,14 @@ const AddVariable = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
   const [height, setHeight] = useState(0); // Dynamic height state
   const [error, setError] = useState(false);
-
+  const updateVersionVariable=(updatedPairs)=>{
+    dispatch(updateBridgeVersionAction({
+      versionId: params.version,
+      dataToSend :{
+        'variable': updatedPairs ? updatedPairs :  variablesKeyValue
+      }
+  }));
+  } 
   const dispatch = useDispatch();
   const accordionContentRef = useRef(null); // Ref for the accordion content
   const isOpeningRef = useRef(false); // To track if the accordion is opening
@@ -50,6 +58,7 @@ const AddVariable = ({ params }) => {
         bridgeId: params.id, 
         versionId 
     }));
+    updateVersionVariable(updatedPairs);
 };
 
   useEffect(() => {
@@ -119,6 +128,7 @@ const AddVariable = ({ params }) => {
     setKeyValuePairs(updatedPairs);
 
     if (updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
+     updateVersionVariable(updatedPairs)
       dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
     }
   };
@@ -166,6 +176,7 @@ const AddVariable = ({ params }) => {
     if (pairs.length > 0) {
       setKeyValuePairs(pairs);
       dispatch(updateVariables({ data: pairs, bridgeId: params.id, versionId }));
+      updateVersionVariable();
       if (areAllPairsValid(pairs)) {
         setError(false);
       } else {
@@ -293,6 +304,7 @@ const AddVariable = ({ params }) => {
                       onChange={(e) =>
                         handleKeyValueChange(index, "value", e.target.value)
                       }
+                      onBlur={() => updateVersionVariable()}
                     />
                     <button
                       className="text-red-500 hover:text-red-700"
