@@ -121,7 +121,6 @@ function Page({ searchParams }) {
     setSelectedVersion(version);
 
     if (version !== "all") {
-      dispatch(getBridgeVersionAction({ versionId: version }));
       try {
         const response = await getVersionHistory(params.thread_id, params.id, version);
         setVersionData(response.data);
