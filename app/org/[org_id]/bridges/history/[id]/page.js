@@ -10,9 +10,6 @@ import { clearThreadData } from "@/store/reducer/historyReducer";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { getBridgeVersionAction } from "@/store/action/bridgeAction";
-import { getVersionHistory } from "@/config";
-
 
 export const runtime = "edge";
 
@@ -25,9 +22,11 @@ function Page({ searchParams }) {
   const sidebarRef = useRef(null);
   const searchRef = useRef();
 
-  const { historyData, thread } = useCustomSelector((state) => ({
+  const { historyData, thread, versionData, selectedVersion } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
+    versionData: state?.historyReducer?.versionHistory || [],
+    selectedVersion : state?.historyReducer?.selectedVersion || 'all'
   }));
 
   const [selectedThread, setSelectedThread] = useState(null);
@@ -42,16 +41,7 @@ function Page({ searchParams }) {
   const [threadPage, setThreadPage] = useState(1);
   const [hasMoreThreadData, setHasMoreThreadData] = useState(true);
   const [selectedSubThreadId, setSelectedSubThreadId] = useState(null);
-  const [selectedVersion, setSelectedVersion] = useState("all");
 
-  const { bridgeVersionsArray } = useCustomSelector(
-    (state) => ({
-      bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
-    })
-  );
-
-
-  const [versionData, setVersionData] = useState(null);
 
   const closeSliderOnEsc = useCallback((event) => {
     if (event.key === "Escape") setIsSliderOpen(false);
@@ -116,49 +106,15 @@ function Page({ searchParams }) {
     if (result?.length < 40) setHasMore(false);
   }, [dispatch, page, params.id, search]);
 
-  const handleVersionChange = async (event) => {
-    const version = event.target.value;
-    setSelectedVersion(version);
-
-    if (version !== "all") {
-      try {
-        const response = await getVersionHistory(params.thread_id, params.id, version);
-        setVersionData(response.data);
-      } catch (error) {
-        console.error('Failed to fetch version history:', error);
-        setVersionData(null);
-      }
-    } else {
-      setVersionData(null);
-    }
-  };
 
   return (
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col">
-          <div className="flex justify-end mr-6 py-4 border-b border-gray-200">
-            <select
-              className="select select-bordered w-full max-w-xs"
-
-              value={selectedVersion}
-              onChange={handleVersionChange}
-            >
-              <option value="all">All Versions</option>
-              {bridgeVersionsArray?.map((version, index) => (
-                <option
-                  key={version}
-                  value={version}
-                >
-                  Version {index + 1} 
-                </option>
-              ))}
-            </select>
-          </div>
           <ThreadContainer
             key={`thread-container-${params.id}-${params.version}`}
-            thread={selectedVersion === "all" ? thread : (versionData || [])}
+            thread={selectedVersion === "all" ? thread : versionData}
             filterOption={filterOption}
             setFilterOption={setFilterOption}
             isFetchingMore={isFetchingMore}
