@@ -121,7 +121,7 @@ const EmbedList = ({ params }) => {
     return (bridge_functions &&
         <div>
             <FunctionParameterModal functionId={functionId} params={params} />
-            <div className="label flex-col items-start">
+            <div className="label flex-col items-start mb-2">
                 <div className="flex flex-wrap gap-4">
                     {renderEmbed}
                 </div>
