@@ -2,7 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   history: [],
+  versionHistory: [],
   thread: [],
+  selectedVersion : 'all',
   loading: false,
   success: false
 };
@@ -46,6 +48,17 @@ export const historyReducer = createSlice({
     clearSubThreadData: (state) => {
       state.subThreads = [];
     },
+    fetchVersionHistoryReducer: (state, action) => {
+      if (action.payload.page === 1) {
+        state.versionHistory = action.payload.data;
+      } else {
+        state.versionHistory = [...state.versionHistory, ...action.payload.data];
+      }
+      state.success = true;
+    },
+    setSelectedVersion: (state, action) => {
+      state.selectedVersion = action.payload;
+    },
   },
 });
 
@@ -57,6 +70,8 @@ export const {
   updateHistoryMessageReducer,
   userFeedbackCountReducer,
   fetchSubThreadReducer,
-  clearSubThreadData
+  clearSubThreadData,
+  fetchVersionHistoryReducer,
+  setSelectedVersion
 } = historyReducer.actions;
 export default historyReducer.reducer;

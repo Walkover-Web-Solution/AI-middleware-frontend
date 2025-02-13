@@ -22,9 +22,11 @@ function Page({ searchParams }) {
   const sidebarRef = useRef(null);
   const searchRef = useRef();
 
-  const { historyData, thread } = useCustomSelector((state) => ({
+  const { historyData, thread, versionData, selectedVersion } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
+    versionData: state?.historyReducer?.versionHistory || [],
+    selectedVersion : state?.historyReducer?.selectedVersion || 'all'
   }));
 
   const [selectedThread, setSelectedThread] = useState(null);
@@ -39,6 +41,7 @@ function Page({ searchParams }) {
   const [threadPage, setThreadPage] = useState(1);
   const [hasMoreThreadData, setHasMoreThreadData] = useState(true);
   const [selectedSubThreadId, setSelectedSubThreadId] = useState(null);
+
 
   const closeSliderOnEsc = useCallback((event) => {
     if (event.key === "Escape") setIsSliderOpen(false);
@@ -103,47 +106,50 @@ function Page({ searchParams }) {
     if (result?.length < 40) setHasMore(false);
   }, [dispatch, page, params.id, search]);
 
+
   return (
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <ThreadContainer 
-          key={`thread-container-${params.id}-${params.version}`}
-          thread={thread}
-          filterOption={filterOption}
-          setFilterOption={setFilterOption}
-          isFetchingMore={isFetchingMore}
-          setIsFetchingMore={setIsFetchingMore}
-          setLoading={setLoading}
-          searchMessageId={searchMessageId}
-          setSearchMessageId={setSearchMessageId}
-          params={params}
-          pathName={pathName}
-          search={search}
+        <div className="drawer-content flex flex-col">
+          <ThreadContainer
+            key={`thread-container-${params.id}-${params.version}`}
+            thread={selectedVersion === "all" ? thread : versionData}
+            filterOption={filterOption}
+            setFilterOption={setFilterOption}
+            isFetchingMore={isFetchingMore}
+            setIsFetchingMore={setIsFetchingMore}
+            setLoading={setLoading}
+            searchMessageId={searchMessageId}
+            setSearchMessageId={setSearchMessageId}
+            params={params}
+            pathName={pathName}
+            search={search}
+            historyData={historyData}
+            selectedThread={selectedThread}
+            setSelectedThread={setSelectedThread}
+            threadHandler={threadHandler}
+            threadPage={threadPage}
+            setThreadPage={setThreadPage}
+            hasMoreThreadData={hasMoreThreadData}
+            setHasMoreThreadData={setHasMoreThreadData}
+            selectedSubThreadId={selectedSubThreadId}
+          />
+        </div>
+        <Sidebar
           historyData={historyData}
           selectedThread={selectedThread}
-          setSelectedThread={setSelectedThread}
           threadHandler={threadHandler}
-          threadPage={threadPage}
-          setThreadPage={setThreadPage}
-          hasMoreThreadData={hasMoreThreadData}
-          setHasMoreThreadData={setHasMoreThreadData}
-          selectedSubThreadId={selectedSubThreadId}
-        />
-        <Sidebar 
-          historyData={historyData} 
-          selectedThread={selectedThread} 
-          threadHandler={threadHandler} 
-          fetchMoreData={fetchMoreData} 
-          hasMore={hasMore} 
-          loading={loading} 
-          params={params} 
-          setSearchMessageId={setSearchMessageId} 
-          setPage={setPage} 
-          setHasMore={setHasMore} 
-          filterOption={filterOption} 
-          setFilterOption={setFilterOption} 
-          searchRef={searchRef} 
+          fetchMoreData={fetchMoreData}
+          hasMore={hasMore}
+          loading={loading}
+          params={params}
+          setSearchMessageId={setSearchMessageId}
+          setPage={setPage}
+          setHasMore={setHasMore}
+          filterOption={filterOption}
+          setFilterOption={setFilterOption}
+          searchRef={searchRef}
           setIsFetchingMore={setIsFetchingMore}
           setThreadPage={setThreadPage}
           threadPage={threadPage}
