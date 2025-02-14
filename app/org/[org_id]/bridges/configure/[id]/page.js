@@ -9,6 +9,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { getSingleBridgesAction } from "@/store/action/bridgeAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { useEffect, useRef } from "react";
+import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
@@ -16,13 +17,14 @@ const Page = ({ searchParams }) => {
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const { bridgeType, service, isServiceModelsAvailable } = useCustomSelector((state) => {
+  const { bridgeType, service, isServiceModelsAvailable, versionService } = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
       bridgeType: bridgeData?.bridgeType,
       service: versionData?.service,
       isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[versionData?.service],
+      versionService: versionData?.service
     };
   });
 
@@ -72,14 +74,15 @@ const Page = ({ searchParams }) => {
           <div className="flex flex-col md:flex-row w-full">
             <div className="w-full md:w-2/3 overflow-auto p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
               <ConfigurationPage params={params} />
-              <div/>
+              <div />
             </div>
             <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
             <div className="w-full md:w-1/3 flex-1 chatPage min-w-[450px]">
               <div className="p-4 m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
                 {/* {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />} */}
-                <Chatbot params={params} key={params}/>
-                <Chat params={params} />
+                <Chatbot params={params} key={params} />
+                {/* <Chat params={params} /> */}
+                {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> : <Chat params={params} />}
               </div>
             </div>
           </div>

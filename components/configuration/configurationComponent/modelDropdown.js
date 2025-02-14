@@ -40,7 +40,12 @@ const ModelDropdown = ({ params }) => {
                 >
                     <option disabled>Select a Model</option>
                     {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
-                        if (group !== 'models' && !(bridgeType === 'chatbot' && group === 'embedding')) {
+                        const isInvalidGroup =
+                            group === 'models' ||
+                            (bridgeType === 'chatbot' && group === 'embedding') ||
+                            (bridgeType === 'batch' && (group === 'image' || group === 'embedding'));
+
+                        if (!isInvalidGroup) {
                             return (
                                 <optgroup label={group} key={`group_${groupIndex}`}>
                                     {Object.keys(options || {}).map((option, optionIndex) => {

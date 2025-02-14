@@ -1,5 +1,4 @@
 "use client";
-import AzureIcon from "@/icons/AzureIcon";
 import Image from "next/image";
 import React from "react";
 
@@ -13,7 +12,7 @@ const ShowcaseCard = ({ img, heading, text }) => {
         <div className="card-body">
           <div className="flex justify-between">
             <h2 className="card-title text-4xl">{heading}</h2>
-            <Image src="/RightArrow.svg" width={20} height={20} />
+            <Image src="/RightArrow.svg" width={20} height={20} alt="Right icon"/>
           </div>
           <p className="pt-10">{text}</p>
         </div>

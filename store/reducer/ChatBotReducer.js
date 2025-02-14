@@ -37,7 +37,7 @@ export const ChatBot = createSlice({
             state.loading = false;
         },
         getChatBotDetailsReducer: (state, action) => {
-            state.ChatBotMap = { ...state.ChatBotMap, [action.payload.botId]: action.payload.data.chatbot }
+            state.ChatBotMap = { ...state.ChatBotMap, [action.payload.botId]: action.payload?.data?.chatbot }
         },
         createNewBotReducer: (state, action) => {
             state.ChatBotMap = { ...state.ChatBotMap, [action.payload.chatbot._id]: action.payload.chatbot }

@@ -684,15 +684,6 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
   }
 };
 
-export const genrateSummary = async (version_id) => {
-  try {
-    const response = await axios.post(`${PYTHON_URL}/bridge/summary`, { version_id: version_id.versionId })
-    return response.data.result;
-  } catch (error) {
-    toast.error(error)
-  }
-}
-
 export const optimizeSchemaApi = async ({ data }) => {
   try {
     const response = await axios.post(
@@ -705,3 +696,41 @@ export const optimizeSchemaApi = async ({ data }) => {
     return error;
   }
 };
+
+export const updateOrganizationData = async (orgId, orgDetails) => {
+  const updateObject = {
+    company_id: orgId,
+    company: orgDetails,
+  };
+  try {
+    const response = await axios.put(`${URL}/user/updateDetails`, updateObject, {
+      headers: {
+        'reference-id': NEXT_PUBLIC_REFERENCEID
+      }
+    });
+    return response.data;
+  } catch (error) {
+
+    toast.error('Error updating organization:', error);
+    const errorMessage = error.response?.data?.message || error.message || 'Organization update failed.';
+  }
+};
+
+export const genrateSummary = async (version_id) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/bridge/summary`, { version_id: version_id.versionId })
+    return response.data.result;
+  } catch (error) {
+    toast.error(error)
+  }
+};
+
+export const batchApi = async ({ payload }) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/api/v2/model/batch/chat/completion`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error in batch API:', error);
+    throw error;
+  }
+}
