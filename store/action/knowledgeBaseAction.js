@@ -1,55 +1,31 @@
 
-import { createKnowledgeBaseEntry } from "@/config";
+import { createKnowledgeBaseEntry, getAllKnowBaseData } from "@/config";
 
 import { toast } from "react-toastify";
+import { addKnowbaseDataReducer, fetchAllKnowlegdeBaseData } from "../reducer/knowledgebaseReducer";
+
+
 
 export const createKnowledgeBaseEntryAction = (data) => async (dispatch) => {
   try {
     const response = await createKnowledgeBaseEntry(data);
     if (response.data?.success) {
-    //   dispatch(createKnowledgeBaseReducer({ orgId: data.orgId, data: response?.data?.entry }))
+      toast.success(response?.data?.message)
+      dispatch(addKnowbaseDataReducer({ orgId: data?.orgId, data, docId: response?.data?.doc_id, _id: response?.data?.mongo_id }))
     }
-    return response.data.entry;
   } catch (error) {
+    toast.error('something went wrong')
     console.error(error);
   }
 };
-
-// export const updateKnowledgeBaseEntryAction = (dataToSend) => async (dispatch) => {
-//   try {
-//     const response = await updateKnowledgeBaseEntry(dataToSend);
-//     if (response.data.success)
-//         console.log("hello");
-        
-//     //   dispatch(knowledgeBaseUpdateReducer({ 
-//     //     orgId: dataToSend.orgId, 
-//     //     id: dataToSend.id, 
-//     //     data: response.data.entry 
-//     //   }))
-//   } catch (error) {
-//     toast.error(error);
-//     console.error(error);
-//   }
-// }
-
-// export const deleteKnowledgeBaseEntryAction = ({ orgId, id }) => async (dispatch) => {
-//   try {
-//     const response = await deleteKnowledgeBaseEntry(id);
-//     if (response.data.success){}
-//     //   dispatch(knowledgeBaseDeleteReducer({ orgId, id }))
-//   } catch (error) {
-//     toast.error(error);
-//     console.error(error);
-//   }
-// }
-
-// export const getAllKnowledgeBaseEntriesAction = (orgId) => async (dispatch) => {
-//   try {
-//     const response = await getAllKnowledgeBaseEntries({ orgId });
-//     // if (response.data.success)
-//     //   dispatch(knowledgeBaseDataReducer({ orgId, data: response.data.result }))
-//   } catch (error) {
-//     console.error(error)
-//     toast.error(error);
-//   }
-// }
+export const getAllKnowBaseDataAction = (orgId) => async (dispatch) => {
+  try {
+    const response = await getAllKnowBaseData();
+    if (response.data) {
+      dispatch(fetchAllKnowlegdeBaseData({ data: response?.data, orgId }))
+    }
+  } catch (error) {
+    toast.error('something went wrong')
+    console.error(error);
+  }
+};

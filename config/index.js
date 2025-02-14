@@ -767,8 +767,17 @@ export const batchApi = async ({ payload }) => {
 
 export const createKnowledgeBaseEntry = async (data) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/rag`, data);
+    const response = await axios.post(`${PYTHON_URL}/rag/`, data);
     return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+export const getAllKnowBaseData = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/rag/docs`);
+    return response?.data;
   } catch (error) {
     console.error(error);
     return error;

@@ -6,6 +6,7 @@ import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, getAllBridgesAction, getAllFunctions, integrationAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
+import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
 import { usePathname } from "next/navigation";
@@ -35,6 +36,7 @@ export default function layoutOrgPage({ children, params }) {
   useEffect(() => {
     if (params?.org_id) {
       dispatch(getAllApikeyAction(params?.org_id));
+      dispatch(getAllKnowBaseDataAction(params?.org_id))
     }
   }, [dispatch, params?.org_id]);
 

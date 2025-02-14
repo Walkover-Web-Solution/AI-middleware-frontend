@@ -105,9 +105,11 @@ function Navbar() {
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDown size={16} /></div>
           <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
-            {['bridges', "chatbot", 'pauthkey', 'apikeys', 'alerts', 'invite', 'metrics', 'knowledge_base'].map((item) => (
+            {['bridges', "chatbot", 'pauthkey', 'apikeys','knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
               <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
-                <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
+                <a className={path[3] === item ? "active" : ""}>
+                  {item === 'knowledge_base' ? 'Knowledge Base' : item.charAt(0).toUpperCase() + item.slice(1)}
+                </a>
               </li>
             ))}
           </ul>
@@ -182,7 +184,7 @@ function Navbar() {
                       + create new chatbot
                     </button> : path[3] === 'knowledge_base' ?
                     <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>
-                      + create new RAG
+                      + Add new Knowledge base
                     </button> : ""
         )}
       </div>

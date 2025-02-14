@@ -341,5 +341,14 @@ export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment']
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
 export const TIME_RANGE_OPTIONS = ['Today', 'Last 3 Days', 'Last Week', 'Last Month'];
 export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
-
+export const KNOWLEDGE_BASE_COLUMNS = ['name', 'description', 'doc_url'];
+export const KNOWLEDGE_BASE_SECTION_TYPES = [
+  { value: 'default', label: 'Default' },
+  { value: 'custom', label: 'Custom' }
+];
+export const KNOWLEDGE_BASE_CUSTOM_SECTION = [
+  { value: 'semantic', label: 'Semantic Chunking' },
+  { value: 'manual', label: 'Manual Chunking' },
+  { value: 'recursive', label: 'Recursive Chunking' }
+];
 export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini'];

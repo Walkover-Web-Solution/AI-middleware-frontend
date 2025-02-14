@@ -1,12 +1,19 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlert, Plus } from 'lucide-react';
+import { CircleAlert, Plus, Trash2 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { openModal } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
+import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 
 const KnowledgebaseList = ({ params }) => {
-    const { knowbaseData } = useCustomSelector((state) => ({
-        knowbaseData: state?.knowbaseReducer?.knowbaseData
+    const { knowledgeBaseData, knowbaseVersionData } = useCustomSelector((state) => ({
+        knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
+        knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
     }));
 
+    const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
@@ -14,34 +21,53 @@ const KnowledgebaseList = ({ params }) => {
     };
 
     const handleAddKnowledgebase = (id) => {
-        // Add logic to handle adding new knowledgebase item
-        console.log('Add new knowledgebase item', id);
+        if (knowbaseVersionData?.includes(id)) return; // Check if ID already exists
+        dispatch(updateBridgeVersionAction({
+            versionId: params.version,
+            dataToSend: { doc_ids: [...(knowbaseVersionData || []), id] }
+        }));
+    };
+
+    const handleDeleteKnowledgebase = (id) => {
+        dispatch(updateBridgeVersionAction({
+            versionId: params.version,
+            dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== id) }
+        }));
     };
 
     const renderKnowledgebase = useMemo(() => (
-        knowbaseData?.map((item) => (
-            <div key={item?.id} className="flex w-[250px] flex-col items-start rounded-md border cursor-pointer bg-base-100 hover:bg-base-200">
-                <div className="p-4 w-full h-full flex flex-col justify-between">
-                    <div>
-                        <div className="flex justify-between items-center">
-                            <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content">
-                                {item?.name}
-                            </h1>
-                            {!item?.description && <CircleAlert color='red' size={16} />}
+        (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
+            const item = knowledgeBaseData?.find(kb => kb._id === docId);
+            return item ? (
+                <div key={docId} className="flex w-[250px] flex-col items-start rounded-md border cursor-pointer bg-base-100 hover:bg-base-200">
+                    <div className="p-4 w-full h-full flex flex-col justify-between">
+                        <div>
+                            <div className="flex justify-between items-center">
+                                <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content">
+                                    {item?.name}
+                                </h1>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteKnowledgebase(item?._id);
+                                        }}
+                                        className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-red-600"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                    {!item?.description && <CircleAlert color='red' size={16} />}
+                                </div>
+                            </div>
+                            <p className="mt-3 text-xs sm:text-sm line-clamp-3">
+                                {item?.description || "A description is required for proper functionality."}
+                            </p>
                         </div>
-                        <p className="mt-3 text-xs sm:text-sm line-clamp-3">
-                            {item?.description || "A description is required for proper functionality."}
-                        </p>
-                    </div>
-                    <div className="mt-4">
-                        <span className="mr-2 inline-block rounded-full capitalize px-3 bg-base-200 py-1 text-[10px] sm:text-xs font-semibold text-base-content">
-                            {!item?.description ? "Description Required" : item?.status || "Active"}
-                        </span>
                     </div>
                 </div>
-            </div>
-        ))
-    ), [knowbaseData]);
+            ) : null;
+        })
+    ), [knowbaseVersionData, knowledgeBaseData]);
 
     return (
         <div className="label flex-col items-start p-0">
@@ -62,10 +88,13 @@ const KnowledgebaseList = ({ params }) => {
                             onChange={handleInputChange}
                             className='input input-bordered w-full input-sm'
                         />
-                        {knowbaseData
-                            ?.filter(item => item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()))
-                            ?.map(item => (
-                                <li key={item?.id} onClick={() => handleAddKnowledgebase(item?.id)}>
+                        {(Array.isArray(knowledgeBaseData) ? knowledgeBaseData : [])
+                            .filter(item =>
+                                item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) &&
+                                !knowbaseVersionData?.includes(item?._id)
+                            )
+                            .map(item => (
+                                <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
                                     <div className="flex justify-between items-center w-full">
                                         <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
                                             {item?.name}
@@ -74,7 +103,7 @@ const KnowledgebaseList = ({ params }) => {
                                 </li>
                             ))
                         }
-                        <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => handleAddKnowledgebase()}>
+                        <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => { openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL) }}>
                             <div>
                                 <Plus size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
                             </div>
@@ -82,7 +111,7 @@ const KnowledgebaseList = ({ params }) => {
                     </div>
                 </ul>
             </div>
-            
+            <KnowledgeBaseModal params={params} />
         </div>
     );
 };
