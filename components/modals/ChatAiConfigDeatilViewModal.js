@@ -3,6 +3,47 @@ import { closeModal } from '@/utils/utility'
 import { CircleX } from 'lucide-react'
 import React from 'react'
 
+const flattenMessage = (message) => {
+  if (typeof message !== 'object' || message === null) {
+    return { 'message': message }
+  }
+
+  const result = {}
+  const flatten = (obj, parentKey = '') => {
+    Object.keys(obj).forEach(key => {
+      const newKey = parentKey ? `${parentKey}.${key}` : key
+      if (typeof obj[key] === 'object' && obj[key] !== null) {
+        flatten(obj[key], newKey)
+      } else {
+        result[newKey] = obj[key]
+      }
+    })
+  }
+  
+  flatten(message)
+  return result
+}
+
+const formatValue = (value) => {
+  if (typeof value === 'string' && value.startsWith('**') && value.includes('\n')) {
+    return value.split('\n').map((line, index) => (
+      <p key={index} className={line.startsWith('**') ? 'font-bold' : ''}>
+        {line}
+      </p>
+    ))
+  }
+  return String(value)
+}
+
+const renderFlattenedMessage = (message) => {
+  const flattened = flattenMessage(message)
+  return Object.entries(flattened).map(([key, value]) => (
+    <div key={key} className="mb-2 last:mb-0">
+      <span className="font-medium">{key}:</span> {formatValue(value)}
+    </div>
+  ))
+}
+
 const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
   return (
     <dialog id={MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL} className="modal">
@@ -27,25 +68,29 @@ const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
                     <ul className="space-y-2 ml-4">
                       {value.map((item, index) => (
                         <li key={index} className="break-words">
-                          {typeof item === 'object' && item !== null ? (
-                            <pre className="bg-base-100 p-4 rounded-lg shadow-inner break-words whitespace-pre-wrap text-sm">
-                              {JSON.stringify(item, null, 2)}
-                            </pre>
-                          ) : (
-                            <span className="text-base-content/80">
-                              {String(item)}
-                            </span>
-                          )}
+                          <div className="bg-base-100 p-4 rounded-lg shadow-inner break-words whitespace-pre-wrap">
+                            {typeof item === 'object' && item !== null && key === 'messages' ? (
+                              renderFlattenedMessage(item)
+                            ) : (
+                              <span className="text-base-content/80">
+                                {typeof item === 'object' && item !== null ? JSON.stringify(item, null, 2) : String(item)}
+                              </span>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </ul>
                   ) : (
                     <div className="bg-base-100 p-4 rounded-lg shadow-inner">
-                      <pre className="text-base-content/80 break-words whitespace-pre-wrap">
-                        {typeof value === 'object' && value !== null 
-                          ? JSON.stringify(value, null, 2)
-                          : String(value)}
-                      </pre>
+                      {typeof value === 'object' && value !== null ? (
+                        <pre className="text-base-content/80 break-words whitespace-pre-wrap">
+                          {JSON.stringify(value, null, 2)}
+                        </pre>
+                      ) : (
+                        <pre className="text-base-content/80 break-words whitespace-pre-wrap">
+                          {formatValue(String(value))}
+                        </pre>
+                      )}
                     </div>
                   )}
                 </div>
