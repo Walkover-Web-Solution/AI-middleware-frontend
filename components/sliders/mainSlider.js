@@ -1,7 +1,7 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import { AlignJustify, Bot, Building2, ChevronDown, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TriangleAlert, UserPlus } from 'lucide-react';
+import { AlignJustify, BookText, Bot, Building2, ChevronDown, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TriangleAlert, UserPlus } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 
@@ -22,7 +22,8 @@ function MainSlider() {
     apikeys: <Key />,
     alerts: <TriangleAlert />,
     invite: <UserPlus />,
-    metrics: <LineChart />
+    metrics: <LineChart />,
+    knowledge_base : <BookText />
   }
 
   const logoutHandler = async () => {
@@ -72,11 +73,11 @@ function MainSlider() {
                 </a>
               </div>
               <ul className="menu space-y-2 p-0">
-                {['bridges', 'pauthkey', 'apikeys', 'alerts', 'invite', 'metrics'].map((item) => (
+                {['bridges', 'pauthkey', 'apikeys', 'alerts', , 'knowledge_base',  'invite', 'metrics'].map((item) => (
                   <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)} className="transition-transform transform hover:scale-105 flex items-center">
                     <a className={` w-full font-medium ${path[3] === item ? "active text-primary" : "text-gray-700"} `}>
                       {Icons[item]}
-                      {item.charAt(0).toUpperCase() + item.slice(1)}
+                      {item === 'knowledge_base' ? 'Knowledge base' : item.charAt(0).toUpperCase() + item.slice(1)}
                     </a>
                   </li>
                 ))}
