@@ -1,8 +1,8 @@
 
-import { createKnowledgeBaseEntry, getAllKnowBaseData } from "@/config";
+import { createKnowledgeBaseEntry, deleteKnowBaseData, getAllKnowBaseData } from "@/config";
 
 import { toast } from "react-toastify";
-import { addKnowbaseDataReducer, fetchAllKnowlegdeBaseData } from "../reducer/knowledgebaseReducer";
+import { addKnowbaseDataReducer, deleteKnowledgeBaseReducer, fetchAllKnowlegdeBaseData } from "../reducer/knowledgebaseReducer";
 
 
 
@@ -29,3 +29,17 @@ export const getAllKnowBaseDataAction = (orgId) => async (dispatch) => {
     console.error(error);
   }
 };
+export const deleteKnowBaseDataAction = ({data}) => async (dispatch) => {
+  try {
+    const response = await deleteKnowBaseData(data);
+    if (response) {
+      toast.success(response.message);
+      dispatch(deleteKnowledgeBaseReducer({id:data?.id, orgId:data?.orgId}))
+    }
+  } catch (error) {
+    toast.error('something went wrong')
+    console.error(error);
+  }
+};
+
+

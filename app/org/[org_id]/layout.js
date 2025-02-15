@@ -113,7 +113,7 @@ export default function layoutOrgPage({ children, params }) {
         <div className=" flex flex-col  h-full">
           <MainSlider />
         </div>
-        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto">
+        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto overflow-x-hidden">
           <Navbar />
           <main className="px-2">{children}</main>
         </div>

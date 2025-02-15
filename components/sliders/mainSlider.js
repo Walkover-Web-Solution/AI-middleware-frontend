@@ -77,7 +77,7 @@ function MainSlider() {
                   <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)} className="transition-transform transform hover:scale-105 flex items-center">
                     <a className={` w-full font-medium ${path[3] === item ? "active text-primary" : "text-gray-700"} `}>
                       {Icons[item]}
-                      {item.charAt(0).toUpperCase() + item.slice(1)}
+                      {item === 'knowledge_base' ? 'Knowledge base' : item.charAt(0).toUpperCase() + item.slice(1)}
                     </a>
                   </li>
                 ))}

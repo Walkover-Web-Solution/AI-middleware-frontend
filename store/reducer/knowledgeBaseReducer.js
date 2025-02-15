@@ -14,7 +14,6 @@ export const knowledgeBaseReducer = createSlice({
       state.loading = false;
     },
     addKnowbaseDataReducer: (state, action) => {
-      debugger
       const { orgId, data, docId, _id } = action.payload;
       if (state.knowledgeBaseData[orgId]) {
         state.knowledgeBaseData[orgId].push({ ...data, docId, _id });
@@ -22,12 +21,19 @@ export const knowledgeBaseReducer = createSlice({
         state.knowledgeBaseData[orgId] = [{ ...data, docId, _id }];
       }
     },
+    deleteKnowledgeBaseReducer: (state, action) => {
+      const { orgId, id } = action.payload;
+      if (state.knowledgeBaseData[orgId]) {
+        state.knowledgeBaseData[orgId] = state.knowledgeBaseData[orgId].filter(entry => entry._id !== id);
+      }
+    },
   }
 });
 
 export const {
   fetchAllKnowlegdeBaseData,
-  addKnowbaseDataReducer
+  addKnowbaseDataReducer,
+  deleteKnowledgeBaseReducer
 } = knowledgeBaseReducer.actions;
 
 export default knowledgeBaseReducer.reducer;

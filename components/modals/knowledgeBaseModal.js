@@ -123,7 +123,7 @@ const KnowledgeBaseModal = ({ params }) => {
                     disabled={isLoading}
                     onChange={(e) => setSelectedSectionType(e.target.value)}
                   >
-                    {KNOWLEDGE_BASE_SECTION_TYPES.map(option => (
+                    {KNOWLEDGE_BASE_SECTION_TYPES?.map(option => (
                       <option key={option.value} value={option.value}>{option.label}</option>
                     ))}
                   </select>
@@ -151,7 +151,7 @@ const KnowledgeBaseModal = ({ params }) => {
                 )}
               </div>
 
-              {selectedSectionType === 'custom' && chunkingType !== 'semantic' && (
+              {selectedSectionType === 'custom' && chunkingType !== 'semantic' && chunkingType && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="form-control">
                     <label className="label !px-0">

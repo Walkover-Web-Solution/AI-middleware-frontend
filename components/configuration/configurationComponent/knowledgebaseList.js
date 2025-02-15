@@ -6,6 +6,8 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
+import GoogleDocIcon from '@/icons/GoogleDocIcon';
+import { truncate } from '@/components/historyPageComponents/assistFile';
 
 const KnowledgebaseList = ({ params }) => {
     const { knowledgeBaseData, knowbaseVersionData } = useCustomSelector((state) => ({
@@ -39,14 +41,17 @@ const KnowledgebaseList = ({ params }) => {
         (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
             const item = knowledgeBaseData?.find(kb => kb._id === docId);
             return item ? (
-                <div key={docId} className="flex w-[250px] flex-col items-start rounded-md border cursor-pointer bg-base-100 hover:bg-base-200">
+                <div key={docId} className="flex w-[250px] flex-col items-start rounded-md border cursor-pointer bg-base-100 hover:bg-base-200 relative">
                     <div className="p-4 w-full h-full flex flex-col justify-between">
                         <div>
                             <div className="flex justify-between items-center">
-                                <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content">
-                                    {item?.name}
-                                </h1>
-                                <div className="flex gap-2">
+                                <div className="flex items-center gap-2">
+                                    <GoogleDocIcon height={24} width={24} />
+                                    <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content pr-5">
+                                        {item?.name}
+                                    </h1>
+                                </div>
+                                <div className="flex gap-2 absolute top-2 right-2">
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -96,9 +101,17 @@ const KnowledgebaseList = ({ params }) => {
                             .map(item => (
                                 <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
                                     <div className="flex justify-between items-center w-full">
-                                        <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
-                                            {item?.name}
-                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <GoogleDocIcon height={16} width={16} />
+                                    
+                                            {item?.name.length > 20 ? (
+                                                <div className="tooltip" data-tip={item?.name}>
+                                                    {truncate(item?.name, 20)}
+                                                </div>
+                                            ) : (
+                                                truncate(item?.name, 20)
+                                            )}
+                                        </div>
                                     </div>
                                 </li>
                             ))

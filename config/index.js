@@ -783,3 +783,16 @@ export const getAllKnowBaseData = async () => {
     return error;
   }
 };
+
+export const deleteKnowBaseData = async (data) => {
+  try {
+    const { id, orgId } = data;
+    const response = await axios.delete(`${PYTHON_URL}/rag/docs`,{
+      data:{id}
+    });
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
