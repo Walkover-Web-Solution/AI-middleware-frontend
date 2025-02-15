@@ -46,7 +46,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
 
     const variables = useMemo(() => {
         return variablesKeyValue.reduce((acc, pair) => {
-            if (pair.key && pair.value && pair.checked) {
+            if (pair?.key && pair?.value) {
                 acc[pair.key] = pair.value;
             }
             return acc;
