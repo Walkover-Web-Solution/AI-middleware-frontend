@@ -333,7 +333,7 @@ export const MODAL_TYPE = {
   WEBHOOK_MODAL: "WEBHOOK_MODAL",
   CHAT_DETAILS_VIEW_MODAL: "chat_details_view",
   JSON_SCHEMA: "JSON_SCHEMA",
-
+  TESTCASE_MODAL : "TESTCASE_MODAL"
 }
 
 export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment']
