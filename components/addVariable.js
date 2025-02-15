@@ -2,7 +2,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
-import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -127,11 +127,8 @@ const AddVariable = ({ params }) => {
       required: !updatedPairs[index].required,
     };
     setKeyValuePairs(updatedPairs);
-
-    if (updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
-      updateVersionVariable(updatedPairs)
-      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
-    }
+    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
+    updateVersionVariable(updatedPairs)
   };
 
   // Function to format key-value pairs for the textarea
@@ -279,12 +276,23 @@ const AddVariable = ({ params }) => {
                 defaultValue={formatPairsForTextarea()}
               />
             ) : (
-              <div className="flex flex-col gap-4 max-h-56 overflow-y-auto mt-4 w-full">
+              <div className="flex flex-col gap-4 max-h-56 overflow-y-auto mt-4 w-full items-start">
+                {keyValuePairs.length >0 && <div className="flex items-center gap-2 w-full">
+                  <div className="tooltip tooltip-right" data-tip="Mark checkbox if it is required">
+                    <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
+                      <Info className="w-4 h-4 text-base-content/70" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
+                    <span className="text-sm font-medium text-base-content/80">Key</span>
+                    <span className="text-sm font-medium text-base-content/80">Value</span>
+                  </div>
+                </div>}
                 {keyValuePairs?.map((pair, index) => (
-                  <div key={index} className="flex items-center gap-4">
+                  <div key={index} className="flex items-center gap-4 w-full">
                     <input
                       type="checkbox"
-                      className="checkbox"
+                      className="checkbox checkbox-sm w-20"
                       checked={pair.required}
                       onChange={() => handleCheckKeyValuePair(index)}
                     />
@@ -308,11 +316,11 @@ const AddVariable = ({ params }) => {
                       onBlur={() => updateVersionVariable()}
                     />
                     <button
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 ml-2"
                       onClick={() => handleRemoveKeyValuePair(index)}
                       aria-label="Remove Variable"
                     >
-                      <Trash2 />
+                      <Trash2 className="w-4 h-4"/>
                     </button>
                   </div>
                 ))}
@@ -321,11 +329,11 @@ const AddVariable = ({ params }) => {
                     Please fill out all existing key-value pairs before adding a new one.
                   </p>
                 )}
-                {
-                  variablesKeyValue.length === 0 ? <p className="text-center text-lg font-semibold">No Variables Found</p> : ""
-                }
+                {variablesKeyValue.length === 0 && (
+                  <p className="text-center text-lg font-semibold w-full">No Variables Found</p>
+                )}
                 <button
-                  className="btn btn-blue mt-4 self-center border-2 bg-gray-200 border-white"
+                  className="btn btn-sm mt-4 self-center border border-base-300 bg-base-100 hover:bg-base-200"
                   onClick={handleAddKeyValuePair}
                 >
                   Add Variable

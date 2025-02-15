@@ -27,7 +27,7 @@ const Chatbot = ({ params }) => {
 
   const variables = useMemo(() => {
     return variablesKeyValueRef.current.reduce((acc, pair) => {
-      if (pair.key && pair.value && pair?.required) {
+      if (pair.key && pair.value) {
         acc[pair.key] = pair.value;
       }
       return acc;
