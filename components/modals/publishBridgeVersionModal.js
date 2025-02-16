@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { genrateSummaryAction, publishBridgeVersionAction, updateBridgeAction } from '@/store/action/bridgeAction';
+import { genrateSummaryAction, getTestcasesScroreAction, publishBridgeVersionAction, updateBridgeAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal, openModal } from '@/utils/utility';
 import { Pencil, ChevronDown, ChevronUp, Plus, Trash } from 'lucide-react';
@@ -19,7 +19,9 @@ function PublishBridgeVersionModal({ params }) {
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
     const [isAccordionOpen, setIsAccordionOpen] = useState(false);
     const [isTestCasesOpen, setIsTestCasesOpen] = useState(false);
-    
+    const [isGeneratingScore, setIsGeneratingScore] = useState(false);
+    const [newTestCaseData, setNewTestCaseData] = useState(bridge_testcases)
+
 
     useEffect(() => {
         setSummary(bridge_summary || "");
@@ -54,20 +56,37 @@ function PublishBridgeVersionModal({ params }) {
         }
     }, [dispatch, params]);
 
-    
+    const handleCreateTestcase = async () => {
+        setIsGeneratingScore(true);
+        try {
+            const totalData = await dispatch(getTestcasesScroreAction(params?.version));
+            const cleanedTestCases = totalData?.comparison_score?.map(({ question, expected_answers, model_answer, comparison_score }) => {
+                const prevTestCase = newTestCaseData?.find(tc => tc.question === question);
+                return {
+                    question,
+                    answer: expected_answers,
+                    model_answer,
+                    prev_comparison_score: prevTestCase?.comparison_score || null,
+                    comparison_score
+                };
+            });
+            setNewTestCaseData(cleanedTestCases);
+            const expected_qna = (cleanedTestCases)?.map(({ question, answer, comparison_score }) => ({
+                question,
+                answer,
+                comparison_score
+            }));
+            dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { expected_qna } }));
+        } finally {
+            setIsGeneratingScore(false);
+        }
+    }
 
     const handleSaveSummary = useCallback(() => {
         const dataToSend = { bridge_summary: summary };
         dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend }));
         setIsEditing(false);
     }, [dispatch, params?.id, summary]);
-
-    // const handleAddTestCase = () => {
-    //     setTestCases([...(testCases || []), { question: '', expected_answers: '' }]);
-    //     setIsTestCasesEdited(true); // Set the edited flag to true
-    // };
-
-   
 
     const renderSummaryEditor = () => (
         <div className="space-y-2">
@@ -180,7 +199,11 @@ function PublishBridgeVersionModal({ params }) {
                         {isTestCasesOpen ? <ChevronUp /> : <ChevronDown />}
                     </div>
                     <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isTestCasesOpen ? 'max-h-[800px]' : 'max-h-0'}`}>
-                        <button onClick={()=>openModal(MODAL_TYPE?.TESTCASE_MODAL)}>{!bridge_testcases ? <span>Generate Test Case</span> : <span>Run Test Case</span> }</button>
+                        <button className='btn btn-ghost btn-sm w-full' onClick={() => { handleCreateTestcase(); openModal(MODAL_TYPE?.TESTCASE_MODAL); }}>
+                            <span className="capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
+                                {!bridge_testcases ? <span>Generate Test Case</span> : <span>Run Test Cases</span>}
+                            </span>
+                        </button>
                     </div>
                 </div>
 
@@ -197,7 +220,7 @@ function PublishBridgeVersionModal({ params }) {
                     </form>
                 </div>
             </div>
-    <TestcaseModal params={params}/>
+            <TestcaseModal params={params} isGeneratingScore={isGeneratingScore} setIsGeneratingScore={setIsGeneratingScore} bridge_testcases={bridge_testcases} setNewTestCaseData={setNewTestCaseData} newTestCaseData={newTestCaseData} />
         </dialog>
     );
 }
