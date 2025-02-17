@@ -10,18 +10,25 @@ const KnowledgeBaseModal = ({ params }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSectionType, setSelectedSectionType] = useState('default');
   const [chunkingType, setChunkingType] = useState('');
+  const [file, setFile] = useState(null); // State to hold the uploaded file
+  const [isUpload, setIsUpload] = useState(false); // State to toggle between link and upload
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
     setIsLoading(true);
     const formData = new FormData(event.target);
+    
+    if (isUpload && file) {
+      formData.append('file', file);
+    } else {
+      formData.append('doc_url', formData.get('doc_url'));
+    }
 
     try {
       const payload = {
         orgId: params?.org_id,
         name: formData.get('name'),
         description: formData.get('description'),
-        doc_url: formData.get('doc_url'),
         sectionType: formData.get('sectionType'),
         chunking_type: formData.get('chunking_type'),
         chunk_size: Number(formData.get('chunk_size')) || null,
@@ -37,16 +44,29 @@ const KnowledgeBaseModal = ({ params }) => {
       await dispatch(createKnowledgeBaseEntryAction(payload));
       closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
       event.target.reset();
+      setFile(null); // Reset the file state after submission
     } finally {
       setSelectedSectionType("default");
       setChunkingType("");
       setIsLoading(false);
     }
-  }, [dispatch, params.org_id]);
+  }, [dispatch, params.org_id, file, isUpload]);
 
   const handleClose = useCallback(() => {
     closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
   }, []);
+
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    const validFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/csv'];
+    
+    if (selectedFile && validFileTypes.includes(selectedFile.type)) {
+      setFile(selectedFile);
+    } else {
+      alert('Please upload a valid file (PDF, Word, or CSV).');
+      setFile(null);
+    }
+  };
 
   return (
     <dialog id={MODAL_TYPE.KNOWLEDGE_BASE_MODAL} className="modal backdrop-blur-sm">
@@ -63,7 +83,7 @@ const KnowledgeBaseModal = ({ params }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 p-4 bg-base-200 rounded-lg">
+          <div className="grid grid-cols-1 gap-4 p-2 bg-base-200 rounded-lg">
             <div className="space-y-4">
               <div className="form-control">
                 <label className="label !px-0">
@@ -81,20 +101,6 @@ const KnowledgeBaseModal = ({ params }) => {
 
               <div className="form-control">
                 <label className="label !px-0">
-                  <span className="label-text text-sm font-medium text-base-content/70">Google Documentation URL</span>
-                </label>
-                <input
-                  type="url"
-                  name="doc_url"
-                  className="input input-bordered input-md focus:ring-1 ring-primary/40"
-                  placeholder="https://example.com/documentation"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="form-control">
-                <label className="label !px-0">
                   <span className="label-text text-sm font-medium text-base-content/70">Description</span>
                 </label>
                 <textarea
@@ -105,6 +111,62 @@ const KnowledgeBaseModal = ({ params }) => {
                   disabled={isLoading}
                 />
               </div>
+
+              <div className="form-control">
+                <label className="label !px-0">
+                  <span className="label-text text-sm font-medium text-base-content/70">Choose Upload Method</span>
+                </label>
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    name="uploadMethod"
+                    value="link"
+                    checked={!isUpload}
+                    onChange={() => setIsUpload(false)}
+                    className="radio mr-2"
+                  />
+                  <span className="label-text">Link</span>
+                  <input
+                    type="radio"
+                    name="uploadMethod"
+                    value="upload"
+                    checked={isUpload}
+                    onChange={() => setIsUpload(true)}
+                    className="radio ml-4 mr-2"
+                  />
+                  <span className="label-text">Upload</span>
+                </div>
+              </div>
+
+              {!isUpload ? (
+                <div className="form-control">
+                  <label className="label !px-0">
+                    <span className="label-text text-sm font-medium text-base-content/70">Google Documentation URL</span>
+                  </label>
+                  <input
+                    type="url"
+                    name="doc_url"
+                    className="input input-bordered input-md focus:ring-1 ring-primary/40"
+                    placeholder="https://example.com/documentation"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+              ) : (
+                <div className="form-control">
+                  <label className="label !px-0">
+                    <span className="label-text text-sm font-medium text-base-content/70">Upload Document (PDF, Word, CSV)</span>
+                  </label>
+                  <input
+                    type="file"
+                    name="file"
+                    accept=".pdf, .doc, .docx, .csv"
+                    className="file-input input-sm focus:ring-1 ring-primary/40"
+                    onChange={handleFileChange}
+                    disabled={isLoading}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
