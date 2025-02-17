@@ -3,7 +3,7 @@ import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bri
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback} from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { openModal } from '@/utils/utility';
@@ -17,14 +17,14 @@ const AdvancedParameters = ({ params }) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const dispatch = useDispatch();
 
-  const { service, model, type, configuration, integrationData, function_data, toolChoiceFunction } = useCustomSelector((state) => ({
+  const { service, model, type, configuration, integrationData, toolChoiceFunction, versionFunctions} = useCustomSelector((state) => ({
     service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service?.toLowerCase(),
     model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
     type: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
     configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
     integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {},
-    function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData,
-    toolChoiceFunction: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.configuration?.tool_choice
+    toolChoiceFunction: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.configuration?.tool_choice,
+    versionFunctions: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.apiCalls
   }));
 
   const { modelInfoData } = useCustomSelector((state) => ({
@@ -40,8 +40,14 @@ const AdvancedParameters = ({ params }) => {
   }, [configuration]);
 
   useEffect(() => {
-    const selectedFunctiondata = filteredOptions?.filter(value => toolChoiceFunction?.includes(value?._id))
-      .map(value => ({ name: value?.function_name, id: value?._id }));
+    const selectedFunctiondata = versionFunctions && typeof versionFunctions === 'object'
+      ? Object.values(versionFunctions)
+          .filter(value => toolChoiceFunction?.includes(value?._id))
+          .map(value => ({ 
+            name: value?.function_name || value?.endpoint_name, 
+            id: value?._id 
+          }))
+      : [];
     setSelectedOptions(selectedFunctiondata);
   }, [configuration])
 
@@ -144,29 +150,13 @@ const AdvancedParameters = ({ params }) => {
     dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: updatedDataToSend }));
 
   }, [configuration, dispatch, params.id, params.version]);
-
-  const filteredOptions = useMemo(() => {
-    return function_data ? Object.values(function_data)
-      .filter(value => {
-        const title = integrationData[value?.endpoint]?.title || integrationData[value?.function_name]?.title;
-        return title !== undefined && title.toLowerCase().includes(searchQuery.toLowerCase());
-      })
-      .sort((a, b) => {
-        const aTitle = integrationData[a?.endpoint]?.title || integrationData[a?.function_name]?.title;
-        const bTitle = integrationData[b?.endpoint]?.title || integrationData[b?.function_name]?.title;
-        if (!aTitle) return 1;
-        if (!bTitle) return -1;
-        return aTitle?.localeCompare(bTitle);
-      }) : [];
-  }, [function_data, integrationData, searchQuery]);
-
+  
   const handleDropdownValueChange = (value,key, functionName) => {
     const isSelected = Array.isArray(selectedOptions) && selectedOptions.some(opt => opt?.id === value?._id);
     const newOptions = isSelected
       ? selectedOptions.filter(opt => opt?.id !== value?._id)
       : [...(Array.isArray(selectedOptions) ? selectedOptions : []), { name: functionName, id: value?._id }];
     setSelectedOptions(newOptions);
-
     handleDropdownChange({ values: { value: newOptions.map(opt => typeof opt === 'object' ? opt.id : opt) } }, key);
   }
 
@@ -257,40 +247,46 @@ const AdvancedParameters = ({ params }) => {
                             className="input input-bordered input-sm w-full"
                           />
                         </div>
-                        {function_data && Object.values(function_data)
-                          .filter(value => {
-                            const title = integrationData[value?.endpoint]?.title || integrationData[value?.function_name]?.title;
-                            return title && title.toLowerCase().includes(searchQuery.toLowerCase());
-                          })
-                          .sort((a, b) => {
-                            const aTitle = integrationData[a?.endpoint]?.title || integrationData[a?.function_name]?.title;
-                            const bTitle = integrationData[b?.endpoint]?.title || integrationData[b?.function_name]?.title;
-                            if (!aTitle) return 1;
-                            if (!bTitle) return -1;
-                            return aTitle.localeCompare(bTitle);
-                          })
-                          .map((value) => {
-                            const functionName = value?.function_name || value?.endpoint;
-                            const title = integrationData[functionName]?.title || 'Untitled';
-                            return (
-                              <div
-                                key={value._id}
-                                className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
-                                onClick={() => {
-                                  handleDropdownValueChange(value, key, functionName);
-                                }}
-                              >
-                                <label className="flex items-center gap-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={Array.isArray(selectedOptions) && selectedOptions.some(opt => opt?.name === functionName)}
-                                    className="checkbox checkbox-sm"
-                                  />
-                                  <span>{title}</span>
-                                </label>
-                              </div>
-                            );
-                          })}
+                        {versionFunctions && typeof versionFunctions === 'object' && (
+                          Object.values(versionFunctions)
+                            .filter(value => {
+                              const functionName = value?.function_name || value?.endpoint_name;
+                              const title = integrationData[functionName]?.title || value?.endpoint_name || 'Untitled';
+                              return title.toLowerCase().includes(searchQuery.toLowerCase());
+                            })
+                            .sort((a, b) => {
+                              const aName = a?.function_name || a?.endpoint_name;
+                              const bName = b?.function_name || b?.endpoint_name;
+                              const aTitle = integrationData[aName]?.title || aName || 'Untitled';
+                              const bTitle = integrationData[bName]?.title || bName || 'Untitled';
+                              return aTitle.localeCompare(bTitle);
+                            })
+                            .map((value) => {
+                              const functionName = value?.function_name || value?.endpoint_name;
+                              const title = integrationData[functionName]?.title || value?.endpoint_name || 'Untitled';
+                              return (
+                                <div
+                                  key={value._id}
+                                  className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
+                                  onClick={() => {
+                                    handleDropdownValueChange(value, key, functionName);
+                                  }}
+                                >
+                                  <label className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      checked={Array.isArray(selectedOptions) && selectedOptions.some(opt => {
+                                        const optName = typeof opt === 'object' ? opt.name : opt;
+                                        return optName === functionName;
+                                      })}
+                                      className="checkbox checkbox-sm"
+                                    />
+                                    <span>{title}</span>
+                                  </label>
+                                </div>
+                              );
+                            })
+                        )}
                       </div>
                     )}
                   </div>
