@@ -1,15 +1,20 @@
 'use client';
 import { MODAL_TYPE } from "@/utils/enums";
 import { allowedAttributes, openModal } from "@/utils/utility";
-import { CircleX, Copy, Eye } from "lucide-react";
+import { CircleX, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
 import { truncate, useCloseSliderOnEsc } from "./assistFile";
 
 const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) => {
-  if (selectedItem)
-    selectedItem['system Prompt'] = selectedItem['System Prompt'];
+  if (selectedItem) {
+    selectedItem['system Prompt'] = 
+      selectedItem['AiConfig']?.messages?.[0]?.role === 'developer' || 
+      selectedItem['AiConfig']?.messages?.[0]?.role === 'system' 
+        ? selectedItem['AiConfig']?.messages?.[0]?.content 
+        : selectedItem['AiConfig']?.system || selectedItem['System Prompt'];
+  }
   const variablesKeyValue = selectedItem && selectedItem['variables'] ? selectedItem['variables'] : {};
   const [modalContent, setModalContent] = useState(null);
   const sidebarRef = useRef(null);
@@ -57,7 +62,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
         return `<span style="background-color: #E5E7EB; padding: 2px; border: 1px solid #ccc; border-radius: 4px;">${value}</span>`;
       }
       return `{{${variableName}}}`;
-    })
+    });
   };
 
   const handleObjectClick = (key, displayValue) => {
@@ -101,6 +106,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                     let displayValue = value;
                     if (key === "system Prompt" && typeof value === "string") {
                       displayValue = replaceVariablesInPrompt(value);
+                      displayValue = displayValue.replace(/\n/g, '<br />');
                     }
 
                     return (
@@ -130,7 +136,9 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                               )}
                             </div>
                           ) : (
-                            <span className="text-gray-600 break-words"><div  dangerouslySetInnerHTML={{ __html: displayValue?.toString() }}></div></span>
+                            <span className="text-gray-600 break-words">
+                              <div dangerouslySetInnerHTML={{ __html: displayValue?.toString() }}></div>
+                            </span>
                           )}
                         </div>
                       </div>
