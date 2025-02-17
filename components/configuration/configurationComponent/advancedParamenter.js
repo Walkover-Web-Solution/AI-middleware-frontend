@@ -3,7 +3,7 @@ import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bri
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { openModal } from '@/utils/utility';
@@ -12,12 +12,19 @@ import { MODAL_TYPE } from '@/utils/enums';
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState([]);
   const dispatch = useDispatch();
-  const { service, model, type, configuration } = useCustomSelector((state) => ({
+
+  const { service, model, type, configuration, integrationData, function_data, toolChoiceFunction } = useCustomSelector((state) => ({
     service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service?.toLowerCase(),
     model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
     type: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
     configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
+    integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {},
+    function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData,
+    toolChoiceFunction: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.configuration?.tool_choice
   }));
 
   const { modelInfoData } = useCustomSelector((state) => ({
@@ -31,6 +38,12 @@ const AdvancedParameters = ({ params }) => {
       );
     }
   }, [configuration]);
+
+  useEffect(() => {
+    const selectedFunctiondata = filteredOptions?.filter(value => toolChoiceFunction?.includes(value?._id))
+      .map(value => ({ name: value?.function_name, id: value?._id }));
+    setSelectedOptions(selectedFunctiondata);
+  }, [configuration])
 
   const handleInputChange = (e, key, isSlider = false) => {
     let newValue = e.target.value;
@@ -121,6 +134,42 @@ const AdvancedParameters = ({ params }) => {
     }
   };
 
+  const handleDropdownChange = useCallback((values, key) => {
+    const newValue = values?.values?.value;
+    const updatedDataToSend = {
+      configuration: {
+        [key]: newValue
+      }
+    };
+    dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: updatedDataToSend }));
+
+  }, [configuration, dispatch, params.id, params.version]);
+
+  const filteredOptions = useMemo(() => {
+    return function_data ? Object.values(function_data)
+      .filter(value => {
+        const title = integrationData[value?.endpoint]?.title || integrationData[value?.function_name]?.title;
+        return title !== undefined && title.toLowerCase().includes(searchQuery.toLowerCase());
+      })
+      .sort((a, b) => {
+        const aTitle = integrationData[a?.endpoint]?.title || integrationData[a?.function_name]?.title;
+        const bTitle = integrationData[b?.endpoint]?.title || integrationData[b?.function_name]?.title;
+        if (!aTitle) return 1;
+        if (!bTitle) return -1;
+        return aTitle?.localeCompare(bTitle);
+      }) : [];
+  }, [function_data, integrationData, searchQuery]);
+
+  const handleDropdownValueChange = (value,key, functionName) => {
+    const isSelected = Array.isArray(selectedOptions) && selectedOptions.some(opt => opt?.id === value?._id);
+    const newOptions = isSelected
+      ? selectedOptions.filter(opt => opt?.id !== value?._id)
+      : [...(Array.isArray(selectedOptions) ? selectedOptions : []), { name: functionName, id: value?._id }];
+    setSelectedOptions(newOptions);
+
+    handleDropdownChange({ values: { value: newOptions.map(opt => typeof opt === 'object' ? opt.id : opt) } }, key);
+  }
+
   return (
     <div className="collapse text-base-content" tabIndex={0}>
       <input type="radio" name="my-accordion-1" onClick={toggleAccordion} className='cursor-pointer' />
@@ -163,6 +212,90 @@ const AdvancedParameters = ({ params }) => {
                 {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
                   modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
               </label>
+              {field === 'dropdown' && (
+                <div className="w-full">
+                  <div className="relative">
+                    <div className={`flex items-center gap-2 input input-bordered input-sm w-full ${selectedOptions && selectedOptions?.length > 0 ? 'min-h-fit' : 'min-h-[2.5rem]'} flex-wrap py-1`}>
+                      {Array.isArray(selectedOptions) && selectedOptions.map(option => {
+                        const optionValue = typeof option === 'object' ? option.name : option;
+                        return (
+                          <div key={optionValue} className="badge badge-outline p-2 flex items-center gap-1">
+                            {integrationData[optionValue]?.title || optionValue}
+                            <button
+                              type="button"
+                              className="text-xs hover:text-error"
+                              onClick={() => {
+                                const newOptions = selectedOptions.filter(opt => {
+                                  const optValue = typeof opt === 'object' ? opt.name : opt;
+                                  return optValue !== optionValue;
+                                });
+                                setSelectedOptions(newOptions);
+                                handleDropdownChange({ values: { value: newOptions.map(opt => typeof opt === 'object' ? opt.id : opt) } }, key);
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        );
+                      })}
+                      <div
+                        className="cursor-pointer ml-auto"
+                        onClick={() => setShowDropdown(!showDropdown)}
+                      >
+                        {showDropdown ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </div>
+                    </div>
+
+                    {showDropdown && (
+                      <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-10 max-h-[200px] overflow-y-auto mt-1 p-2">
+                        <div className="p-2 top-0 bg-base-100">
+                          <input
+                            type="text"
+                            placeholder="Search functions..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="input input-bordered input-sm w-full"
+                          />
+                        </div>
+                        {function_data && Object.values(function_data)
+                          .filter(value => {
+                            const title = integrationData[value?.endpoint]?.title || integrationData[value?.function_name]?.title;
+                            return title && title.toLowerCase().includes(searchQuery.toLowerCase());
+                          })
+                          .sort((a, b) => {
+                            const aTitle = integrationData[a?.endpoint]?.title || integrationData[a?.function_name]?.title;
+                            const bTitle = integrationData[b?.endpoint]?.title || integrationData[b?.function_name]?.title;
+                            if (!aTitle) return 1;
+                            if (!bTitle) return -1;
+                            return aTitle.localeCompare(bTitle);
+                          })
+                          .map((value) => {
+                            const functionName = value?.function_name || value?.endpoint;
+                            const title = integrationData[functionName]?.title || 'Untitled';
+                            return (
+                              <div
+                                key={value._id}
+                                className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
+                                onClick={() => {
+                                  handleDropdownValueChange(value, key, functionName);
+                                }}
+                              >
+                                <label className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={Array.isArray(selectedOptions) && selectedOptions.some(opt => opt?.name === functionName)}
+                                    className="checkbox checkbox-sm"
+                                  />
+                                  <span>{title}</span>
+                                </label>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               {field === 'slider' && (
                 <div>
                   <input
