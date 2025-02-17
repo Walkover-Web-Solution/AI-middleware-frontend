@@ -37,13 +37,13 @@ function TestcaseModal({ params, bridge_testcases, setIsGeneratingScore, isGener
     };
 
     const handleSaveTestCases = (testCaseData) => {
-        const cleanedTestCases = (testCaseData ? testCaseData : newTestCaseData).map(({ question, answer, comparison_score }) => ({
+        const cleanedTestCases = (testCaseData ? testCaseData : newTestCaseData || [])?.map(({ question, answer, comparison_score }) => ({
             question,
             answer,
             comparison_score
-        }));
-        const dataToSend = { expected_qna: cleanedTestCases };
-        dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend }));
+        }))||[];
+        const dataToSend = { expected_qna: cleanedTestCases || [] };
+        {cleanedTestCases.length > 0 && dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend }));}
         setIsTestCasesEdited(false)
     };
 

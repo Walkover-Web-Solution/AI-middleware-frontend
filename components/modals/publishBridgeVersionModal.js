@@ -76,7 +76,7 @@ function PublishBridgeVersionModal({ params }) {
                 answer,
                 comparison_score
             }));
-            dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { expected_qna } }));
+            {expected_qna && dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { expected_qna } }));}
         } finally {
             setIsGeneratingScore(false);
         }
