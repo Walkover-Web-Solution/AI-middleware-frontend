@@ -62,7 +62,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
 
                                                 <button
                                                     className="btn btn-ghost btn-xs"
-                                                    onClick={() => handleCopy('api_key_1234567890', 'accessKey')}
+                                                    onClick={() => handleCopy(access_key, 'accessKey')}
                                                 >
                                                     {copied.accessKey ? <Check size={16} className="text-success" /> : <Copy size={16} />}
                                                 </button>

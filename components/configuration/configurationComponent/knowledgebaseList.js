@@ -3,7 +3,7 @@ import { CircleAlert, Plus, Trash2 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { openModal } from '@/utils/utility';
+import { GetFileTypeIcon, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import GoogleDocIcon from '@/icons/GoogleDocIcon';
@@ -46,7 +46,7 @@ const KnowledgebaseList = ({ params }) => {
                         <div>
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    <GoogleDocIcon height={24} width={24} />
+                                    {GetFileTypeIcon(item?.file_type, 24, 24)}
                                     <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content pr-5">
                                         {item?.name}
                                     </h1>
@@ -102,8 +102,7 @@ const KnowledgebaseList = ({ params }) => {
                                 <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
                                     <div className="flex justify-between items-center w-full">
                                         <div className="flex items-center gap-2">
-                                            <GoogleDocIcon height={16} width={16} />
-                                    
+                                            {GetFileTypeIcon(item?.file_type, 16, 16)}
                                             {item?.name.length > 20 ? (
                                                 <div className="tooltip" data-tip={item?.name}>
                                                     {truncate(item?.name, 20)}

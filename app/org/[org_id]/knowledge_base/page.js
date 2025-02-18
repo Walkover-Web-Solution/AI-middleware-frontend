@@ -3,13 +3,14 @@ import KnowledgeBaseModal from "@/components/modals/knowledgeBaseModal";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import GoogleDocIcon from "@/icons/GoogleDocIcon";
 import { deleteKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
-import { EllipsisVertical, LayoutGrid, Table } from "lucide-react";
+import { BookText, EllipsisVertical, LayoutGrid, Table } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch } from "react-redux";
 import CustomTable from "@/components/customTable/customTable";
 import { KNOWLEDGE_BASE_COLUMNS } from "@/utils/enums";
 import { truncate } from "@/components/historyPageComponents/assistFile";
 import KnowledgeBaseIntegrationSlider from "@/components/configuration/configurationComponent/knowledgeBaseIntegrationSlider";
+import { GetFileTypeIcon } from "@/utils/utility";
 
 export const runtime = 'edge';
 
@@ -33,6 +34,8 @@ const Page = ({ params }) => {
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
+  
+
   const filteredKnowledgeBase = useMemo(() =>
     knowledgeBaseData?.filter(item =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -42,9 +45,9 @@ const Page = ({ params }) => {
 
   const tableData = filteredKnowledgeBase.map(item => ({
     ...item,
-    icon: (
+    File_Type: (
       <div className="flex items-center gap-2">
-        <GoogleDocIcon height={24} width={24} />
+       {GetFileTypeIcon(item?.file_type, 24 , 24)}
       </div>
     ),
     name: String(item?.name),
@@ -78,7 +81,7 @@ const Page = ({ params }) => {
         />
         <div className="join">
           <button className="btn mr-4" onClick={() => setOpenKnowledgeBaseSlider(true)}>
-            Integration
+          <BookText /> Integration Guide
           </button>
           <button
             className={`btn rounded-r-none rounded-md ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
