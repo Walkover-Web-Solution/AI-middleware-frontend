@@ -22,7 +22,6 @@ function PublishBridgeVersionModal({ params }) {
     const [isGeneratingScore, setIsGeneratingScore] = useState(false);
     const [newTestCaseData, setNewTestCaseData] = useState(bridge_testcases)
 
-
     useEffect(() => {
         setSummary(bridge_summary || "");
         setIsAccordionOpen(false);
@@ -35,7 +34,7 @@ function PublishBridgeVersionModal({ params }) {
     }, []);
 
     const handlePublishBridge = useCallback(async () => {
-        dispatch(publishBridgeVersionAction({
+        await dispatch(publishBridgeVersionAction({
             bridgeId: params?.id,
             versionId: params?.version,
             orgId: params?.org_id
@@ -60,23 +59,23 @@ function PublishBridgeVersionModal({ params }) {
         setIsGeneratingScore(true);
         try {
             const totalData = await dispatch(getTestcasesScroreAction(params?.version));
-            const cleanedTestCases = totalData?.comparison_score?.map(({ question, expected_answers, model_answer, comparison_score }) => {
+            const cleanedTestCases = totalData?.comparison_score?.map(({ question, expected_answer, answer, model_answer, comparison_score }) => {
                 const prevTestCase = newTestCaseData?.find(tc => tc.question === question);
                 return {
                     question,
-                    answer: expected_answers,
+                    answer: expected_answer || answer,
                     model_answer,
                     prev_comparison_score: prevTestCase?.comparison_score || null,
                     comparison_score
                 };
             });
             setNewTestCaseData(cleanedTestCases);
-            const expected_qna = (cleanedTestCases)?.map(({ question, answer, comparison_score }) => ({
+            const expected_qna = cleanedTestCases?.map(({ question, answer, comparison_score }) => ({
                 question,
                 answer,
                 comparison_score
             }));
-            {expected_qna && dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { expected_qna } }));}
+            expected_qna && dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend: { expected_qna } }));
         } finally {
             setIsGeneratingScore(false);
         }

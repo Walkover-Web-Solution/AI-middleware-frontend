@@ -41,21 +41,21 @@ function TestcaseModal({ params, bridge_testcases, setIsGeneratingScore, isGener
             question,
             answer,
             comparison_score
-        }))||[];
+        })) || [];
         const dataToSend = { expected_qna: cleanedTestCases || [] };
-        {cleanedTestCases.length > 0 && dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend }));}
-        setIsTestCasesEdited(false)
+        cleanedTestCases.length > 0 && dispatch(updateBridgeAction({ bridgeId: params?.id, dataToSend }));
+        setIsTestCasesEdited(false);
     };
 
     const handleGenerateScore = useCallback(async () => {
         setIsGeneratingScore(true);
         try {
             const totalData = await dispatch(getTestcasesScroreAction(params?.version));
-            const cleanedTestCases = totalData?.comparison_score?.map(({ question, expected_answers, model_answer, comparison_score }) => {
-                const prevTestCase = bridge_testcases.find(tc => tc.question === question);
+            const cleanedTestCases = totalData?.comparison_score?.map(({ question, expected_answer, model_answer, answer, comparison_score }) => {
+                const prevTestCase = bridge_testcases?.find(tc => tc.question === question);
                 return {
                     question,
-                    answer: expected_answers,
+                    answer: expected_answer || answer,
                     model_answer,
                     prev_comparison_score: prevTestCase?.comparison_score || null,
                     comparison_score
@@ -95,7 +95,7 @@ function TestcaseModal({ params, bridge_testcases, setIsGeneratingScore, isGener
                                 <div>
                                     <h4 className="font-semibold mb-2">Existing Test Cases</h4>
                                     <div className="space-y-4">
-                                        {(newTestCaseData).map((testCase, index) => (
+                                        {newTestCaseData.map((testCase, index) => (
                                             <div key={index} className="bg-base-100 p-4 rounded-lg">
                                                 <div className="flex justify-between items-start mb-2">
                                                     <h4 className="font-medium">Test Case #{index + 1}</h4>
