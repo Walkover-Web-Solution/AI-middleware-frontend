@@ -17,13 +17,12 @@ const KnowledgeBaseModal = ({ params }) => {
     event.preventDefault();
     setIsLoading(true);
     const formData = new FormData(event.target);
-    
+
     // Create payload object
     const payload = {
       orgId: params?.org_id,
       name: formData.get('name'),
       description: formData.get('description'),
-      // sectionType: formData.get('sectionType'),
       chunking_type: formData.get('chunking_type'),
       chunk_size: Number(formData.get('chunk_size')) || null,
       chunk_overlap: Number(formData.get('chunk_overlap')) || null
@@ -69,7 +68,7 @@ const KnowledgeBaseModal = ({ params }) => {
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     const validFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/csv'];
-    
+
     if (selectedFile && validFileTypes.includes(selectedFile.type)) {
       setFile(selectedFile);
     } else {

@@ -33,12 +33,12 @@ const Page = ({ params }) => {
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
-  const filteredKnowledgeBase = useMemo(() => 
+  const filteredKnowledgeBase = useMemo(() =>
     knowledgeBaseData?.filter(item =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchTerm.toLowerCase())
     ) || []
-  , [knowledgeBaseData, searchTerm]);
+    , [knowledgeBaseData, searchTerm]);
 
   const tableData = filteredKnowledgeBase.map(item => ({
     ...item,
@@ -51,7 +51,7 @@ const Page = ({ params }) => {
     actions: (
       <div className="dropdown dropdown-right">
         <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>
-          <EllipsisVertical size={16}/>
+          <EllipsisVertical size={16} />
         </div>
         <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
           <li><a onClick={() => handleDelete(item.name, item?._id)} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
@@ -62,7 +62,7 @@ const Page = ({ params }) => {
 
   const handleDelete = (name, id) => {
     if (window.confirm(`Do you want to delete document with name: ${name}?`)) {
-      dispatch(deleteKnowBaseDataAction({data: {id, orgId: params?.org_id}}));
+      dispatch(deleteKnowBaseDataAction({ data: { id, orgId: params?.org_id } }));
     }
   };
 
@@ -78,15 +78,15 @@ const Page = ({ params }) => {
         />
         <div className="join">
           <button className="btn mr-4" onClick={() => setOpenKnowledgeBaseSlider(true)}>
-            Integration 
+            Integration
           </button>
-          <button 
+          <button
             className={`btn rounded-r-none rounded-md ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
             onClick={() => setViewMode('grid')}
           >
             <LayoutGrid size={16} />
           </button>
-          <button 
+          <button
             className={`btn rounded-l-none rounded-md ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
             onClick={() => setViewMode('table')}
           >
@@ -105,7 +105,7 @@ const Page = ({ params }) => {
               >
                 <div className="dropdown dropdown-right absolute top-2 right-2">
                   <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>
-                    <EllipsisVertical size={16}/>
+                    <EllipsisVertical size={16} />
                   </div>
                   <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
                     <li><a onClick={() => handleDelete(item.name, item?._id)} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
@@ -115,12 +115,12 @@ const Page = ({ params }) => {
                   <GoogleDocIcon height={40} width={40} />
                   <div className="tooltip" data-tip={item?.name}>
                     <h3 className="text-lg font-medium max-w-[90%] w-full">
-                    {truncate(String(item?.name), 10)}
+                      {truncate(String(item?.name), 10)}
                     </h3>
                   </div>
                   <div className="tooltip" data-tip={item?.description}>
                     <p className="text-sm text-base-content/70 max-w-[90%] w-full">
-                      {truncate(item?.description,20)}
+                      {truncate(item?.description, 20)}
                     </p>
                   </div>
                 </div>
@@ -128,10 +128,10 @@ const Page = ({ params }) => {
             ))}
           </div>
         ) : (
-          <CustomTable 
-            data={tableData} 
-            columnsToShow={KNOWLEDGE_BASE_COLUMNS} 
-            sorting 
+          <CustomTable
+            data={tableData}
+            columnsToShow={KNOWLEDGE_BASE_COLUMNS}
+            sorting
             sortingColumns={['name']}
             keysToWrap={['name', 'description']}
           />
@@ -142,7 +142,7 @@ const Page = ({ params }) => {
         </div>
       )}
       <KnowledgeBaseModal params={params} />
-      <KnowledgeBaseIntegrationSlider params ={params} setOpenKnowledgeBaseSlider={setOpenKnowledgeBaseSlider} openKnowledgeBaseSlider={openKnowledgeBaseSlider}/>
+      <KnowledgeBaseIntegrationSlider params={params} setOpenKnowledgeBaseSlider={setOpenKnowledgeBaseSlider} openKnowledgeBaseSlider={openKnowledgeBaseSlider} />
     </div>
   );
 };
