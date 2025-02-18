@@ -18,30 +18,40 @@ const KnowledgeBaseModal = ({ params }) => {
     setIsLoading(true);
     const formData = new FormData(event.target);
     
+    // Create payload object
+    const payload = {
+      orgId: params?.org_id,
+      name: formData.get('name'),
+      description: formData.get('description'),
+      // sectionType: formData.get('sectionType'),
+      chunking_type: formData.get('chunking_type'),
+      chunk_size: Number(formData.get('chunk_size')) || null,
+      chunk_overlap: Number(formData.get('chunk_overlap')) || null
+    };
+
+    if (payload.sectionType === 'default') {
+      payload.chunking_type = null;
+      payload.chunk_size = null;
+      payload.chunk_overlap = null;
+    }
+
+    // Convert payload to FormData
+    const payloadFormData = new FormData();
+    for (const key in payload) {
+      if (payload[key] !== null) {
+        payloadFormData.append(key, payload[key]);
+      }
+    }
+
+    // Add file to FormData if present
     if (isUpload && file) {
-      formData.append('file', file);
+      payloadFormData.append('file', file);
     } else {
-      formData.append('doc_url', formData.get('doc_url'));
+      payloadFormData.append('doc_url', formData.get('doc_url'));
     }
 
     try {
-      const payload = {
-        orgId: params?.org_id,
-        name: formData.get('name'),
-        description: formData.get('description'),
-        sectionType: formData.get('sectionType'),
-        chunking_type: formData.get('chunking_type'),
-        chunk_size: Number(formData.get('chunk_size')) || null,
-        chunk_overlap: Number(formData.get('chunk_overlap')) || null
-      };
-
-      if (payload.sectionType === 'default') {
-        payload.chunking_type = null;
-        payload.chunk_size = null;
-        payload.chunk_overlap = null;
-      }
-
-      await dispatch(createKnowledgeBaseEntryAction(payload));
+      await dispatch(createKnowledgeBaseEntryAction(payloadFormData));
       closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
       event.target.reset();
       setFile(null); // Reset the file state after submission

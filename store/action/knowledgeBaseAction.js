@@ -11,7 +11,13 @@ export const createKnowledgeBaseEntryAction = (data) => async (dispatch) => {
     const response = await createKnowledgeBaseEntry(data);
     if (response.data?.success) {
       toast.success(response?.data?.message)
-      dispatch(addKnowbaseDataReducer({ orgId: data?.orgId, data, docId: response?.data?.doc_id, _id: response?.data?.mongo_id }))
+      const data = {...Object.fromEntries(data.entries())}
+      dispatch(addKnowbaseDataReducer({ 
+        orgId: data?.orgId, 
+        data : response?.data,
+        docId: response?.data?.doc_id, 
+        _id: response?.data?.mongo_id 
+      }))
     }
   } catch (error) {
     toast.error('something went wrong')

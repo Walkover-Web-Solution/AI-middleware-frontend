@@ -796,3 +796,14 @@ export const deleteKnowBaseData = async (data) => {
     throw error;
   }
 };
+
+
+export const generateAccessKey = async () =>{
+  try {
+    const response = await axios.get(`${URL}/org/auth_token`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}

@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import CustomTable from "@/components/customTable/customTable";
 import { KNOWLEDGE_BASE_COLUMNS } from "@/utils/enums";
 import { truncate } from "@/components/historyPageComponents/assistFile";
+import KnowledgeBaseIntegrationSlider from "@/components/configuration/configurationComponent/knowledgeBaseIntegrationSlider";
 
 export const runtime = 'edge';
 
@@ -17,6 +18,7 @@ const Page = ({ params }) => {
   const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id]);
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [searchTerm, setSearchTerm] = useState('');
+  const [openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider] = useState(false);
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -75,14 +77,17 @@ const Page = ({ params }) => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <div className="join">
+          <button className="btn mr-4" onClick={() => setOpenKnowledgeBaseSlider(true)}>
+            Integration 
+          </button>
           <button 
-            className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
+            className={`btn rounded-r-none rounded-md ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
             onClick={() => setViewMode('grid')}
           >
             <LayoutGrid size={16} />
           </button>
           <button 
-            className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
+            className={`btn rounded-l-none rounded-md ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
             onClick={() => setViewMode('table')}
           >
             <Table size={16} />
@@ -137,6 +142,7 @@ const Page = ({ params }) => {
         </div>
       )}
       <KnowledgeBaseModal params={params} />
+      <KnowledgeBaseIntegrationSlider params ={params} setOpenKnowledgeBaseSlider={setOpenKnowledgeBaseSlider} openKnowledgeBaseSlider={openKnowledgeBaseSlider}/>
     </div>
   );
 };
