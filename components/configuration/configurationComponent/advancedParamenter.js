@@ -3,7 +3,7 @@ import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bri
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
-import React, { useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { openModal } from '@/utils/utility';
@@ -17,18 +17,22 @@ const AdvancedParameters = ({ params }) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const dispatch = useDispatch();
 
-  const { service, model, type, configuration, integrationData, toolChoiceFunction, versionFunctions} = useCustomSelector((state) => ({
-    service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service?.toLowerCase(),
-    model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
-    type: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
-    configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
-    integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {},
-    toolChoiceFunction: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.configuration?.tool_choice,
-    versionFunctions: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params.version]?.apiCalls
-  }));
+  const { service, type, model, configuration, integrationData, version_function_data, tool_choice_data } = useCustomSelector((state) => {
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+    const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
+    return {
+      integrationData,
+      service: versionData?.service,
+      type: versionData?.configuration?.type,
+      configuration: versionData?.configuration,
+      tool_choice_data: versionData?.configuration?.tool_choice,
+      model: versionData?.configuration?.model,
+      version_function_data: versionData?.apiCalls
+    };
+  });
 
   const { modelInfoData } = useCustomSelector((state) => ({
-    modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters,
+    modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
 
   useEffect(() => {
@@ -37,19 +41,27 @@ const AdvancedParameters = ({ params }) => {
         JSON.stringify(configuration?.response_type?.json_schema, undefined, 4)
       );
     }
-  }, [configuration]);
+  }, [tool_choice_data]);
 
   useEffect(() => {
-    const selectedFunctiondata = versionFunctions && typeof versionFunctions === 'object'
-      ? Object.values(versionFunctions)
-          .filter(value => toolChoiceFunction?.includes(value?._id))
-          .map(value => ({ 
-            name: value?.function_name || value?.endpoint_name, 
-            id: value?._id 
-          }))
+    if(tool_choice_data === "auto"  || tool_choice_data === "none")
+    {
+      setSelectedOptions([{name:tool_choice_data,id:tool_choice_data}])
+      return
+    }
+    const selectedFunctiondata = version_function_data && typeof version_function_data === 'object'
+      ? Object.values(version_function_data)
+        .filter(value => {
+          const toolChoice = typeof tool_choice_data === 'string' ? tool_choice_data : '';
+          return toolChoice === value?._id;
+        })
+        .map(value => ({
+          name: value?.function_name || value?.endpoint_name,
+          id: value?._id
+        }))
       : [];
     setSelectedOptions(selectedFunctiondata);
-  }, [configuration])
+  }, [tool_choice_data])
 
   const handleInputChange = (e, key, isSlider = false) => {
     let newValue = e.target.value;
@@ -97,8 +109,6 @@ const AdvancedParameters = ({ params }) => {
           'quality': newValue
         }
       }
-
-
     }
     if (key === 'json_schema') {
       if (!is_json) return toast.error('Json schema is not parsable JSON');
@@ -140,25 +150,15 @@ const AdvancedParameters = ({ params }) => {
     }
   };
 
-  const handleDropdownChange = useCallback((values, key) => {
-    const newValue = values?.values?.value;
+  const handleDropdownChange = useCallback((value, key) => {
+    const newValue = value ? value : null; // Corrected to handle single value
     const updatedDataToSend = {
       configuration: {
         [key]: newValue
       }
     };
     dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: updatedDataToSend }));
-
-  }, [configuration, dispatch, params.id, params.version]);
-  
-  const handleDropdownValueChange = (value,key, functionName) => {
-    const isSelected = Array.isArray(selectedOptions) && selectedOptions.some(opt => opt?.id === value?._id);
-    const newOptions = isSelected
-      ? selectedOptions.filter(opt => opt?.id !== value?._id)
-      : [...(Array.isArray(selectedOptions) ? selectedOptions : []), { name: functionName, id: value?._id }];
-    setSelectedOptions(newOptions);
-    handleDropdownChange({ values: { value: newOptions.map(opt => typeof opt === 'object' ? opt.id : opt) } }, key);
-  }
+  }, [dispatch, params.id, params.version]);
 
   return (
     <div className="collapse text-base-content" tabIndex={0}>
@@ -195,8 +195,6 @@ const AdvancedParameters = ({ params }) => {
                       {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
                     </ul>
                   </div>
-
-
                 </div>
                 {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
                 {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
@@ -205,29 +203,22 @@ const AdvancedParameters = ({ params }) => {
               {field === 'dropdown' && (
                 <div className="w-full">
                   <div className="relative">
-                    <div className={`flex items-center gap-2 input input-bordered input-sm w-full ${selectedOptions && selectedOptions?.length > 0 ? 'min-h-fit' : 'min-h-[2.5rem]'} flex-wrap py-1`}>
-                      {Array.isArray(selectedOptions) && selectedOptions.map(option => {
-                        const optionValue = typeof option === 'object' ? option.name : option;
-                        return (
-                          <div key={optionValue} className="badge badge-outline p-2 flex items-center gap-1">
-                            {integrationData[optionValue]?.title || optionValue}
-                            <button
-                              type="button"
-                              className="text-xs hover:text-error"
-                              onClick={() => {
-                                const newOptions = selectedOptions.filter(opt => {
-                                  const optValue = typeof opt === 'object' ? opt.name : opt;
-                                  return optValue !== optionValue;
-                                });
-                                setSelectedOptions(newOptions);
-                                handleDropdownChange({ values: { value: newOptions.map(opt => typeof opt === 'object' ? opt.id : opt) } }, key);
-                              }}
-                            >
-                              ×
-                            </button>
-                          </div>
-                        );
-                      })}
+                    <div className={`flex items-center gap-2 input input-bordered input-sm w-full ${selectedOptions.length > 0 ? 'min-h-fit' : 'min-h-[2.5rem]'} flex-wrap py-1`}>
+                      {selectedOptions.length > 0 && (
+                        <div className="badge badge-outline p-2 flex items-center gap-1">
+                          {integrationData[selectedOptions[0].name]?.title || selectedOptions[0].name}
+                          <button
+                            type="button"
+                            className="text-xs hover:text-error"
+                            onClick={() => {
+                              setSelectedOptions([]);
+                              handleDropdownChange(null, key); // Updated to pass null
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
                       <div
                         className="cursor-pointer ml-auto"
                         onClick={() => setShowDropdown(!showDropdown)}
@@ -238,6 +229,7 @@ const AdvancedParameters = ({ params }) => {
 
                     {showDropdown && (
                       <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-10 max-h-[200px] overflow-y-auto mt-1 p-2">
+
                         <div className="p-2 top-0 bg-base-100">
                           <input
                             type="text"
@@ -247,8 +239,35 @@ const AdvancedParameters = ({ params }) => {
                             className="input input-bordered input-sm w-full"
                           />
                         </div>
-                        {versionFunctions && typeof versionFunctions === 'object' && (
-                          Object.values(versionFunctions)
+                        {/* Add option data to show in dropdown */}
+                        {options && options.map(option => (
+                          <div
+                            key={option.id}
+                            className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
+                            onClick={() => {
+                              setSelectedOptions([{ name: option, id: option }]);
+                              handleDropdownChange(option, key);
+                              setShowDropdown(false);
+                            }}
+                          >
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name="function-select"
+                                checked={selectedOptions.some(opt => opt.name === option)}
+                                className="radio radio-sm"
+                              />
+                              <span className="font-semibold">{option}</span>
+                              <span className="text-gray-500 text-xs">
+                                {option === 'none' 
+                                  ? "Model won't call a function; it will generate a message." 
+                                  : "Model can generate a message or call a function."}
+                              </span>
+                            </label>
+                          </div>
+                        ))}
+                        {version_function_data && typeof version_function_data === 'object' && (
+                          Object.values(version_function_data)
                             .filter(value => {
                               const functionName = value?.function_name || value?.endpoint_name;
                               const title = integrationData[functionName]?.title || value?.endpoint_name || 'Untitled';
@@ -264,22 +283,23 @@ const AdvancedParameters = ({ params }) => {
                             .map((value) => {
                               const functionName = value?.function_name || value?.endpoint_name;
                               const title = integrationData[functionName]?.title || value?.endpoint_name || 'Untitled';
+                              const isSelected = selectedOptions.some(opt => opt?.id === value._id);
                               return (
                                 <div
                                   key={value._id}
                                   className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
                                   onClick={() => {
-                                    handleDropdownValueChange(value, key, functionName);
+                                    setSelectedOptions(isSelected ? [] : [{ name: functionName, id: value._id }]);
+                                    handleDropdownChange(isSelected ? null : value._id, key); // Updated to pass the correct value
+                                    setShowDropdown(false);
                                   }}
                                 >
                                   <label className="flex items-center gap-2">
                                     <input
-                                      type="checkbox"
-                                      checked={Array.isArray(selectedOptions) && selectedOptions.some(opt => {
-                                        const optName = typeof opt === 'object' ? opt.name : opt;
-                                        return optName === functionName;
-                                      })}
-                                      className="checkbox checkbox-sm"
+                                      type="radio"
+                                      name="function-select"
+                                      checked={isSelected}
+                                      className="radio radio-sm"
                                     />
                                     <span>{title}</span>
                                   </label>
@@ -287,11 +307,13 @@ const AdvancedParameters = ({ params }) => {
                               );
                             })
                         )}
+
                       </div>
                     )}
                   </div>
                 </div>
               )}
+
               {field === 'slider' && (
                 <div>
                   <input
