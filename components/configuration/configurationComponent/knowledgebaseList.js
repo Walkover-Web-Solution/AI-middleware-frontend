@@ -46,7 +46,7 @@ const KnowledgebaseList = ({ params }) => {
                         <div>
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    {GetFileTypeIcon(item?.file_type, 24, 24)}
+                                    {GetFileTypeIcon(item?.type, 24, 24)}
                                     <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content pr-5">
                                         {item?.name}
                                     </h1>
@@ -102,7 +102,7 @@ const KnowledgebaseList = ({ params }) => {
                                 <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
                                     <div className="flex justify-between items-center w-full">
                                         <div className="flex items-center gap-2">
-                                            {GetFileTypeIcon(item?.file_type, 16, 16)}
+                                            {GetFileTypeIcon(item?.type, 16, 16)}
                                             {item?.name.length > 20 ? (
                                                 <div className="tooltip" data-tip={item?.name}>
                                                     {truncate(item?.name, 20)}

@@ -50,7 +50,7 @@ const KnowledgeBaseModal = ({ params }) => {
     }
 
     try {
-      await dispatch(createKnowledgeBaseEntryAction(payloadFormData));
+      await dispatch(createKnowledgeBaseEntryAction(payloadFormData,params?.org_id));
       closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
       event.target.reset();
       setFile(null); // Reset the file state after submission

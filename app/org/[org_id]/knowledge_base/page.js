@@ -47,7 +47,7 @@ const Page = ({ params }) => {
     ...item,
     File_Type: (
       <div className="flex items-center gap-2">
-       {GetFileTypeIcon(item?.file_type, 24 , 24)}
+       {GetFileTypeIcon(item?.type, 24 , 24)}
       </div>
     ),
     name: String(item?.name),
