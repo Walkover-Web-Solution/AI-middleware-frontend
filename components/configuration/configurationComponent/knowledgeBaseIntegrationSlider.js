@@ -35,66 +35,50 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
         dispatch(generateAccessKeyAction(params?.org_id))
     }
 
+    const Section = ({ title, caption, children }) => (
+        <div className="flex items-start flex-col justify-center">
+            <h3 className="text-lg font-semibold">{title}</h3>
+            <p className="text-sm text-gray-600 block">{caption}</p>
+            {children}
+        </div>
+    );
+
     const renderStepOne = ({ orgId, access_key }) => {
-        return (
-            <div className="p-6">
-                <div className="flex flex-col gap-8">
-                    {/* Step 1 */}
-                    <div>
-                        <h3 className="text-lg font-semibold mb-4">Step 1: Connect Knowledge Base</h3>
-                        <div className="bg-base-200 p-4 rounded-lg">
-                            <div className="mb-6">
-                                <p className="text-sm font-medium mb-2">Sample API Configuration:</p>
-                                <pre className="bg-base-100 p-3 rounded-md text-sm overflow-x-auto">
-                                    {`{
+        const apiConfig = `{
     "org_id": ${orgId},
     "user_id": "unique_user_id"
-}`}
-                                </pre>
-                            </div>
-                            <div className="space-y-4">
-                                <div>
-                                    {access_key && <div>
-                                        <label className="block text-sm font-medium mb-1">Access Key</label>
-                                        <div className="p-2 bg-base-100 rounded-md border border-base-300 flex items-center justify-between">
-                                            <span className="text-sm"> {access_key}</span>
-                                            <div className="tooltip" data-tip={copied.accessKey ? "Copied!" : "Copy"}>
+}`;
 
-                                                <button
-                                                    className="btn btn-ghost btn-xs"
-                                                    onClick={() => handleCopy(access_key, 'accessKey')}
-                                                >
-                                                    {copied.accessKey ? <Check size={16} className="text-success" /> : <Copy size={16} />}
-                                                </button>
-
-                                            </div>
-
-                                        </div>
-                                    </div>}
-                                    {!access_key && <button className='btn mt-4 text-base-content' onClick={handleGenerateAccessKey}>Genrate Access key</button>}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        return (
+            <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
+                <Section title="Step 1: Connect Knowledge Base" caption="Use the following API configuration and access key." />
+                <div className="mockup-code">
+                    <CopyButton data={apiConfig} />
+                        <pre data-prefix=">" className="text-error"><code>org_id=</code><code className="text-warning">{orgId}</code></pre>
+                        <pre data-prefix=">" className="text-error"><code>user_id=</code><code className="text-warning">"unique_user_id"</code></pre>
                 </div>
+                {access_key ? (
+                    <div className="mockup-code">
+                        <CopyButton data={access_key} />
+                        <pre data-prefix=">" className="text-error">
+                            <code>Access Key: </code>
+                            <code className="text-warning">{access_key}</code>
+                        </pre>
+                    </div>
+                ) : (
+                    <button className='btn mt-4 text-base-content' onClick={handleGenerateAccessKey}>Generate Access key</button>
+                )}
             </div>
         );
     }
+
     const renderStepTwo = () => {
         const DataObject = {
             script: `<script\n      id="rag-main-script"\n      embedToken=" <embed token here> "\n      src=${process?.env?.NEXT_PUBLIC_KNOWLEDGEBASE_SCRIPT_SRC}\n     ></script>`,
         };
 
-        const Section = ({ title, caption, children }) => (
-            <div className="flex items-start flex-col justify-center">
-                <h3 className="text-lg font-semibold">{title}</h3>
-                <p className="text-sm text-gray-600 block">{caption}</p>
-                {children}
-            </div>
-        );
-
         return (
-            <div className="flex w-full flex-col gap-4 bg-white rounded-lg shadow p-8">
+            <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
                 <Section title="Step 2" caption="Add below code in your product." />
                 <div className="mockup-code">
                     <CopyButton data={DataObject.script} />
@@ -107,6 +91,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
             </div>
         );
     }
+
     return (
         <div
             ref={sidebarRef}

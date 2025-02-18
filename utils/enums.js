@@ -341,7 +341,7 @@ export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment']
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
 export const TIME_RANGE_OPTIONS = ['Today', 'Last 3 Days', 'Last Week', 'Last Month'];
 export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
-export const KNOWLEDGE_BASE_COLUMNS = ['File_Type', 'name', 'description', 'actions'];
+export const KNOWLEDGE_BASE_COLUMNS = ['name', 'description'];
 export const KNOWLEDGE_BASE_SECTION_TYPES = [
   { value: 'default', label: 'Default' },
   { value: 'custom', label: 'Custom' }

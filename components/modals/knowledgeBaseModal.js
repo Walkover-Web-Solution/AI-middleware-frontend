@@ -79,7 +79,7 @@ const KnowledgeBaseModal = ({ params }) => {
 
   return (
     <dialog id={MODAL_TYPE.KNOWLEDGE_BASE_MODAL} className="modal backdrop-blur-sm">
-      <div className="modal-box w-11/12 max-w-3xl bg-gradient-to-br from-base-100 via-[#f4f4f5] to-base-200 shadow-2xl border-2 border-primary/20">
+      <div className="modal-box w-11/12 max-w-3xl border-2">
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
           <h3 className="font-bold text-xl">New Knowledge Base Configuration</h3>
           <button
@@ -92,12 +92,12 @@ const KnowledgeBaseModal = ({ params }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 p-2 bg-base-200 rounded-lg">
-            <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 rounded-lg">
+            <div className="space-y-2">
               <div className="form-control">
-                <label className="label !px-0">
-                  <span className="label-text text-sm font-medium text-base-content/70">Knowledge Base Name</span>
-                </label>
+                <div className="label">
+                  <span className="label-text font-medium text-md">Knowledge Base Name</span>
+                </div>
                 <input
                   type="text"
                   name="name"
@@ -110,7 +110,7 @@ const KnowledgeBaseModal = ({ params }) => {
 
               <div className="form-control">
                 <label className="label !px-0">
-                  <span className="label-text text-sm font-medium text-base-content/70">Description</span>
+                  <span className="label-text text-sm font-medium">Description</span>
                 </label>
                 <textarea
                   name="description"
@@ -123,7 +123,7 @@ const KnowledgeBaseModal = ({ params }) => {
 
               <div className="form-control">
                 <label className="label !px-0">
-                  <span className="label-text text-sm font-medium text-base-content/70">Choose Upload Method</span>
+                  <span className="label-text text-sm font-medium">Choose Upload Method</span>
                 </label>
                 <div className="flex items-center">
                   <input
@@ -150,7 +150,7 @@ const KnowledgeBaseModal = ({ params }) => {
               {!isUpload ? (
                 <div className="form-control">
                   <label className="label !px-0">
-                    <span className="label-text text-sm font-medium text-base-content/70">Google Documentation URL</span>
+                    <span className="label-text text-sm font-medium">Google Documentation URL</span>
                   </label>
                   <input
                     type="url"
@@ -163,14 +163,14 @@ const KnowledgeBaseModal = ({ params }) => {
                 </div>
               ) : (
                 <div className="form-control">
-                  <label className="label !px-0">
-                    <span className="label-text text-sm font-medium text-base-content/70">Upload Document (PDF, Word, CSV)</span>
+                  <label className="label">
+                    <span className="label-text text-sm font-medium">Upload Document (PDF, Word, CSV)</span>
                   </label>
                   <input
                     type="file"
                     name="file"
                     accept=".pdf, .doc, .docx, .csv"
-                    className="file-input input-sm focus:ring-1 ring-primary/40"
+                    className="file-input file-input-bordered file-input-sm w-full max-w-xs" // Changed to text-xs for smaller size
                     onChange={handleFileChange}
                     disabled={isLoading}
                   />
@@ -179,12 +179,12 @@ const KnowledgeBaseModal = ({ params }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 p-4 bg-base-200 rounded-lg">
+          <div className="grid grid-cols-1 gap-4 rounded-lg">
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label !px-0">
-                    <span className="label-text text-sm font-medium text-base-content/70">Processing Method</span>
+                    <span className="label-text text-sm font-medium">Processing Method</span>
                   </label>
                   <select
                     name="sectionType"
@@ -203,7 +203,7 @@ const KnowledgeBaseModal = ({ params }) => {
                 {selectedSectionType === 'custom' && (
                   <div className="form-control">
                     <label className="label !px-0">
-                      <span className="label-text text-sm font-medium text-base-content/70">Chunking Type</span>
+                      <span className="label-text text-sm font-medium">Chunking Type</span>
                     </label>
                     <select
                       name="chunking_type"
@@ -256,10 +256,10 @@ const KnowledgeBaseModal = ({ params }) => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-base-300">
+          <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              className="btn btn-ghost btn-sm px-6 text-base-content/70 hover:text-base-content"
+              className="btn hover:text-base-content"
               onClick={handleClose}
               disabled={isLoading}
             >
@@ -267,7 +267,7 @@ const KnowledgeBaseModal = ({ params }) => {
             </button>
             <button
               type="submit"
-              className="btn btn-primary btn-sm px-6 text-white hover:bg-primary-focus"
+              className="btn btn-primary text-white hover:bg-primary-focus"
               disabled={isLoading}
             >
               {isLoading ? 'Creating...' : 'Create Knowledge Base'}

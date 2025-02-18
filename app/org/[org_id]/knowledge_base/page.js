@@ -45,14 +45,22 @@ const Page = ({ params }) => {
 
   const tableData = filteredKnowledgeBase.map(item => ({
     ...item,
-    File_Type: (
+    name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
        {GetFileTypeIcon(item?.type, 24 , 24)}
       </div>
-    ),
-    name: String(item?.name),
-    actions: (
-      <div className="dropdown dropdown-right">
+      <div className="tooltip" data-tip={item.name}>
+        {truncate(item.name, 30)}
+      </div>
+      
+    </div>,
+    description : item?.description,
+    actual_name: item?.name,
+  }));
+
+  const EndComponent = () =>{
+    return (
+      <div className="dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>
           <EllipsisVertical size={16} />
         </div>
@@ -61,8 +69,7 @@ const Page = ({ params }) => {
         </ul>
       </div>
     )
-  }));
-
+  }
   const handleDelete = (name, id) => {
     if (window.confirm(`Do you want to delete document with name: ${name}?`)) {
       dispatch(deleteKnowBaseDataAction({ data: { id, orgId: params?.org_id } }));
@@ -115,7 +122,7 @@ const Page = ({ params }) => {
                   </ul>
                 </div>
                 <div className="flex flex-col items-center w-full gap-2">
-                  <GoogleDocIcon height={40} width={40} />
+                  {GetFileTypeIcon(item?.type, 26, 26)}
                   <div className="tooltip" data-tip={item?.name}>
                     <h3 className="text-lg font-medium max-w-[90%] w-full">
                       {truncate(String(item?.name), 10)}
@@ -137,6 +144,7 @@ const Page = ({ params }) => {
             sorting
             sortingColumns={['name']}
             keysToWrap={['name', 'description']}
+            endComponent={EndComponent}
           />
         )
       ) : (
