@@ -9,7 +9,6 @@ import { addKnowbaseDataReducer, deleteKnowledgeBaseReducer, fetchAllKnowlegdeBa
 export const createKnowledgeBaseEntryAction = (data, orgId) => async (dispatch) => {
   try {
     const response = await createKnowledgeBaseEntry(data);
-    console.log(response)
     if (response.data) {
       toast.success(response?.data?.message)
       dispatch(addKnowbaseDataReducer({ 
