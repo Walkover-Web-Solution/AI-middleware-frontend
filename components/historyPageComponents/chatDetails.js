@@ -94,8 +94,8 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
               </button>
             </div>
             <div className="bg-base-100 rounded-md shadow-sm">
-              <table className="w-full">
-                <tbody>
+              <div className="w-full">
+                <div className="w-full">
                   {/* Important attributes first */}
                   {allowedAttributes.important
                     .sort((a, b) => a[1].localeCompare(b[1]))
@@ -110,11 +110,11 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                     }
 
                     return (
-                      <tr key={key} className="border-b bg-base-100 transition-colors duration-150">
-                        <td className="py-4 px-6 text-sm font-semibold capitalize">
+                      <div key={key} className="border-b bg-base-100 transition-colors duration-150">
+                        <div className="pt-4 px-4 text-sm font-semibold capitalize">
                           {displayKey}
-                        </td>
-                        <td className="py-4 px-6">
+                        </div>
+                        <div className="py-4 px-4">
                           {typeof displayValue === "object" ? (
                             <div className="relative">
                               <pre 
@@ -140,16 +140,16 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                               <div dangerouslySetInnerHTML={{ __html: displayValue?.toString() }}></div>
                             </span>
                           )}
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
                     );
                   })}
 
-                  <tr className="bg-base-200">
-                    <td colSpan="2" className="py-2 px-6 text-sm font-semibold text-gray-500">
+                  <div className="bg-base-200">
+                    <div className="py-2 px-6 text-sm font-semibold text-gray-500">
                       Optional Details
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
 
                   {allowedAttributes.optional
                     .sort((a, b) => a[1].localeCompare(b[1]))
@@ -170,8 +170,8 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                         </tr>
                       );
                     })}
-                </tbody>
-              </table>
+                </div>
+              </div>
             </div>
           </div>
         </aside>
