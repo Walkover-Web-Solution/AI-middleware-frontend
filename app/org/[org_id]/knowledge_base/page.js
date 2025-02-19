@@ -60,12 +60,12 @@ const Page = ({ params }) => {
 
   const EndComponent = () =>{
     return (
-      <div className="dropdown dropdown-end">
+      <div className="dropdown dropdown-left">
         <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>
           <EllipsisVertical size={16} />
         </div>
         <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
-          <li><a onClick={() => handleDelete(item.name, item?._id)} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
+          <li><a onClick={() => handleDelete(item.name, item?._id)} className="">Delete</a></li>
         </ul>
       </div>
     )
