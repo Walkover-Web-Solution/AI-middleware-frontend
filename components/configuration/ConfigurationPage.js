@@ -23,6 +23,7 @@ import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
 import ToolCallCount from "./configurationComponent/toolCallCount";
 import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/utils/enums";
+import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -51,6 +52,8 @@ export default function ConfigurationPage({ params }) {
                         <PreEmbedList params={params} />
                         <InputConfigComponent params={params} />
                         <EmbedList params={params} />
+                        <hr className="my-0 p-0" />
+                        <KnowledgebaseList params={params}/>
                     </>
                 )}
             <ServiceDropdown params={params} />

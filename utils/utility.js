@@ -1,7 +1,10 @@
 import AnthropicIcon from "@/icons/AnthropicIcon";
+import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
+import GoogleDocIcon from "@/icons/GoogleDocIcon";
 import GroqIcon from "@/icons/GroqIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
+import { PdfIcon } from "@/icons/pdfIcon";
 import { cloneDeep } from "lodash";
 
 export const updatedData = (obj1, obj2 = {}, type) => {
@@ -277,3 +280,13 @@ export const allowedAttributes = {
   ]
 };
 
+export const GetFileTypeIcon = (fileType, height, width) =>{
+    switch (fileType) {
+        case 'pdf':
+            return <PdfIcon height={height} width={width} />;
+        case 'csv':
+            return <CsvIcon height={height} width={width} />;
+        default:
+            return <GoogleDocIcon height={height} width={width} />;
+    }
+}
