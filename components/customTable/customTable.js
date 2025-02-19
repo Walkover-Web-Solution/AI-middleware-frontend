@@ -88,7 +88,7 @@ const CustomTable = ({
                         {visibleColumns.map((column) => (
                             <th
                                 key={column}
-                                className="py-3 px-3"
+                                className="py-3 px-3 capitalize"
                             >
                                 <div className="flex items-center">
                                     {sorting && sortableColumns.includes(column) && (
