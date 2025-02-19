@@ -2,7 +2,7 @@
 import { createKnowledgeBaseEntry, deleteKnowBaseData, getAllKnowBaseData } from "@/config";
 
 import { toast } from "react-toastify";
-import { addKnowbaseDataReducer, deleteKnowledgeBaseReducer, fetchAllKnowlegdeBaseData } from "../reducer/knowledgebaseReducer";
+import { addKnowbaseDataReducer, deleteKnowledgeBaseReducer, fetchAllKnowlegdeBaseData } from "../reducer/knowledgeBaseReducer";
 
 
 
