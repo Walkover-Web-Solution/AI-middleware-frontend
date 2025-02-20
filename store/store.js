@@ -1,17 +1,18 @@
-import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { combineReducers } from 'redux';
-import bridgeReducer from "./reducer/bridgeReducer";
-import modelReducer from "./reducer/modelReducer";
-import historyReducer from "./reducer/historyReducer";
-import dryRunReducer from "./reducer/dryRunReducer";
-import userDetailsReducer from "./reducer/userDetailsReducer";
-import authDataReducer from "./reducer/authkeyReducer";
-import orgReducer from "./reducer/orgReducer";
-import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
 import persistReducer from "redux-persist/es/persistReducer";
 import persistStore from "redux-persist/es/persistStore";
-import responseTypeReducer from "./reducer/responseTypeReducer";
+import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
+import authDataReducer from "./reducer/authkeyReducer";
+import bridgeReducer from "./reducer/bridgeReducer";
 import ChatBot from "./reducer/ChatBotReducer";
+import dryRunReducer from "./reducer/dryRunReducer";
+import historyReducer from "./reducer/historyReducer";
+import knowledgeBaseReducer from "./reducer/knowledgeBaseReducer";
+import modelReducer from "./reducer/modelReducer";
+import orgReducer from "./reducer/orgReducer";
+import responseTypeReducer from "./reducer/responseTypeReducer";
+import userDetailsReducer from "./reducer/userDetailsReducer";
 import webhookAlertReducer from "./reducer/webhookAlertReducer";
 
 const createNoopStorage = () => {
@@ -43,6 +44,7 @@ const rootReducer = combineReducers({
     responseTypeReducer,
     ChatBot,
     webhookAlertReducer,
+    knowledgeBaseReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

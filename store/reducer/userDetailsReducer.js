@@ -23,12 +23,23 @@ export const userDetailsReducer = createSlice({
     updateUserDetails: (state, action) => {
       const { orgId, updatedUserDetails } = action.payload;
       state.organizations[orgId] = updatedUserDetails;
+    },
+    updateToken: (state,action) =>{
+      const {auth_token,orgId} = action.payload;
+      state.organizations[orgId] = {
+        ...state.organizations[orgId],
+        meta: {
+          ...state.organizations[orgId]?.meta,
+          auth_token: auth_token
+        }
+      }
     }
   },
 });
 
 export const {
     fetchUserDetails,
-    updateUserDetails
+    updateUserDetails, 
+    updateToken
 } = userDetailsReducer.actions;
 export default userDetailsReducer.reducer;

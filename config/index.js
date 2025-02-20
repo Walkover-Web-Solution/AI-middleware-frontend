@@ -165,6 +165,24 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
   }
 };
 
+export const getVersionHistory = async (threadId, bridgeId, versionId, nextPage = 1, user_feedback, pagelimit = 40) => {
+  try {
+    const response = await axios.get(
+      `${URL}/api/v1/config/threads/${threadId}/${bridgeId}?version_id=${versionId}`, {
+        params: {
+          sub_thread_id: threadId,
+          pageNo: nextPage,
+          limit: pagelimit,
+          user_feedback: user_feedback
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
   try {
     let dryRun
@@ -765,12 +783,54 @@ export const batchApi = async ({ payload }) => {
   }
 }
 
+export const createKnowledgeBaseEntry = async (data) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/rag/`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+export const getAllKnowBaseData = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/rag/docs`);
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const deleteKnowBaseData = async (data) => {
+  try {
+    const { id, orgId } = data;
+    const response = await axios.delete(`${PYTHON_URL}/rag/docs`,{
+      data:{id}
+    });
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+
+export const generateAccessKey = async () =>{
+  try {
+    const response = await axios.get(`${URL}/org/auth_token`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 export const getTestcasesScrore = async (version_id) =>{
   try {
     const response = await axios.get(`${PYTHON_URL}/bridge/versions/testcases/${version_id}`)
     return response.data;
   } catch (error) {
     console.error("error while getting testcase score", error);
-    throw error;
   }
 }

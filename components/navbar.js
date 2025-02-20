@@ -5,17 +5,20 @@ import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
 import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import OrgSlider from './sliders/orgSlider';
+import { getVersionHistoryAction } from '@/store/action/historyAction';
+import { setSelectedVersion } from '@/store/reducer/historyReducer';
 
 function Navbar() {
   const router = useRouter();
   const searchParams = useSearchParams()
   const versionId = searchParams.get('version')
+  const thread_id = searchParams.get('thread_id')
   const dispatch = useDispatch();
   const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
@@ -27,6 +30,11 @@ function Navbar() {
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || [],
     publishedVersion: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || [],
     isdrafted: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted,
+  }));
+  const params = useParams();
+
+  const { selectedVersion } = useCustomSelector((state) => ({
+    selectedVersion : state?.historyReducer?.selectedVersion || 'all'
   }));
 
   const handleDeleteBridge = async (item, newStatus = 0) => {
@@ -93,6 +101,27 @@ function Navbar() {
   const toggleBridgeSidebar = () => toggleSidebar('default-bridge-sidebar');
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
 
+  
+
+  const { bridgeVersionsArray } = useCustomSelector(
+    (state) => ({
+      bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
+    })
+  );
+
+  const handleVersionChange = async (event) => {
+    const version = event.target.value;
+    dispatch(setSelectedVersion(version));
+
+    if (version !== "all") {
+      try {
+         dispatch(getVersionHistoryAction(thread_id, params.id, version))
+      } catch (error) {
+        console.error('Failed to fetch version history:', error);
+      }
+    }
+  };
+
   return (
     <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[100] max-h-[4rem] bg-base-100 sticky top-0 mb-3`}>
       <div className={`flex items-center w-full justify-start gap-2 ${path.length > 4 ? '' : 'hidden'}`}>
@@ -105,9 +134,11 @@ function Navbar() {
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDown size={16} /></div>
           <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
-            {['bridges', "chatbot", 'pauthkey', 'apikeys', 'alerts', 'invite', 'metrics'].map((item) => (
+            {['bridges', "chatbot", 'pauthkey', 'apikeys','knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
               <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
-                <a className={path[3] === item ? "active" : ""}>{item.charAt(0).toUpperCase() + item.slice(1)}</a>
+                <a className={path[3] === item ? "active" : ""}>
+                  {item === 'knowledge_base' ? 'Knowledge Base' : item.charAt(0).toUpperCase() + item.slice(1)}
+                </a>
               </li>
             ))}
           </ul>
@@ -140,6 +171,28 @@ function Navbar() {
                 >
                   Publish Version
                 </button>
+                <div className="divider divider-horizontal mx-1"></div>
+              </div>
+            )}
+            {path[4] === 'history' && (
+              <div className='flex items-center'>
+                
+                <select
+              className="select select-bordered w-full max-w-xs"
+
+              value={selectedVersion}
+              onChange={handleVersionChange}
+            >
+              <option value="all">All Versions</option>
+              {bridgeVersionsArray?.map((version, index) => (
+                <option
+                  key={version}
+                  value={version}
+                >
+                  Version {index + 1} 
+                </option>
+              ))}
+            </select>
                 <div className="divider divider-horizontal mx-1"></div>
               </div>
             )}
@@ -180,6 +233,9 @@ function Navbar() {
                   </div> : (path[3] === 'chatbot' && path.length === 4) ?
                     <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CHATBOT_MODAL)}>
                       + create new chatbot
+                    </button> : path[3] === 'knowledge_base' ?
+                    <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>
+                      + Add new Knowledge base
                     </button> : ""
         )}
       </div>
