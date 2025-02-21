@@ -1,3 +1,5 @@
+import FAQPage from "./page";
+
 export const metadata = {
   title: "faq",
   description:
@@ -9,7 +11,16 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-theme="light">
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <div className="flex">
+          <div className="w-1/2">
+            <FAQPage/>
+          </div>
+          <div className="w-1/2">
+            {children}
+          </div>
+        </div>
+      </body>
     </html>
   );
 }
