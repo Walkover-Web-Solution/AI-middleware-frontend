@@ -37,50 +37,64 @@ const ModelDocs = () => {
   };
 
   return (
-    <div className="bg-gray-300 min-h-[100vh] overflow-hidden flex gap-0 flex-col">
-      <nav className="bg-black w-full p-[20px] flex items-center justify-between px-[4rem]">
-        <h1 className="text-white">GTWY AI</h1>
-        <input
-          type="text"
-          ref={searchInputRef}
-          placeholder="Search here ..."
-          className="w-[50%] p-2 border border-gray-300 rounded-md"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <span className="absolute right-[80px] top-8 text-gray-400 text-sm z-9999999">Cmd/Ctrl + K</span>
-      </nav>
-      <div className="bg-white rounded-xl shadow-lg space-y-6 p-[30px]">
-        <div className="space-y-2 mb-8">
-          <h1 className="text-xl font-extrabold">Table of Contents</h1>
-          <ul className="list-disc list-inside">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      {/* Search Header */}
+      <div className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="relative w-full max-w-2xl mx-auto">
+            <input
+              type="text"
+              ref={searchInputRef}
+              placeholder="Search documentation..."
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm bg-white px-2">
+              ⌘K / Ctrl+K
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Table of Contents */}
+        <div className="lg:col-span-1 bg-white rounded-xl shadow-sm p-6 sticky top-6 h-fit">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Table of Contents</h2>
+          <nav className="space-y-2">
             {filteredSections.map((section) => (
-              <li key={section.id} className="flex gap-[5px] flex-row">
+              <div key={section.id} className="group">
                 <Tooltip text={section?.description}>
                   <a
                     href={`#${section.id}`}
-                    className={`text-blue-500 hover:underline ${activeSection === section.id ? 'font-bold' : ''}`}
+                    className={`flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors ${activeSection === section.id ? 'font-medium text-blue-600' : ''
+                      }`}
                     onClick={() => handleSectionClick(section.id)}
                   >
-                    <span>&#x2022;</span> {section.title}
+                    <span className="w-1.5 h-1.5 bg-gray-300 rounded-full group-hover:bg-blue-600 transition-colors"></span>
+                    <span>{section.title}</span>
                   </a>
                 </Tooltip>
-              </li>
+              </div>
             ))}
-          </ul>
+          </nav>
         </div>
-        {
-          (filteredSections || [])?.map((section) => (
-            <div
+
+        {/* Documentation Content */}
+        <div className="lg:col-span-3 bg-white rounded-xl shadow-sm p-8">
+          {filteredSections.map((section) => (
+            <section
               key={section.id}
               id={section.id}
-              className={`mt-[20px] ${activeSection === section.id ? 'bg-blue-100 p-4 rounded-md' : ''}`}
+              className={`mb-12 scroll-mt-20 ${activeSection === section.id ? 'bg-blue-50 p-6 rounded-lg border-l-4 border-blue-600' : ''
+                }`}
             >
-              <h3 className=" text-black font-semibold">{section?.title}</h3>
-              <p className="text-md text-gray-700">{section?.description}</p>
-            </div>
-          ))
-        }
+              <h3 className="text-2xl font-semibold text-gray-900 mb-3">{section.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{section.description}</p>
+            </section>
+          ))}
+        </div>
       </div>
     </div>
   );

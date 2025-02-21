@@ -12,11 +12,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" data-theme="light">
       <body suppressHydrationWarning>
-        <div className="flex">
-          <div className="w-1/2">
-            <FAQPage/>
+        <div className="flex h-screen">
+          <div className="h-full">
+            <FAQPage />
           </div>
-          <div className="w-1/2">
+          <div className="flex-1 overflow-y-auto">
             {children}
           </div>
         </div>

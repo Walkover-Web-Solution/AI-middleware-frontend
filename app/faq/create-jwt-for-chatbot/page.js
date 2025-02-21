@@ -1,46 +1,100 @@
 "use client";
 
+import { LucideBot, LucideBuilding, LucideKey, LucideUser } from "lucide-react";
+
 const CreateJwtToken = () => {
   return (
-    <div id="someContent" className="m-14">
-      <h1 id="someHeading" className="text-4xl font-bold mb-4">Create JWT Token For ChatBot</h1>
-      <p className="mb-4">This document will guide you through the process of generating a JWT token for integrating gtwy.ai ChatBot. The token will be created using your organization's ID (<code>org_id</code>), the ChatBot ID (<code>chatbot_id</code>), and the User ID (<code>user_id</code>). The token will be signed with an access key provided by gtwy.ai.</p>
-      
-      <h2 className="text-2xl font-semibold mb-2">
-        <strong>Step 1: Gather Required Information</strong>
-      </h2>
-      <p className="mb-4">To create the JWT token, you will need the following information:</p>
-      <ul className="list-disc list-inside mb-4">
-        <li><strong>org_id</strong>: Your organization's unique identifier.</li>
-        <li><strong>chatbot_id</strong>: The ID of the ChatBot you are integrating.</li>
-        <li><strong>user_id</strong>: The User ID that will be associated with the token.</li>
-        <li><strong>access key</strong>: A secret key provided by gtwy.ai, used to sign the JWT token.</li>
-      </ul>
-      
-      <h2 className="text-2xl font-semibold mb-2">
-        <strong>Step 2: Create the JWT Token</strong>
-      </h2>
-      <p className="mb-4">The JWT token will be signed using the <strong>HS256</strong> algorithm. Below is an example of how to structure the JSON payload for the JWT token:</p>
-      
-      <pre className="bg-gray-800 text-white p-4 rounded mb-4">
-        <code>
-          {"{"}
-          <br />
-          &nbsp;&nbsp;"org_id": "1277",
-          <br />
-          &nbsp;&nbsp;"chatbot_id": "6650628ad48e20e61cf701a0",
-          <br />
-          &nbsp;&nbsp;"user_id": "your_user_id_here",
-          <br />
-          &nbsp;&nbsp;"variables": {"{"} "key": "value" {"}"}
-          <br />
-          {"}"}
-        </code>
-      </pre>
-      
-      <p className="mb-4">After generating the JWT token, include it as a parameter within the script tag with the ID <code>'chatbot-main-script'</code>, specifically in the <code>embedToken</code> parameter. This will facilitate seamless integration.</p>
-      
-      <p className="mb-4"><strong>Note:</strong> Flows of an embed project will be different for all users, so make sure you pass a unique <code>user_id</code> to ensure every user has their own flows.</p>
+    <div className="w-full p-8 bg-white rounded-xl shadow-lg">
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">Create JWT Token For ChatBot</h1>
+          <p className="text-lg text-gray-600 leading-relaxed mb-4">
+            This document will guide you through the process of generating a JWT token for integrating gtwy.ai ChatBot. The token will be created using your organization's ID (<code>org_id</code>), the ChatBot ID (<code>chatbot_id</code>), and the User ID (<code>user_id</code>). The token will be signed with an access key provided by gtwy.ai.
+          </p>
+        </div>
+
+
+        {/* Step 1 Section */}
+        <div className="bg-gray-50 p-6 rounded-lg">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+            <span className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 text-white rounded-full flex items-center justify-center mr-3 shadow-md">1</span>
+            Gather Required Information
+          </h2>
+          <p className="text-gray-600 mb-4">To create the JWT token, you will need the following information:</p>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                <LucideBuilding className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <strong className="text-blue-600">org_id</strong>: Your organization's unique identifier.
+              </div>
+            </li>
+            <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                <LucideBot className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <strong className="text-blue-600">chatbot_id</strong>: The ID of the ChatBot you are integrating.
+              </div>
+            </li>
+            <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                <LucideUser className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <strong className="text-blue-600">user_id</strong>: The User ID that will be associated with the token.
+              </div>
+            </li>
+            <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                <LucideKey className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <strong className="text-blue-600">access key</strong>: A secret key provided by gtwy.ai, used to sign the JWT token.
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        {/* Step 2 Section */}
+        <div className="bg-gray-50 p-6 rounded-lg">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+            <span className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 text-white rounded-full flex items-center justify-center mr-3 shadow-md">2</span>
+            Create the JWT Token
+          </h2>
+          <p className="text-gray-600 mb-4">The JWT token will be signed using the <strong className="text-blue-600">HS256</strong> algorithm. Below is an example of how to structure the JSON payload for the JWT token:</p>
+
+          <div className="bg-gray-800 p-6 rounded-lg mb-4">
+            <pre className="text-sm text-gray-200 overflow-x-auto">
+              <code>
+                {"{"}
+                <br />
+                &nbsp;&nbsp;"org_id": "1277",
+                <br />
+                &nbsp;&nbsp;"chatbot_id": "6650628ad48e20e61cf701a0",
+                <br />
+                &nbsp;&nbsp;"user_id": "your_user_id_here",
+                <br />
+                &nbsp;&nbsp;"variables": {"{"} "key": "value" {"}"}
+                <br />
+                {"}"}
+              </code>
+            </pre>
+          </div>
+
+          <p className="text-gray-600 mb-4">
+            After generating the JWT token, include it as a parameter within the script tag with the ID <code className="bg-gray-100 px-2 py-1 rounded-md">'chatbot-main-script'</code>, specifically in the <code className="bg-gray-100 px-2 py-1 rounded-md">embedToken</code> parameter. This will facilitate seamless integration.
+          </p>
+
+          <div className="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+            <p className="text-yellow-800">
+              <strong>Note:</strong> Flows of an embed project will be different for all users, so make sure you pass a unique <code className="bg-yellow-100 px-2 py-1 rounded-md">user_id</code> to ensure every user has their own flows.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
