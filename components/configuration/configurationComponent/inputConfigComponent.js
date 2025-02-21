@@ -7,6 +7,7 @@ import { openModal } from '@/utils/utility';
 import { ChevronDown, Info } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import PromptSummary from './PromptSummary';
 
 const InputConfigComponent = ({ params }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -242,9 +243,21 @@ const InputConfigComponent = ({ params }) => {
 
     return (
         <div>
-            <div className='flex justify-between align-bottom'>
-                <div className="label">
+            <div className='flex justify-between items-center mb-2'>
+                <div className="label flex items-center gap-2">
                     <span className="label-text capitalize font-medium">Prompt</span>
+                    <div className="h-4 w-px bg-gray-300 mx-2"></div>
+                    <div className="flex items-center justify-center">
+                        <button 
+                            className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
+                            onClick={() => {openModal(MODAL_TYPE?.PROMPT_SUMMARY)}}
+                        >
+                            <span>Prompt Summary</span>
+                        </button>
+                        <div className="tooltip tooltip-right" data-tip={"Prompt summary is only for the bridge not for the Versions"}>
+                            <Info size={12} className='ml-2' />
+                        </div>
+                    </div>
                 </div>
                 <div className="label cursor-pointer" onClick={()=> openModal(MODAL_TYPE.OPTIMIZE_PROMPT)}>
                     <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">Optimize Prompt</span>
@@ -297,6 +310,7 @@ const InputConfigComponent = ({ params }) => {
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
             <OptimizePromptModal params={params} />
+            <PromptSummary params={params}/>
         </div>
     );
 };
