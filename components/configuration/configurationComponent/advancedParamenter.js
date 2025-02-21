@@ -260,8 +260,10 @@ const AdvancedParameters = ({ params }) => {
                               <span className="font-semibold">{option}</span>
                               <span className="text-gray-500 text-xs">
                                 {option === 'none' 
-                                  ? "Model won't call a function; it will generate a message." 
-                                  : "Model can generate a message or call a function."}
+                                  ? "Model won't call a function; it will generate a message."
+                                  : option === 'auto'
+                                  ? "Model can generate a response or call a function."
+                                  : "One or more specific functions must be called"}
                               </span>
                             </label>
                           </div>
