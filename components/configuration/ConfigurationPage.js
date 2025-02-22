@@ -42,6 +42,21 @@ export default function ConfigurationPage({ params }) {
         router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${params.version}&view=${target}`);
     };
 
+    const renderNeedHelp = () => {
+        return (
+            <div className="mb-4">
+                <a 
+                    href="/faq/how-to-use-gtwy-ai" 
+                    className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Need help? Visit FAQ →
+                </a>
+            </div>
+        );
+    };
+
     const renderSetupView = useMemo(() => () => (
         <>
             {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
@@ -116,6 +131,7 @@ export default function ConfigurationPage({ params }) {
                 </div>
             </div>
             {currentView === 'setup' ? renderSetupView() : renderGuideView()}
+            {renderNeedHelp()}
         </div>
     );
 }

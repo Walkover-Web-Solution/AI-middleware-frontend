@@ -17,7 +17,7 @@ const roboto = Roboto({
 });
 const HeroPage = () => {
   return (
-    <div className="hero-bg flex flex-col w-full">
+    <div className="hero-bg flex flex-col w-full pt-32">
       <Header />
       <div className="flex flex-grow flex-col items-center justify-center gap-6  py-28">
         <div className="flex flex-col  text-center space-y-4 w-full max-w-screen-xl">
