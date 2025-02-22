@@ -44,9 +44,9 @@ const AdvancedParameters = ({ params }) => {
   }, [tool_choice_data]);
 
   useEffect(() => {
-    if(tool_choice_data === "auto"  || tool_choice_data === "none")
+    if(tool_choice_data === "auto"  || tool_choice_data === "none" || tool_choice_data === "default")
     {
-      setSelectedOptions([{name:tool_choice_data,id:tool_choice_data}])
+      setSelectedOptions([{name: tool_choice_data === "default" ? "auto" : tool_choice_data, id: tool_choice_data === "default" ? "auto" : tool_choice_data}])
       return
     }
     const selectedFunctiondata = version_function_data && typeof version_function_data === 'object'
@@ -203,26 +203,16 @@ const AdvancedParameters = ({ params }) => {
               {field === 'dropdown' && (
                 <div className="w-full">
                   <div className="relative">
-                    <div className={`flex items-center gap-2 input input-bordered input-sm w-full ${selectedOptions.length > 0 ? 'min-h-fit' : 'min-h-[2.5rem]'} flex-wrap py-1`}>
-                      {selectedOptions.length > 0 && (
-                        <div className="badge badge-outline p-2 flex items-center gap-1">
-                          {integrationData[selectedOptions[0].name]?.title || selectedOptions[0].name}
-                          <button
-                            type="button"
-                            className="text-xs hover:text-error"
-                            onClick={() => {
-                              setSelectedOptions([]);
-                              handleDropdownChange(null, key); // Updated to pass null
-                            }}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      )}
-                      <div
-                        className="cursor-pointer ml-auto"
-                        onClick={() => setShowDropdown(!showDropdown)}
-                      >
+                    <div 
+                      className="flex items-center gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer"
+                      onClick={() => setShowDropdown(!showDropdown)}
+                    >
+                      <span className="text-base-content">
+                        {selectedOptions.length > 0 
+                          ? (integrationData[selectedOptions[0].name]?.title || selectedOptions[0].name) 
+                          : 'Select an tool choice option...'}
+                      </span>
+                      <div className="ml-auto">
                         {showDropdown ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </div>
                     </div>
