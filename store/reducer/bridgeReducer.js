@@ -160,7 +160,7 @@ export const bridgeReducer = createSlice({
     publishBrigeVersionReducer: (state, action) => {
       const { bridgeId = null, versionId = null, orgId = null } = action.payload;
       const publishedVersionData = state.bridgeVersionMapping[bridgeId][versionId];
-      
+
       // Update the allBridgesMap with the data from the published version
       state.allBridgesMap[bridgeId] = {
         ...state.allBridgesMap[bridgeId],
@@ -224,6 +224,15 @@ export const bridgeReducer = createSlice({
       const { bridgeId, prompt = "No optimized prompt" } = action.payload;
       state.allBridgesMap[bridgeId]['optimizePromptHistory'] = [...(state.allBridgesMap?.[bridgeId]?.['optimizePromptHistory'] || []), prompt];
     },
+    webhookURLForBatchAPIReducer: (state, action) => {
+      const { bridge_id, version_id, webhook } = action.payload;
+      if (state.allBridgesMap[bridge_id]) {
+        if (!state.allBridgesMap[bridge_id][version_id]) {
+          state.allBridgesMap[bridge_id][version_id] = {};
+        }
+        state.allBridgesMap[bridge_id][version_id].webhook = webhook;
+      }
+    },
   },
 });
 
@@ -250,7 +259,8 @@ export const {
   apikeyDeleteReducer,
   updateBridgeActionReducer,
   updateFunctionReducer,
-  optimizePromptReducer
+  optimizePromptReducer,
+  webhookURLForBatchAPIReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;
