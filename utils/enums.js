@@ -352,3 +352,53 @@ export const KNOWLEDGE_BASE_CUSTOM_SECTION = [
   { value: 'recursive', label: 'Recursive Chunking' }
 ];
 export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini'];
+
+export const FAQSIDEBARLINKS = [
+  {
+      title: "How use Gtwy Ai",
+      href: "/faq/how-to-use-gtwy-ai",
+  },
+  {
+      title: "Addvance Parameter Guide", 
+      href: "/faq/guide",
+  },
+  {
+      title: "JSON Format Guide",
+      href: "/faq/jsonformatdoc",
+  },
+  {
+      title: "Create JWT Token Chatbot",
+      href: "/faq/create-jwt-for-chatbot",
+  },
+];
+
+export const PRICINGPLANS = [
+  {
+    name: 'Free',
+    price: 0,
+    description: 'Perfect for getting started and exploring our core features',
+    features: [
+      '1,000 API calls/month',
+      'Basic support via email',
+      'Core API features & integrations', 
+      'Access to public documentation',
+      'Basic analytics dashboard',
+      'Chatbot Integration'
+    ]
+  },
+  {
+    name: 'Enterprise',
+    price: 'Custom Pricing',
+    description: 'Tailored solutions for large-scale organizations',
+    features: [
+      'Unlimited API calls',
+      '24/7 priority support',
+      'Custom feature development',
+      'Enterprise SLA guarantees', 
+      'On-premise deployment options',
+      'Advanced security features',
+      'Dedicated account manager',
+      'Custom analytics & reporting'
+    ]
+  }
+];
