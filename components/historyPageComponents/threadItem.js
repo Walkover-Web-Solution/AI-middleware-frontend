@@ -38,7 +38,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       return;
     }
     dispatch(updateContentHistory({
-      id: item.id,
+      id: item?.Id,
       bridge_id: params.id,
       message: modalInput,
       index
