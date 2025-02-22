@@ -825,3 +825,12 @@ export const generateAccessKey = async () =>{
     throw error;
   }
 }
+
+export const getTestcasesScrore = async (version_id) =>{
+  try {
+    const response = await axios.get(`${PYTHON_URL}/bridge/versions/testcases/${version_id}`)
+    return response.data;
+  } catch (error) {
+    console.error("error while getting testcase score", error);
+  }
+}
