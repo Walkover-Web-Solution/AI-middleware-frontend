@@ -15,15 +15,15 @@ const FAQPage = () => {
                     {/* Logo and Title Container */}
                     <div className="flex items-center gap-2">
                         {/* Logo */}
-                        <Image 
-                            src="/favicon.ico" 
-                            alt="GTWY AI Logo" 
-                            width={32}
-                            height={32}
+                        <Image
+                            src="/ButtonMd.svg"
+                            alt="GTWY AI Logo"
+                            width={40}
+                            height={40}
                         />
-                        
+
                         {/* Main Title */}
-                        <h1 
+                        <h1
                             className="text-2xl font-bold text-white mb-2 cursor-pointer hover:text-gray-300 transition-colors"
                             onClick={() => window.location.href = "/"}
                         >
@@ -68,7 +68,7 @@ const FAQPage = () => {
                                         Your complete guide to getting started with GTWY AI platform
                                     </p>
                                 </div>
-                    
+
                                 {/* Quick Start Guide */}
                                 <div className="mb-16">
                                     <h2 className="text-2xl font-semibold mb-6">Quick Start Guide</h2>
@@ -77,7 +77,7 @@ const FAQPage = () => {
                                             <h3 className="text-lg font-medium mb-3">1. Create Your Bridge</h3>
                                             <p className="text-gray-600 mb-4">Start by creating a new bridge and selecting your preferred AI model.</p>
                                             <div className="aspect-video bg-gray-100 rounded-lg">
-                                                <iframe 
+                                                <iframe
                                                     className="w-full h-full rounded-lg"
                                                     src="https://www.youtube.com/embed/your-video-id"
                                                     title="How to Create a Bridge"
@@ -85,12 +85,12 @@ const FAQPage = () => {
                                                 />
                                             </div>
                                         </div>
-                    
+
                                         <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                                             <h3 className="text-lg font-medium mb-3">2. Configure Settings</h3>
                                             <p className="text-gray-600 mb-4">Customize your bridge settings and parameters for optimal performance.</p>
                                             <div className="aspect-video bg-gray-100 rounded-lg">
-                                                <iframe 
+                                                <iframe
                                                     className="w-full h-full rounded-lg"
                                                     src="https://www.youtube.com/embed/your-video-id"
                                                     title="Configure Your Bridge"
@@ -98,12 +98,12 @@ const FAQPage = () => {
                                                 />
                                             </div>
                                         </div>
-                    
+
                                         <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                                             <h3 className="text-lg font-medium mb-3">3. Deploy & Integrate</h3>
                                             <p className="text-gray-600 mb-4">Learn how to deploy your bridge and integrate it into your application.</p>
                                             <div className="aspect-video bg-gray-100 rounded-lg">
-                                                <iframe 
+                                                <iframe
                                                     className="w-full h-full rounded-lg"
                                                     src="https://www.youtube.com/embed/your-video-id"
                                                     title="Deploy and Integrate"
@@ -113,7 +113,7 @@ const FAQPage = () => {
                                         </div>
                                     </div>
                                 </div>
-                    
+
                                 {/* Detailed Guides */}
                                 <div className="space-y-12">
                                     <div className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
@@ -129,7 +129,7 @@ const FAQPage = () => {
                                             </ul>
                                         </div>
                                     </div>
-                    
+
                                     <div className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
                                         <h2 className="text-2xl font-semibold mb-6">Chatbot Implementation</h2>
                                         <div className="prose max-w-none">
@@ -142,7 +142,7 @@ const FAQPage = () => {
                                             </ol>
                                         </div>
                                     </div>
-                    
+
                                     <div className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
                                         <h2 className="text-2xl font-semibold mb-6">Best Practices</h2>
                                         <div className="grid md:grid-cols-2 gap-6">
@@ -165,14 +165,14 @@ const FAQPage = () => {
                                         </div>
                                     </div>
                                 </div>
-                    
+
                                 {/* Help & Support */}
                                 <div className="mt-12 text-center">
                                     <h2 className="text-2xl font-semibold mb-4">Need Additional Help?</h2>
                                     <p className="text-gray-600 mb-6">
                                         Our support team is always here to help you get the most out of GTWY AI.
                                     </p>
-                                    <a 
+                                    <a
                                         href="mailto:support@gtwy.ai"
                                         className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
                                     >
