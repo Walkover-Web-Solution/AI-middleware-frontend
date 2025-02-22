@@ -52,7 +52,7 @@ export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, g
     const result = await createBridgeVersionApi(dataToSend);
     if (result?.success) {
       onSuccess(result);
-      dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId, version_description:data?.version_description }));
+      dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId, version_description: data?.version_description }));
       toast.success('New version created successfully');
     }
   } catch (error) {
@@ -127,6 +127,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
     dispatch(isPending());
     const data = await updateBridge({ bridgeId, dataToSend });
     dispatch(updateBridgeReducer({ bridges: data.data.bridge, functionData: dataToSend?.functionData || null }));
+    return { success: true };
   } catch (error) {
     console.error(error);
     dispatch(isError());
