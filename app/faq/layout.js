@@ -1,3 +1,5 @@
+import FAQPage from "@/components/FAQSidebar";
+
 export const metadata = {
   title: "faq",
   description:
@@ -8,8 +10,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" data-theme="light">
-      <body suppressHydrationWarning>{children}</body>
-    </html>
+      <div className="flex h-screen w-full">
+          <div className="h-full">
+            <FAQPage />
+          </div>
+          <div className="w-full overflow-y-auto">
+            {children}
+          </div>
+        </div>
   );
 }
