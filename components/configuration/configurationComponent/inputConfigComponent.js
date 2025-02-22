@@ -7,7 +7,7 @@ import { openModal } from '@/utils/utility';
 import { ChevronDown, Info } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import PromptSummary from './PromptSummary';
+import PromptSummaryModal from '../../modals/PromptSummaryModal';
 
 const InputConfigComponent = ({ params }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -310,7 +310,7 @@ const InputConfigComponent = ({ params }) => {
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
             <OptimizePromptModal params={params} />
-            <PromptSummary params={params}/>
+            <PromptSummaryModal params={params}/>
         </div>
     );
 };
