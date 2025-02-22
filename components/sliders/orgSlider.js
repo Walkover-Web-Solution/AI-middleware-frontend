@@ -2,7 +2,7 @@ import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { filterOrganizations, openModal, toggleSidebar } from '@/utils/utility';
-import { Building2, ChevronDown, KeyRound, LogOut, Mail, Settings2, X } from 'lucide-react';
+import { Building2, ChevronDown, Cog, KeyRound, LogOut, Mail, Settings2, X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateOrg from '../createNewOrg';
@@ -113,6 +113,7 @@ function OrgSlider() {
                         <ul className="menu w-full   text-base-content">
                             <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
                             <li> <a className={`py-2 px-2  ${path[3] === 'Pauthkey' ? "active" : ""}  rounded-md`} onClick={() => { router.push(`/org/${path[2]}/pauthkey`) }}> <KeyRound size={16} />Pauth key</a> </li>
+                            <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <Cog size={16} /> Workspace Setting</a> </li>
                             <li onClick={logoutHandler}><a className='py-2 px-2 rounded-md'> <LogOut size={16} />  logout</a></li>
                         </ul>
                     </div>

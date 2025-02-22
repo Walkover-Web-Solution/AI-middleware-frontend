@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
 const PYTHON_URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const PROXY_URL = process.env.NEXT_PUBLIC_PROXY_URL;
+const NEXT_PUBLIC_REFERENCEID = process.env.NEXT_PUBLIC_REFERENCEID
 
 export const runtime = 'edge';
 
@@ -156,6 +157,24 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
       }
     });
     return getSingleThreadData.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getVersionHistory = async (threadId, bridgeId, versionId, nextPage = 1, user_feedback, pagelimit = 40) => {
+  try {
+    const response = await axios.get(
+      `${URL}/api/v1/config/threads/${threadId}/${bridgeId}?version_id=${versionId}`, {
+        params: {
+          sub_thread_id: threadId,
+          pageNo: nextPage,
+          limit: pagelimit,
+          user_feedback: user_feedback
+        }
+      }
+    );
+    return response.data;
   } catch (error) {
     console.error(error);
   }
@@ -708,7 +727,7 @@ export const updateOrganizationData = async (orgId, orgDetails) => {
         'reference-id': NEXT_PUBLIC_REFERENCEID
       }
     });
-    return response.data;
+    return response.data; 
   } catch (error) {
 
     toast.error('Error updating organization:', error);

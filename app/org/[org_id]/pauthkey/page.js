@@ -107,7 +107,10 @@ function Page() {
     <div className="h-full">
       {isCreating && <LoadingSpinner />}
       <CustomTable
-        data={authData}
+        data={authData.map(item => ({
+          ...item,
+          actualName: item.name
+        }))}
         columnsToShow={PAUTH_KEY_COLUMNS}
         sorting
         sortingColumns={["name"]}

@@ -24,7 +24,7 @@ const Header = () => {
               width={32}
               height={32}
             />
-            <p className="font-medium cursor-pointer">AI MIDDLEWARE</p>
+            <p className="font-medium cursor-pointer">GTWY AI</p>
           </div>
         </Link>
       </div>

@@ -1,7 +1,7 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import { AlignJustify, Bot, Building2, ChevronDown, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TriangleAlert, UserPlus } from 'lucide-react';
+import { AlignJustify, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TriangleAlert, UserPlus } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 
@@ -99,6 +99,7 @@ function MainSlider() {
                 <div className="border-t border-gray-200 bg-white">
                   <ul className="menu w-full   text-base-content">
                     <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
+                    <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <Cog size={16} /> Workspace Setting</a> </li>
                     <li ><a className='py-2 px-2 rounded-md' onClick={logoutHandler}> <LogOut size={16} />  logout</a></li>
                   </ul>
                 </div>
