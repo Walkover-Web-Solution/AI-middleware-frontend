@@ -9,7 +9,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData,
     }));
     const [searchQuery, setSearchQuery] = useState('');
-    
+
     const handleInputChange = (e) => {
         setSearchQuery(e.target?.value || ""); // Update search query when the input changes
     };
@@ -22,7 +22,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             // .filter(value => !bridge_pre_tools?.includes(value?._id))
             // .filter(value => !(connectedFunctions || [])?.includes(value?._id))
             .filter(value => {
-                const title = integrationData[value?.endpoint]?.title || integrationData[value?.function_name]?.title;
+                const title = integrationData?.[value?.endpoint]?.title || integrationData?.[value?.function_name]?.title;
                 return title !== undefined && title?.toLowerCase()?.includes(searchQuery.toLowerCase()) &&
                     !(connectedFunctions || [])?.includes(value?._id);
             })
