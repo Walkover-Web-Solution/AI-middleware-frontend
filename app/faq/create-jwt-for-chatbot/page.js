@@ -1,5 +1,3 @@
-"use client";
-
 import { LucideBot, LucideBuilding, LucideKey, LucideUser } from "lucide-react";
 
 const CreateJwtToken = () => {
@@ -8,7 +6,7 @@ const CreateJwtToken = () => {
       <div className="space-y-8">
         {/* Header Section */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Create JWT Token For ChatBot</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">Create JWT Token For ChatBot</h1>
           <p className="text-lg text-gray-600 leading-relaxed mb-4">
             This document will guide you through the process of generating a JWT token for integrating gtwy.ai ChatBot. The token will be created using your organization's ID (<code>org_id</code>), the ChatBot ID (<code>chatbot_id</code>), and the User ID (<code>user_id</code>). The token will be signed with an access key provided by gtwy.ai.
           </p>
