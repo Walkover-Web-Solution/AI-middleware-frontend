@@ -10,9 +10,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" data-theme="light">
-      <body suppressHydrationWarning>
-        <div className="flex h-screen w-full">
+      <div className="flex h-screen w-full">
           <div className="h-full">
             <FAQPage />
           </div>
@@ -20,7 +18,5 @@ export default function RootLayout({ children }) {
             {children}
           </div>
         </div>
-      </body>
-    </html>
   );
 }

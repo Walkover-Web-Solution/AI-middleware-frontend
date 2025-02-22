@@ -43,11 +43,10 @@ const Header = () => {
       isScrolled ? 'backdrop-blur-md bg-black/30' : ''
     }`}>
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4 md:px-8 py-6">
-        <div onClick={() => router.push("/")} className="group flex items-center space-x-3 transition-transform hover:scale-105 cursor-pointer">
+        <div onClick={() => router.push("/")} className="flex items-center space-x-3 cursor-pointer">
           <Image
             src="/ButtonMd.svg"
             alt="GTWY AI Logo"
-            className="group-hover:rotate-12 transition-transform duration-300"
             width={40}
             height={40}
           />
@@ -66,7 +65,7 @@ const Header = () => {
           {isLoggedIn ? (
             <button 
               onClick={() => router.push("/login")}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:-translate-y-0.5"
+              className="btn btn-primary"
             >
               Go to App
             </button>
