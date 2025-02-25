@@ -1,17 +1,26 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { KNOWLEDGE_BASE_CUSTOM_SECTION, KNOWLEDGE_BASE_SECTION_TYPES, MODAL_TYPE } from '@/utils/enums';
-import { closeModal } from '@/utils/utility';
-import { createKnowledgeBaseEntryAction } from '@/store/action/knowledgeBaseAction';
+import { closeModal, openModal } from '@/utils/utility';
+import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/store/action/knowledgeBaseAction';
 
-const KnowledgeBaseModal = ({ params }) => {
+const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {} }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSectionType, setSelectedSectionType] = useState('default');
   const [chunkingType, setChunkingType] = useState('');
   const [file, setFile] = useState(null); // State to hold the uploaded file
   const [isUpload, setIsUpload] = useState(false); // State to toggle between link and upload
+
+  const resetModal = useCallback(() => {
+    setSelectedSectionType('default');
+    setChunkingType('');
+    setFile(null);
+    setIsUpload(false);
+    setIsLoading(false);
+    setSelectedKnowledgeBase(null);
+  }, []);
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -23,15 +32,20 @@ const KnowledgeBaseModal = ({ params }) => {
       orgId: params?.org_id,
       name: formData.get('name'),
       description: formData.get('description'),
-      chunking_type: formData.get('chunking_type'),
-      chunk_size: Number(formData.get('chunk_size')) || null,
-      chunk_overlap: Number(formData.get('chunk_overlap')) || null
     };
 
-    if (payload.sectionType === 'default') {
-      payload.chunking_type = null;
-      payload.chunk_size = null;
-      payload.chunk_overlap = null;
+    if (selectedKnowledgeBase?._id) {
+      payload.id = selectedKnowledgeBase._id;
+    } else {
+      payload.chunking_type = formData.get('chunking_type');
+      payload.chunk_size = Number(formData.get('chunk_size')) || null;
+      payload.chunk_overlap = Number(formData.get('chunk_overlap')) || null;
+
+      if (payload.sectionType === 'default') {
+        payload.chunking_type = null;
+        payload.chunk_size = null;
+        payload.chunk_overlap = null;
+      }
     }
 
     // Convert payload to FormData
@@ -42,27 +56,29 @@ const KnowledgeBaseModal = ({ params }) => {
       }
     }
 
-    // Add file to FormData if present
-    if (isUpload && file) {
+    // Add file to FormData if present and not updating
+    if (!selectedKnowledgeBase && isUpload && file) {
       payloadFormData.append('file', file);
-    } else {
-      payloadFormData.append('doc_url', formData.get('doc_url'));
+    } else if (!selectedKnowledgeBase) {
+      payloadFormData.append('url', formData.get('url'));
     }
 
     try {
-      await dispatch(createKnowledgeBaseEntryAction(payloadFormData,params?.org_id));
+      selectedKnowledgeBase ? await dispatch(updateKnowledgeBaseAction({ data: { data: payload, id: selectedKnowledgeBase?._id } }, params?.org_id)) : await dispatch(createKnowledgeBaseEntryAction(payloadFormData, params?.org_id));
       closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
       event.target.reset();
+      resetModal();
       setFile(null); // Reset the file state after submission
     } finally {
       setSelectedSectionType("default");
       setChunkingType("");
       setIsLoading(false);
     }
-  }, [dispatch, params.org_id, file, isUpload]);
+  }, [dispatch, params.org_id, file, isUpload, selectedKnowledgeBase]);
 
   const handleClose = useCallback(() => {
     closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
+    resetModal();
   }, []);
 
   const handleFileChange = (event) => {
@@ -81,7 +97,7 @@ const KnowledgeBaseModal = ({ params }) => {
     <dialog id={MODAL_TYPE.KNOWLEDGE_BASE_MODAL} className="modal backdrop-blur-sm">
       <div className="modal-box w-11/12 max-w-3xl border-2">
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
-          <h3 className="font-bold text-xl">New Knowledge Base Configuration</h3>
+          <h3 className="font-bold text-xl">{selectedKnowledgeBase ? 'Update' : 'New'} Knowledge Base Configuration</h3>
           <button
             onClick={handleClose}
             className="btn btn-circle btn-ghost btn-sm"
@@ -105,6 +121,7 @@ const KnowledgeBaseModal = ({ params }) => {
                   placeholder="Enter knowledge base name"
                   required
                   disabled={isLoading}
+                  defaultValue={selectedKnowledgeBase?.actual_name || ''}
                 />
               </div>
 
@@ -118,6 +135,7 @@ const KnowledgeBaseModal = ({ params }) => {
                   placeholder="Describe the purpose and content of this knowledge base..."
                   required
                   disabled={isLoading}
+                  defaultValue={selectedKnowledgeBase?.description || ''}
                 />
               </div>
 
@@ -133,6 +151,7 @@ const KnowledgeBaseModal = ({ params }) => {
                     checked={!isUpload}
                     onChange={() => setIsUpload(false)}
                     className="radio mr-2"
+                    disabled={selectedKnowledgeBase}
                   />
                   <span className="label-text">Link</span>
                   <input
@@ -142,6 +161,7 @@ const KnowledgeBaseModal = ({ params }) => {
                     checked={isUpload}
                     onChange={() => setIsUpload(true)}
                     className="radio ml-4 mr-2"
+                    disabled={selectedKnowledgeBase}
                   />
                   <span className="label-text">Upload</span>
                 </div>
@@ -154,11 +174,12 @@ const KnowledgeBaseModal = ({ params }) => {
                   </label>
                   <input
                     type="url"
-                    name="doc_url"
+                    name="url"
                     className="input input-bordered input-md focus:ring-1 ring-primary/40"
                     placeholder="https://example.com/documentation"
-                    required
-                    disabled={isLoading}
+                    required={!selectedKnowledgeBase}
+                    disabled={isLoading || selectedKnowledgeBase}
+                    defaultValue={selectedKnowledgeBase?.url || ''}
                   />
                 </div>
               ) : (
@@ -170,9 +191,9 @@ const KnowledgeBaseModal = ({ params }) => {
                     type="file"
                     name="file"
                     accept=".pdf, .doc, .docx, .csv"
-                    className="file-input file-input-bordered file-input-sm w-full max-w-xs" // Changed to text-xs for smaller size
+                    className="file-input file-input-bordered file-input-sm w-full max-w-xs"
                     onChange={handleFileChange}
-                    disabled={isLoading}
+                    disabled={isLoading || selectedKnowledgeBase}
                   />
                 </div>
               )}
@@ -188,10 +209,10 @@ const KnowledgeBaseModal = ({ params }) => {
                   </label>
                   <select
                     name="sectionType"
-                    defaultValue="default"
+                    value={selectedSectionType}
                     className="select select-bordered select-md focus:ring-1 ring-primary/40"
-                    required
-                    disabled={isLoading}
+                    required={!selectedKnowledgeBase}
+                    disabled={isLoading || selectedKnowledgeBase}
                     onChange={(e) => setSelectedSectionType(e.target.value)}
                   >
                     {KNOWLEDGE_BASE_SECTION_TYPES?.map(option => (
@@ -208,9 +229,9 @@ const KnowledgeBaseModal = ({ params }) => {
                     <select
                       name="chunking_type"
                       className="select select-bordered select-md focus:ring-1 ring-primary/40"
-                      required={selectedSectionType === 'custom'}
-                      disabled={isLoading}
-                      defaultValue=""
+                      required={selectedSectionType === 'custom' && !selectedKnowledgeBase}
+                      disabled={isLoading || selectedKnowledgeBase}
+                      value={chunkingType}
                       onChange={(e) => setChunkingType(e.target.value)}
                     >
                       <option value="" disabled>Select strategy</option>
@@ -232,9 +253,10 @@ const KnowledgeBaseModal = ({ params }) => {
                       type="number"
                       name="chunk_size"
                       className="input input-bordered input-md focus:ring-1 ring-primary/40"
-                      required={selectedSectionType === 'custom'}
+                      required={selectedSectionType === 'custom' && !selectedKnowledgeBase}
                       min="100"
-                      disabled={isLoading}
+                      disabled={isLoading || selectedKnowledgeBase}
+                      defaultValue={selectedKnowledgeBase?.chunk_size || ''}
                     />
                   </div>
 
@@ -246,9 +268,10 @@ const KnowledgeBaseModal = ({ params }) => {
                       type="number"
                       name="chunk_overlap"
                       className="input input-bordered input-md focus:ring-1 ring-primary/40"
-                      required={selectedSectionType === 'custom'}
+                      required={selectedSectionType === 'custom' && !selectedKnowledgeBase}
                       min="0"
-                      disabled={isLoading}
+                      disabled={isLoading || selectedKnowledgeBase}
+                      defaultValue={selectedKnowledgeBase?.chunk_overlap || ''}
                     />
                   </div>
                 </div>
@@ -270,7 +293,7 @@ const KnowledgeBaseModal = ({ params }) => {
               className="btn btn-primary text-white hover:bg-primary-focus"
               disabled={isLoading}
             >
-              {isLoading ? 'Creating...' : 'Create Knowledge Base'}
+              {isLoading ? (selectedKnowledgeBase ? 'Updating...' : 'Creating...') : (selectedKnowledgeBase ? 'Update' : 'Create') + ' Knowledge Base'}
             </button>
           </div>
         </form>

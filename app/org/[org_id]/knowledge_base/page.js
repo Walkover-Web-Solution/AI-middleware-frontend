@@ -1,16 +1,15 @@
 'use client';
 import KnowledgeBaseModal from "@/components/modals/knowledgeBaseModal";
 import { useCustomSelector } from '@/customHooks/customSelector';
-import GoogleDocIcon from "@/icons/GoogleDocIcon";
 import { deleteKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
-import { BookText, EllipsisVertical, LayoutGrid, Table } from "lucide-react";
+import { BookText, EllipsisVertical, LayoutGrid, SquarePen, Table, Trash2 } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch } from "react-redux";
 import CustomTable from "@/components/customTable/customTable";
-import { KNOWLEDGE_BASE_COLUMNS } from "@/utils/enums";
+import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
 import { truncate } from "@/components/historyPageComponents/assistFile";
 import KnowledgeBaseIntegrationSlider from "@/components/configuration/configurationComponent/knowledgeBaseIntegrationSlider";
-import { GetFileTypeIcon } from "@/utils/utility";
+import { GetFileTypeIcon, openModal } from "@/utils/utility";
 
 export const runtime = 'edge';
 
@@ -20,6 +19,7 @@ const Page = ({ params }) => {
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [searchTerm, setSearchTerm] = useState('');
   const [openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider] = useState(false);
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -33,8 +33,6 @@ const Page = ({ params }) => {
     window.addEventListener('resize', updateScreenSize);
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
-
-  
 
   const filteredKnowledgeBase = useMemo(() =>
     knowledgeBaseData?.filter(item =>
@@ -52,24 +50,37 @@ const Page = ({ params }) => {
       <div className="tooltip" data-tip={item.name}>
         {truncate(item.name, 30)}
       </div>
-      
     </div>,
     description : item?.description,
     actual_name: item?.name,
   }));
 
-  const EndComponent = () =>{
+  const EndComponent = ({ row }) => {
     return (
-      <div className="dropdown dropdown-left">
-        <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>
-          <EllipsisVertical size={16} />
+      <div className="flex gap-3 justify-center items-center">
+        <div
+          className="tooltip tooltip-primary"
+          data-tip="delete"
+          onClick={() => handleDelete(row.actual_name, row._id)}
+        >
+          <Trash2 strokeWidth={2} size={20} />
         </div>
-        <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
-          <li><a onClick={() => handleDelete(item.name, item?._id)} className="">Delete</a></li>
-        </ul>
+        <div
+          className="tooltip tooltip-primary"
+          data-tip="Update"
+          onClick={() => handleUpdateKnowledgeBase(row)}
+        >
+          <SquarePen size={20} />
+        </div>
       </div>
-    )
-  }
+    );
+  };
+  
+  const handleUpdateKnowledgeBase = (item) => {
+    setSelectedKnowledgeBase(item);
+    openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)
+  };
+
   const handleDelete = (name, id) => {
     if (window.confirm(`Do you want to delete document with name: ${name}?`)) {
       dispatch(deleteKnowBaseDataAction({ data: { id, orgId: params?.org_id } }));
@@ -119,6 +130,7 @@ const Page = ({ params }) => {
                   </div>
                   <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
                     <li><a onClick={() => handleDelete(item.name, item?._id)} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
+                    <li><a onClick={() => handleUpdateKnowledgeBase(item)} className="hover:bg-base-200">Update</a></li>
                   </ul>
                 </div>
                 <div className="flex flex-col items-center w-full gap-2">
@@ -152,7 +164,7 @@ const Page = ({ params }) => {
           <p className="text-gray-500">No knowledge base entries found</p>
         </div>
       )}
-      <KnowledgeBaseModal params={params} />
+      <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase}/>
       <KnowledgeBaseIntegrationSlider params={params} setOpenKnowledgeBaseSlider={setOpenKnowledgeBaseSlider} openKnowledgeBaseSlider={openKnowledgeBaseSlider} />
     </div>
   );

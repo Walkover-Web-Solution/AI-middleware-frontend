@@ -1,8 +1,8 @@
 
-import { createKnowledgeBaseEntry, deleteKnowBaseData, getAllKnowBaseData } from "@/config";
+import { createKnowledgeBaseEntry, deleteKnowBaseData, getAllKnowBaseData, updateKnowledgeBaseEntry } from "@/config";
 
 import { toast } from "react-toastify";
-import { addKnowbaseDataReducer, deleteKnowledgeBaseReducer, fetchAllKnowlegdeBaseData } from "../reducer/knowledgeBaseReducer";
+import { addKnowbaseDataReducer, deleteKnowledgeBaseReducer, fetchAllKnowlegdeBaseData, updateKnowledgeBaseReducer } from "../reducer/knowledgeBaseReducer";
 
 
 
@@ -14,8 +14,7 @@ export const createKnowledgeBaseEntryAction = (data, orgId) => async (dispatch) 
       dispatch(addKnowbaseDataReducer({ 
         orgId,
         data : response?.data,
-        docId: response?.data?.doc_id, 
-        _id: response?.data?.mongo_id 
+        _id: response?.data?._id 
       }))
     }
   } catch (error) {
@@ -23,6 +22,7 @@ export const createKnowledgeBaseEntryAction = (data, orgId) => async (dispatch) 
     console.error(error);
   }
 };
+
 export const getAllKnowBaseDataAction = (orgId) => async (dispatch) => {
   try {
     const response = await getAllKnowBaseData();
@@ -34,6 +34,7 @@ export const getAllKnowBaseDataAction = (orgId) => async (dispatch) => {
     console.error(error);
   }
 };
+
 export const deleteKnowBaseDataAction = ({data}) => async (dispatch) => {
   try {
     const response = await deleteKnowBaseData(data);
@@ -43,6 +44,23 @@ export const deleteKnowBaseDataAction = ({data}) => async (dispatch) => {
     }
   } catch (error) {
     toast.error('something went wrong')
+    console.error(error);
+  }
+};
+
+export const updateKnowledgeBaseAction = (data, orgId) => async (dispatch) => {
+  try {
+    const response = await updateKnowledgeBaseEntry(data);
+    if (response.data) {
+      toast.success(response?.data?.message);
+      dispatch(updateKnowledgeBaseReducer({ 
+        orgId,
+        data: response?.data?.data,
+        _id: response?.data?.data?._id
+      }));
+    }
+  } catch (error) {
+    toast.error('Something went wrong');
     console.error(error);
   }
 };

@@ -27,13 +27,22 @@ export const knowledgeBaseReducer = createSlice({
         state.knowledgeBaseData[orgId] = state.knowledgeBaseData[orgId].filter(entry => entry._id !== id);
       }
     },
+    updateKnowledgeBaseReducer: (state, action) => {
+      const { orgId, data, _id } = action.payload;
+      if (state.knowledgeBaseData[orgId]) {
+        state.knowledgeBaseData[orgId] = state.knowledgeBaseData[orgId].map(entry => 
+          entry._id === _id ? { ...data, _id } : entry
+        );
+      }
+    }
   }
 });
 
 export const {
   fetchAllKnowlegdeBaseData,
   addKnowbaseDataReducer,
-  deleteKnowledgeBaseReducer
+  deleteKnowledgeBaseReducer,
+  updateKnowledgeBaseReducer
 } = knowledgeBaseReducer.actions;
 
 export default knowledgeBaseReducer.reducer;
