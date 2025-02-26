@@ -1,4 +1,4 @@
-"use client";
+import { FAQ_QUESTION_ANSWER } from "@/utils/enums";
 import Image from "next/image";
 
 const Questions = () => {
@@ -19,54 +19,21 @@ const Questions = () => {
           <h1 className="text-5xl font-bold mb-4">
             Frequently asked questions
           </h1>
-          <p className="text-2xl opacity-50">
-            Everything you need to know about AIMiddleWare. Can't find the
-            answer you're looking for? Feel free to{" "}
-            <span>
-              <a
-                href="#"
-                className="cursor-pointer text-blue-600 border-b-2 border-blue-600 z-10"
-              >
+          <p className="text-2xl">
+            <span className="opacity-50">Everything you need to know about AIMiddleWare. Can't find the
+            answer you're looking for? Feel free to{" "}</span>
+            <span className="cursor-pointer text-blue-500 border-b-2 border-blue-600 z-10 opacity-90" >
                 contact us
-              </a>
             </span>
           </p>
 
           <div className="relative flex flex-col gap-7 mt-7 hero-bg-center text-black">
-            {[
-              {
-                question: "What is GTWY AI, and how does it work?",
-                answer:
-                  "GTWY AI is a powerful platform that simplifies the integration of AI into your products. It provides tools like model suggestions, web crawling, and database integrations to help businesses easily build and deploy AI-powered workflows and applications.",
-              },
-              {
-                question: "Can I use GTWY AI without technical expertise?",
-                answer:
-                  "Yes! GTWY AI is designed for both technical and non-technical users. Its intuitive interface and pre-built features make it easy to create and manage AI solutions without requiring deep coding knowledge.",
-              },
-              {
-                question:
-                  "What types of AI models can I use with GTWY AI?",
-                answer:
-                  "GTWY AI supports a wide variety of AI models, from pre-trained Large Language Models (LLMs) to custom APIs. You can select models tailored to your specific needs, such as content generation, data analysis, or customer service.",
-              },
-              {
-                question: "Is my data secure with GTWY AI?",
-                answer:
-                  "Absolutely. GTWY AI is built with robust security measures to ensure that all your data integrations and workflows are secure and compliant with industry standards.",
-              },
-              {
-                question:
-                  "How can GTWY AI help reduce costs for my business?",
-                answer:
-                  "GTWY AI reduces costs by offering ready-made AI tools and integrations, removing the need for expensive in-house AI development. It also optimizes workflows, saving time and resources while boosting productivity.",
-              },
-            ].map((item, index) => (
+            {
+            FAQ_QUESTION_ANSWER.map((item, index) => (
               <div key={index} className="collapse collapse-plus bg-base-200">
                 <input
                   type="radio"
                   name="my-accordion-3"
-                  defaultChecked={index === 0}
                 />
                 <div className="collapse-title text-xl font-medium">
                   {item.question}
