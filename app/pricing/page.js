@@ -11,7 +11,7 @@ export default function PricingPage() {
     (async function () {
       const cal = await getCalApi({
         "namespace": "30min",
-        "embedLibUrl": process.env.NEXT_PUBLIC_ONE_HASH_CAL_URL
+        "embedLibUrl": process.env.NEXT_PUBLIC_ONE_HASH_CAL_EMBED_URL
       });
       cal("ui", {
         "hideEventTypeDetails": true,
@@ -24,7 +24,7 @@ export default function PricingPage() {
     if (planName === 'Enterprise') {
       const calButton = document.createElement('button');
       calButton.setAttribute('data-cal-namespace', '30min');
-      calButton.setAttribute('data-cal-link', 'natwar-rathor-zjdgmv/30min');
+      calButton.setAttribute('data-cal-link', 'team/gtwy.ai/30min');
       calButton.setAttribute('data-cal-origin', 'https://cal.id');
       calButton.setAttribute('data-cal-config', '{"layout":"month_view"}');
       document.body.appendChild(calButton);

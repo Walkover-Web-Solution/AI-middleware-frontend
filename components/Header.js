@@ -33,16 +33,16 @@ const Header = () => {
     const isActive = pathname === path;
     return `relative px-6 py-2 ${
       isActive
-        ? "text-blue-400 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-400"
-        : "text-white hover:text-blue-400"
+        ? "text-white after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-white"
+        : "text-white hover:text-white"
     } transition-all duration-300 ease-in-out`;
   };
 
   return (
     <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'backdrop-blur-md bg-black/30' : ''
+      isScrolled ? 'backdrop-blur-md bg-black/60' : ''
     }`}>
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 md:px-8 py-6">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 md:px-8 py-4">
         <div onClick={() => router.push("/")} className="flex items-center space-x-3 cursor-pointer">
           <Image
             src="/ButtonMd.svg"
@@ -71,7 +71,7 @@ const Header = () => {
             )}
             <span className={getButtonClass("/pricing")}>Pricing</span>
           </button>
-          <button onClick={() => router.push("/showcase")} className={getButtonClass("/shwocase")}>Show case</button>
+          <button onClick={() => router.push("/showcase")} className={getButtonClass("/showcase")}>Show case</button>
           <button onClick={() => router.push("/faq")} className={getButtonClass("/faq")}>FAQ</button>
         </nav>
 

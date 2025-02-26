@@ -11,7 +11,7 @@ const DemoModal = () => {
         (async function () {
             const cal = await getCalApi({
                 "namespace": "30min",
-                "embedLibUrl": process.env.NEXT_PUBLIC_ONE_HASH_CAL_URL
+                "embedLibUrl": process.env.NEXT_PUBLIC_ONE_HASH_CAL_EMBED_URL
             });
             cal("ui", {
                 "hideEventTypeDetails": true,
@@ -56,9 +56,8 @@ const DemoModal = () => {
 
                 <div className="modal-action mt-4">
                     <button
-                        target="_blank"
                         data-cal-namespace="30min"
-                        data-cal-link="natwar-rathor-zjdgmv/30min"
+                        data-cal-link="team/gtwy.ai/30min"
                         data-cal-origin="https://cal.id"
                         data-cal-config='{"layout":"month_view"}'
                         onClick={() => handleClose()}
