@@ -6,8 +6,26 @@ import axios from "axios";
 const Footer = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleSubscribe = async () => {
+    setError("");
+    
+    if (!email) {
+      setError("Email is required");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await axios.post("https://flow.sokt.io/func/scri4pu3FJQc", { email });
@@ -15,6 +33,7 @@ const Footer = () => {
       setEmail("");
     } catch (error) {
       console.error("Error subscribing:", error);
+      setError("Failed to subscribe. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -29,23 +48,26 @@ const Footer = () => {
             Keep up to date with everything Reflect
           </h5>
         </div>
-        <div className="flex items-center gap-4">
-          <input
-            type="text"
-            placeholder="Enter your Email"
-            className="input input-bordered w-full max-w-xs text-black"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-4">
+            <input
+              type="email"
+              placeholder="Enter your Email"
+              className={`input input-bordered w-full max-w-xs text-black ${error ? 'input-error' : ''}`}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-          <button
-            role="button"
-            className="btn btn-primary"
-            onClick={handleSubscribe}
-            disabled={loading}
-          >
-            {loading ? "Subscribing..." : "Subscribe"}
-          </button>
+            <button
+              role="button"
+              className="btn btn-primary"
+              onClick={handleSubscribe}
+              disabled={loading}
+            >
+              {loading ? "Subscribing..." : "Subscribe"}
+            </button>
+          </div>
+          {error && <span className="text-red-500 text-sm">{error}</span>}
         </div>
       </div>
 

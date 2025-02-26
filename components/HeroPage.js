@@ -1,8 +1,11 @@
+'use client'
 import { Inter } from "next/font/google";
 import { Roboto } from "next/font/google";
-import Image from "next/image";
 import Header from "./Header";
 import Link from "next/link";
+import { openModal } from "@/utils/utility";
+import { MODAL_TYPE } from "@/utils/enums";
+import DemoModal from "./modals/DemoModal";
 
 // Load the font outside the component function
 const inter = Inter({
@@ -47,13 +50,13 @@ const HeroPage = () => {
               Start for free
             </button>
           </Link>
-          <Link href="/showcase">
-            <button className=" btn px-6 py-3 bg-transparent border border-white text-white rounded-lg w-auto text-center hover:text-black">
-              Get demo
-            </button>
-          </Link>
+          
+          <button className=" btn px-6 py-3 bg-transparent border border-white text-white rounded-lg w-auto text-center hover:text-black" onClick={() => openModal(MODAL_TYPE?.DEMO_MODAL)}>
+            Get demo
+          </button>
         </div>
       </div>
+      <DemoModal />
     </div>
   );
 };
