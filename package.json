@@ -10,6 +10,7 @@
     "build:pages": "npx @cloudflare/next-on-pages"
   },
   "dependencies": {
+    "@calcom/embed-react": "^1.5.2",
     "@reduxjs/toolkit": "^2.2.0",
     "axios": "^1.6.7",
     "debounce": "^2.0.0",
