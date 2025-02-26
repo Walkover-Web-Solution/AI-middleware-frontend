@@ -1,8 +1,20 @@
+'use client'
 import Header from '@/components/Header';
 import Footer from "@/components/Footer";
 import { PRICINGPLANS } from '@/utils/enums';
+import { openModal } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
 
 export default function PricingPage() {
+
+  const handleClick = (planName) => {
+    if(planName === 'Enterprise') {
+      openModal(MODAL_TYPE.DEMO_MODAL);
+    } else {
+      window.location.href = '/login';
+    }
+  };
+
   return (
     <div className="bg-black flex flex-col w-full min-h-screen text-white relative pt-40">
       <div className="hero-bg absolute w-full top-[-10px] h-screen z-10"></div>
@@ -40,7 +52,10 @@ export default function PricingPage() {
                   ))}
                 </div>
 
-                <button className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 rounded-md transition-colors mt-8">
+                <button 
+                  onClick={() => handleClick(plan.name)}
+                  className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 rounded-md transition-colors mt-8"
+                >
                   {plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
                 </button>
               </div>

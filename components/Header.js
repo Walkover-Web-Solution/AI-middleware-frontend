@@ -57,7 +57,21 @@ const Header = () => {
 
         <nav className="hidden md:flex items-center space-x-8">
           <button onClick={() => router.push("/")} className={getButtonClass("/")}>Home</button>
-          <button onClick={() => router.push("/pricing")} className={getButtonClass("/pricing")}>Pricing</button>
+          <button
+            onClick={() => router.push("/pricing")}
+            className="relative flex flex-col items-end"
+          >
+            {pathname !== '/pricing' && (
+              <div
+                className="absolute left-16 text-white bg-gradient-to-r from-blue-400 to-blue-300 px-3 py-0.5 rounded-full font-semibold transform rotate-12"
+                style={{ fontSize: "0.75rem" }}
+              >
+                Free
+              </div>
+            )}
+            <span className={getButtonClass("/pricing")}>Pricing</span>
+          </button>
+          <button onClick={() => router.push("/showcase")} className={getButtonClass("/shwocase")}>Show case</button>
           <button onClick={() => router.push("/faq")} className={getButtonClass("/faq")}>FAQ</button>
         </nav>
 
