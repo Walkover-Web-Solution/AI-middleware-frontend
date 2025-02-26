@@ -1,9 +1,25 @@
+'use client'
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CircleX, CalendarDays } from 'lucide-react';
+import { getCalApi } from "@calcom/embed-react";
 
 const DemoModal = () => {
+
+    useEffect(() => {
+        (async function () {
+            const cal = await getCalApi({
+                "namespace": "30min",
+                "embedLibUrl": process.env.NEXT_PUBLIC_ONE_HASH_CAL_URL
+            });
+            cal("ui", {
+                "hideEventTypeDetails": true,
+                "layout": "month_view"
+            });
+        })();
+    }, []);
+
     const handleClose = () => {
         closeModal(MODAL_TYPE.DEMO_MODAL);
     };
@@ -15,7 +31,7 @@ const DemoModal = () => {
                     <h3 className="font-bold text-2xl bg-gradient-to-r from-blue-400 to-purple-300 bg-clip-text text-transparent">
                         Discover GTWY AI
                     </h3>
-                    <button 
+                    <button
                         onClick={handleClose}
                         className="btn btn-ghost p-2 rounded-full hover:bg-slate-700/50 transition-colors group"
                     >
@@ -39,15 +55,18 @@ const DemoModal = () => {
                 </div>
 
                 <div className="modal-action mt-4">
-                    <a
-                        href=""
+                    <button
                         target="_blank"
-                        rel="noopener noreferrer"
+                        data-cal-namespace="30min"
+                        data-cal-link="natwar-rathor-zjdgmv/30min"
+                        data-cal-origin="https://cal.id"
+                        data-cal-config='{"layout":"month_view"}'
+                        onClick={() => handleClose()}
                         className="btn btn-primary px-8 py-3 text-lg font-semibold bg-gradient-to-r from-purple-500 to-blue-500 border-none hover:from-purple-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
                     >
                         <CalendarDays className="w-5 h-5" />
                         <span>Schedule Personalized Demo</span>
-                    </a>
+                    </button>
                 </div>
             </div>
         </dialog>
