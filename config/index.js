@@ -785,7 +785,7 @@ export const batchApi = async ({ payload }) => {
 
 export const createKnowledgeBaseEntry = async (data) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/rag/`, data);
+    const response = await axios.post(`${URL}/rag/`, data);
     return response;
   } catch (error) {
     console.error(error);
@@ -794,7 +794,7 @@ export const createKnowledgeBaseEntry = async (data) => {
 };
 export const getAllKnowBaseData = async () => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/rag/docs`);
+    const response = await axios.get(`${URL}/rag/docs`);
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -805,7 +805,7 @@ export const getAllKnowBaseData = async () => {
 export const deleteKnowBaseData = async (data) => {
   try {
     const { id, orgId } = data;
-    const response = await axios.delete(`${PYTHON_URL}/rag/docs`,{
+    const response = await axios.delete(`${URL}/rag/docs/${id}`,{
       data:{id}
     });
     return response?.data;
@@ -814,6 +814,18 @@ export const deleteKnowBaseData = async (data) => {
     throw error;
   }
 };
+
+export const updateKnowledgeBaseEntry = async (data) => {
+  try {
+    const { data: dataToUpdate, id } = data?.data;
+    const response = await axios.patch(`${URL}/rag/docs/${id}`, dataToUpdate);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 
 
 export const generateAccessKey = async () =>{
