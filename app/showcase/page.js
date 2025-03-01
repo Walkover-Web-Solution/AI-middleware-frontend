@@ -15,7 +15,6 @@ function Page() {
       try {
         const data = await getAllShowCase();
         setShowcaseData(data?.data || []);
-        setFilteredData(data?.data || []);
       } catch (error) {
         console.error(error);
         setShowcaseData([]);
@@ -34,7 +33,7 @@ function Page() {
   }, [searchQuery, showcaseData]);
 
   return (
-    <div className="bg-black h-full w-full text-white">
+    <div className="bg-black h-100vh w-full text-white">
       <div className="hero-bg">
         <Header />
         <Showcaseheading />
@@ -48,7 +47,7 @@ function Page() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-      <div className="grid grid-cols-2 w-3/4 mx-auto mt-20 gap-10 text-black pb-10">
+      <div className="grid grid-cols-2 w-3/4 mx-auto mt-20 gap-10 text-black pb-10 min-h-[50vh]">
         {Array.isArray(filteredData) && filteredData.map((card, index) => (
           <ShowcaseCard
             key={index}
