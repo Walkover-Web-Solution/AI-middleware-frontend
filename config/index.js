@@ -837,3 +837,13 @@ export const generateAccessKey = async () =>{
     throw error;
   }
 }
+
+export const getAllShowCase = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/utils/all`);
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
