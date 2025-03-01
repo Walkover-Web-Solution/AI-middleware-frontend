@@ -104,7 +104,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   const renderToolData = (toolData, index) => (
     Object.entries(toolData).map(([key, tool]) => (
       <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 shadow-sm">
-        <div onClick={() => openViasocket(tool?.name, { flowHitId: tool?.metadata?.flowHitId })}
+        <div onClick={() => openViasocket(tool?.id, { flowHitId: tool?.metadata?.flowHitId })}
           className="cursor-pointer flex items-center justify-center py-4 pl-2">
           <div className="text-center">
             {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
@@ -113,7 +113,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         <div className="flex gap-3">
           <div className="tooltip tooltip-top relative" data-tip="function logs">
             <SquareFunction size={22}
-              onClick={() => openViasocket(tool.name, { flowHitId: tool?.metadata?.flowHitId })}
+              onClick={() => openViasocket(tool?.id, { flowHitId: tool?.metadata?.flowHitId })}
               className="opacity-80 cursor-pointer" />
           </div>
           <div className="tooltip tooltip-top pr-2 relative" data-tip="function data">
