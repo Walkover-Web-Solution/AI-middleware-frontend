@@ -42,6 +42,31 @@ function Home({ params }) {
 
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const activeElement = document.activeElement;
+      const isTyping = activeElement.tagName === "INPUT" || 
+                       activeElement.tagName === "TEXTAREA" || 
+                       activeElement.isContentEditable;
+    
+      const isModalOpen = !!document.querySelector("dialog[open]");
+    
+      if (!isTyping && !isModalOpen && /^[a-zA-Z]$/.test(event.key) && !event.ctrlKey && !event.metaKey) {
+        event.preventDefault();
+        inputRef.current?.focus();
+        setSearchTerm((prev) => prev + event.key);
+      }
+    
+      if ((event.ctrlKey || event.metaKey) && event.key === "k") {
+        event.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+  
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+  
 
   const filteredBridges = filterBridges(allBridges, searchTerm);
   const filteredArchivedBridges = filteredBridges?.filter((item) => item.status === 0);
