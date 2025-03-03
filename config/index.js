@@ -840,7 +840,7 @@ export const generateAccessKey = async () =>{
 
 export const getAllShowCase = async () => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/utils/all`);
+    const response = await axios.get(`${URL}/showcase/all`);
     return response?.data;
   } catch (error) {
     console.error(error);
