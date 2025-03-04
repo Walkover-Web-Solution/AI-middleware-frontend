@@ -114,8 +114,8 @@ export default function SettingsPage({ params }) {
                     key={timezone.identifier}
                     onClick={() => handleTimezoneChange(timezone)}
                     className={`p-2 text-sm cursor-pointer ${timezone.identifier === selectedTimezone?.identifier
-                        ? 'bg-primary text-white'
-                        : 'hover:bg-gray-50'
+                      ? 'bg-primary text-white'
+                      : 'hover:bg-gray-50'
                       }`}
                   >
                     {timezone.identifier} {timezone.offSet ? `(${timezone.offSet})` : ''}

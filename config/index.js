@@ -166,13 +166,13 @@ export const getVersionHistory = async (threadId, bridgeId, versionId, nextPage 
   try {
     const response = await axios.get(
       `${URL}/api/v1/config/threads/${threadId}/${bridgeId}?version_id=${versionId}`, {
-        params: {
-          sub_thread_id: threadId,
-          pageNo: nextPage,
-          limit: pagelimit,
-          user_feedback: user_feedback
-        }
+      params: {
+        sub_thread_id: threadId,
+        pageNo: nextPage,
+        limit: pagelimit,
+        user_feedback: user_feedback
       }
+    }
     );
     return response.data;
   } catch (error) {
@@ -701,9 +701,10 @@ export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, 
     console.error(error);
     return error;
   }
-};
+}
 
 export const optimizeSchemaApi = async ({ data }) => {
+
   try {
     const response = await axios.post(
       `${PYTHON_URL}/utility/structured_output`,
@@ -727,7 +728,7 @@ export const updateOrganizationData = async (orgId, orgDetails) => {
         'reference-id': NEXT_PUBLIC_REFERENCEID
       }
     });
-    return response.data; 
+    return response.data;
   } catch (error) {
 
     toast.error('Error updating organization:', error);
@@ -750,6 +751,61 @@ export const batchApi = async ({ payload }) => {
     return response.data;
   } catch (error) {
     console.error('Error in batch API:', error);
+    throw error;
+  }
+}
+
+export const createKnowledgeBaseEntry = async (data) => {
+  try {
+    const response = await axios.post(`${URL}/rag/`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+export const getAllKnowBaseData = async () => {
+  try {
+    const response = await axios.get(`${URL}/rag/docs`);
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const deleteKnowBaseData = async (data) => {
+  try {
+    const { id, orgId } = data;
+    const response = await axios.delete(`${URL}/rag/docs/${id}`, {
+      data: { id }
+    });
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const updateKnowledgeBaseEntry = async (data) => {
+  try {
+    const { data: dataToUpdate, id } = data?.data;
+    const response = await axios.patch(`${URL}/rag/docs/${id}`, dataToUpdate);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+
+
+export const generateAccessKey = async () => {
+  try {
+    const response = await axios.get(`${URL}/org/auth_token`);
+    return response;
+  } catch (error) {
+    console.error(error);
     throw error;
   }
 }

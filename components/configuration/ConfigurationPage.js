@@ -24,6 +24,7 @@ import VersionDescriptionInput from "./configurationComponent/VersionDescription
 import ToolCallCount from "./configurationComponent/toolCallCount";
 import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/utils/enums";
 import BatchApiGuide from "./configurationComponent/BatchApiGuide";
+import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -45,8 +46,8 @@ export default function ConfigurationPage({ params }) {
     const renderNeedHelp = () => {
         return (
             <div className="mb-4">
-                <a 
-                    href="/faq/how-to-use-gtwy-ai" 
+                <a
+                    href="/faq/how-to-use-gtwy-ai"
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -67,6 +68,8 @@ export default function ConfigurationPage({ params }) {
                         <PreEmbedList params={params} />
                         <InputConfigComponent params={params} />
                         <EmbedList params={params} />
+                        <hr className="my-0 p-0" />
+                        <KnowledgebaseList params={params} />
                     </>
                 )}
             <ServiceDropdown params={params} />

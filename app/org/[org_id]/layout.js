@@ -6,6 +6,7 @@ import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, getAllBridgesAction, getAllFunctions, integrationAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
+import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
 import { usePathname } from "next/navigation";
@@ -25,9 +26,9 @@ export default function layoutOrgPage({ children, params }) {
 
   useEffect(() => {
     dispatch(getAllBridgesAction((data) => {
-        if (data === 0) {
+      if (data === 0) {
         openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-        }
+      }
     }))
     dispatch(getAllFunctions())
   }, []);
@@ -35,6 +36,7 @@ export default function layoutOrgPage({ children, params }) {
   useEffect(() => {
     if (params?.org_id) {
       dispatch(getAllApikeyAction(params?.org_id));
+      dispatch(getAllKnowBaseDataAction(params?.org_id))
     }
   }, [dispatch, params?.org_id]);
 
@@ -89,11 +91,11 @@ export default function layoutOrgPage({ children, params }) {
         status: e?.data?.action
       }
       dispatch(integrationAction(dataToSend, params?.org_id));
-      if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created" || e?.data?.action === "updated") && e?.data?.description?.length > 0) {
+      if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created" || e?.data?.action === "updated")) {
         const dataFromEmbed = {
           url: e?.data?.webhookurl,
           payload: e?.data?.payload,
-          desc: e?.data?.description,
+          desc: e?.data?.description || e?.data?.title,
           id: e?.data?.id,
           status: e?.data?.action,
           title: e?.data?.title,
@@ -111,7 +113,7 @@ export default function layoutOrgPage({ children, params }) {
         <div className=" flex flex-col  h-full">
           <MainSlider />
         </div>
-        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto">
+        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto overflow-x-hidden">
           <Navbar />
           <main className="px-2">{children}</main>
         </div>

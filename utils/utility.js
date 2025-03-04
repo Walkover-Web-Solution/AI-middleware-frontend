@@ -1,7 +1,10 @@
 import AnthropicIcon from "@/icons/AnthropicIcon";
+import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
+import GoogleDocIcon from "@/icons/GoogleDocIcon";
 import GroqIcon from "@/icons/GroqIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
+import { PdfIcon } from "@/icons/pdfIcon";
 import { cloneDeep } from "lodash";
 
 export const updatedData = (obj1, obj2 = {}, type) => {
@@ -171,7 +174,7 @@ export const getIconOfService = (service, height, width) => {
     }
 }
 
-export function getStatusClass (status) {
+export function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
         case 'drafted':
             return 'bg-yellow-100';
@@ -212,7 +215,7 @@ export function flattenParameters(parameters, prefix = '') {
             enum: value.enum,
             required_params: value?.required_params,
             parameter: value?.parameter,
-            items:value?.items
+            items: value?.items
         });
         if (Object?.keys(value?.parameter || value?.items || {})?.length > 0) {
             flat = flat?.concat(flattenParameters(value?.parameter || value?.items?.properties || {}, currentKey));
@@ -234,8 +237,8 @@ export function filterBridges(bridgesList, bridgeSearchQuery) {
 
 export function filterOrganizations(orgList, orgSearchQuery) {
     return Object.values(orgList).filter(
-        (item) => 
-            item?.name?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase()) || 
+        (item) =>
+            item?.name?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase()) ||
             item?.id?.toString()?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase())
     );
 }
@@ -260,20 +263,30 @@ export function closeModal(modalName) {
 }
 
 export const allowedAttributes = {
-  important: [
-    ['variables', 'Variables'],
-    ['system Prompt', 'System Prompt'],
-    ['AiConfig', 'AI Configuration'],
-    ['latency', 'Latency'],
-  ],
-  optional: [
-    ['message_id', 'Message ID'],
-    ['input_tokens', 'Input Tokens'],
-    ['output_tokens', 'Output Tokens'],
-    ['expected_cost', 'Expected Cost'], 
-    ['createdAt', 'Created At'],
-    ['service', 'Service'], 
-    ['model', 'Model'],
-  ]
+    important: [
+        ['variables', 'Variables'],
+        ['system Prompt', 'System Prompt'],
+        ['AiConfig', 'AI Configuration'],
+        ['latency', 'Latency'],
+    ],
+    optional: [
+        ['message_id', 'Message ID'],
+        ['input_tokens', 'Input Tokens'],
+        ['output_tokens', 'Output Tokens'],
+        ['expected_cost', 'Expected Cost'],
+        ['createdAt', 'Created At'],
+        ['service', 'Service'],
+        ['model', 'Model'],
+    ]
 };
 
+export const GetFileTypeIcon = (fileType, height, width) => {
+    switch (fileType) {
+        case 'pdf':
+            return <PdfIcon height={height} width={width} />;
+        case 'csv':
+            return <CsvIcon height={height} width={width} />;
+        default:
+            return <GoogleDocIcon height={height} width={width} />;
+    }
+}
