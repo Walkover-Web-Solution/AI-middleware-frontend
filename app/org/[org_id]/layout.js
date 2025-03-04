@@ -1,4 +1,5 @@
 "use client";
+import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import Navbar from "@/components/navbar";
 import MainSlider from "@/components/sliders/mainSlider";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -10,15 +11,16 @@ import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
 export default function layoutOrgPage({ children, params }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
-
-  const { chatbot_token, embedToken, alertingEmbedToken } = useCustomSelector((state) => ({
+  const [selectedItem,setSelectedItem] = useState(null)
+  const [isSliderOpen,setIsSliderOpen] = useState(false)
+  const { chatbot_token, embedToken,alertingEmbedToken} = useCustomSelector((state) => ({
     chatbot_token: state?.ChatBot?.chatbot_token || '',
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
@@ -106,6 +108,10 @@ export default function layoutOrgPage({ children, params }) {
         dispatch(createApiAction(params.org_id, dataFromEmbed));
       }
     }
+    if(e.data?.type === 'MESSAGE_CLICK'){
+      setSelectedItem(e?.data?.data)
+      setIsSliderOpen(true)
+    }
   }
 
   const isHomePage = useMemo(() => path?.length < 5, [path]);
@@ -120,6 +126,7 @@ export default function layoutOrgPage({ children, params }) {
           <Navbar />
           <main className="px-2">{children}</main>
         </div>
+        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
       </div>
     );
   } else {
@@ -127,6 +134,7 @@ export default function layoutOrgPage({ children, params }) {
       <div className="h-screen">
         <Navbar />
         {children}
+        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
       </div>
     );
   }
