@@ -18,11 +18,14 @@ export default function layoutOrgPage({ children, params }) {
   const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
 
-  const { chatbot_token, embedToken } = useCustomSelector((state) => ({
+  const { chatbot_token, embedToken, alertingEmbedToken } = useCustomSelector((state) => ({
     chatbot_token: state?.ChatBot?.chatbot_token || '',
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+    alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
+
   }));
-  useEmbedScriptLoader(embedToken);
+  
+  useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts')  ? alertingEmbedToken : '');
 
   useEffect(() => {
     dispatch(getAllBridgesAction((data) => {
