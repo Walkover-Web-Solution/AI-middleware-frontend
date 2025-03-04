@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { Inter } from "next/font/google";
 import { Roboto } from "next/font/google";
 import Header from "./Header";
@@ -20,7 +20,7 @@ const roboto = Roboto({
 });
 const HeroPage = () => {
   return (
-    <div className="hero-bg flex flex-col w-full pt-32">
+    <div className="hero-bg flex flex-col w-full pt-32 h-screen">
       <Header />
       <div className="flex flex-grow flex-col items-center justify-center gap-6  py-28">
         <div className="flex flex-col  text-center space-y-4 w-full max-w-screen-xl">
@@ -50,8 +50,11 @@ const HeroPage = () => {
               Start for free
             </button>
           </Link>
-          
-          <button className=" btn px-6 py-3 bg-transparent border border-white text-white rounded-lg w-auto text-center hover:text-black" onClick={() => openModal(MODAL_TYPE?.DEMO_MODAL)}>
+
+          <button
+            className=" btn px-6 py-3 bg-transparent border border-white text-white rounded-lg w-auto text-center hover:text-black"
+            onClick={() => openModal(MODAL_TYPE?.DEMO_MODAL)}
+          >
             Get demo
           </button>
         </div>
