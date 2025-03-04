@@ -13,28 +13,25 @@ const Questions = () => {
               className="mr-2"
               width={96}
               height={34}
-              priority
             />
           </div>
           <h1 className="text-5xl font-bold mb-4">
             Frequently asked questions
           </h1>
           <p className="text-2xl">
-            <span className="opacity-50">Everything you need to know about AIMiddleWare. Can't find the
-            answer you're looking for? Feel free to{" "}</span>
-            <span className="cursor-pointer text-blue-500 border-b-2 border-blue-600 z-10 opacity-90" >
-                contact us
+            <span className="opacity-50">
+              Everything you need to know about AIMiddleWare. Can't find the
+              answer you're looking for? Feel free to{" "}
+            </span>
+            <span className="cursor-pointer text-blue-500 border-b-2 border-blue-600 z-10 opacity-90">
+              contact us
             </span>
           </p>
 
           <div className="relative flex flex-col gap-7 mt-7 hero-bg-center text-black">
-            {
-            FAQ_QUESTION_ANSWER.map((item, index) => (
+            {FAQ_QUESTION_ANSWER.map((item, index) => (
               <div key={index} className="collapse collapse-plus bg-base-200">
-                <input
-                  type="radio"
-                  name="my-accordion-3"
-                />
+                <input type="radio" name="my-accordion-3" />
                 <div className="collapse-title text-xl font-medium">
                   {item.question}
                 </div>
