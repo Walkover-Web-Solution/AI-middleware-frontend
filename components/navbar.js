@@ -123,7 +123,7 @@ function Navbar() {
   };
 
   return (
-    <div className={` ${router.pathname === '/' ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[100] max-h-[4rem] bg-base-100 sticky top-0 mb-3`}>
+    <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[100] max-h-[4rem] bg-base-100 sticky top-0 mb-3`}>
       <div className={`flex items-center w-full justify-start gap-2 ${path.length > 4 ? '' : 'hidden'}`}>
         <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/bridges`)}>
           <Home size={16} />
@@ -230,7 +230,14 @@ function Navbar() {
                     <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>
                       + create new bridge
                     </button>
-                  </div> : (path[3] === 'chatbot' && path.length === 4) ?
+                  </div> :
+                   path[3] === 'metrics' ?
+                   <div>
+                     <button className="btn btn-primary" onClick={() => router.push(`/org/${path[2]}/alerts`)}>
+                       Configure Alerts
+                     </button>
+                   </div> : 
+                  (path[3] === 'chatbot' && path.length === 4) ?
                     <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CHATBOT_MODAL)}>
                       + create new chatbot
                     </button> : path[3] === 'knowledge_base' ?
