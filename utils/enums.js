@@ -333,14 +333,18 @@ export const MODAL_TYPE = {
   WEBHOOK_MODAL: "WEBHOOK_MODAL",
   CHAT_DETAILS_VIEW_MODAL: "chat_details_view",
   JSON_SCHEMA: "JSON_SCHEMA",
-  KNOWLEDGE_BASE_MODAL:'KNOWLEDGE_BASE_MODAL',
-  PROMPT_SUMMARY:'PROMPT_SUMMARY',
-  TESTCASE_MODAL : "TESTCASE_MODAL",
+  KNOWLEDGE_BASE_MODAL: 'KNOWLEDGE_BASE_MODAL',
+  PROMPT_SUMMARY: 'PROMPT_SUMMARY',
+  TESTCASE_MODAL: "TESTCASE_MODAL",
+  DEMO_MODAL: "DEMO_MODAL"
 }
 
-export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment']
+export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
+
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
+
 export const TIME_RANGE_OPTIONS = ['Today', 'Last 3 Days', 'Last Week', 'Last Month'];
+
 export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
 export const KNOWLEDGE_BASE_COLUMNS = ['name', 'description'];
 export const KNOWLEDGE_BASE_SECTION_TYPES = [
@@ -356,20 +360,20 @@ export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini'];
 
 export const FAQSIDEBARLINKS = [
   {
-      title: "How use Gtwy Ai",
-      href: "/faq/how-to-use-gtwy-ai",
+    title: "How use Gtwy Ai",
+    href: "/faq/how-to-use-gtwy-ai",
   },
   {
-      title: "Addvance Parameter Guide", 
-      href: "/faq/guide",
+    title: "Addvance Parameter Guide",
+    href: "/faq/guide",
   },
   {
-      title: "JSON Format Guide",
-      href: "/faq/jsonformatdoc",
+    title: "JSON Format Guide",
+    href: "/faq/jsonformatdoc",
   },
   {
-      title: "Create JWT Token Chatbot",
-      href: "/faq/create-jwt-for-chatbot",
+    title: "Create JWT Token Chatbot",
+    href: "/faq/create-jwt-for-chatbot",
   },
 ];
 
@@ -381,7 +385,7 @@ export const PRICINGPLANS = [
     features: [
       '1,000 API calls/month',
       'Basic support via email',
-      'Core API features & integrations', 
+      'Core API features & integrations',
       'Access to public documentation',
       'Basic analytics dashboard',
       'Chatbot Integration'
@@ -395,7 +399,7 @@ export const PRICINGPLANS = [
       'Unlimited API calls',
       '24/7 priority support',
       'Custom feature development',
-      'Enterprise SLA guarantees', 
+      'Enterprise SLA guarantees',
       'On-premise deployment options',
       'Advanced security features',
       'Dedicated account manager',
@@ -403,3 +407,51 @@ export const PRICINGPLANS = [
     ]
   }
 ];
+
+export const FAQ_QUESTION_ANSWER = [
+  {
+    question: "What is GTWY AI, and how does it work?",
+    answer:
+      "GTWY AI is a powerful platform that simplifies the integration of AI into your products. It provides tools like model suggestions, web crawling, and database integrations to help businesses easily build and deploy AI-powered workflows and applications.",
+  },
+  {
+    question: "Can I use GTWY AI without technical expertise?",
+    answer:
+      "Yes! GTWY AI is designed for both technical and non-technical users. Its intuitive interface and pre-built features make it easy to create and manage AI solutions without requiring deep coding knowledge.",
+  },
+  {
+    question:
+      "What types of AI models can I use with GTWY AI?",
+    answer:
+      "GTWY AI supports a wide variety of AI models, from pre-trained Large Language Models (LLMs) to custom APIs. You can select models tailored to your specific needs, such as content generation, data analysis, or customer service.",
+  },
+  {
+    question: "Is my data secure with GTWY AI?",
+    answer:
+      "Absolutely. GTWY AI is built with robust security measures to ensure that all your data integrations and workflows are secure and compliant with industry standards.",
+  },
+  {
+    question:
+      "How can GTWY AI help reduce costs for my business?",
+    answer:
+      "GTWY AI reduces costs by offering ready-made AI tools and integrations, removing the need for expensive in-house AI development. It also optimizes workflows, saving time and resources while boosting productivity.",
+  },
+]
+
+export const FEATURE_DATA = [
+  {
+    title: "Connect Apps:",
+    subtitle: "Seamlessly Integrate Your Tools and Automate Workflows",
+    description: "Effortlessly integrate various apps and platforms, allowing them to work together seamlessly. From CRM tools to marketing platforms and databases, connect apps in one place to automate tasks, streamline workflows, and enhance productivity across different services.",
+    image: "./ConnectApps.svg",
+    icon: "/live.svg"
+  },
+
+  {
+    title: "Test Cases:",
+    subtitle: "Achieve Perfection with Intelligent Testing",
+    description: "With test cases, you can ensure your workflows, integrations, and AI interactions work exactly as intended from start to finish. They help you catch potential issues, validate every step, and keep everything running seamlessly and reliably.",
+    image: "./TestCase.svg",
+    icon: "/live.svg"
+  },
+]
