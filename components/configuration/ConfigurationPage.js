@@ -46,8 +46,8 @@ export default function ConfigurationPage({ params }) {
     const renderNeedHelp = () => {
         return (
             <div className="mb-4">
-                <a 
-                    href="/faq/how-to-use-gtwy-ai" 
+                <a
+                    href="/faq/how-to-use-gtwy-ai"
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -69,7 +69,7 @@ export default function ConfigurationPage({ params }) {
                         <InputConfigComponent params={params} />
                         <EmbedList params={params} />
                         <hr className="my-0 p-0" />
-                        <KnowledgebaseList params={params}/>
+                        <KnowledgebaseList params={params} />
                     </>
                 )}
             <ServiceDropdown params={params} />

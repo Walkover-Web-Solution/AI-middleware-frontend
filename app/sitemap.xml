@@ -28,25 +28,33 @@
       <changefreq>daily</changefreq>
    </url>
 
+
    <url>
-      <loc>https://gtwy.ai/org</loc>
+      <loc>https://gtwy.ai/pricing</loc>
       <lastmod>2024-01-09</lastmod>
-      <priority>0.8</priority>
+      <priority>0.9</priority>
       <changefreq>daily</changefreq>
    </url>
 
    <url>
       <loc>https://gtwy.ai/faq/guide</loc>
       <lastmod>2024-01-09</lastmod>
-      <priority>0.7</priority>
-      <changefreq>weekly</changefreq>
+      <priority>0.8</priority>
+      <changefreq>daily</changefreq>
    </url>
 
    <url>
       <loc>https://gtwy.ai/faq/create-jwt-for-chatbot</loc>
       <lastmod>2024-01-09</lastmod>
+      <priority>0.8</priority>
+      <changefreq>daily</changefreq>
+   </url>
+
+   <url>
+      <loc>https://gtwy.ai/org</loc>
+      <lastmod>2024-01-09</lastmod>
       <priority>0.7</priority>
-      <changefreq>weekly</changefreq>
+      <changefreq>daily</changefreq>
    </url>
 
 </urlset>

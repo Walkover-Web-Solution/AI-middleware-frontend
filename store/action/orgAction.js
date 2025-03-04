@@ -41,7 +41,7 @@ export const updateOrgTimeZone = (orgId, orgDetails) => async (dispatch) => {
   }
 }
 
-export const generateAccessKeyAction = (orgId) => async(dispatch) => {
+export const generateAccessKeyAction = (orgId) => async (dispatch) => {
   try {
     const response = await generateAccessKey();
     dispatch(updateToken({ orgId, auth_token: response?.data?.auth_token }));

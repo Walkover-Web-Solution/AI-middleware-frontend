@@ -1,24 +1,27 @@
+import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { MODAL_TYPE } from '@/utils/enums';
+import { openModal } from '@/utils/utility';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
-import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { openModal } from '@/utils/utility';
-import { MODAL_TYPE } from '@/utils/enums';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState();
   const dispatch = useDispatch();
-  const { service, model, type, configuration } = useCustomSelector((state) => ({
-    service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service?.toLowerCase(),
-    model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
-    type: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
-    configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
-  }));
+  const { service, model, type, configuration } = useCustomSelector((state) => {
+    const bridgeVersion = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+    return {
+      service: bridgeVersion?.service?.toLowerCase(),
+      model: bridgeVersion?.configuration?.model,
+      type: bridgeVersion?.configuration?.type,
+      configuration: bridgeVersion?.configuration,
+    };
+  });
 
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters,

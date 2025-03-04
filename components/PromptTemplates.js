@@ -12,7 +12,6 @@ const PromptTemplates = () => {
             className="mr-2"
             width={54}
             height={34}
-            priority
           />
         </div>
 
