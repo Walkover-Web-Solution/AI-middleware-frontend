@@ -333,14 +333,17 @@ export const MODAL_TYPE = {
   WEBHOOK_MODAL: "WEBHOOK_MODAL",
   CHAT_DETAILS_VIEW_MODAL: "chat_details_view",
   JSON_SCHEMA: "JSON_SCHEMA",
-  KNOWLEDGE_BASE_MODAL:'KNOWLEDGE_BASE_MODAL',
-  PROMPT_SUMMARY:'PROMPT_SUMMARY',
+  KNOWLEDGE_BASE_MODAL: 'KNOWLEDGE_BASE_MODAL',
+  PROMPT_SUMMARY: 'PROMPT_SUMMARY',
   DEMO_MODAL: "DEMO_MODAL"
 }
 
-export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment']
+export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
+
 export const USER_FEEDBACK_FILTER_OPTIONS = ["all", "1", "2"];
+
 export const TIME_RANGE_OPTIONS = ['Today', 'Last 3 Days', 'Last Week', 'Last Month'];
+
 export const METRICS_FACTOR_OPTIONS = ['bridge_id', 'apikey_id', 'model'];
 export const KNOWLEDGE_BASE_COLUMNS = ['name', 'description'];
 export const KNOWLEDGE_BASE_SECTION_TYPES = [
@@ -356,20 +359,20 @@ export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini'];
 
 export const FAQSIDEBARLINKS = [
   {
-      title: "How use Gtwy Ai",
-      href: "/faq/how-to-use-gtwy-ai",
+    title: "How use Gtwy Ai",
+    href: "/faq/how-to-use-gtwy-ai",
   },
   {
-      title: "Addvance Parameter Guide", 
-      href: "/faq/guide",
+    title: "Addvance Parameter Guide",
+    href: "/faq/guide",
   },
   {
-      title: "JSON Format Guide",
-      href: "/faq/jsonformatdoc",
+    title: "JSON Format Guide",
+    href: "/faq/jsonformatdoc",
   },
   {
-      title: "Create JWT Token Chatbot",
-      href: "/faq/create-jwt-for-chatbot",
+    title: "Create JWT Token Chatbot",
+    href: "/faq/create-jwt-for-chatbot",
   },
 ];
 
@@ -381,7 +384,7 @@ export const PRICINGPLANS = [
     features: [
       '1,000 API calls/month',
       'Basic support via email',
-      'Core API features & integrations', 
+      'Core API features & integrations',
       'Access to public documentation',
       'Basic analytics dashboard',
       'Chatbot Integration'
@@ -395,7 +398,7 @@ export const PRICINGPLANS = [
       'Unlimited API calls',
       '24/7 priority support',
       'Custom feature development',
-      'Enterprise SLA guarantees', 
+      'Enterprise SLA guarantees',
       'On-premise deployment options',
       'Advanced security features',
       'Dedicated account manager',
@@ -442,7 +445,7 @@ export const FEATURE_DATA = [
     image: "./ConnectApps.svg",
     icon: "/live.svg"
   },
-  
+
   {
     title: "Test Cases:",
     subtitle: "Achieve Perfection with Intelligent Testing",
