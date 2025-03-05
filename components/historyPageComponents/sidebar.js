@@ -4,14 +4,15 @@ import { clearSubThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { openModal } from "@/utils/utility.js";
 import { ChevronDown, ChevronUp, Download, ThumbsDown, ThumbsUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
+import { usePathname, useRouter } from "next/navigation.js";
 
-const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedSubThreadId, setSelectedSubThreadId }) => {
+const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData }) => {
   const { subThreads } = useCustomSelector(state => ({
     subThreads: state?.historyReducer?.subThreads || [],
   }));
@@ -21,14 +22,18 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedThreads, setExpandedThreads] = useState([]);
   const dispatch = useDispatch();
+  const pathName = usePathname();
+  const router = useRouter();
+console.log(isThreadSelectable, selectedThreadIds, expandedThreads);
 
   const { userFeedbackCount } = useCustomSelector(state => ({
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
   }));
+  // debugger
 
   useEffect(() => {
     setExpandedThreads([]);
-  }, [selectedThread]);
+  }, [params.thread_id]);
 
   const debounce = (func, delay) => {
     let timeoutId;
@@ -38,10 +43,10 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     };
   };
 
-  const handleChange = debounce((e) => {
+  const handleChange = useCallback(debounce((e) => {
     setSearchQuery(e?.target?.value);
     handleSearch(e);
-  }, 500);
+  }, 500), [setSearchQuery]);
 
   const handleSearch = async (e) => {
     e?.preventDefault();
@@ -60,7 +65,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     setHasMore(true);
     setFilterOption("all");
     const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
-    await dispatch(getThread(selectedThread, params?.id, 1, "all"));
+    await dispatch(getThread(params.thread_id, params?.id, params.subthread_id || params.thread_id,  1, "all"));
     if (result?.length < 40) setHasMore(false);
   };
 
@@ -74,11 +79,11 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
     const isExpanded = expandedThreads?.includes(threadId);
     if (isExpanded) {
       setThreadPage(1);
-      const result = await dispatch(getThread({ threadId, bridgeId: params?.id, nextPage: 1 }));
+      const result = await dispatch(getThread({ threadId, bridgeId: params?.id, subThreadId: params?.subthread_id, nextPage: 1 }));
       setHasMoreThreadData(result?.data?.length >= 40);
-      setExpandedThreads([]);
+      setExpandedThreads([threadId]);
       await dispatch(clearSubThreadData());
-      setSelectedSubThreadId(null);
+      router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subthread_id=${threadId}`, undefined, { shallow: true });
     } else {
       setExpandedThreads((prev) => [...prev, threadId]);
       await dispatch(getSubThreadsAction({ thread_id: threadId }));
@@ -93,8 +98,10 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
   };
 
   const handleSelectSubThread = async (subThreadId, threadId) => {
+    console.log(subThreadId,'hello')
     setThreadPage(1);
-    setSelectedSubThreadId(subThreadId);
+    setExpandedThreads([threadId]);
+    router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subthread_id=${subThreadId}`, undefined, { shallow: true });
     const result = await dispatch(getThread({ threadId, subThreadId, bridgeId: params?.id, nextPage: 1, user_feedback: filterOption }));
     setHasMoreThreadData(result?.data?.length >= 40);
   };
@@ -191,7 +198,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                     </div>
                   )}
                   <li
-                    className={`${selectedThread === item?.thread_id
+                    className={`${params.thread_id === item?.thread_id
                         ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
                         : ""
                       } flex-grow cursor-pointer`}
@@ -199,7 +206,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                   >
                     <a className={`w-full h-full flex items-center justify-between relative ${item?.thread_id?.length > 35 ? 'tooltip' : ''}`} data-tip={item?.thread_id?.length > 35 ? item?.thread_id : ''}>
                       <span>{truncate(`${item?.thread_id}`, 35)}</span>
-                      {!searchQuery && selectedThread === item?.thread_id && (
+                      {!searchQuery && params.thread_id === item?.thread_id && (
                         <div
                           onClick={(e) => {
                             e?.stopPropagation();
@@ -216,7 +223,7 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                       )}
                     </a>
                   </li>
-                  {selectedThread === item?.thread_id && expandedThreads?.includes(item?.thread_id) && (
+                  {params.thread_id === item?.thread_id && expandedThreads?.includes(item?.thread_id) && (
                     <div className="pl-10 p-2 text-gray-600 text-sm">
                       <ul>
                         {subThreads?.length === 0 ? (
@@ -225,14 +232,14 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
                           subThreads?.map((subThreadId, index) => (
                             <li
                               key={index}
-                              className={`cursor-pointer ${selectedSubThreadId === subThreadId?.sub_thread_id
+                              className={`cursor-pointer ${params.subthread_id === subThreadId?.sub_thread_id
                                   ? "hover:bg-base-primary hover:text-base-100"
                                   : "hover:bg-base-300 hover:text-gray-800"
-                                } p-2 rounded-md transition-all duration-200 ${selectedSubThreadId === subThreadId?.sub_thread_id
+                                } p-2 rounded-md transition-all duration-200 ${params.subthread_id === subThreadId?.sub_thread_id
                                   ? "bg-primary text-base-100"
                                   : ""
                                 }`}
-                              onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, selectedThread)}
+                              onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, params.thread_id)}
                             >
                               {subThreadId?.display_name}
                             </li>
@@ -283,6 +290,6 @@ const Sidebar = ({ historyData, selectedThread, threadHandler, fetchMoreData, ha
       </div>
     </div>
   );
-};
+});
 
 export default Sidebar;
