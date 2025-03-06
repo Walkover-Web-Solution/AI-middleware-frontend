@@ -39,7 +39,6 @@ const DisplayCards = () => {
               className="mr-2"
               width={54}
               height={34}
-              priority
             />
           </div>
           <h1 className="text-4xl font-bold mb-4 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4 ">
@@ -61,17 +60,16 @@ const DisplayCards = () => {
               className="mr-2"
               width={54}
               height={34}
-              priority
             />
           </div>
           <h1 className="text-4xl font-bold mb-4 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4 ">
             Chatbot That Speaks the Language of Your Product
           </h1>
           <p className="text-md mb-4 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4  ">
-            Bring intelligent, domain-focused chatbots and AI assistants into your
-            operations with ease. Designed to address your industry's challenges,
-            they enable seamless collaboration, streamline workflows, and elevate
-            the way you do business.
+            Bring intelligent, domain-focused chatbots and AI assistants into
+            your operations with ease. Designed to address your industry's
+            challenges, they enable seamless collaboration, streamline
+            workflows, and elevate the way you do business.
           </p>
           <div className="flex justify-center mt-auto relative">
             <Image
@@ -92,14 +90,16 @@ const DisplayCards = () => {
               className="mr-2"
               width={54}
               height={34}
-              priority
             />
           </div>
           <h1 className="text-4xl font-bold mb-4 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4">
             Connect Apps
           </h1>
           <p className="text-md mb-4 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4">
-            Effortlessly integrate various apps and platforms, allowing them to work together seamlessly. From CRM tools to marketing platforms and databases, connect apps in one place to automate tasks, streamline workflows, and enhance productivity across different services.
+            Effortlessly integrate various apps and platforms, allowing them to
+            work together seamlessly. From CRM tools to marketing platforms and
+            databases, connect apps in one place to automate tasks, streamline
+            workflows, and enhance productivity across different services.
           </p>
           <div className="flex justify-center mt-auto relative">
             <Image
@@ -118,14 +118,16 @@ const DisplayCards = () => {
               className="mr-2"
               width={54}
               height={34}
-              priority
             />
           </div>
           <h1 className="text-4xl mb-4 font-bold transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4">
             Test Cases
           </h1>
           <p className="text-md transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4">
-            With test cases, you can ensure your workflows, integrations, and AI interactions work exactly as intended from start to finish. They help you catch potential issues, validate every step, and keep everything running seamlessly and reliably.
+            With test cases, you can ensure your workflows, integrations, and AI
+            interactions work exactly as intended from start to finish. They
+            help you catch potential issues, validate every step, and keep
+            everything running seamlessly and reliably.
           </p>
           <div className="flex justify-center mt-auto relative">
             <Image

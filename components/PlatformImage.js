@@ -9,7 +9,6 @@ const PlatformImage = () => {
         className="object-contain"
         width={1280}
         height={620}
-        priority
       />
     </div>
   );

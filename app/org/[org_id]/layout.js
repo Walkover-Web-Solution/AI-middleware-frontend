@@ -26,9 +26,9 @@ export default function layoutOrgPage({ children, params }) {
 
   useEffect(() => {
     dispatch(getAllBridgesAction((data) => {
-        if (data === 0) {
+      if (data === 0) {
         openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-        }
+      }
     }))
     dispatch(getAllFunctions())
   }, []);
