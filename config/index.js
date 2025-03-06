@@ -818,3 +818,17 @@ export const getTestcasesScrore = async (version_id) => {
     console.error("error while getting testcase score", error);
   }
 }
+
+export const optimizeJsonApi = async ({ data }) => {
+  try {
+    const response = await axios.post(
+      `${PYTHON_URL}/bridge/genrate/rawjson`,
+      data
+    );
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
