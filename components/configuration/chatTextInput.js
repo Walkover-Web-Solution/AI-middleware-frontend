@@ -58,7 +58,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             setErrorMessage("Prompt is required");
             return;
         }
-        const newMessage = inputRef?.current?.value;
+        const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n'); 
         if (modelType !== 'completion' && modelType !== 'embedding') {
             if (newMessage?.trim() === "") {
                 setErrorMessage("Message cannot be empty");
@@ -76,9 +76,9 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     hour: "2-digit",
                     minute: "2-digit",
                 }),
-                content: newMessage,
+                content: newMessage.replace(/\n/g, "  \n"), // Markdown line break
                 image_urls: uploadedImages // Store images in the user role
-            };
+            };         
             setUploadedImages([]);
             let response, responseData;
             let data;
@@ -175,13 +175,21 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         }
     };
 
-    const handleKeyPress = useCallback(
+    const handleKeyDown = useCallback(
         event => {
-            if (event.key === "Enter" && !loading) {
-                handleSendMessage(event);
+            if (event.key === "Enter") {
+                if (event.shiftKey) {
+                    // Do nothing, let the default behavior create a new line
+                } else {
+                    // Only prevent default and send if not loading
+                    if (!loading && !uploading) {
+                        event.preventDefault();
+                        handleSendMessage(event);
+                    }
+                }
             }
         },
-        [handleSendMessage]
+        [loading, uploading]
     );
     const handleFileChange = async (e) => {
         const files = fileInputRef.current.files;
@@ -230,12 +238,13 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 </div>
             )}
             {(modelType !== "completion") && (modelType !== 'image') && (
-                <input
+                <textarea
                     ref={inputRef}
-                    type="text"
                     placeholder="Type here"
-                    className="input input-bordered w-full focus:border-primary"
-                    onKeyPress={handleKeyPress}
+                    className="textarea textarea-bordered w-full focus:border-primary"
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                    style={{ resize: 'vertical', minHeight: '40px', maxHeight: '100px' }}
                 />
             )}
             <input
