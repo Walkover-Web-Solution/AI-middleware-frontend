@@ -4,12 +4,12 @@ import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, d
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
-export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
+export const getSingleBridgesAction = ({id , version}) => async (dispatch, getState) => {
   try {
     dispatch(isPending())
     const data = await getSingleBridge(id);
     dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge }));
-    getBridgeVersionAction({ versionId: data.data?.bridge?.published_version_id || data.data?.bridge?.versions?.[0] })(dispatch);
+    getBridgeVersionAction({ versionId: version || data.data?.bridge?.published_version_id  })(dispatch);
   } catch (error) {
     dispatch(isError())
     console.error(error);
