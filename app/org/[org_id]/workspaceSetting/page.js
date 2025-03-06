@@ -68,7 +68,7 @@ export default function SettingsPage({ params }) {
                 <Globe2 className="h-4 w-4 text-primary" />
                 <span className="text-sm text-gray-500">Domain</span>
               </div>
-              <p className="mt-1">{userDetails?.domain || 'ai.walkover.in'}</p>
+              <p className="mt-1">{userDetails?.domain || 'gtwy.ai'}</p>
             </div>
 
             <div className="p-3 bg-base-100 rounded">
