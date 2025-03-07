@@ -9,6 +9,8 @@ import {
 import { useParams, useSearchParams } from "next/navigation";
 import { useCustomSelector } from "@/customHooks/customSelector";
 
+export const runtime = 'edge';
+
 function Testcase() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -132,9 +134,9 @@ function Testcase() {
     }
   }, [dispatch, params?.version, newTestCaseData, bridge_testcases]);
 
-  useEffect(()=>{
+  useEffect(() => {
     handleCreateTestcase()
-  },[])
+  }, [])
 
   return (
     <div className="w-screen h-full">
@@ -242,16 +244,16 @@ function Testcase() {
                               style={{
                                 "--value": testCase?.prev_comparison_score
                                   ? Math.round(
-                                      testCase.prev_comparison_score * 100
-                                    )
+                                    testCase.prev_comparison_score * 100
+                                  )
                                   : 0,
                               }}
                               role="progressbar"
                             >
                               {testCase?.prev_comparison_score
                                 ? `${Math.round(
-                                    testCase.prev_comparison_score * 100
-                                  )}%`
+                                  testCase.prev_comparison_score * 100
+                                )}%`
                                 : "N/A"}
                             </div>
                           </div>
@@ -274,8 +276,8 @@ function Testcase() {
                             >
                               {testCase?.comparison_score
                                 ? `${Math.round(
-                                    testCase.comparison_score * 100
-                                  )}%`
+                                  testCase.comparison_score * 100
+                                )}%`
                                 : "N/A"}
                             </div>
                           </div>
@@ -290,9 +292,8 @@ function Testcase() {
 
           <div className="mt-4 flex justify-between items-center">
             <button
-              className={`btn btn-ghost btn-sm ${
-                isGeneratingScore ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`btn btn-ghost btn-sm ${isGeneratingScore ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               onClick={handleAddTestCase}
               disabled={isGeneratingScore}
             >
@@ -307,7 +308,7 @@ function Testcase() {
               <button className="btn" onClick={handleGenerateScore}>
                 Run Test Case
               </button>
-           }
+            }
           </div>
         </div>
       </div>
