@@ -43,6 +43,9 @@ const WithAuth = (Children) => {
 
       const configuration = {
         referenceId: process.env.NEXT_PUBLIC_REFERENCEID,
+        addInfo: {
+          redirect_path: '/login'
+        },
         success: (data) => {
           console.dir('success response', data);
         },

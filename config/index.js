@@ -809,3 +809,37 @@ export const generateAccessKey = async () => {
     throw error;
   }
 }
+
+export const getTestcasesScrore = async (version_id) => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/bridge/versions/testcases/${version_id}`)
+    return response.data;
+  } catch (error) {
+    console.error("error while getting testcase score", error);
+  }
+}
+
+
+export const getAllShowCase = async () => {
+  try {
+    const response = await axios.get(`${URL}/showcase/all`);
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export const optimizeJsonApi = async ({ data }) => {
+  try {
+    const response = await axios.post(
+      `${PYTHON_URL}/bridge/genrate/rawjson`,
+      data
+    );
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
