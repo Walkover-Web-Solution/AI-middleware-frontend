@@ -42,6 +42,7 @@ export default function layoutOrgPage({ children, params }) {
   useEffect(() => {
     if (params?.org_id) {
       dispatch(getAllApikeyAction(params?.org_id));
+      dispatch(getAllKnowBaseDataAction(params?.org_id))
     }
   }, [dispatch, params?.org_id]);
 

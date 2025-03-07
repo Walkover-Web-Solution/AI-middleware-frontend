@@ -1,15 +1,15 @@
 'use client';
+import KnowledgeBaseIntegrationSlider from "@/components/configuration/configurationComponent/knowledgeBaseIntegrationSlider";
+import CustomTable from "@/components/customTable/customTable";
+import { truncate } from "@/components/historyPageComponents/assistFile";
 import KnowledgeBaseModal from "@/components/modals/knowledgeBaseModal";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
-import { BookText, EllipsisVertical, LayoutGrid, SquarePen, Table, Trash2 } from "lucide-react";
-import React, { useState, useEffect, useMemo } from 'react';
-import { useDispatch } from "react-redux";
-import CustomTable from "@/components/customTable/customTable";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
-import { truncate } from "@/components/historyPageComponents/assistFile";
-import KnowledgeBaseIntegrationSlider from "@/components/configuration/configurationComponent/knowledgeBaseIntegrationSlider";
 import { GetFileTypeIcon, openModal } from "@/utils/utility";
+import { BookText, EllipsisVertical, LayoutGrid, SquarePen, Table, Trash2 } from "lucide-react";
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
 
@@ -76,7 +76,6 @@ const Page = ({ params }) => {
       </div>
     );
   };
-
   const handleUpdateKnowledgeBase = (item) => {
     setSelectedKnowledgeBase(item);
     openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)
