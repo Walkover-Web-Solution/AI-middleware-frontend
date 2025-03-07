@@ -114,3 +114,12 @@ html {
     background-position: center;
   }
 }
+
+.show-on-hover{
+  &:hover .see-on-hover{
+    opacity: 1 !important;
+  }
+}
+.see-on-hover{
+  opacity: 0;
+}

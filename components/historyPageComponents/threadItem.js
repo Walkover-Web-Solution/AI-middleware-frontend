@@ -1,5 +1,5 @@
 import { updateContentHistory } from "@/store/action/historyAction";
-import { Bot, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, User } from "lucide-react";
+import { Bot, BotMessageSquare, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, User } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -8,6 +8,7 @@ import CodeBlock from "../codeBlock/codeBlock";
 import EditMessageModal from "../modals/EditMessageModal";
 import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
+import { getSingleMessage } from "@/config";
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId }) => {
   const dispatch = useDispatch();
@@ -147,6 +148,22 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     </div>
   );
 
+  const handleAskAi = async (item) =>{
+    let variables = {...item}
+    try {
+      const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
+      variables = {"System Prompt" : systemPromptResponse, ...variables}
+    } catch (error) {
+      console.error("Failed to fetch single message:", error);
+    }
+    window.SendDataToChatbot({
+      "parentId":'',
+      "bridgeName": "history_page_chabot",
+      "threadId": item?.id,
+      variables
+    });
+      window.openChatbot()
+  }
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
       {item?.role === "tools_call" ? (
@@ -159,9 +176,12 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           </div>
         </div>
       ) : (
-        <div>
-          <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
+        <div className="show-on-hover" >
+
+          <div   className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
+    
             <div className="chat-image avatar flex justify-center items-center">
+       
               <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center">
                 <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                   {item.role === "user" ? (
@@ -222,12 +242,24 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     </ul>
                   </div>
                 )}
+                
               </div>
+             
             </div>
+        
             <div className="chat-header flex gap-4 items-center mb-1">
               {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
             </div>
+            <div className="flex justify-end items-end gap-1" >
+        { item.role === "assistant" &&    <div data-tip="Ask AI" className="see-on-hover tooltip">
+                   <BotMessageSquare
+                className=" cursor-pointer bot-icon"
+                size={18}
+                onClick={()=> handleAskAi(item)}
+            />
+            </div>}
             <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
+      
               {item?.role === "user" && (
                 <div className="flex flex-wrap">
                   {item?.urls?.map((url, index) => (
@@ -260,6 +292,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                   </div>
                 </div>
               )}
+                   
               <ReactMarkdown components={{
                 code: ({ node, inline, className, children, ...props }) => (
                   <CodeBlock
@@ -274,14 +307,16 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 {!item.image_url && getMessageToDisplay()}
               </ReactMarkdown>
               {!item.image_url && item?.role === 'assistant' && (
-                <div className="tooltip absolute top-2  right-2 text-sm cursor-pointer" data-tip="Edit response">
+                <div className="flex gap-2 tooltip absolute top-2 right-2 text-sm cursor-pointer" data-tip="Edit response">
                   <Pencil
                     size={16}
                     onClick={handleEdit}
                   />
-                </div>
+                  </div>
               )}
             </div>
+            </div>
+            
             {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
           {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div className="flex justify-center items-center my-4">
@@ -305,6 +340,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             )
           }
+          
         </div>
       )}
 
