@@ -1,33 +1,40 @@
 "use client";
+import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import Navbar from "@/components/navbar";
 import MainSlider from "@/components/sliders/mainSlider";
+import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, getAllBridgesAction, getAllFunctions, integrationAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
+import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
-import { usePathname } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useParams, usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
 export default function layoutOrgPage({ children, params }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
-
-  const { chatbot_token, embedToken } = useCustomSelector((state) => ({
+  const [selectedItem, setSelectedItem] = useState(null)
+  const [isSliderOpen, setIsSliderOpen] = useState(false)
+  const { chatbot_token, embedToken, alertingEmbedToken } = useCustomSelector((state) => ({
     chatbot_token: state?.ChatBot?.chatbot_token || '',
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+    alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
+
   }));
-  useEmbedScriptLoader(embedToken);
+  const urlParams = useParams()
+  useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
 
   useEffect(() => {
     dispatch(getAllBridgesAction((data) => {
-        if (data === 0) {
+      if (data === 0) {
         openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-        }
+      }
     }))
     dispatch(getAllFunctions())
   }, []);
@@ -51,6 +58,7 @@ export default function layoutOrgPage({ children, params }) {
         const script = document.createElement("script");
         script.setAttribute("embedToken", chatbot_token);
         script.setAttribute("hideIcon", true);
+        script.setAttribute("eventsToSubscribe", JSON.stringify(["MESSAGE_CLICK"]));
         script.id = scriptId;
         script.src = scriptSrc;
         document.head.appendChild(script);
@@ -81,7 +89,7 @@ export default function layoutOrgPage({ children, params }) {
     };
   }, [params.id]);
 
-  function handleMessage(e) {
+  async function handleMessage(e) {
     // todo: need to make api call to update the name & description
     if (e?.data?.webhookurl) {
       const dataToSend = {
@@ -101,6 +109,15 @@ export default function layoutOrgPage({ children, params }) {
         dispatch(createApiAction(params.org_id, dataFromEmbed));
       }
     }
+    if (e.data?.type === 'MESSAGE_CLICK') {
+      try {
+        const systemPromptResponse = await getSingleMessage({ bridge_id: urlParams?.id, message_id: e?.data?.data?.createdAt });
+        setSelectedItem({ "System Prompt": systemPromptResponse, ...e?.data?.data });
+        setIsSliderOpen(true)
+      } catch (error) {
+        console.error("Failed to fetch single message:", error);
+      }
+    }
   }
 
   const isHomePage = useMemo(() => path?.length < 5, [path]);
@@ -111,10 +128,11 @@ export default function layoutOrgPage({ children, params }) {
         <div className=" flex flex-col  h-full">
           <MainSlider />
         </div>
-        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto">
+        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto overflow-x-hidden">
           <Navbar />
           <main className="px-2">{children}</main>
         </div>
+        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
       </div>
     );
   } else {
@@ -122,6 +140,7 @@ export default function layoutOrgPage({ children, params }) {
       <div className="h-screen">
         <Navbar />
         {children}
+        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
       </div>
     );
   }

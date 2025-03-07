@@ -1,13 +1,14 @@
+import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { MODAL_TYPE } from '@/utils/enums';
+import { openModal } from '@/utils/utility';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { openModal } from '@/utils/utility';
-import { MODAL_TYPE } from '@/utils/enums';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -17,19 +18,17 @@ const AdvancedParameters = ({ params }) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const dispatch = useDispatch();
 
-  const { service, type, model, configuration, integrationData, version_function_data, tool_choice_data } = useCustomSelector((state) => {
+  const { service, configuration, integrationData } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
     return {
       integrationData,
       service: versionData?.service,
-      type: versionData?.configuration?.type,
       configuration: versionData?.configuration,
-      tool_choice_data: versionData?.configuration?.tool_choice,
-      model: versionData?.configuration?.model,
-      version_function_data: versionData?.apiCalls
     };
   });
+
+  const { tool_choice: tool_choice_data, type, model, apiCalls: version_function_data } = configuration;
 
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
@@ -44,9 +43,8 @@ const AdvancedParameters = ({ params }) => {
   }, [tool_choice_data]);
 
   useEffect(() => {
-    if(tool_choice_data === "auto"  || tool_choice_data === "none" || tool_choice_data === "default")
-    {
-      setSelectedOptions([{name: tool_choice_data === "default" ? "auto" : tool_choice_data, id: tool_choice_data === "default" ? "auto" : tool_choice_data}])
+    if (tool_choice_data === "auto" || tool_choice_data === "none" || tool_choice_data === "default") {
+      setSelectedOptions([{ name: tool_choice_data === "default" ? "auto" : tool_choice_data, id: tool_choice_data === "default" ? "auto" : tool_choice_data }])
       return
     }
     const selectedFunctiondata = version_function_data && typeof version_function_data === 'object'
@@ -203,13 +201,13 @@ const AdvancedParameters = ({ params }) => {
               {field === 'dropdown' && (
                 <div className="w-full">
                   <div className="relative">
-                    <div 
+                    <div
                       className="flex items-center gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer"
                       onClick={() => setShowDropdown(!showDropdown)}
                     >
                       <span className="text-base-content">
-                        {selectedOptions.length > 0 
-                          ? (integrationData[selectedOptions[0].name]?.title || selectedOptions[0].name) 
+                        {selectedOptions.length > 0
+                          ? (integrationData[selectedOptions[0].name]?.title || selectedOptions[0].name)
                           : 'Select an tool choice option...'}
                       </span>
                       <div className="ml-auto">
@@ -249,11 +247,11 @@ const AdvancedParameters = ({ params }) => {
                               />
                               <span className="font-semibold">{option}</span>
                               <span className="text-gray-500 text-xs">
-                                {option === 'none' 
+                                {option === 'none'
                                   ? "Model won't call a function; it will generate a message."
                                   : option === 'auto'
-                                  ? "Model can generate a response or call a function."
-                                  : "One or more specific functions must be called"}
+                                    ? "Model can generate a response or call a function."
+                                    : "One or more specific functions must be called"}
                               </span>
                             </label>
                           </div>

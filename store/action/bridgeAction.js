@@ -1,15 +1,15 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
 import { toast } from "react-toastify";
 import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
-export const getSingleBridgesAction = (id) => async (dispatch, getState) => {
+export const getSingleBridgesAction = ({id , version}) => async (dispatch, getState) => {
   try {
     dispatch(isPending())
     const data = await getSingleBridge(id);
     dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge }));
-    getBridgeVersionAction({ versionId: data.data?.bridge?.published_version_id || data.data?.bridge?.versions?.[0] })(dispatch);
+    getBridgeVersionAction({ versionId: version || data.data?.bridge?.published_version_id  })(dispatch);
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -52,7 +52,7 @@ export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, g
     const result = await createBridgeVersionApi(dataToSend);
     if (result?.success) {
       onSuccess(result);
-      dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId, version_description:data?.version_description }));
+      dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId, version_description: data?.version_description }));
       toast.success('New version created successfully');
     }
   } catch (error) {
@@ -71,13 +71,14 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     dispatch(isPending())
     const response = await getAllBridges();
     const embed_token = response?.data?.embed_token;
+    const alerting_embed_token = response?.data?.alerting_embed_token;
     const integrationData = await integration(embed_token);
     const flowObject = integrationData?.flows?.reduce((obj, item) => {
       obj[item.id] = item;
       return obj;
     }, {});
     if (onSuccess) onSuccess(response?.data?.bridge?.length)
-    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, integrationData: flowObject, embed_token }));
+    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, integrationData: flowObject, embed_token, alerting_embed_token }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -127,6 +128,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
     dispatch(isPending());
     const data = await updateBridge({ bridgeId, dataToSend });
     dispatch(updateBridgeReducer({ bridges: data.data.bridge, functionData: dataToSend?.functionData || null }));
+    return { success: true };
   } catch (error) {
     console.error(error);
     dispatch(isError());
@@ -271,5 +273,15 @@ export const genrateSummaryAction = ({ bridgeId, versionId, orgId }) => async (d
     dispatch(isError());
     toast.error('Failed to update summary');
     console.error("Failed to update summary: ", error);
+  }
+}
+
+export const getTestcasesScroreAction = (version_id) => async (dispatch) =>{
+  try {
+    const reponse = await getTestcasesScrore(version_id);
+    return reponse;
+  } catch (error) {
+    toast.error('Failed to Genrate Score')
+    toast.error('Failed to genrate testcase score');
   }
 }

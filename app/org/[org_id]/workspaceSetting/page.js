@@ -2,7 +2,7 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateOrgTimeZone } from '@/store/action/orgAction';
 import timezoneData from '@/utils/timezoneData';
-import { Pencil } from 'lucide-react';
+import { Pencil, Building2, Globe2, Mail } from 'lucide-react';
 import React, { useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -54,73 +54,92 @@ export default function SettingsPage({ params }) {
   }, [userDetails?.meta?.identifier]);
 
   return (
-    <div className="flex overflow-hidden">
-      <main className="flex-1 p-8">
-        <div className="space-y-6">
-          <div className="flex items-start justify-between">
-            <h1 className="text-3xl font-extrabold text-primary flex items-center gap-4 ml-2">Workspace Settings</h1>
-          </div>
-          <div className="space-y-8 bg-base-100 p-6 rounded-xl shadow-xl">
-            <div className="space-y-6 ml-10">
-              <h3 className="font-semibold text-xl text-base-content">Organization Details</h3>
-              <div className="space-y-2">
-                <p className="text-lg text-base-500">
-                  <span className="font-semibold">Domain:</span> {userDetails?.domain || 'ai.walkover.in'}
-                </p>
-                <p className="text-lg text-base-500">
-                  <span className="font-semibold">Name:</span> {userDetails?.name || 'N/A'}
-                </p>
-                <p className="text-lg text-gray-700">
-                  <span className="font-semibold">Email:</span> {userDetails?.email || 'N/A'}
-                </p>
+    <main className="max-w-4xl mx-auto p-4 my-20">
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <Building2 className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-semibold">Workspace Settings</h1>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-3 bg-base-100 rounded">
+              <div className="flex items-center gap-2">
+                <Globe2 className="h-4 w-4 text-primary" />
+                <span className="text-sm text-gray-500">Domain</span>
               </div>
-              <div className="flex items-center">
-                <p className="text-lg text-base-500 cursor-pointer" onClick={handleContentOpen}>
-                  <span className="font-semibold">Timezone:</span> {selectedTimezone?.identifier} ({selectedTimezone?.offSet})
-                </p>
-                <Pencil size={16} className="ml-2 cursor-pointer text-primary" onClick={handleContentOpen} />
+              <p className="mt-1">{userDetails?.domain || 'gtwy.ai'}</p>
+            </div>
+
+            <div className="p-3 bg-base-100 rounded">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-primary" />
+                <span className="text-sm text-gray-500">Organization Name</span>
               </div>
-              {isContentOpen && (
-                <div className="mt-6">
-                  <label htmlFor="sidebarTimezone" className="text-lg font-semibold text-blue-800">
-                    Select Timezone
-                  </label>
-                  <div className="relative ml-5">
-                    <input
-                      type="text"
-                      placeholder="Search timezone..."
-                      className="border border-gray-300 rounded-lg p-3 w-full mb-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <div className="overflow-y-auto max-h-[40vh] border border-gray-300 rounded-lg">
-                      {filteredTimezones.map((timezone) => (
-                        <div
-                          key={timezone.identifier}
-                          onClick={() => handleTimezoneChange(timezone)}
-                          className={`p-3 hover:bg-blue-100 cursor-pointer ${
-                            timezone.identifier === selectedTimezone?.identifier ? 'bg-blue-200' : ''
-                          }`}
-                        >
-                          {timezone.identifier} {timezone.offSet ? `(${timezone.offSet})` : ''}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex justify-end gap-3 mt-3">
-                      <button className="bg-primary text-base-100 px-5 py-2 rounded-lg" onClick={handleSave}>
-                        Save
-                      </button>
-                      <button className="bg-base-300 px-5 py-2 rounded-lg" onClick={handleCancel}>
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
+              <p className="mt-1">{userDetails?.name || 'N/A'}</p>
+            </div>
+
+            <div className="p-3 bg-base-100 rounded">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-primary" />
+                <span className="text-sm text-gray-500">Email Address</span>
+              </div>
+              <p className="mt-1">{userDetails?.email || 'N/A'}</p>
+            </div>
+
+            <div className="p-3 bg-base-100 rounded cursor-pointer" onClick={handleContentOpen}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Globe2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm text-gray-500">Timezone</span>
                 </div>
-              )}
+                <Pencil size={14} className="text-primary" />
+              </div>
+              <p className="mt-1">{selectedTimezone?.identifier} ({selectedTimezone?.offSet})</p>
             </div>
           </div>
+
+          {isContentOpen && (
+            <div className="mt-4 border rounded-lg p-4">
+              <input
+                type="text"
+                placeholder="Search timezone..."
+                className="w-full p-2 border rounded mb-3 text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <div className="h-48 overflow-y-auto border rounded">
+                {filteredTimezones.map((timezone) => (
+                  <div
+                    key={timezone.identifier}
+                    onClick={() => handleTimezoneChange(timezone)}
+                    className={`p-2 text-sm cursor-pointer ${timezone.identifier === selectedTimezone?.identifier
+                      ? 'bg-primary text-white'
+                      : 'hover:bg-gray-50'
+                      }`}
+                  >
+                    {timezone.identifier} {timezone.offSet ? `(${timezone.offSet})` : ''}
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-2 mt-3">
+                <button
+                  className="px-3 py-1.5 text-sm rounded bg-gray-100 hover:bg-gray-200"
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-3 py-1.5 text-sm rounded bg-primary text-white hover:bg-primary-dark"
+                  onClick={handleSave}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
