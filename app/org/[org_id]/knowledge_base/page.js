@@ -1,7 +1,7 @@
 'use client';
 import KnowledgeBaseModal from "@/components/modals/knowledgeBaseModal";
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { deleteKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
+import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { BookText, EllipsisVertical, LayoutGrid, SquarePen, Table, Trash2 } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch } from "react-redux";
@@ -29,6 +29,7 @@ const Page = ({ params }) => {
         setViewMode('table');
       }
     };
+    dispatch(getAllKnowBaseDataAction(params?.org_id))
     updateScreenSize();
     window.addEventListener('resize', updateScreenSize);
     return () => window.removeEventListener('resize', updateScreenSize);
@@ -45,13 +46,13 @@ const Page = ({ params }) => {
     ...item,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
-       {GetFileTypeIcon(item?.type, 24 , 24)}
+        {GetFileTypeIcon(item?.type, 24, 24)}
       </div>
       <div className="tooltip" data-tip={item.name}>
         {truncate(item.name, 30)}
       </div>
     </div>,
-    description : item?.description,
+    description: item?.description,
     actual_name: item?.name,
   }));
 
@@ -75,7 +76,7 @@ const Page = ({ params }) => {
       </div>
     );
   };
-  
+
   const handleUpdateKnowledgeBase = (item) => {
     setSelectedKnowledgeBase(item);
     openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)
@@ -99,7 +100,7 @@ const Page = ({ params }) => {
         />
         <div className="join">
           <button className="btn mr-4" onClick={() => setOpenKnowledgeBaseSlider(true)}>
-          <BookText /> Integration Guide
+            <BookText /> Integration Guide
           </button>
           <button
             className={`btn rounded-r-none rounded-md ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
@@ -164,7 +165,7 @@ const Page = ({ params }) => {
           <p className="text-gray-500">No knowledge base entries found</p>
         </div>
       )}
-      <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase}/>
+      <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} />
       <KnowledgeBaseIntegrationSlider params={params} setOpenKnowledgeBaseSlider={setOpenKnowledgeBaseSlider} openKnowledgeBaseSlider={openKnowledgeBaseSlider} />
     </div>
   );
