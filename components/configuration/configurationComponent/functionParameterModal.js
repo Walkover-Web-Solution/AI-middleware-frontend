@@ -405,7 +405,7 @@ function FunctionParameterModal({ functionId, params }) {
       const reqJson = JSON.parse(objectFieldValue);
       const result = await optimizeJsonApi({
         data: {
-          json_schema: reqJson,
+          example_json: reqJson,
         },
       });
       setObjectFieldValue(result.result);
