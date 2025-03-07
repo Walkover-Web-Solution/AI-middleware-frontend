@@ -72,8 +72,10 @@ export default function ConfigurationPage({ params }) {
                         <KnowledgebaseList params={params} />
                     </>
                 )}
-            <ServiceDropdown params={params} />
-            <ModelDropdown params={params} />
+            <div className="flex gap-4">
+                <ServiceDropdown params={params} />
+                <ModelDropdown params={params} />
+            </div>
             <ApiKeyInput params={params} />
             <AdvancedParameters params={params} />
             {modelType !== "image" && modelType !== 'embedding' && (
