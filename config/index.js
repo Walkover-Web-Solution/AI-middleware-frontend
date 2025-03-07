@@ -819,6 +819,16 @@ export const getTestcasesScrore = async (version_id) => {
   }
 }
 
+
+export const getAllShowCase = async () => {
+  try {
+    const response = await axios.get(`${URL}/showcase/all`);
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }}
+
 export const optimizeJsonApi = async ({ data }) => {
   try {
     const response = await axios.post(
