@@ -827,6 +827,7 @@ export const getAllShowCase = async () => {
   } catch (error) {
     console.error(error);
     throw error;
+  }}
 
 export const optimizeJsonApi = async ({ data }) => {
   try {
