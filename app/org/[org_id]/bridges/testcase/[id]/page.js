@@ -137,7 +137,7 @@ function Testcase() {
   },[])
 
   return (
-    <div className="container w-full h-full ">
+    <div className="w-screen h-full">
       <div className="relative overflow-y-hidden">
         {isGeneratingScore && (
           <div className="absolute inset-0 bg-base-100/90 flex items-center justify-center rounded-lg z-[999999]">
