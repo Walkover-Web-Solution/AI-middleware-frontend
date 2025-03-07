@@ -157,6 +157,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       console.error("Failed to fetch single message:", error);
     }
     window.SendDataToChatbot({
+      "parentId":'',
       "bridgeName": "history_page_chabot",
       "threadId": item?.id,
       variables
