@@ -1,5 +1,15 @@
 import { updateContentHistory } from "@/store/action/historyAction";
-import { Bot, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, User } from "lucide-react";
+import {
+  Bot,
+  ChevronDown,
+  ChevronUp,
+  FileClock,
+  MessageCircleCode,
+  Parentheses,
+  Pencil,
+  SquareFunction,
+  User,
+} from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -9,9 +19,21 @@ import EditMessageModal from "../modals/EditMessageModal";
 import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
 
-const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId }) => {
+const ThreadItem = ({
+  index,
+  item,
+  threadHandler,
+  formatDateAndTime,
+  integrationData,
+  params,
+  threadRefs,
+  searchMessageId,
+  setSearchMessageId,
+}) => {
   const dispatch = useDispatch();
-  const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
+  const [messageType, setMessageType] = useState(
+    item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1
+  );
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
   const [modalInput, setModalInput] = useState("");
@@ -38,22 +60,28 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       alert("Message cannot be empty.");
       return;
     }
-    dispatch(updateContentHistory({
-      id: item?.Id,
-      bridge_id: params.id,
-      message: modalInput,
-      index
-    }));
+    dispatch(
+      updateContentHistory({
+        id: item?.Id,
+        bridge_id: params.id,
+        message: modalInput,
+        index,
+      })
+    );
     setModalInput("");
     modalRef.current?.close() || console.error("Modal element not found");
   }, [dispatch, item.id, params.id, modalInput, index]);
 
   const getMessageToDisplay = useCallback(() => {
     switch (messageType) {
-      case 0: return item.chatbot_message;
-      case 1: return item.content;
-      case 2: return item.updated_message;
-      default: return "";
+      case 0:
+        return item.chatbot_message;
+      case 1:
+        return item.content;
+      case 2:
+        return item.updated_message;
+      default:
+        return "";
     }
   }, [messageType, item]);
 
@@ -64,7 +92,11 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropupRef.current && !dropupRef.current.contains(event.target) && !event.target.closest('.bot-icon')) {
+      if (
+        dropupRef.current &&
+        !dropupRef.current.contains(event.target) &&
+        !event.target.closest(".bot-icon")
+      ) {
         setIsDropupOpen(false);
       }
     };
@@ -88,35 +120,58 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   const messageId = item.message_id;
   useEffect(() => {
     if (messageId && !threadRefs.current[messageId]) {
-      threadRefs.current[messageId] = document.getElementById(`message-${messageId}`);
+      threadRefs.current[messageId] = document.getElementById(
+        `message-${messageId}`
+      );
     }
-    const messageElement = document.getElementById(`message-${searchMessageId}`);
+    const messageElement = document.getElementById(
+      `message-${searchMessageId}`
+    );
 
     if (messageElement && searchMessageId) {
-      messageElement.classList.add('bg-base-300', 'rounded-md');
+      messageElement.classList.add("bg-base-300", "rounded-md");
       setTimeout(() => {
-        messageElement.classList.remove('bg-base-300', 'rounded-md');
+        messageElement.classList.remove("bg-base-300", "rounded-md");
       }, 2000);
       setSearchMessageId(null);
     }
   }, [messageId, searchMessageId, threadRefs, setSearchMessageId]);
 
-  const renderToolData = (toolData, index) => (
+  const renderToolData = (toolData, index) =>
     Object.entries(toolData).map(([key, tool]) => (
-      <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 shadow-sm">
-        <div onClick={() => openViasocket(tool?.id, { flowHitId: tool?.metadata?.flowHitId })}
-          className="cursor-pointer flex items-center justify-center py-4 pl-2">
+      <div
+        key={index}
+        className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 shadow-sm"
+      >
+        <div
+          onClick={() =>
+            openViasocket(tool?.id, { flowHitId: tool?.metadata?.flowHitId })
+          }
+          className="cursor-pointer flex items-center justify-center py-4 pl-2"
+        >
           <div className="text-center">
             {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
           </div>
         </div>
         <div className="flex gap-3">
-          <div className="tooltip tooltip-top relative" data-tip="function logs">
-            <SquareFunction size={22}
-              onClick={() => openViasocket(tool.name, { flowHitId: tool?.metadata?.flowHitId })}
-              className="opacity-80 cursor-pointer" />
+          <div
+            className="tooltip tooltip-top relative"
+            data-tip="function logs"
+          >
+            <SquareFunction
+              size={22}
+              onClick={() =>
+                openViasocket(tool.name, {
+                  flowHitId: tool?.metadata?.flowHitId,
+                })
+              }
+              className="opacity-80 cursor-pointer"
+            />
           </div>
-          <div className="tooltip tooltip-top pr-2 relative" data-tip="function data">
+          <div
+            className="tooltip tooltip-top pr-2 relative"
+            data-tip="function data"
+          >
             <FileClock
               size={22}
               onClick={() => {
@@ -128,188 +183,306 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           </div>
         </div>
       </div>
-    ))
-  );
+    ));
 
   const renderFunctionData = (funcName, index) => (
-    <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
-      <div onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId })}
-        className="cursor-pointer flex items-center justify-center py-4 pl-2">
+    <div
+      key={index}
+      className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1"
+    >
+      <div
+        onClick={() =>
+          openViasocket(funcName, {
+            flowHitId: JSON?.parse(item.function[funcName] || "{}")?.metadata
+              ?.flowHitId,
+          })
+        }
+        className="cursor-pointer flex items-center justify-center py-4 pl-2"
+      >
         <div className="font-semibold text-center">
           {truncate(integrationData?.[funcName]?.title || funcName, 20)}
         </div>
       </div>
       <div className="tooltip tooltip-top pr-2" data-tip="function logs">
-        <SquareFunction size={22}
-          onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId })}
-          className="opacity-80 cursor-pointer" />
+        <SquareFunction
+          size={22}
+          onClick={() =>
+            openViasocket(funcName, {
+              flowHitId: JSON?.parse(item.function[funcName] || "{}")?.metadata
+                ?.flowHitId,
+            })
+          }
+          className="opacity-80 cursor-pointer"
+        />
       </div>
     </div>
   );
 
   return (
-    <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
+    <div
+      key={`item-id-${item?.id}`}
+      id={`message-${messageId}`}
+      ref={(el) => (threadRefs.current[messageId] = el)}
+      className=""
+    >
       {item?.role === "tools_call" ? (
         <div className="mb-2 flex flex-col justify-center items-center">
           <h1 className="p-1">
-            <span className="flex justify-center items-center gap-2 font-semibold"><Parentheses size={16} />Functions Executed Successfully</span>
+            <span className="flex justify-center items-center gap-2 font-semibold">
+              <Parentheses size={16} />
+              Functions Executed Successfully
+            </span>
           </h1>
           <div className="flex h-full gap-2 justify-center items-center flex-wrap">
-            {item?.tools_call_data ? item.tools_call_data.map(renderToolData) : Object.keys(item.function).map(renderFunctionData)}
+            {item?.tools_call_data
+              ? item.tools_call_data.map(renderToolData)
+              : Object.keys(item.function).map(renderFunctionData)}
           </div>
         </div>
       ) : (
         <div>
-          <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
-            <div className="chat-image avatar flex justify-center items-center">
-              <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center">
-                <div className="relative rounded-full bg-base-300 flex justify-center items-center">
-                  {item.role === "user" ? (
-                    <User size={20} />
-                  ) : (
-                    <div>
-                      <Bot
-                        className=" cursor-pointer bot-icon"
-                        size={20}
-                        onClick={() => setIsDropupOpen(!isDropupOpen)}
-                      /></div>
+          {item.role !== "error" && (
+            <div
+              className={`chat ${
+                item.role === "user" ? "chat-start" : "chat-end"
+              }`}
+            >
+              <div className="chat-image avatar flex justify-center items-center">
+                <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center">
+                  <div className="relative rounded-full bg-base-300 flex justify-center items-center">
+                    {item.role === "user" ? (
+                      <User size={20} />
+                    ) : (
+                      <div>
+                        <Bot
+                          className=" cursor-pointer bot-icon"
+                          size={20}
+                          onClick={() => setIsDropupOpen(!isDropupOpen)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {isDropupOpen && item.role !== "user" && (
+                    <div
+                      ref={dropupRef}
+                      className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-inherit rounded-md shadow-lg "
+                      style={{ zIndex: 9 }}
+                    >
+                      <ul className="flex justify-center flex-col items-center gap-2">
+                        {item.chatbot_message && (
+                          <li>
+                            <button
+                              className={`px-2 py-1 ${
+                                messageType === 0
+                                  ? "bg-primary text-white rounded-md"
+                                  : ""
+                              }`}
+                              onClick={() => selectMessageType(0)}
+                            >
+                              <div
+                                className="tooltip tooltip-left"
+                                data-tip="Chatbot Response"
+                              >
+                                <Bot className="" size={16} />
+                              </div>
+                            </button>
+                          </li>
+                        )}
+                        <li>
+                          <button
+                            className={`px-2 py-1 ${
+                              messageType === 1
+                                ? "bg-primary text-white rounded-md"
+                                : ""
+                            }`}
+                            onClick={() => selectMessageType(1)}
+                          >
+                            <div
+                              className="tooltip tooltip-left"
+                              data-tip="Normal Response"
+                            >
+                              <MessageCircleCode className="" size={16} />
+                            </div>
+                          </button>
+                        </li>
+                        {item.updated_message && (
+                          <li>
+                            <button
+                              className={`px-2 py-1 ${
+                                messageType === 2
+                                  ? "bg-primary text-white rounded-md"
+                                  : ""
+                              }`}
+                              onClick={() => selectMessageType(2)}
+                            >
+                              <div
+                                className="tooltip tooltip-left"
+                                data-tip="Updated Message"
+                              >
+                                <Pencil className="" size={16} />
+                              </div>
+                            </button>
+                          </li>
+                        )}
+                      </ul>
+                    </div>
                   )}
                 </div>
-                {isDropupOpen && item.role !== "user" && (
+              </div>
+              <div className="chat-header flex gap-4 items-center mb-1">
+                {messageType === 2 && (
+                  <p className="text-xs opacity-50">Edited</p>
+                )}
+              </div>
+              <div className="flex flex-col gap-1 items-end">
+                {item.firstAttemptError && item?.role === "assistant" && (
+                  <div className="collapse bg-gray-200 rounded-md max-w-24">
+                    <input
+                      type="checkbox"
+                      className="peer hidden"
+                      id="errorCollapse"
+                    />
+
+                    <label
+                      htmlFor="errorCollapse"
+                      className="collapse-title font-semibold cursor-pointer flex justify-between items-center py-2 pb-0"
+                    >
+                      <span>Error</span>
+                        <ChevronDown className="w-5 h-5" />
+                    </label>
+
+                    <div className="collapse-content max-w-[400px]">
+                      {item.firstAttemptError}
+                    </div>
+                  </div>
+                )}
+                {item.role !== "error" && (
                   <div
-                    ref={dropupRef}
-                    className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-inherit rounded-md shadow-lg "
-                    style={{ zIndex: 9 }}
+                    className={`${
+                      item.role === "user"
+                        ? "cursor-pointer chat-bubble-primary "
+                        : "bg-base-200  text-base-content pr-10"
+                    } chat-bubble transition-all ease-in-out duration-300`}
+                    onClick={() => threadHandler(item.thread_id, item)}
                   >
-                    <ul className="flex justify-center flex-col items-center gap-2">
-                      {item.chatbot_message && (
-                        <li>
-                          <button
-                            className={`px-2 py-1 ${messageType === 0 ? "bg-primary text-white rounded-md" : ""
-                              }`}
-                            onClick={() => selectMessageType(0)}
+                    {item?.role === "user" && (
+                      <div className="flex flex-wrap">
+                        {item?.urls?.map((url, index) => (
+                          <div
+                            key={index}
+                            className="chat chat-end flex-grow-1"
                           >
-                            <div className="tooltip tooltip-left" data-tip="Chatbot Response">
-                              <Bot className="" size={16} />
+                            <div>
+                              <Image
+                                src={url}
+                                alt="Attached"
+                                width={64}
+                                height={64}
+                                className="max-w-full max-h-16 w-auto h-auto rounded-md"
+                                loading="lazy"
+                              />
                             </div>
-                          </button>
-                        </li>
-                      )}
-                      <li>
-                        <button
-                          className={`px-2 py-1 ${messageType === 1 ? "bg-primary text-white rounded-md" : ""
-                            }`}
-                          onClick={() => selectMessageType(1)}
-                        >
-                          <div className="tooltip tooltip-left" data-tip="Normal Response">
-                            <MessageCircleCode className="" size={16} />
                           </div>
-                        </button>
-                      </li>
-                      {item.updated_message && (
-                        <li>
-                          <button
-                            className={`px-2 py-1 ${messageType === 2 ? "bg-primary text-white rounded-md" : ""
-                              }`}
-                            onClick={() => selectMessageType(2)}
+                        ))}
+                      </div>
+                    )}
+                    {item?.role === "assistant" && item?.image_url && (
+                      <div className="chat chat-end">
+                        <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
+                          <Image
+                            src={item.image_url}
+                            alt="Attached"
+                            width={300}
+                            height={300}
+                            className="max-w-full max-h-96 w-auto h-auto rounded-md"
+                            loading="lazy"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <ReactMarkdown
+                      components={{
+                        code: ({
+                          node,
+                          inline,
+                          className,
+                          children,
+                          ...props
+                        }) => (
+                          <CodeBlock
+                            inline={inline}
+                            className={className}
+                            {...props}
                           >
-                            <div className="tooltip tooltip-left" data-tip="Updated Message">
-                              <Pencil className="" size={16} />
-                            </div>
-                          </button>
-                        </li>
-                      )}
-                    </ul>
+                            {children}
+                          </CodeBlock>
+                        ),
+                      }}
+                    >
+                      {!item.image_url && getMessageToDisplay()}
+                    </ReactMarkdown>
+
+                    {!item.image_url && item?.role === "assistant" && (
+                      <div
+                        className="tooltip absolute top-2 right-2 text-sm cursor-pointer"
+                        data-tip="Edit response"
+                      >
+                        <Pencil size={16} onClick={handleEdit} />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            </div>
-            <div className="chat-header flex gap-4 items-center mb-1">
-              {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
-            </div>
-            <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
-              {item?.role === "user" && (
-                <div className="flex flex-wrap">
-                  {item?.urls?.map((url, index) => (
-                    <div key={index} className="chat chat-end flex-grow-1">
-                      <div className="">
-                        <Image
-                          src={url}
-                          alt="Attached"
-                          width={64} // Adjust width as needed
-                          height={64} // Adjust height as needed
-                          className="max-w-full max-h-16 w-auto h-auto rounded-md"
-                          loading="lazy"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {item?.role === "assistant" && item?.image_url && (
-                <div className="chat chat-end">
-                  <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
-                    <Image
-                      src={item.image_url}
-                      alt="Attached"
-                      width={300} // Adjust width as needed
-                      height={300} // Adjust height as needed
-                      className="max-w-full max-h-96 w-auto h-auto rounded-md"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              )}
-              <ReactMarkdown components={{
-                code: ({ node, inline, className, children, ...props }) => (
-                  <CodeBlock
-                    inline={inline}
-                    className={className}
-                    {...props}
-                  >
-                    {children}
-                  </CodeBlock>
-                )
-              }}>
-                {!item.image_url && getMessageToDisplay()}
-              </ReactMarkdown>
-              {!item.image_url && item?.role === 'assistant' && (
-                <div className="tooltip absolute top-2  right-2 text-sm cursor-pointer" data-tip="Edit response">
-                  <Pencil
-                    size={16}
-                    onClick={handleEdit}
-                  />
-                </div>
+              {item?.role === "assistant" && (
+                <time className="text-xs opacity-50 chat-end">
+                  {formatDateAndTime(item.createdAt)}
+                </time>
               )}
             </div>
-            {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
-          </div>
-          {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div className="flex justify-center items-center my-4">
-            <p className="border-t border-base-300 w-full"></p>
-            <p className="bg-error text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
-              History cleared
-            </p>
-            <p className="border-t border-base-300 w-full"></p>
-          </div>}
-          {
-            item?.error && (
-              <div className="chat chat-end">
-                <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
-                  <span className="font-bold">Error</span>
-                  <p>{item?.error}</p>
-                </div>
-                <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
-                  <Bot size={20} />
-                </div>
-                {item?.role === "user" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item?.createdAt)}</time>}
+          )}
+          {(item?.role === "assistant" || item.role === "user") &&
+            item?.is_reset && (
+              <div className="flex justify-center items-center my-4">
+                <p className="border-t border-base-300 w-full"></p>
+                <p className="bg-error text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+                  History cleared
+                </p>
+                <p className="border-t border-base-300 w-full"></p>
               </div>
-            )
-          }
+            )}
+          {item?.error && item.role === "error" && (
+            <div className="chat chat-end">
+              <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
+                <span className="font-bold">Error</span>
+                <p>{item?.error}</p>
+              </div>
+              <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
+                <Bot size={20} />
+              </div>
+              {item?.role === "user" && (
+                <time className="text-xs opacity-50 chat-end">
+                  {formatDateAndTime(item?.createdAt)}
+                </time>
+              )}
+            </div>
+          )}
         </div>
       )}
 
-      <ToolsDataModal toolsData={toolsData} handleClose={handleCloseToolsDataModal} toolsDataModalRef={toolsDataModalRef} integrationData={integrationData} />
-      <EditMessageModal modalRef={modalRef} setModalInput={setModalInput} handleClose={handleClose} handleSave={handleSave} modalInput={modalInput} />
+      <ToolsDataModal
+        toolsData={toolsData}
+        handleClose={handleCloseToolsDataModal}
+        toolsDataModalRef={toolsDataModalRef}
+        integrationData={integrationData}
+      />
+      <EditMessageModal
+        modalRef={modalRef}
+        setModalInput={setModalInput}
+        handleClose={handleClose}
+        handleSave={handleSave}
+        modalInput={modalInput}
+      />
     </div>
   );
 };
