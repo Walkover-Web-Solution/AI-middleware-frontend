@@ -1,5 +1,5 @@
 import { updateContentHistory } from "@/store/action/historyAction";
-import { Bot, BotMessageSquare, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, User } from "lucide-react";
+import { Bot, BotMessageSquare, ChevronDown, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, User } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -250,14 +250,39 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             <div className="chat-header flex gap-4 items-center mb-1">
               {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
             </div>
+            {item?.firstAttemptError && item?.role === "assistant" && (
+              <div className="collapse bg-base-300 rounded-lg shadow-sm max-w-24 mb-2 hover:shadow-md transition-shadow duration-200">
+                <input
+                  type="checkbox"
+                  className="peer"
+                  id={`errorCollapse-${item.id || index}`}
+                />
+
+                <label
+                  htmlFor={`errorCollapse-${item.id || index}`}
+                  className="collapse-title text-sm font-medium cursor-pointer flex justify-between items-center py-2"
+                >
+                  <span className="flex items-center gap-1">
+                    Error
+                  </span>
+                  <ChevronDown className="w-4 h-4 transition-transform peer-checked:rotate-180" />
+                </label>
+
+                <div className="collapse-content text-sm max-w-[400px]">
+                  {item?.firstAttemptError}
+                </div>
+              </div>
+            )}
             <div className="flex justify-end items-end gap-1" >
-        { item.role === "assistant" &&    <div data-tip="Ask AI" className="see-on-hover tooltip">
+            {item.role === "assistant" &&    
+              <div data-tip="Ask AI" className="see-on-hover tooltip">
                    <BotMessageSquare
-                className=" cursor-pointer bot-icon"
-                size={18}
-                onClick={()=> handleAskAi(item)}
-            />
-            </div>}
+                    className=" cursor-pointer bot-icon"
+                    size={18}
+                    onClick={()=> handleAskAi(item)}
+                  />
+              </div>
+            }
             <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
       
               {item?.role === "user" && (
