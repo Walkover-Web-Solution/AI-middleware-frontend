@@ -69,6 +69,7 @@ function Home({ params }) {
     bridgeType: item.bridgeType,
     status: item.status,
     versionId: item?.published_version_id || item?.versions?.[0],
+    totalTokens : item?.total_tokens 
   }));
 
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
@@ -92,6 +93,7 @@ function Home({ params }) {
     bridgeType: item.bridgeType,
     status: item.status,
     versionId: item?.published_version_id || item?.versions?.[0],
+    totalTokens : item?.total_tokens 
   }));
 
   const onClickConfigure = (id, versionId) => {
@@ -228,7 +230,7 @@ function Home({ params }) {
                   </div>
 
                 ) : (
-                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
+                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'prompt', 'model', 'totalTokens']} sorting sortingColumns={['name', 'model','totalTokens']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
                 )}
                 {filteredArchivedBridges?.length > 0 && <div className="">
                   <div className="flex justify-center items-center my-4">
@@ -247,7 +249,7 @@ function Home({ params }) {
 
                   ) : (
                     <div className="opacity-60">
-                      <CustomTable data={ArchivedBridges} columnsToShow={['name', 'prompt', 'model']} sorting sortingColumns={['name', 'model']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
+                      <CustomTable data={ArchivedBridges} columnsToShow={['name', 'prompt', 'model', 'totalTokens']} sorting sortingColumns={['name', 'model', 'totalTokens']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
                     </div>
                   )}
                 </div>}
