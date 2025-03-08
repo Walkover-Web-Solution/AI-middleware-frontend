@@ -68,13 +68,17 @@ const Testcases = () => {
     setSelectedBridge(newBridge);
     const selectedBridgeId = allBridges.find((bridge) => bridge.name === newBridge)
     router.push(
-      `/org/${path[2]}/bridges/testcases/${selectedBridgeId._id}?version=${selectedVersionId}`
+      `/org/${path[2]}/testcases?id=${selectedBridgeId._id}&version=${selectedVersionId}`
     );
   };
 
   const handleVersionChange = (e) => {
     const newVersionId = e.target.value;
     setSelectedVersionId(newVersionId);
+    const id = searchParams.get('id')
+    router.push(
+      `/org/${path[2]}/testcases?id=${id}&version=${newVersionId}`
+    )
   };
 
   const handleAddTestCase = () => {
