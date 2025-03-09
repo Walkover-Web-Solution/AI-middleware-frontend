@@ -1,23 +1,23 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
-import { deleteTestCaseAction, getAllTestCasesOfBridgeAction } from '@/store/action/testCasesAction';
+import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction } from '@/store/action/testCasesAction';
 import { Trash2 } from 'lucide-react';
 
 function TestCases({ params }) {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [selectedBridge, setSelectedBridge] = useState('');
-  const [selectedVersion, setSelectedVersion] = useState('');
+  const [isloading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const [selectedBridge, setSelectedBridge] = useState(searchParams.get('id') || '');
+  const [selectedVersion, setSelectedVersion] = useState(searchParams.get('version') || '');
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
   const { testCases } = useCustomSelector((state) => ({
     testCases: state.testCasesReducer?.testCases || {},
   }));
-
-  console.log(testCases,'testCases')
 
   const selectedBridgeTestCases = useMemo(() => {
     return testCases?.[selectedBridge] || [];
@@ -40,46 +40,57 @@ function TestCases({ params }) {
     }
   }, [selectedVersion, router]);
 
+  const handleRunTestCase = () => {
+    setIsLoading(true);
+    dispatch(runTestCaseAction({ versionId: selectedVersion }))
+      .then(() => setIsLoading(false));
+  }
+
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Test Cases</h1>
-      <div className="flex gap-4">
-        <div className="form-control w-full max-w-xs">
-          <label className="label">
-            <span className="label-text">Select Bridge</span>
-          </label>
-          <select
-            className="select select-bordered"
-            value={selectedBridge}
-            onChange={(e) => setSelectedBridge(e.target.value)}
-          >
-            <option disabled value="">Select a Bridge</option>
-            {allBridges.map((bridge) => (
-              <option key={bridge._id} value={bridge._id}>
-                {bridge?.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className='flex justify-between items-center'>
+        <div className="flex gap-4">
+          <div className="form-control w-full max-w-xs">
+            <label className="label">
+              <span className="label-text">Select Bridge</span>
+            </label>
+            <select
+              className="select select-bordered"
+              value={selectedBridge}
+              onChange={(e) => { setSelectedBridge(e.target.value); setSelectedVersion(''); }}
+            >
+              <option disabled value="">Select a Bridge</option>
+              {allBridges.map((bridge) => (
+                <option key={bridge._id} value={bridge._id}>
+                  {bridge?.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="form-control w-full max-w-xs">
-          <label className="label">
-            <span className="label-text">Select Version</span>
-          </label>
-          <select
-            className="select select-bordered"
-            value={selectedVersion}
-            onChange={(e) => setSelectedVersion(e.target.value)}
-            disabled={!selectedBridge}
-          >
-            <option disabled value="">Select a Version</option>
-            {selectedBridge && versions?.map((version, index) => (
-              <option key={index} value={version}>
-                {version}
-              </option>
-            ))}
-          </select>
+          <div className="form-control w-full max-w-xs">
+            <label className="label">
+              <span className="label-text">Select Version</span>
+            </label>
+            <select
+              className="select select-bordered"
+              value={selectedVersion}
+              onChange={(e) => setSelectedVersion(e.target.value)}
+              disabled={!selectedBridge}
+            >
+              <option disabled value="">Select a Version</option>
+              {selectedBridge && versions?.map((version, index) => (
+                <option key={index} value={version}>
+                  {version}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
+        <button className='btn' onClick={handleRunTestCase} disabled={!selectedBridge || !selectedVersion || isloading}>
+          Run Test Case
+        </button>
       </div>
 
       <div className="mt-4">

@@ -875,3 +875,13 @@ export const createTestCaseApi = async ({ bridgeId, data }) => {
     return error;
   }
 }
+
+export const runTestCaseApi = async ({ versionId }) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/api/v2/model/testcases/${versionId}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}

@@ -1,13 +1,17 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { MODAL_TYPE } from '@/utils/enums'
+import { createTestCaseAction } from '@/store/action/testCasesAction';
+import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { CrossIcon, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
-    const params = useParams()
+    const params = useParams();
+    const [isLoading, setIsLoading] = useState(false);
+    const dispatch = useDispatch();
     const { mongoIdsOfTools } = useCustomSelector((state) => ({
         mongoIdsOfTools: Object.values(state.bridgeReducer.org?.[params.org_id]?.functionData)?.reduce((acc, item) => {
             acc[item.function_name] = item._id;
@@ -43,14 +47,14 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
     }).filter(Boolean) : [];
 
     const [finalTestCases, setFinalTestCases] = useState(initialTestCases);
-    const [responseType, setResponseType] = useState('exact')
+    const [responseType, setResponseType] = useState('cosine')
     useEffect(() => {
         setFinalTestCases(initialTestCases);
     }, [testCaseConversation]);
 
-    // console.log(finalTestCases, 13243);
-
     const handleSubmit = (event) => {
+        setIsLoading(true);
+        event.preventDefault();
         const lastTestCase = finalTestCases[finalTestCases.length - 1] || {};
         const isAssistant = lastTestCase.role === "assistant";
         const isToolsCall = lastTestCase.role === "tools_call";
@@ -65,10 +69,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
             bridge_id: params?.id,
             matching_type: responseType
         };
-        console.log(payload, 12324313243)
-        event.preventDefault();
-        // console.log(finalTestCases, 'finalTestCases');
-        // Further logic to handle the finalTestCases can be added here
+        dispatch(createTestCaseAction({ bridgeId: params?.id, data: payload })).then(() => { handleClose(); setIsLoading(false) });
     };
 
     const handleChange = (newValue, index, childIndex) => {
@@ -101,9 +102,9 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
     };
 
     return (
-        <dialog id={MODAL_TYPE?.ADD_TEST_CASE_MODAL} className="modal modal-bottom sm:modal-middle">
-            <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
-                <h3>Add Test Case</h3>
+        <dialog id={MODAL_TYPE?.ADD_TEST_CASE_MODAL} className="modal">
+            <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4  w-11/12 max-w-5xl">
+                <h3 className='font-bold'>Add Test Case</h3>
                 <div className="flex flex-col gap-2">
                     {finalTestCases?.map((message, index) => (
                         <div key={index} className="p-2 border rounded">
@@ -112,16 +113,18 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                                 message.tools?.map((item, idx) => (
                                     <div key={idx} className='flex'>
                                         <textarea defaultValue={JSON.stringify(item)} className="w-full p-2 border rounded min-h-28" onBlur={(event) => handleChange(event?.target?.value, index, idx)} />
-                                        <button
-                                            className={"px-2 py-1  rounded-md"}
-                                            onClick={() => removeTool(index, idx)}
-                                        >
-                                            <X />
-                                        </button>
+                                        {message.tools.length > 1 && (
+                                            <button
+                                                className={"px-2 py-1  rounded-md"}
+                                                onClick={() => removeTool(index, idx)}
+                                            >
+                                                <X />
+                                            </button>
+                                        )}
                                     </div>
                                 ))
                             ) : (
-                                <textarea defaultValue={message.message} className="w-full p-2 border rounded min-h-24" onBlur={(event) => handleChange(event?.target?.value, index, null)} />
+                                <textarea defaultValue={message.message} className="w-full p-2 border rounded min-h-8" onBlur={(event) => handleChange(event?.target?.value, index, null)} />
                             )}
                         </div>
                     ))}
@@ -136,7 +139,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                         </select>
                     </div>
                     <button type="button" className="btn" onClick={handleClose}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Create</button>
+                    <button type="submit" className="btn btn-primary" disabled={isLoading}>{!isLoading ? 'Create' : 'Creating'}</button>
                 </div>
             </form>
         </dialog>

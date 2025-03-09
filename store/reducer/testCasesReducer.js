@@ -28,10 +28,13 @@ const testCasesReducer = createSlice({
             }
             return state;
         },
+        runTestCaseReducer: (state, action) => {
+            return state;
+        },
     },
 });
 
 
-export const { createTestCaseReducer, getAllTestCasesReducer, deleteTestCaseReducer } = testCasesReducer.actions;
+export const { createTestCaseReducer, getAllTestCasesReducer, deleteTestCaseReducer, runTestCaseReducer } = testCasesReducer.actions;
 
 export default testCasesReducer.reducer;
