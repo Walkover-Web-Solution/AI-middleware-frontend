@@ -843,3 +843,13 @@ export const optimizeJsonApi = async ({ data }) => {
     return error;
   }
 };
+
+export const getAllTestCasesOfBridgeApi = async ({ bridgeId }) => {
+  try {
+    const response = await axios.get(`${URL}/testcases/?bridge_id=${bridgeId}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
