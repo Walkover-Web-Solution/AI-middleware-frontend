@@ -95,52 +95,56 @@ function TestCases({ params }) {
 
       <div className="mt-4">
         <h2 className="text-lg font-semibold mb-2">Test Case Details</h2>
-        <table className="table table-auto w-full">
-          <thead>
-            <tr>
-              <th className="px-4 py-2">User Input</th>
-              <th className="px-4 py-2">Expected Output</th>
-              <th className="px-4 py-2">Modal Answer</th>
-              {versions.map((version, index) => (
-                <th key={index} className="px-4 py-2">{`V ${index + 1}`}</th>
-              ))}
-              <th className="px-4 py-2">Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            {selectedBridgeTestCases.map((testCase, index) => {
-              const lastUserMessage = testCase.conversation
-                .filter(message => message.role === 'user')
-                .pop()?.content || 'N/A';
+        <div className="overflow-x-auto">
+          <table className="table table-auto w-full">
+            <thead>
+              <tr>
+                <th className="px-4 py-2">S.No.</th>
+                <th className="px-4 py-2">User Input</th>
+                <th className="px-4 py-2">Expected Output</th>
+                <th className="px-4 py-2">Modal Answer</th>
+                {versions.map((version, index) => (
+                  <th key={index} className="px-4 py-2">{`V ${index + 1}`}</th>
+                ))}
+                <th className="px-4 py-2">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedBridgeTestCases.map((testCase, index) => {
+                const lastUserMessage = testCase.conversation
+                  .filter(message => message.role === 'user')
+                  .pop()?.content || 'N/A';
 
-              const expectedOutput = testCase.expected.tool_calls
-                ? JSON.stringify(testCase.expected.tool_calls)
-                : testCase.expected.response || 'N/A';
+                const expectedOutput = testCase.expected.tool_calls
+                  ? JSON.stringify(testCase.expected.tool_calls)
+                  : testCase.expected.response || 'N/A';
 
-              const handleDelete = (id) => {
-                dispatch(deleteTestCaseAction({ testCaseId: id, bridgeId: selectedBridge }));
-              };
+                const handleDelete = (id) => {
+                  dispatch(deleteTestCaseAction({ testCaseId: id, bridgeId: selectedBridge }));
+                };
 
-              return (
-                <tr key={index}>
-                  <td className="px-4 py-2">{lastUserMessage}</td>
-                  <td className="px-4 py-2">{expectedOutput}</td>
-                  <td className="px-4 py-2">N/A</td>
-                  {versions.map((version, versionIndex) => (
-                    <td key={versionIndex} className="px-4 py-2">N/A</td>
-                  ))}
-                  <td className="px-4 py-2">
-                    <button
-                      onClick={() => handleDelete(testCase?._id)}
-                    >
-                      <Trash2 color='red' />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                return (
+                  <tr key={index}>
+                    <td className="px-4 py-2 overflow-hidden">{index + 1}</td>
+                    <td className="px-4 py-2 overflow-hidden whitespace-nowrap overflow-ellipsis">{lastUserMessage}</td>
+                    <td className="px-4 py-2 max-w-xs overflow-hidden whitespace-nowrap overflow-ellipsis">{expectedOutput}</td>
+                    <td className="px-4 py-2 overflow-hidden">N/A</td>
+                    {versions.map((version, versionIndex) => (
+                      <td key={versionIndex} className="px-4 py-2">N/A</td>
+                    ))}
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => handleDelete(testCase?._id)}
+                      >
+                        <Trash2 color='red' />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
