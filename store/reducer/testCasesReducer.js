@@ -8,6 +8,15 @@ const testCasesReducer = createSlice({
     name: 'testCases',
     initialState,
     reducers: {
+        createTestCaseReducer: (state, action) => {
+            const { data, bridgeId } = action.payload;
+            if (state.testCases[bridgeId]) {
+                state.testCases[bridgeId].push(data);
+            } else {
+                state.testCases[bridgeId] = [data];
+            }
+            return state;
+        },
         getAllTestCasesReducer: (state, action) => {
             const { data, bridgeId } = action.payload;
             state.testCases[bridgeId] = data;
@@ -23,6 +32,6 @@ const testCasesReducer = createSlice({
 });
 
 
-export const { getAllTestCasesReducer, deleteTestCaseReducer } = testCasesReducer.actions;
+export const { createTestCaseReducer, getAllTestCasesReducer, deleteTestCaseReducer } = testCasesReducer.actions;
 
 export default testCasesReducer.reducer;

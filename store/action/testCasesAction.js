@@ -1,6 +1,19 @@
-import { deleteTestCaseApi, getAllTestCasesOfBridgeApi } from "@/config";
-import { deleteTestCaseReducer, getAllTestCasesReducer } from "../reducer/testCasesReducer";
+import { createTestCaseApi, deleteTestCaseApi, getAllTestCasesOfBridgeApi } from "@/config";
+import { createTestCaseReducer, deleteTestCaseReducer, getAllTestCasesReducer } from "../reducer/testCasesReducer";
 import { toast } from "react-toastify";
+
+export const createTestCaseAction = ({ bridgeId, data }) => async (dispatch) => {
+    try {
+        const response = await createTestCaseApi({ bridgeId, data });
+        if (response?.success) {
+            dispatch(createTestCaseReducer({ bridgeId, data: response?.result }));
+            toast.success("Test case created successfully");
+        }
+        return;
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 export const getAllTestCasesOfBridgeAction = ({ bridgeId }) => async (dispatch) => {
     try {
