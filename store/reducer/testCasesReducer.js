@@ -29,6 +29,20 @@ const testCasesReducer = createSlice({
             return state;
         },
         runTestCaseReducer: (state, action) => {
+            const { data: { testcases_result }, bridgeId, versionId } = action.payload;
+            if (testcases_result && state.testCases[bridgeId]) {
+                Object.keys(testcases_result).forEach((testCaseId) => {
+                    const testCase = state.testCases[bridgeId].find(testCase => testCase._id === testCaseId);
+                    if (testCase) {
+                        if (!testCase.version_history[versionId]) {
+                            testCase.version_history[versionId] = [];
+                        }
+                        testCase.version_history[versionId].push(testcases_result[testCaseId]?.result);
+                    }
+                });
+            } else {
+                console.error("Invalid testcases_result or bridgeId not found in state.testCases");
+            }
             return state;
         },
     },

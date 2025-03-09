@@ -10,6 +10,8 @@ function TestCases({ params }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [isloading, setIsLoading] = useState(false);
+  const [expandedRows, setExpandedRows] = useState({});
+
   const searchParams = useSearchParams();
   const [selectedBridge, setSelectedBridge] = useState(searchParams.get('id') || '');
   const [selectedVersion, setSelectedVersion] = useState(searchParams.get('version') || '');
@@ -42,9 +44,17 @@ function TestCases({ params }) {
 
   const handleRunTestCase = () => {
     setIsLoading(true);
-    dispatch(runTestCaseAction({ versionId: selectedVersion }))
-      .then(() => setIsLoading(false));
+    dispatch(runTestCaseAction({ versionId: selectedVersion, bridgeId: selectedBridge }))
+      .then(() => { dispatch(getAllTestCasesOfBridgeAction({ bridgeId: selectedBridge })); setIsLoading(false); });
   }
+
+
+  const toggleRow = (index) => {
+    setExpandedRows(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
 
   return (
     <div className="p-4">
@@ -96,17 +106,17 @@ function TestCases({ params }) {
       <div className="mt-4">
         <h2 className="text-lg font-semibold mb-2">Test Case Details</h2>
         <div className="overflow-x-auto">
-          <table className="table table-auto w-full">
+          {/* <table className="table table-auto w-full">
             <thead>
               <tr>
-                <th className="px-4 py-2">S.No.</th>
-                <th className="px-4 py-2">User Input</th>
-                <th className="px-4 py-2">Expected Output</th>
-                <th className="px-4 py-2">Modal Answer</th>
+                <th className=""></th>
+                <th className="">User Input</th>
+                <th className="">Expected Output</th>
+                <th className="">Modal Answer</th>
                 {versions.map((version, index) => (
-                  <th key={index} className="px-4 py-2">{`V ${index + 1}`}</th>
+                  <th key={index} className="">{`V ${index + 1}`}</th>
                 ))}
-                <th className="px-4 py-2">Delete</th>
+                <th className="">Delete</th>
               </tr>
             </thead>
             <tbody>
@@ -125,14 +135,29 @@ function TestCases({ params }) {
 
                 return (
                   <tr key={index}>
-                    <td className="px-4 py-2 overflow-hidden">{index + 1}</td>
-                    <td className="px-4 py-2 overflow-hidden whitespace-nowrap overflow-ellipsis">{lastUserMessage}</td>
-                    <td className="px-4 py-2 max-w-xs overflow-hidden whitespace-nowrap overflow-ellipsis">{expectedOutput}</td>
-                    <td className="px-4 py-2 overflow-hidden">N/A</td>
-                    {versions.map((version, versionIndex) => (
-                      <td key={versionIndex} className="px-4 py-2">N/A</td>
-                    ))}
-                    <td className="px-4 py-2">
+                    <td className="overflow-hidden max-w-1">{index + 1}</td>
+                    <td className="overflow-hidden whitespace-nowrap overflow-ellipsis">{lastUserMessage}</td>
+                    <td className="max-w-xs overflow-hidden whitespace-nowrap overflow-ellipsis">{expectedOutput}</td>
+                    {(() => {
+                      const testCaseVersionArray = testCase?.version_history?.[selectedVersion];
+                      const model_output = JSON.stringify(testCaseVersionArray?.[testCaseVersionArray.length - 1]?.model_output);
+                      return (
+                        <td className="overflow-hidden max-w-56 overflow-ellipsis whitespace-nowrap" data-tip={model_output || 'N/A'}>
+                          <div className="tooltip tooltip-left z-[999999]" data-tip={model_output || 'N/A'}>
+                            {model_output || 'N/A'}
+                          </div>
+                        </td>
+                      );
+                    })()}
+
+                    {versions.map((version, versionIndex) => {
+                      const testCaseVersionArray = testCase?.version_history?.[version];
+                      const versionScore = testCaseVersionArray?.[testCaseVersionArray.length - 1]?.score;
+                      return (
+                        <td key={versionIndex} className="max-w-10 whitespace-nowrap overflow-hidden overflow-ellipsis">{versionScore || 'N/A'}</td>
+                      )
+                    })}
+                    <td className="">
                       <button
                         onClick={() => handleDelete(testCase?._id)}
                       >
@@ -140,6 +165,109 @@ function TestCases({ params }) {
                       </button>
                     </td>
                   </tr>
+                );
+              })}
+            </tbody>
+          </table> */}
+          <table className="table table-auto w-full">
+            <thead>
+              <tr>
+                <th className="w-8"></th>
+                <th className="">User Input</th>
+                <th className="">Expected Output</th>
+                <th className="">Modal Answer</th>
+                {versions.map((version, index) => (
+                  <th key={index} className="">{`V ${index + 1}`}</th>
+                ))}
+                <th className="">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedBridgeTestCases.map((testCase, index) => {
+                const lastUserMessage = testCase.conversation
+                  .filter(message => message.role === 'user')
+                  .pop()?.content || 'N/A';
+
+                const expectedOutput = testCase.expected.tool_calls
+                  ? JSON.stringify(testCase.expected.tool_calls)
+                  : testCase.expected.response || 'N/A';
+
+                const testCaseVersionArray = testCase?.version_history?.[selectedVersion];
+                const model_output = JSON.stringify(testCaseVersionArray?.[testCaseVersionArray.length - 1]?.model_output);
+
+                const isExpanded = expandedRows[index] || false;
+
+                return (
+                  <React.Fragment key={index}>
+                    <tr className="hover cursor-pointer" onClick={() => toggleRow(index)}>
+                      <td className="font-medium">
+                        {index + 1}
+                        <span className="ml-2">
+                          {isExpanded ? '▼' : '▶'}
+                        </span>
+                      </td>
+                      <td className="max-w-xs overflow-hidden whitespace-nowrap overflow-ellipsis">
+                        {lastUserMessage.substring(0, 30)}{lastUserMessage.length > 30 ? '...' : ''}
+                      </td>
+                      <td className="max-w-xs overflow-hidden whitespace-nowrap overflow-ellipsis">
+                        {expectedOutput.substring(0, 30)}{expectedOutput.length > 30 ? '...' : ''}
+                      </td>
+                      <td className="max-w-xs overflow-hidden whitespace-nowrap overflow-ellipsis">
+                        {model_output ? model_output.substring(0, 30) + (model_output.length > 30 ? '...' : '') : 'N/A'}
+                      </td>
+                      {versions.map((version, versionIndex) => {
+                        const versionArray = testCase?.version_history?.[version];
+                        const versionScore = versionArray?.[versionArray.length - 1]?.score;
+                        return (
+                          <td key={versionIndex} className="overflow-hidden overflow-ellipsis whitespace-nowrap max-w-20">{versionScore || 'N/A'}</td>
+                        );
+                      })}
+                      <td>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            dispatch(deleteTestCaseAction({ testCaseId: testCase?._id, bridgeId: selectedBridge }));
+                          }}
+                        >
+                          <Trash2 color="red" size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                    {isExpanded && (
+                      <tr className="bg-base-200">
+                        <td colSpan={versions.length + 5} className="p-4">
+                          <div className="grid grid-cols-1 gap-4">
+                            <div>
+                              <h3 className="font-bold">User Input:</h3>
+                              <div className="p-2 bg-base-100 rounded mt-1 overflow-auto max-h-40">{lastUserMessage}</div>
+                            </div>
+                            <div>
+                              <h3 className="font-bold">Expected Output:</h3>
+                              <div className="p-2 bg-base-100 rounded mt-1 overflow-auto max-h-40 whitespace-pre-wrap">{expectedOutput}</div>
+                            </div>
+                            <div>
+                              <h3 className="font-bold">Modal Answer:</h3>
+                              <div className="p-2 bg-base-100 rounded mt-1 overflow-auto max-h-40 whitespace-pre-wrap">{model_output || 'N/A'}</div>
+                            </div>
+                            <div>
+                              <h3 className="font-bold">Version Scores:</h3>
+                              <div className="flex flex-wrap gap-4 mt-2">
+                                {versions.map((version, versionIndex) => {
+                                  const versionArray = testCase?.version_history?.[version];
+                                  const versionScore = versionArray?.[versionArray.length - 1]?.score;
+                                  return (
+                                    <div key={versionIndex} className="badge badge-lg">
+                                      V{versionIndex + 1}: {versionScore || 'N/A'}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 );
               })}
             </tbody>
