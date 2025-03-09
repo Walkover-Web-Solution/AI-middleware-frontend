@@ -14,11 +14,10 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
     const dispatch = useDispatch();
     const { mongoIdsOfTools } = useCustomSelector((state) => ({
         mongoIdsOfTools: Object.values(state.bridgeReducer.org?.[params.org_id]?.functionData)?.reduce((acc, item) => {
-            acc[item.function_name] = item._id;
+            acc[item?.function_name] = item?._id;
             return acc;
         }, {})
     }));
-
     // Ensure testCaseConversation is not undefined or null
     const initialTestCases = testCaseConversation && testCaseConversation.length > 0 ? testCaseConversation.map((message) => {
         if (message.role === "user") {
@@ -34,13 +33,13 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
         } else if (message.role === "tools_call") {
             return {
                 role: message?.role,
-                tools: Object.values(message.tools_call_data?.[0])?.map((item) => (
-                    {
+                tools: message.tools_call_data?.map((toolData) => (
+                    Object.values(toolData || {}).map((item) => ({
                         name: item?.name,
-                        id: mongoIdsOfTools[item.id],
-                        arguments: item.args
-                    }
-                ))
+                        id: mongoIdsOfTools[item?.id],
+                        arguments: item?.args
+                    }))
+                )).flat()
             };
         }
         return null;
