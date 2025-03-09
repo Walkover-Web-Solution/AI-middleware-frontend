@@ -88,7 +88,7 @@ function TestCases({ params }) {
             </select>
           </div>
         </div>
-        <button className='btn' onClick={handleRunTestCase} disabled={!selectedBridge || !selectedVersion || isloading}>
+        <button className='btn btn-primary' onClick={handleRunTestCase} disabled={!selectedBridge || !selectedVersion || isloading}>
           Run Test Case
         </button>
       </div>

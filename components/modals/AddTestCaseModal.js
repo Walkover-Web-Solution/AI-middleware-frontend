@@ -24,12 +24,12 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
         if (message.role === "user") {
             return {
                 role: message.role,
-                message: message.content?.[0]?.text || message?.content
+                content: message.content?.[0]?.text || message?.content
             };
         } else if (message.role === "assistant" && message.content) {
             return {
                 role: message.role,
-                message: message.content?.[0]?.text || message?.content
+                content: message.content?.[0]?.text || message?.content
             };
         } else if (message.role === "tools_call") {
             return {
@@ -63,7 +63,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
             conversation: finalTestCases.slice(0, -1),
             type: isAssistant ? "response" : "function",
             expected: {
-                ...(isAssistant && { response: lastTestCase.message }),
+                ...(isAssistant && { response: lastTestCase.content }),
                 ...(isToolsCall && { tool_calls: lastTestCase.tools })
             },
             bridge_id: params?.id,
@@ -79,12 +79,12 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                 try {
                     JSON.parse(newValue);
                 } catch (error) {
-                    toast.success('InValid JSON');
+                    toast.error('InValid JSON');
                     return prevTestCases;
                 }
                 updatedTestCases[index].tools[childIndex] = JSON.parse(newValue);
             } else {
-                updatedTestCases[index].message = newValue;
+                updatedTestCases[index].content = newValue;
             }
             return updatedTestCases;
         });
@@ -124,7 +124,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                                     </div>
                                 ))
                             ) : (
-                                <textarea defaultValue={message.message} className="w-full p-2 border rounded min-h-8" onBlur={(event) => handleChange(event?.target?.value, index, null)} />
+                                <textarea defaultValue={message.content} className="w-full p-2 border rounded min-h-8" onBlur={(event) => handleChange(event?.target?.value, index, null)} />
                             )}
                         </div>
                     ))}
