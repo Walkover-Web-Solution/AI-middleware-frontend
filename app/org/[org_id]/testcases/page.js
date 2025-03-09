@@ -6,6 +6,8 @@ import { useDispatch } from 'react-redux';
 import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction } from '@/store/action/testCasesAction';
 import { Trash2 } from 'lucide-react';
 
+export const runtime = 'edge';
+
 function TestCases({ params }) {
   const router = useRouter();
   const dispatch = useDispatch();
