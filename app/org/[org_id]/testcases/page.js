@@ -3,7 +3,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
-import { getAllTestCasesOfBridgeAction } from '@/store/action/testCasesAction';
+import { deleteTestCaseAction, getAllTestCasesOfBridgeAction } from '@/store/action/testCasesAction';
+import { Trash2 } from 'lucide-react';
 
 function TestCases({ params }) {
   const router = useRouter();
@@ -15,6 +16,8 @@ function TestCases({ params }) {
   const { testCases } = useCustomSelector((state) => ({
     testCases: state.testCasesReducer?.testCases || {},
   }));
+
+  console.log(testCases,'testCases')
 
   const selectedBridgeTestCases = useMemo(() => {
     return testCases?.[selectedBridge] || [];
@@ -87,6 +90,10 @@ function TestCases({ params }) {
               <th className="px-4 py-2">User Input</th>
               <th className="px-4 py-2">Expected Output</th>
               <th className="px-4 py-2">Modal Answer</th>
+              {versions.map((version, index) => (
+                <th key={index} className="px-4 py-2">{`V ${index + 1}`}</th>
+              ))}
+              <th className="px-4 py-2">Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -99,10 +106,25 @@ function TestCases({ params }) {
                 ? JSON.stringify(testCase.expected.tool_calls)
                 : testCase.expected.response || 'N/A';
 
+              const handleDelete = (id) => {
+                dispatch(deleteTestCaseAction({ testCaseId: id, bridgeId: selectedBridge }));
+              };
+
               return (
                 <tr key={index}>
                   <td className="px-4 py-2">{lastUserMessage}</td>
                   <td className="px-4 py-2">{expectedOutput}</td>
+                  <td className="px-4 py-2">N/A</td>
+                  {versions.map((version, versionIndex) => (
+                    <td key={versionIndex} className="px-4 py-2">N/A</td>
+                  ))}
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => handleDelete(testCase?._id)}
+                    >
+                      <Trash2 color='red' />
+                    </button>
+                  </td>
                 </tr>
               );
             })}

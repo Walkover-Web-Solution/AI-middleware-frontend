@@ -853,3 +853,15 @@ export const getAllTestCasesOfBridgeApi = async ({ bridgeId }) => {
     return error;
   }
 }
+
+export const deleteTestCaseApi = async ({ testCaseId }) => {
+  try {
+    const response = await axios.delete(`${URL}/testcases/`, {
+      data: { id: testCaseId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
