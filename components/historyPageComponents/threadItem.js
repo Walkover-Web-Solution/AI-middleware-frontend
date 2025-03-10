@@ -1,5 +1,5 @@
 import { updateContentHistory } from "@/store/action/historyAction";
-import { Bot, BotMessageSquare, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, User } from "lucide-react";
+import { Bot, BotMessageSquare, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, TestTubeDiagonal, User } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -10,7 +10,7 @@ import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
 import { getSingleMessage } from "@/config";
 
-const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId }) => {
+const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase }) => {
   const dispatch = useDispatch();
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]);
@@ -148,22 +148,23 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     </div>
   );
 
-  const handleAskAi = async (item) =>{
-    let variables = {...item}
+  const handleAskAi = async (item) => {
+    let variables = { ...item }
     try {
       const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
-      variables = {"System Prompt" : systemPromptResponse, ...variables}
+      variables = { "System Prompt": systemPromptResponse, ...variables }
     } catch (error) {
       console.error("Failed to fetch single message:", error);
     }
     window.SendDataToChatbot({
-      "parentId":'',
+      "parentId": '',
       "bridgeName": "history_page_chabot",
       "threadId": item?.id,
       variables
     });
-      window.openChatbot()
+    window.openChatbot()
   }
+
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
       {item?.role === "tools_call" ? (
@@ -173,6 +174,14 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           </h1>
           <div className="flex h-full gap-2 justify-center items-center flex-wrap">
             {item?.tools_call_data ? item.tools_call_data.map(renderToolData) : Object.keys(item.function).map(renderFunctionData)}
+            <button
+              className="btn btn-xs"
+              onClick={() => handleAddTestCase(item, index)}
+            >
+              <div className="tooltip tooltip-top" data-tip="Add Test Case">
+                <TestTubeDiagonal size={16} />
+              </div>
+            </button>
           </div>
         </div>
       ) : (
@@ -242,81 +251,92 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     </ul>
                   </div>
                 )}
-                
+
               </div>
-             
+
             </div>
-        
+
             <div className="chat-header flex gap-4 items-center mb-1">
               {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
             </div>
             <div className="flex justify-end items-end gap-1" >
-        { item.role === "assistant" &&    <div data-tip="Ask AI" className="see-on-hover tooltip">
-                   <BotMessageSquare
-                className=" cursor-pointer bot-icon"
-                size={18}
-                onClick={()=> handleAskAi(item)}
-            />
-            </div>}
-            <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
-      
-              {item?.role === "user" && (
-                <div className="flex flex-wrap">
-                  {item?.urls?.map((url, index) => (
-                    <div key={index} className="chat chat-end flex-grow-1">
-                      <div className="">
-                        <Image
-                          src={url}
-                          alt="Attached"
-                          width={64} // Adjust width as needed
-                          height={64} // Adjust height as needed
-                          className="max-w-full max-h-16 w-auto h-auto rounded-md"
-                          loading="lazy"
-                        />
-                      </div>
+              {item.role === "assistant" && (
+                <>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleAddTestCase(item, index)}
+                  >
+                    <div className="tooltip tooltip-top" data-tip="Add Test Case">
+                      <TestTubeDiagonal size={16} />
                     </div>
-                  ))}
-                </div>
-              )}
-              {item?.role === "assistant" && item?.image_url && (
-                <div className="chat chat-end">
-                  <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
-                    <Image
-                      src={item.image_url}
-                      alt="Attached"
-                      width={300} // Adjust width as needed
-                      height={300} // Adjust height as needed
-                      className="max-w-full max-h-96 w-auto h-auto rounded-md"
-                      loading="lazy"
+                  </button>
+                  <div data-tip="Ask AI" className="see-on-hover tooltip">
+                    <BotMessageSquare
+                      className="cursor-pointer bot-icon"
+                      size={18}
+                      onClick={() => handleAskAi(item)}
                     />
                   </div>
-                </div>
+                </>
               )}
-                   
-              <ReactMarkdown components={{
-                code: ({ node, inline, className, children, ...props }) => (
-                  <CodeBlock
-                    inline={inline}
-                    className={className}
-                    {...props}
-                  >
-                    {children}
-                  </CodeBlock>
-                )
-              }}>
-                {!item.image_url && getMessageToDisplay()}
-              </ReactMarkdown>
-              {!item.image_url && item?.role === 'assistant' && (
-                <div className="flex gap-2 tooltip absolute top-2 right-2 text-sm cursor-pointer" data-tip="Edit response">
-                  <Pencil
-                    size={16}
-                    onClick={handleEdit}
-                  />
+              <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
+
+                {item?.role === "user" && (
+                  <div className="flex flex-wrap">
+                    {item?.urls?.map((url, index) => (
+                      <div key={index} className="chat chat-end flex-grow-1">
+                        <div className="">
+                          <Image
+                            src={url}
+                            alt="Attached"
+                            width={64} // Adjust width as needed
+                            height={64} // Adjust height as needed
+                            className="max-w-full max-h-16 w-auto h-auto rounded-md"
+                            loading="lazy"
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-              )}
+                )}
+                {item?.role === "assistant" && item?.image_url && (
+                  <div className="chat chat-end">
+                    <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
+                      <Image
+                        src={item.image_url}
+                        alt="Attached"
+                        width={300} // Adjust width as needed
+                        height={300} // Adjust height as needed
+                        className="max-w-full max-h-96 w-auto h-auto rounded-md"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <ReactMarkdown components={{
+                  code: ({ node, inline, className, children, ...props }) => (
+                    <CodeBlock
+                      inline={inline}
+                      className={className}
+                      {...props}
+                    >
+                      {children}
+                    </CodeBlock>
+                  )
+                }}>
+                  {!item.image_url && getMessageToDisplay()}
+                </ReactMarkdown>
+                {!item.image_url && item?.role === 'assistant' && (
+                  <div className="flex gap-2 tooltip absolute top-2 right-2 text-sm cursor-pointer" data-tip="Edit response">
+                    <Pencil
+                      size={16}
+                      onClick={handleEdit}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-            </div>
-            
             {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
           {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div className="flex justify-center items-center my-4">
@@ -340,7 +360,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             )
           }
-          
         </div>
       )}
 

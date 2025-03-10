@@ -1,13 +1,14 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TriangleAlert, UserPlus } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TestTubeDiagonal, TriangleAlert, UserPlus } from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
 function MainSlider() {
   const pathName = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams()
   const path = pathName.split('?')[0].split('/')
   const { userdetails, organizations } = useCustomSelector((state) => ({
     userdetails: state?.userDetailsReducer?.userDetails,
@@ -23,7 +24,8 @@ function MainSlider() {
     alerts: <TriangleAlert />,
     invite: <UserPlus />,
     metrics: <LineChart />,
-    knowledge_base: <BookText />
+    knowledge_base: <BookText />,
+    testcases: <TestTubeDiagonal />
   }
 
   const logoutHandler = async () => {
@@ -74,7 +76,7 @@ function MainSlider() {
               </div>
               <ul className="menu space-y-2 p-0">
                 {
-                  ['bridges', 'pauthkey', 'apikeys', 'alerts', , 'knowledge_base', 'invite', 'metrics'].map((item) => (
+                  ['bridges', 'pauthkey', 'apikeys', 'alerts', 'testcases', 'knowledge_base', 'invite', 'metrics'].map((item) => (
                     <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)} className="transition-transform transform hover:scale-105 flex items-center">
                       <a className={` w-full font-medium ${path[3] === item ? "active text-primary" : "text-gray-700"} `}>
                         {Icons[item]}
