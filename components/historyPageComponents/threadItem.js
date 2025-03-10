@@ -114,7 +114,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         <div className="flex gap-3">
           <div className="tooltip tooltip-top relative" data-tip="function logs">
             <SquareFunction size={22}
-              onClick={() => openViasocket(tool.name, { flowHitId: tool?.metadata?.flowHitId })}
+              onClick={() => openViasocket(tool.id, { flowHitId: tool?.metadata?.flowHitId })}
               className="opacity-80 cursor-pointer" />
           </div>
           <div className="tooltip tooltip-top pr-2 relative" data-tip="function data">

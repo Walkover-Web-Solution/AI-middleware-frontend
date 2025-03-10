@@ -23,9 +23,9 @@ const Questions = () => {
               Everything you need to know about AIMiddleWare. Can't find the
               answer you're looking for? Feel free to{" "}
             </span>
-            <span className="cursor-pointer text-blue-500 border-b-2 border-blue-600 z-10 opacity-90">
+            <a href="mailto:support@gtwy.ai" className="cursor-pointer text-blue-500 border-b-2 border-blue-600 z-10 opacity-90 hover:text-blue-700 transition-colors">
               contact us
-            </span>
+            </a>
           </p>
 
           <div className="relative flex flex-col gap-7 mt-7 hero-bg-center text-black">
