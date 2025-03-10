@@ -90,7 +90,7 @@ function Page({ searchParams }) {
         router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}&subThread_id=${thread_id}`, undefined, { shallow: true });
       }
     },
-    [pathName, router, params.id, params.version]
+    [pathName, params.id, params.version]
   );
 
   const fetchMoreData = useCallback(async () => {

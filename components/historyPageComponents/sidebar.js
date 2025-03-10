@@ -24,12 +24,10 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const dispatch = useDispatch();
   const pathName = usePathname();
   const router = useRouter();
-console.log(isThreadSelectable, selectedThreadIds, expandedThreads);
 
   const { userFeedbackCount } = useCustomSelector(state => ({
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
   }));
-  // debugger
 
   useEffect(() => {
     setExpandedThreads([]);
@@ -65,7 +63,7 @@ console.log(isThreadSelectable, selectedThreadIds, expandedThreads);
     setHasMore(true);
     setFilterOption("all");
     const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
-    await dispatch(getThread(params.thread_id, params?.id, params.subthread_id || params.thread_id,  1, "all"));
+    await dispatch(getThread(params.thread_id, params?.id, params.subThread_id || params.thread_id,  1, "all"));
     if (result?.length < 40) setHasMore(false);
   };
 
@@ -79,11 +77,11 @@ console.log(isThreadSelectable, selectedThreadIds, expandedThreads);
     const isExpanded = expandedThreads?.includes(threadId);
     if (isExpanded) {
       setThreadPage(1);
-      const result = await dispatch(getThread({ threadId, bridgeId: params?.id, subThreadId: params?.subthread_id, nextPage: 1 }));
+      const result = await dispatch(getThread({ threadId, bridgeId: params?.id, subThreadId: params?.subThread_id, nextPage: 1 }));
       setHasMoreThreadData(result?.data?.length >= 40);
       setExpandedThreads([threadId]);
       await dispatch(clearSubThreadData());
-      router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subthread_id=${threadId}`, undefined, { shallow: true });
+      router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${threadId}`, undefined, { shallow: true });
     } else {
       setExpandedThreads((prev) => [...prev, threadId]);
       await dispatch(getSubThreadsAction({ thread_id: threadId }));
@@ -98,10 +96,9 @@ console.log(isThreadSelectable, selectedThreadIds, expandedThreads);
   };
 
   const handleSelectSubThread = async (subThreadId, threadId) => {
-    console.log(subThreadId,'hello')
     setThreadPage(1);
     setExpandedThreads([threadId]);
-    router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subthread_id=${subThreadId}`, undefined, { shallow: true });
+    router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}`, undefined, { shallow: true });
     const result = await dispatch(getThread({ threadId, subThreadId, bridgeId: params?.id, nextPage: 1, user_feedback: filterOption }));
     setHasMoreThreadData(result?.data?.length >= 40);
   };
@@ -232,10 +229,10 @@ console.log(isThreadSelectable, selectedThreadIds, expandedThreads);
                           subThreads?.map((subThreadId, index) => (
                             <li
                               key={index}
-                              className={`cursor-pointer ${params.subthread_id === subThreadId?.sub_thread_id
+                              className={`cursor-pointer ${params.subThread_id === subThreadId?.sub_thread_id
                                   ? "hover:bg-base-primary hover:text-base-100"
                                   : "hover:bg-base-300 hover:text-gray-800"
-                                } p-2 rounded-md transition-all duration-200 ${params.subthread_id === subThreadId?.sub_thread_id
+                                } p-2 rounded-md transition-all duration-200 ${params.subThread_id === subThreadId?.sub_thread_id
                                   ? "bg-primary text-base-100"
                                   : ""
                                 }`}

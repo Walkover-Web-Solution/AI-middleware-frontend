@@ -31,8 +31,14 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       setThreadPage(1);
 
       const fetchThread = async (threadId) => {
-        url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subthread_id=${params.subThread_id || threadId}`;
-        result = await dispatch(getThread({ threadId, bridgeId: params?.id, nextPage: 1, user_feedback: filterOption, subThreadId: params.subThread_id }));
+        url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}`;
+        result = await dispatch(getThread({ 
+          threadId, 
+          bridgeId: params?.id, 
+          nextPage: 1, 
+          user_feedback: filterOption, 
+          subThreadId: params?.subThread_id || threadId
+        }));
         return result;
       };
 
@@ -41,7 +47,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       } else if (historyData?.length > 0) {
         const firstThreadId = historyData?.[0]?.thread_id;
         await fetchThread(firstThreadId);
-        url = `${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subthread_id=${params?.subThread_id || firstThreadId}`;
+        url = `${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subThread_id=${params?.subThread_id || firstThreadId}`;
         if (startDate && endDate) {
           url += `&start=${startDate}&end=${endDate}`;
         }
@@ -55,14 +61,14 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     };
 
     fetchData();
-  }, [filterOption, search]);
+  }, [filterOption, search, params?.thread_id, params?.subThread_id]);
 
   const fetchMoreThreadData = useCallback(async () => {
     if (isFetchingMore) return;
     setIsFetchingMore(true);
     previousScrollHeightRef.current = historyRef?.current?.scrollHeight;
     const nextPage = threadPage + 1;
-    const result = await dispatch(getThread({ threadId: params.thread_id, bridgeId: params?.id,subThreadId:selectedSubThreadId, nextPage, user_feedback: filterOption }));
+    const result = await dispatch(getThread({ threadId: params.thread_id, bridgeId: params?.id,subThreadId:params?.subThread_id, nextPage, user_feedback: filterOption }));
     setThreadPage(nextPage);
     setHasMoreThreadData(result?.data?.length >= 40);
     if (!result || result?.data?.length < 40) {
