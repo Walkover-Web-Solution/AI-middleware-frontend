@@ -11,7 +11,7 @@ import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import AddTestCaseModal from '../modals/AddTestCaseModal';
 
-const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, setSelectedThread, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedSubThreadId }) => {
+const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData }) => {
 
   const integrationData = useCustomSelector(state => state?.bridgeReducer?.org?.[params?.org_id]?.integrationData) || {};
   const historyRef = useRef(null);
@@ -50,8 +50,14 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
       setThreadPage(1);
 
       const fetchThread = async (threadId) => {
-        setSelectedThread(threadId);
-        result = await dispatch(getThread({ threadId, bridgeId: params?.id, nextPage: 1, user_feedback: filterOption }));
+        url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}`;
+        result = await dispatch(getThread({ 
+          threadId, 
+          bridgeId: params?.id, 
+          nextPage: 1, 
+          user_feedback: filterOption, 
+          subThreadId: params?.subThread_id || threadId
+        }));
         return result;
       };
 
@@ -60,7 +66,7 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
       } else if (historyData?.length > 0) {
         const firstThreadId = historyData?.[0]?.thread_id;
         await fetchThread(firstThreadId);
-        url = `${pathName}?version=${params?.version}&thread_id=${firstThreadId}`;
+        url = `${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subThread_id=${params?.subThread_id || firstThreadId}`;
         if (startDate && endDate) {
           url += `&start=${startDate}&end=${endDate}`;
         }
@@ -74,21 +80,21 @@ const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore,
     };
 
     fetchData();
-  }, [filterOption, search]);
+  }, [filterOption, search, params?.thread_id, params?.subThread_id]);
 
   const fetchMoreThreadData = useCallback(async () => {
     if (isFetchingMore) return;
     setIsFetchingMore(true);
     previousScrollHeightRef.current = historyRef?.current?.scrollHeight;
     const nextPage = threadPage + 1;
-    const result = await dispatch(getThread({ threadId: selectedThread, bridgeId: params?.id, subThreadId: selectedSubThreadId, nextPage, user_feedback: filterOption }));
+    const result = await dispatch(getThread({ threadId: params.thread_id, bridgeId: params?.id,subThreadId:params?.subThread_id, nextPage, user_feedback: filterOption }));
     setThreadPage(nextPage);
     setHasMoreThreadData(result?.data?.length >= 40);
     if (!result || result?.data?.length < 40) {
       setSearchMessageId(null);
     }
     setIsFetchingMore(false);
-  }, [filterOption, hasMoreThreadData, isFetchingMore, threadPage, selectedThread, selectedSubThreadId]);
+  }, [filterOption, hasMoreThreadData, isFetchingMore, threadPage, params.thread_id, params.subThread_id]);
 
   useLayoutEffect(() => {
     if (isFetchingMore && historyRef?.current && hasMoreThreadData) {

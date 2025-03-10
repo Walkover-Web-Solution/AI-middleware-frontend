@@ -29,7 +29,6 @@ const Footer = () => {
     setLoading(true);
     try {
       const response = await axios.post("https://flow.sokt.io/func/scri4pu3FJQc", { email });
-      console.log(response.data);
       setEmail("");
     } catch (error) {
       console.error("Error subscribing:", error);
