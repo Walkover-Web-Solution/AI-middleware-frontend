@@ -187,10 +187,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       ) : (
         <div className="show-on-hover" >
 
-          <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
-
+          <div   className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
+    
             <div className="chat-image avatar flex justify-center items-center">
-
+       
               <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center">
                 <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                   {item.role === "user" ? (
@@ -337,7 +337,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 )}
               </div>
             </div>
-
             {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
           {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div className="flex justify-center items-center my-4">
@@ -361,7 +360,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             )
           }
-
         </div>
       )}
 
