@@ -11,7 +11,7 @@ import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import AddTestCaseModal from '../modals/AddTestCaseModal';
 
-const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, setSelectedThread, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedSubThreadId }) => {
+const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData }) => {
 
   const integrationData = useCustomSelector(state => state?.bridgeReducer?.org?.[params?.org_id]?.integrationData) || {};
   const historyRef = useRef(null);
