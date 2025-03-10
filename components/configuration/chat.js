@@ -54,20 +54,20 @@ function Chat({ params }) {
                     </div>
                   )}
                 </div>
-                <div className="chat-bubble break-keep">
+                <div className="chat-bubble break-keep inline-block">
                   <ReactMarkdown components={{
                     code: ({ node, inline, className, children, ...props }) => (
-                      <CodeBlock
-                        inline={inline}
-                        className={className}
-                        isDark={true} // Pass isDark to CodeBlock
-                        {...props}
-                      >
-                        {children}
-                      </CodeBlock>
-                    )
-                  }}>{message.content}</ReactMarkdown>
-                </div>
+                     <CodeBlock
+                     inline={inline}
+                     className={className}
+                      isDark={true} // Pass isDark to CodeBlock
+                     {...props}
+                  >
+                 {children}
+               </CodeBlock>
+    )
+  }}>{message.content}</ReactMarkdown>
+</div>
               </div>
             )
           })}

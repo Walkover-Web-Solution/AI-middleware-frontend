@@ -7,10 +7,13 @@ import { useDispatch } from 'react-redux';
 import { getThread } from '@/store/action/historyAction';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useRouter } from "next/navigation";
+import { openModal } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
+import AddTestCaseModal from '../modals/AddTestCaseModal';
 
-const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedSubThreadId}) => {
+const ThreadContainer = ({ thread, filterOption, selectedThread, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, setSelectedThread, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedSubThreadId }) => {
 
-  const integrationData  = useCustomSelector(state => state?.bridgeReducer?.org?.[params?.org_id]?.integrationData) || {};
+  const integrationData = useCustomSelector(state => state?.bridgeReducer?.org?.[params?.org_id]?.integrationData) || {};
   const historyRef = useRef(null);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -20,7 +23,23 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [flexDirection, setFlexDirection] = useState("column");
   const [threadMessageState, setThreadMessageState] = useState();
-  
+  const [testCaseConversation, setTestCaseConversation] = useState([]);
+
+  const handleAddTestCase = (item, index) => {
+    const conversation = [];
+    for (let i = index; i >= 0; i--) {
+      if (thread[i].role === "user") {
+        conversation.push(...(thread[i]?.AiConfig?.messages || []));
+        if (thread[i].id === item.id) {
+          break;
+        }
+      }
+    }
+    conversation.push((item || {}));
+    setTestCaseConversation(conversation);
+    openModal(MODAL_TYPE.ADD_TEST_CASE_MODAL);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       const thread_id = search?.get("thread_id");
@@ -213,6 +232,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
                     threadRefs={threadRefs}
                     searchMessageId={searchMessageId}
                     setSearchMessageId={setSearchMessageId}
+                    handleAddTestCase={handleAddTestCase}
                   />
                 ))}
             </div>
@@ -228,6 +248,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
           </button>
         )}
       </div>
+      <AddTestCaseModal testCaseConversation={testCaseConversation} setTestCaseConversation={setTestCaseConversation} />
     </div>
   );
 };

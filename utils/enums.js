@@ -336,7 +336,8 @@ export const MODAL_TYPE = {
   KNOWLEDGE_BASE_MODAL: 'KNOWLEDGE_BASE_MODAL',
   PROMPT_SUMMARY: 'PROMPT_SUMMARY',
   TESTCASE_MODAL: "TESTCASE_MODAL",
-  DEMO_MODAL: "DEMO_MODAL"
+  DEMO_MODAL: "DEMO_MODAL",
+  ADD_TEST_CASE_MODAL: "ADD_TEST_CASE_MODAL",
 }
 
 export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
@@ -455,3 +456,4 @@ export const FEATURE_DATA = [
     icon: "/live.svg"
   },
 ]
+
