@@ -171,9 +171,13 @@ function Home({ params }) {
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault();
-        inputRef.current?.focus(); // Focus on the input field
+        inputRef.current?.focus();
+      } else if (event.key.match(/^[a-z]$/i) && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        event.preventDefault();
+        inputRef.current?.focus();
+        setSearchTerm(prev => prev + event.key);
       }
     };
 
