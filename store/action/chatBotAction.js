@@ -6,7 +6,9 @@ import { updateBridgeActionReducer, updateBridgeReducer } from "../reducer/bridg
 export const getAllChatBotAction = (orgId) => async (dispatch, getState) => {
     try {
         const response = await getAllChatBot(orgId);
-        dispatch(getAllChatBotReducer({ chatbots: response.data.result.chatbots, orgId, chatbot_token: response.data.chatbot_token }));
+        const chatbot_token=response?.data?.chatbot_token
+        dispatch(getAllChatBotReducer({ chatbots: response.data.result.chatbots, orgId, chatbot_token }));
+        return { chatbot_token }
     } catch (error) {
         console.error(error);
     }
