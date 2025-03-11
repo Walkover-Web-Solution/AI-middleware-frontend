@@ -21,8 +21,7 @@ export default function layoutOrgPage({ children, params }) {
   const path = pathName.split('?')[0].split('/')
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
-  const { chatbot_token, embedToken, alertingEmbedToken } = useCustomSelector((state) => ({
-    chatbot_token: state?.ChatBot?.chatbot_token || '',
+  const { embedToken, alertingEmbedToken } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
 
@@ -50,14 +49,15 @@ export default function layoutOrgPage({ children, params }) {
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
 
   useEffect(() => {
-    const updateScript = () => {
+
+    const updateScript = (token) => {
       const existingScript = document.getElementById(scriptId);
       if (existingScript) {
         document.head.removeChild(existingScript);
       }
-      if (chatbot_token) {
+      if (token) {
         const script = document.createElement("script");
-        script.setAttribute("embedToken", chatbot_token);
+        script.setAttribute("embedToken", token);
         script.setAttribute("hideIcon", true);
         script.setAttribute("eventsToSubscribe", JSON.stringify(["MESSAGE_CLICK"]));
         script.id = scriptId;
@@ -66,12 +66,11 @@ export default function layoutOrgPage({ children, params }) {
       }
     };
 
-    setTimeout(() => {
-      if (!pathName.includes('/history')) {
-        updateScript();
-      }
-    }, 150); // Delay of 150ms
-
+    dispatch(getAllChatBotAction(params.org_id)).then(e=>{
+      const chatbotToken=e?.chatbot_token
+      if(chatbotToken || !pathName.includes('/history')) updateScript(chatbotToken);
+    })
+    
     return () => {
       if (!pathName.includes('/history')) {
         const existingScript = document.getElementById(scriptId);
@@ -80,11 +79,8 @@ export default function layoutOrgPage({ children, params }) {
       }
       }
     };
-  }, [chatbot_token]);
-
-  useEffect(() => {
-    dispatch(getAllChatBotAction(params.org_id))
   }, []);
+
 
   useEffect(() => {
     window.addEventListener("message", handleMessage);
