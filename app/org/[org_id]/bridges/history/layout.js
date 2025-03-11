@@ -11,7 +11,6 @@ export default function layoutHistoryPage({ children, params }) {
       }));
   const scriptId = "chatbot-main-script";
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
-  const scriptSource = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC
 
   useEffect(() => {
     const existingScript = document.getElementById(scriptId);
@@ -42,7 +41,7 @@ export default function layoutHistoryPage({ children, params }) {
           script.setAttribute("hideIcon", true);
           script.setAttribute("eventsToSubscribe", JSON.stringify(["MESSAGE_CLICK"]));
           script.id = scriptId;
-          script.src = scriptSource;
+          script.src = scriptSrc;
           document.head.appendChild(script);
         }
       };

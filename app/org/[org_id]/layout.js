@@ -67,13 +67,17 @@ export default function layoutOrgPage({ children, params }) {
     };
 
     setTimeout(() => {
-      updateScript();
+      if (!pathName.includes('/history')) {
+        updateScript();
+      }
     }, 150); // Delay of 150ms
 
     return () => {
-      const existingScript = document.getElementById(scriptId);
+      if (!pathName.includes('/history')) {
+        const existingScript = document.getElementById(scriptId);
       if (existingScript) {
         document.head.removeChild(existingScript);
+      }
       }
     };
   }, [chatbot_token]);
