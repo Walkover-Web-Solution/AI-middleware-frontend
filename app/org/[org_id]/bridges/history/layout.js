@@ -3,11 +3,8 @@ import { useEffect } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
 
 export default function layoutHistoryPage({ children, params }) {
-    const { chatbot_token, embedToken, alertingEmbedToken } = useCustomSelector((state) => ({
+    const { chatbot_token} = useCustomSelector((state) => ({
         chatbot_token: state?.ChatBot?.chatbot_token || '',
-        embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
-        alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
-    
       }));
   const scriptId = "chatbot-main-script";
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
@@ -48,8 +45,7 @@ export default function layoutHistoryPage({ children, params }) {
   
       setTimeout(() => {
         updateScript();
-      }, 150); // Delay of 150ms
-    //   setTimeout(() => { window.openChabot(); }, 500);
+      }, 150);
     };
   }, []);
 

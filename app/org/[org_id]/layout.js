@@ -68,7 +68,7 @@ export default function layoutOrgPage({ children, params }) {
 
     dispatch(getAllChatBotAction(params.org_id)).then(e=>{
       const chatbotToken=e?.chatbot_token
-      if(chatbotToken || !pathName.includes('/history')) updateScript(chatbotToken);
+      if(chatbotToken && !pathName.includes('/history')) updateScript(chatbotToken);
     })
     
     return () => {
