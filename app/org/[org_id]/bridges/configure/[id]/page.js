@@ -72,12 +72,12 @@ const Page = ({ searchParams }) => {
       <div className="flex flex-col items-start justify-start">
         <div className="flex w-full justify-start gap-16 items-start">
           <div className="flex flex-col md:flex-row w-full">
-            <div className="w-full md:w-2/3 overflow-auto p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
+            <div className="w-full md:w-1/2 overflow-auto p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
               <ConfigurationPage params={params} />
               <div />
             </div>
             <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
-            <div className="w-full md:w-1/3 flex-1 chatPage min-w-[450px]">
+            <div className="w-full md:w-1/2 flex-1 chatPage min-w-[450px]">
               <div className="p-4 m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
                 {/* {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />} */}
                 <Chatbot params={params} key={params} />
@@ -88,7 +88,6 @@ const Page = ({ searchParams }) => {
           </div>
         </div>
       </div>
-
     </>
   );
 };
