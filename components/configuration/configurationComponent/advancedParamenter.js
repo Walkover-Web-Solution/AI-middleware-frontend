@@ -28,9 +28,7 @@ const AdvancedParameters = ({ params }) => {
     };
   });
 
-  const { tool_choice: tool_choice_data, type, model } = configuration;
-  console.log(version_function_data);
-  
+  const { tool_choice: tool_choice_data, type, model } = configuration || {};  
 
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
@@ -74,9 +72,8 @@ const AdvancedParameters = ({ params }) => {
         [key]: isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue,
       }
     };
-    if ((isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue) !== configuration[key]) {
-      // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
-      dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { ...updatedDataToSend } }));
+    if ((isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue) !== configuration?.[key]) {
+      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
 
@@ -101,7 +98,6 @@ const AdvancedParameters = ({ params }) => {
           'size': newValue
         }
       }
-
     }
     if (key === "quality") {
       updatedDataToSend = {
@@ -130,8 +126,8 @@ const AdvancedParameters = ({ params }) => {
         }
       }
     }
-    if (newValue !== configuration[key]) {
-      dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { ...updatedDataToSend } }));
+    if (newValue !== configuration?.[key]) {
+      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
 
@@ -145,20 +141,20 @@ const AdvancedParameters = ({ params }) => {
         [key]: value
       }
     };
-    if (value !== configuration[key]) {
-      dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: updatedDataToSend }));
+    if (value !== configuration?.[key]) {
+      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: updatedDataToSend }));
     }
   };
 
   const handleDropdownChange = useCallback((value, key) => {
-    const newValue = value ? value : null; // Corrected to handle single value
+    const newValue = value ? value : null;
     const updatedDataToSend = {
       configuration: {
         [key]: newValue
       }
     };
-    dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: updatedDataToSend }));
-  }, [dispatch, params.id, params.version]);
+    dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: updatedDataToSend }));
+  }, [dispatch, params?.id, params?.version]);
 
   return (
     <div className="collapse text-base-content" tabIndex={0}>
@@ -174,7 +170,7 @@ const AdvancedParameters = ({ params }) => {
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
-          if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
+          if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
           const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
           const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
           let error = false;
@@ -208,8 +204,8 @@ const AdvancedParameters = ({ params }) => {
                       onClick={() => setShowDropdown(!showDropdown)}
                     >
                       <span className="text-base-content">
-                        {selectedOptions.length > 0
-                          ? (integrationData[selectedOptions[0].name]?.title || selectedOptions[0].name)
+                        {selectedOptions?.length > 0
+                          ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
                           : 'Select an tool choice option...'}
                       </span>
                       <div className="ml-auto">
@@ -232,7 +228,7 @@ const AdvancedParameters = ({ params }) => {
                         {/* Add option data to show in dropdown */}
                         {options && options.map(option => (
                           <div
-                            key={option.id}
+                            key={option?.id}
                             className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
                             onClick={() => {
                               setSelectedOptions([{ name: option, id: option }]);
@@ -244,7 +240,7 @@ const AdvancedParameters = ({ params }) => {
                               <input
                                 type="radio"
                                 name="function-select"
-                                checked={selectedOptions.some(opt => opt.name === option)}
+                                checked={selectedOptions?.some(opt => opt?.name === option)}
                                 className="radio radio-sm"
                               />
                               <span className="font-semibold">{option}</span>
@@ -262,27 +258,27 @@ const AdvancedParameters = ({ params }) => {
                           Object.values(version_function_data)
                             .filter(value => {
                               const functionName = value?.function_name || value?.endpoint_name;
-                              const title = integrationData[functionName]?.title || value?.endpoint_name || 'Untitled';
-                              return title.toLowerCase().includes(searchQuery.toLowerCase());
+                              const title = integrationData?.[functionName]?.title || value?.endpoint_name || 'Untitled';
+                              return title?.toLowerCase()?.includes(searchQuery?.toLowerCase());
                             })
                             .sort((a, b) => {
                               const aName = a?.function_name || a?.endpoint_name;
                               const bName = b?.function_name || b?.endpoint_name;
-                              const aTitle = integrationData[aName]?.title || aName || 'Untitled';
-                              const bTitle = integrationData[bName]?.title || bName || 'Untitled';
-                              return aTitle.localeCompare(bTitle);
+                              const aTitle = integrationData?.[aName]?.title || aName || 'Untitled';
+                              const bTitle = integrationData?.[bName]?.title || bName || 'Untitled';
+                              return aTitle?.localeCompare(bTitle);
                             })
                             .map((value) => {
                               const functionName = value?.function_name || value?.endpoint_name;
-                              const title = integrationData[functionName]?.title || value?.endpoint_name || 'Untitled';
-                              const isSelected = selectedOptions.some(opt => opt?.id === value._id);
+                              const title = integrationData?.[functionName]?.title || value?.endpoint_name || 'Untitled';
+                              const isSelected = selectedOptions?.some(opt => opt?.id === value?._id);
                               return (
                                 <div
-                                  key={value._id}
+                                  key={value?._id}
                                   className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
                                   onClick={() => {
-                                    setSelectedOptions(isSelected ? [] : [{ name: functionName, id: value._id }]);
-                                    handleDropdownChange(isSelected ? null : value._id, key); // Updated to pass the correct value
+                                    setSelectedOptions(isSelected ? [] : [{ name: functionName, id: value?._id }]);
+                                    handleDropdownChange(isSelected ? null : value?._id, key);
                                     setShowDropdown(false);
                                   }}
                                 >
