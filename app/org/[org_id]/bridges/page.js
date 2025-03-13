@@ -69,7 +69,7 @@ function Home({ params }) {
     bridgeType: item.bridgeType,
     status: item.status,
     versionId: item?.published_version_id || item?.versions?.[0],
-    totalTokens : item?.total_tokens 
+    totalTokens: item?.total_tokens
   }));
 
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
@@ -93,7 +93,7 @@ function Home({ params }) {
     bridgeType: item.bridgeType,
     status: item.status,
     versionId: item?.published_version_id || item?.versions?.[0],
-    totalTokens : item?.total_tokens 
+    totalTokens: item?.total_tokens
   }));
 
   const onClickConfigure = (id, versionId) => {
@@ -161,12 +161,12 @@ function Home({ params }) {
     return (
       <div className="flex items-center mr-4">
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button 
+          <button
             className="btn btn-outline btn-ghost btn-sm"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              router.push(`/org/${params.org_id}/bridges/testcase/${row._id}`);
+              router.push(`/org/${params.org_id}/bridges/testcase/${row._id}?version=${row?.versionId || null}`);
             }}
           >
             Test Case
@@ -175,10 +175,10 @@ function Home({ params }) {
         <div className="dropdown dropdown-left bg-transparent">
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
           <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-            <li><a onClick={(e) => { 
-              e.preventDefault(); 
-              e.stopPropagation(); 
-              archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined) 
+            <li><a onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
             }}>{(row?.status === 0) ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
           </ul>
         </div>
@@ -247,7 +247,7 @@ function Home({ params }) {
                   </div>
 
                 ) : (
-                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'prompt', 'model', 'totalTokens']} sorting sortingColumns={['name', 'model','totalTokens']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
+                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'prompt', 'model', 'totalTokens']} sorting sortingColumns={['name', 'model', 'totalTokens']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
                 )}
                 {filteredArchivedBridges?.length > 0 && <div className="">
                   <div className="flex justify-center items-center my-4">
