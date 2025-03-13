@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { createTestCaseAction } from '@/store/action/testCasesAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { X } from 'lucide-react';
+import { Bot, User, X } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -102,45 +102,74 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
 
     return (
         <dialog id={MODAL_TYPE?.ADD_TEST_CASE_MODAL} className="modal">
-            <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4  w-11/12 max-w-5xl">
-                <h3 className='font-bold'>Add Test Case</h3>
-                <div className="flex flex-col gap-2">
-                    {finalTestCases?.map((message, index) => (
-                        <div key={index} className="p-2 border rounded">
-                            <strong>{message.role}:</strong>
-                            {message.role === "tools_call" ? (
-                                message.tools?.map((item, idx) => (
-                                    <div key={idx} className='flex'>
-                                        <textarea defaultValue={JSON.stringify(item)} className="w-full p-2 border rounded min-h-28" onBlur={(event) => handleChange(event?.target?.value, index, idx)} />
-                                        {message.tools.length > 1 && (
-                                            <button
-                                                className={"px-2 py-1  rounded-md"}
-                                                onClick={() => removeTool(index, idx)}
-                                            >
-                                                <X />
-                                            </button>
-                                        )}
-                                    </div>
-                                ))
-                            ) : (
-                                <textarea defaultValue={message.content} className="w-full p-2 border rounded min-h-8" onBlur={(event) => handleChange(event?.target?.value, index, null)} />
-                            )}
-                        </div>
-                    ))}
-                </div>
-                <div className="modal-action">
-                    <div className='flex items-center gap-2'>
-                        <label htmlFor="responseType" className="block mb-1">Match Type</label>
-                        <select id="responseType" className="select select-bordered" value={responseType} onChange={(e) => setResponseType(e?.target?.value)}>
-                            <option value="exact" selected>exact</option>
-                            <option value="ai">ai</option>
-                            <option value="cosine">cosine</option>
-                        </select>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-[1000] min-w-[100vw] min-h-[100vh] overflow-auto py-4">
+                <form onSubmit={handleSubmit} className="bg-base-200 rounded-lg shadow-2xl max-w-5xl w-[90vw] overflow-auto relative flex flex-col">
+                    <div className="flex justify-between items-center p-6 pb-0 sticky top-0 bg-base-100 z-10">
+                        <h3 className="text-xl font-semibold">Create Test Case</h3>
+                        <button type="button" className="btn btn-circle btn-ghost btn-sm" onClick={handleClose}>✕</button>
                     </div>
-                    <button type="button" className="btn" onClick={handleClose}>Cancel</button>
-                    <button type="submit" className="btn btn-primary" disabled={isLoading}>{!isLoading ? 'Create' : 'Creating'}</button>
-                </div>
-            </form>
+                    
+                    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+                        {finalTestCases?.map((message, index) => (
+                            <div key={index} className="space-y-2">
+                                <div className="text-xs font-medium uppercase text-gray-500 tracking-wide">
+                                    {message.role.replace('_', ' ')}
+                                </div>
+                                {message.role === "tools_call" ? (
+                                    <div className="space-y-3">
+                                        {message.tools?.map((item, idx) => (
+                                            <div key={idx} className="flex gap-3 items-start group relative bg-base-100 rounded-lg p-3 shadow-sm">
+                                                <textarea 
+                                                    defaultValue={JSON.stringify(item, null, 2)}
+                                                    className="textarea w-full font-mono text-sm p-2 bg-transparent focus:outline-none min-h-20 h-auto max-h-72 overflow-y-auto"
+                                                    onBlur={(e) => handleChange(e.target.value, index, idx)}
+                                                    rows={4}
+                                                />
+                                                {message.tools.length > 1 && (
+                                                    <button
+                                                        className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        onClick={() => removeTool(index, idx)}
+                                                    >
+                                                        <X size={16} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <textarea 
+                                        defaultValue={message.content}
+                                        className="textarea w-full text-sm p-3 focus:outline-none bg-base-100 rounded-lg shadow-sm min-h-20 h-auto max-h-72"
+                                        onBlur={(e) => handleChange(e.target.value, index, null)}
+                                        rows={3}
+                                    />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex justify-between items-center p-6 pt-4 bg-base-200 sticky bottom-0">
+                        <div className="flex items-center gap-3">
+                            <label className="text-sm text-gray-600">Matching strategy:</label>
+                            <select 
+                                className="select select-sm bg-transparent focus:outline-none border-none"
+                                value={responseType} 
+                                onChange={(e) => setResponseType(e.target.value)}
+                            >
+                                <option value="exact">Exact</option>
+                                <option value="ai">AI</option>
+                                <option value="cosine">Cosine</option>
+                            </select>
+                        </div>
+                        <div className="flex gap-2">
+                            <button type="button" className="btn btn-ghost" onClick={handleClose}>Cancel</button>
+                            <button type="submit" className="btn btn-primary px-6" disabled={isLoading}>
+                                {isLoading ? <span className="loading loading-spinner"></span> : 'Create'}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </dialog>
     );
 }

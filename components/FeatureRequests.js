@@ -4,7 +4,7 @@ import Link from "next/link";
 const FeatureRequests = () => {
   return (
     <div className="relative flex w-3/4 mx-auto py-20 mt-20">
-      <div className="w-full md:w-1/2 z-10 ">
+      <div className="w-full md:w-1/2">
         <h1 className="text-4xl font-bold mb-4">
           Recommend a Feature & Shape the Future of GTWY AI!
         </h1>

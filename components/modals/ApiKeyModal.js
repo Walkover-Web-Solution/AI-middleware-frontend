@@ -78,7 +78,6 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                             name={field}
                             placeholder={`Enter ${field}`}
                             defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
-                            required={field !== 'comment'}
                         />
                     </div>
                 ))}

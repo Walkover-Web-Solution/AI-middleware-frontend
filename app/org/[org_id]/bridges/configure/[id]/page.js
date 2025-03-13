@@ -29,7 +29,7 @@ const Page = ({ searchParams }) => {
   });
 
   useEffect(() => {
-    dispatch(getSingleBridgesAction({id: params.id, version: params.version }));
+    dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
     return () => {
       try {
         if (handleclose) {

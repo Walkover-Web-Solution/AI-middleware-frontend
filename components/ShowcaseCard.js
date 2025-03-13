@@ -9,10 +9,12 @@ const ShowcaseCard = ({ img, heading, text, url }) => {
         {/* Increased height to 400px */}
         <div className="h-[400px] border-[0.1px] bg-white overflow-hidden rounded-lg flex items-center justify-center">
           {img && (
-            <img
+            <Image
               src={img}
               alt={heading}
-              className="w-full h-full object-fill transition-transform duration-300 group-hover:scale-105"
+              layout="fill"
+              objectFit="cover"
+              className="transition-transform duration-300 group-hover:scale-105"
             />
           )}
         </div>
@@ -21,10 +23,10 @@ const ShowcaseCard = ({ img, heading, text, url }) => {
             <h2 className="card-title text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
               {heading}
             </h2>
-            <Image 
-              src="/RightArrow.svg" 
-              width={20} 
-              height={20} 
+            <Image
+              src="/RightArrow.svg"
+              width={20}
+              height={20}
               alt="Right icon"
               className="transition-transform duration-300 group-hover:translate-x-2 cursor-pointer"
               onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
@@ -33,7 +35,7 @@ const ShowcaseCard = ({ img, heading, text, url }) => {
           <p className="pt-6 text-lg text-gray-300 leading-relaxed">{text}</p>
           {url && (
             <div className="card-actions justify-end mt-4">
-              <a 
+              <a
                 href={url}
                 className="btn bg-primary text-white hover:bg-primary hover:text-white border-none"
                 target="_blank"

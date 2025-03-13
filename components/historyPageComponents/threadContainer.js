@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import AddTestCaseModal from '../modals/AddTestCaseModal';
+import LoadingSpinner from '../loadingSpinner';
+
 
 const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData }) => {
 
@@ -24,6 +26,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [flexDirection, setFlexDirection] = useState("column");
   const [threadMessageState, setThreadMessageState] = useState();
   const [testCaseConversation, setTestCaseConversation] = useState([]);
+  const [loadingData, setLoadingData] = useState(true); // New state for loading
 
   const handleAddTestCase = (item, index) => {
     const conversation = [];
@@ -48,6 +51,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       let result;
       let url;
       setThreadPage(1);
+      setLoadingData(true); // Set loading to true before fetching data
 
       const fetchThread = async (threadId) => {
         url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}`;
@@ -77,10 +81,11 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       setHasMoreThreadData(result?.data?.length >= 40);
       setIsFetchingMore(false);
       setLoading(false);
+      setLoadingData(false); // Set loading to false after data is fetched
     };
 
     fetchData();
-  }, [filterOption, search, params?.thread_id, params?.subThread_id]);
+  }, [filterOption, search, params?.thread_id]);
 
   const fetchMoreThreadData = useCallback(async () => {
     if (isFetchingMore) return;
@@ -205,38 +210,49 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
             flexDirection: flexDirection,
           }}
         >
-          <InfiniteScroll
-            dataLength={thread?.length}
-            next={fetchMoreThreadData}
-            hasMore={hasMoreThreadData}
-            loader={<p></p>}
-            scrollThreshold="250px"
-            inverse={flexDirection === "column-reverse"}
-            scrollableTarget="scrollableDiv"
-          >
-            <div
-              ref={contentRef}
-              className="pb-16 px-3 pt-4"
-              style={{ width: "100%" }}
-            >
-              {thread &&
-                thread?.map((item, index) => (
-                  <ThreadItem
-                    key={index}
-                    params={params}
-                    index={index}
-                    item={item}
-                    threadHandler={threadHandler}
-                    formatDateAndTime={formatDateAndTime}
-                    integrationData={integrationData}
-                    threadRefs={threadRefs}
-                    searchMessageId={searchMessageId}
-                    setSearchMessageId={setSearchMessageId}
-                    handleAddTestCase={handleAddTestCase}
-                  />
-                ))}
+          {loadingData && (
+            <div>
+              <LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px'/>
             </div>
-          </InfiniteScroll>
+          )}
+          {!loadingData && (!thread || thread.length === 0) ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500 text-lg">No history present</p>
+            </div>
+          ) : (
+            <InfiniteScroll
+              dataLength={thread?.length}
+              next={fetchMoreThreadData}
+              hasMore={hasMoreThreadData}
+              loader={<p></p>}
+              scrollThreshold="250px"
+              inverse={flexDirection === "column-reverse"}
+              scrollableTarget="scrollableDiv"
+            >
+              <div
+                ref={contentRef}
+                className="pb-16 px-3 pt-4"
+                style={{ width: "100%" }}
+              >
+                {thread &&
+                  thread?.map((item, index) => (
+                    <ThreadItem
+                      key={index}
+                      params={params}
+                      index={index}
+                      item={item}
+                      threadHandler={threadHandler}
+                      formatDateAndTime={formatDateAndTime}
+                      integrationData={integrationData}
+                      threadRefs={threadRefs}
+                      searchMessageId={searchMessageId}
+                      setSearchMessageId={setSearchMessageId}
+                      handleAddTestCase={handleAddTestCase}
+                    />
+                  ))}
+              </div>
+            </InfiniteScroll>
+          )}
         </div>
 
         {showScrollToBottom && (

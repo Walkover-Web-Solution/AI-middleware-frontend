@@ -65,10 +65,12 @@ export default function layoutOrgPage({ children, params }) {
         document.head.appendChild(script);
       }
     };
+
     dispatch(getAllChatBotAction(params.org_id)).then(e=>{
       const chatbotToken=e?.chatbot_token
       if(chatbotToken && !pathName.includes('/history')) updateScript(chatbotToken);
     })
+    
     return () => {
       if (!pathName.includes('/history')) {
         const existingScript = document.getElementById(scriptId);
