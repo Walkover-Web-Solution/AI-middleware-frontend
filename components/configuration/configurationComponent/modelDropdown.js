@@ -48,7 +48,7 @@ const ModelDropdown = ({ params }) => {
         setHoveredModel(null);
         setIsDropdownOpen(false);
     };
-    
+
     const handleClickOutside = useCallback((event) => {
         if (dropdownRef.current && isDropdownOpen && !dropdownRef.current.contains(event.target)) {
             setIsDropdownOpen(false);
@@ -126,8 +126,8 @@ const ModelDropdown = ({ params }) => {
                 </div>
             </div>
 
-            {hoveredModel && modelSpecs && (
-                <div className="max-w-[500px] bg-white border border-gray-100 rounded-xl shadow-xl p-4 mt-8 top-0 absolute left-[320px] transition-all duration-300 ease-in-out">
+            {!hoveredModel && modelSpecs && (
+                <div className="max-w-[500px] bg-white border border-gray-100 rounded-xl shadow-xl p-4 mt-8 top-0 absolute left-[320px] transition-all duration-300 ease-in-out z-[99]">
                     <div className="space-y-3">
                         <div className="border-b pb-2">
                             {modelSpecs && <h3 className="text-lg font-semibold text-gray-900">{hoveredModel}</h3>}
