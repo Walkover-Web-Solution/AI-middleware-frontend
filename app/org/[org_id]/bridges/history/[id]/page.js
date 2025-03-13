@@ -51,6 +51,12 @@ function Page({ searchParams }) {
   }, []);
 
   useEffect(() => {
+    return () => {
+      dispatch(clearThreadData());
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
     dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: "all" }));
   }, [dispatch, params.id]);
 

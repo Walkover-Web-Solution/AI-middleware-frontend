@@ -4,7 +4,7 @@ import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, dup
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss } from 'lucide-react';
+import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss, TestTube } from 'lucide-react';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -134,7 +134,7 @@ function Navbar() {
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDown size={16} /></div>
           <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
-            {['bridges', "chatbot", 'pauthkey', 'apikeys','knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
+            {['bridges', 'pauthkey', 'apikeys','knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
               <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
                 <a className={path[3] === item ? "active" : ""}>
                   {item === 'knowledge_base' ? 'Knowledge Base' : item.charAt(0).toUpperCase() + item.slice(1)}
@@ -197,8 +197,9 @@ function Navbar() {
               </div>
             )}
             <div className="join">
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${bridgeId}?version=${versionId}`)} className={` ${path[4] === 'configure' ? "btn-primary" : ""}   btn join-item `}> <FileSliders size={16} /> Configure</button>
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${bridgeId}?version=${versionId}`)} className={` ${path[4] === 'history' ? "btn-primary" : ""}   btn join-item `}><History size={16} /> History</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'configure' ? "btn-primary" : ""} btn join-item`}><FileSliders size={16} /> Configure</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/testcase/${bridgeId}`)} className={`${path[4] === 'testcase' ? "btn-primary" : ""} btn join-item`}><TestTube size={16} /> Test Cases</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'history' ? "btn-primary" : ""} btn join-item`}><History size={16} /> History</button>
             </div>
             <div className='ml-2'>
             </div>

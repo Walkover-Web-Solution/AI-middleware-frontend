@@ -127,7 +127,7 @@ const CustomTable = ({
                 <tbody className="">
                     {sortedData?.length > 0 ? (
                         sortedData?.map((row, index) => (
-                            <tr key={row.id || row?._id || index} className="border-b hover:bg-gray-100 transition-colors cursor-pointer relative" onClick={() =>
+                            <tr key={row.id || row?._id || index} className="border-b hover:bg-gray-100 transition-colors cursor-pointer relative group" onClick={() =>
                                 handleRowClick(
                                     keysToExtractOnRowClick.reduce((acc, key) => {
                                         acc[key] = row[key];
