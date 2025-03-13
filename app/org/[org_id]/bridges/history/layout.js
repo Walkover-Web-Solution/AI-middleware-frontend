@@ -3,9 +3,11 @@ import { useEffect } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
 
 export default function layoutHistoryPage({ children, params }) {
-    const { chatbot_token} = useCustomSelector((state) => ({
+    const {chatbot_token, history_page_chatbot_token} = useCustomSelector((state) => ({
         chatbot_token: state?.ChatBot?.chatbot_token || '',
+        history_page_chatbot_token : state?.bridgeReducer?.org?.[params?.org_id]?.history_page_chatbot_token
       }));
+      
   const scriptId = "chatbot-main-script";
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
 
@@ -16,7 +18,7 @@ export default function layoutHistoryPage({ children, params }) {
     }
     
     const script = document.createElement("script");
-    script.setAttribute("embedToken", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdfaWQiOiIxMTIwMiIsImNoYXRib3RfaWQiOiI2NzI4NmQ0MDgzZTQ4MmZkNWI0NjZiNjkiLCJ1c2VyX2lkIjoiMTIzNCJ9.l6E8OyvSeQW5gxoZbLQ_lBx4yNsF5BQsOWQHL64hxoQ");
+    script.setAttribute("embedToken", history_page_chatbot_token);
     script.setAttribute("hideIcon", "true");
     script.id = scriptId;
     script.src = scriptSrc;
