@@ -91,6 +91,7 @@ export default function layoutOrgPage({ children, params }) {
   }, [params.id]);
 
   async function handleMessage(e) {
+    if(e.data?.metadata?.type==='trigger') return;
     // todo: need to make api call to update the name & description
     if (e?.data?.webhookurl) {
       const dataToSend = {

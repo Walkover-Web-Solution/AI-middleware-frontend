@@ -28,13 +28,16 @@ function getStatusClass(status) {
 const EmbedList = ({ params }) => {
     const [functionId, setFunctionId] = useState(null);
     const dispatch = useDispatch();
-    const { integrationData, bridge_functions, function_data, modelType, model } = useCustomSelector((state) => ({
+    const { integrationData, bridge_functions, function_data, modelType, model, embedToken } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {},
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData || {},
         bridge_functions: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.function_ids || [],
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
         model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
+        embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+
     }));
+
     const handleOpenModal = (functionId) => {
         setFunctionId(functionId);
         openModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL)
@@ -61,7 +64,9 @@ const EmbedList = ({ params }) => {
 
                 return (
                     <div key={value?._id} id={value?._id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
-                        <div className="p-4 w-full h-full flex flex-col justify-between" onClick={() => openViasocket(functionName)}>
+                        <div className="p-4 w-full h-full flex flex-col justify-between" onClick={() => openViasocket(functionName, {
+                            embedToken
+                        })}>
                             <div>
                                 <div className="flex justify-between items-center">
                                     <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content">
