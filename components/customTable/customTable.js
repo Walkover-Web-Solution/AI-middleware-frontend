@@ -31,9 +31,21 @@ const CustomTable = ({
             return [...data].sort((a, b) => {
                 const valueA = activeColumn === 'name' ? a.actualName : a[activeColumn];
                 const valueB = activeColumn === 'name' ? b.actualName : b[activeColumn];
+                if (activeColumn === 'totaltoken') {
+                    // Sort by totaltoken in ascending order
+                    return ascending ? a.totaltoken - b.totaltoken : b.totaltoken - a.totaltoken;
+                }
                 if (typeof valueA === 'string' && typeof valueB === 'string') {
                     return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
                 }
+                
+                if (typeof valueA === 'number' && typeof valueB === 'number') {
+                    return ascending ? valueA - valueB : valueB - valueA;
+                }
+                
+                if (valueA === "-") return ascending ? -1 : 1;
+                if (valueB === "-") return ascending ? 1 : -1;
+                
                 if (valueA < valueB) return ascending ? -1 : 1;
                 if (valueA > valueB) return ascending ? 1 : -1;
                 return 0;

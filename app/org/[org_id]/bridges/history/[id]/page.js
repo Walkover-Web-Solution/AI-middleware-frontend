@@ -21,7 +21,7 @@ function Page({ searchParams }) {
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
   const searchRef = useRef();
-
+  
   const { historyData, thread, versionData, selectedVersion } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
@@ -29,7 +29,6 @@ function Page({ searchParams }) {
     selectedVersion : state?.historyReducer?.selectedVersion || 'all'
   }));
 
-  const [selectedThread, setSelectedThread] = useState(null);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [page, setPage] = useState(1);
@@ -40,8 +39,6 @@ function Page({ searchParams }) {
   const [filterOption, setFilterOption] = useState("all");
   const [threadPage, setThreadPage] = useState(1);
   const [hasMoreThreadData, setHasMoreThreadData] = useState(true);
-  const [selectedSubThreadId, setSelectedSubThreadId] = useState(null);
-
 
   const closeSliderOnEsc = useCallback((event) => {
     if (event.key === "Escape") setIsSliderOpen(false);
@@ -90,11 +87,10 @@ function Page({ searchParams }) {
           console.error("Failed to fetch single message:", error);
         }
       } else {
-        setSelectedThread(thread_id);
-        router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}`, undefined, { shallow: true });
+        router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}&subThread_id=${thread_id}`, undefined, { shallow: true });
       }
     },
-    [pathName, router, params.id, params.version]
+    [pathName, params.id, params.version]
   );
 
   const fetchMoreData = useCallback(async () => {
@@ -105,7 +101,6 @@ function Page({ searchParams }) {
     const result = await dispatch(getHistoryAction(params.id, startDate, endDate, nextPage));
     if (result?.length < 40) setHasMore(false);
   }, [dispatch, page, params.id, search]);
-
 
   return (
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
@@ -126,24 +121,20 @@ function Page({ searchParams }) {
             pathName={pathName}
             search={search}
             historyData={historyData}
-            selectedThread={selectedThread}
-            setSelectedThread={setSelectedThread}
             threadHandler={threadHandler}
             threadPage={threadPage}
             setThreadPage={setThreadPage}
             hasMoreThreadData={hasMoreThreadData}
-            setHasMoreThreadData={setHasMoreThreadData}
-            selectedSubThreadId={selectedSubThreadId}
-          />
+            setHasMoreThreadData={setHasMoreThreadData}          />
         </div>
         <Sidebar
           historyData={historyData}
-          selectedThread={selectedThread}
           threadHandler={threadHandler}
           fetchMoreData={fetchMoreData}
           hasMore={hasMore}
           loading={loading}
           params={params}
+          search={search}
           setSearchMessageId={setSearchMessageId}
           setPage={setPage}
           setHasMore={setHasMore}
@@ -155,8 +146,6 @@ function Page({ searchParams }) {
           threadPage={threadPage}
           hasMoreThreadData={hasMoreThreadData}
           setHasMoreThreadData={setHasMoreThreadData}
-          setSelectedSubThreadId={setSelectedSubThreadId}
-          selectedSubThreadId={selectedSubThreadId}
         />
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
