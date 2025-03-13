@@ -1,8 +1,98 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+
+// Model Preview component to display model specifications
+const ModelPreview = memo(({ hoveredModel, modelSpecs }) => {
+    if (!hoveredModel || !modelSpecs) return null;
+
+    return (
+        <div className="max-w-[500px] bg-white border border-gray-200 rounded-lg shadow-lg p-6 mt-8 top-0 absolute left-[320px] transition-transform duration-300 ease-in-out z-[99] transform hover:scale-105">
+            <div className="space-y-4">
+                <div className="border-b pb-3">
+                    <h3 className="text-xl font-bold text-gray-800">{hoveredModel}</h3>
+                    {modelSpecs?.description && (
+                        <p className="text-sm text-gray-700 mt-2">
+                            {modelSpecs.description}
+                        </p>
+                    )}
+                </div>
+
+                {modelSpecs && (['input_cost', 'output_cost'].some(type => modelSpecs[type])) && (
+                    <div className="grid grid-cols-2 gap-4">
+                        {['input_cost', 'output_cost'].map((type) => {
+                            const spec = modelSpecs?.[type];
+                            const cost = modelSpecs?.cost?.[type];
+                            return spec && (
+                                <div key={type} className="bg-gray-100 p-3 rounded-md hover:bg-gray-200 transition-colors">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-sm font-medium text-gray-800 capitalize tracking-wide">
+                                            {type.replace('_', ' ')}
+                                        </h4>
+                                        {cost && (
+                                            <p className="text-sm text-gray-600 ml-2">
+                                                Cost: {cost}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-gray-700 break-words leading-tight mt-2">
+                                        {typeof spec === 'object'
+                                            ? JSON.stringify(spec, null, 2)
+                                            : spec}
+                                    </p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {modelSpecs && Object.entries(modelSpecs)
+                    .filter(([key, value]) =>
+                        !['input_cost', 'output_cost', 'description'].includes(key) &&
+                        value &&
+                        (!Array.isArray(value) || value.length > 0)
+                    ).length > 0 && (
+                        <div className="w-full">
+                            {Object.entries(modelSpecs)
+                                .filter(([key, value]) =>
+                                    !['input_cost', 'output_cost', 'description'].includes(key) &&
+                                    value &&
+                                    (!Array.isArray(value) || value.length > 0)
+                                )
+                                .map(([key, value]) => (
+                                    <div key={key} className="bg-gray-100 p-3 rounded-md hover:bg-gray-200 transition-colors mb-3">
+                                        <h4 className="text-sm font-medium text-gray-800 mb-2 capitalize tracking-wide">
+                                            {key.replace(/_/g, ' ')}
+                                        </h4>
+                                        {Array.isArray(value) ? (
+                                            <ul className="space-y-1">
+                                                {value.map((item, index) => (
+                                                    item && (
+                                                        <li key={index} className="text-sm text-gray-700 pl-2">
+                                                            • {item}
+                                                        </li>
+                                                    )
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-sm text-gray-700 break-words leading-tight">
+                                                {typeof value === 'object'
+                                                    ? JSON.stringify(value, null, 2)
+                                                    : value}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                        </div>
+                    )}
+            </div>
+        </div>
+    );
+});
+
+ModelPreview.displayName = 'ModelPreview';
 
 const ModelDropdown = ({ params }) => {
     const dispatch = useDispatch();
@@ -21,8 +111,17 @@ const ModelDropdown = ({ params }) => {
 
     const handleFinetuneModelChange = (e) => {
         const selectedFineTunedModel = e.target.value;
-        // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { fine_tune_model: { current_model: selectedFineTunedModel } } } }));
-        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { configuration: { fine_tune_model: { current_model: selectedFineTunedModel } } } }));
+        dispatch(updateBridgeVersionAction({
+            bridgeId: params.id,
+            versionId: params.version,
+            dataToSend: {
+                configuration: {
+                    fine_tune_model: {
+                        current_model: selectedFineTunedModel
+                    }
+                }
+            }
+        }));
     }
 
     const handleModelHover = (modelName) => {
@@ -56,11 +155,13 @@ const ModelDropdown = ({ params }) => {
     }, [isDropdownOpen]);
 
     useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
+        if (isDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [handleClickOutside]);
+    }, [handleClickOutside, isDropdownOpen]);
 
     const toggleDropdown = () => {
         setIsDropdownOpen(prev => !prev);
@@ -126,92 +227,11 @@ const ModelDropdown = ({ params }) => {
                 </div>
             </div>
 
-            {!hoveredModel && modelSpecs && (
-                <div className="max-w-[500px] bg-white border border-gray-100 rounded-xl shadow-xl p-4 mt-8 top-0 absolute left-[320px] transition-all duration-300 ease-in-out z-[99]">
-                    <div className="space-y-3">
-                        <div className="border-b pb-2">
-                            {modelSpecs && <h3 className="text-lg font-semibold text-gray-900">{hoveredModel}</h3>}
-                            {modelSpecs?.description && (
-                                <p className="text-xs text-gray-600 mt-1">
-                                    {modelSpecs.description}
-                                </p>
-                            )}
-                        </div>
-
-                        {modelSpecs && (['input_cost', 'output_cost'].some(type => modelSpecs[type])) && (
-                            <div className="grid grid-cols-2 gap-2">
-                                {['input_cost', 'output_cost'].map((type) => {
-                                    const spec = modelSpecs?.[type];
-                                    const cost = modelSpecs?.cost?.[type];
-                                    return spec && (
-                                        <div key={type} className="bg-gray-50 p-2 rounded-md hover:bg-gray-100 transition-colors">
-                                            <div className="flex items-center justify-between">
-                                                <h4 className="text-xs font-medium text-gray-700 capitalize tracking-wide">
-                                                    {type.replace('_', ' ')}
-                                                </h4>
-                                                {cost && (
-                                                    <p className="text-xs text-gray-500 ml-2">
-                                                        Cost: {cost}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <p className="text-xs text-gray-600 break-words leading-tight mt-1">
-                                                {typeof spec === 'object'
-                                                    ? JSON.stringify(spec, null, 2)
-                                                    : spec}
-                                            </p>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        {modelSpecs && Object.entries(modelSpecs)
-                            .filter(([key, value]) =>
-                                !['input_cost', 'output_cost', 'description'].includes(key) &&
-                                value &&
-                                (!Array.isArray(value) || value.length > 0)
-                            ).length > 0 && (
-                                <div className="w-full">
-                                    {Object.entries(modelSpecs)
-                                        .filter(([key, value]) =>
-                                            !['input_cost', 'output_cost', 'description'].includes(key) &&
-                                            value &&
-                                            (!Array.isArray(value) || value.length > 0)
-                                        )
-                                        .map(([key, value]) => (
-                                            <div key={key} className="bg-gray-50 p-2 rounded-md hover:bg-gray-100 transition-colors mb-2">
-                                                <h4 className="text-xs font-medium text-gray-700 mb-1 capitalize tracking-wide">
-                                                    {key.replace(/_/g, ' ')}
-                                                </h4>
-                                                {Array.isArray(value) ? (
-                                                    <ul className="space-y-0.5">
-                                                        {value.map((item, index) => (
-                                                            item && (
-                                                                <li key={index} className="text-xs text-gray-600 pl-1.5">
-                                                                    • {item}
-                                                                </li>
-                                                            )
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="text-xs text-gray-600 break-words leading-tight">
-                                                        {typeof value === 'object'
-                                                            ? JSON.stringify(value, null, 2)
-                                                            : value}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ))}
-                                </div>
-                            )}
-                    </div>
-                </div>
-            )}
+            <ModelPreview hoveredModel={hoveredModel} modelSpecs={modelSpecs} />
 
             {/* If model is fine-tuned model*/}
             {modelType === 'fine-tune' && (
-                <div className="w-full  max-w-xs">
+                <div className="w-full max-w-xs">
                     <div className="label">
                         <span className="label-text text-gray-700">Fine-Tune Model</span>
                     </div>
