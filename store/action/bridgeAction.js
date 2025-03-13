@@ -72,13 +72,14 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     const response = await getAllBridges();
     const embed_token = response?.data?.embed_token;
     const alerting_embed_token = response?.data?.alerting_embed_token;
+    const history_page_chatbot_token = response?.data?.history_page_chatbot_token
     const integrationData = await integration(embed_token);
     const flowObject = integrationData?.flows?.reduce((obj, item) => {
       obj[item.id] = item;
       return obj;
     }, {});
     if (onSuccess) onSuccess(response?.data?.bridge?.length)
-    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, integrationData: flowObject, embed_token, alerting_embed_token }));
+    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, integrationData: flowObject, embed_token, alerting_embed_token, history_page_chatbot_token }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
