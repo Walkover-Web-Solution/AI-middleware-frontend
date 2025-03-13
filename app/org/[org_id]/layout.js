@@ -67,12 +67,14 @@ export default function layoutOrgPage({ children, params }) {
     };
     dispatch(getAllChatBotAction(params.org_id)).then(e=>{
       const chatbotToken=e?.chatbot_token
-      if(chatbotToken) updateScript(chatbotToken);
+      if(chatbotToken && !pathName.includes('/history')) updateScript(chatbotToken);
     })
     return () => {
-      const existingScript = document.getElementById(scriptId);
+      if (!pathName.includes('/history')) {
+        const existingScript = document.getElementById(scriptId);
       if (existingScript) {
         document.head.removeChild(existingScript);
+      }
       }
     };
   }, []);
