@@ -1,7 +1,7 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 const ModelDropdown = ({ params }) => {
@@ -48,6 +48,19 @@ const ModelDropdown = ({ params }) => {
         setHoveredModel(null);
         setIsDropdownOpen(false);
     };
+    
+    const handleClickOutside = useCallback((event) => {
+        if (dropdownRef.current && isDropdownOpen && !dropdownRef.current.contains(event.target)) {
+            setIsDropdownOpen(false);
+        }
+    }, [isDropdownOpen]);
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [handleClickOutside]);
 
     const toggleDropdown = () => {
         setIsDropdownOpen(prev => !prev);
