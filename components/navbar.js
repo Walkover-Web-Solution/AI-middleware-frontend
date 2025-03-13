@@ -34,7 +34,7 @@ function Navbar() {
   const params = useParams();
 
   const { selectedVersion } = useCustomSelector((state) => ({
-    selectedVersion : state?.historyReducer?.selectedVersion || 'all'
+    selectedVersion: state?.historyReducer?.selectedVersion || 'all'
   }));
 
   const handleDeleteBridge = async (item, newStatus = 0) => {
@@ -101,7 +101,7 @@ function Navbar() {
   const toggleBridgeSidebar = () => toggleSidebar('default-bridge-sidebar');
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
 
-  
+
 
   const { bridgeVersionsArray } = useCustomSelector(
     (state) => ({
@@ -115,7 +115,7 @@ function Navbar() {
 
     if (version !== "all") {
       try {
-         dispatch(getVersionHistoryAction(thread_id, params.id, version))
+        dispatch(getVersionHistoryAction(thread_id, params.id, version))
       } catch (error) {
         console.error('Failed to fetch version history:', error);
       }
@@ -134,7 +134,7 @@ function Navbar() {
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDown size={16} /></div>
           <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
-            {['bridges', 'pauthkey', 'apikeys','knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
+            {['bridges', 'pauthkey', 'apikeys', 'knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
               <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
                 <a className={path[3] === item ? "active" : ""}>
                   {item === 'knowledge_base' ? 'Knowledge Base' : item.charAt(0).toUpperCase() + item.slice(1)}
@@ -176,29 +176,29 @@ function Navbar() {
             )}
             {path[4] === 'history' && (
               <div className='flex items-center'>
-                
-                <select
-              className="select select-bordered w-full max-w-xs"
 
-              value={selectedVersion}
-              onChange={handleVersionChange}
-            >
-              <option value="all">All Versions</option>
-              {bridgeVersionsArray?.map((version, index) => (
-                <option
-                  key={version}
-                  value={version}
+                <select
+                  className="select select-bordered w-full max-w-xs"
+
+                  value={selectedVersion}
+                  onChange={handleVersionChange}
                 >
-                  Version {index + 1} 
-                </option>
-              ))}
-            </select>
+                  <option value="all">All Versions</option>
+                  {bridgeVersionsArray?.map((version, index) => (
+                    <option
+                      key={version}
+                      value={version}
+                    >
+                      Version {index + 1}
+                    </option>
+                  ))}
+                </select>
                 <div className="divider divider-horizontal mx-1"></div>
               </div>
             )}
             <div className="join">
               <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'configure' ? "btn-primary" : ""} btn join-item`}><FileSliders size={16} /> Configure</button>
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/testcase/${bridgeId}`)} className={`${path[4] === 'testcase' ? "btn-primary" : ""} btn join-item`}><TestTube size={16} /> Test Cases</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/testcase/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'testcase' ? "btn-primary" : ""} btn join-item`}><TestTube size={16} /> Test Cases</button>
               <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'history' ? "btn-primary" : ""} btn join-item`}><History size={16} /> History</button>
             </div>
             <div className='ml-2'>
@@ -232,19 +232,19 @@ function Navbar() {
                       + create new bridge
                     </button>
                   </div> :
-                   path[3] === 'metrics' ?
-                   <div>
-                     <button className="btn btn-primary" onClick={() => router.push(`/org/${path[2]}/alerts`)}>
-                       Configure Alerts
-                     </button>
-                   </div> : 
-                  (path[3] === 'chatbot' && path.length === 4) ?
-                    <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CHATBOT_MODAL)}>
-                      + create new chatbot
-                    </button> : path[3] === 'knowledge_base' ?
-                    <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>
-                      + Add new Knowledge base
-                    </button> : ""
+                  path[3] === 'metrics' ?
+                    <div>
+                      <button className="btn btn-primary" onClick={() => router.push(`/org/${path[2]}/alerts`)}>
+                        Configure Alerts
+                      </button>
+                    </div> :
+                    (path[3] === 'chatbot' && path.length === 4) ?
+                      <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CHATBOT_MODAL)}>
+                        + create new chatbot
+                      </button> : path[3] === 'knowledge_base' ?
+                        <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>
+                          + Add new Knowledge base
+                        </button> : ""
         )}
       </div>
 
