@@ -1,4 +1,3 @@
-import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
@@ -18,17 +17,20 @@ const AdvancedParameters = ({ params }) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const dispatch = useDispatch();
 
-  const { service, configuration, integrationData } = useCustomSelector((state) => {
+  const { service, version_function_data, configuration, integrationData } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
     return {
+      version_function_data: versionData?.apiCalls,
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
     };
   });
 
-  const { tool_choice: tool_choice_data, type, model, apiCalls: version_function_data } = configuration;
+  const { tool_choice: tool_choice_data, type, model } = configuration;
+  console.log(version_function_data);
+  
 
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
@@ -43,7 +45,7 @@ const AdvancedParameters = ({ params }) => {
   }, [tool_choice_data]);
 
   useEffect(() => {
-    if (tool_choice_data === "auto" || tool_choice_data === "none" || tool_choice_data === "default") {
+    if (tool_choice_data === "auto" || tool_choice_data === "none" || tool_choice_data === "default" || tool_choice_data === "required") {
       setSelectedOptions([{ name: tool_choice_data === "default" ? "auto" : tool_choice_data, id: tool_choice_data === "default" ? "auto" : tool_choice_data }])
       return
     }
