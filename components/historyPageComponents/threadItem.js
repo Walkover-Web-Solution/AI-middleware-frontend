@@ -161,7 +161,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       "bridgeName": "history_page_chabot",
       "threadId": item?.id,
       variables,
-      version_id : null
+      version_id: null
     });
     setTimeout(() => window.openChatbot(), 100)
   }
@@ -188,10 +188,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       ) : (
         <div className="show-on-hover" >
 
-          <div   className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
-    
+          <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
+
             <div className="chat-image avatar flex justify-center items-center">
-       
+
               <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center">
                 <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                   {item.role === "user" ? (
@@ -260,6 +260,29 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             <div className="chat-header flex gap-4 items-center mb-1">
               {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
             </div>
+            {item?.firstAttemptError && item?.role === "assistant" && (
+              <div className="collapse bg-base-300 rounded-lg shadow-sm max-w-24 mb-2 hover:shadow-md transition-shadow duration-200">
+                <input
+                  type="checkbox"
+                  className="peer"
+                  id={`errorCollapse-${item.id || index}`}
+                />
+
+                <label
+                  htmlFor={`errorCollapse-${item.id || index}`}
+                  className="collapse-title text-sm font-medium cursor-pointer flex justify-between items-center py-2"
+                >
+                  <span className="flex items-center gap-1">
+                    Error
+                  </span>
+                  <ChevronDown className="w-4 h-4 transition-transform peer-checked:rotate-180" />
+                </label>
+
+                <div className="collapse-content text-sm max-w-[400px]">
+                  {item?.firstAttemptError}
+                </div>
+              </div>
+            )}
             <div className="flex justify-end items-end gap-1" >
               {item.role === "assistant" && (
                 <>
@@ -366,7 +389,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
 
       <ToolsDataModal toolsData={toolsData} handleClose={handleCloseToolsDataModal} toolsDataModalRef={toolsDataModalRef} integrationData={integrationData} />
       <EditMessageModal modalRef={modalRef} setModalInput={setModalInput} handleClose={handleClose} handleSave={handleSave} modalInput={modalInput} />
-    </div>
+    </div >
   );
 };
 
