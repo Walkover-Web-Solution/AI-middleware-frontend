@@ -1,5 +1,5 @@
 import { updateContentHistory } from "@/store/action/historyAction";
-import { Bot, BotMessageSquare, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, TestTubeDiagonal, User } from "lucide-react";
+import { Bot, BotMessageSquare, ChevronDown, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, TestTubeDiagonal, User } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
