@@ -268,7 +268,7 @@ const InputConfigComponent = ({ params }) => {
             </div>
           </div>
           <div className='flex gap-4'>
-             <div
+             {/* <div
               className="label cursor-pointer">
 
             <Link
@@ -279,7 +279,7 @@ const InputConfigComponent = ({ params }) => {
                 Generate Test Case
               </span>
             </Link>
-                </div>
+                </div> */}
             <div
               className="label cursor-pointer"
               onClick={() => openModal(MODAL_TYPE.OPTIMIZE_PROMPT)}

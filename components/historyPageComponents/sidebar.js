@@ -76,14 +76,13 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const handleToggleThread = async (threadId) => {
     const isExpanded = expandedThreads?.includes(threadId);
     if (isExpanded) {
+      setExpandedThreads(prev => prev.filter(id => id !== threadId));
       setThreadPage(1);
       const result = await dispatch(getThread({ threadId, bridgeId: params?.id, subThreadId: params?.subThread_id, nextPage: 1 }));
       setHasMoreThreadData(result?.data?.length >= 40);
-      setExpandedThreads([threadId]);
-      await dispatch(clearSubThreadData());
       router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${threadId}`, undefined, { shallow: true });
     } else {
-      setExpandedThreads((prev) => [...prev, threadId]);
+      setExpandedThreads([threadId]);
       await dispatch(getSubThreadsAction({ thread_id: threadId }));
     }
   };

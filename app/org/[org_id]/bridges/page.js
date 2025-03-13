@@ -8,7 +8,7 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
-import { Ellipsis, LayoutGrid, Table } from "lucide-react";
+import { Ellipsis, LayoutGrid, Table, TestTubeDiagonal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -159,12 +159,29 @@ function Home({ params }) {
 
   const EndComponent = ({ row }) => {
     return (
-      <div className="dropdown dropdown-left bg-transparent absolute right-3 top-3 bg-black">
-        <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
-        <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-          {/* <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li> */}
-          <li><a onClick={(e) => { e.preventDefault(); e.stopPropagation(); archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined) }}>{(row?.status === 0) ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
-        </ul>
+      <div className="flex items-center mr-4">
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button 
+            className="btn btn-outline btn-ghost btn-sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/org/${params.org_id}/bridges/testcase/${row._id}`);
+            }}
+          >
+            Test Case
+          </button>
+        </div>
+        <div className="dropdown dropdown-left bg-transparent">
+          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
+          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+            <li><a onClick={(e) => { 
+              e.preventDefault(); 
+              e.stopPropagation(); 
+              archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined) 
+            }}>{(row?.status === 0) ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
+          </ul>
+        </div>
       </div>
     )
   }
