@@ -81,6 +81,19 @@ const BridgeTypeToggle = ({ params }) => {
                                 />
                                 <span className="label-text ml-2">Batch API</span>
                             </label>
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="bridgeType"
+                                    value="trigger"
+                                    className="radio"
+                                    checked={bridgeType?.toString()?.toLowerCase() === "trigger"}
+                                    onChange={(e) => {
+                                        handleInputChange(e, "bridgeType")}}
+                                    disabled={modelType === 'embedding'}
+                                />
+                                <span className="label-text ml-2">Triggers</span>
+                            </label>
                         </>
                     ) : (
                         <>

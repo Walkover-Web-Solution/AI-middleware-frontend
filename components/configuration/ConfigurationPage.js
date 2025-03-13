@@ -25,6 +25,7 @@ import ToolCallCount from "./configurationComponent/toolCallCount";
 import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/utils/enums";
 import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
+import TriggersList from "./configurationComponent/TriggersList";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -61,6 +62,8 @@ export default function ConfigurationPage({ params }) {
     const renderSetupView = useMemo(() => () => (
         <>
             {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
+            {bridgeType === 'trigger' && <TriggersList params={params} />}
+
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING && (modelType === AVAILABLE_MODEL_TYPES.REASONING
                 ? PROMPT_SUPPORTED_REASIONING_MODELS?.includes(modelName)
                 : true)) && (
