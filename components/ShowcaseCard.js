@@ -4,10 +4,9 @@ import React from "react";
 
 const ShowcaseCard = ({ img, heading, text, url }) => {
   return (
-    <div className="group cursor-pointer">
-      <div className="card bg-base-100 w-full h-[700px] shadow-xl p-4 bg-transparent text-white border-[0.1px] border-gray-500 transition-all duration-300 hover:border-primary">
-        {/* Increased height to 400px */}
-        <div className="h-[400px] border-[0.1px] bg-white overflow-hidden rounded-lg flex items-center justify-center">
+    <div className="group w-full">
+      <div className="card bg-base-100 w-full shadow-xl bg-transparent text-white border-[0.1px] border-gray-500 transition-all duration-300 hover:border-primary overflow-hidden">
+        <div className="relative h-64 w-full">
           {img && (
             <Image
               src={img}
@@ -18,9 +17,9 @@ const ShowcaseCard = ({ img, heading, text, url }) => {
             />
           )}
         </div>
-        <div className="card-body">
+        <div className="p-6 space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="card-title text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+            <h2 className="card-title text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
               {heading}
             </h2>
             <Image
@@ -32,12 +31,12 @@ const ShowcaseCard = ({ img, heading, text, url }) => {
               onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
             />
           </div>
-          <p className="pt-6 text-lg text-gray-300 leading-relaxed">{text}</p>
+          <p className="text-lg text-gray-300 leading-relaxed">{text}</p>
           {url && (
-            <div className="card-actions justify-end mt-4">
+            <div className="card-actions justify-end">
               <a
                 href={url}
-                className="btn bg-primary text-white hover:bg-primary hover:text-white border-none"
+                className="btn bg-primary text-white hover:bg-primary/90 border-none"
                 target="_blank"
                 rel="noopener noreferrer"
               >

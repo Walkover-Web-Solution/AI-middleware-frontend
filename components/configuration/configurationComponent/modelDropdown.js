@@ -169,7 +169,7 @@ const ModelDropdown = ({ params }) => {
 
     return (
         <div className="flex items-start gap-4 relative">
-            <div className="w-full max-w-xs z-[999]">
+            <div className="w-full max-w-xs z-[9]">
                 <div className="label">
                     <span className="label-text text-gray-700">Model</span>
                 </div>
