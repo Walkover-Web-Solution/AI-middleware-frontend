@@ -1,30 +1,37 @@
-import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState([]);
   const dispatch = useDispatch();
-  const { service, model, type, configuration } = useCustomSelector((state) => {
-    const bridgeVersion = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+
+  const { service, version_function_data, configuration, integrationData } = useCustomSelector((state) => {
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+    const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
     return {
-      service: bridgeVersion?.service?.toLowerCase(),
-      model: bridgeVersion?.configuration?.model,
-      type: bridgeVersion?.configuration?.type,
-      configuration: bridgeVersion?.configuration,
+      version_function_data: versionData?.apiCalls,
+      integrationData,
+      service: versionData?.service,
+      configuration: versionData?.configuration,
     };
   });
 
+  const { tool_choice: tool_choice_data, type, model } = configuration || {};  
+
   const { modelInfoData } = useCustomSelector((state) => ({
-    modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters,
+    modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
 
   useEffect(() => {
@@ -33,7 +40,26 @@ const AdvancedParameters = ({ params }) => {
         JSON.stringify(configuration?.response_type?.json_schema, undefined, 4)
       );
     }
-  }, [configuration]);
+  }, [tool_choice_data]);
+
+  useEffect(() => {
+    if (tool_choice_data === "auto" || tool_choice_data === "none" || tool_choice_data === "default" || tool_choice_data === "required") {
+      setSelectedOptions([{ name: tool_choice_data === "default" ? "auto" : tool_choice_data, id: tool_choice_data === "default" ? "auto" : tool_choice_data }])
+      return
+    }
+    const selectedFunctiondata = version_function_data && typeof version_function_data === 'object'
+      ? Object.values(version_function_data)
+        .filter(value => {
+          const toolChoice = typeof tool_choice_data === 'string' ? tool_choice_data : '';
+          return toolChoice === value?._id;
+        })
+        .map(value => ({
+          name: value?.function_name || value?.endpoint_name,
+          id: value?._id
+        }))
+      : [];
+    setSelectedOptions(selectedFunctiondata);
+  }, [tool_choice_data])
 
   const handleInputChange = (e, key, isSlider = false) => {
     let newValue = e.target.value;
@@ -46,9 +72,8 @@ const AdvancedParameters = ({ params }) => {
         [key]: isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue,
       }
     };
-    if ((isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue) !== configuration[key]) {
-      // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
-      dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { ...updatedDataToSend } }));
+    if ((isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue) !== configuration?.[key]) {
+      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
 
@@ -73,7 +98,6 @@ const AdvancedParameters = ({ params }) => {
           'size': newValue
         }
       }
-
     }
     if (key === "quality") {
       updatedDataToSend = {
@@ -81,8 +105,6 @@ const AdvancedParameters = ({ params }) => {
           'quality': newValue
         }
       }
-
-
     }
     if (key === 'json_schema') {
       if (!is_json) return toast.error('Json schema is not parsable JSON');
@@ -104,8 +126,8 @@ const AdvancedParameters = ({ params }) => {
         }
       }
     }
-    if (newValue !== configuration[key]) {
-      dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { ...updatedDataToSend } }));
+    if (newValue !== configuration?.[key]) {
+      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
 
@@ -119,10 +141,20 @@ const AdvancedParameters = ({ params }) => {
         [key]: value
       }
     };
-    if (value !== configuration[key]) {
-      dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: updatedDataToSend }));
+    if (value !== configuration?.[key]) {
+      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: updatedDataToSend }));
     }
   };
+
+  const handleDropdownChange = useCallback((value, key) => {
+    const newValue = value ? value : null;
+    const updatedDataToSend = {
+      configuration: {
+        [key]: newValue
+      }
+    };
+    dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: updatedDataToSend }));
+  }, [dispatch, params?.id, params?.version]);
 
   return (
     <div className="collapse text-base-content" tabIndex={0}>
@@ -138,7 +170,7 @@ const AdvancedParameters = ({ params }) => {
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
-          if (KEYS_NOT_TO_DISPLAY.includes(key)) return null;
+          if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
           const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
           const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
           let error = false;
@@ -159,13 +191,117 @@ const AdvancedParameters = ({ params }) => {
                       {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
                     </ul>
                   </div>
-
-
                 </div>
                 {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
                 {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
                   modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
               </label>
+              {field === 'dropdown' && (
+                <div className="w-full">
+                  <div className="relative">
+                    <div
+                      className="flex items-center gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer"
+                      onClick={() => setShowDropdown(!showDropdown)}
+                    >
+                      <span className="text-base-content">
+                        {selectedOptions?.length > 0
+                          ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
+                          : 'Select an tool choice option...'}
+                      </span>
+                      <div className="ml-auto">
+                        {showDropdown ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </div>
+                    </div>
+
+                    {showDropdown && (
+                      <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-10 max-h-[200px] overflow-y-auto mt-1 p-2">
+
+                        <div className="p-2 top-0 bg-base-100">
+                          <input
+                            type="text"
+                            placeholder="Search functions..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="input input-bordered input-sm w-full"
+                          />
+                        </div>
+                        {/* Add option data to show in dropdown */}
+                        {options && options.map(option => (
+                          <div
+                            key={option?.id}
+                            className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
+                            onClick={() => {
+                              setSelectedOptions([{ name: option, id: option }]);
+                              handleDropdownChange(option, key);
+                              setShowDropdown(false);
+                            }}
+                          >
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name="function-select"
+                                checked={selectedOptions?.some(opt => opt?.name === option)}
+                                className="radio radio-sm"
+                              />
+                              <span className="font-semibold">{option}</span>
+                              <span className="text-gray-500 text-xs">
+                                {option === 'none'
+                                  ? "Model won't call a function; it will generate a message."
+                                  : option === 'auto'
+                                    ? "Model can generate a response or call a function."
+                                    : "One or more specific functions must be called"}
+                              </span>
+                            </label>
+                          </div>
+                        ))}
+                        {version_function_data && typeof version_function_data === 'object' && (
+                          Object.values(version_function_data)
+                            .filter(value => {
+                              const functionName = value?.function_name || value?.endpoint_name;
+                              const title = integrationData?.[functionName]?.title || value?.endpoint_name || 'Untitled';
+                              return title?.toLowerCase()?.includes(searchQuery?.toLowerCase());
+                            })
+                            .sort((a, b) => {
+                              const aName = a?.function_name || a?.endpoint_name;
+                              const bName = b?.function_name || b?.endpoint_name;
+                              const aTitle = integrationData?.[aName]?.title || aName || 'Untitled';
+                              const bTitle = integrationData?.[bName]?.title || bName || 'Untitled';
+                              return aTitle?.localeCompare(bTitle);
+                            })
+                            .map((value) => {
+                              const functionName = value?.function_name || value?.endpoint_name;
+                              const title = integrationData?.[functionName]?.title || value?.endpoint_name || 'Untitled';
+                              const isSelected = selectedOptions?.some(opt => opt?.id === value?._id);
+                              return (
+                                <div
+                                  key={value?._id}
+                                  className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
+                                  onClick={() => {
+                                    setSelectedOptions(isSelected ? [] : [{ name: functionName, id: value?._id }]);
+                                    handleDropdownChange(isSelected ? null : value?._id, key);
+                                    setShowDropdown(false);
+                                  }}
+                                >
+                                  <label className="flex items-center gap-2">
+                                    <input
+                                      type="radio"
+                                      name="function-select"
+                                      checked={isSelected}
+                                      className="radio radio-sm"
+                                    />
+                                    <span>{title}</span>
+                                  </label>
+                                </div>
+                              );
+                            })
+                        )}
+
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {field === 'slider' && (
                 <div>
                   <input

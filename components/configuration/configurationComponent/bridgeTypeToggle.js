@@ -44,31 +44,31 @@ const BridgeTypeToggle = ({ params }) => {
         <div className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
             <div className='flex flex-col items-start gap-1'>
                 <div className="flex flex-row items-center gap-4 mb-4">
-                    {service?.toLowerCase() === 'openai' && modelType !== 'image' && modelType !== 'embedding' ? (
-                        <>
-                            <label className="flex items-center cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="bridgeType"
-                                    value="api"
-                                    className="radio"
-                                    checked={bridgeType?.toString()?.toLowerCase() === "api"}
-                                    onChange={(e) => handleInputChange(e, "bridgeType")}
-                                />
-                                <span className="label-text ml-2">API</span>
-                            </label>
-                            <label className="flex items-center cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="bridgeType"
-                                    value="chatbot"
-                                    className="radio"
-                                    checked={bridgeType?.toString()?.toLowerCase() === "chatbot"}
-                                    onChange={(e) => handleInputChange(e, "bridgeType")}
-                                    disabled={modelType === 'embedding'}
-                                />
-                                <span className="label-text ml-2">ChatBot</span>
-                            </label>
+                    <>
+                        <label className="flex items-center cursor-pointer">
+                            <input
+                                type="radio"
+                                name="bridgeType"
+                                value="api"
+                                className="radio"
+                                checked={bridgeType?.toString()?.toLowerCase() === "api"}
+                                onChange={(e) => handleInputChange(e, "bridgeType")}
+                            />
+                            <span className="label-text ml-2">API</span>
+                        </label>
+                        <label className="flex items-center cursor-pointer">
+                            <input
+                                type="radio"
+                                name="bridgeType"
+                                value="chatbot"
+                                className="radio"
+                                checked={bridgeType?.toString()?.toLowerCase() === "chatbot"}
+                                onChange={(e) => handleInputChange(e, "bridgeType")}
+                                disabled={modelType === 'embedding'}
+                            />
+                            <span className="label-text ml-2">ChatBot</span>
+                        </label>
+                        <div className="flex items-center gap-2">
                             <label className="flex items-center cursor-pointer">
                                 <input
                                     type="radio"
@@ -77,11 +77,18 @@ const BridgeTypeToggle = ({ params }) => {
                                     className="radio"
                                     checked={bridgeType?.toString()?.toLowerCase() === "batch"}
                                     onChange={(e) => handleInputChange(e, "bridgeType")}
-                                    disabled={modelType === 'embedding'}
+                                    disabled={modelType === 'embedding' || service?.toLowerCase() !== 'openai' || modelType === 'image' || modelType === 'embedding'}
                                 />
-                                <span className="label-text ml-2">Batch API</span>
+                                <div className="group relative inline-block">
+                                    <div className="absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                                        Batch api automates and executes multiple tasks simultaneously for greater efficiency.
+                                        <div className="absolute w-3 h-3 bg-gray-700 transform rotate-45 -bottom-1.5 left-1/2 -translate-x-1/2"></div>
+                                    </div>
+                                    <span className="label-text ml-2 cursor-pointer">Batch API</span>
+                                </div>
                             </label>
-                            <label className="flex items-center cursor-pointer">
+                        </div>
+                        <label className="flex items-center cursor-pointer">
                                 <input
                                     type="radio"
                                     name="bridgeType"
@@ -94,27 +101,8 @@ const BridgeTypeToggle = ({ params }) => {
                                 />
                                 <span className="label-text ml-2">Triggers</span>
                             </label>
-                        </>
-                    ) : (
-                        <>
-                            <div className='flex flex-row items-center gap-2'>
-                                <div className="label">
-                                    <span className="label-text">API</span>
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    key={bridgeType}
-                                    className="toggle"
-                                    defaultChecked={bridgeType?.toString()?.toLowerCase() === "chatbot" ? true : false}
-                                    onChange={(e) => handleInputChange(e, "bridgeType")}
-                                    disabled={modelType === 'embedding'}
-                                />
-                                <div className="label">
-                                    <span className="label-text">ChatBot</span>
-                                </div>
-                            </div>
-                        </>
-                    )}
+                    </>
+
                 </div>
             </div>
             <div>

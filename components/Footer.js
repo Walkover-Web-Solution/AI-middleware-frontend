@@ -52,7 +52,7 @@ const Footer = () => {
             <input
               type="email"
               placeholder="Enter your Email"
-              className={`input input-bordered w-full max-w-xs text-black ${error ? 'input-error' : ''}`}
+              className={`input input-bordered w-full max-w-xs z-[99] text-black ${error ? 'input-error' : ''}`}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />

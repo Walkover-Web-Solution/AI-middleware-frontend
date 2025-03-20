@@ -17,18 +17,10 @@ const SuggestionTemplates = () => {
         <h1
           className={`text-4xl font-bold mb-4 transition-all ease-in-out duration-300 group-hover:scale-105  `}
         >
-          AI Playground:
-        </h1>
-        <h1
-          className={`text-4xl font-bold mb-4 transition-all ease-in-out duration-300 group-hover:scale-105  `}
-        >
-          Test, Compare, and Perfect Your Models
+          Smart AI Recommendations for Better and Cost Effective Results
         </h1>
         <p className="text-md transition-all ease-in-out duration-300 group-hover:scale-105  ">
-          Get hands-on experience on our Experiment Playground - where your team
-          can easily test different prompts and models side by side. It's the
-          perfect space to compare performance , experiment with ideas and
-          fine-tune your AI for the best results.
+          Whether you’re building workflows, developing applications, or analyzing data, AIMiddleWare intelligently suggests the best AI models tailored to your tasks. This thoughtful approach helps optimize your processes while cutting costs by 20-30%, ensuring efficiency and value at every step.
         </p>
         <div>
           <Link href="/login">
@@ -45,7 +37,7 @@ const SuggestionTemplates = () => {
         width={300}
         height={300}
         layout="intrinsic"
-        // layout="responsive"
+      // layout="responsive"
       />
     </div>
   );

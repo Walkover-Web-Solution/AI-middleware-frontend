@@ -1,5 +1,6 @@
+import { getSingleMessage } from "@/config";
 import { updateContentHistory } from "@/store/action/historyAction";
-import { Bot, BotMessageSquare, FileClock, MessageCircleCode, Parentheses, Pencil, SquareFunction, TestTubeDiagonal, User } from "lucide-react";
+import { Bot, BotMessageSquare, ChevronDown, FileClock, MessageCircleCode, Parentheses, Pencil, Plus, SquareFunction, User } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -8,7 +9,6 @@ import CodeBlock from "../codeBlock/codeBlock";
 import EditMessageModal from "../modals/EditMessageModal";
 import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
-import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase }) => {
@@ -118,7 +118,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         <div className="flex gap-3">
           <div className="tooltip tooltip-top relative" data-tip="function logs">
             <SquareFunction size={22}
-              onClick={() => openViasocket(tool.name, { flowHitId: tool?.metadata?.flowHitId, embedToken })}
+              onClick={() => openViasocket(tool.id, { flowHitId: tool?.metadata?.flowHitId, embedToken })}
               className="opacity-80 cursor-pointer" />
           </div>
           <div className="tooltip tooltip-top pr-2 relative" data-tip="function data">
@@ -183,19 +183,17 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               className="btn btn-xs"
               onClick={() => handleAddTestCase(item, index)}
             >
-              <div className="tooltip tooltip-top" data-tip="Add Test Case">
-                <TestTubeDiagonal size={16} />
+              <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                <Plus className="h-3 w-3" />
+                <span>Test Case</span>
               </div>
             </button>
           </div>
         </div>
       ) : (
         <div className="show-on-hover" >
-
           <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
-
             <div className="chat-image avatar flex justify-center items-center">
-
               <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center">
                 <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                   {item.role === "user" ? (
@@ -294,8 +292,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     className="btn btn-xs see-on-hover"
                     onClick={() => handleAddTestCase(item, index)}
                   >
-                    <div className="tooltip tooltip-top" data-tip="Add Test Case">
-                      <TestTubeDiagonal size={16} />
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <Plus className="h-3 w-3" />
+                      <span>Test Case</span>
                     </div>
                   </button>
                   <div data-tip="Ask AI" className="see-on-hover tooltip">
