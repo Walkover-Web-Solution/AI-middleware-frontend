@@ -95,15 +95,15 @@ function TestCases({ params }) {
                   {versions.map((version, index) => (
                     <th key={index} className="p-3 text-left text-sm font-medium text-gray-700 border-b">
                       <div className="flex items-center gap-2">
-                      <div className="tooltip tooltip-left" data-tip="Run Test Case">
-                        <button
-                          className="btn btn-xs btn-circle bg-white border border-gray-200 hover:bg-primary hover:border-primary hover:text-white disabled:bg-gray-100 disabled:border-gray-200 disabled:text-gray-400"
-                          onClick={() => handleRunTestCase(version)}
-                          disabled={!params?.id || isloading}
-                        >
-                          <Play className="w-3 h-3" />
-                        </button>
-                      </div>
+                        <div className="tooltip tooltip-left" data-tip="Run Test Case">
+                          <button
+                            className="btn btn-xs btn-circle bg-white border border-gray-200 hover:bg-primary hover:border-primary hover:text-white disabled:bg-gray-100 disabled:border-gray-200 disabled:text-gray-400"
+                            onClick={() => handleRunTestCase(version)}
+                            disabled={!params?.id || isloading}
+                          >
+                            <Play className="w-3 h-3" />
+                          </button>
+                        </div>
                         <span className="font-medium text-gray-800">{`V${index + 1}`}</span>
                       </div>
                     </th>
@@ -239,7 +239,7 @@ function TestCases({ params }) {
                                   <Trash2 className="w-4 h-4" /> Delete
                                 </button>
                               </div>
-                              
+
                               <div>
                                 <h3 className="text-sm font-medium text-gray-700 mb-1">Version Scores</h3>
                                 <div className="flex flex-wrap gap-2">
@@ -247,16 +247,22 @@ function TestCases({ params }) {
                                     const versionArray = testCase?.version_history?.[version];
                                     const versionScore = versionArray?.[versionArray.length - 1]?.score;
                                     const progressValue = versionScore ? Math.round(versionScore * 100) : 0;
+                                    const lastRun = versionArray?.[versionArray.length - 1]?.created_at;
                                     return (
                                       <div
                                         key={versionIndex}
-                                        className="flex items-center gap-2 px-3 py-1 bg-white rounded-full text-sm text-gray-700 border border-gray-200"
+                                        className="flex flex-col gap-2 px-3 py-2 bg-white rounded-lg text-sm text-gray-700 border border-gray-200"
                                       >
-                                        <span>V{versionIndex + 1}:</span>
-                                        <div className="radial-progress text-primary" 
-                                          style={{"--value": progressValue, "--size": "3rem", "--thickness": "3px"}}
-                                          role="progressbar">
-                                          {progressValue}%
+                                        <div className="flex items-center gap-2">
+                                          <span>V{versionIndex + 1}:</span>
+                                          <div className="radial-progress text-primary"
+                                            style={{ "--value": progressValue, "--size": "3rem", "--thickness": "3px" }}
+                                            role="progressbar">
+                                            {progressValue}%
+                                          </div>
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                          Last run: {lastRun ? new Date(lastRun).toLocaleString() : '-'}
                                         </div>
                                       </div>
                                     );
