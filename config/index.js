@@ -885,3 +885,12 @@ export const runTestCaseApi = async ({ versionId }) => {
     return error;
   }
 }
+export const modelSuggestionApi = async ({ versionId }) => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/bridge/versions/suggest/${versionId}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
