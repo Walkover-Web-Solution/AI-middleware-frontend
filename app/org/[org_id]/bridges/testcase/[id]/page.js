@@ -92,6 +92,7 @@ function TestCases({ params }) {
                   <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">User Input</th>
                   <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">Expected Output</th>
                   <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">Model Answer</th>
+                  <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">Matching Type</th>
                   {versions.map((version, index) => (
                     <th key={index} className="p-3 text-left text-sm font-medium text-gray-700 border-b">
                       <div className="flex items-center gap-2">
@@ -110,7 +111,7 @@ function TestCases({ params }) {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 w-full">
                 {Array.isArray(testCases) ? testCases.map((testCase, index) => {
                   const lastUserMessage = testCase.conversation
                     .filter(message => message.role === 'user')
@@ -148,6 +149,7 @@ function TestCases({ params }) {
                         <td className="p-3 max-w-xs truncate" title={model_output}>
                           {model_output ? model_output.substring(0, 30) + (model_output.length > 30 ? '...' : '') : 'N/A'}
                         </td>
+                        <td className="p-3 max-w-xs truncate" title={testCase?.matching_type}> {testCase?.matching_type}</td>
                         {versions.map((version, versionIndex) => {
                           const versionArray = testCase?.version_history?.[version];
                           const versionScore = versionArray?.[versionArray.length - 1]?.score;
@@ -160,7 +162,7 @@ function TestCases({ params }) {
                       </tr>
                       {isExpanded && (
                         <tr>
-                          <td colSpan={versions.length + 4} className="p-4 bg-gray-50">
+                          <td colSpan={versions.length + 5} className="p-4 bg-gray-50">
                             <div className="space-y-4">
                               <div>
                                 <h3 className="text-sm font-medium text-gray-700 mb-1">User Input</h3>
