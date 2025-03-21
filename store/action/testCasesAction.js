@@ -19,7 +19,7 @@ export const getAllTestCasesOfBridgeAction = ({ bridgeId }) => async (dispatch) 
     try {
         const response = await getAllTestCasesOfBridgeApi({ bridgeId });
         if (response?.success) {
-            dispatch(getAllTestCasesReducer({ bridgeId, data: response?.result }))
+            dispatch(getAllTestCasesReducer({ bridgeId, data: response?.data }))
         }
         return;
     } catch (error) {
