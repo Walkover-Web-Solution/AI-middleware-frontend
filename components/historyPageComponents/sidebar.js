@@ -11,6 +11,8 @@ import { toast } from "react-toastify";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 import { usePathname, useRouter } from "next/navigation.js";
+import { getVersionHistoryAction } from '@/store/action/historyAction';
+import { setSelectedVersion } from '@/store/reducer/historyReducer';
 
 const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData }) => {
   const { subThreads } = useCustomSelector(state => ({
@@ -24,10 +26,30 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const dispatch = useDispatch();
   const pathName = usePathname();
   const router = useRouter();
+  const { selectedVersion } = useCustomSelector((state) => ({
+    selectedVersion: state?.historyReducer?.selectedVersion || 'all'
+  }));
 
   const { userFeedbackCount } = useCustomSelector(state => ({
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
   }));
+  const { bridgeVersionsArray } = useCustomSelector(
+    (state) => ({
+      bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
+    })
+  );
+  const handleVersionChange = async (event) => {
+    const version = event.target.value;
+    dispatch(setSelectedVersion(version));
+
+    if (version !== "all") {
+      try {
+        dispatch(getVersionHistoryAction(params?.thread_id, params.id, version))
+      } catch (error) {
+        console.error('Failed to fetch version history:', error);
+      }
+    }
+  };
 
   useEffect(() => {
     setExpandedThreads([]);
@@ -133,6 +155,23 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
             {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the bridge is ${userFeedbackCount}`}
           </p>
         </div>
+        <div className='flex items-center'>
+            <select
+              className="select select-bordered w-full max-w-xs"
+              value={selectedVersion}
+              onChange={handleVersionChange}
+            >
+              <option value="all">All Versions</option>
+              {bridgeVersionsArray?.map((version, index) => (
+                <option
+                  key={version}
+                  value={version}
+                >
+                  Version {index + 1}
+                </option>
+              ))}
+            </select>
+          </div>
         <div className="collapse collapse-arrow join-item border border-base-300">
           <input type="checkbox" className="peer" />
           <div className="collapse-title text-md font-medium peer-checked:bg-base-300 peer-checked:text-base-content">
