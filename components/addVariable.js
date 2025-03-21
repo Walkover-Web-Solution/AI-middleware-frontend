@@ -25,15 +25,19 @@ const AddVariable = ({ params }) => {
   const isOpeningRef = useRef(false); // To track if the accordion is opening
   
   const updateVersionVariable = (updatedPairs) => {
-    const filteredPairs = updatedPairs ? updatedPairs.filter(pair => 
-      prompt.includes(`{{${pair.key}}}`)
-    ) : variablesKeyValue.filter(pair =>
-      prompt.includes(`{{${pair.key}}}`)
-    );
+    const filteredPairs = updatedPairs ? updatedPairs?.filter(pair => 
+      prompt?.includes(`{{${pair?.key}}}`)
+    )?.map(pair => ({
+      [pair?.key]: pair?.required ? 'required' : 'optional'
+    })) : variablesKeyValue?.filter(pair =>
+      prompt?.includes(`{{${pair?.key}}}`)
+    )?.map(pair => ({
+      [pair?.key]: pair?.required ? 'required' : 'optional'
+    }));
     dispatch(updateBridgeVersionAction({
-      versionId: params.version,
+      versionId: params?.version,
       dataToSend: {
-        'variables_state': filteredPairs
+        'variables_state': Object.assign({}, ...filteredPairs)
       }
     }));
   }
