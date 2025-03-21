@@ -155,7 +155,7 @@ function TestCases({ params }) {
                           const versionScore = versionArray?.[versionArray.length - 1]?.score;
                           return (
                             <td key={versionIndex} className="p-3 truncate max-w-20">
-                              {versionScore || 'N/A'}
+                              {versionScore ? `${(versionScore * 100).toFixed(2)}%` : 'N/A'}
                             </td>
                           );
                         })}
