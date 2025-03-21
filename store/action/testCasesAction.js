@@ -1,5 +1,5 @@
-import { createTestCaseApi, deleteTestCaseApi, getAllTestCasesOfBridgeApi, runTestCaseApi } from "@/config";
-import { createTestCaseReducer, deleteTestCaseReducer, getAllTestCasesReducer, runTestCaseReducer } from "../reducer/testCasesReducer";
+import { createTestCaseApi, deleteTestCaseApi, getAllTestCasesOfBridgeApi, runTestCaseApi, updateTestCaseApi } from "@/config";
+import { createTestCaseReducer, deleteTestCaseReducer, getAllTestCasesReducer, runTestCaseReducer, updateTestCaseReducer } from "../reducer/testCasesReducer";
 import { toast } from "react-toastify";
 
 export const createTestCaseAction = ({ bridgeId, data }) => async (dispatch) => {
@@ -19,7 +19,7 @@ export const getAllTestCasesOfBridgeAction = ({ bridgeId }) => async (dispatch) 
     try {
         const response = await getAllTestCasesOfBridgeApi({ bridgeId });
         if (response?.success) {
-            dispatch(getAllTestCasesReducer({ bridgeId, data: response?.data }))
+            dispatch(getAllTestCasesReducer({ bridgeId, data: response?.result }))
         }
         return;
     } catch (error) {
@@ -52,3 +52,17 @@ export const runTestCaseAction = ({ versionId, bridgeId }) => async (dispatch) =
         console.error(error);
     }
 }
+
+export const updateTestCaseAction = ({ bridge_id, dataToUpdate }) => async (dispatch) => {
+    try {
+        const response = await updateTestCaseApi({ bridge_id, dataToUpdate });
+        if (response?.success) {
+            dispatch(updateTestCaseReducer({bridge_id, dataToUpdate}));
+            toast.success("Test case updated successfully");
+        }
+        return;
+    } catch (error) {
+        console.error(error);
+    }
+}
+

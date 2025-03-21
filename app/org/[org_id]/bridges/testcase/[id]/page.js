@@ -3,8 +3,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
-import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction } from '@/store/action/testCasesAction';
-import { ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
+import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction, updateTestCaseAction } from '@/store/action/testCasesAction';
+import { ChevronDown, ChevronRight, Edit, Trash2 } from 'lucide-react';
 
 export const runtime = 'edge';
 
@@ -13,32 +13,25 @@ function TestCases({ params }) {
   const dispatch = useDispatch();
   const [isloading, setIsLoading] = useState(false);
   const [expandedRows, setExpandedRows] = useState({});
-
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editUserInput, setEditUserInput] = useState('');
+  const [editExpectedOutput, setEditExpectedOutput] = useState('');
   const searchParams = useSearchParams();
   const bridgeVersion = searchParams.get('version');
-  const [selectedBridge, setSelectedBridge] = useState(params?.id || '');
   const [selectedVersion, setSelectedVersion] = useState(searchParams.get('versionId') || '');
-  // const [filterBridges, setFilterBridges] = useState("");
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
   const { testCases } = useCustomSelector((state) => ({
-    testCases: state.testCasesReducer?.testCases || {},
+    testCases: state.testCasesReducer?.testCases?.[params?.id] || {},
   }));
 
-  const selectedBridgeTestCases = useMemo(() => {
-    return testCases?.[selectedBridge] || [];
-  }, [selectedBridge, testCases]);
-
   const versions = useMemo(() => {
-    return allBridges.find((bridge) => bridge?._id === selectedBridge)?.versions || [];
-  }, [selectedBridge, allBridges]);
+    return allBridges.find((bridge) => bridge?._id === params?.id)?.versions || [];
+  }, [allBridges]);
 
-  // useEffect(() => {
-  //   if (selectedBridge) {
-  //     router.replace(`?id=${selectedBridge}`);
-  //     dispatch(getAllTestCasesOfBridgeAction({ bridgeId: selectedBridge }));
-  //   }
-  // }, [selectedBridge, router]);
+  useEffect(() => {
+    dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
+  }, [])
 
   useEffect(() => {
     if (selectedVersion) {
@@ -48,10 +41,9 @@ function TestCases({ params }) {
 
   const handleRunTestCase = () => {
     setIsLoading(true);
-    dispatch(runTestCaseAction({ versionId: selectedVersion, bridgeId: selectedBridge }))
-      .then(() => { dispatch(getAllTestCasesOfBridgeAction({ bridgeId: selectedBridge })); setIsLoading(false); });
+    dispatch(runTestCaseAction({ versionId: selectedVersion, bridgeId: params?.id }))
+      .then(() => { dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id })); setIsLoading(false); });
   }
-
 
   const toggleRow = (index) => {
     setExpandedRows(prev => ({
@@ -60,59 +52,38 @@ function TestCases({ params }) {
     }));
   };
 
+  const handleEditClick = (e, index, testCase) => {
+    e.stopPropagation();
+    setEditingIndex(index);
+    setEditUserInput(testCase.conversation.find(message => message.role === 'user')?.content || '');
+    setEditExpectedOutput(testCase.expected.tool_calls
+      ? JSON.stringify(testCase.expected.tool_calls)
+      : testCase.expected.response || '');
+  };
+
+  const handleSaveEdit = (e, testCase) => {
+    e.stopPropagation();
+    const updatedTestCase = {
+      ...testCase,
+      conversation: testCase.conversation.map(message =>
+        message.role === 'user'
+          ? { ...message, content: editUserInput }
+          : message
+      ),
+      expected: testCase.type === 'function'
+        ? { tool_calls: JSON.parse(editExpectedOutput) }
+        : { response: editExpectedOutput }
+    };
+    dispatch(updateTestCaseAction({ bridge_id: params?.id, dataToUpdate: updatedTestCase }))
+    setEditingIndex(null);
+  };
+
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-800 mb-2">Test Cases</h1>
         <div className="flex justify-between items-center">
           <div className="flex gap-4">
-            {/* <div className="form-control w-full max-w-xs">
-              <label className="label">
-                <span className="label-text flex items-center gap-2">
-                  Select Bridge 
-                </span>
-              </label>
-              <div className="dropdown">
-                <div tabIndex={0} role="button" className="btn btn-outline w-full justify-start">
-                  {selectedBridge ? allBridges.find(b => b._id === selectedBridge)?.name : <>Select a Bridge <ChevronDown className="w-4 h-4" /></>}
-                </div>
-                <div className="dropdown-content bg-base-200 p-2 shadow rounded-box w-96 max-h-96 overflow-y-auto overflow-x-hidden z-[1000] relative">
-                  <input
-                    type="text"
-                    placeholder="Search bridges..."
-                    className="input input-bordered w-full sticky top-0 z-10"
-                    value={filterBridges}
-                    onChange={(e) => setFilterBridges(e.target.value)}
-                  />
-                  <ul className="menu menu-sm pt-3">  
-                    {allBridges
-                      .filter(bridge => 
-                        bridge?.name.toLowerCase().includes(filterBridges.toLowerCase())
-                      )
-                      .map((bridge) => (
-                        <li key={bridge._id}>
-                          <button 
-                            className={`w-full text-left p-2 rounded ${
-                              bridge._id === selectedBridge 
-                                ? 'bg-primary text-primary-content' 
-                                : 'hover:bg-base-300'
-                            }`}
-                            onClick={() => {
-                              setSelectedBridge(bridge._id);
-                              setSelectedVersion('');
-                            }}
-                            aria-selected={bridge._id === selectedBridge}
-                          >
-                            {bridge.name}
-                          </button>
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              </div>
-            </div> 
-            */}
-
             <div className="form-control w-full max-w-xs">
               <label className="label">
                 <span className="label-text text-gray-700">Select Version</span>
@@ -123,7 +94,7 @@ function TestCases({ params }) {
                 onChange={(e) => setSelectedVersion(e.target.value)}
               >
                 <option disabled value="">Select a Version</option>
-                {selectedBridge && versions?.map((version, index) => (
+                {params?.id && versions?.map((version, index) => (
                   <option key={index} value={version}>
                     Version {index + 1}
                   </option>
@@ -132,9 +103,9 @@ function TestCases({ params }) {
             </div>
           </div>
           <button
-            className="btn bg-primary text-white disabled:bg-gray-300 disabled:text-gray-500"
+            className="btn bg-primary text-white disabled:bg-gray-300 disabled:text-gray-500 hover:bg-primary"
             onClick={handleRunTestCase}
-            disabled={!selectedBridge || !selectedVersion || isloading}
+            disabled={!params?.id || !selectedVersion || isloading}
           >
             Run Test Case
           </button>
@@ -155,11 +126,11 @@ function TestCases({ params }) {
                   {versions.map((version, index) => (
                     <th key={index} className="p-3 text-left text-sm font-medium text-gray-700 border-b">{`V${index + 1}`}</th>
                   ))}
-                  <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">Actions</th>
+                  <th className="p-3 text-left text-sm font-medium text-gray-极700 border-b">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {selectedBridgeTestCases.map((testCase, index) => {
+                {Array.isArray(testCases) ? testCases.map((testCase, index) => {
                   const lastUserMessage = testCase.conversation
                     .filter(message => message.role === 'user')
                     .pop()?.content || 'N/A';
@@ -179,7 +150,7 @@ function TestCases({ params }) {
                         className="hover:bg-gray-50 cursor-pointer transition-colors"
                         onClick={() => toggleRow(index)}
                       >
-                        <td className="p-2 font-medium text-gray-900">
+                        <td className="p极2 font-medium text-gray-900">
                           <div className="flex items-center">
                             <span className="mr-2 text-gray-500">
                               {isExpanded ? <ChevronDown /> : <ChevronRight />}
@@ -205,11 +176,22 @@ function TestCases({ params }) {
                             </td>
                           );
                         })}
-                        <td className="p-3">
+                        <td className="p-3 flex gap-2">
+                          {isExpanded && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditClick(e, index, testCase);
+                              }}
+                              className="text-gray-500 hover:text-blue-600 transition-colors"
+                            >
+                              <Edit size={16} />
+                            </button>
+                          )}
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              dispatch(deleteTestCaseAction({ testCaseId: testCase?._id, bridgeId: selectedBridge }));
+                              dispatch(deleteTestCaseAction({ testCaseId: testCase?._id, bridgeId: params?.id }));
                             }}
                             className="text-gray-500 hover:text-red-600 transition-colors"
                           >
@@ -223,15 +205,31 @@ function TestCases({ params }) {
                             <div className="space-y-4">
                               <div>
                                 <h3 className="text-sm font-medium text-gray-700 mb-1">User Input</h3>
-                                <div className="p-3 bg-white rounded-md shadow-sm text-sm text-gray-600 overflow-auto max-h-40">
-                                  {lastUserMessage}
-                                </div>
+                                {editingIndex === index ? (
+                                  <textarea
+                                    value={editUserInput}
+                                    onChange={(e) => setEditUserInput(e.target.value)}
+                                    className="w-full p-3 bg-white min-h-20 rounded-md shadow-sm text-sm text-gray-600"
+                                  />
+                                ) : (
+                                  <div className="p-3 bg-white rounded-md shadow-sm text-sm text-gray-600 overflow-auto max-h-40">
+                                    {lastUserMessage}
+                                  </div>
+                                )}
                               </div>
                               <div>
                                 <h3 className="text-sm font-medium text-gray-700 mb-1">Expected Output</h3>
-                                <div className="p-3 bg-white rounded-md shadow-sm text-sm text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
-                                  {expectedOutput}
-                                </div>
+                                {editingIndex === index ? (
+                                  <textarea
+                                    value={editExpectedOutput}
+                                    onChange={(e) => setEditExpectedOutput(e.target.value)}
+                                    className="w-full p-3 min-h-20 bg-white rounded-md shadow-sm text-sm text-gray-600"
+                                  />
+                                ) : (
+                                  <div className="p-3 bg-white rounded-md shadow-sm text-sm text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
+                                    {expectedOutput}
+                                  </div>
+                                )}
                               </div>
                               <div>
                                 <h3 className="text-sm font-medium text-gray-700 mb-1">Model Answer</h3>
@@ -239,6 +237,28 @@ function TestCases({ params }) {
                                   {model_output || 'N/A'}
                                 </div>
                               </div>
+                              {editingIndex === index && (
+                                <div className="flex justify-end gap-2">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSaveEdit(e, testCase);
+                                    }}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingIndex(null);
+                                    }}
+                                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              )}
                               <div>
                                 <h3 className="text-sm font-medium text-gray-700 mb-1">Version Scores</h3>
                                 <div className="flex flex-wrap gap-2">
@@ -262,7 +282,7 @@ function TestCases({ params }) {
                       )}
                     </React.Fragment>
                   );
-                })}
+                }) : null}
               </tbody>
             </table>
           </div>

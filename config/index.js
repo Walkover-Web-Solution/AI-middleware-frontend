@@ -846,7 +846,7 @@ export const optimizeJsonApi = async ({ data }) => {
 
 export const getAllTestCasesOfBridgeApi = async ({ bridgeId }) => {
   try {
-    const response = await axios.get(`${PYTHON_URL}/testcases/${bridgeId}`);
+    const response = await axios.get(`${URL}/testcases?bridge_id=${bridgeId}`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -879,6 +879,16 @@ export const createTestCaseApi = async ({ bridgeId, data }) => {
 export const runTestCaseApi = async ({ versionId }) => {
   try {
     const response = await axios.post(`${PYTHON_URL}/api/v2/model/testcases/${versionId}`, { "version_id": versionId });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const updateTestCaseApi = async ({ bridge_id, dataToUpdate }) => {
+  try {
+    const response = await axios.put(`${URL}/testcases/`, { bridge_id, ...dataToUpdate });
     return response.data;
   } catch (error) {
     console.error(error);
