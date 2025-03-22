@@ -1,30 +1,25 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 function BridgeNameInput({ params }) {
     const dispatch = useDispatch();
-    const inputRef = useRef(null);
     const { bridgeName } = useCustomSelector((state) => ({
-        bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
+        bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
     }));
 
     const handleBridgeNameChange = useCallback((e) => {
-        const newValue = e.target.textContent;
+        const newValue = e.target.value.trim() || "";
+        if (newValue === bridgeName) { e.target.value = bridgeName; return };
         if (newValue?.trim() === "") {
             toast.error('Bridge name cannot be empty');
-            e.target.textContent = bridgeName;
+            e.target.value = bridgeName;
+            
             return;
         }
-        if(newValue === bridgeName) return;
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { name: newValue } }));
-        if (newValue && window?.SendDataToChatbot) {
-            SendDataToChatbot({
-                "threadId": newValue
-            });
-        }
     }, [dispatch, params.id, bridgeName]);
 
     const handleKeyDown = useCallback((e) => {
@@ -34,27 +29,18 @@ function BridgeNameInput({ params }) {
         }
     }, [handleBridgeNameChange]);
 
-    const handleFocus = useCallback((e) => {
-        const range = document.createRange();
-        const selection = window.getSelection();
-        range.setStart(e.target, 1);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-    }, []);
-
     return (
-        <div className='mb-2'>
-            <div
-                ref={inputRef}
-                contentEditable
-                suppressContentEditableWarning
-                className="font-bold text-xl outline-none rounded px-1 cursor-text"
-                onBlur={handleBridgeNameChange}
-                onKeyDown={handleKeyDown}
-                onFocus={handleFocus}
-            >
-                {bridgeName}
+        <div className='flex flex-row items-center'>
+            <div className="relative w-full">
+                <input
+                    type="text"
+                    className="font-bold text-xl outline-none w-full"
+                    onBlur={handleBridgeNameChange}
+                    onKeyDown={handleKeyDown}
+                    defaultValue={bridgeName}
+                    placeholder="Enter Bridge Name"
+                    key={bridgeName}
+                />
             </div>
         </div>
     )
