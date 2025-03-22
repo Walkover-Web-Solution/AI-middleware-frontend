@@ -130,9 +130,9 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   }
 }
 
-export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, pagelimit = 40) => {
+export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, pagelimit = 40) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}`, {
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}&version_id=${versionId=== 'undefined' ? undefined : versionId}`, {
       params: {
         user_feedback
       }
@@ -162,23 +162,6 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
   }
 };
 
-export const getVersionHistory = async (threadId, bridgeId, versionId, nextPage = 1, user_feedback, pagelimit = 40) => {
-  try {
-    const response = await axios.get(
-      `${URL}/api/v1/config/threads/${threadId}/${bridgeId}?version_id=${versionId}`, {
-      params: {
-        sub_thread_id: threadId,
-        pageNo: nextPage,
-        limit: pagelimit,
-        user_feedback: user_feedback
-      }
-    }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
   try {
@@ -836,7 +819,6 @@ export const optimizeJsonApi = async ({ data }) => {
       `${PYTHON_URL}/bridge/genrate/rawjson`,
       data
     );
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error(error);

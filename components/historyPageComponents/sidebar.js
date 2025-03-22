@@ -11,10 +11,9 @@ import { toast } from "react-toastify";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 import { usePathname, useRouter } from "next/navigation.js";
-import { getVersionHistoryAction } from '@/store/action/historyAction';
 import { setSelectedVersion } from '@/store/reducer/historyReducer';
 
-const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData }) => {
+const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion}) => {
   const { subThreads } = useCustomSelector(state => ({
     subThreads: state?.historyReducer?.subThreads || [],
   }));
@@ -26,9 +25,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const dispatch = useDispatch();
   const pathName = usePathname();
   const router = useRouter();
-  const { selectedVersion } = useCustomSelector((state) => ({
-    selectedVersion: state?.historyReducer?.selectedVersion || 'all'
-  }));
 
   const { userFeedbackCount } = useCustomSelector(state => ({
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
@@ -41,14 +37,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const handleVersionChange = async (event) => {
     const version = event.target.value;
     dispatch(setSelectedVersion(version));
-
-    if (version !== "all") {
-      try {
-        dispatch(getVersionHistoryAction(params?.thread_id, params.id, version))
-      } catch (error) {
-        console.error('Failed to fetch version history:', error);
-      }
-    }
   };
 
   useEffect(() => {
