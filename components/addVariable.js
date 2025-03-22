@@ -23,9 +23,9 @@ const AddVariable = ({ params }) => {
   const dispatch = useDispatch();
   const accordionContentRef = useRef(null); // Ref for the accordion content
   const isOpeningRef = useRef(false); // To track if the accordion is opening
-  
+
   const updateVersionVariable = (updatedPairs) => {
-    const filteredPairs = updatedPairs ? updatedPairs?.filter(pair => 
+    const filteredPairs = updatedPairs ? updatedPairs?.filter(pair =>
       prompt?.includes(`{{${pair?.key}}}`)
     )?.map(pair => ({
       [pair?.key]: pair?.required ? 'required' : 'optional'
@@ -46,7 +46,7 @@ const AddVariable = ({ params }) => {
     const regex = /{{(.*?)}}/g;
     const matches = [...prompt.matchAll(regex)];
     const variables = [...new Set(matches.map(match => match[1].trim()))];
-   
+
     const existingPairsMap = new Map(variablesKeyValue.map(pair => [pair.key, pair]));
 
     const newVariables = variables.filter(v => !existingPairsMap.has(v));
@@ -61,7 +61,7 @@ const AddVariable = ({ params }) => {
         required: true
       }))
     ];
-    
+
     setKeyValuePairs(updatedPairs);
     dispatch(updateVariables({
       data: updatedPairs,
@@ -286,7 +286,7 @@ const AddVariable = ({ params }) => {
               />
             ) : (
               <div className="flex flex-col gap-4 max-h-56 overflow-y-auto mt-4 w-full items-start">
-                {keyValuePairs.length >0 && <div className="flex items-center gap-2 w-full">
+                {keyValuePairs.length > 0 && <div className="flex items-center gap-2 w-full">
                   <div className="tooltip tooltip-right" data-tip="Mark checkbox if it is required">
                     <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
                       <Info className="w-4 h-4 text-base-content/70" />
@@ -329,7 +329,7 @@ const AddVariable = ({ params }) => {
                       onClick={() => handleRemoveKeyValuePair(index)}
                       aria-label="Remove Variable"
                     >
-                      <Trash2 className="w-4 h-4"/>
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
