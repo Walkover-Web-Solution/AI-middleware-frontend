@@ -13,7 +13,7 @@ import AddTestCaseModal from '../modals/AddTestCaseModal';
 import LoadingSpinner from '../loadingSpinner';
 
 
-const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData }) => {
+const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedVersion }) => {
 
   const integrationData = useCustomSelector(state => state?.bridgeReducer?.org?.[params?.org_id]?.integrationData) || {};
   const historyRef = useRef(null);
@@ -26,7 +26,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [flexDirection, setFlexDirection] = useState("column");
   const [threadMessageState, setThreadMessageState] = useState();
   const [testCaseConversation, setTestCaseConversation] = useState([]);
-  const [loadingData, setLoadingData] = useState(true); // New state for loading
+  const [loadingData, setLoadingData] = useState(false); // New state for loading
 
   const handleAddTestCase = (item, index) => {
     const conversation = [];
@@ -60,7 +60,8 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
           bridgeId: params?.id, 
           nextPage: 1, 
           user_feedback: filterOption, 
-          subThreadId: params?.subThread_id || threadId
+          subThreadId: params?.subThread_id || threadId,
+          versionId: selectedVersion === "all" ? '' : selectedVersion
         }));
         return result;
       };
@@ -76,7 +77,6 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         }
         router.push(url, undefined, { shallow: true });
       }
-
       setThreadMessageState({ totalPages: result?.totalPages, totalEntries: result?.totalEnteries });
       setHasMoreThreadData(result?.data?.length >= 40);
       setIsFetchingMore(false);
@@ -85,14 +85,14 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     };
 
     fetchData();
-  }, [filterOption, search, params?.thread_id]);
+  }, [filterOption, search, params?.thread_id, selectedVersion]);
 
   const fetchMoreThreadData = useCallback(async () => {
     if (isFetchingMore) return;
     setIsFetchingMore(true);
     previousScrollHeightRef.current = historyRef?.current?.scrollHeight;
     const nextPage = threadPage + 1;
-    const result = await dispatch(getThread({ threadId: params.thread_id, bridgeId: params?.id,subThreadId:params?.subThread_id, nextPage, user_feedback: filterOption }));
+    const result = await dispatch(getThread({ threadId: params.thread_id, bridgeId: params?.id,subThreadId:params?.subThread_id, nextPage, user_feedback: filterOption, versionId: selectedVersion === "all" ? '' : selectedVersion}));
     setThreadPage(nextPage);
     setHasMoreThreadData(result?.data?.length >= 40);
     if (!result || result?.data?.length < 40) {
