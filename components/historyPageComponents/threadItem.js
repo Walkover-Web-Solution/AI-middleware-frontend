@@ -169,14 +169,14 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
       {item?.role === "tools_call" ? (
-        <div className="mb-2 flex flex-col justify-center items-center">
+        <div className="mb-2 flex flex-col justify-center items-center show-on-hover">
           <h1 className="p-1">
             <span className="flex justify-center items-center gap-2 font-semibold"><Parentheses size={16} />Functions Executed Successfully</span>
           </h1>
           <div className="flex h-full gap-2 justify-center items-center flex-wrap">
             {item?.tools_call_data ? item.tools_call_data.map(renderToolData) : Object.keys(item.function).map(renderFunctionData)}
             <button
-              className="btn btn-xs"
+              className="btn btn-xs see-on-hover"
               onClick={() => handleAddTestCase(item, index)}
             >
               <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
@@ -188,22 +188,22 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         </div>
       ) : (
         <div className="show-on-hover" >
-          <div className={`chat ${item.role === "user" ? "chat-start" : "chat-end"}`}>
+          <div className={`chat ${item.role === "assistant" ? "chat-start" : "chat-end"}`}>
             <div className="chat-image avatar flex justify-center items-center">
               <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center">
                 <div className="relative rounded-full bg-base-300 flex justify-center items-center">
-                  {item.role === "user" ? (
-                    <User size={20} />
-                  ) : (
+                  {item.role === "assistant" ? (
                     <div>
                       <Bot
                         className=" cursor-pointer bot-icon"
                         size={20}
                         onClick={() => setIsDropupOpen(!isDropupOpen)}
                       /></div>
+                  ) : (
+                    <User size={20} />
                   )}
                 </div>
-                {isDropupOpen && item.role !== "user" && (
+                {isDropupOpen && item.role === "assistant" && (
                   <div
                     ref={dropupRef}
                     className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-inherit rounded-md shadow-lg "
@@ -281,29 +281,23 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </div>
               </div>
             )}
-            <div className="flex justify-end items-end gap-1" >
-              {item.role === "assistant" && (
-                <>
-                  <button
-                    className="btn btn-xs see-on-hover"
-                    onClick={() => handleAddTestCase(item, index)}
-                  >
-                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <Plus className="h-3 w-3" />
-                      <span>Test Case</span>
-                    </div>
-                  </button>
-                  <div data-tip="Ask AI" className="see-on-hover tooltip">
-                    <BotMessageSquare
-                      className="cursor-pointer bot-icon"
-                      size={18}
-                      onClick={() => handleAskAi(item)}
-                    />
-                  </div>
-                </>
-              )}
-              <div className={`${item.role === "user" ? "cursor-pointer chat-bubble-primary " : "bg-base-200  text-base-content pr-10"} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
+            <div className="flex justify-start items-start gap-1" >
+              <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "cursor-pointer chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
 
+                {item?.role === "assistant" && item?.image_url && (
+                  <div className="chat chat-start">
+                    <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
+                      <Image
+                        src={item.image_url}
+                        alt="Attached"
+                        width={300} // Adjust width as needed
+                        height={300} // Adjust height as needed
+                        className="max-w-full max-h-96 w-auto h-auto rounded-md"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                )}
                 {item?.role === "user" && (
                   <div className="flex flex-wrap">
                     {item?.urls?.map((url, index) => (
@@ -320,20 +314,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                         </div>
                       </div>
                     ))}
-                  </div>
-                )}
-                {item?.role === "assistant" && item?.image_url && (
-                  <div className="chat chat-end">
-                    <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
-                      <Image
-                        src={item.image_url}
-                        alt="Attached"
-                        width={300} // Adjust width as needed
-                        height={300} // Adjust height as needed
-                        className="max-w-full max-h-96 w-auto h-auto rounded-md"
-                        loading="lazy"
-                      />
-                    </div>
                   </div>
                 )}
 
@@ -358,9 +338,29 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     />
                   </div>
                 )}
+                {item?.role === 'assistant' && <div className=" absolute bottom-[-30px] left-0 flex gap-2">
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleAddTestCase(item, index)}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <Plus className="h-3 w-3" />
+                      <span>Test Case</span>
+                    </div>
+                  </button>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleAskAi(item)}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <BotMessageSquare className="h-3 w-3" />
+                      <span>Ask AI</span>
+                    </div>
+                  </button>
+                </div>}
               </div>
             </div>
-            {item?.role === "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
+            {item?.role !== "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
           {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div className="flex justify-center items-center my-4">
             <p className="border-t border-base-300 w-full"></p>
@@ -371,15 +371,16 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           </div>}
           {
             item?.error && (
-              <div className="chat chat-end">
-                <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
-                  <span className="font-bold">Error</span>
-                  <p>{item?.error}</p>
+              <div className="chat chat-start">
+                <div>
+                  <div className="flex flex-row-reverse items-end justify-end gap-1">
+                    <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
+                      <span className="font-bold">Error</span>
+                      <p>{item?.error}</p>
+                    </div>
+                    <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center"><Bot size={20} /></div>
+                  </div>
                 </div>
-                <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center">
-                  <Bot size={20} />
-                </div>
-                {item?.role === "user" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item?.createdAt)}</time>}
               </div>
             )
           }

@@ -1,47 +1,47 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
-import { Pencil } from 'lucide-react';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 function BridgeNameInput({ params }) {
     const dispatch = useDispatch();
-    const [isEditable, setIsEditable] = React.useState(false);
     const { bridgeName } = useCustomSelector((state) => ({
-        bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
+        bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
     }));
 
     const handleBridgeNameChange = useCallback((e) => {
-        const newValue = e.target.value;
+        const newValue = e.target.value.trim() || "";
+        if (newValue === bridgeName) { e.target.value = bridgeName; return };
         if (newValue?.trim() === "") {
             toast.error('Bridge name cannot be empty');
+            e.target.value = bridgeName;
+            
             return;
         }
-        setIsEditable(false);
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { name: newValue } }));
-        if (newValue && window?.SendDataToChatbot) {
-            SendDataToChatbot({
-                "threadId": newValue
-            });
-        }
-    }, [dispatch, params.id]);
+    }, [dispatch, params.id, bridgeName]);
 
     const handleKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {
-            handleBridgeNameChange(e);
+            e.preventDefault();
+            e.target.blur();
         }
     }, [handleBridgeNameChange]);
 
     return (
-        <div className='mb-2'>
-            {!isEditable &&
-                <div className='flex flex-row items-center gap-4'>
-                    <div className="font-bold text-xl">{bridgeName}</div>
-                    <Pencil size={18} onClick={() => setIsEditable(true)} className='' />
-                </div>
-            }
-            {isEditable && <input key={bridgeName} type="text" placeholder="Type here" autoFocus className="input w-full max-w-xs text-lg" onBlur={handleBridgeNameChange} defaultValue={bridgeName} onKeyDown={handleKeyDown} />}
+        <div className='flex flex-row items-center'>
+            <div className="relative w-full">
+                <input
+                    type="text"
+                    className="font-bold text-xl outline-none w-full"
+                    onBlur={handleBridgeNameChange}
+                    onKeyDown={handleKeyDown}
+                    defaultValue={bridgeName}
+                    placeholder="Enter Bridge Name"
+                    key={bridgeName}
+                />
+            </div>
         </div>
     )
 }
