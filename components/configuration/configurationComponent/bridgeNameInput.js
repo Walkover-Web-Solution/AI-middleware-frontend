@@ -18,6 +18,7 @@ function BridgeNameInput({ params }) {
             e.target.textContent = bridgeName;
             return;
         }
+        if(newValue === bridgeName) return;
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { name: newValue } }));
         if (newValue && window?.SendDataToChatbot) {
             SendDataToChatbot({
@@ -29,7 +30,6 @@ function BridgeNameInput({ params }) {
     const handleKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            handleBridgeNameChange(e);
             e.target.blur();
         }
     }, [handleBridgeNameChange]);
