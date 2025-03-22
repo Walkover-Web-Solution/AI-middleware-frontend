@@ -43,12 +43,6 @@ export default function ConfigurationPage({ params }) {
         router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${params.version}&view=${target}`);
     };
 
-    useEffect(() => {
-        if (bridgeType === 'api' && currentView !== 'setup') {
-            handleNavigation('setup');
-        }
-    }, [bridgeType, currentView]);
-
     const renderNeedHelp = () => {
         return (
             <div className="mb-4">
@@ -84,8 +78,8 @@ export default function ConfigurationPage({ params }) {
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
                     <AddVariable params={params} />
+                    <GptMemory params={params} />
                     <ToolCallCount params={params} />
-                    <ActionList params={params} />
                 </>
             )}
             {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
@@ -95,8 +89,8 @@ export default function ConfigurationPage({ params }) {
     const renderChatbotConfigView = useMemo(() => () => (
         <>
             <SlugNameInput params={params} />
-            <GptMemory params={params} />
             <UserRefernceForRichText params={params} />
+            <ActionList params={params} />
         </>
     ), [bridgeType, modelType, params, modelName]);
 
@@ -135,14 +129,12 @@ export default function ConfigurationPage({ params }) {
                         >
                             <Cog size={16} /> Setup
                         </button>
-                        {bridgeType === 'chatbot' && (
-                            <button
-                                onClick={() => handleNavigation('chatbot-config')}
-                                className={` ${currentView === 'chatbot-config' ? "btn-primary" : ""} btn join-item `}
-                            >
-                                <FileSliders size={16} /> Chatbot Config
-                            </button>
-                        )}
+                        <button
+                            onClick={() => handleNavigation('chatbot-config')}
+                            className={` ${currentView === 'chatbot-config' ? "btn-primary" : ""} btn join-item `}
+                        >
+                            <FileSliders size={16} /> Chatbot Config
+                        </button>
                         <button
                             onClick={() => handleNavigation('guide')}
                             className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
