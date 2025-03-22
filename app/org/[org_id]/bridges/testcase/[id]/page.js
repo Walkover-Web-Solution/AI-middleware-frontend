@@ -27,7 +27,7 @@ function TestCases({ params }) {
 
   const versions = useMemo(() => {
     return allBridges.find((bridge) => bridge?._id === params?.id)?.versions || [];
-  }, [allBridges]);
+  }, [allBridges, params?.id]);
 
   useEffect(() => {
     dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
@@ -56,7 +56,7 @@ function TestCases({ params }) {
   const handleEditClick = (e, index, testCase) => {
     e.stopPropagation();
     setEditingIndex(index);
-    setEditUserInput(testCase.conversation.find(message => message.role === 'user')?.content || '');
+    setEditUserInput(testCase.conversation[testCase.conversation.length - 1]?.content || '');
     setEditExpectedOutput(testCase.expected.tool_calls
       ? JSON.stringify(testCase.expected.tool_calls)
       : testCase.expected.response || '');
@@ -66,8 +66,8 @@ function TestCases({ params }) {
     e.stopPropagation();
     const updatedTestCase = {
       ...testCase,
-      conversation: testCase.conversation.map(message =>
-        message.role === 'user'
+      conversation: testCase.conversation.map((message, i) =>
+        i === testCase.conversation.length - 1 && message.role === 'user'
           ? { ...message, content: editUserInput }
           : message
       ),
@@ -105,7 +105,9 @@ function TestCases({ params }) {
                             <Play className="w-3 h-3" />
                           </button>
                         </div>
-                        <span className="font-medium text-gray-800">{`V${index + 1}`}</span>
+                        <span className={`font-medium text-gray-800 ${version === selectedVersion ? 'relative after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:bg-green-500 after:rounded-full' : ''}`}>
+                          {`V${index + 1}`}
+                        </span>
                       </div>
                     </th>
                   ))}
