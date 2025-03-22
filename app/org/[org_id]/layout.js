@@ -6,27 +6,29 @@ import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
-import { createApiAction, getAllBridgesAction, getAllFunctions, integrationAction } from "@/store/action/bridgeAction";
+import { createApiAction, getAllBridgesAction, getAllFunctions, integrationAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
 export default function layoutOrgPage({ children, params }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
+  const searchParams = useSearchParams();
+  const version_id = searchParams.get('version');
   const path = pathName.split('?')[0].split('/')
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
-  const { embedToken, alertingEmbedToken } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
-
+    versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {}
   }));
-  const urlParams = useParams()
+  const urlParams = useParams();
   useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
 
   useEffect(() => {
@@ -66,17 +68,17 @@ export default function layoutOrgPage({ children, params }) {
       }
     };
 
-    dispatch(getAllChatBotAction(params.org_id)).then(e=>{
-      const chatbotToken=e?.chatbot_token
-      if(chatbotToken && !pathName.includes('/history')) updateScript(chatbotToken);
+    dispatch(getAllChatBotAction(params.org_id)).then(e => {
+      const chatbotToken = e?.chatbot_token
+      if (chatbotToken && !pathName.includes('/history')) updateScript(chatbotToken);
     })
-    
+
     return () => {
       if (!pathName.includes('/history')) {
         const existingScript = document.getElementById(scriptId);
-      if (existingScript) {
-        document.head.removeChild(existingScript);
-      }
+        if (existingScript) {
+          document.head.removeChild(existingScript);
+        }
       }
     };
   }, []);
@@ -107,7 +109,20 @@ export default function layoutOrgPage({ children, params }) {
           status: e?.data?.action,
           title: e?.data?.title,
         };
-        dispatch(createApiAction(params.org_id, dataFromEmbed));
+        dispatch(createApiAction(params.org_id, dataFromEmbed)).then((data) => {
+          if (!versionData?.[data?._id]) {
+            dispatch(updateBridgeVersionAction({
+              bridgeId: path[5],
+              versionId: version_id,
+              dataToSend: {
+                functionData: {
+                  function_id: data?._id,
+                  function_operation: "1"
+                }
+              }
+            }))
+          }
+        });
       }
     }
     if (e.data?.type === 'MESSAGE_CLICK') {
