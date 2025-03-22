@@ -169,14 +169,14 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
       {item?.role === "tools_call" ? (
-        <div className="mb-2 flex flex-col justify-center items-center">
+        <div className="mb-2 flex flex-col justify-center items-center show-on-hover">
           <h1 className="p-1">
             <span className="flex justify-center items-center gap-2 font-semibold"><Parentheses size={16} />Functions Executed Successfully</span>
           </h1>
           <div className="flex h-full gap-2 justify-center items-center flex-wrap">
             {item?.tools_call_data ? item.tools_call_data.map(renderToolData) : Object.keys(item.function).map(renderFunctionData)}
             <button
-              className="btn btn-xs"
+              className="btn btn-xs see-on-hover"
               onClick={() => handleAddTestCase(item, index)}
             >
               <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
