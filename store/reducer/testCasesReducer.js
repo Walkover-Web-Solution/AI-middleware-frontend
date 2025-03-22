@@ -28,6 +28,16 @@ const testCasesReducer = createSlice({
             }
             return state;
         },
+        updateTestCaseReducer: (state, action) => {
+            const { bridge_id, dataToUpdate } = action.payload;
+            if (state.testCases[bridge_id]) {
+                const index = state.testCases[bridge_id].findIndex(testCase => testCase._id === dataToUpdate._id);
+                if (index !== -1) {
+                    state.testCases[bridge_id][index] = dataToUpdate;
+                }
+            }
+            return state;
+        },
         runTestCaseReducer: (state, action) => {
             const { data: { testcases_result }, bridgeId, versionId } = action.payload;
             if (testcases_result && state.testCases[bridgeId]) {
@@ -49,6 +59,6 @@ const testCasesReducer = createSlice({
 });
 
 
-export const { createTestCaseReducer, getAllTestCasesReducer, deleteTestCaseReducer, runTestCaseReducer } = testCasesReducer.actions;
+export const { createTestCaseReducer, getAllTestCasesReducer, deleteTestCaseReducer, runTestCaseReducer, updateTestCaseReducer } = testCasesReducer.actions;
 
 export default testCasesReducer.reducer;
