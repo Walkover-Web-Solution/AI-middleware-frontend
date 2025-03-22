@@ -94,7 +94,7 @@ function TestCases({ params }) {
                   <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">Model Answer</th>
                   <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">Matching Type</th>
                   {versions.map((version, index) => (
-                    <th key={index} className="p-3 text-left text-sm font-medium text-gray-700 border-b">
+                    <th key={index} className={`p-3 text-left text-sm font-medium text-gray-700 border-b ${version === selectedVersion ? 'relative after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:bg-green-500 after:rounded-full' : ''}`}>
                       <div className="flex items-center gap-2">
                         <div className="tooltip tooltip-left" data-tip="Run Test Case">
                           <button
@@ -105,7 +105,7 @@ function TestCases({ params }) {
                             <Play className="w-3 h-3" />
                           </button>
                         </div>
-                        <span className={`font-medium text-gray-800 ${version === selectedVersion ? 'relative after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:bg-green-500 after:rounded-full' : ''}`}>
+                        <span className={`font-medium text-gray-800 `}>
                           {`V${index + 1}`}
                         </span>
                       </div>
