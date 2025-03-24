@@ -6,7 +6,7 @@ import Protected from "@/components/protected";
 import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getHistoryAction, userFeedbackCountAction } from "@/store/action/historyAction";
-import { clearThreadData } from "@/store/reducer/historyReducer";
+import { clearThreadData, setSelectedVersion } from "@/store/reducer/historyReducer";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -22,13 +22,11 @@ function Page({ searchParams }) {
   const sidebarRef = useRef(null);
   const searchRef = useRef();
   
-  const { historyData, thread, versionData, selectedVersion } = useCustomSelector((state) => ({
+  const { historyData, thread, selectedVersion } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
-    versionData: state?.historyReducer?.versionHistory || [],
     selectedVersion : state?.historyReducer?.selectedVersion || 'all'
   }));
-
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [page, setPage] = useState(1);
@@ -53,8 +51,9 @@ function Page({ searchParams }) {
   useEffect(() => {
     return () => {
       dispatch(clearThreadData());
+      dispatch(setSelectedVersion("all"));
     };
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
     dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: "all" }));
@@ -115,7 +114,7 @@ function Page({ searchParams }) {
         <div className="drawer-content flex flex-col">
           <ThreadContainer
             key={`thread-container-${params.id}-${params.version}`}
-            thread={selectedVersion === "all" ? thread : versionData}
+            thread={thread}
             filterOption={filterOption}
             setFilterOption={setFilterOption}
             isFetchingMore={isFetchingMore}
@@ -131,7 +130,9 @@ function Page({ searchParams }) {
             threadPage={threadPage}
             setThreadPage={setThreadPage}
             hasMoreThreadData={hasMoreThreadData}
-            setHasMoreThreadData={setHasMoreThreadData}          />
+            setHasMoreThreadData={setHasMoreThreadData} 
+            selectedVersion={selectedVersion}
+          />
         </div>
         <Sidebar
           historyData={historyData}
@@ -152,6 +153,7 @@ function Page({ searchParams }) {
           threadPage={threadPage}
           hasMoreThreadData={hasMoreThreadData}
           setHasMoreThreadData={setHasMoreThreadData}
+          selectedVersion={selectedVersion}
         />
       </div>
       <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
