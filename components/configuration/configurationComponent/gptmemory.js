@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
@@ -6,6 +6,7 @@ import { Info } from 'lucide-react';
 
 const GptMemory = ({ params }) => {
     const dispatch = useDispatch();
+    const [showInput, setShowInput] = useState(false);
     const { gpt_memory_context, gpt_memory } = useCustomSelector((state) => ({
         gpt_memory_context: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.gpt_memory_context || "",
         gpt_memory: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.gpt_memory || false,
@@ -39,9 +40,15 @@ const GptMemory = ({ params }) => {
                         onChange={handleCheckboxChange}
                         className="toggle"
                     />
+                    {gpt_memory && <button 
+                        onClick={() => setShowInput(!showInput)}
+                        className="btn btn-sm bg-transparent text-primary hover:bg-primary/10 border-none shadow-none"
+                    >
+                        {showInput ? 'Hide Customization' : 'Customize Gpt Memory'}
+                    </button>}
                 </div>
             </label>
-            {gpt_memory && (
+            {gpt_memory && showInput && (
                 <textarea
                     placeholder="Please provide the context for GPT memory (e.g., instructions, preferences)"
                     className="textarea textarea-bordered w-full min-h-[10rem] border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-primary"
