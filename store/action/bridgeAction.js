@@ -4,12 +4,12 @@ import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, d
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
-export const getSingleBridgesAction = ({id , version}) => async (dispatch, getState) => {
+export const getSingleBridgesAction = ({ id, version }) => async (dispatch, getState) => {
   try {
     dispatch(isPending())
     const data = await getSingleBridge(id);
     dispatch(fetchSingleBridgeReducer({ bridge: data.data?.bridge }));
-    getBridgeVersionAction({ versionId: version || data.data?.bridge?.published_version_id  })(dispatch);
+    getBridgeVersionAction({ versionId: version || data.data?.bridge?.published_version_id })(dispatch);
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -73,13 +73,17 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     const embed_token = response?.data?.embed_token;
     const alerting_embed_token = response?.data?.alerting_embed_token;
     const history_page_chatbot_token = response?.data?.history_page_chatbot_token
+    const triggerEmbedToken = response?.data?.trigger_embed_token;
+
+    if (onSuccess) onSuccess(response?.data?.bridge?.length)
+    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken }));
+
     const integrationData = await integration(embed_token);
     const flowObject = integrationData?.flows?.reduce((obj, item) => {
       obj[item.id] = item;
       return obj;
     }, {});
-    if (onSuccess) onSuccess(response?.data?.bridge?.length)
-    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, integrationData: flowObject, embed_token, alerting_embed_token, history_page_chatbot_token }));
+    dispatch(fetchAllBridgeReducer({ orgId: response?.data?.org_id, integrationData: flowObject }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -277,7 +281,7 @@ export const genrateSummaryAction = ({ bridgeId, versionId, orgId }) => async (d
   }
 }
 
-export const getTestcasesScroreAction = (version_id) => async (dispatch) =>{
+export const getTestcasesScroreAction = (version_id) => async (dispatch) => {
   try {
     const reponse = await getTestcasesScrore(version_id);
     return reponse;
