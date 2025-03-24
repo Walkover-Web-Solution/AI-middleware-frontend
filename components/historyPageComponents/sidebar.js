@@ -11,8 +11,9 @@ import { toast } from "react-toastify";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 import { usePathname, useRouter } from "next/navigation.js";
+import { setSelectedVersion } from '@/store/reducer/historyReducer';
 
-const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData }) => {
+const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion}) => {
   const { subThreads } = useCustomSelector(state => ({
     subThreads: state?.historyReducer?.subThreads || [],
   }));
@@ -28,6 +29,15 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const { userFeedbackCount } = useCustomSelector(state => ({
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
   }));
+  const { bridgeVersionsArray } = useCustomSelector(
+    (state) => ({
+      bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
+    })
+  );
+  const handleVersionChange = async (event) => {
+    const version = event.target.value;
+    dispatch(setSelectedVersion(version));
+  };
 
   useEffect(() => {
     setExpandedThreads([]);
@@ -63,7 +73,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setHasMore(true);
     setFilterOption("all");
     const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
-    await dispatch(getThread(params.thread_id, params?.id, params.subThread_id || params.thread_id,  1, "all"));
+    await dispatch(getThread(params.thread_id, params?.id, params.subThread_id || params.thread_id, 1, "all"));
     if (result?.length < 40) setHasMore(false);
   };
 
@@ -112,27 +122,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     <div className="drawer-side justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
       <div className="p-4 gap-3 flex flex-col">
-        <div className="p-2 bg-base-300 rounded-md text-center">
-          <p className="text-center m-2 font-semibold">Filter Response</p>
-          <div className="flex items-center justify-center mb-2 gap-4">
-            {USER_FEEDBACK_FILTER_OPTIONS?.map((value, index) => (
-              <label key={index} className="flex items-center gap-1 cursor-pointer">
-                <input
-                  type="radio"
-                  name="filterOption"
-                  value={value}
-                  checked={filterOption === value}
-                  onChange={() => handleFilterChange(value)}
-                  className={`radio ${value === "all" ? "radio-primary" : value === "1" ? "radio-success" : "radio-error"}`}
-                />
-                {value === "all" ? <span>All</span> : value === "1" ? <ThumbsUp size={16} /> : <ThumbsDown size={16} />}
-              </label>
-            ))}
-          </div>
-          <p className="text-xs text-base-content">
-            {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the bridge is ${userFeedbackCount}`}
-          </p>
-        </div>
         <div className="collapse collapse-arrow join-item border border-base-300">
           <input type="checkbox" className="peer" />
           <div className="collapse-title text-md font-medium peer-checked:bg-base-300 peer-checked:text-base-content">
@@ -140,7 +129,45 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
           </div>
           <div className="collapse-content">
             <DateRangePicker params={params} setFilterOption={setFilterOption} />
+            <div className="p-2 mt-4 bg-base-300 rounded-md text-center">
+              <p className="text-center m-2 font-semibold">Filter Response</p>
+              <div className="flex items-center justify-center mb-2 gap-4">
+                {USER_FEEDBACK_FILTER_OPTIONS?.map((value, index) => (
+                  <label key={index} className="flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="filterOption"
+                      value={value}
+                      checked={filterOption === value}
+                      onChange={() => handleFilterChange(value)}
+                      className={`radio ${value === "all" ? "radio-primary" : value === "1" ? "radio-success" : "radio-error"}`}
+                    />
+                    {value === "all" ? <span>All</span> : value === "1" ? <ThumbsUp size={16} /> : <ThumbsDown size={16} />}
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-base-content">
+                {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the bridge is ${userFeedbackCount}`}
+              </p>
+            </div>
           </div>
+        </div>
+        <div className='flex items-center'>
+          <select
+            className="select select-bordered w-full max-w-xs"
+            value={selectedVersion}
+            onChange={handleVersionChange}
+          >
+            <option value="all">All Versions</option>
+            {bridgeVersionsArray?.map((version, index) => (
+              <option
+                key={version}
+                value={version}
+              >
+                Version {index + 1}
+              </option>
+            ))}
+          </select>
         </div>
         <form onSubmit={handleSearch} className="relative">
           <input
@@ -195,8 +222,8 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                   )}
                   <li
                     className={`${params.thread_id === item?.thread_id
-                        ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
-                        : ""
+                      ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
+                      : ""
                       } flex-grow cursor-pointer`}
                     onClick={() => threadHandler(item?.thread_id)}
                   >
@@ -229,8 +256,8 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                             <li
                               key={index}
                               className={`cursor-pointer ${params.subThread_id === subThreadId?.sub_thread_id
-                                  ? "hover:bg-base-primary hover:text-base-100"
-                                  : "hover:bg-base-300 hover:text-gray-800"
+                                ? "hover:bg-base-primary hover:text-base-100"
+                                : "hover:bg-base-300 hover:text-gray-800"
                                 } p-2 rounded-md transition-all duration-200 ${params.subThread_id === subThreadId?.sub_thread_id
                                   ? "bg-primary text-base-100"
                                   : ""
