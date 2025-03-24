@@ -179,6 +179,7 @@ export const createApiAction = (org_id, dataFromEmbed) => async (dispatch) => {
     const data = await createapi(dataFromEmbed);
     if (data?.success) {
       dispatch(updateBridgeToolsReducer({ orgId: org_id, functionData: data?.data }));
+      return data?.data;
     }
   } catch (error) {
     console.error(error)
