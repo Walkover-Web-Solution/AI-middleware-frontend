@@ -1,5 +1,5 @@
-import { getHistory, getSingleThreadData, getSubThreadIds, getVersionHistory, updateHistoryMessage, userFeedbackCount } from "@/config";
-import { fetchAllHistoryReducer, fetchSubThreadReducer, fetchThreadReducer, fetchVersionHistoryReducer, updateHistoryMessageReducer, userFeedbackCountReducer } from "../reducer/historyReducer";
+import { getHistory, getSingleThreadData, getSubThreadIds, updateHistoryMessage, userFeedbackCount } from "@/config";
+import { fetchAllHistoryReducer, fetchSubThreadReducer, fetchThreadReducer, updateHistoryMessageReducer, userFeedbackCountReducer } from "../reducer/historyReducer";
 
 export const getHistoryAction = (id, start, end, page = 1, keyword = '',user_feedback) => async (dispatch) => {
   try {
@@ -13,9 +13,9 @@ export const getHistoryAction = (id, start, end, page = 1, keyword = '',user_fee
   }
 };
 
-export const getThread = ({threadId, bridgeId, subThreadId ,nextPage,user_feedback}) => async (dispatch) => {
+export const getThread = ({threadId, bridgeId, subThreadId ,nextPage,user_feedback, versionId}) => async (dispatch) => {
   try {
-    const data = await getSingleThreadData(threadId, bridgeId, subThreadId, nextPage,user_feedback);
+    const data = await getSingleThreadData(threadId, bridgeId, subThreadId, nextPage,user_feedback, versionId);
     dispatch(fetchThreadReducer({ data: data.data, nextPage }));
     return data.data;
   } catch (error) {
@@ -51,11 +51,3 @@ export const getSubThreadsAction = ({thread_id}) => async (dispatch) =>{
   }
 }
 
-export const getVersionHistoryAction = ( threadId, bridgeId, versionId, nextPage = 1, user_feedback = null, pagelimit = 40) => async (dispatch) => {
-  try {
-    const data = await getVersionHistory(threadId, bridgeId, versionId, nextPage, user_feedback, pagelimit);
-    dispatch(fetchVersionHistoryReducer({ data: data.data, page: nextPage })); 
-  } catch (error) {
-    console.error("Error fetching version history:", error);
-  }
-};
