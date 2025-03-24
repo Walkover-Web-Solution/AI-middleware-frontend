@@ -9,6 +9,7 @@ import TrustedBy from "@/components/TrustedBy";
 import WithAuth from "@/components/withauth";
 import SuggestionTemplates from "@/components/SuggestionTemplate";
 import FeatureRequests from "@/components/FeatureRequests";
+import RoadMapCards from "@/components/RoadMapCards";
 /*
   This page is the entry point for the user to start the login process.
   The page checks if the user has already logged in or not.
@@ -24,6 +25,7 @@ function page() {
       <DisplayCards />
       <SuggestionTemplates />
       <PromptTemplates />
+      <RoadMapCards />
       <CommentsCards />
       <Questions />
       <FeatureRequests />
