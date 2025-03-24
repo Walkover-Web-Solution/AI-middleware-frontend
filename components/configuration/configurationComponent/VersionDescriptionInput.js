@@ -1,46 +1,50 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { Pencil } from 'lucide-react';
-import React, { useCallback, useState, useRef } from 'react';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 function VersionDescriptionInput({ params }) {
     const dispatch = useDispatch();
-    const [isEditable, setIsEditable] = useState(false);
     const { versionDescription } = useCustomSelector((state) => ({
         versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.version_description || "",
     }));
 
-    const inputRef = useRef(null);
-
-    const saveBridgeVersionDescription = useCallback(() => {
-        setIsEditable(false);
-        const newValue = inputRef.current?.value.trim() || "";
-        if (newValue === versionDescription) 
-        return;
+    const saveBridgeVersionDescription = useCallback((e) => {
+        const newValue = e.target.value.trim() || "";
+        if (newValue === versionDescription) { e.target.value = versionDescription; return };
+        if (newValue?.trim() === "") {
+            toast.error('Version description cannot be empty');
+            e.target.value = versionDescription;
+            return;
+        }
         dispatch(updateBridgeVersionAction({ versionId: params?.version, dataToSend: { version_description: newValue } }));
     }, [dispatch, params?.version, versionDescription]);
 
     const handleKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {
-            saveBridgeVersionDescription();
+            e.preventDefault();
+            e.target.blur();
         }
     }, [saveBridgeVersionDescription]);
 
     return (
         <div className='mb-2'>
-            <div className='flex flex-row items-center gap-2'>
-                <div className="label">
+            <div className='flex flex-row items-center'>
+                <div className="label pl-0  whitespace-nowrap">
                     <span className="label-text capitalize font-medium">Version Description :</span>
                 </div>
-                {!isEditable && <div className='flex items-center gap-4'>
-                    <div className="flex items-center gap-4">
-                        <div className="bg-base">{versionDescription || <span className='opacity-50'>Enter version description</span>}</div>
-                        <Pencil size={16} onClick={() => setIsEditable(true)} className='' />
-                    </div>
-                </div>}
-                {isEditable && <input ref={inputRef} type="text" placeholder="Enter version description" autoFocus className="input w-full max-w-xs bg-base placeholder-opacity-50" onBlur={saveBridgeVersionDescription} defaultValue={versionDescription} onKeyDown={handleKeyDown} />}
+                <div className="relative w-full">
+                    <input
+                        type="text"
+                        className="text-md outline-none w-full"
+                        onBlur={saveBridgeVersionDescription}
+                        onKeyDown={handleKeyDown}
+                        defaultValue={versionDescription}
+                        placeholder="Enter Version Description"
+                        key={versionDescription}
+                    />
+                </div>
             </div>
         </div>
     )

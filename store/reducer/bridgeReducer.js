@@ -40,8 +40,15 @@ export const bridgeReducer = createSlice({
       state.loading = false;
     },
     fetchAllBridgeReducer: (state, action) => {
-      const { bridges, orgId, integrationData, embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken } = action.payload;
-      state.org = { ...state.org, [orgId]: { ...state.org?.[orgId], orgs: [...bridges], integrationData, embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken} };
+      const { orgId, bridges, ...restPayload } = action.payload;
+      state.org = {
+        ...state.org,
+        [orgId]: {
+          ...state.org?.[orgId],
+          orgs: bridges ? [...bridges] : state.org?.[orgId]?.orgs || [],
+          ...restPayload
+        }
+      };
       state.loading = false;
     },
     fetchAllFunctionsReducer: (state, action) => {

@@ -114,8 +114,10 @@ export default function ConfigurationPage({ params }) {
 
     return (
         <div className="flex flex-col gap-3 relative">
-            <BridgeNameInput params={params} />
-            <VersionDescriptionInput params={params} />
+            <div>
+                <BridgeNameInput params={params} />
+                <VersionDescriptionInput params={params} />
+            </div>
             <BridgeTypeToggle params={params} />
             <div className="absolute right-0 top-0">
                 <div className="flex items-center">
