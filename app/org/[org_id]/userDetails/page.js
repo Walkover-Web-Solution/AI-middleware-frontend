@@ -51,7 +51,7 @@ const page = ({children}) => {
   }, []);
 
   return (
-    <>{children}</>
+<div id="proxyContainer"></div>
   )
 }
 
