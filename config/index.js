@@ -881,7 +881,7 @@ export const runTestCaseApi = async ({ versionId }) => {
     const response = await axios.post(`${PYTHON_URL}/api/v2/model/testcases/${versionId}`, { "version_id": versionId });
     return response.data;
   } catch (error) {
-    toast.error(error?.response?.data?.detail?.error)
+    toast.error(error?.response?.data?.detail?.error ? error?.response?.data?.detail?.error : "Error while running the testcases")
     console.error(error);
     return error;
   }
