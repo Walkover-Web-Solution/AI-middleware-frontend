@@ -7,10 +7,12 @@ import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 
 const PreEmbedList = ({ params }) => {
-    const { integrationData, bridge_pre_tools, function_data } = useCustomSelector((state) => ({
+    const { integrationData, bridge_pre_tools, function_data, embedToken } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
         bridge_pre_tools: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.pre_tools || [],
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData || {},
+        embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+
     }));
     const dispatch = useDispatch();
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
@@ -34,7 +36,7 @@ const PreEmbedList = ({ params }) => {
 
                 return (
                     <div key={value?._id} id={value?._id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
-                        <div className="p-4 w-full" onClick={() => openViasocket(functionName)}>
+                        <div className="p-4 w-full" onClick={() => openViasocket(functionName,{embedToken})}>
                             <div className="flex justify-between items-center">
                                 <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full text-base-content">
                                     {title}
