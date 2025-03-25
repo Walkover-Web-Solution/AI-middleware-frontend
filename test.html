@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <link rel="stylesheet" href="https://interface-embed.viasocket.com/style.css"> -->
+</head>
+
+<body>
+
+    <script id="chatbot-main-script"
+        embedToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdfaWQiOiIxMzUxMSIsImNoYXRib3RfaWQiOiI2N2MwMzY0M2Y1NGQ5ZjUzODEyNTAxM2IiLCJ1c2VyX2lkIjoicnVkcmEifQ.CyNAE-g1Rap7KlQsxXdoTFzwS5b99Ej-5n7D-DI7xP0"
+        src="./public/chatbot-script.js" threadId="pagination2" bridgeName="test"
+        ></script>
+    <script>
+        const element = document.getElementById("hello");
+        element.addEventListener("click", () => {
+            window.SendDataToChatbot({
+                hideCloseButton: true,
+            })
+        });
+    </script>
+</body>
+
+</html>
