@@ -108,8 +108,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setThreadPage(1);
     setExpandedThreads([threadId]);
     router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}`, undefined, { shallow: true });
-    const result = await dispatch(getThread({ threadId, subThreadId, bridgeId: params?.id, nextPage: 1, user_feedback: filterOption }));
-    setHasMoreThreadData(result?.data?.length >= 40);
   };
 
   const handleFilterChange = async user_feedback => {
