@@ -28,18 +28,23 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [testCaseConversation, setTestCaseConversation] = useState([]);
   const [loadingData, setLoadingData] = useState(false); // New state for loading
 
-  const handleAddTestCase = (item, index) => {
+  const handleAddTestCase = (item, index, variables = false) => {
     const conversation = [];
+    let AiConfigForVariable = {};
     for (let i = index; i >= 0; i--) {
       if (thread[i].role === "user") {
         conversation.push(...(thread[i]?.AiConfig?.messages || []));
+        AiConfigForVariable = thread[i]?.AiConfig ? thread[i]?.AiConfig : {};
         if (thread[i].id === item.id) {
           break;
         }
       }
     }
-    conversation.push((item || {}));
+    conversation.push(item || {});
     setTestCaseConversation(conversation);
+    if (variables) {
+      return AiConfigForVariable;
+    }
     openModal(MODAL_TYPE.ADD_TEST_CASE_MODAL);
   };
 
