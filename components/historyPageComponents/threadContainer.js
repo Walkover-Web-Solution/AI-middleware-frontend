@@ -220,7 +220,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
               <LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px'/>
             </div>
           )}
-          {!loadingData && (!thread || thread.length === 0) ? (
+          {(thread?.length === 0) ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500 text-lg">No history present</p>
             </div>
