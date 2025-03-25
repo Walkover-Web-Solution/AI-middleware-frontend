@@ -165,6 +165,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     });
     setTimeout(() => window.openChatbot(), 100)
   }
+  const handleUserButtonClick = (value) =>{
+    threadHandler(item.thread_id, item, value)
+  }
 
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
@@ -281,7 +284,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </div>
               </div>
             )}
-            <div className="flex justify-start items-start gap-1" >
+            <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1`}>
               <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "cursor-pointer chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
 
                 {item?.role === "assistant" && item?.image_url && (
@@ -359,6 +362,37 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                   </button>
                 </div>}
               </div>
+              {item.role === "user" &&
+             <div className="flex gap-1"> 
+              <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("AiConfig")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <SquareFunction className="h-3 w-3" />
+                      <span>Ai config</span>
+                    </div>
+                  </button>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("variables")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <Parentheses className="h-3 w-3" />
+                      <span>Variables</span>
+                    </div>
+                  </button>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("system Prompt")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <FileClock className="h-3 w-3" />
+                      <span>System Prompt</span>
+                    </div>
+                  </button>
+                  </div>
+                  }
             </div>
             {item?.role !== "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
           </div>
