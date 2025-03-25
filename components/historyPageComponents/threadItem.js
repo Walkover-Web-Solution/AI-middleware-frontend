@@ -149,7 +149,8 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   );
 
   const handleAskAi = async (item) => {
-    let variables = { ...item }
+    const aiconfig = handleAddTestCase(item, index, true)
+    let variables = {aiconfig, response: item?.chatbot_message ? item?.chatbot_message : item?.content}
     try {
       const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
       variables = { "System Prompt": systemPromptResponse, ...variables }
