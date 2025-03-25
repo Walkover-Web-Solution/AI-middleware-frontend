@@ -235,8 +235,9 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
                 style={{ width: "100%" }}
               >
                 {thread &&
-                  thread?.map((item, index) => (
+                  thread?.map((item, index, array) => (
                     <ThreadItem
+                      array = {array}
                       key={index}
                       params={params}
                       index={index}

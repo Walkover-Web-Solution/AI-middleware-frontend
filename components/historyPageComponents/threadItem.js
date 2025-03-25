@@ -10,7 +10,7 @@ import EditMessageModal from "../modals/EditMessageModal";
 import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
 
-const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase }) => {
+const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase, array }) => {
   const dispatch = useDispatch();
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]);
@@ -149,7 +149,8 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   );
 
   const handleAskAi = async (item) => {
-    let variables = { ...item }
+    const previousItem = index > 0 && array[index - 1]?.role === 'tools_call' ? array[index - 2] : null;
+    let variables = {aiconfig:previousItem?.AiConfig, response: item?.chatbot_message ? item?.chatbot_message : item?.content}
     try {
       const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
       variables = { "System Prompt": systemPromptResponse, ...variables }
