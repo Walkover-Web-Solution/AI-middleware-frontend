@@ -1,4 +1,3 @@
-import { modelSuggestionApi } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -109,8 +108,6 @@ const ModelDropdown = ({ params }) => {
     const [hoveredModel, setHoveredModel] = useState(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [modelSpecs, setModelSpecs] = useState();
-    const [modelRecommendations, setModelRecommendations] = useState('');
-    const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
 
     const handleFinetuneModelChange = (e) => {
         const selectedFineTunedModel = e.target.value;
@@ -170,50 +167,12 @@ const ModelDropdown = ({ params }) => {
         setIsDropdownOpen(prev => !prev);
     };
 
-    const handleGetRecommendations = async () => {
-        setIsLoadingRecommendations(true);
-        try {
-            const response = await modelSuggestionApi({versionId:params?.version});
-            console.log(response)
-            if (response?.success) {
-                setModelRecommendations({
-                    available: response.data.best_model_from_available_model
-                });
-            } else {
-                setModelRecommendations({ error: 'Failed to get model recommendations' });
-            }
-        } catch (error) {
-            console.error('Error fetching recommended model:', error);
-            setModelRecommendations({ error: 'Error fetching recommended model' });
-        } finally {
-            setIsLoadingRecommendations(false);
-        }
-    };
-
     return (
         <div className="flex items-start gap-4 relative">
             <div className="w-full max-w-xs z-[999]">
-                <div className="label flex items-center justify-between">
+                <div className="label">
                     <span className="label-text text-gray-700">Model</span>
-                    <button 
-                        className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
-                        onClick={handleGetRecommendations}
-                        disabled={isLoadingRecommendations}
-                    >
-                        {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
-                    </button>
                 </div>
-                {modelRecommendations && (
-                    <div className="mt-1 mb-2 p-2 text-sm border rounded">
-                        {modelRecommendations.error ? (
-                            <p className="text-gray-600">{modelRecommendations.error}</p>
-                        ) : (
-                            <p className="text-gray-700">
-                                Best Model: <span className="font-medium">{modelRecommendations.available}</span>
-                            </p>
-                        )}
-                    </div>
-                )}
                 <div className="dropdown w-full font-normal" ref={dropdownRef}>
                     <div
                         tabIndex={0}
