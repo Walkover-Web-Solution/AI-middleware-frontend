@@ -5,10 +5,14 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
 import { ChevronDown, Info } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import Link from 'next/link';
+import EditorComponent from '../../TiptapEditor/tipatpEditor';
+import * as Y from 'yjs';
+import { HocuspocusProvider } from '@hocuspocus/provider';
+
 
 const InputConfigComponent = ({ params }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -242,6 +246,20 @@ const InputConfigComponent = ({ params }) => {
 
     if (service === "google" && serviceType === "chat") return null;
 
+    const localToken = useMemo(() => localStorage.getItem('proxy_token'), []);
+
+    const { ydoc, provider } = useMemo(() => {
+        const ydoc = new Y.Doc();
+        const provider = new HocuspocusProvider({
+          url: process.env.NEXT_PUBLIC_DOC_RTC_URL_FOR_TIPTAP,
+          name: params?.version,
+          parameters: {version_id: params.version, localToken: localToken, service: "ai-middleware" },
+          document: ydoc,
+        });
+        return { ydoc, provider };
+      }, [params?.id, params, params.version, localToken]);
+    
+
     return (
       <div>
         <div className="flex justify-between items-center mb-2">
@@ -291,14 +309,15 @@ const InputConfigComponent = ({ params }) => {
           </div>
         </div>
         <div className="form-control h-full">
-          <textarea
+        <EditorComponent params={params} ydoc={ydoc} provider={provider} key={params.version}/>
+          {/* <textarea
             ref={textareaRef}
             className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2 rounded-b-none"
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
             onBlur={savePrompt}
-          />
+          /> */}
           {showSuggestions && renderSuggestions()}
           <div className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 border-t-0 border border-base-300 rounded-t-none">
             <input type="checkbox" className="min-h-[0.75rem]" />
