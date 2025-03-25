@@ -331,17 +331,18 @@ function BridgesToSwitch({ chatBotId, handleSave ,orgId}) {
             const eligibleBridges = []
             const unEligibleBrigdes = []
             Object.values(state.bridgeReducer.allBridgesMap || {})?.forEach((item) => {
-                if (!!item?.slugName && !!item?.published_version_id && item?.org_id === orgId ) {
-                    const allowedBridge = state?.ChatBot?.ChatBotMap?.[chatBotId]?.config?.bridges?.find(bridge => bridge?.id === item?._id);
-                    const newItem = { ...item }; // Create a shallow copy of the item
-                    newItem.displayName = allowedBridge?.displayName || item.name;
-                    if (allowedBridge) {
-                        newItem.checked = true;
+                if(item?.org_id === orgId){
+                    if (!!item?.slugName && !!item?.published_version_id ) {
+                        const allowedBridge = state?.ChatBot?.ChatBotMap?.[chatBotId]?.config?.bridges?.find(bridge => bridge?.id === item?._id);
+                        const newItem = { ...item }; // Create a shallow copy of the item
+                        newItem.displayName = allowedBridge?.displayName || item.name;
+                        if (allowedBridge) {
+                            newItem.checked = true;
+                        }
+                        eligibleBridges?.push(newItem);
+                    } else {
+                        unEligibleBrigdes?.push(item);
                     }
-                    eligibleBridges?.push(newItem);
-                } 
-                if(item?.org_id === orgId ) {
-                    unEligibleBrigdes?.push(item);
                 }
             });
             return { eligibleBridges, unEligibleBrigdes }
