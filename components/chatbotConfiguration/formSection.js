@@ -304,7 +304,7 @@ export default function FormSection({ params, chatbotId = null }) {
                     })} defaultChecked={formData?.allowBridgeSwitch} checked={formData?.allowBridgeSwitch} name="allowBridgeSwitch" />
                 </label>
                 {
-                    formData?.allowBridgeSwitch && <BridgesToSwitch chatBotId={chatBotId} handleSave={handleBlur} />
+                    formData?.allowBridgeSwitch && <BridgesToSwitch chatBotId={chatBotId} handleSave={handleBlur} orgId={params?.org_id}/>
                 }
             </div>
             <div className="">
@@ -324,13 +324,14 @@ export default function FormSection({ params, chatbotId = null }) {
     );
 }
 
-function BridgesToSwitch({ chatBotId, handleSave }) {
+function BridgesToSwitch({ chatBotId, handleSave ,orgId}) {
+
     let { eligibleBridges, unEligibleBrigdes } = useCustomSelector((state) => ({
         ...(() => {
             const eligibleBridges = []
             const unEligibleBrigdes = []
             Object.values(state.bridgeReducer.allBridgesMap || {})?.forEach((item) => {
-                if (!!item?.slugName && !!item?.published_version_id) {
+                if (!!item?.slugName && !!item?.published_version_id && item?.org_id === orgId ) {
                     const allowedBridge = state?.ChatBot?.ChatBotMap?.[chatBotId]?.config?.bridges?.find(bridge => bridge?.id === item?._id);
                     const newItem = { ...item }; // Create a shallow copy of the item
                     newItem.displayName = allowedBridge?.displayName || item.name;
@@ -338,7 +339,8 @@ function BridgesToSwitch({ chatBotId, handleSave }) {
                         newItem.checked = true;
                     }
                     eligibleBridges?.push(newItem);
-                } else {
+                } 
+                if(item?.org_id === orgId ) {
                     unEligibleBrigdes?.push(item);
                 }
             });
