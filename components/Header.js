@@ -73,6 +73,7 @@ const Header = () => {
           </button>
           <button onClick={() => router.push("/showcase")} className={getButtonClass("/showcase")}>Show case</button>
           <button onClick={() => router.push("/faq")} className={getButtonClass("/faq")}>FAQ</button>
+          <button onClick={() => window.open("https://blog.gtwy.ai/", "_blank")} className={getButtonClass("/faq")}>Blog</button>
         </nav>
 
         <div className="flex items-center space-x-4">
