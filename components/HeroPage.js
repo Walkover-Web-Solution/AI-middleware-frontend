@@ -30,7 +30,7 @@ const HeroPage = () => {
             The Only Platform To
           </h1>
           <h1
-            className={`${inter.className} text-5xl md:text-8xl px-6 font-medium`}
+            className={`${inter.className} text-5xl md:text-6xl lg:text-8xl px-6 font-medium`}
           >
             Integrate AI into Your Product
           </h1>
