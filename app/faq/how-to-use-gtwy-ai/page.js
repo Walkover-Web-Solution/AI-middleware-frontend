@@ -1,5 +1,13 @@
 import React from 'react'
 
+export const metadata = {
+  title: "How to use | GTWY AI",
+  description: "Comprehensive guide on how to use GTWY AI platform - step-by-step instructions for leveraging our AI middleware and integration services",
+  category: 'technology',
+  generator: 'GTWY AI',
+  keywords: "gtwy ai, ai middleware, ai integration platform, ai chatbot service, openai integration, anthropic api, groq ai, o1 ai, ai automation tools, ai api gateway, large language model integration, llm api, ai software solutions, ai-powered chatbot, ai model deployment, machine learning api, enterprise ai solutions, ai infrastructure, gateway AI, artificial intelligence services, custom ai development, ai orchestration, ai cloud services, multi-ai platform, ai business solutions, ai developer tools, ai framework, gpt integration, ai tools for business, llm deployment, ai model hosting, ai tech stack, ai-powered applications, smart ai assistant, best ai middleware, chatbot development platform, ai-powered automation",
+};
+
 const Page = () => {
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50">

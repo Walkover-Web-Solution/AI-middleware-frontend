@@ -2,6 +2,14 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import React from "react";
 
+export const metadata = {
+  title: "Terms & Conditions | GTWY AI",
+  description: "Terms and conditions for GTWY AI platform - legal agreement governing the use of our integration services",
+  category: 'technology',
+  generator: 'GTWY AI',
+  keywords: "gtwy ai, ai middleware, ai integration platform, ai chatbot service, openai integration, anthropic api, groq ai, o1 ai, ai automation tools, ai api gateway, large language model integration, llm api, ai software solutions, ai-powered chatbot, ai model deployment, machine learning api, enterprise ai solutions, ai infrastructure, artificial intelligence services, custom ai development, ai orchestration, ai cloud services, multi-ai platform, ai business solutions, ai developer tools, ai framework, gpt integration, ai tools for business, llm deployment, ai model hosting, ai tech stack, ai-powered applications, smart ai assistant, best ai middleware, chatbot development platform, ai-powered automation",
+};
+
 const Terms = () => {
   return (
     <div className="bg-black flex flex-col w-full min-h-screen text-white relative">
