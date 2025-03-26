@@ -48,10 +48,6 @@ const Page = ({ searchParams }) => {
   }, [service]);
 
   useEffect(() => {
-    handleResizer();
-  }, []);
-
-  useEffect(() => {
     if (mountRef.current) {
       if (bridgeType === 'chatbot') {
         if (typeof openChatbot !== 'undefined' && document.getElementById('parentChatbot')) {
@@ -65,6 +61,10 @@ const Page = ({ searchParams }) => {
     }
     mountRef.current = true;
   }, [bridgeType])
+
+  useEffect(() => {
+    handleResizer();
+  }, []);
 
   return (
     <>
@@ -93,13 +93,31 @@ const Page = ({ searchParams }) => {
 };
 
 // Extracted functions for better readability
+
 function handleResizer() {
   const resizer = document.querySelector(".resizer");
+  if (!resizer) return;
+
   const leftSide = resizer.previousElementSibling;
+  const rightSide = resizer.nextElementSibling;
   let x = 0;
   let w = 0;
 
   const mouseDownHandler = function (e) {
+    // Prevent iframe from capturing mouse events
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.right = '0';
+    overlay.style.bottom = '0';
+    overlay.style.zIndex = '9999';
+    document.body.appendChild(overlay);
+
+    // Add bg-primary class and ensure cursor-col-resize during resizing
+    resizer.classList.add('bg-primary');
+    document.body.style.cursor = 'col-resize';
+
     x = e.clientX;
     w = leftSide.getBoundingClientRect().width;
     document.addEventListener("mousemove", mouseMoveHandler);
@@ -108,10 +126,21 @@ function handleResizer() {
 
   const mouseMoveHandler = function (e) {
     const dx = e.clientX - x;
-    leftSide.style.width = `${w + dx}px`;
+    const newWidth = Math.max(350, Math.min(w + dx, window.innerWidth - 450));
+    leftSide.style.width = `${newWidth}px`;
   };
 
   const mouseUpHandler = function () {
+    // Remove the overlay
+    const overlay = document.querySelector('div[style*="z-index: 9999"]');
+    if (overlay) {
+      overlay.remove();
+    }
+
+    // Remove bg-primary class and reset cursor when done resizing
+    resizer.classList.remove('bg-primary');
+    document.body.style.cursor = '';
+
     document.removeEventListener("mousemove", mouseMoveHandler);
     document.removeEventListener("mouseup", mouseUpHandler);
   };
