@@ -15,9 +15,12 @@ import randomColor from "randomcolor";
 import * as Y from "yjs";
 import "@/app/globals.css"; // Ensure this path is correct
 import HardBreak from "@tiptap/extension-hard-break";
+import { Maximize2, Minimize2 } from "lucide-react";
 
-const EditorComponent = ({ params, provider, ydoc }) => {
+const EditorComponent = ({ params, provider, ydoc}) => {
   const variablesRef = useRef([]);
+  const editorRef = useRef(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const { name, variables } = useCustomSelector((state) => ({
     name: state?.userDetailsReducer?.userDetails?.name || "My Name",
     variables:
@@ -27,6 +30,20 @@ const EditorComponent = ({ params, provider, ydoc }) => {
           value: variable.value,
         })) || [],
   }));
+
+  const toggleFullScreen = () => {
+    const editorContainer = editorRef.current;
+    if (!editorContainer) return;
+
+    if (!isFullScreen) {
+      editorContainer.classList.add('h-[90vh]');
+      // Scroll to the editor when entering full screen
+      editorContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      editorContainer.classList.remove('h-[90vh]');
+    }
+    setIsFullScreen(!isFullScreen);
+  };
 
   const editor = useEditor({
     editorProps: {
@@ -120,14 +137,25 @@ const EditorComponent = ({ params, provider, ydoc }) => {
     }
   }, [variables, editor]);
 
-
   return (
     <>
-      <EditorContent
-        editor={editor}
-        className="editor-content"
-        style={{ height: "400px" }}
-      />
+      <div ref={editorRef} className="editor-container relative">
+        <div className="absolute top-2 right-2 z-10">
+          <div className="tooltip" data-tip={isFullScreen ? 'Exit Full Screen' : 'Full Screen'}>
+            <button
+              onClick={toggleFullScreen}
+              className="p-1 hover:bg-gray-100 rounded-md transition-colors bg-white shadow-sm"
+            >
+              {isFullScreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            </button>
+          </div>
+        </div>
+        <EditorContent
+          editor={editor}
+          className="editor-content"
+          style={{ height: isFullScreen ? 'calc(100vh - 64px)' : '400px' }}
+        />
+      </div>
     </>
   );
 };
