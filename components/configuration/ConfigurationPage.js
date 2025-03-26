@@ -1,8 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { Bot, Cog } from "lucide-react";
+import { Bot, Cog, FileSliders } from "lucide-react";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useMemo } from 'react';
-import AddVariable from "../addVariable";
+import { useEffect, useMemo, useState } from 'react';
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
@@ -25,6 +24,7 @@ import ToolCallCount from "./configurationComponent/toolCallCount";
 import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/utils/enums";
 import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
+import AddVariable from "../addVariable";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -60,7 +60,6 @@ export default function ConfigurationPage({ params }) {
 
     const renderSetupView = useMemo(() => () => (
         <>
-            {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING && (modelType === AVAILABLE_MODEL_TYPES.REASONING
                 ? PROMPT_SUPPORTED_REASIONING_MODELS?.includes(modelName)
                 : true)) && (
@@ -80,12 +79,18 @@ export default function ConfigurationPage({ params }) {
                 <>
                     <AddVariable params={params} />
                     <GptMemory params={params} />
-                    <UserRefernceForRichText params={params} />
                     <ToolCallCount params={params} />
-                    <ActionList params={params} />
                 </>
             )}
             {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
+        </>
+    ), [bridgeType, modelType, params, modelName]);
+
+    const renderChatbotConfigView = useMemo(() => () => (
+        <>
+            <SlugNameInput params={params} />
+            <UserRefernceForRichText params={params} />
+            <ActionList params={params} />
         </>
     ), [bridgeType, modelType, params, modelName]);
 
@@ -127,6 +132,12 @@ export default function ConfigurationPage({ params }) {
                             <Cog size={16} /> Setup
                         </button>
                         <button
+                            onClick={() => handleNavigation('chatbot-config')}
+                            className={` ${currentView === 'chatbot-config' ? "btn-primary" : ""} btn join-item `}
+                        >
+                            <FileSliders size={16} /> Chatbot Config
+                        </button>
+                        <button
                             onClick={() => handleNavigation('guide')}
                             className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
                         >
@@ -135,7 +146,7 @@ export default function ConfigurationPage({ params }) {
                     </div>
                 </div>
             </div>
-            {currentView === 'setup' ? renderSetupView() : renderGuideView()}
+            {currentView === 'chatbot-config' ? renderChatbotConfigView() : currentView === 'guide' ? renderGuideView() : renderSetupView()}
             {renderNeedHelp()}
         </div>
     );
