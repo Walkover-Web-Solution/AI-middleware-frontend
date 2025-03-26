@@ -1,6 +1,7 @@
 import { Syne } from "next/font/google";
 import "./globals.css";
 import Wrapper from "@/wrapper/Wrapper";
+import Head from "next/head";
 
 const inter = Syne({ subsets: ["latin"] });
 
@@ -15,6 +16,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-theme="light">
+      <Head>
+        <link rel="canonical" href="https://gtwy.ai" />
+      </Head>
       <body suppressHydrationWarning>
         <Wrapper>
           {children}
