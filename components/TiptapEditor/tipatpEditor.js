@@ -12,7 +12,6 @@ import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import randomColor from "randomcolor";
-import * as Y from "yjs";
 import "@/app/globals.css"; // Ensure this path is correct
 import HardBreak from "@tiptap/extension-hard-break";
 import { Maximize2, Minimize2 } from "lucide-react";
