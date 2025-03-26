@@ -1,4 +1,3 @@
-import FAQPage from '@/components/FAQSidebar'
 import React from 'react'
 
 const page = ({children}) => {
