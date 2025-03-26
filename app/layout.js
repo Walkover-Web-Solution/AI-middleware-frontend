@@ -1,11 +1,10 @@
 import { Syne } from "next/font/google";
-import { Metadata } from 'next'
 import "./globals.css";
 import Wrapper from "@/wrapper/Wrapper";
 
 const inter = Syne({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "GTWY AI | Connect 5000+ apps in just 1 click",
   description: "Simplified AI & chatbot integration",
   category: 'technology',
