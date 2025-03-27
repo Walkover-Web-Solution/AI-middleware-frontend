@@ -36,11 +36,17 @@ function ServiceDropdown({ params }) {
     const handleGetRecommendations = async () => {
         setIsLoadingRecommendations(true);
         try {
-            const response = await modelSuggestionApi({versionId: params?.version});
+            const response = await modelSuggestionApi({ versionId: params?.version });
             if (response?.success) {
                 setModelRecommendations({
-                    service: response.data.best_model_from_available_service,
-                    model: response.data.best_model_from_available_model
+                    available: {
+                        service: response.data.available.service,
+                        model: response.data.available.model
+                    },
+                    unavailable: {
+                        service: response.data.unavailable.service,
+                        model: response.data.unavailable.model
+                    }
                 });
             } else {
                 setModelRecommendations({ error: 'Failed to get model recommendations' });
@@ -56,18 +62,36 @@ function ServiceDropdown({ params }) {
     const isDisabled = bridgeType === 'batch' && service === 'openai';
 
     return (
-        <div className="space-y-4 max-w-xs">
+        <div className="space-y-4 w-full">
             <label className="form-control">
-                <div className="label gap-2 max-w-xl">
-                    <span className="label-text font-medium">Service</span>
-                    <button 
-                        className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
-                        onClick={handleGetRecommendations}
-                        disabled={isLoadingRecommendations}
-                    >
-                        {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
-                    </button>
+                <div className="gap-2 max-w-xl">
+                    <div className="label max-w-xs flex justify-between items-center gap-10">
+                        <span className="label-text font-medium items-end">Service</span>
+                        <button
+                            className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text hover:opacity-80 transition-opacity"
+                            onClick={handleGetRecommendations}
+                            disabled={isLoadingRecommendations}
+                        >
+                            {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
+                        </button>
+                    </div>
                 </div>
+                {modelRecommendations && (
+                    <div className="mb-2 p-4 bg-gray-50 rounded-lg border border-gray-200 max-w-xs">
+                        {modelRecommendations.error ? (
+                            <p className="text-red-500 text-sm">{modelRecommendations.error}</p>
+                        ) : (
+                            <div className="space-y-2">
+                                <p className="text-gray-700">
+                                    <span className="font-medium">Recommended Service:</span> {modelRecommendations?.available?.service}
+                                </p>
+                                <p className="text-gray-700">
+                                    <span className="font-medium">Recommended Model:</span> {modelRecommendations?.available?.model}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
                 <div className="flex items-center gap-2">
                     <select
                         value={selectedService}
@@ -90,23 +114,6 @@ function ServiceDropdown({ params }) {
                     )}
                 </div>
             </label>
-
-            {modelRecommendations && (
-                <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    {modelRecommendations.error ? (
-                        <p className="text-red-500 text-sm">{modelRecommendations.error}</p>
-                    ) : (
-                        <div className="space-y-2">
-                            <p className="text-gray-700">
-                                <span className="font-medium">Service:</span> {modelRecommendations?.service}
-                            </p>
-                            <p className="text-gray-700">
-                                <span className="font-medium">Recommended Model:</span> {modelRecommendations?.model}
-                            </p>
-                        </div>
-                    )}
-                </div>
-            )}
         </div>
     );
 }
