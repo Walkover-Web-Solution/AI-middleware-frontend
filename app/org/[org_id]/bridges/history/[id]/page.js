@@ -87,6 +87,7 @@ function Page({ searchParams }) {
         try {
           const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
           setSelectedItem({ variables: item.variables, "System Prompt": systemPromptResponse, ...item, value});
+          if(value === 'system Prompt' || value === 'more' || item?.[value] === null)
           setIsSliderOpen(true);
         } catch (error) {
           console.error("Failed to fetch single message:", error);

@@ -66,10 +66,8 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
   };
 
   const handleObjectClick = useCallback((key, displayValue) => {
-    if (JSON.stringify(displayValue).length > 197) {
       setModalContent(key === 'variables' ? {"variable":displayValue} : displayValue);
       openModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL);
-    }
   }, []);
 
   // Open modal if selectedItem.value matches a key
@@ -77,7 +75,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
     if (selectedItem?.value && selectedItem?.value !== 'system Prompt') {
       const key = selectedItem.value;
       const value = selectedItem[key];
-      if (value && JSON.stringify(value).length > 197) {
+      if (value) {
         handleObjectClick(key, value);
       }
     }
@@ -124,7 +122,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                       <div 
                         key={key} 
                         className={`border-b bg-base-100 transition-colors duration-150 ${
-                          selectedItem?.value === key ? 'ring-2 ring-green-500 ring-opacity-75 shadow-lg' : ''
+                          selectedItem?.value === key ? 'ring-2 ring-green-500 ring-opacity-75 shadow-lg rounded-md' : ''
                         }`}
                       >
                         <div className="pt-4 px-4 text-sm font-semibold capitalize">

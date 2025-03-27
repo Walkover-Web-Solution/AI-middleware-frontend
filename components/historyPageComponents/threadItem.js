@@ -282,7 +282,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             )}
             <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1`}>
-              <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "cursor-pointer chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
+              <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`}>
                 {item?.role === "assistant" && item?.image_url && (
                   <div className="chat chat-start">
                     <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
@@ -389,6 +389,15 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
                       <FileClock className="h-3 w-3" />
                       <span>System Prompt</span>
+                    </div>
+                  </button>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("more")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <Plus className="h-3 w-3" />
+                      <span>More...</span>
                     </div>
                   </button>
                 </div>
