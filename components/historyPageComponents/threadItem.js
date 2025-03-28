@@ -162,7 +162,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       "bridgeName": "history_page_chabot",
       "threadId": item?.id,
       variables,
-      version_id: null
+      version_id: 'null'
     });
     setTimeout(() => window.openChatbot(), 100)
   }
