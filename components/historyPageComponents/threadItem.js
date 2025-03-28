@@ -166,6 +166,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     });
     setTimeout(() => window.openChatbot(), 100)
   }
+  const handleUserButtonClick = (value) => {
+    threadHandler(item.thread_id, item, value)
+  }
 
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
@@ -251,11 +254,8 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     </ul>
                   </div>
                 )}
-
               </div>
-
             </div>
-
             <div className="chat-header flex gap-4 items-center mb-1">
               {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
             </div>
@@ -282,9 +282,8 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </div>
               </div>
             )}
-            <div className="flex justify-start items-start gap-1" >
-              <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "cursor-pointer chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
-
+            <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1`}>
+              <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`}>
                 {item?.role === "assistant" && item?.image_url && (
                   <div className="chat chat-start">
                     <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
@@ -361,7 +360,49 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </div>}
               </div>
             </div>
-            {item?.role !== "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
+            {item?.role === "user" && <div className="flex flex-row-reverse gap-2 m-1 items-center">
+                <time className="text-xs opacity-50 chat-end">
+                  {formatDateAndTime(item.createdAt)}
+                </time> 
+                <div className="flex gap-1">
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("AiConfig")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <SquareFunction className="h-3 w-3" />
+                      <span>Ai config</span>
+                    </div>
+                  </button>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("variables")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <Parentheses className="h-3 w-3" />
+                      <span>Variables</span>
+                    </div>
+                  </button>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("system Prompt")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <FileClock className="h-3 w-3" />
+                      <span>System Prompt</span>
+                    </div>
+                  </button>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("more")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <Plus className="h-3 w-3" />
+                      <span>More...</span>
+                    </div>
+                  </button>
+                </div>
+              </div>}
           </div>
           {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div className="flex justify-center items-center my-4">
             <p className="border-t border-base-300 w-full"></p>
