@@ -1,5 +1,6 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import Head from "next/head";
 import React from "react";
 
 export const metadata = {
@@ -13,6 +14,9 @@ export const metadata = {
 const Terms = () => {
   return (
     <div className="bg-black flex flex-col w-full min-h-screen text-white relative">
+      <Head>
+        <link rel="canonical" href="https://gtwy.ai" />
+      </Head>
       <div className="hero-bg absolute top-0 left-0 w-full h-screen z-10"></div>
       <div className="px-20 z-20">
         <Header />

@@ -1,9 +1,10 @@
 'use client'
-import Header from '@/components/Header';
 import Footer from "@/components/Footer";
+import Header from '@/components/Header';
 import { PRICINGPLANS } from '@/utils/enums';
-import { useEffect } from 'react';
 import { getCalApi } from "@calcom/embed-react";
+import Head from 'next/head';
+import { useEffect } from 'react';
 
 export default function PricingPage() {
 
@@ -37,6 +38,9 @@ export default function PricingPage() {
 
   return (
     <div className="bg-black flex flex-col w-full min-h-screen text-white relative pt-40">
+      <Head>
+        <link rel="canonical" href="https://gtwy.ai" />
+      </Head>
       <div className="hero-bg absolute w-full top-[-10px] h-screen z-10"></div>
       <div className="z-20">
         <Header />
