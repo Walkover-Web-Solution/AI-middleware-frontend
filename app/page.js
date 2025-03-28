@@ -1,15 +1,15 @@
 import CommentsCards from "@/components/CommentsCards";
 import DisplayCards from "@/components/DisplayCards";
+import FeatureRequests from "@/components/FeatureRequests";
 import Footer from "@/components/Footer";
 import HeroPage from "@/components/HeroPage";
 import PlatformImage from "@/components/PlatformImage";
 import PromptTemplates from "@/components/PromptTemplates";
 import Questions from "@/components/Questions";
-import TrustedBy from "@/components/TrustedBy";
-import WithAuth from "@/components/withauth";
-import SuggestionTemplates from "@/components/SuggestionTemplate";
-import FeatureRequests from "@/components/FeatureRequests";
 import RoadMapCards from "@/components/RoadMapCards";
+import SuggestionTemplates from "@/components/SuggestionTemplate";
+import TrustedBy from "@/components/TrustedBy";
+import Head from "next/head";
 /*
   This page is the entry point for the user to start the login process.
   The page checks if the user has already logged in or not.
@@ -19,6 +19,9 @@ import RoadMapCards from "@/components/RoadMapCards";
 function page() {
   return (
     <div className="bg-black h-full w-full text-white overflow-hidden">
+      <Head>
+        <link rel="canonical" href="https://gtwy.ai" />
+      </Head>
       <HeroPage />
       <PlatformImage />
       <TrustedBy />

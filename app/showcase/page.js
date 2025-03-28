@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import ShowcaseCard from "@/components/ShowcaseCard";
 import Showcaseheading from "@/components/Showcaseheading";
 import { getAllShowCase } from "@/config";
+import Head from "next/head";
 import { useState, useEffect } from "react";
 
 function Page() {
@@ -25,7 +26,7 @@ function Page() {
   }, []);
 
   useEffect(() => {
-    const filtered = showcaseData.filter(card => 
+    const filtered = showcaseData.filter(card =>
       card?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       card?.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -34,6 +35,9 @@ function Page() {
 
   return (
     <div className="bg-black h-100vh w-full text-white">
+      <Head>
+        <link rel="canonical" href="https://gtwy.ai" />
+      </Head>
       <div className="hero-bg">
         <Header />
         <Showcaseheading />
