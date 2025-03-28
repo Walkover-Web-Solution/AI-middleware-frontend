@@ -20,6 +20,7 @@ function Page() {
   const dispatch = useDispatch();
   const route = useRouter()
   const organizations = useCustomSelector(state => state.userDetailsReducer.organizations);
+  
 
   const handleSwitchOrg = useCallback(async (id, name) => {
     try {

@@ -14,6 +14,7 @@ import { openModal } from "@/utils/utility";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
+import { updateTitle } from "@/components/webiteTile";
 
 export default function layoutOrgPage({ children, params }) {
   const dispatch = useDispatch();
@@ -23,13 +24,20 @@ export default function layoutOrgPage({ children, params }) {
   const path = pathName.split('?')[0].split('/')
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
-  const { embedToken, alertingEmbedToken, versionData } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, orgName } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
-    versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {}
+    versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
+    orgName: state?.userDetailsReducer?.organizations?.[params?.org_id]?.name
   }));
   const urlParams = useParams();
   useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
+
+  useEffect(() => {
+    if (orgName) {
+      updateTitle(orgName);
+    }
+  }, [orgName]);
 
   useEffect(() => {
     dispatch(getAllBridgesAction((data) => {

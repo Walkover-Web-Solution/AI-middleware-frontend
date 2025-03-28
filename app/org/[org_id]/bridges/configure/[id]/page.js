@@ -11,22 +11,34 @@ import { getModelAction } from "@/store/action/modelAction";
 import { useEffect, useRef } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
+import { updateTitle } from "@/components/webiteTile";
 
 export const runtime = 'edge';
 const Page = ({ searchParams }) => {
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const { bridgeType, service, isServiceModelsAvailable, versionService } = useCustomSelector((state) => {
+  const { bridgeType, service, isServiceModelsAvailable, versionService, bridgeData } = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
       bridgeType: bridgeData?.bridgeType,
       service: versionData?.service,
       isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[versionData?.service],
-      versionService: versionData?.service
+      versionService: versionData?.service,
+      bridgeData: bridgeData
     };
   });
+
+  useEffect(() => {
+    const bridgeName = bridgeData?.name || '';
+    const currentTitle = document.title;
+    const orgName = currentTitle.split(' - ')[0]; // Extract org name from title
+    if (bridgeName) {
+      console.log(currentTitle,orgName,bridgeName)
+      updateTitle(`${bridgeName}`);
+    }
+  }, [params.id]);
 
   useEffect(() => {
     dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
