@@ -102,6 +102,7 @@ function MainSlider() {
                 <div className="border-t border-gray-200 bg-white">
                   <ul className="menu w-full   text-base-content">
                     <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
+                    <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/userDetails`) }}> <Cog size={16} />Update User Details</a> </li>
                     <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <Cog size={16} /> Workspace Setting</a> </li>
                     <li ><a className='py-2 px-2 rounded-md' onClick={logoutHandler}> <LogOut size={16} />  logout</a></li>
                   </ul>
