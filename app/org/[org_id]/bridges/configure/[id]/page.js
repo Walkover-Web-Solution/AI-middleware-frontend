@@ -11,22 +11,30 @@ import { getModelAction } from "@/store/action/modelAction";
 import { useEffect, useRef } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
+import { updateTitle } from "@/utils/utility";
 
 export const runtime = 'edge';
 const Page = ({ searchParams }) => {
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const { bridgeType, service, isServiceModelsAvailable, versionService } = useCustomSelector((state) => {
+  const { bridgeType, service, isServiceModelsAvailable, versionService, bridgeName} = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
       bridgeType: bridgeData?.bridgeType,
       service: versionData?.service,
       isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[versionData?.service],
-      versionService: versionData?.service
+      versionService: versionData?.service,
+      bridgeName: bridgeData?.name,
     };
   });
+
+  useEffect(() => {
+    if (bridgeName) {
+      updateTitle(`GTWY Ai | ${bridgeName}`);
+    }
+  }, [bridgeName]);
 
   useEffect(() => {
     dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
