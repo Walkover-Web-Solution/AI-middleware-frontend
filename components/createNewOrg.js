@@ -7,9 +7,10 @@ import { toast } from 'react-toastify';
 import LoadingSpinner from './loadingSpinner';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
+import timezoneData from '@/utils/timezoneData';
 
-const CreateOrg = ({handleSwitchOrg }) => {
-    const [orgDetails, setOrgDetails] = useState({ name: '', about: '' });
+const CreateOrg = ({ handleSwitchOrg }) => {
+    const [orgDetails, setOrgDetails] = useState({ name: '', about: '', timezone: '' });
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
     const route = useRouter();
@@ -24,13 +25,19 @@ const CreateOrg = ({handleSwitchOrg }) => {
 
     const createOrgHandler = useCallback(async (e) => {
         e.preventDefault();
-        const { name, about } = orgDetails;
+        const { name, about, timezone } = orgDetails;
         setIsLoading(true);
         try {
+            const selectedTimezone = timezoneData.find(tz => tz.identifier === timezone);
             const dataToSend = {
                 company: {
                     name,
-                    meta: { about },
+                    meta: {
+                        about,
+                        identifier:selectedTimezone?.identifier,
+                        offSet:selectedTimezone?.offSet
+                    },
+                    timezone : selectedTimezone?.offSet
                 },
             };
 
@@ -82,8 +89,22 @@ const CreateOrg = ({handleSwitchOrg }) => {
                             maxLength={400}
                             required
                         />
+                        <label className='label-text mb-1'>Timezone</label>
+                        <select
+                            className="select select-bordered w-full mb-4"
+                            value={orgDetails.timezone}
+                            onChange={(e) => setOrgDetails(prev => ({ ...prev, timezone: e.target.value }))}
+                            required
+                        >
+                            <option value="">Select a timezone</option>
+                            {timezoneData.map((timezone) => (
+                                <option key={timezone.identifier} value={timezone.identifier}>
+                                    {timezone.identifier} ({timezone.offSet})
+                                </option>
+                            ))}
+                        </select>
                         <div className="modal-action">
-                            <button type="button" onClick={()=>closeModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="btn">Close</button>
+                            <button type="button" onClick={() => closeModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="btn">Close</button>
                             <button type="submit" className="btn btn-primary">Create</button>
                         </div>
                     </form>
