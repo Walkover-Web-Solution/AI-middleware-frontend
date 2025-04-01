@@ -879,10 +879,10 @@ export const updateTestCaseApi = async ({ bridge_id, dataToUpdate }) => {
   }
 }
 
-export const deleteFunctionApi = async (endpoint_name) => {
+export const deleteFunctionApi = async (function_name) => {
   try {
     const response = await axios.delete(`${PYTHON_URL}/functions/`, {
-      data: { endpoint_name }
+      data: { function_name }
     });
     return response.data;
   } catch (error) {

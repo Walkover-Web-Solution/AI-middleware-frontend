@@ -103,7 +103,7 @@ export default function layoutOrgPage({ children, params }) {
       if (e?.data?.action === 'deleted') {
         if (versionData && typeof versionData === 'object' && !Array.isArray(versionData)) {
           const selectedVersionData = Object.values(versionData).find(
-            fn => fn.function_name || fn.endpoint_name === e?.data?.id
+            fn => fn.function_name === e?.data?.id
           );
           if (selectedVersionData) {
             await dispatch(updateBridgeVersionAction({
@@ -117,7 +117,7 @@ export default function layoutOrgPage({ children, params }) {
               }
             }));
           }
-          dispatch(deleteFunctionAction({"endpoint_name" : e?.data?.title, orgId:path[2], functionId: selectedVersionData?._id}));
+          dispatch(deleteFunctionAction({function_name : e?.data?.id, orgId:path[2], functionId: selectedVersionData?._id}));
         }
       }
       
