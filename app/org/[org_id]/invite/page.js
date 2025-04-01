@@ -12,6 +12,7 @@ function InvitePage({ params }) {
   const [email, setEmail] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [invitedMembers, setInvitedMembers] = useState([]);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     fetchInvitedMembers();
@@ -67,6 +68,12 @@ function InvitePage({ params }) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+  const filteredMembers = !query
+    ? invitedMembers
+    : invitedMembers.filter(member =>
+      member.email.toLowerCase().includes(query.toLowerCase())
+    );
 
   const isEmailAlreadyInvited = (email) => {
     return invitedMembers.some(member => member.email === email);
@@ -151,10 +158,23 @@ function InvitePage({ params }) {
 
         {/* Members List */}
         <div className="bg-gray-50 p-6 rounded-lg shadow-inner">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Team Members</h2>
-          {invitedMembers.length > 0 ? (
+
+          <div className='flex justify-between items-center'>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Team Members</h2>
+            <div className="mb-8">
+              <input
+                type="text"
+                placeholder="Search team members..."
+                onChange={(e) => setQuery(e.target.value)}
+                className="input input-bordered w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+
+          {filteredMembers.length > 0 ? (
             <div className="space-y-4">
-              {invitedMembers.map((member, index) => (
+              {filteredMembers.map((member, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all"
@@ -166,8 +186,10 @@ function InvitePage({ params }) {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : filteredMembers?.length === 0 && invitedMembers.length === 0 ? (
             <p className="text-gray-600 text-center">No members invited yet. Start by inviting your team.</p>
+          ) : (
+            <p className="text-gray-600 text-center">No members found matching your search.</p>
           )}
         </div>
 
