@@ -29,9 +29,15 @@ export const getBridgeVersionAction = ({ versionId }) => async (dispatch) => {
 
 export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, getState) => {
   try {
-    const data = await createBridge(dataToSend.dataToSend);
-    onSuccess(data);
-    dispatch(createBridgeReducer({ data, orgId: dataToSend.orgid }));
+    const response = await createBridge(dataToSend.dataToSend);
+    // Extract only the necessary serializable data from the response
+    const serializableData = {
+      data: response.data,
+      status: response.status,
+      statusText: response.statusText
+    };
+    onSuccess(serializableData);
+    dispatch(createBridgeReducer({ data: serializableData, orgId: dataToSend.orgid }));
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
       toast.error("Bridge Name can't be duplicate");
@@ -39,7 +45,7 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
       toast.error("Something went wrong");
     }
     console.error(error);
-    throw error
+    throw error;
   }
 };
 
