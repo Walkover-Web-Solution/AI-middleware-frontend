@@ -1,6 +1,8 @@
 'use client'
 import { useEffect } from "react";
 
+export const runtime = 'edge';
+
 const page = () => {
     useEffect(() => {
         // Check if script is already loaded
