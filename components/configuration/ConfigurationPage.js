@@ -29,7 +29,7 @@ import AddVariable from "../addVariable";
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const view = searchParams.get('view') || 'setup';
+    const view = searchParams.get('view') || 'config';
     const [currentView, setCurrentView] = useState(view);
 
     const { bridgeType, modelType, modelName } = useCustomSelector((state) => ({
@@ -126,10 +126,10 @@ export default function ConfigurationPage({ params }) {
                     <BridgeVersionDropdown params={params} />
                     <div className="join">
                         <button
-                            onClick={() => handleNavigation('setup')}
-                            className={` ${currentView === 'setup' ? "btn-primary" : ""} btn join-item `}
+                            onClick={() => handleNavigation('config')}
+                            className={` ${currentView === 'config' ? "btn-primary" : ""} btn join-item `}
                         >
-                            <Cog size={16} /> Setup
+                            <Cog size={16} /> Config
                         </button>
                         <button
                             onClick={() => handleNavigation('chatbot-config')}

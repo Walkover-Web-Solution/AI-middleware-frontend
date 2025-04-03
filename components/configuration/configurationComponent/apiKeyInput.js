@@ -120,7 +120,7 @@ const ApiKeyInput = ({ params }) => {
                         maxLength="10"
                         value={selectedValue}
                     >
-                        <option value="">Select API key</option>
+                        <option value="" disabled>Select API key</option>
 
                         {/* Display bridge_apiKey if it is not in the filtered API keys */}
                         {!bridgeApikey_object_id && bridge_apiKey && !apikeydata.some(apiKey => apiKey?._id === bridge_apiKey) && (
