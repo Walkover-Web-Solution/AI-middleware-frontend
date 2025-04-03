@@ -15,7 +15,7 @@ function Chat({ params }) {
   }, [messages]);
 
   return (
-    <>
+    <div className="px-4 pt-4">
       <div className="w-full flex justify-between items-center">
         <span className="label-text">Playground</span>
       </div>
@@ -85,7 +85,7 @@ function Chat({ params }) {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
