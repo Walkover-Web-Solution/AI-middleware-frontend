@@ -290,3 +290,9 @@ export const GetFileTypeIcon = (fileType, height, width) => {
             return <GoogleDocIcon height={height} width={width} />;
     }
 }
+
+export const updateTitle = (newTitle) => {
+    if (typeof document !== 'undefined' && newTitle) {
+      document.title = newTitle;
+    }
+  };

@@ -156,6 +156,12 @@ export const bridgeReducer = createSlice({
       const { dataToSend, orgId } = action.payload;
       state.org[orgId].integrationData[dataToSend.id] = dataToSend
     },
+    removeFunctionDataReducer: (state, action) => {
+      const { functionId, orgId } = action.payload;
+      if (state.org[orgId]?.functionData?.[functionId]) {
+        delete state.org[orgId].functionData[functionId];
+      }
+    },
     updateVariables: (state, action) => {
       const { data, bridgeId, versionId = "" } = action.payload;
       if (versionId) {
@@ -267,6 +273,7 @@ export const {
   updateBridgeActionReducer,
   updateFunctionReducer,
   optimizePromptReducer,
+  removeFunctionDataReducer,
   webhookURLForBatchAPIReducer
 } = bridgeReducer.actions;
 

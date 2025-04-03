@@ -878,3 +878,15 @@ export const updateTestCaseApi = async ({ bridge_id, dataToUpdate }) => {
     return error;
   }
 }
+
+export const deleteFunctionApi = async (function_name) => {
+  try {
+    const response = await axios.delete(`${PYTHON_URL}/functions/`, {
+      data: { function_name }
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}

@@ -1,6 +1,6 @@
 import { getSingleMessage } from "@/config";
 import { updateContentHistory } from "@/store/action/historyAction";
-import { Bot, BotMessageSquare, ChevronDown, FileClock, MessageCircleCode, Parentheses, Pencil, Plus, SquareFunction, User } from "lucide-react";
+import { AlertCircle, Bot, BotMessageSquare, ChevronDown, FileClock, MessageCircleCode, Parentheses, Pencil, Plus, SquareFunction, User } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -259,29 +259,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             <div className="chat-header flex gap-4 items-center mb-1">
               {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
             </div>
-            {item?.firstAttemptError && item?.role === "assistant" && (
-              <div className="collapse bg-base-300 rounded-lg shadow-sm max-w-24 mb-2 hover:shadow-md transition-shadow duration-200">
-                <input
-                  type="checkbox"
-                  className="peer"
-                  id={`errorCollapse-${item.id || index}`}
-                />
-
-                <label
-                  htmlFor={`errorCollapse-${item.id || index}`}
-                  className="collapse-title text-sm font-medium cursor-pointer flex justify-between items-center py-2"
-                >
-                  <span className="flex items-center gap-1">
-                    Error
-                  </span>
-                  <ChevronDown className="w-4 h-4 transition-transform peer-checked:rotate-180" />
-                </label>
-
-                <div className="collapse-content text-sm max-w-[400px]">
-                  {item?.firstAttemptError}
-                </div>
-              </div>
-            )}
+            
             <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1`}>
               <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`}>
                 {item?.role === "assistant" && item?.image_url && (
@@ -314,6 +292,31 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+                {item?.firstAttemptError && item?.role === "assistant" && (
+                  <div className="collapse bg-base-200/50  p-0">
+                    <input
+                      type="checkbox"
+                      className="peer"
+                      // id={`errorCollapse-${item.id || index}`}
+                    />
+                    <label
+                      htmlFor={`errorCollapse-${item.id || index}`}
+                      className="collapse-title text-sm font-medium cursor-pointer flex items-center justify-between  hover:bg-base-300/50 transition-colors p-0"
+                    >
+                      <span className="flex items-center gap-4">
+                        <AlertCircle className="w-4 h-4 text-warning" />
+                        <span className="font-light">Retry Attempt with {item?.model}</span>
+                        <ChevronDown className="w-4 h-4 transform peer-checked:rotate-180 transition-transform" />
+                      </span>
+                     
+                    </label>
+                    <div className="collapse-content bg-base-100/50 rounded-b-md text-sm  border-t border-base-300">
+                      <div className="text-error font-mono break-words bg-base-200/50 rounded-md p-2">
+                        <pre className="whitespace-pre-wrap">{item?.firstAttemptError}</pre>
+                      </div>
+                    </div>
                   </div>
                 )}
 

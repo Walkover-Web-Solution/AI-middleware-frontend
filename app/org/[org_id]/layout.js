@@ -6,7 +6,7 @@ import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
-import { createApiAction, getAllBridgesAction, getAllFunctions, integrationAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
+import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, integrationAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { MODAL_TYPE } from "@/utils/enums";
@@ -90,7 +90,7 @@ export default function layoutOrgPage({ children, params }) {
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, [params.id]);
+  }, [params.id, versionData, version_id, path]);
 
   async function handleMessage(e) {
     // todo: need to make api call to update the name & description
@@ -100,6 +100,27 @@ export default function layoutOrgPage({ children, params }) {
         status: e?.data?.action
       }
       dispatch(integrationAction(dataToSend, params?.org_id));
+      if (e?.data?.action === 'deleted') {
+        if (versionData && typeof versionData === 'object' && !Array.isArray(versionData)) {
+          const selectedVersionData = Object.values(versionData).find(
+            fn => fn.function_name === e?.data?.id
+          );
+          if (selectedVersionData) {
+            await dispatch(updateBridgeVersionAction({
+              bridgeId: path[5],
+              versionId: version_id,
+              dataToSend: {
+                functionData: {
+                  function_id: selectedVersionData._id,
+                  function_name: selectedVersionData.function_name
+                }
+              }
+            }));
+          }
+          dispatch(deleteFunctionAction({function_name : e?.data?.id, orgId:path[2], functionId: selectedVersionData?._id}));
+        }
+      }
+      
       if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created" || e?.data?.action === "updated")) {
         const dataFromEmbed = {
           url: e?.data?.webhookurl,

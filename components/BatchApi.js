@@ -78,7 +78,7 @@ const WebhookForm = ({ params }) => {
     );
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 rounded-lg h-full">
+        <form onSubmit={handleSubmit} className="space-y-6 rounded-lg h-full p-4">
             <div className="form-control mb-4">
                 <label htmlFor="webhookUrl" className="label">
                     <span className="label-text font-semibold">Webhook URL</span>
