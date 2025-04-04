@@ -890,3 +890,12 @@ export const deleteFunctionApi = async (function_name) => {
     return error;
   }
 }
+
+export const getUserDetailsHistoryApi = async (version_id) =>{
+  try {
+    const resposne = await axios.get(`${URL}/api/v1/config/getuserupdates/${version_id}`);
+    
+  } catch (error) {
+    
+  }
+}

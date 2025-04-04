@@ -153,6 +153,9 @@ function Navbar() {
             </div>
             <div className='ml-2'>
             </div>
+            <button className='btn' onClick={()=>{}}>
+            <History />
+            </button>
 
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="btn capitalize m-1">
