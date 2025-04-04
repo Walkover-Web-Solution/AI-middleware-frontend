@@ -9,15 +9,21 @@ function Chat({ params }) {
   const [messages, setMessages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadedImages, setUploadedImages] = useState([]);
+  const [conversation, setConversation] = useState([]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleResetChat = () => {
+    setMessages([]);
+    setConversation([]);
+  }
   return (
     <div className="px-4 pt-4">
-      <div className="w-full flex justify-between items-center">
+      <div className="w-full flex justify-between items-center px-2">
         <span className="label-text">Playground</span>
+        {conversation?.length > 0 && <button className="btn btn-sm" onClick={handleResetChat}>Reset Chat</button>}
       </div>
 
       <div className="sm:p-2 mt-4 justify-between flex flex-col h-[86vh] border rounded-md w-full z-10">
@@ -57,17 +63,17 @@ function Chat({ params }) {
                 <div className="chat-bubble break-keep inline-block">
                   <ReactMarkdown components={{
                     code: ({ node, inline, className, children, ...props }) => (
-                     <CodeBlock
-                     inline={inline}
-                     className={className}
-                      isDark={true} // Pass isDark to CodeBlock
-                     {...props}
-                  >
-                 {children}
-               </CodeBlock>
-    )
-  }}>{message.content}</ReactMarkdown>
-</div>
+                      <CodeBlock
+                        inline={inline}
+                        className={className}
+                        isDark={true} // Pass isDark to CodeBlock
+                        {...props}
+                      >
+                        {children}
+                      </CodeBlock>
+                    )
+                  }}>{message.content}</ReactMarkdown>
+                </div>
               </div>
             )
           })}
@@ -77,7 +83,7 @@ function Chat({ params }) {
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-10">
           <div className="relative flex flex-col gap-4 w-full">
             <div className="flex flex-row gap-2">
-              <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} message={messages} params={params} uploadedImages={uploadedImages} setUploadedImages={setUploadedImages} />
+              <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} message={messages} params={params} uploadedImages={uploadedImages} setUploadedImages={setUploadedImages} conversation={conversation} setConversation={setConversation} />
             </div>
           </div>
           {errorMessage && (
