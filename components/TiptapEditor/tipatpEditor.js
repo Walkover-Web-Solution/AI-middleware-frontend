@@ -81,6 +81,7 @@ const EditorComponent = ({ params, provider, ydoc}) => {
           label.style.borderRadius = "4px";
           label.style.fontSize = "0.75em";
           label.style.whiteSpace = "nowrap";
+          label.style.zIndex = "100";
           label.textContent = user.name;
 
           cursor.appendChild(label);
