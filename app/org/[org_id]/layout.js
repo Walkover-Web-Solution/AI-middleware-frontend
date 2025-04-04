@@ -1,4 +1,5 @@
 "use client";
+import ErrorPage from "@/app/not-found";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import Navbar from "@/components/navbar";
 import MainSlider from "@/components/sliders/mainSlider";
@@ -23,74 +24,101 @@ export default function layoutOrgPage({ children, params }) {
   const path = pathName.split('?')[0].split('/')
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
-  const { embedToken, alertingEmbedToken, versionData } = useCustomSelector((state) => ({
+  const [isValidOrg, setIsValidOrg] = useState(false);
+
+  const { embedToken, alertingEmbedToken, versionData, organizations } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
-    versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {}
+    versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
+    organizations : state.userDetailsReducer.organizations
   }));
   const urlParams = useParams();
   useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
 
   useEffect(() => {
-    dispatch(getAllBridgesAction((data) => {
-      if (data === 0) {
-        openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
+    const validateOrg = async () => {
+      try {
+        if (!organizations) {
+          return;
+        }
+        const orgExists = organizations[params?.org_id]
+        if (orgExists) {
+          setIsValidOrg(true);
+        } else {
+          setIsValidOrg(false);
+        }
+      } catch (error) {
+        setIsValidOrg(false);
       }
-    }))
-    dispatch(getAllFunctions())
-  }, []);
+    };
+    if (params.org_id && organizations) {
+      validateOrg();
+    }
+  }, [params, organizations]);
 
   useEffect(() => {
-    if (params?.org_id) {
+    if (isValidOrg) {
+      dispatch(getAllBridgesAction((data) => {
+        if (data === 0) {
+          openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
+        }
+      }))
+      dispatch(getAllFunctions())
+    }
+  }, [isValidOrg]);
+
+  useEffect(() => {
+    if (isValidOrg && params?.org_id) {
       dispatch(getAllApikeyAction(params?.org_id));
       dispatch(getAllKnowBaseDataAction(params?.org_id))
     }
-  }, [dispatch, params?.org_id]);
+  }, [isValidOrg, dispatch, params?.org_id]);
 
   const scriptId = "chatbot-main-script";
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
 
   useEffect(() => {
-
-    const updateScript = (token) => {
-      const existingScript = document.getElementById(scriptId);
-      if (existingScript) {
-        document.head.removeChild(existingScript);
-      }
-      if (token) {
-        const script = document.createElement("script");
-        script.setAttribute("embedToken", token);
-        script.setAttribute("hideIcon", true);
-        script.setAttribute("eventsToSubscribe", JSON.stringify(["MESSAGE_CLICK"]));
-        script.id = scriptId;
-        script.src = scriptSrc;
-        document.head.appendChild(script);
-      }
-    };
-
-    dispatch(getAllChatBotAction(params.org_id)).then(e => {
-      const chatbotToken = e?.chatbot_token
-      if (chatbotToken && !pathName.includes('/history')) updateScript(chatbotToken);
-    })
-
-    return () => {
-      if (!pathName.includes('/history')) {
+    if (isValidOrg) {
+      const updateScript = (token) => {
         const existingScript = document.getElementById(scriptId);
         if (existingScript) {
           document.head.removeChild(existingScript);
         }
-      }
-    };
-  }, []);
+        if (token) {
+          const script = document.createElement("script");
+          script.setAttribute("embedToken", token);
+          script.setAttribute("hideIcon", true);
+          script.setAttribute("eventsToSubscribe", JSON.stringify(["MESSAGE_CLICK"]));
+          script.id = scriptId;
+          script.src = scriptSrc;
+          document.head.appendChild(script);
+        }
+      };
 
+      dispatch(getAllChatBotAction(params.org_id)).then(e => {
+        const chatbotToken = e?.chatbot_token
+        if (chatbotToken && !pathName.includes('/history')) updateScript(chatbotToken);
+      })
+
+      return () => {
+        if (!pathName.includes('/history')) {
+          const existingScript = document.getElementById(scriptId);
+          if (existingScript) {
+            document.head.removeChild(existingScript);
+          }
+        }
+      };
+    }
+  }, [isValidOrg]);
 
   useEffect(() => {
-    window.addEventListener("message", handleMessage);
-
-    return () => {
-      window.removeEventListener("message", handleMessage);
-    };
-  }, [params.id, versionData, version_id, path]);
+    if (isValidOrg) {
+      window.addEventListener("message", handleMessage);
+      return () => {
+        window.removeEventListener("message", handleMessage);
+      };
+    }
+  }, [isValidOrg, params.id, versionData, version_id, path]);
 
   async function handleMessage(e) {
     // todo: need to make api call to update the name & description
@@ -158,7 +186,9 @@ export default function layoutOrgPage({ children, params }) {
   }
 
   const isHomePage = useMemo(() => path?.length < 5, [path]);
-
+  if (!isValidOrg) {
+    return <ErrorPage></ErrorPage>;
+  }
   if (isHomePage) {
     return (
       <div className="flex h-screen">
