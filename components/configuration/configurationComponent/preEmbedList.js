@@ -7,11 +7,23 @@ import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 
 const PreEmbedList = ({ params }) => {
-    const { integrationData, bridge_pre_tools, function_data } = useCustomSelector((state) => ({
-        integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
-        bridge_pre_tools: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.pre_tools || [],
-        function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData || {},
-    }));
+    const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const orgData = state?.bridgeReducer?.org?.[params?.org_id];
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
+        return {
+            integrationData: orgData?.integrationData || {},
+            function_data: orgData?.functionData || {},
+            bridge_pre_tools: versionData?.pre_tools || [],
+            modelType: modelTypeName,
+            model: modelName,
+            service: serviceName,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools
+        };
+    });
     const dispatch = useDispatch();
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
 
@@ -83,15 +95,16 @@ const PreEmbedList = ({ params }) => {
                     <label className='label-text font-medium whitespace-nowrap'>Pre functions</label>
                 </div>
                 <div className="label flex-col items-start">
-                    <div className="flex flex-wrap gap-4">
-                        {renderEmbed}
-                    </div>
+                    {shouldToolsShow &&
+                        <div className="flex flex-wrap gap-4">
+                            {renderEmbed}
+                        </div>}
                 </div>
             </div>
         </div> :
         (
             <div className='flex'>
-                <EmbedListSuggestionDropdownMenu params={params} name={"Select Pre function"} hideCreateFunction={true} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} />
+                <EmbedListSuggestionDropdownMenu params={params} name={"Select Pre function"} hideCreateFunction={true} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} shouldToolsShow={shouldToolsShow} modelName={model} />
             </div>
         )
     );
