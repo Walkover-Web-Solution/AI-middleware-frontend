@@ -132,7 +132,7 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
 
 export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, pagelimit = 40) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}&version_id=${versionId=== 'undefined' ? undefined : versionId}`, {
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}&version_id=${versionId === 'undefined' ? undefined : versionId}`, {
       params: {
         user_feedback
       }
@@ -885,6 +885,16 @@ export const deleteFunctionApi = async (function_name) => {
       data: { function_name }
     });
     return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const createBridgeWithAiAPi = async ({ ...dataToSend }) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/api/v1/config/create_bridge_using_ai`, dataToSend);
+    return response;
   } catch (error) {
     console.error(error);
     return error;
