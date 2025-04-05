@@ -12,7 +12,7 @@ function ApiKeyMessage({ params }) {
 
     if (!bridgeApiKey) {
         return (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-base-200 z-[99999] gap-2">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-base-200 z-[100000] gap-2">
                 <AlertTriangle className="h-12 w-12 text-warning" />
                 <div className="text-lg font-semibold">API Key Required</div>
                 <div className="text-sm text-center">
