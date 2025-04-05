@@ -86,7 +86,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
       ref={sidebarRef}
       className={`fixed inset-y-0 right-0 border-l-2 bg-base-100 shadow-2xl rounded-md ${
         isSliderOpen ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
-      } overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-[9999]`}
+      } overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-[9999999]`}
     >
       {selectedItem && (
         <aside className="flex flex-col h-screen overflow-y-auto">
