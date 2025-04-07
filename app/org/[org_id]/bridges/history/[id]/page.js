@@ -10,6 +10,7 @@ import { clearThreadData, setSelectedVersion } from "@/store/reducer/historyRedu
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import LoadingSpinner from '@/components/loadingSpinner';
 
 export const runtime = "edge";
 
@@ -107,6 +108,12 @@ function Page({ searchParams }) {
     const result = await dispatch(getHistoryAction(params.id, startDate, endDate, nextPage));
     if (result?.length < 40) setHasMore(false);
   }, [dispatch, page, params.id, search]);
+
+  if (loading || !historyData) return (
+    <div>
+      <LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px'/>
+    </div>
+  )
 
   return (
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
