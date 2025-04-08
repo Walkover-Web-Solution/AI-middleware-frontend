@@ -54,7 +54,6 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
 
     const handleSendMessage = async (e) => {
         if (inputRef.current) {
-            inputRef.current.style.height = 'auto';
             inputRef.current.style.height = '40px'; // Set initial height
         }
         if (prompt?.trim() === "" && (modelType !== 'completion' && modelType !== 'embedding')) {
@@ -248,7 +247,6 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     onKeyDown={handleKeyDown}
                     rows={1}
                     onInput={(e) => {
-                        e.target.style.height = 'auto';
                         e.target.style.height = `${e.target.scrollHeight}px`;
                     }}
                 />
