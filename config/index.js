@@ -900,3 +900,13 @@ export const getBridgeConfigHistory = async (versionId, page = 1, pageSize = 30)
     throw new Error(error);
   }
 };
+
+export const getAllServices = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/api/v1/config/service`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};
