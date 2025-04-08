@@ -36,6 +36,13 @@ function Chat({ params }) {
                 <div className="chat-header">
                   {message.sender}
                   <time className="text-xs opacity-50 pl-2">{message.time}</time>
+                  {message?.sender === "Assist" && message?.fallback && (
+                    <div className="flex items-center gap-1 bg-base-200/70 text-primary px-2 py-1 rounded-full text-xs my-1">
+                      <span className="text-[0.7rem]">↻</span>
+                      <span>Retried with</span>
+                      <span className="font-medium">{message?.modelName}</span>
+                    </div>
+                  )}
                 </div>
                 <div>
                   {message?.image_urls && message?.image_urls?.length > 0 && (
@@ -57,17 +64,17 @@ function Chat({ params }) {
                 <div className="chat-bubble break-keep inline-block">
                   <ReactMarkdown components={{
                     code: ({ node, inline, className, children, ...props }) => (
-                     <CodeBlock
-                     inline={inline}
-                     className={className}
-                      isDark={true} // Pass isDark to CodeBlock
-                     {...props}
-                  >
-                 {children}
-               </CodeBlock>
-    )
-  }}>{message.content}</ReactMarkdown>
-</div>
+                      <CodeBlock
+                        inline={inline}
+                        className={className}
+                        isDark={true} // Pass isDark to CodeBlock
+                        {...props}
+                      >
+                        {children}
+                      </CodeBlock>
+                    )
+                  }}>{message.content}</ReactMarkdown>
+                </div>
               </div>
             )
           })}

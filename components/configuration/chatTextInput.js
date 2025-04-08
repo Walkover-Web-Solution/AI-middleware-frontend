@@ -146,7 +146,9 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             const assistConversation = {
                 role: response?.role || "assistant",
                 content: content,
-                image_urls: response?.image_urls || []
+                fallback : response?.fallback,
+                image_urls: response?.image_urls || [],
+                model: response?.model
             };
 
             if (modelType !== 'completion' && modelType !== 'embedding') {
@@ -162,7 +164,9 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     minute: "2-digit",
                 }),
                 content: Array.isArray(content) ? content.join(", ") : content.toString(),
-                image_urls: assistConversation.image_urls
+                image_urls: assistConversation.image_urls,
+                fallback : assistConversation?.fallback,
+                modelName : assistConversation?.model
             };
 
             setMessages(prevMessages => [...prevMessages, newChatAssist]);
