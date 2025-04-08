@@ -23,10 +23,11 @@ export default function layoutOrgPage({ children, params }) {
   const path = pathName.split('?')[0].split('/')
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
-  const { embedToken, alertingEmbedToken, versionData } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, preTools } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
-    versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {}
+    versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
+    preTools : state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {}
   }));
   const urlParams = useParams();
   useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
@@ -131,7 +132,7 @@ export default function layoutOrgPage({ children, params }) {
           title: e?.data?.title,
         };
         dispatch(createApiAction(params.org_id, dataFromEmbed)).then((data) => {
-          if (!versionData?.[data?._id]) {
+          if (!versionData?.[data?._id] && !preTools?.includes(data?._id)) {
             dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
               versionId: version_id,
