@@ -1,5 +1,5 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { DEFAULT_MODEL, SERVICES } from "@/jsonFiles/bridgeParameter";
+import { DEFAULT_MODEL } from "@/jsonFiles/bridgeParameter";
 import { createBridgeAction, createBridgeWithAiAction } from "@/store/action/bridgeAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,8 @@ function CreateNewBridge({ orgid }) {
     const textAreaPurposeRef = useRef();
     const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState();
 
-    const { allBridgeLength, allBridgeList, modelsList } = useCustomSelector((state) => ({
+    const { allBridgeLength, allBridgeList, modelsList, SERVICES } = useCustomSelector((state) => ({
+        SERVICES : state?.serviceReducer?.services,
         allBridgeLength: (state.bridgeReducer.org[orgid] || [])?.length,
         allBridgeList: (state.bridgeReducer.org[orgid] || [])?.orgs,
         modelsList: state?.modelReducer?.serviceModels[selectedService],
@@ -173,7 +174,7 @@ function CreateNewBridge({ orgid }) {
                                 <select value={selectedService} onChange={handleService} className="select select-bordered w-full ">
                                     <option disabled></option>
                                     {SERVICES.map((service, index) => (
-                                        <option key={index} value={service}>{service}</option>
+                                        <option key={index} value={service?.value}>{service?.displayName}</option>
                                     ))}
                                 </select>
                             </label>
