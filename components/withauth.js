@@ -41,11 +41,7 @@ const WithAuth = (Children) => {
       let redirectionUrl = localStorage.getItem("previous_url") || "/org";
 
       if (proxyToken) {
-        if(localStorage.getItem("previous_url")){
-          await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch);
-        }
-        router.replace(redirectionUrl);
-        localStorage.removeItem("previous_url");
+        router.replace("/org");
         return;
       }
 
