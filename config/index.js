@@ -891,6 +891,16 @@ export const deleteFunctionApi = async (function_name) => {
   }
 }
 
+export const getBridgeConfigHistory = async (versionId, page = 1, pageSize = 30) => {
+  try {
+    const response = await axios.get(`${URL}/api/v1/config/getuserupdates/${versionId}?page=${page}&limit=${pageSize}`);
+    return response.data; 
+  } catch (error) {
+    console.error("Error fetching bridge config history:", error);
+    throw new Error(error);
+  }
+};
+
 export const createBridgeWithAiAPi = async ({ ...dataToSend }) => {
   try {
     const response = await axios.post(`${PYTHON_URL}/api/v1/config/create_bridge_using_ai`, dataToSend);
