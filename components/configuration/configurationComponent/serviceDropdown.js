@@ -1,12 +1,13 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { DEFAULT_MODEL, SERVICES } from "@/jsonFiles/bridgeParameter";
+import { DEFAULT_MODEL } from "@/jsonFiles/bridgeParameter";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { Info } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 
 function ServiceDropdown({ params }) {
-    const { bridgeType, service } = useCustomSelector((state) => ({
+    const { bridgeType, service, SERVICES } = useCustomSelector((state) => ({
+        SERVICES: state?.serviceReducer?.services,
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
     }));
@@ -46,8 +47,8 @@ function ServiceDropdown({ params }) {
                     disabled={isDisabled}
                 >
                     <option disabled>Select a Service</option>
-                    {SERVICES.map((service, index) => (
-                        <option key={index} value={service}>{service}</option>
+                    {SERVICES?.map((service, index) => (
+                        <option key={index} value={service?.value}>{service?.displayName}</option>
                     ))}
                 </select>
                 {isDisabled && (

@@ -4,6 +4,7 @@ import Protected from '@/components/protected';
 import { switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
+import { getServiceAction } from '@/store/action/serviceAction';
 import { userDetails } from '@/store/action/userDetailsAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { filterOrganizations, openModal } from '@/utils/utility';
@@ -42,6 +43,7 @@ function Page() {
 
   useEffect(() => {
     dispatch(userDetails());
+    dispatch(getServiceAction())
   }, []);
 
   const filteredOrganizations = filterOrganizations(organizations,searchQuery);

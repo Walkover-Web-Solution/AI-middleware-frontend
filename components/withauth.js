@@ -1,11 +1,31 @@
-"use client"
-import { loginUser } from '@/config';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useLayoutEffect, useState } from 'react';
+"use client";
+import { loginUser } from "@/config";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useLayoutEffect, useState } from "react";
+import { switchOrg } from "@/config";
+import { userDetails } from "@/store/action/userDetailsAction";
+import { useDispatch } from "react-redux";
+
+
+const handleUserDetailsAndSwitchOrg = async (url, dispatch) => {
+  await dispatch(userDetails());
+  const companyRefId = extractCompanyRefId(url); 
+  if (companyRefId) {
+    await switchOrg(companyRefId); 
+  }
+};
+
+const extractCompanyRefId = (url) => {
+  const regex = /\/org\/(\d+)\//; // This assumes the company_ref_id is between '/org/' and another '/'
+  const match = url.match(regex);
+  return match ? match[1] : null; 
+};
+
 
 const WithAuth = (Children) => {
   return (props) => {
     const router = useRouter();
+    const dispatch = useDispatch();
 
     const [loading, setLoading] = useState(false);
     const searchParams = useSearchParams();
@@ -18,6 +38,8 @@ const WithAuth = (Children) => {
 
       const proxyToken = localStorage.getItem('proxy_token');
       const proxyAuthToken = proxy_auth_token;
+      let redirectionUrl = localStorage.getItem("previous_url") || "/org";
+
       if (proxyToken) {
         router.replace("/org");
         return;
@@ -37,7 +59,11 @@ const WithAuth = (Children) => {
           localStorage.setItem('local_token', localToken.token);
         }
 
-        router.replace("/org");
+        if(localStorage.getItem("previous_url")) {
+          await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch);
+        }
+        router.replace(redirectionUrl);
+        localStorage.removeItem("previous_url");
         return;
       }
 
@@ -73,9 +99,6 @@ const WithAuth = (Children) => {
       runEffect();
     }, []);
 
-    if (localStorage.getItem('proxy_token')) {
-      router.replace('/org');
-    }
     return <Children {...props} loading={loading}/>;
   }
 };
