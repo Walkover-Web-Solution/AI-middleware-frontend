@@ -50,7 +50,7 @@ function ConfigHistorySlider({ versionId }) {
   return (
     <aside
       id="default-config-history-slider"
-      className="sidebar-container fixed flex flex-col top-0 right-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen bg-base-200 transition-all duration-300 border-l overflow-y-auto translate-x-full"
+      className="sidebar-container fixed z-[999999] flex flex-col top-0 right-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen bg-base-200 transition-all duration-300 border-l overflow-y-auto translate-x-full"
       aria-label="Config History Slider"
     >
       <div className="flex flex-col w-full gap-4">

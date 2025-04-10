@@ -193,7 +193,7 @@ const InputConfigComponent = ({ params }) => {
 
     const renderSuggestions = () => {
         return (
-            <div className="dropdown dropdown-open z-[999999]" style={{
+            <div className="dropdown dropdown-open z-[9999999]" style={{
                 position: 'absolute',
                 top: getCaretCoordinatesAdjusted().top + 4,
                 left: getCaretCoordinatesAdjusted().left + 8,
@@ -293,7 +293,7 @@ const InputConfigComponent = ({ params }) => {
         <div className="form-control h-full">
           <textarea
             ref={textareaRef}
-            className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2 rounded-b-none"
+            className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-[8] caret-black p-2 rounded-b-none"
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
