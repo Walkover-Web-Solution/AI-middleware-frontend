@@ -1,6 +1,7 @@
 "use client";
 import ErrorPage from "@/app/not-found";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
+import LoadingSpinner from "@/components/loadingSpinner";
 import Navbar from "@/components/navbar";
 import MainSlider from "@/components/sliders/mainSlider";
 import { getSingleMessage } from "@/config";
@@ -25,12 +26,13 @@ export default function layoutOrgPage({ children, params }) {
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(false);
-
-  const { embedToken, alertingEmbedToken, versionData, organizations } = useCustomSelector((state) => ({
+  const [loading, setLoading] = useState(true);
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
-    organizations : state.userDetailsReducer.organizations
+    organizations : state.userDetailsReducer.organizations,
+    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {}
   }));
   const urlParams = useParams();
   useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
@@ -58,10 +60,12 @@ export default function layoutOrgPage({ children, params }) {
 
   useEffect(() => {
     if (isValidOrg) {
+      setLoading(true);
       dispatch(getAllBridgesAction((data) => {
         if (data === 0) {
           openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
         }
+        setLoading(false);
       }))
       dispatch(getAllFunctions())
     }
@@ -145,10 +149,10 @@ export default function layoutOrgPage({ children, params }) {
               }
             }));
           }
-          dispatch(deleteFunctionAction({function_name : e?.data?.id, orgId:path[2], functionId: selectedVersionData?._id}));
+          dispatch(deleteFunctionAction({ function_name: e?.data?.id, orgId: path[2], functionId: selectedVersionData?._id }));
         }
       }
-      
+
       if ((e?.data?.action === "published" || e?.data?.action === "paused" || e?.data?.action === "created" || e?.data?.action === "updated")) {
         const dataFromEmbed = {
           url: e?.data?.webhookurl,
@@ -159,7 +163,7 @@ export default function layoutOrgPage({ children, params }) {
           title: e?.data?.title,
         };
         dispatch(createApiAction(params.org_id, dataFromEmbed)).then((data) => {
-          if (!versionData?.[data?._id]) {
+          if (!versionData?.[data?._id] && !preTools?.includes(data?._id)) {
             dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
               versionId: version_id,
@@ -197,7 +201,9 @@ export default function layoutOrgPage({ children, params }) {
         </div>
         <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto overflow-x-hidden">
           <Navbar />
-          <main className="px-2">{children}</main>
+          {loading ? <LoadingSpinner /> :
+            <main className="px-2">{children}</main>
+          }
         </div>
         <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
       </div>
@@ -206,7 +212,7 @@ export default function layoutOrgPage({ children, params }) {
     return (
       <div className="h-screen">
         <Navbar />
-        {children}
+        {loading ? <LoadingSpinner /> : children}
         <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
       </div>
     );
