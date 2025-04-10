@@ -3,7 +3,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { filterOrganizations } from '@/utils/utility';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { DEFAULT_MODEL, SERVICES } from '@/jsonFiles/bridgeParameter';
+import { DEFAULT_MODEL } from '@/jsonFiles/bridgeParameter';
 import Protected from '@/components/protected';
 import { getModelAction } from '@/store/action/modelAction';
 import { switchOrg } from '@/config';
@@ -13,58 +13,62 @@ import { createBridgeAction } from '@/store/action/bridgeAction';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '@/components/loadingSpinner';
 
+const INITIAL_FORM_STATE = {
+    bridgeName: '',
+    selectedOrg: null,
+    searchQuery: '',
+    bridgeType: 'api',
+    selectedService: 'openai',
+    selectedModel: "gpt-4o",
+    selectedModelType: 'chat',
+    slugName: '',
+    isLoading: false
+};
+
 function Page() {
     const dispatch = useDispatch();
     const route = useRouter();
-    const [formState, setFormState] = useState({
-        bridgeName: '',
-        selectedOrg: null,
-        searchQuery: '',
-        bridgeType: 'api',
-        selectedService: 'openai',
-        selectedModel: "gpt-4o",
-        selectedModelType: 'chat',
-        slugName: '',
-        isLoading: false
-    });
+    const [formState, setFormState] = useState(INITIAL_FORM_STATE);
 
-    const organizations = useCustomSelector(state => state.userDetailsReducer.organizations);
-    const modelsList = useCustomSelector(state => state?.modelReducer?.serviceModels[formState.selectedService]);
+    const { organizations, modelsList, SERVICES } = useCustomSelector(state => ({
+        organizations: state.userDetailsReducer.organizations,
+        modelsList: state?.modelReducer?.serviceModels[formState.selectedService],
+        SERVICES: state?.serviceReducer?.services
+    }));
 
     useEffect(() => {
-        if (formState.selectedService) {
-            dispatch(getModelAction({ service: formState.selectedService }));
-        }
+        formState.selectedService && dispatch(getModelAction({ service: formState.selectedService }));
     }, [formState.selectedService, dispatch]);
 
     const updateFormState = useCallback((updates) => {
         setFormState(prev => ({ ...prev, ...updates }));
     }, []);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
+        const { selectedOrg, bridgeName, bridgeType, slugName } = formState;
 
-        if (!formState.selectedOrg || !formState.bridgeName.trim()) {
+        if (!selectedOrg || !bridgeName.trim()) {
             return toast.error('Please select an organization and enter a bridge name');
         }
 
-        if (formState.bridgeType === 'chatbot' && !formState.slugName.trim()) {
+        if (bridgeType === 'chatbot' && !slugName.trim()) {
             return toast.error('Please enter a slug name for chatbot');
         }
 
         try {
             updateFormState({ isLoading: true });
-            const response = await switchOrg(formState.selectedOrg.id);
+            const response = await switchOrg(selectedOrg.id);
 
             if (process.env.NEXT_PUBLIC_ENV === 'local') {
                 const { token } = await switchUser({
-                    orgId: formState.selectedOrg.id,
-                    orgName: formState.selectedOrg.name
+                    orgId: selectedOrg.id,
+                    orgName: selectedOrg.name
                 });
                 localStorage.setItem('local_token', token);
             }
 
-            await dispatch(setCurrentOrgIdAction(formState.selectedOrg.id));
+            await dispatch(setCurrentOrgIdAction(selectedOrg.id));
 
             if (response.status !== 200) {
                 throw new Error('Failed to switch organization');
@@ -73,38 +77,26 @@ function Page() {
             const bridgeData = {
                 service: formState.selectedService,
                 model: formState.selectedModel,
-                name: formState.bridgeName,
-                slugName: formState.slugName || formState.bridgeName,
-                bridgeType: formState.bridgeType,
+                name: bridgeName,
+                slugName: slugName || bridgeName,
+                bridgeType,
                 type: formState.selectedModelType,
-                orgid: formState.selectedOrg.id
+                orgid: selectedOrg.id
             };
 
-            await new Promise((resolve, reject) => {
-                dispatch(createBridgeAction({
-                    dataToSend: bridgeData,
-                    orgid: formState.selectedOrg.id
-                }, (data) => {
-                    setTimeout(() => {
-                        route.push(`/org/${formState.selectedOrg.id}/bridges/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
-                        resolve();
-                    }, 100);
-                })).catch(reject);
-            });
+            dispatch(createBridgeAction({
+                dataToSend: bridgeData,
+                orgid: selectedOrg.id
+            }, (data) => {
+                route.push(`/org/${selectedOrg.id}/bridges/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+            }));
 
         } catch (error) {
             console.error("Error:", error.message || error);
             toast.error(error.message || "An error occurred");
-        } finally {
-            updateFormState({
-                selectedService: "openai",
-                selectedModel: "gpt-4o",
-                selectedModelType: "chat",
-                bridgeType: "api",
-                isLoading: false
-            });
+            updateFormState({ isLoading: false });
         }
-    };
+    }, [formState, dispatch, route]);
 
     const handleSelectOrg = useCallback((orgId, orgName) => {
         updateFormState({ selectedOrg: { id: orgId, name: orgName } });
@@ -181,47 +173,52 @@ function Page() {
                                 <span className="label-text font-medium">Used as</span>
                             </div>
                             <div className="flex items-center gap-6">
-                                <label className="label cursor-pointer gap-2">
-                                    <input
-                                        type="radio"
-                                        name="bridgeType"
-                                        className="radio radio-primary"
-                                        value="api"
-                                        checked={formState.bridgeType === "api"}
-                                        onChange={() => updateFormState({ bridgeType: 'api' })}
-                                        required
-                                    />
-                                    <span className="label-text">API</span>
-                                </label>
-                                <label className="label cursor-pointer gap-2">
-                                    <input
-                                        type="radio"
-                                        name="bridgeType"
-                                        className="radio radio-black"
-                                        value="chatbot"
-                                        checked={formState.bridgeType === "chatbot"}
-                                        onChange={() => updateFormState({ bridgeType: 'chatbot' })}
-                                        required
-                                    />
-                                    <span className="label-text">ChatBot</span>
-                                </label>
+                                {['api', 'chatbot'].map(type => (
+                                    <label key={type} className="label cursor-pointer gap-2">
+                                        <input
+                                            type="radio"
+                                            name="bridgeType"
+                                            className={`radio radio-${type === 'api' ? 'primary' : 'black'}`}
+                                            value={type}
+                                            checked={formState.bridgeType === type}
+                                            onChange={() => updateFormState({ bridgeType: type })}
+                                            required
+                                        />
+                                        <span className="label-text">{type === 'api' ? 'API' : 'ChatBot'}</span>
+                                    </label>
+                                ))}
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 gap-6">
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text font-medium">Bridge Name</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formState.bridgeName}
-                                    onChange={handleChange('bridgeName')}
-                                    className="input input-bordered w-full focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter bridge name"
-                                    required
-                                />
-                            </div>
+                            {[
+                                {
+                                    label: 'Bridge Name',
+                                    field: 'bridgeName',
+                                    type: 'text',
+                                    placeholder: 'Enter bridge name'
+                                },
+                                formState.bridgeType === 'chatbot' && {
+                                    label: 'Slug Name',
+                                    field: 'slugName',
+                                    type: 'text',
+                                    placeholder: 'Enter slug name'
+                                }
+                            ].filter(Boolean).map(({ label, field, type, placeholder }) => (
+                                <div key={field} className="form-control">
+                                    <label className="label">
+                                        <span className="label-text font-medium">{label}</span>
+                                    </label>
+                                    <input
+                                        type={type}
+                                        value={formState[field]}
+                                        onChange={handleChange(field)}
+                                        className="input input-bordered w-full focus:ring-2 focus:ring-blue-500"
+                                        placeholder={placeholder}
+                                        required
+                                    />
+                                </div>
+                            ))}
 
                             <div className="form-control">
                                 <label className="label">
@@ -232,8 +229,8 @@ function Page() {
                                     onChange={handleService}
                                     className="select select-bordered w-full focus:ring-2 focus:ring-blue-500"
                                 >
-                                    {SERVICES.map((service) => (
-                                        <option key={service} value={service}>{service}</option>
+                                    {SERVICES.map(({ value, displayName }) => (
+                                        <option key={value} value={value}>{displayName}</option>
                                     ))}
                                 </select>
                             </div>
@@ -249,41 +246,22 @@ function Page() {
                                     required
                                 >
                                     <option disabled></option>
-                                    {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
-                                        if (group !== 'models') {
-                                            return (
-                                                <optgroup label={group} key={`group_${groupIndex}`}>
-                                                    {Object.keys(options || {}).map((option, optionIndex) => {
-                                                        const modelName = options?.[option]?.configuration?.model?.default;
-                                                        return modelName && (
-                                                            <option key={`option_${option}_${optionIndex}`}>
-                                                                {modelName}
-                                                            </option>
-                                                        );
-                                                    })}
-                                                </optgroup>
-                                            );
-                                        }
-                                        return null;
-                                    })}
+                                    {Object.entries(modelsList || {}).map(([group, options], groupIndex) => (
+                                        group !== 'models' && (
+                                            <optgroup label={group} key={`group_${groupIndex}`}>
+                                                {Object.keys(options || {}).map((option, optionIndex) => {
+                                                    const modelName = options?.[option]?.configuration?.model?.default;
+                                                    return modelName && (
+                                                        <option key={`option_${option}_${optionIndex}`}>
+                                                            {modelName}
+                                                        </option>
+                                                    );
+                                                })}
+                                            </optgroup>
+                                        )
+                                    ))}
                                 </select>
                             </div>
-
-                            {formState.bridgeType === 'chatbot' && (
-                                <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium">Slug Name</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formState.slugName}
-                                        onChange={handleChange('slugName')}
-                                        className="input input-bordered w-full focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter slug name"
-                                        required
-                                    />
-                                </div>
-                            )}
                         </div>
 
                         <button

@@ -2,7 +2,6 @@
 import ErrorPage from "@/app/not-found";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import LoadingSpinner from "@/components/loadingSpinner";
-import LoadingSpinner from "@/components/loadingSpinner";
 import Navbar from "@/components/navbar";
 import MainSlider from "@/components/sliders/mainSlider";
 import { getSingleMessage } from "@/config";
