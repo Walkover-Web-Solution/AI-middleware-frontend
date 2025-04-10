@@ -9,7 +9,7 @@ import { truncate } from '@/components/historyPageComponents/assistFile';
 
 const PrebuiltToolsList = ({ params }) => {
     const { prebuiltToolsData, toolsVersionData, service } = useCustomSelector((state) => ({
-        prebuiltToolsData: state?.prebuiltToolsReducer?.prebuiltToolsData?.[params?.org_id],
+        prebuiltToolsData: state?.bridgeReducer?.prebuiltTools,
         toolsVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.built_in_tools,
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
     }));
