@@ -160,7 +160,7 @@ function Navbar() {
               <div className='ml-2'>
               </div>
 
-              <div className="dropdown dropdown-end">
+              {/* <div className="dropdown dropdown-end">
                 <div tabIndex={0} role="button" className="btn capitalize m-1">
                   <Ellipsis />
                 </div>
@@ -171,7 +171,7 @@ function Navbar() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </div> */}
             </>
           ) : (
             path[3] === 'apikeys' ?
