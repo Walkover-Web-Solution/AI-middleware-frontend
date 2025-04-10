@@ -159,19 +159,6 @@ function Navbar() {
               </div>
               <div className='ml-2'>
               </div>
-
-              {/* <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className="btn capitalize m-1">
-                  <Ellipsis />
-                </div>
-                <ul tabIndex={0} className="dropdown-content z-[9999999999] menu p-2 shadow bg-base-100 rounded-box w-52 custom-dropdown">
-                  {['Archive'].map((item) => (
-                    <li key={item} onClick={() => handleDeleteBridge(item, bridge.status !== undefined ? Number(!bridge.status) : undefined)}>
-                      <a className={path[3] === item ? "active" : ""}>{item === 'Archive' ? (bridge.status === 0 ? 'Unarchive' : 'Archive') : item.charAt(0).toUpperCase() + item.slice(1)}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div> */}
             </>
           ) : (
             path[3] === 'apikeys' ?
