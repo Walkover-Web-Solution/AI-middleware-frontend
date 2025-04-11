@@ -35,7 +35,7 @@ function TestCases({ params }) {
 
   useEffect(() => {
     if (selectedVersion) {
-      router.replace(`?version=${bridgeVersion}&versionId=${selectedVersion}`);
+      router.push(`?version=${bridgeVersion}&versionId=${selectedVersion}`);
     }
   }, [selectedVersion, router]);
 
@@ -43,7 +43,7 @@ function TestCases({ params }) {
     setIsLoading(true);
     dispatch(runTestCaseAction({ versionId, bridgeId: params?.id }))
       .then(() => { dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id })); setIsLoading(false); setSelectedVersion(versionId) });
-    router.replace(`?version=${bridgeVersion}&versionId=${versionId}`);
+    router.push(`?version=${bridgeVersion}&versionId=${versionId}`);
   }
 
   const toggleRow = (index) => {
