@@ -6,7 +6,7 @@ import Protected from "@/components/protected";
 import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getHistoryAction, userFeedbackCountAction } from "@/store/action/historyAction";
-import { clearThreadData, setSelectedVersion } from "@/store/reducer/historyReducer";
+import { clearThreadData, clearHistoryData, setSelectedVersion } from "@/store/reducer/historyReducer";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -51,7 +51,9 @@ function Page({ searchParams }) {
 
   useEffect(() => {
     return () => {
+      console.log("Unmounting component and clearing data...");
       dispatch(clearThreadData());
+      dispatch(clearHistoryData());
       dispatch(setSelectedVersion("all"));
     };
   }, []);
@@ -76,6 +78,15 @@ function Page({ searchParams }) {
       const endDate = search.get("end");
       await dispatch(getHistoryAction(params.id, startDate, endDate, 1, null, filterOption));
       dispatch(clearThreadData());
+      if (!params?.thread_id && historyData.length > 0) {
+        const firstThreadId = historyData[0]?.thread_id;
+        if (firstThreadId) {
+          console.log('version', params.version);
+          console.log('thread_id', firstThreadId);
+          // Update the URL with the first thread_id
+          router.push(`${pathName}?version=${params.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}`, undefined, { shallow: true });
+        }
+      }
       setLoading(false);
     };
     if (!searchRef.current.value) fetchInitialData();
