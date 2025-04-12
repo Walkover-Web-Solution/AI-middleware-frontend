@@ -4,14 +4,14 @@ import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, dup
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss, TestTube } from 'lucide-react';
+import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss, TestTube, MessageCircleMore } from 'lucide-react';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import OrgSlider from './sliders/orgSlider';
-
+import ConfigHistorySlider from "./sliders/configHistorySlider";
 
 function Navbar() {
   const router = useRouter();
@@ -93,9 +93,11 @@ function Navbar() {
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleBridgeSidebar = () => toggleSidebar('default-bridge-sidebar');
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
+  const toggleConfigHistorySidebar = () =>
+    toggleSidebar("default-config-history-slider", "right");
 
   return (
-    <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[100] max-h-[4rem] bg-base-100 sticky top-0`}>
+    <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[100002] max-h-[4rem] bg-base-100 sticky top-0`}>
       <div className={`flex items-center w-full justify-start gap-2 ${path.length > 4 ? '' : 'hidden'}`}>
         <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/bridges`)}>
           <Home size={16} />
@@ -122,6 +124,9 @@ function Navbar() {
       <div className="justify-end w-full" >
         {path.length === 6 && path[3] === 'bridges' ? (
           <>
+            <button className="btn m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
+              <History size={16} />
+            </button>
             {path[4] === 'configure' && (
               <div className='flex items-center'>
                 {(isdrafted && publishedVersion === versionId) && (
@@ -149,7 +154,7 @@ function Navbar() {
             <div className="join">
               <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'configure' ? "btn-primary" : ""} btn join-item`}><FileSliders size={16} /> Configure</button>
               <button onClick={() => router.push(`/org/${path[2]}/bridges/testcase/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'testcase' ? "btn-primary" : ""} btn join-item`}><TestTube size={16} /> Test Cases</button>
-              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'history' ? "btn-primary" : ""} btn join-item`}><History size={16} /> History</button>
+              <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'history' ? "btn-primary" : ""} btn join-item`}><MessageCircleMore size={16} /> Chat Logs</button>
             </div>
             <div className='ml-2'>
             </div>
@@ -207,7 +212,7 @@ function Navbar() {
       {/* chatbot slider */}
       <ChatBotSlider />
 
-
+      <ConfigHistorySlider versionId={versionId} />
     </div>
   );
 }

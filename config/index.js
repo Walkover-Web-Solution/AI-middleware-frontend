@@ -890,3 +890,23 @@ export const deleteFunctionApi = async (function_name) => {
     return error;
   }
 }
+
+export const getBridgeConfigHistory = async (versionId, page = 1, pageSize = 30) => {
+  try {
+    const response = await axios.get(`${URL}/api/v1/config/getuserupdates/${versionId}?page=${page}&limit=${pageSize}`);
+    return response.data; 
+  } catch (error) {
+    console.error("Error fetching bridge config history:", error);
+    throw new Error(error);
+  }
+};
+
+export const getAllServices = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/api/v1/config/service`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};

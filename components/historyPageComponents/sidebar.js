@@ -262,7 +262,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                 }`}
                               onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, params.thread_id)}
                             >
-                              {subThreadId?.display_name}
+                              {subThreadId?.display_name || subThreadId?.sub_thread_id}
                             </li>
                           ))
                         )}
