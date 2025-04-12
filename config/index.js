@@ -217,13 +217,20 @@ export const logout = async () => {
   }
 }
 
-export const allAuthKey = async () => {
+export const allAuthKey = async (name = null) => {
   try {
-
-    const response = await axios(`${PROXY_URL}/api/c/authkey`)
-    return response?.data?.data
+    let url = `${PROXY_URL}/api/c/authkey`;
+    
+    // If name is provided, add it as a query parameter
+    if (name) {
+      url += `?name=${encodeURIComponent(name)}`;
+    }
+    
+    const response = await axios(url);
+    return response?.data?.data;
   } catch (error) {
-    console.error(error)
+    console.error(error);
+    throw error;
   }
 }
 
@@ -885,3 +892,33 @@ export const runTestCaseApi = async ({ versionId }) => {
     return error;
   }
 }
+
+export const getOrCreateNotificationAuthKey = async () => {
+  try {
+    // First, get the notification auth key by name
+    const notificationAuthKeys = await allAuthKey("gtwy_trigger");
+    
+    // Check if the notification auth key exists
+    const notificationAuthKey = notificationAuthKeys?.length > 0 ? notificationAuthKeys[0] : null;
+    
+    if (notificationAuthKey) {
+      // If it exists, return it
+      return notificationAuthKey;
+    } else {
+      // If it doesn't exist, create it
+      const dataToSend = {
+        name: "gtwy_notification",
+        throttle_limit: "60:800",
+        temporary_throttle_limit: "60:600",
+        temporary_throttle_time: "30"
+      };
+      
+      const response = await createAuthKey(dataToSend);
+      return response?.data;
+    }
+  } catch (error) {
+    console.error("Error in getOrCreateNotificationAuthKey:", error);
+    throw error;
+  }
+};
+
