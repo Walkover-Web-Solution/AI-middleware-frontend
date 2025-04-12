@@ -62,6 +62,14 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       let result;
       let url;
 
+      if(!thread_id && historyData &&  historyData?.length > 0) {
+        const firstThreadId = historyData?.[0]?.thread_id;
+        if (firstThreadId) {
+          router.push(`${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}`, undefined, { shallow: true });
+          return;
+        }
+      }
+
       // Debounced thread fetching function
       const fetchThread = async (threadId) => {
         try {

@@ -24,7 +24,6 @@ function Page({ searchParams }) {
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
   const searchRef = useRef();
-  console.log("page touched");
   const { historyData, thread, selectedVersion } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
