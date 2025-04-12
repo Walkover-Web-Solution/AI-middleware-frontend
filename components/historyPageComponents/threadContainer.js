@@ -48,63 +48,76 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     openModal(MODAL_TYPE.ADD_TEST_CASE_MODAL);
   };
   
-  {/* hkjllddddddddddddddd */}
 
   useEffect(() => {
-    console.log("useeffect")
-    const fetchData = async () => {
-      console.log("fetchdata function")
-      const thread_id = params?.thread_id;  // Get thread_id from URL params
-      const startDate = search.get("start");
-      const endDate = search.get("end");
-      setThreadPage(1);
-      setLoadingData(true); // Set loading to true before fetching data
-      let result;
+    let timeoutId;
 
-      let  url;
-      // This url is only used to make a request to fetch the thread.
+    const fetchData = async () => {
+      const thread_id = params?.thread_id;
+      const startDate = search.get("start"); 
+      const endDate = search.get("end");
+      
+      setThreadPage(1);
+      setLoadingData(true);
+      let result;
+      let url;
+
+      // Debounced thread fetching function
       const fetchThread = async (threadId) => {
-        // Generate the URL for the API request
-        url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}`;
-        if (startDate && endDate) {
-          // If start and end dates are provided, append them to the URL
-          url += `&start=${startDate}&end=${endDate}`;
+        try {
+          url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}`;
+          if (startDate && endDate) {
+            url += `&start=${startDate}&end=${endDate}`;
+          }
+
+          // Add 500ms delay before making the request
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          result = await dispatch(getThread({
+            threadId,
+            bridgeId: params?.id,
+            nextPage: 1,
+            user_feedback: filterOption,
+            subThreadId: params?.subThread_id || threadId,
+            versionId: selectedVersion === "all" ? "" : selectedVersion,
+          }));
+
+          return result;
+        } catch (error) {
+          console.error("Error fetching thread:", error);
+          setLoadingData(false);
+          return null;
         }
-  
-        // Dispatch action to fetch thread data
-        result = await dispatch(getThread({
-          threadId,
-          bridgeId: params?.id,
-          nextPage: 1,
-          user_feedback: filterOption,
-          subThreadId: params?.subThread_id || threadId,
-          versionId: selectedVersion === "all" ? "" : selectedVersion,
-        }));
-  
-        return result;
       };
-  
-      // If thread_id exists in params, fetch the respective thread
+      // Only fetch if we have valid data
       if (thread_id && historyData?.some(history => history?.thread_id === thread_id)) {
-        await fetchThread(thread_id);
-      } else if (historyData?.length > 0) {
-        // If thread_id doesn't exist, fetch the first thread from historyData
-        const firstThreadId = historyData?.[0]?.thread_id;
-        if (firstThreadId) {
-          await fetchThread(firstThreadId);  // Fetch the first thread
-          // No need to update the URL here, it's already done in Page.js
-        }
+        result = await fetchThread(thread_id);
+      } 
+
+      if (result) {
+        setThreadMessageState({ 
+          totalPages: result?.totalPages, 
+          totalEntries: result?.totalEnteries 
+        });
+        setHasMoreThreadData(result?.data?.length >= 40);
       }
-  
-      setThreadMessageState({ totalPages: result?.totalPages, totalEntries: result?.totalEnteries });
-      setHasMoreThreadData(result?.data?.length >= 40);
+
       setIsFetchingMore(false);
       setLoading(false);
-      setLoadingData(false); // Set loading to false after data is fetched
+      setLoadingData(false);
     };
-  
-    fetchData();
-  }, [params?.thread_id, search, filterOption, selectedVersion, dispatch]);
+
+    // Debounce the fetchData call
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fetchData();
+    }, 300);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+
+  }, [params?.thread_id, filterOption,search, params?.subThread_id,  selectedVersion]);
   
 
 

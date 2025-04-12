@@ -22,6 +22,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedThreads, setExpandedThreads] = useState([]);
+  const [loadingSubThreads, setLoadingSubThreads] = useState(false);
   const dispatch = useDispatch();
   const pathName = usePathname();
   const router = useRouter();
@@ -87,13 +88,15 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     const isExpanded = expandedThreads?.includes(threadId);
     if (isExpanded) {
       setExpandedThreads(prev => prev.filter(id => id !== threadId));
-      setThreadPage(1);
-      const result = await dispatch(getThread({ threadId, bridgeId: params?.id, subThreadId: params?.subThread_id, nextPage: 1 }));
-      setHasMoreThreadData(result?.data?.length >= 40);
-      router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${threadId}`, undefined, { shallow: true });
+      // setThreadPage(1);
+      // const result = await dispatch(getThread({ threadId, bridgeId: params?.id, subThreadId: params?.subThread_id, nextPage: 1 }));
+      // setHasMoreThreadData(result?.data?.length >= 40);
+      // router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${threadId}`, undefined, { shallow: true });
     } else {
       setExpandedThreads([threadId]);
+      setLoadingSubThreads(true);
       await dispatch(getSubThreadsAction({ thread_id: threadId }));
+      setLoadingSubThreads(false);
     }
   };
 
@@ -115,6 +118,16 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setThreadPage(1);
     dispatch(userFeedbackCountAction({ bridge_id: params?.id, user_feedback }));
   };
+
+  const SubThreadSkeleton = () => (
+    <div className="pl-10 p-2">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded-md mb-2"></div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="drawer-side justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r relative" id="sidebar">
@@ -245,29 +258,35 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                     </a>
                   </li>
                   {params.thread_id === item?.thread_id && expandedThreads?.includes(item?.thread_id) && (
-                    <div className="pl-10 p-2 text-gray-600 text-sm">
-                      <ul>
-                        {subThreads?.length === 0 ? (
-                          <li>No sub thread available</li>
-                        ) : (
-                          subThreads?.map((subThreadId, index) => (
-                            <li
-                              key={index}
-                              className={`cursor-pointer ${params.subThread_id === subThreadId?.sub_thread_id
-                                ? "hover:bg-base-primary hover:text-base-100"
-                                : "hover:bg-base-300 hover:text-gray-800"
-                                } p-2 rounded-md transition-all duration-200 ${params.subThread_id === subThreadId?.sub_thread_id
-                                  ? "bg-primary text-base-100"
-                                  : ""
-                                }`}
-                              onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, params.thread_id)}
-                            >
-                              {subThreadId?.display_name || subThreadId?.sub_thread_id}
-                            </li>
-                          ))
-                        )}
-                      </ul>
-                    </div>
+                    <>
+                      {loadingSubThreads ? (
+                        <SubThreadSkeleton />
+                      ) : (
+                        <div className="pl-10 p-2 text-gray-600 text-sm">
+                          <ul>
+                            {subThreads?.length === 0 ? (
+                              <li>No sub thread available</li>
+                            ) : (
+                              subThreads?.map((subThreadId, index) => (
+                                <li
+                                  key={index}
+                                  className={`cursor-pointer ${params.subThread_id === subThreadId?.sub_thread_id
+                                    ? "hover:bg-base-primary hover:text-base-100"
+                                    : "hover:bg-base-300 hover:text-gray-800"
+                                    } p-2 rounded-md transition-all duration-200 ${params.subThread_id === subThreadId?.sub_thread_id
+                                      ? "bg-primary text-base-100"
+                                      : ""
+                                    }`}
+                                  onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, params.thread_id)}
+                                >
+                                  {subThreadId?.display_name || subThreadId?.sub_thread_id}
+                                </li>
+                              ))
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </>
                   )}
                   {item?.message && item?.message?.length > 0 && (
                     <div className="pl-10 pb-2 text-gray-600 text-sm">

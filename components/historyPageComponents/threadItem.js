@@ -417,7 +417,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           </div>}
           {
             item?.error && (
-              <div className="chat chat-start">
+              <div className="chat chat-start break-all break-words">
                 <div>
                   <div className="flex flex-row-reverse items-end justify-end gap-1">
                     <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
