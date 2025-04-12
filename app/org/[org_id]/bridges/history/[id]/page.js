@@ -24,7 +24,7 @@ function Page({ searchParams }) {
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
   const searchRef = useRef();
-  
+  console.log("page touched");
   const { historyData, thread, selectedVersion } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
@@ -79,7 +79,7 @@ function Page({ searchParams }) {
       const startDate = search.get("start");
       const endDate = search.get("end");
      const result =  await dispatch(getHistoryAction(params.id, startDate, endDate, 1, null, filterOption));
-      // dispatch(clearThreadData());
+      dispatch(clearThreadData());
       if(params?.thread_id) {
         const threadId = params?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
