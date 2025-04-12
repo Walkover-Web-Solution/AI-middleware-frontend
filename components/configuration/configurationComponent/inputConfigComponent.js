@@ -336,6 +336,11 @@ const InputConfigComponent = ({ params }) => {
                                     <span className="">&#123;&#123;pre_function&#125;&#125;</span>
                                     <span className="">- Use this variable if you are using the pre_function</span>
                                 </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
+                                    <span className="">&#123;&#123;timezone&#125;&#125;</span>
+                                    <span className="">- Access the timezone using a timezone identifier</span>
+                                </div>
                             </div>
                         </div>
                     </div>
