@@ -1,5 +1,5 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { DEFAULT_MODEL, SERVICES } from "@/jsonFiles/bridgeParameter";
+import { DEFAULT_MODEL } from "@/jsonFiles/bridgeParameter";
 import { createBridgeAction } from "@/store/action/bridgeAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { useRouter } from "next/navigation";
@@ -16,7 +16,8 @@ function CreateNewBridge({ orgid }) {
     const [selectedType, setSelectedType] = useState("chat");
     const [bridgeType, setBridgeType] = useState("api");
 
-    const { allBridgeLength, modelsList } = useCustomSelector((state) => ({
+    const { allBridgeLength, modelsList, SERVICES } = useCustomSelector((state) => ({
+        SERVICES : state?.serviceReducer?.services,
         allBridgeLength: (state.bridgeReducer.org[orgid] || [])?.length,
         modelsList: state?.modelReducer?.serviceModels[selectedService],
     }));
@@ -129,7 +130,7 @@ function CreateNewBridge({ orgid }) {
                                 <select value={selectedService} onChange={handleService} className="select select-bordered w-full ">
                                     <option disabled></option>
                                     {SERVICES.map((service, index) => (
-                                        <option key={index} value={service}>{service}</option>
+                                        <option key={index} value={service?.value}>{service?.displayName}</option>
                                     ))}
                                 </select>
                             </label>

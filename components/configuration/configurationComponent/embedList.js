@@ -28,16 +28,24 @@ function getStatusClass(status) {
 const EmbedList = ({ params }) => {
     const [functionId, setFunctionId] = useState(null);
     const dispatch = useDispatch();
-    const { integrationData, bridge_functions, function_data, modelType, model, embedToken } = useCustomSelector((state) => ({
-        integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {},
-        function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData || {},
-        bridge_functions: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.function_ids || [],
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
-        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
-        embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
-
-    }));
-
+    const { integrationData, bridge_functions, function_data, modelType, model, service, shouldToolsShow, embedToken } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const orgData = state?.bridgeReducer?.org?.[params?.org_id];
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
+        return {
+            integrationData: orgData?.integrationData || {},
+            function_data: orgData?.functionData || {},
+            bridge_functions: versionData?.function_ids || [],
+            modelType: modelTypeName,
+            model: modelName,
+            service: serviceName,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            embedToken: orgData?.embed_token,
+        };
+    });
     const handleOpenModal = (functionId) => {
         setFunctionId(functionId);
         openModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL)
@@ -127,11 +135,14 @@ const EmbedList = ({ params }) => {
         <div>
             <FunctionParameterModal functionId={functionId} params={params} />
             <div className="label flex-col items-start mb-2">
-                <div className="flex flex-wrap gap-4">
-                    {renderEmbed}
-                </div>
+                {
+                    shouldToolsShow &&
+                    <div className="flex flex-wrap gap-4">
+                        {renderEmbed}
+                    </div>
+                }
             </div>
-            <EmbedListSuggestionDropdownMenu params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} />
+            <EmbedListSuggestionDropdownMenu params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />
         </div>
     );
 };

@@ -124,14 +124,18 @@ export const isValidJson = (jsonString) => {
     }
 };
 
-export const toggleSidebar = (sidebarId) => {
+export const toggleSidebar = (sidebarId, direction = "left") => {
     const sidebar = document.getElementById(sidebarId);
     const handleClickOutside = (event) => {
         const sidebar = document.getElementById(sidebarId);
         const button = event.target.closest('button');
 
         if (sidebar && !sidebar.contains(event.target) && !button) {
-            sidebar.classList.add('-translate-x-full');
+            if (direction === "left") {
+                sidebar.classList.add('-translate-x-full');
+            } else {
+                sidebar.classList.add('translate-x-full');
+            }
             document.removeEventListener('click', handleClickOutside);
             document.removeEventListener('keydown', handleEscPress);
         }
@@ -139,16 +143,24 @@ export const toggleSidebar = (sidebarId) => {
 
     const handleEscPress = (event) => {
         if (event.key === 'Escape') {
-            sidebar.classList.add('-translate-x-full');
+            if (direction === "left") {
+                sidebar.classList.add('-translate-x-full');
+            } else {
+                sidebar.classList.add('translate-x-full');
+            }
             document.removeEventListener('click', handleClickOutside);
             document.removeEventListener('keydown', handleEscPress);
         }
     };
 
     if (sidebar) {
-        sidebar.classList.toggle('-translate-x-full');
+        if (direction === "left") {
+            sidebar.classList.toggle('-translate-x-full');
+        } else {
+            sidebar.classList.toggle('translate-x-full');
+        }
 
-        if (!sidebar.classList.contains('-translate-x-full')) {
+        if (!sidebar.classList.contains(direction === "left" ? '-translate-x-full' : 'translate-x-full')) {
             document.addEventListener('click', handleClickOutside);
             document.addEventListener('keydown', handleEscPress);
         } else {
@@ -290,3 +302,9 @@ export const GetFileTypeIcon = (fileType, height, width) => {
             return <GoogleDocIcon height={height} width={width} />;
     }
 }
+
+export const updateTitle = (newTitle) => {
+    if (typeof document !== 'undefined' && newTitle) {
+      document.title = newTitle;
+    }
+  };

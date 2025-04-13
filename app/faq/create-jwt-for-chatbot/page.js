@@ -1,5 +1,13 @@
 import { LucideBot, LucideBuilding, LucideKey, LucideUser } from "lucide-react";
 
+export const metadata = {
+  title: "Integrate Chatbot | GTWY AI",
+  description: "Learn how to create JWT tokens for integrating GTWY AI chatbots into your applications - step-by-step guide for secure authentication",
+  category: 'technology',
+  generator: 'GTWY AI',
+  keywords: "gtwy ai, ai middleware, ai integration platform, ai chatbot service, openai integration, anthropic api, groq ai, o1 ai, ai automation tools, ai api gateway, large language model integration, llm api, ai software solutions, ai-powered chatbot, ai model deployment, machine learning api, enterprise ai solutions, ai infrastructure, artificial intelligence services, custom ai development, ai orchestration, ai cloud services, multi-ai platform, ai business solutions, ai developer tools, ai framework, gpt integration, ai tools for business, llm deployment, ai model hosting, ai tech stack, ai-powered applications, smart ai assistant, best ai middleware, chatbot development platform, ai-powered automation",
+};
+
 const CreateJwtToken = () => {
   return (
     <div className="w-full p-8 bg-white rounded-xl shadow-lg">

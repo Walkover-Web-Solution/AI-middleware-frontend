@@ -23,13 +23,14 @@ export const ADVANCED_BRIDGE_PARAMETERS = {
 
 export const KEYS_NOT_TO_DISPLAY = ['model', 'prompt', 'apikey', 'type', 'bridgeType', 'tools', 'response_format', 'stream', 'vision'];
 
-export const SERVICES = ['openai', 'anthropic', 'groq'];
+// export const SERVICES = ['openai', 'anthropic', 'groq', 'openai_response'];
 
 export const DEFAULT_MODEL = {
     'openai': "gpt-4o",
     'google': 'gemini-pro',
     'anthropic': "claude-3-5-sonnet-latest",
-    'groq': "llama3-8b-8192"
+    'groq': "llama3-8b-8192",
+    'openai_response': "gpt-4o"
 }
 
 export function getDefaultValues(additionalParams, bridgeParams) {

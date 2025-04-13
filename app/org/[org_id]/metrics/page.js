@@ -133,7 +133,7 @@ function Page({ params }) {
         </div>
         <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Select Bridge:</label>
-          <div className={`dropdown dropdown-end z-[99] border rounded-lg ${level !== 'Bridge' ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`dropdown dropdown-end z-[999] border rounded-lg ${level !== 'Bridge' ? 'opacity-50 pointer-events-none' : ''}`}>
           <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Bridge'}</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-row overflow-y-auto max-h-[70vh]">
             <input

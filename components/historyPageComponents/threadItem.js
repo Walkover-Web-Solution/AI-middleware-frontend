@@ -1,6 +1,6 @@
 import { getSingleMessage } from "@/config";
 import { updateContentHistory } from "@/store/action/historyAction";
-import { Bot, BotMessageSquare, ChevronDown, FileClock, MessageCircleCode, Parentheses, Pencil, Plus, SquareFunction, User } from "lucide-react";
+import { AlertCircle, Bot, BotMessageSquare, ChevronDown, FileClock, MessageCircleCode, Parentheses, Pencil, Plus, SquareFunction, User } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -153,7 +153,8 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   );
 
   const handleAskAi = async (item) => {
-    let variables = { ...item }
+    const aiconfig = handleAddTestCase(item, index, true)
+    let variables = {aiconfig, response: item?.chatbot_message ? item?.chatbot_message : item?.content}
     try {
       const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
       variables = { "System Prompt": systemPromptResponse, ...variables }
@@ -165,9 +166,13 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       "bridgeName": "history_page_chabot",
       "threadId": item?.id,
       variables,
-      version_id: null
+      version_id: 'null',
+      hideCloseButton : 'false'
     });
     setTimeout(() => window.openChatbot(), 100)
+  }
+  const handleUserButtonClick = (value) => {
+    threadHandler(item.thread_id, item, value)
   }
 
   return (
@@ -254,40 +259,14 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     </ul>
                   </div>
                 )}
-
               </div>
-
             </div>
-
             <div className="chat-header flex gap-4 items-center mb-1">
               {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
             </div>
-            {item?.firstAttemptError && item?.role === "assistant" && (
-              <div className="collapse bg-base-300 rounded-lg shadow-sm max-w-24 mb-2 hover:shadow-md transition-shadow duration-200">
-                <input
-                  type="checkbox"
-                  className="peer"
-                  id={`errorCollapse-${item.id || index}`}
-                />
-
-                <label
-                  htmlFor={`errorCollapse-${item.id || index}`}
-                  className="collapse-title text-sm font-medium cursor-pointer flex justify-between items-center py-2"
-                >
-                  <span className="flex items-center gap-1">
-                    Error
-                  </span>
-                  <ChevronDown className="w-4 h-4 transition-transform peer-checked:rotate-180" />
-                </label>
-
-                <div className="collapse-content text-sm max-w-[400px]">
-                  {item?.firstAttemptError}
-                </div>
-              </div>
-            )}
-            <div className="flex justify-start items-start gap-1" >
-              <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "cursor-pointer chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`} onClick={() => threadHandler(item.thread_id, item)}>
-
+            
+            <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1`}>
+              <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`}>
                 {item?.role === "assistant" && item?.image_url && (
                   <div className="chat chat-start">
                     <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
@@ -318,6 +297,31 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+                {item?.firstAttemptError && item?.role === "assistant" && (
+                  <div className="collapse bg-base-200/50  p-0">
+                    <input
+                      type="checkbox"
+                      className="peer"
+                      // id={`errorCollapse-${item.id || index}`}
+                    />
+                    <label
+                      htmlFor={`errorCollapse-${item.id || index}`}
+                      className="collapse-title text-sm font-medium cursor-pointer flex items-center justify-between  hover:bg-base-300/50 transition-colors p-0"
+                    >
+                      <span className="flex items-center gap-4">
+                        <AlertCircle className="w-4 h-4 text-warning" />
+                        <span className="font-light">Retry Attempt with {item?.model}</span>
+                        <ChevronDown className="w-4 h-4 transform peer-checked:rotate-180 transition-transform" />
+                      </span>
+                     
+                    </label>
+                    <div className="collapse-content bg-base-100/50 rounded-b-md text-sm  border-t border-base-300">
+                      <div className="text-error font-mono break-words bg-base-200/50 rounded-md p-2">
+                        <pre className="whitespace-pre-wrap">{item?.firstAttemptError}</pre>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -364,7 +368,49 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </div>}
               </div>
             </div>
-            {item?.role !== "assistant" && <time className="text-xs opacity-50 chat-end">{formatDateAndTime(item.createdAt)}</time>}
+            {item?.role === "user" && <div className="flex flex-row-reverse gap-2 m-1 items-center">
+                <time className="text-xs opacity-50 chat-end">
+                  {formatDateAndTime(item.createdAt)}
+                </time> 
+                <div className="flex gap-1">
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("AiConfig")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <SquareFunction className="h-3 w-3" />
+                      <span>Ai config</span>
+                    </div>
+                  </button>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("variables")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <Parentheses className="h-3 w-3" />
+                      <span>Variables</span>
+                    </div>
+                  </button>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("system Prompt")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <FileClock className="h-3 w-3" />
+                      <span>System Prompt</span>
+                    </div>
+                  </button>
+                  <button
+                    className="btn btn-xs see-on-hover"
+                    onClick={() => handleUserButtonClick("more")}
+                  >
+                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                      <Plus className="h-3 w-3" />
+                      <span>More...</span>
+                    </div>
+                  </button>
+                </div>
+              </div>}
           </div>
           {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div className="flex justify-center items-center my-4">
             <p className="border-t border-base-300 w-full"></p>

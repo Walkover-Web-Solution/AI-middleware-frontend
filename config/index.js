@@ -130,9 +130,9 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   }
 }
 
-export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, pagelimit = 40) => {
+export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, pagelimit = 40) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}`, {
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}&version_id=${versionId=== 'undefined' ? undefined : versionId}`, {
       params: {
         user_feedback
       }
@@ -162,23 +162,6 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
   }
 };
 
-export const getVersionHistory = async (threadId, bridgeId, versionId, nextPage = 1, user_feedback, pagelimit = 40) => {
-  try {
-    const response = await axios.get(
-      `${URL}/api/v1/config/threads/${threadId}/${bridgeId}?version_id=${versionId}`, {
-      params: {
-        sub_thread_id: threadId,
-        pageNo: nextPage,
-        limit: pagelimit,
-        user_feedback: user_feedback
-      }
-    }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 export const dryRun = async ({ localDataToSend, bridge_id }) => {
   try {
@@ -843,7 +826,6 @@ export const optimizeJsonApi = async ({ data }) => {
       `${PYTHON_URL}/bridge/genrate/rawjson`,
       data
     );
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -888,6 +870,7 @@ export const runTestCaseApi = async ({ versionId }) => {
     const response = await axios.post(`${PYTHON_URL}/api/v2/model/testcases/${versionId}`, { "version_id": versionId });
     return response.data;
   } catch (error) {
+    toast.error(error?.response?.data?.detail?.error ? error?.response?.data?.detail?.error : "Error while running the testcases")
     console.error(error);
     return error;
   }
@@ -922,3 +905,44 @@ export const getOrCreateNotificationAuthKey = async () => {
   }
 };
 
+export const updateTestCaseApi = async ({ bridge_id, dataToUpdate }) => {
+  try {
+    const response = await axios.put(`${URL}/testcases/`, { bridge_id, ...dataToUpdate });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const deleteFunctionApi = async (function_name) => {
+  try {
+    const response = await axios.delete(`${PYTHON_URL}/functions/`, {
+      data: { function_name }
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const getBridgeConfigHistory = async (versionId, page = 1, pageSize = 30) => {
+  try {
+    const response = await axios.get(`${URL}/api/v1/config/getuserupdates/${versionId}?page=${page}&limit=${pageSize}`);
+    return response.data; 
+  } catch (error) {
+    console.error("Error fetching bridge config history:", error);
+    throw new Error(error);
+  }
+};
+
+export const getAllServices = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/api/v1/config/service`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};

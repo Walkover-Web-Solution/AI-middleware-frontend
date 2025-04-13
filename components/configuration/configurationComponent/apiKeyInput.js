@@ -1,6 +1,5 @@
 import ApiKeyModal from '@/components/modals/ApiKeyModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { SERVICES } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
@@ -13,7 +12,7 @@ const ApiKeyInput = ({ params }) => {
     const [selectedApiKeys, setSelectedApiKeys] = useState({});
     const dropdownRef = useRef(null);
 
-    const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
+    const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id, currentService, SERVICES } = useCustomSelector((state) => {
         const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version] || {};
         const apikeys = state?.bridgeReducer?.apikeys || {};
 
@@ -23,6 +22,7 @@ const ApiKeyInput = ({ params }) => {
             apikeydata: apikeys[params?.org_id] || [], // Ensure apikeydata is an array
             bridgeApikey_object_id: bridgeMap?.apikey_object_id,
             currentService: bridgeMap?.service,
+            SERVICES : state?.serviceReducer?.services
         };
     });
     // Memoize filtered API keys
@@ -120,7 +120,7 @@ const ApiKeyInput = ({ params }) => {
                         maxLength="10"
                         value={selectedValue}
                     >
-                        <option value="">Select API key</option>
+                        <option value="" disabled>Select API key</option>
 
                         {/* Display bridge_apiKey if it is not in the filtered API keys */}
                         {!bridgeApikey_object_id && bridge_apiKey && !apikeydata.some(apiKey => apiKey?._id === bridge_apiKey) && (
@@ -157,25 +157,25 @@ const ApiKeyInput = ({ params }) => {
                 <div>
                     {showDropdown && (
                         <div className="absolute w-full bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-80 overflow-auto">
-                            {SERVICES?.filter(service => service !== bridge?.service).map(service => (
-                                <div key={service} className="px-4 py-2 border-b last:border-b-0">
-                                    <div className="font-semibold capitalize mb-1">{service}</div>
-                                    {filterApiKeysByService(service).map(apiKey => (
-                                        <label key={apiKey._id} className="flex items-center mb-1">
+                            {SERVICES?.filter(service => service?.value !== bridge?.service).map(service => (
+                                <div key={service?.value} className="px-4 py-2 border-b last:border-b-0">
+                                    <div className="font-semibold capitalize mb-1">{service?.displayName}</div>
+                                    {filterApiKeysByService(service?.value)?.map(apiKey => (
+                                        <label key={apiKey?._id} className="flex items-center mb-1">
                                             <input
                                                 type="radio"
-                                                name={`apiKey-${service}`}
-                                                value={apiKey._id}
-                                                checked={selectedApiKeys[service] === apiKey?._id}
-                                                onChange={() => handleSelectionChange(service, apiKey._id)}
+                                                name={`apiKey-${service?.value}`}
+                                                value={apiKey?._id}
+                                                checked={selectedApiKeys[service?.value] === apiKey?._id}
+                                                onChange={() => handleSelectionChange(service?.value, apiKey?._id)}
                                                 className="radio h-4 w-4"
                                             />
                                             <span className="ml-2 text-sm">
-                                                {truncateText(apiKey.name, maxChar)}
+                                                {truncateText(apiKey?.name, maxChar)}
                                             </span>
                                         </label>
                                     ))}
-                                    {filterApiKeysByService(service).length === 0 && (
+                                    {filterApiKeysByService(service?.value)?.length === 0 && (
                                         <span className="text-sm text-gray-500">No API keys available</span>
                                     )}
                                 </div>

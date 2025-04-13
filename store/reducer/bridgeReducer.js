@@ -162,9 +162,14 @@ export const bridgeReducer = createSlice({
       if (!state.org[orgId].triggerData) {
         state.org[orgId].triggerData = [];
       }
-
       // Add the new trigger data
       state.org[orgId].triggerData.push(dataToSend);
+    },
+    removeFunctionDataReducer: (state, action) => {
+      const { functionId, orgId } = action.payload;
+      if (state.org[orgId]?.functionData?.[functionId]) {
+        delete state.org[orgId].functionData[functionId];
+      }
     },
     updateVariables: (state, action) => {
       const { data, bridgeId, versionId = "" } = action.payload;
@@ -277,8 +282,9 @@ export const {
   updateBridgeActionReducer,
   updateFunctionReducer,
   optimizePromptReducer,
-  webhookURLForBatchAPIReducer,
-  updateTriggerDataReducer
+  updateTriggerDataReducer,
+  removeFunctionDataReducer,
+  webhookURLForBatchAPIReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;

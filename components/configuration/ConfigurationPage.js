@@ -1,8 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { Bot, Cog } from "lucide-react";
+import { Bot, Cog, FileSliders } from "lucide-react";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useMemo } from 'react';
-import AddVariable from "../addVariable";
+import { useEffect, useMemo, useState } from 'react';
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
@@ -26,11 +25,12 @@ import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/uti
 import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import TriggersList from "./configurationComponent/TriggersList";
+import AddVariable from "../addVariable";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const view = searchParams.get('view') || 'setup';
+    const view = searchParams.get('view') || 'config';
     const [currentView, setCurrentView] = useState(view);
 
     const { bridgeType, modelType, modelName } = useCustomSelector((state) => ({
@@ -61,9 +61,7 @@ export default function ConfigurationPage({ params }) {
 
     const renderSetupView = useMemo(() => () => (
         <>
-            {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
             {bridgeType === 'trigger' && <TriggersList params={params} />}
-
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING && (modelType === AVAILABLE_MODEL_TYPES.REASONING
                 ? PROMPT_SUPPORTED_REASIONING_MODELS?.includes(modelName)
                 : true)) && (
@@ -83,12 +81,18 @@ export default function ConfigurationPage({ params }) {
                 <>
                     <AddVariable params={params} />
                     <GptMemory params={params} />
-                    <UserRefernceForRichText params={params} />
                     <ToolCallCount params={params} />
-                    <ActionList params={params} />
                 </>
             )}
             {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
+        </>
+    ), [bridgeType, modelType, params, modelName]);
+
+    const renderChatbotConfigView = useMemo(() => () => (
+        <>
+            <SlugNameInput params={params} />
+            <UserRefernceForRichText params={params} />
+            <ActionList params={params} />
         </>
     ), [bridgeType, modelType, params, modelName]);
 
@@ -124,10 +128,16 @@ export default function ConfigurationPage({ params }) {
                     <BridgeVersionDropdown params={params} />
                     <div className="join">
                         <button
-                            onClick={() => handleNavigation('setup')}
-                            className={` ${currentView === 'setup' ? "btn-primary" : ""} btn join-item `}
+                            onClick={() => handleNavigation('config')}
+                            className={` ${currentView === 'config' ? "btn-primary" : ""} btn join-item `}
                         >
-                            <Cog size={16} /> Setup
+                            <Cog size={16} /> Config
+                        </button>
+                        <button
+                            onClick={() => handleNavigation('chatbot-config')}
+                            className={` ${currentView === 'chatbot-config' ? "btn-primary" : ""} btn join-item `}
+                        >
+                            <FileSliders size={16} /> Chatbot Config
                         </button>
                         <button
                             onClick={() => handleNavigation('guide')}
@@ -138,7 +148,7 @@ export default function ConfigurationPage({ params }) {
                     </div>
                 </div>
             </div>
-            {currentView === 'setup' ? renderSetupView() : renderGuideView()}
+            {currentView === 'chatbot-config' ? renderChatbotConfigView() : currentView === 'guide' ? renderGuideView() : renderSetupView()}
             {renderNeedHelp()}
         </div>
     );

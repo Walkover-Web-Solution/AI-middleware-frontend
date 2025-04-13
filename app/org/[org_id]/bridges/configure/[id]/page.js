@@ -11,22 +11,31 @@ import { getModelAction } from "@/store/action/modelAction";
 import { useEffect, useRef } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
+import { updateTitle } from "@/utils/utility";
+import ApiKeyMessage from "@/components/apiKeyMessage";
 
 export const runtime = 'edge';
 const Page = ({ searchParams }) => {
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const { bridgeType, service, isServiceModelsAvailable, versionService } = useCustomSelector((state) => {
+  const { bridgeType, service, isServiceModelsAvailable, versionService, bridgeName } = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
       bridgeType: bridgeData?.bridgeType,
       service: versionData?.service,
       isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[versionData?.service],
-      versionService: versionData?.service
+      versionService: versionData?.service,
+      bridgeName: bridgeData?.name,
     };
   });
+
+  useEffect(() => {
+    if (bridgeName) {
+      updateTitle(`GTWY Ai | ${bridgeName}`);
+    }
+  }, [bridgeName]);
 
   useEffect(() => {
     dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
@@ -48,10 +57,6 @@ const Page = ({ searchParams }) => {
   }, [service]);
 
   useEffect(() => {
-    handleResizer();
-  }, []);
-
-  useEffect(() => {
     if (mountRef.current) {
       if (bridgeType === 'chatbot') {
         if (typeof openChatbot !== 'undefined' && document.getElementById('parentChatbot')) {
@@ -66,25 +71,24 @@ const Page = ({ searchParams }) => {
     mountRef.current = true;
   }, [bridgeType])
 
+  useEffect(() => {
+    handleResizer();
+  }, []);
+
   return (
     <>
       {!bridgeType && <LoadingSpinner />}
-      <div className="flex flex-col items-start justify-start">
-        <div className="flex w-full justify-start gap-16 items-start">
-          <div className="flex flex-col md:flex-row w-full">
-            <div className="w-full md:w-1/2 overflow-auto p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
-              <ConfigurationPage params={params} />
-              <div />
-            </div>
-            <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
-            <div className="w-full md:w-1/2 flex-1 chatPage min-w-[450px]">
-              <div className="p-4 m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
-                {/* {bridgeType === 'chatbot' ? <Chatbot params={params} /> : <Chat params={params} />} */}
-                <Chatbot params={params} key={params} />
-                {/* <Chat params={params} /> */}
-                {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> : <Chat params={params} />}
-              </div>
-            </div>
+      <div className="flex flex-col md:flex-row w-full">
+        <div className="w-full md:w-1/2 overflow-auto p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
+          <ConfigurationPage params={params} />
+          <div />
+        </div>
+        <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
+        <div className="w-full md:w-1/2 flex-1 chatPage min-w-[450px] relative">
+          <div className="m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
+            <Chatbot params={params} key={params} />
+            <ApiKeyMessage params={params} />
+            {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> : <Chat params={params} />}
           </div>
         </div>
       </div>
@@ -93,13 +97,31 @@ const Page = ({ searchParams }) => {
 };
 
 // Extracted functions for better readability
+
 function handleResizer() {
   const resizer = document.querySelector(".resizer");
+  if (!resizer) return;
+
   const leftSide = resizer.previousElementSibling;
+  const rightSide = resizer.nextElementSibling;
   let x = 0;
   let w = 0;
 
   const mouseDownHandler = function (e) {
+    // Prevent iframe from capturing mouse events
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.right = '0';
+    overlay.style.bottom = '0';
+    overlay.style.zIndex = '9999';
+    document.body.appendChild(overlay);
+
+    // Add bg-primary class and ensure cursor-col-resize during resizing
+    resizer.classList.add('bg-primary');
+    document.body.style.cursor = 'col-resize';
+
     x = e.clientX;
     w = leftSide.getBoundingClientRect().width;
     document.addEventListener("mousemove", mouseMoveHandler);
@@ -108,10 +130,21 @@ function handleResizer() {
 
   const mouseMoveHandler = function (e) {
     const dx = e.clientX - x;
-    leftSide.style.width = `${w + dx}px`;
+    const newWidth = Math.max(350, Math.min(w + dx, window.innerWidth - 450));
+    leftSide.style.width = `${newWidth}px`;
   };
 
   const mouseUpHandler = function () {
+    // Remove the overlay
+    const overlay = document.querySelector('div[style*="z-index: 9999"]');
+    if (overlay) {
+      overlay.remove();
+    }
+
+    // Remove bg-primary class and reset cursor when done resizing
+    resizer.classList.remove('bg-primary');
+    document.body.style.cursor = '';
+
     document.removeEventListener("mousemove", mouseMoveHandler);
     document.removeEventListener("mouseup", mouseUpHandler);
   };

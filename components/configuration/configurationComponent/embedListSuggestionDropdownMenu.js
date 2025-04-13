@@ -1,9 +1,9 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
-import { Plus } from 'lucide-react';
+import { Info, Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
-function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [] }) {
+function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
     const { integrationData, function_data, embedToken } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData,
@@ -59,11 +59,22 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             }
             )
     ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, params.version]);
-
     return (
         <div className="dropdown dropdown-right">
-            <button tabIndex={0}
-                className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect function"}</button>
+            <div className="flex items-center gap-2">
+                <button tabIndex={0} disabled={!shouldToolsShow}
+                    className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect function"}
+                </button>
+                {
+                    !shouldToolsShow &&
+                    <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
+                        <Info size={16} className="flex-shrink-0 mt-0.5" />
+                        <span className='label-text-alt text-xs leading-tight'>
+                            {`The ${modelName} does not support ${name?.toLowerCase()?.includes('pre function') ? 'pre functions' : 'functions'} calling`}
+                        </span>
+                    </div>
+                }
+            </div>
             <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                 <div className='flex flex-col gap-2 w-full'>
                     <li className="text-sm font-semibold disabled">Suggested Functions</li>

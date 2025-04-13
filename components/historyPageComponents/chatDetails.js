@@ -2,7 +2,7 @@
 import { MODAL_TYPE } from "@/utils/enums";
 import { allowedAttributes, openModal } from "@/utils/utility";
 import { CircleX, Copy } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
 import { truncate, useCloseSliderOnEsc } from "./assistFile";
@@ -65,19 +65,28 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
     })
   };
 
-  const handleObjectClick = (key, displayValue) => {
-    if (JSON.stringify(displayValue).length > 197) {
+  const handleObjectClick = useCallback((key, displayValue) => {
       setModalContent(key === 'variables' ? {"variable":displayValue} : displayValue);
       openModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL);
+  }, []);
+
+  // Open modal if selectedItem.value matches a key
+  useEffect(() => {
+    if (selectedItem?.value && selectedItem?.value !== 'system Prompt') {
+      const key = selectedItem.value;
+      const value = selectedItem[key];
+      if (value) {
+        handleObjectClick(key, value);
+      }
     }
-  };
+  }, [selectedItem, handleObjectClick]);
 
   return (
     <div
       ref={sidebarRef}
       className={`fixed inset-y-0 right-0 border-l-2 bg-base-100 shadow-2xl rounded-md ${
         isSliderOpen ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
-      } overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-[9999]`}
+      } overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-[9999999]`}
     >
       {selectedItem && (
         <aside className="flex flex-col h-screen overflow-y-auto">
@@ -110,7 +119,12 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                     }
 
                     return (
-                      <div key={key} className="border-b bg-base-100 transition-colors duration-150">
+                      <div 
+                        key={key} 
+                        className={`border-b bg-base-100 transition-colors duration-150 ${
+                          selectedItem?.value === key ? 'ring-2 ring-green-500 ring-opacity-75 shadow-lg rounded-md' : ''
+                        }`}
+                      >
                         <div className="pt-4 px-4 text-sm font-semibold capitalize">
                           {displayKey}
                         </div>

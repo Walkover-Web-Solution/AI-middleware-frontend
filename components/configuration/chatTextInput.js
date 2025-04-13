@@ -8,10 +8,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages }) {
+function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation }) {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [conversation, setConversation] = useState([]);
     const dispatch = useDispatch();
     const inputRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -54,6 +53,9 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     }, [variablesKeyValue]);
 
     const handleSendMessage = async (e) => {
+        if (inputRef.current) {
+            inputRef.current.style.height = '40px'; // Set initial height
+        }
         if (prompt?.trim() === "" && (modelType !== 'completion' && modelType !== 'embedding')) {
             setErrorMessage("Prompt is required");
             return;
@@ -146,7 +148,9 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             const assistConversation = {
                 role: response?.role || "assistant",
                 content: content,
-                image_urls: response?.image_urls || []
+                fallback : response?.fallback,
+                image_urls: response?.image_urls || [],
+                model: response?.model
             };
 
             if (modelType !== 'completion' && modelType !== 'embedding') {
@@ -162,7 +166,9 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     minute: "2-digit",
                 }),
                 content: Array.isArray(content) ? content.join(", ") : content.toString(),
-                image_urls: assistConversation.image_urls
+                image_urls: assistConversation.image_urls,
+                fallback : assistConversation?.fallback,
+                modelName : assistConversation?.model
             };
 
             setMessages(prevMessages => [...prevMessages, newChatAssist]);
@@ -212,7 +218,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     };
 
     return (
-        <div className="input-group flex gap-1 w-full relative">
+        <div className="input-group flex justify-end items-end gap-2 w-full relative">
             {uploadedImages.length > 0 && (
                 <div className="absolute bottom-16 left-0 gap-2 flex w-auto rounded-lg">
                     {uploadedImages.map((url, index) => (
@@ -241,10 +247,12 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 <textarea
                     ref={inputRef}
                     placeholder="Type here"
-                    className="textarea textarea-bordered w-full focus:border-primary"
+                    className="textarea textarea-bordered w-full focus:border-primary max-h-[200px] resize-none overflow-y-auto h-auto"
                     onKeyDown={handleKeyDown}
                     rows={1}
-                    style={{ resize: 'vertical', minHeight: '40px', maxHeight: '100px' }}
+                    onInput={(e) => {
+                        e.target.style.height = `${e.target.scrollHeight}px`;
+                    }}
                 />
             )}
             <input

@@ -1,6 +1,6 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
 import { toast } from "react-toastify";
-import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
+import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
@@ -290,7 +290,16 @@ export const getTestcasesScroreAction = (version_id) => async (dispatch) => {
     const reponse = await getTestcasesScrore(version_id);
     return reponse;
   } catch (error) {
-    toast.error('Failed to Genrate Score')
     toast.error('Failed to genrate testcase score');
+  }
+}
+
+export const deleteFunctionAction = ({function_name, functionId, orgId}) => async (dispatch) => {
+  try {
+    const reponse = await deleteFunctionApi(function_name);
+    dispatch(removeFunctionDataReducer({orgId, functionId}))
+    return reponse;
+  } catch (error) {
+    toast.error('Failed to delete function')
   }
 }
