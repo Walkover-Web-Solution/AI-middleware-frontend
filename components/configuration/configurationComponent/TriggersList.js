@@ -1,3 +1,4 @@
+import { allAuthKey } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateTriggerDataReducer } from "@/store/reducer/bridgeReducer";
 import { Plus } from "lucide-react";
@@ -29,11 +30,18 @@ export default function TriggersList({ params }) {
         triggerData: state?.bridgeReducer?.org?.[params?.org_id]?.triggerData
     }));
     const [triggers, setTriggers] = useState([]);
+    const [authkey, setAuthkey]=useState('')
 
+    async function getAndSetAuthKey(){
+        const data=await allAuthKey()
+        const keytoset=data?.data?.[0]?.authkey
+       if(keytoset) setAuthkey(keytoset)
+    }
     useEffect(() => {
         if (triggerData) {
             setTriggers(triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []);
         }
+        getAndSetAuthKey()
     }, [triggerData, params?.id]);
 
     function openTrigger(triggerId) {
@@ -41,8 +49,20 @@ export default function TriggersList({ params }) {
             embedToken: triggerEmbedToken,
             meta: {
                 type: 'trigger',
-                bridge_id: params?.id
-            }
+                bridge_id: params?.id,
+            },
+            configurationJson:{
+                "rowe6baqarrm": {
+                  "key": "Talk_to_AI",
+                  "inputValues": {
+                    "bridge":params?.id,
+                    "_bridge":params?.id,
+                  },
+                  "authValues": {
+                    "pauth_key": authkey
+                  }
+                }
+              }
         })
     }
 
