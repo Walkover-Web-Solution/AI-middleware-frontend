@@ -910,3 +910,13 @@ export const getAllServices = async () => {
     throw new Error(error);
   }
 };
+
+export const getPrebuiltToolsApi = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/api/v1/config/inbuilt/tools`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}

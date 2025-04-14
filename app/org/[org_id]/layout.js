@@ -7,7 +7,7 @@ import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
-import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, integrationAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
+import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { MODAL_TYPE } from "@/utils/enums";
@@ -48,6 +48,7 @@ export default function layoutOrgPage({ children, params }) {
     if (params?.org_id) {
       dispatch(getAllApikeyAction(params?.org_id));
       dispatch(getAllKnowBaseDataAction(params?.org_id))
+      dispatch(getPrebuiltToolsAction())
     }
   }, [dispatch, params?.org_id]);
 
