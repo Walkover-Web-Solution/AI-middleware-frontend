@@ -348,8 +348,10 @@ const InputConfigComponent = ({ params }) => {
                     </div>
                 </div>
             </div>
-            <ToneDropdown params={params} />
-            <ResponseStyleDropdown params={params} />
+            <div className='flex mt-2'>
+              <ToneDropdown params={params} />
+              <ResponseStyleDropdown params={params} />
+            </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
             <OptimizePromptModal params={params} />
             <PromptSummaryModal params={params}/>
