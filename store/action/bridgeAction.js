@@ -144,7 +144,7 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
   try {
     dispatch(isPending());
     const data = await updateBridgeVersionApi({ versionId, dataToSend });
-    if (data.success) {
+    if (data?.success) {
       dispatch(updateBridgeVersionReducer({ bridges: data.bridge, functionData: dataToSend?.functionData || null }));
     }
   } catch (error) {
