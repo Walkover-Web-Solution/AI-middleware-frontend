@@ -139,7 +139,6 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     inputRef.current.value = data.content;
                     setMessages(prevMessages => prevMessages.slice(0, -1));
                 }
-                toast.error(responseData?.error || "An error occurred");
                 setLoading(false);
                 return;
             }
