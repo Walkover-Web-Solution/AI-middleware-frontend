@@ -911,6 +911,16 @@ export const getAllServices = async () => {
   }
 };
 
+export const modelSuggestionApi = async ({ versionId }) => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/bridge/versions/suggest/${versionId}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
 export const getPrebuiltToolsApi = async () => {
   try {
     const response = await axios.get(`${PYTHON_URL}/api/v1/config/inbuilt/tools`);
