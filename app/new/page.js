@@ -12,6 +12,7 @@ import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { createBridgeAction } from '@/store/action/bridgeAction';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '@/components/loadingSpinner';
+import { getServiceAction } from '@/store/action/serviceAction';
 
 const INITIAL_FORM_STATE = {
     bridgeName: '',
@@ -35,6 +36,12 @@ function Page() {
         modelsList: state?.modelReducer?.serviceModels[formState.selectedService],
         SERVICES: state?.serviceReducer?.services
     }));
+
+    useEffect(() => {
+        if(!SERVICES) {
+            dispatch(getServiceAction({ orgid: params.orgid }))
+        }
+    }, [SERVICES]);
 
     useEffect(() => {
         formState.selectedService && dispatch(getModelAction({ service: formState.selectedService }));
@@ -229,9 +236,9 @@ function Page() {
                                     onChange={handleService}
                                     className="select select-bordered w-full focus:ring-2 focus:ring-blue-500"
                                 >
-                                    {SERVICES.map(({ value, displayName }) => (
+                                    {Array.isArray(SERVICES) ? SERVICES?.map(({ value, displayName }) => (
                                         <option key={value} value={value}>{displayName}</option>
-                                    ))}
+                                    )) : null}
                                 </select>
                             </div>
 
