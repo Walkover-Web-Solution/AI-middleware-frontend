@@ -193,7 +193,7 @@ const InputConfigComponent = ({ params }) => {
 
     const renderSuggestions = () => {
         return (
-            <div className="dropdown dropdown-open z-[999999]" style={{
+            <div className="dropdown dropdown-open z-[9999999]" style={{
                 position: 'absolute',
                 top: getCaretCoordinatesAdjusted().top + 4,
                 left: getCaretCoordinatesAdjusted().left + 8,
@@ -293,7 +293,7 @@ const InputConfigComponent = ({ params }) => {
         <div className="form-control h-full">
           <textarea
             ref={textareaRef}
-            className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-10 caret-black p-2 rounded-b-none"
+            className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-[8] caret-black p-2 rounded-b-none"
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
@@ -335,6 +335,11 @@ const InputConfigComponent = ({ params }) => {
                                     <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
                                     <span className="">&#123;&#123;pre_function&#125;&#125;</span>
                                     <span className="">- Use this variable if you are using the pre_function</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
+                                    <span className="">&#123;&#123;timezone&#125;&#125;</span>
+                                    <span className="">- Access the timezone using a timezone identifier</span>
                                 </div>
                             </div>
                         </div>

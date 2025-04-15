@@ -52,7 +52,6 @@ const CreateOrg = ({ handleSwitchOrg }) => {
             console.error(error);
         } finally {
             setIsLoading(false);
-            closeModal(MODAL_TYPE.CREATE_ORG_MODAL)
         }
     }, [orgDetails, dispatch, route]);
 

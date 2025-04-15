@@ -27,7 +27,11 @@ const ApiKeyInput = ({ params }) => {
     });
     // Memoize filtered API keys
     const filteredApiKeys = useMemo(() => {
-        return apikeydata.filter(apiKey => apiKey?.service === bridge?.service);
+        return apikeydata.filter(apiKey => 
+            apiKey?.service === bridge?.service || 
+            (apiKey?.service === 'openai' && bridge?.service === 'openai_response') ||
+            (apiKey?.service === 'openai_response' && bridge?.service === 'openai')
+        );
     }, [apikeydata, bridge?.service]);
 
 

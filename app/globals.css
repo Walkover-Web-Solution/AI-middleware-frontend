@@ -123,3 +123,11 @@ html {
 .see-on-hover{
   opacity: 0;
 }
+
+#iframe-viasocket-embed-parent-container {
+  z-index: 999999;
+}
+
+#iframe-parent-container {
+  z-index: 99;
+}

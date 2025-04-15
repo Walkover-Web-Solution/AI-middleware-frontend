@@ -1,6 +1,6 @@
-import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createBridgeWithAiAPi, createDuplicateBridge, createapi, deleteBridge, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
+import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createDuplicateBridge, createapi, deleteBridge, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
 import { toast } from "react-toastify";
-import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
+import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
@@ -29,9 +29,15 @@ export const getBridgeVersionAction = ({ versionId }) => async (dispatch) => {
 
 export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, getState) => {
   try {
-    const data = await createBridge(dataToSend.dataToSend);
-    onSuccess(data);
-    dispatch(createBridgeReducer({ data, orgId: dataToSend.orgid }));
+    const response = await createBridge(dataToSend.dataToSend);
+    // Extract only the necessary serializable data from the response
+    const serializableData = {
+      data: response.data,
+      status: response.status,
+      statusText: response.statusText
+    };
+    onSuccess(serializableData);
+    dispatch(createBridgeReducer({ data: serializableData, orgId: dataToSend.orgid }));
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
       toast.error("Bridge Name can't be duplicate");
@@ -39,7 +45,7 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
       toast.error("Something went wrong");
     }
     console.error(error);
-    throw error
+    throw error;
   }
 };
 
@@ -314,5 +320,14 @@ export const deleteFunctionAction = ({ function_name, functionId, orgId }) => as
     return reponse;
   } catch (error) {
     toast.error('Failed to delete function')
+  }
+}
+
+export const getPrebuiltToolsAction = () => async (dispatch) => {
+  try {
+    const response = await getPrebuiltToolsApi();
+    dispatch(getPrebuiltToolsReducer({ tools: response?.in_built_tools }));
+  } catch (error) {
+    console.error(error)
   }
 }
