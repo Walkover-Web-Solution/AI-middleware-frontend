@@ -1,35 +1,45 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { X, Clock, User, FileText, ShieldCheck } from "lucide-react";
 import { toggleSidebar } from "@/utils/utility";
 import { getBridgeConfigHistory } from "@/config";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 function ConfigHistorySlider({ versionId }) {
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const fetchHistory = useCallback(async () => {
+    if (!versionId) return;
+    
+    setLoading(true);
+    try {
+      const response = await getBridgeConfigHistory(versionId, page, pageSize);
+      if (response?.success) {
+        const newData = response?.userData?.updates ?? [];
+        setHistoryData(prev => page === 1 ? newData : [...prev, ...newData]);
+        setHasMore(newData.length === pageSize);
+      }
+    } catch (error) {
+      console.error("Error fetching bridge history:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [versionId, page, pageSize]);
 
   useEffect(() => {
-    if (versionId) {
-      const fetchHistory = async () => {
-        setLoading(true);
-        try {
-          const response = await getBridgeConfigHistory(versionId);
-          if (response?.success) {
-            setHistoryData(response?.userData?.updates ?? []);
-          }
-        } catch (error) {
-          console.error("Error fetching bridge history:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchHistory();
-    }
-  }, [versionId]);
+    fetchHistory();
+  }, [fetchHistory]);
+
+  const loadMore = () => {
+    setPage(prev => prev + 1);
+  };
 
   const formatTime = (time) => {
     const date = new Date(time);
-
     const options = {
       year: "numeric",
       month: "long",
@@ -39,7 +49,6 @@ function ConfigHistorySlider({ versionId }) {
       second: "2-digit",
       hour12: true,
     };
-
     return date.toLocaleString("en-US", options);
   };
 
@@ -65,43 +74,62 @@ function ConfigHistorySlider({ versionId }) {
           />
         </div>
         <div className="mt-2">
-          {loading ? (
+          {loading && page === 1 ? (
             <div className="flex justify-center items-center h-40">
               <div className="loading loading-spinner loading-md"></div>
             </div>
           ) : (
-            <ul className="space-y-2 text-base-content">
-              {historyData?.length > 0 ? (
-                historyData.map((item, index) => (
-                  <li
-                    key={item?.id ?? index}
-                    className="p-3 rounded-lg bg-base-100 shadow-sm hover:shadow-md transition duration-200"
-                  >
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-5 h-5 text-success" />
-                        <span className="text-lg font-medium">
-                          {item?.type}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <User className="w-4 h-4" />
-                        <span>{item?.user_name || "Unknown User"}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Clock className="w-4 h-4" />
-                        <span>{formatTime(item?.time)}</span>
-                      </div>
-                    </div>
-                  </li>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No history available</p>
+            <InfiniteScroll
+              dataLength={historyData.length}
+              next={loadMore}
+              hasMore={hasMore}
+              loader={
+                <div className="flex justify-center py-4">
+                  <div className="loading loading-spinner loading-md"></div>
                 </div>
-              )}
-            </ul>
+              }
+              endMessage={
+                historyData.length > 0 && (
+                  <div className="text-center py-4 text-gray-500">
+                    <p>No more history to load</p>
+                  </div>
+                )
+              }
+              scrollableTarget="default-config-history-slider"
+            >
+              <ul className="space-y-2 text-base-content">
+                {historyData?.length > 0 ? (
+                  historyData.map((item, index) => (
+                    <li
+                      key={item?.id ?? index}
+                      className="p-3 rounded-lg bg-base-100 shadow-sm hover:shadow-md transition duration-200"
+                    >
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="w-5 h-5 text-success" />
+                          <span className="text-lg font-medium">
+                            {item?.type}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <User className="w-4 h-4" />
+                          <span>{item?.user_name || "Unknown User"}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <Clock className="w-4 h-4" />
+                          <span>{formatTime(item?.time)}</span>
+                        </div>
+                      </div>
+                    </li>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>No history available</p>
+                  </div>
+                )}
+              </ul>
+            </InfiniteScroll>
           )}
         </div>
       </div>
