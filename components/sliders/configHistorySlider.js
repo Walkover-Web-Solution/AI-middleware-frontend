@@ -34,6 +34,14 @@ function ConfigHistorySlider({ versionId }) {
     fetchHistory();
   }, [fetchHistory]);
 
+  useEffect(() => {
+    if (versionId) {
+      setPage(1);
+      setHistoryData([]);
+      fetchHistory();
+    }
+  }, [versionId]);
+
   const loadMore = () => {
     setPage(prev => prev + 1);
   };
