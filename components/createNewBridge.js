@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import LoadingSpinner from "./loadingSpinner";
 import { closeModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
+import { getServiceAction } from "@/store/action/serviceAction";
 import { Bot, CircleAlert, Clock10, Webhook } from "lucide-react";
 
 function CreateNewBridge({ orgid }) {
@@ -26,6 +27,12 @@ function CreateNewBridge({ orgid }) {
         allBridgeList: (state.bridgeReducer.org[orgid] || [])?.orgs,
         modelsList: state?.modelReducer?.serviceModels[selectedService],
     }));
+
+    useEffect(() => {
+        if(!SERVICES) {
+            dispatch(getServiceAction({ orgid }))
+        }
+    }, [SERVICES]);
 
     const [isLoading, setIsLoading] = useState(false);
     const [isAiLoading, setIsAiLoading] = useState(false);
@@ -173,9 +180,9 @@ function CreateNewBridge({ orgid }) {
                                 </div>
                                 <select value={selectedService} onChange={handleService} className="select select-bordered w-full ">
                                     <option disabled></option>
-                                    {SERVICES.map((service, index) => (
-                                        <option key={index} value={service?.value}>{service?.displayName}</option>
-                                    ))}
+                                    {Array.isArray(SERVICES) ? SERVICES?.map(({ value, displayName }) => (
+                                        <option key={value} value={value}>{displayName}</option>
+                                    )) : null}
                                 </select>
                             </label>
                             <label className="form-control w-full mb-2 ">

@@ -5,6 +5,7 @@ import { Info } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
+import { getServiceAction } from "@/store/action/serviceAction";
 
 function ServiceDropdown({ params }) {
     const { bridgeType, service, SERVICES } = useCustomSelector((state) => ({
@@ -22,6 +23,12 @@ function ServiceDropdown({ params }) {
             setSelectedService(service);
         }
     }, [service]);
+
+    useEffect(() => {
+        if (!SERVICES) {
+            dispatch(getServiceAction({ orgid: params.orgid }))
+        }
+    }, [SERVICES]);
 
     const handleServiceChange = useCallback((e) => {
         const newService = e.target.value;
@@ -101,9 +108,9 @@ function ServiceDropdown({ params }) {
                         disabled={isDisabled}
                     >
                         <option disabled>Select a Service</option>
-                        {SERVICES?.map((service, index) => (
-                            <option key={index} value={service?.value}>{service?.displayName}</option>
-                        ))}
+                        {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
+                            <option key={value} value={value}>{displayName}</option>
+                        )) : null}
                     </select>
                     {isDisabled && (
                         <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">

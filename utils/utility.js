@@ -290,6 +290,7 @@ export const allowedAttributes = {
         ['createdAt', 'Created At'],
         ['service', 'Service'],
         ['model', 'Model'],
+        ['version_id', 'Version ID'],
     ]
 };
 
