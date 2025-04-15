@@ -306,7 +306,7 @@ export default function FormSection({ params, chatbotId = null }) {
                 {
                     formData?.allowBridgeSwitch && <BridgesToSwitch chatBotId={chatBotId} handleSave={handleBlur} orgId={params?.org_id}/>
                 }
-            </div>
+            </div> 
             <div className="">
                 <div className="label">
                     <span className="label-text">ChatBot Preview </span>

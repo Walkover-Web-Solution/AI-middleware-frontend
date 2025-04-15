@@ -25,6 +25,7 @@ import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/uti
 import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import AddVariable from "../addVariable";
+import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -69,6 +70,7 @@ export default function ConfigurationPage({ params }) {
                         <EmbedList params={params} />
                         <hr className="my-0 p-0" />
                         <KnowledgebaseList params={params} />
+                        <PrebuiltToolsList params={params} />
                     </>
                 )}
             <ServiceDropdown params={params} />
