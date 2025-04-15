@@ -1,10 +1,10 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
+import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction, updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss, TestTube, MessageCircleMore } from 'lucide-react';
+import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss, TestTube, MessageCircleMore, Play, Pause, File } from 'lucide-react';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -29,7 +29,6 @@ function Navbar() {
     publishedVersion: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || [],
     isdrafted: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted,
   }));
-
   const handleDeleteBridge = async (item, newStatus = 0) => {
     const orgId = path[2];
 
@@ -89,7 +88,14 @@ function Navbar() {
     dispatch(updateBridgeVersionReducer({ bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false } }));
     dispatch(dicardBridgeVersionAction({ bridgeId, versionId }));
   }
-
+   const handlePauseBridge = (status) => {
+    dispatch(updateBridgeAction({
+      bridgeId: bridgeId, 
+      dataToSend: {
+        bridge_status: status === 'paused' ? 0 : 1
+      }
+    }));
+  }
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleBridgeSidebar = () => toggleSidebar('default-bridge-sidebar');
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
@@ -125,6 +131,14 @@ function Navbar() {
         <div className="justify-end w-full" >
           {path.length === 6 && path[3] === 'bridges' ? (
             <>
+          {/* Add Pause/Resume Button */}
+          <button 
+              className={`btn m-1 tooltip tooltip-left ${bridge?.bridge_status === 0 ? 'bg-green-200 hover:bg-green-300' : 'bg-red-200 hover:bg-red-300'}`}
+              data-tip={bridge?.bridge_status === 0 ? 'Resume Bridge' : 'Pause Bridge'}
+              onClick={() => handlePauseBridge(bridge?.bridge_status === 0 ? 'resume' : 'paused')}
+            >
+              {bridge?.bridge_status === 0 ? <Play size={16} /> : <Pause size={16} />}
+            </button>
               <button className="btn m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
                 <History size={16} />
               </button>
@@ -152,10 +166,29 @@ function Navbar() {
                   <div className="divider divider-horizontal mx-1"></div>
                 </div>
               )}
-              <div className="join">
-                <button onClick={() => router.push(`/org/${path[2]}/bridges/configure/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'configure' ? "btn-primary" : ""} btn join-item`}><FileSliders size={16} /> Configure</button>
-                <button onClick={() => router.push(`/org/${path[2]}/bridges/testcase/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'testcase' ? "btn-primary" : ""} btn join-item`}><TestTube size={16} /> Test Cases</button>
-                <button onClick={() => router.push(`/org/${path[2]}/bridges/history/${bridgeId}?version=${versionId}`)} className={`${path[4] === 'history' ? "btn-primary" : ""} btn join-item`}><MessageCircleMore size={16} /> Chat Logs</button>
+              <div className="join group flex">
+              <button 
+                onClick={() => router.push(`/org/${path[2]}/bridges/configure/${bridgeId}?version=${versionId}`)} 
+                className={`${path[4] === 'configure' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
+              >
+                <FileSliders size={16} className="shrink-0" />
+                <span className={`${path[4] === 'configure' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Configure Bridge</span>
+              </button>
+                <button 
+                onClick={() => router.push(`/org/${path[2]}/bridges/testcase/${bridgeId}?version=${versionId}`)} 
+                className={`${path[4] === 'testcase' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-2 group/btn`}
+              >
+                <TestTube size={16} className="shrink-0" />
+                <span className={`${path[4] === 'testcase' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Test Cases</span>
+              </button>
+              
+                <button 
+                onClick={() => router.push(`/org/${path[2]}/bridges/history/${bridgeId}?version=${versionId}`)} 
+                className={`${path[4] === 'history' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-2 group/btn`}
+              >
+                <MessageCircleMore size={16} className="shrink-0" />
+                <span className={`${path[4] === 'history' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chat History</span>
+              </button>
               </div>
               <div className='ml-2'>
               </div>
