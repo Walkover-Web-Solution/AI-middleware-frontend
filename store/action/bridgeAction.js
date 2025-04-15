@@ -49,6 +49,22 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
   }
 };
 
+export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => async (dispatch, getState) => {
+  try {
+    const data = await createBridgeWithAiAPi(dataToSend)
+    dispatch(createBridgeReducer({ data, orgId: orgId }));
+    return data;
+  } catch (error) {
+    if (error?.response?.data?.message?.includes("duplicate key")) {
+      toast.error("Bridge Name can't be duplicate");
+    } else {
+      toast.error("Something went wrong");
+    }
+    console.error(error);
+    throw error
+  }
+};
+
 export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, getState) => {
   try {
     const dataToSend = {
@@ -300,10 +316,10 @@ export const getTestcasesScroreAction = (version_id) => async (dispatch) => {
   }
 }
 
-export const deleteFunctionAction = ({function_name, functionId, orgId}) => async (dispatch) => {
+export const deleteFunctionAction = ({ function_name, functionId, orgId }) => async (dispatch) => {
   try {
     const reponse = await deleteFunctionApi(function_name);
-    dispatch(removeFunctionDataReducer({orgId, functionId}))
+    dispatch(removeFunctionDataReducer({ orgId, functionId }))
     return reponse;
   } catch (error) {
     toast.error('Failed to delete function')
