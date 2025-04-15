@@ -24,6 +24,7 @@ import ToolCallCount from "./configurationComponent/toolCallCount";
 import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/utils/enums";
 import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
+import TriggersList from "./configurationComponent/TriggersList";
 import AddVariable from "../addVariable";
 import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 
@@ -61,6 +62,7 @@ export default function ConfigurationPage({ params }) {
 
     const renderSetupView = useMemo(() => () => (
         <>
+            {bridgeType === 'trigger' && <TriggersList params={params} />}
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING && (modelType === AVAILABLE_MODEL_TYPES.REASONING
                 ? PROMPT_SUPPORTED_REASIONING_MODELS?.includes(modelName)
                 : true)) && (

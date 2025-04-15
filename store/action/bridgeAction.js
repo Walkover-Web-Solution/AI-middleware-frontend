@@ -90,6 +90,9 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
       return obj;
     }, {});
     dispatch(fetchAllBridgeReducer({ orgId: response?.data?.org_id, integrationData: flowObject }));
+
+    const triggerData = await integration(triggerEmbedToken);
+    dispatch(fetchAllBridgeReducer({ orgId: response?.data?.org_id, triggerData: triggerData?.flows || [] }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
