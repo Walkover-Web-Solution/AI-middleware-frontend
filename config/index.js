@@ -176,7 +176,7 @@ export const dryRun = async ({ localDataToSend, bridge_id }) => {
     return { success: true, data: dryRun.data }
   } catch (error) {
     console.error("dry run error", error, error.response.data.error);
-    toast.error(error?.response?.data?.error);
+    toast.error(error?.response?.data?.error || error?.response?.data?.detail?.error || "Something went wrong.");
     return { success: false, error: error.response.data.error }
   }
 }
@@ -946,3 +946,23 @@ export const getAllServices = async () => {
     throw new Error(error);
   }
 };
+
+export const modelSuggestionApi = async ({ versionId }) => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/bridge/versions/suggest/${versionId}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const getPrebuiltToolsApi = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/api/v1/config/inbuilt/tools`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}

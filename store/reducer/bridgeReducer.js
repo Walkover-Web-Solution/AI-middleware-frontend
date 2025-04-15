@@ -255,6 +255,10 @@ export const bridgeReducer = createSlice({
         state.allBridgesMap[bridge_id][version_id].webhook = webhook;
       }
     },
+    getPrebuiltToolsReducer: (state, action) => {
+      const { tools } = action.payload;
+      state.prebuiltTools = tools;
+    },
   },
 });
 
@@ -284,7 +288,8 @@ export const {
   optimizePromptReducer,
   updateTriggerDataReducer,
   removeFunctionDataReducer,
-  webhookURLForBatchAPIReducer
+  webhookURLForBatchAPIReducer,
+  getPrebuiltToolsReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;

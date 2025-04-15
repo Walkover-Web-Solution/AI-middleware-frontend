@@ -26,6 +26,7 @@ import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import TriggersList from "./configurationComponent/TriggersList";
 import AddVariable from "../addVariable";
+import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -71,6 +72,7 @@ export default function ConfigurationPage({ params }) {
                         <EmbedList params={params} />
                         <hr className="my-0 p-0" />
                         <KnowledgebaseList params={params} />
+                        <PrebuiltToolsList params={params} />
                     </>
                 )}
             <ServiceDropdown params={params} />
