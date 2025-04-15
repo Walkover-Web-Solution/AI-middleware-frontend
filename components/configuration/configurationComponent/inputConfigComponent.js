@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import Link from 'next/link';
+import ToneDropdown from './toneDropdown'; 
+import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
 
 const InputConfigComponent = ({ params }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -345,6 +347,10 @@ const InputConfigComponent = ({ params }) => {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div className='flex mt-2'>
+              <ToneDropdown params={params} />
+              <ResponseStyleDropdown params={params} />
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
             <OptimizePromptModal params={params} />

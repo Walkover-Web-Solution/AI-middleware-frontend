@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 
 const PreEmbedList = ({ params }) => {
-    const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model } = useCustomSelector((state) => {
+    const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -21,7 +21,8 @@ const PreEmbedList = ({ params }) => {
             modelType: modelTypeName,
             model: modelName,
             service: serviceName,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            embedToken: orgData?.embed_token,
         };
     });
     const dispatch = useDispatch();
@@ -46,7 +47,7 @@ const PreEmbedList = ({ params }) => {
 
                 return (
                     <div key={value?._id} id={value?._id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
-                        <div className="p-4 w-full" onClick={() => openViasocket(functionName)}>
+                        <div className="p-4 w-full" onClick={() => openViasocket(functionName,{embedToken})}>
                             <div className="flex justify-between items-center">
                                 <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full text-base-content">
                                     {title}

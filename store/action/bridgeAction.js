@@ -49,6 +49,22 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
   }
 };
 
+export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => async (dispatch, getState) => {
+  try {
+    const data = await createBridgeWithAiAPi(dataToSend)
+    dispatch(createBridgeReducer({ data, orgId: orgId }));
+    return data;
+  } catch (error) {
+    if (error?.response?.data?.message?.includes("duplicate key")) {
+      toast.error("Bridge Name can't be duplicate");
+    } else {
+      toast.error("Something went wrong");
+    }
+    console.error(error);
+    throw error
+  }
+};
+
 export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, getState) => {
   try {
     const dataToSend = {
@@ -90,6 +106,9 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
       return obj;
     }, {});
     dispatch(fetchAllBridgeReducer({ orgId: response?.data?.org_id, integrationData: flowObject }));
+
+    const triggerData = await integration(triggerEmbedToken);
+    dispatch(fetchAllBridgeReducer({ orgId: response?.data?.org_id, triggerData: triggerData?.flows || [] }));
   } catch (error) {
     dispatch(isError())
     console.error(error);
@@ -150,7 +169,7 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (d
   try {
     dispatch(isPending());
     const data = await updateBridgeVersionApi({ versionId, dataToSend });
-    if (data.success) {
+    if (data?.success) {
       dispatch(updateBridgeVersionReducer({ bridges: data.bridge, functionData: dataToSend?.functionData || null }));
     }
   } catch (error) {
@@ -297,10 +316,10 @@ export const getTestcasesScroreAction = (version_id) => async (dispatch) => {
   }
 }
 
-export const deleteFunctionAction = ({function_name, functionId, orgId}) => async (dispatch) => {
+export const deleteFunctionAction = ({ function_name, functionId, orgId }) => async (dispatch) => {
   try {
     const reponse = await deleteFunctionApi(function_name);
-    dispatch(removeFunctionDataReducer({orgId, functionId}))
+    dispatch(removeFunctionDataReducer({ orgId, functionId }))
     return reponse;
   } catch (error) {
     toast.error('Failed to delete function')
