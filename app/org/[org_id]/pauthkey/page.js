@@ -83,7 +83,7 @@ function Page() {
     });
     closeModal(MODAL_TYPE.PAUTH_KEY_DELETE_MODAL);
   };
-
+  
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center">
@@ -105,6 +105,12 @@ function Page() {
 
   return (
     <div className="h-full">
+       <div className="p-4">
+       <h1 className="text-2xl font-bold mb-1">PauthKey</h1>
+        <p className="text-base text-gray-700 mb-3">
+        A unique key used to validate API requests for sending and receiving messages securely.
+       </p>
+       </div>
       {isCreating && <LoadingSpinner />}
       <CustomTable
         data={authData.map(item => ({
