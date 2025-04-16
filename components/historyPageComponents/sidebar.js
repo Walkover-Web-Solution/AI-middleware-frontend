@@ -106,7 +106,9 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const handleSelectSubThread = async (subThreadId, threadId) => {
     setThreadPage(1);
     setExpandedThreads([threadId]);
-    router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}`, undefined, { shallow: true });
+    const start = searchParams.get('start');
+    const end = searchParams.get('end');
+    router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=${start}&end=${end}`, undefined, { shallow: true });
   };
 
   const handleFilterChange = async user_feedback => {
@@ -135,7 +137,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
             Advance Filter
           </div>
           <div className="collapse-content">
-            <DateRangePicker params={params} setFilterOption={setFilterOption} />
+            <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage}/>
             <div className="p-2 mt-4 bg-base-300 rounded-md text-center">
               <p className="text-center m-2 font-semibold">Filter Response</p>
               <div className="flex items-center justify-center mb-2 gap-4">
