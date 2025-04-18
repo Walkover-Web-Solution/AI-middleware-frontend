@@ -53,6 +53,10 @@ function Page({ searchParams }) {
 
   useEffect(() => {
     return () => {
+      const cleanUrl = new URL(window.location.href);
+      const version = search.get("version");
+      cleanUrl.search = version ? `version=${version}` : '';
+      window.history.replaceState({}, '', cleanUrl);
       dispatch(clearThreadData());
       dispatch(clearHistoryData());
       dispatch(setSelectedVersion("all"));
@@ -83,13 +87,13 @@ function Page({ searchParams }) {
         const threadId = params?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
         if(thread) {
-          router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${threadId}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${threadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
         }
       }
       else if (!params?.thread_id && result?.length > 0) {
         const firstThreadId = result[0]?.thread_id;
         if (firstThreadId) {
-          router.push(`${pathName}?version=${params.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${params.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
         }
       }
       setLoading(false);
@@ -110,10 +114,12 @@ function Page({ searchParams }) {
           console.error("Failed to fetch single message:", error);
         }
       } else {
-        router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}&subThread_id=${thread_id}`, undefined, { shallow: true });
+        const start = search.get("start");
+        const end = search.get("end");
+        router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}&subThread_id=${thread_id}&start=${start}&end=${end}`, undefined, { shallow: true });
       }
     },
-    [pathName, params.id, params.version]
+    [pathName, params.id, params.version, params?.start, params?.end]
   );
 
   const fetchMoreData = useCallback(async () => {
@@ -160,7 +166,7 @@ function Page({ searchParams }) {
             />
           </React.Suspense>
         </div>
-        <React.Suspense fallback={<LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px'/>}>
+        <React.Suspense fallback={<LoadingSpinner/>}>
           <Sidebar
             historyData={historyData}
             threadHandler={threadHandler}
