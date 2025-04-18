@@ -1,7 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { DEFAULT_MODEL } from "@/jsonFiles/bridgeParameter";
 import { createBridgeAction, createBridgeWithAiAction } from "@/store/action/bridgeAction";
-import { getModelAction } from "@/store/action/modelAction";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -40,12 +39,6 @@ function CreateNewBridge({ orgid }) {
     // const [showFileUploadModal, setShowFileUploadModal] = useState(false);
     const dispatch = useDispatch();
     const route = useRouter();
-
-    useEffect(() => {
-        if (selectedService && !modelsList) {
-            dispatch(getModelAction({ service: selectedService }))
-        }
-    }, [selectedService]);
 
     const handleService = (e) => {
         setSelectedService(e.target.value);

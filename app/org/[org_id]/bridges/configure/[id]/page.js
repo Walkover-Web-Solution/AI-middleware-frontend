@@ -7,7 +7,6 @@ import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getSingleBridgesAction } from "@/store/action/bridgeAction";
-import { getModelAction } from "@/store/action/modelAction";
 import { useEffect, useRef } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
@@ -49,12 +48,6 @@ const Page = ({ searchParams }) => {
       }
     }
   }, []);
-
-  useEffect(() => {
-    if (service && !isServiceModelsAvailable) {
-      dispatch(getModelAction({ service }))
-    }
-  }, [service]);
 
   useEffect(() => {
     if (mountRef.current) {
