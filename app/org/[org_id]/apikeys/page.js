@@ -90,6 +90,12 @@ const Page = () => {
 
   return (
     <div className="w-full">
+      <div className="p-4">
+       <h1 className="text-2xl font-bold mb-1">ApiKeys</h1>
+        <p className="text-base text-gray-700 mb-2">
+        Add your model-specific API keys to enable and use different AI models in your chat.
+       </p>
+       </div>
       {Object.entries(
         dataWithIcons.reduce((acc, item) => {
           const service = item.service.props.children[1].props.children;

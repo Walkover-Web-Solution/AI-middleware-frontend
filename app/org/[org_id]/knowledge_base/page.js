@@ -89,32 +89,38 @@ const Page = ({ params }) => {
 
   return (
     <div className="">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
-        <input
-          type="text"
-          placeholder="Search knowledge base..."
-          className="input input-bordered w-full md:max-w-xs"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <div className="join">
-          <button className="btn mr-4" onClick={() => setOpenKnowledgeBaseSlider(true)}>
-            <BookText /> Integration Guide
-          </button>
-          <button
-            className={`btn rounded-r-none rounded-md ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
-            onClick={() => setViewMode('grid')}
-          >
-            <LayoutGrid size={16} />
-          </button>
-          <button
-            className={`btn rounded-l-none rounded-md ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
-            onClick={() => setViewMode('table')}
-          >
-            <Table size={16} />
-          </button>
-        </div>
-      </div>
+      <div className="flex flex-col md:flex-row items-start justify-between mb-4 gap-4 p-1">
+  <div className="flex-1 min-w-[250px]">
+    <h1 className="text-2xl font-bold mb-1">Knowledge Base</h1>
+    <p className="text-base text-gray-700 mb-2">
+    A repository where you can provide reference data that the AI uses to generate accurate and context-aware responses.
+    </p>
+    <input
+      type="text"
+      placeholder="Search knowledge base..."
+      className="input input-bordered w-full md:max-w-xs"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
+  </div>
+  <div className="flex flex-wrap justify-end items-start gap-2">
+    <button className="btn" onClick={() => setOpenKnowledgeBaseSlider(true)}>
+      <BookText /> Integration Guide
+    </button>
+    <button
+      className={`btn rounded-r-none rounded-md ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
+      onClick={() => setViewMode('grid')}
+    >
+      <LayoutGrid size={16} />
+    </button>
+    <button
+      className={`btn rounded-l-none rounded-md ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
+      onClick={() => setViewMode('table')}
+    >
+      <Table size={16} />
+    </button>
+  </div>
+</div>
 
       {filteredKnowledgeBase.length > 0 ? (
         viewMode === 'grid' ? (
