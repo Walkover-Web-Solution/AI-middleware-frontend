@@ -13,7 +13,7 @@ import DateRangePicker from "./dateRangePicker.js";
 import { usePathname, useRouter } from "next/navigation.js";
 import { setSelectedVersion } from '@/store/reducer/historyReducer';
 
-const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion}) => {
+const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion }) => {
   const { subThreads } = useCustomSelector(state => ({
     subThreads: state?.historyReducer?.subThreads || [],
   }));
@@ -153,10 +153,18 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                   </label>
                 ))}
               </div>
-              <p className="text-xs text-base-content">
+              <p className="text-xs text-base-content mt-2">
                 {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the bridge is ${userFeedbackCount}`}
               </p>
+
+              <div className="flex items-center justify-center gap-2 mt-4">
+              <span className="text-sm">
+                Show Error Chat History
+              </span>
+              <input type="checkbox" className="toggle" />
             </div>
+            </div>
+            
           </div>
         </div>
         <div className='flex items-center'>
