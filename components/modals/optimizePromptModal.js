@@ -86,29 +86,37 @@ function OptmizePromptModal({ params }) {
                             readOnly
                         />
                     </div>
-                    <div className='w-full'>
-                        <div className='flex justify-between'>
-                            <div className="label">
-                                <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">AI generated prompt</span>
-                            </div>
-                            <div className="label gap-2">
-                                <div className="tooltip cursor-pointer" data-tip="Previous Prompt">
-                                    <Undo onClick={handleUndo} className={!currentIndex && "opacity-50 pointer-events-none"} />
-                                </div>
-                                <div className="tooltip tooltip-left cursor-pointer" data-tip="Next Prompt">
-                                    <Redo onClick={handleRedo} />
-                                </div>
-                                <div className="tooltip tooltip-left cursor-pointer" data-tip={copyText || "Copy Prompt"}>
-                                    <Copy onClick={copyToClipboard} size={20} />
-                                </div>
-                            </div>
-                        </div>
-                        <textarea
-                            className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary caret-black p-2"
-                            value={newPrompt}
-                            onChange={(e) => setNewPrompt(e.target.value)}
-                        />
-                    </div>
+                    {newPrompt ? (
+  <div className='w-full'>
+    <div className='flex justify-between'>
+      <div className="label">
+        <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">AI generated prompt</span>
+      </div>
+      <div className="label gap-2">
+        <div className="tooltip cursor-pointer" data-tip="Previous Prompt">
+          <Undo onClick={handleUndo} className={!currentIndex && "opacity-50 pointer-events-none"} />
+        </div>
+        <div className="tooltip tooltip-left cursor-pointer" data-tip="Next Prompt">
+          <Redo onClick={handleRedo} />
+        </div>
+        <div className="tooltip tooltip-left cursor-pointer" data-tip={copyText || "Copy Prompt"}>
+          <Copy onClick={copyToClipboard} size={20} />
+        </div>
+      </div>
+    </div>
+    <textarea
+      className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary caret-black p-2"
+      value={newPrompt}
+      onChange={(e) => setNewPrompt(e.target.value)}
+    />
+  </div>
+) : (
+    <div className='w-full flex items-center justify-center'>
+    <div className="w-full min-h-96 flex items-center justify-center text-gray-500">
+      Click "Optimize" to generate an AI prompt
+    </div>
+  </div>
+)}
                 </div>
                 <div className="modal-action">
                     <form method="dialog">
