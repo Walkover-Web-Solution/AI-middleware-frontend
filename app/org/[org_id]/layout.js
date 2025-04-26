@@ -164,7 +164,7 @@ export default function layoutOrgPage({ children, params }) {
           title: e?.data?.title,
         };
         dispatch(createApiAction(params.org_id, dataFromEmbed)).then((data) => {
-          if (!versionData?.[data?._id] && !preTools?.includes(data?._id)) {
+          if (!versionData?.[data?._id] && (!Array.isArray(preTools) || !preTools?.includes(data?._id))) {
             dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
               versionId: version_id,
