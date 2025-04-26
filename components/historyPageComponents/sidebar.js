@@ -1,6 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector.js";
 import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountAction } from "@/store/action/historyAction.js";
-import { clearSubThreadData } from "@/store/reducer/historyReducer.js";
+import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { openModal } from "@/utils/utility.js";
 import { ChevronDown, ChevronUp, Download, ThumbsDown, ThumbsUp } from "lucide-react";
@@ -10,10 +10,10 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
-import { usePathname, useRouter } from "next/navigation.js";
+import { usePathname, useRouter, useSearchParams } from "next/navigation.js";
 import { setSelectedVersion } from '@/store/reducer/historyReducer';
 
-const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion}) => {
+const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion, setIsErrorTrue, isErrorTrue}) => {
   const { subThreads } = useCustomSelector(state => ({
     subThreads: state?.historyReducer?.subThreads || [],
   }));
@@ -26,6 +26,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const dispatch = useDispatch();
   const pathName = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { userFeedbackCount } = useCustomSelector(state => ({
     userFeedbackCount: state?.historyReducer?.userFeedbackCount,
@@ -34,6 +35,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     (state) => ({
       bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
     })
+
   );
   const handleVersionChange = async (event) => {
     const version = event.target.value;
@@ -91,7 +93,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     } else {
       setExpandedThreads([threadId]);
       setLoadingSubThreads(true);
-      await dispatch(getSubThreadsAction({ thread_id: threadId }));
+      await dispatch(getSubThreadsAction({ thread_id: threadId, error: isErrorTrue }));
       setLoadingSubThreads(false);
     }
   };
@@ -127,6 +129,31 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     </div>
   );
 
+  const handleCheckError = async (isError) => {
+    console.log(isError);
+    if(isError === true) {
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set('error', 'true');
+      const queryString = newSearchParams.toString();
+      await dispatch(getHistoryAction(params.id, null, null, 1, null, filterOption, true));
+      setThreadPage(1);
+      setIsErrorTrue(true);
+      setHasMore(true);
+      dispatch(clearThreadData());
+      window.history.replaceState(null, '', `?${queryString}`);
+    }
+    else {
+      setIsErrorTrue(false);
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('error');
+      const queryString = newSearchParams.toString();
+      await dispatch(getHistoryAction(params.id, null, null, 1, null, filterOption));
+      setThreadPage(1);
+      setHasMore(true);
+      window.history.replaceState(null, '', `?${queryString}`);
+    }
+  }
+
   return (
     <div className="drawer-side justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
@@ -158,6 +185,13 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
               <p className="text-xs text-base-content">
                 {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the bridge is ${userFeedbackCount}`}
               </p>
+
+              <div className="flex items-center justify-center gap-2 mt-4">
+              <span className="text-sm">
+                Show Error Chat History
+              </span>
+              <input type="checkbox" className="toggle" checked={isErrorTrue} onChange={() => handleCheckError(!isErrorTrue)} />
+            </div>
             </div>
           </div>
         </div>

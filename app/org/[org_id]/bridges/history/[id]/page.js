@@ -40,6 +40,7 @@ function Page({ searchParams }) {
   const [filterOption, setFilterOption] = useState("all");
   const [threadPage, setThreadPage] = useState(1);
   const [hasMoreThreadData, setHasMoreThreadData] = useState(true);
+  const [isErrorTrue, setIsErrorTrue] = useState(false);
 
   const closeSliderOnEsc = useCallback((event) => {
     if (event.key === "Escape") setIsSliderOpen(false);
@@ -79,10 +80,10 @@ function Page({ searchParams }) {
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
+       dispatch(clearThreadData());
       const startDate = search.get("start");
       const endDate = search.get("end");
-     const result =  await dispatch(getHistoryAction(params.id, startDate, endDate, 1, null, filterOption));
-      dispatch(clearThreadData());
+     const result =  await dispatch(getHistoryAction(params.id, startDate, endDate, 1, null, filterOption, isErrorTrue));
       if(params?.thread_id) {
         const threadId = params?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
@@ -94,6 +95,12 @@ function Page({ searchParams }) {
         const firstThreadId = result[0]?.thread_id;
         if (firstThreadId) {
           router.push(`${pathName}?version=${params.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
+        }
+      }
+      if(isErrorTrue) {
+        const firstThreadId = result[0]?.thread_id;
+        if (firstThreadId) {
+          router.push(`${pathName}?version=${params.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=true`, undefined, { shallow: true });
         }
       }
       setLoading(false);
@@ -163,6 +170,8 @@ function Page({ searchParams }) {
               hasMoreThreadData={hasMoreThreadData}
               setHasMoreThreadData={setHasMoreThreadData} 
               selectedVersion={selectedVersion}
+              setIsErrorTrue={setIsErrorTrue}
+              isErrorTrue={isErrorTrue}
             />
           </React.Suspense>
         </div>
@@ -187,6 +196,8 @@ function Page({ searchParams }) {
             hasMoreThreadData={hasMoreThreadData}
             setHasMoreThreadData={setHasMoreThreadData}
             selectedVersion={selectedVersion}
+            setIsErrorTrue={setIsErrorTrue}
+            isErrorTrue={isErrorTrue}
           />
         </React.Suspense>
       </div>
