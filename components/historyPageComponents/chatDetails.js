@@ -113,8 +113,6 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                     if (value === undefined) return null;
 
                     let displayValue = value;
-
-                    console.log(displayValue);
                     
                     if (displayKey === "Latency" && typeof value === "object" && value !== null) {
                       let callCounter = 1; // To track the call number
