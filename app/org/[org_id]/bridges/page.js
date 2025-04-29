@@ -1,7 +1,9 @@
 "use client"
 import CreateNewBridge from "@/components/createNewBridge";
 import CustomTable from "@/components/customTable/customTable";
+import MainLayout from "@/components/layoutComponents/MainLayout";
 import LoadingSpinner from "@/components/loadingSpinner";
+import PageHeader from "@/components/Pageheader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
@@ -220,22 +222,26 @@ function Home({ params }) {
                 </div>
               </div>
             ) : (
-              <div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-0' : ''}`}>
+
+              < div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-0' : ''}`}>
                 <div className="px-4 pt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between w-full ">
                <div className="sm:max-w-4xl w-full">
-               <h1 className="text-2xl font-bold mb-1">Bridges</h1>
-               <p className="text-gray-600 mb-3">A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code.</p>
-               <input
+                <MainLayout>
+                <PageHeader 
+                 title="Bridges" 
+                 description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code." 
+                />
+               </MainLayout>
+      <input
                ref={inputRef}
                type="text"
-               placeholder="Search for bridges  (Ctrl/Cmd + K)"
-               className="input input-bordered input-md w-80 mb-4"
+               placeholder="Search for bridges (Ctrl/Cmd + K)"
+               className="input input-bordere input-md w-80 mb-4"
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
               />
-             </div>
-             
-  <div className="join hidden sm:flex ml-auto mt-2 sm:mt-0 space-x-2">
+             </div> 
+  <div className="join hidden sm:block">
     <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
       <LayoutGrid className="h-4 w-4" />
     </a>

@@ -1,6 +1,8 @@
 'use client';
 import CustomTable from "@/components/customTable/customTable";
+import MainLayout from "@/components/layoutComponents/MainLayout";
 import ApiKeyModal from '@/components/modals/ApiKeyModal';
+import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, getAllApikeyAction } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
@@ -90,12 +92,13 @@ const Page = () => {
 
   return (
     <div className="w-full">
-      <div className="p-4">
-       <h1 className="text-2xl font-bold mb-1">ApiKeys</h1>
-        <p className="text-base text-gray-700 mb-2">
-        Add your model-specific API keys to enable and use different AI models in your chat.
-       </p>
-       </div>
+
+        <MainLayout>
+        <PageHeader 
+         title="ApiKeys" 
+         description="Add your model-specific API keys to enable and use different AI models in your chat." 
+        />
+        </MainLayout>
       {Object.entries(
         dataWithIcons.reduce((acc, item) => {
           const service = item.service.props.children[1].props.children;

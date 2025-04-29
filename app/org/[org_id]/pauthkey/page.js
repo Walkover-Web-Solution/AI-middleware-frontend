@@ -1,6 +1,8 @@
 "use client"
 import CustomTable from '@/components/customTable/customTable'
+import MainLayout from '@/components/layoutComponents/MainLayout'
 import LoadingSpinner from '@/components/loadingSpinner'
+import PageHeader from '@/components/Pageheader'
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
@@ -105,12 +107,13 @@ function Page() {
 
   return (
     <div className="h-full">
-       <div className="p-4">
-       <h1 className="text-2xl font-bold mb-1">PauthKey</h1>
-        <p className="text-base text-gray-700 mb-3">
-        A unique key used to validate API requests for sending and receiving messages securely.
-       </p>
-       </div>
+
+      <MainLayout>
+      <PageHeader 
+        title="PauthKey" 
+        description="A unique key used to validate API requests for sending and receiving messages securely." 
+      />
+       </MainLayout>  
       {isCreating && <LoadingSpinner />}
       <CustomTable
         data={authData.map(item => ({
@@ -175,8 +178,8 @@ function Page() {
 
           </div>
         </div>
-      </dialog>
-    </div>
+      </dialog>   
+    </div>  
   )
 }
 
