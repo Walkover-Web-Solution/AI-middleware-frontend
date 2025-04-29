@@ -450,7 +450,7 @@ function CreateNewBridge({ orgid }) {
                             ) : (
                                 <button
                                     className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
-                                    onClick={handleCreateBridgeUsingAI}
+                                    onClick={createBridgeHandler}
                                     disabled={isAiLoading || isLoading}
                                 >
                                     {isAiLoading ? (
