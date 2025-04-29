@@ -114,7 +114,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
 
                     let displayValue = value;
                     
-                    if (displayKey === "Latency" && typeof value === "object" && value !== null) {
+                    if (displayKey === "Latency" && typeof value === "object") {
                       let callCounter = 1; // To track the call number
                       let isGptCall = true; // Toggle between gpt and function call
                     
