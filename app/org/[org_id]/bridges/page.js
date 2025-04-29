@@ -1,7 +1,9 @@
 "use client"
 import CreateNewBridge from "@/components/createNewBridge";
 import CustomTable from "@/components/customTable/customTable";
+import MainLayout from "@/components/layoutComponents/MainLayout";
 import LoadingSpinner from "@/components/loadingSpinner";
+import PageHeader from "@/components/Pageheader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
@@ -223,25 +225,34 @@ function Home({ params }) {
                 </div>
               </div>
             ) : (
-              <div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-0' : ''}`}>
-                <div className="relative flex flex-col md:flex-row items-center justify-between mx-4">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    placeholder="Search for bridges (Ctrl/Cmd + K)"
-                    className="input input-bordered md:max-w-sm input-md w-full mb-4 md:mb-0"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <div className="join hidden sm:block">
-                    <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
-                      <LayoutGrid className="h-4 w-4" />
-                    </a>
-                    <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
-                      <Table className="h-4 w-4" />
-                    </a>
-                  </div>
-                </div>
+
+              < div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-0' : ''}`}>
+                <div className="px-4 pt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between w-full ">
+               <div className="sm:max-w-4xl w-full">
+                <MainLayout>
+                <PageHeader 
+                 title="Bridges" 
+                 description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code." 
+                />
+               </MainLayout>
+      <input
+               ref={inputRef}
+               type="text"
+               placeholder="Search for bridges (Ctrl/Cmd + K)"
+               className="input input-bordere input-md w-80 mb-4"
+               value={searchTerm}
+               onChange={(e) => setSearchTerm(e.target.value)}
+              />
+             </div> 
+  <div className="join hidden sm:block">
+    <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
+      <LayoutGrid className="h-4 w-4" />
+    </a>
+    <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
+      <Table className="h-4 w-4" />
+    </a>
+  </div>
+</div>        
                 {viewMode === 'grid' ? (
                   <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
                     {filteredUnArchivedBridges.slice().sort((a, b) => a.name?.localeCompare(b.name)).map((item) => (
