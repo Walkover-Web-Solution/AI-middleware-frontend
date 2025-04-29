@@ -21,6 +21,7 @@ function Home({ params }) {
   const inputRef = useRef(null);
   const router = useRouter();
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
+  const averageResponseTime = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.average_response_time || []);
 
   const { isLoading } = useCustomSelector((state) => ({
     isLoading: state.bridgeReducer.loading,
@@ -69,7 +70,8 @@ function Home({ params }) {
     bridgeType: item.bridgeType,
     status: item.status,
     versionId: item?.published_version_id || item?.versions?.[0],
-    totalTokens: item?.total_tokens
+    totalTokens: item?.total_tokens,
+    averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]}</div>
   }));
 
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
@@ -93,7 +95,8 @@ function Home({ params }) {
     bridgeType: item.bridgeType,
     status: item.status,
     versionId: item?.published_version_id || item?.versions?.[0],
-    totalTokens: item?.total_tokens
+    totalTokens: item?.total_tokens,
+    averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]}</div>
   }));
 
   const onClickConfigure = (id, versionId) => {
@@ -247,7 +250,7 @@ function Home({ params }) {
                   </div>
 
                 ) : (
-                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'prompt', 'model', 'totalTokens']} sorting sortingColumns={['name', 'model', 'totalTokens']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
+                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'prompt', 'model', 'totalTokens', 'averageResponseTime']} sorting sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
                 )}
                 {filteredArchivedBridges?.length > 0 && <div className="">
                   <div className="flex justify-center items-center my-4">
@@ -266,7 +269,7 @@ function Home({ params }) {
 
                   ) : (
                     <div className="opacity-60">
-                      <CustomTable data={ArchivedBridges} columnsToShow={['name', 'prompt', 'model', 'totalTokens']} sorting sortingColumns={['name', 'model', 'totalTokens']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
+                      <CustomTable data={ArchivedBridges} columnsToShow={['name', 'prompt', 'model', 'totalTokens', 'averageResponseTime']} sorting sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
                     </div>
                   )}
                 </div>}
