@@ -31,14 +31,14 @@ export default function TriggersList({ params }) {
         triggerData: state?.bridgeReducer?.org?.[params?.org_id]?.triggerData
     }));
     const [triggers, setTriggers] = useState([]);
-    const [authkey, setAuthkey]=useState('')
+    const [authkey, setAuthkey] = useState('')
 
-    async function getAndSetAuthKey(){
-        const {data} = await allAuthKey()
+    async function getAndSetAuthKey() {
+        const { data } = await allAuthKey()
         let data_authkey = data?.[0]?.authkey
-        if(data?.length === 0){
-            const datatosend= {
-                name:'Trigger',
+        if (data?.length === 0) {
+            const datatosend = {
+                name: 'Trigger',
                 throttle_limit: "60:800",
                 temporary_throttle_limit: "60:600",
                 temporary_throttle_time: "30",
@@ -46,8 +46,8 @@ export default function TriggersList({ params }) {
             const response = await dispatch(createNewAuthData(datatosend));
             data_authkey = response?.data?.authkey;
         }
-        const keytoset= data_authkey
-       if(keytoset) setAuthkey(keytoset)
+        const keytoset = data_authkey
+        if (keytoset) setAuthkey(keytoset)
     }
     useEffect(() => {
         if (triggerData) {
@@ -63,18 +63,18 @@ export default function TriggersList({ params }) {
                 type: 'trigger',
                 bridge_id: params?.id,
             },
-            configurationJson:{
+            configurationJson: {
                 "rowe6baqarrm": {
-                  "key": "Talk_to_AI",
-                  "inputValues": {
-                    "bridge":params?.id,
-                    "_bridge":params?.id,
-                  },
-                  "authValues": {
-                    "pauth_key": authkey
-                  }
+                    "key": "Talk_to_AI",
+                    "inputValues": {
+                        "bridge": params?.id,
+                        "_bridge": params?.id,
+                    },
+                    "authValues": {
+                        "pauth_key": authkey
+                    }
                 }
-              }
+            }
         })
     }
 
