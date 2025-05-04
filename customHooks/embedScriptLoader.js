@@ -1,24 +1,10 @@
-import { allAuthKey } from "@/config";
-import { createNewAuthData } from "@/store/action/authkeyAction";
+import { getOrCreateNotificationAuthKey } from "@/config";
 import { useEffect } from "react";
 
 export const useEmbedScriptLoader = (embedToken) => {
 
   async function embedMaker() {
-    const { data } = await allAuthKey()
-    let data_authkey = data?.[0]?.authkey
-    if (data?.length === 0) {
-      const datatosend = {
-        name: 'Trigger',
-        throttle_limit: "60:800",
-        temporary_throttle_limit: "60:600",
-        temporary_throttle_time: "30",
-      }
-      const response = dispatch(createNewAuthData(datatosend));
-      data_authkey = response?.data?.authkey;
-    }
-
-    const pAuthKey = data_authkey
+    const pAuthKey = await getOrCreateNotificationAuthKey('gtwy_bridge_trigger').then(res => res?.authkey)
     const activeElement = document.activeElement;
     const script = document.createElement("script");
     script.setAttribute("embedToken", embedToken);

@@ -1,6 +1,5 @@
-import { allAuthKey } from "@/config";
+import { getOrCreateNotificationAuthKey } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { createNewAuthData } from "@/store/action/authkeyAction";
 import { updateTriggerDataReducer } from "@/store/reducer/bridgeReducer";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -34,27 +33,15 @@ export default function TriggersList({ params }) {
     const [authkey, setAuthkey] = useState('')
 
     async function getAndSetAuthKey() {
-        const { data } = await allAuthKey()
-        let data_authkey = data?.[0]?.authkey
-        if (data?.length === 0) {
-            const datatosend = {
-                name: 'Trigger',
-                throttle_limit: "60:800",
-                temporary_throttle_limit: "60:600",
-                temporary_throttle_time: "30",
-            }
-            const response = await dispatch(createNewAuthData(datatosend));
-            data_authkey = response?.data?.authkey;
-        }
-        const keytoset = data_authkey
-        if (keytoset) setAuthkey(keytoset)
+        const keytoset = await getOrCreateNotificationAuthKey('gtwy_bridge_trigger')
+        if (keytoset) setAuthkey(keytoset?.authkey)
     }
     useEffect(() => {
         if (triggerData) {
             setTriggers(triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []);
         }
         getAndSetAuthKey()
-    }, [triggerData, params?.id]);
+    }, [params?.org_id]);
 
     function openTrigger(triggerId) {
         openViasocket(triggerId, {
