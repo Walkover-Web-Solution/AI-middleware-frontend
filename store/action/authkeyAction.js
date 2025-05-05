@@ -33,6 +33,7 @@ export const createNewAuthData = (dataToSend) => async (dispatch, getState) => {
 
     // Update the authkey reducer with the new auth key data
     dispatch(addAuthData(data));
+    return data
   } catch (error) {
     // Log the error if any
     console.error(error);
