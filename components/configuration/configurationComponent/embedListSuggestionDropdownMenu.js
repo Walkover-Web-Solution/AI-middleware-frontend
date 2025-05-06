@@ -4,9 +4,11 @@ import { Info, Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
-    const { integrationData, function_data } = useCustomSelector((state) => ({
+    const { integrationData, function_data, embedToken } = useCustomSelector((state) => ({
         integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
         function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData,
+        embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+
     }));
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -88,7 +90,9 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     ) : (
                         <li className="text-center mt-2">No functions found</li>
                     )}
-                    {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket()}>
+                    {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined, 
+                        {embedToken}
+                    )}>
                         <div>
                             <Plus size={16} /><p className='font-semibold'>Add new Function</p>
                         </div>

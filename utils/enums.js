@@ -357,7 +357,7 @@ export const KNOWLEDGE_BASE_CUSTOM_SECTION = [
   { value: 'manual', label: 'Manual Chunking' },
   { value: 'recursive', label: 'Recursive Chunking' }
 ];
-export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini'];
+export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini', 'o4-mini'];
 
 export const FAQSIDEBARLINKS = [
   {

@@ -9,6 +9,7 @@ import CodeBlock from "../codeBlock/codeBlock";
 import EditMessageModal from "../modals/EditMessageModal";
 import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
+import { useCustomSelector } from "@/customHooks/customSelector";
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase }) => {
   const dispatch = useDispatch();
@@ -16,6 +17,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
   const [modalInput, setModalInput] = useState("");
+   const { embedToken } = useCustomSelector((state) => ({
+    embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+  }));
   const [isDropupOpen, setIsDropupOpen] = useState(false);
   const modalRef = useRef(null);
   const dropupRef = useRef(null);
@@ -105,7 +109,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   const renderToolData = (toolData, index) => (
     Object.entries(toolData).map(([key, tool]) => (
       <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 shadow-sm">
-        <div onClick={() => openViasocket(tool?.id, { flowHitId: tool?.metadata?.flowHitId })}
+        <div onClick={() => openViasocket(tool?.id, { flowHitId: tool?.metadata?.flowHitId, embedToken })}
           className="cursor-pointer flex items-center justify-center py-4 pl-2">
           <div className="text-center">
             {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
@@ -114,7 +118,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         <div className="flex gap-3">
           <div className="tooltip tooltip-top relative" data-tip="function logs">
             <SquareFunction size={22}
-              onClick={() => openViasocket(tool.id, { flowHitId: tool?.metadata?.flowHitId })}
+              onClick={() => openViasocket(tool.id, { flowHitId: tool?.metadata?.flowHitId, embedToken })}
               className="opacity-80 cursor-pointer" />
           </div>
           <div className="tooltip tooltip-top pr-2 relative" data-tip="function data">
@@ -134,7 +138,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
 
   const renderFunctionData = (funcName, index) => (
     <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
-      <div onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId })}
+      <div onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken })}
         className="cursor-pointer flex items-center justify-center py-4 pl-2">
         <div className="font-semibold text-center">
           {truncate(integrationData?.[funcName]?.title || funcName, 20)}
@@ -142,7 +146,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       </div>
       <div className="tooltip tooltip-top pr-2" data-tip="function logs">
         <SquareFunction size={22}
-          onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId })}
+          onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken })}
           className="opacity-80 cursor-pointer" />
       </div>
     </div>
@@ -417,7 +421,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           </div>}
           {
             item?.error && (
-              <div className="chat chat-start">
+              <div className="chat chat-start break-all break-words">
                 <div>
                   <div className="flex flex-row-reverse items-end justify-end gap-1">
                     <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">

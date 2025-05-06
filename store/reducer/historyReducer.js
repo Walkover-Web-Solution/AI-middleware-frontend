@@ -51,6 +51,9 @@ export const historyReducer = createSlice({
     setSelectedVersion: (state, action) => {
       state.selectedVersion = action.payload;
     },
+    clearHistoryData: (state) => {
+      state.history = [];
+    },
   },
 });
 
@@ -63,6 +66,7 @@ export const {
   userFeedbackCountReducer,
   fetchSubThreadReducer,
   clearSubThreadData,
-  setSelectedVersion
+  setSelectedVersion,
+  clearHistoryData
 } = historyReducer.actions;
 export default historyReducer.reducer;

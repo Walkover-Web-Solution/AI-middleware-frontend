@@ -5,6 +5,7 @@ import GoogleDocIcon from "@/icons/GoogleDocIcon";
 import GroqIcon from "@/icons/GroqIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { PdfIcon } from "@/icons/pdfIcon";
+import { WebSearchIcon } from "@/icons/webSearchIcon";
 import { cloneDeep } from "lodash";
 
 export const updatedData = (obj1, obj2 = {}, type) => {
@@ -289,6 +290,7 @@ export const allowedAttributes = {
         ['createdAt', 'Created At'],
         ['service', 'Service'],
         ['model', 'Model'],
+        ['version_id', 'Version ID'],
     ]
 };
 
@@ -300,6 +302,14 @@ export const GetFileTypeIcon = (fileType, height, width) => {
             return <CsvIcon height={height} width={width} />;
         default:
             return <GoogleDocIcon height={height} width={width} />;
+    }
+}
+export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
+    switch (preBuiltTools) {
+        case 'web_search':
+            return <WebSearchIcon height={height} width={width} />;
+        default:
+            return null;
     }
 }
 

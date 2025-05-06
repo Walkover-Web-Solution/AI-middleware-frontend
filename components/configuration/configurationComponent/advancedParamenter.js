@@ -40,7 +40,7 @@ const AdvancedParameters = ({ params }) => {
         JSON.stringify(configuration?.response_type?.json_schema, undefined, 4)
       );
     }
-  }, [tool_choice_data]);
+  }, [configuration?.response_type?.json_schema]);
 
   useEffect(() => {
     if (tool_choice_data === "auto" || tool_choice_data === "none" || tool_choice_data === "default" || tool_choice_data === "required") {

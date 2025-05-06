@@ -132,7 +132,7 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
 
 export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, pagelimit = 40) => {
   try {
-    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}&version_id=${versionId=== 'undefined' ? undefined : versionId}`, {
+    const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}&version_id=${versionId === 'undefined' ? undefined : versionId}`, {
       params: {
         user_feedback
       }
@@ -176,7 +176,7 @@ export const dryRun = async ({ localDataToSend, bridge_id }) => {
     return { success: true, data: dryRun.data }
   } catch (error) {
     console.error("dry run error", error, error.response.data.error);
-    toast.error(error?.response?.data?.error);
+    toast.error(error?.response?.data?.error || error?.response?.data?.detail?.error || "Something went wrong.");
     return { success: false, error: error.response.data.error }
   }
 }
@@ -200,13 +200,20 @@ export const logout = async () => {
   }
 }
 
-export const allAuthKey = async () => {
+export const allAuthKey = async (name = null) => {
   try {
-
-    const response = await axios(`${PROXY_URL}/api/c/authkey`)
-    return response?.data?.data
+    let url = `${PROXY_URL}/api/c/authkey`;
+    
+    // If name is provided, add it as a query parameter
+    if (name) {
+      url += `?name=${encodeURIComponent(name)}`;
+    }
+    
+    const response = await axios(url);
+    return response?.data?.data;
   } catch (error) {
-    console.error(error)
+    console.error(error);
+    throw error;
   }
 }
 
@@ -869,6 +876,35 @@ export const runTestCaseApi = async ({ versionId }) => {
   }
 }
 
+export const getOrCreateNotificationAuthKey = async (name) => {
+  try {
+    // First, get the notification auth key by name
+    const notificationAuthKeys = await allAuthKey(name);
+    
+    // Check if the notification auth key exists
+    const notificationAuthKey = notificationAuthKeys?.data?.length > 0 ? notificationAuthKeys?.data[0] : null;
+    
+    if (notificationAuthKey) {
+      // If it exists, return it
+      return notificationAuthKey;
+    } else {
+      // If it doesn't exist, create it
+      const dataToSend = {
+        name: name,
+        throttle_limit: "60:800",
+        temporary_throttle_limit: "60:600",
+        temporary_throttle_time: "30"
+      };
+      
+      const response = await createAuthKey(dataToSend);
+      return response?.data;
+    }
+  } catch (error) {
+    console.error("Error in getOrCreateNotificationAuthKey:", error);
+    throw error;
+  }
+};
+
 export const updateTestCaseApi = async ({ bridge_id, dataToUpdate }) => {
   try {
     const response = await axios.put(`${URL}/testcases/`, { bridge_id, ...dataToUpdate });
@@ -901,6 +937,16 @@ export const getBridgeConfigHistory = async (versionId, page = 1, pageSize = 30)
   }
 };
 
+export const createBridgeWithAiAPi = async ({ ...dataToSend }) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/api/v1/config/create_bridge_using_ai`, dataToSend);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
 export const getAllServices = async () => {
   try {
     const response = await axios.get(`${PYTHON_URL}/api/v1/config/service`);
@@ -910,3 +956,23 @@ export const getAllServices = async () => {
     throw new Error(error);
   }
 };
+
+export const modelSuggestionApi = async ({ versionId }) => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/bridge/versions/suggest/${versionId}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const getPrebuiltToolsApi = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/api/v1/config/inbuilt/tools`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}

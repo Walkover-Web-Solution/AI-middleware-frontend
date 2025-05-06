@@ -47,51 +47,86 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     }
     openModal(MODAL_TYPE.ADD_TEST_CASE_MODAL);
   };
+  
 
   useEffect(() => {
+    let timeoutId;
+
     const fetchData = async () => {
-      const thread_id = search?.get("thread_id");
-      const startDate = search?.get("start");
-      const endDate = search?.get("end");
+      const thread_id = params?.thread_id;
+      const startDate = search.get("start"); 
+      const endDate = search.get("end");
+      
+      setThreadPage(1);
+      setLoadingData(true);
       let result;
       let url;
-      setThreadPage(1);
-      setLoadingData(true); // Set loading to true before fetching data
 
-      const fetchThread = async (threadId) => {
-        url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}`;
-        result = await dispatch(getThread({ 
-          threadId, 
-          bridgeId: params?.id, 
-          nextPage: 1, 
-          user_feedback: filterOption, 
-          subThreadId: params?.subThread_id || threadId,
-          versionId: selectedVersion === "all" ? '' : selectedVersion
-        }));
-        return result;
-      };
-
-      if (thread_id && historyData?.some(history => history?.thread_id === thread_id)) {
-        await fetchThread(thread_id);
-      } else if (historyData?.length > 0) {
+      if(!thread_id && historyData &&  historyData?.length > 0) {
         const firstThreadId = historyData?.[0]?.thread_id;
-        await fetchThread(firstThreadId);
-        url = `${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subThread_id=${params?.subThread_id || firstThreadId}`;
-        if (startDate && endDate) {
-          url += `&start=${startDate}&end=${endDate}`;
+        if (firstThreadId) {
+          router.push(`${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}`, undefined, { shallow: true });
+          return;
         }
-        router.push(url, undefined, { shallow: true });
       }
-      setThreadMessageState({ totalPages: result?.totalPages, totalEntries: result?.totalEnteries });
-      setHasMoreThreadData(result?.data?.length >= 40);
+
+      // Debounced thread fetching function
+      const fetchThread = async (threadId) => {
+        try {
+          url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}`;
+          if (startDate && endDate) {
+            url += `&start=${startDate}&end=${endDate}`;
+          }
+
+          // Add 500ms delay before making the request
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          result = await dispatch(getThread({
+            threadId,
+            bridgeId: params?.id,
+            nextPage: 1,
+            user_feedback: filterOption,
+            subThreadId: params?.subThread_id || threadId,
+            versionId: selectedVersion === "all" ? "" : selectedVersion,
+          }));
+
+          return result;
+        } catch (error) {
+          console.error("Error fetching thread:", error);
+          setLoadingData(false);
+          return null;
+        }
+      };
+      // Only fetch if we have valid data
+      if (thread_id && historyData?.some(history => history?.thread_id === thread_id)) {
+        result = await fetchThread(thread_id);
+      } 
+
+      if (result) {
+        setThreadMessageState({ 
+          totalPages: result?.totalPages, 
+          totalEntries: result?.totalEnteries 
+        });
+        setHasMoreThreadData(result?.data?.length >= 40);
+      }
+
       setIsFetchingMore(false);
       setLoading(false);
-      setLoadingData(false); // Set loading to false after data is fetched
+      setLoadingData(false);
     };
 
-    fetchData();
-  }, [filterOption, search, params?.thread_id, selectedVersion]);
+    // Debounce the fetchData call
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fetchData();
+    }, 300);
 
+    return () => {
+      clearTimeout(timeoutId);
+    };
+
+  }, [params?.thread_id, filterOption,search, params?.subThread_id,  selectedVersion]);
+  
   const fetchMoreThreadData = useCallback(async () => {
     if (isFetchingMore) return;
     setIsFetchingMore(true);
