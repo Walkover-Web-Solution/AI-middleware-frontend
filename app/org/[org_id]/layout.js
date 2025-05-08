@@ -3,6 +3,7 @@ import ErrorPage from "@/app/not-found";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Navbar from "@/components/navbar";
+import Protected from "@/components/protected";
 import MainSlider from "@/components/sliders/mainSlider";
 import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -17,7 +18,8 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
-export default function layoutOrgPage({ children, params }) {
+function layoutOrgPage({ children, params }) {
+  
   const dispatch = useDispatch();
   const pathName = usePathname();
   const searchParams = useSearchParams();
@@ -219,3 +221,5 @@ export default function layoutOrgPage({ children, params }) {
     );
   }
 }
+
+export default Protected(layoutOrgPage);
