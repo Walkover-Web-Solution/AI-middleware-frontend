@@ -1,9 +1,9 @@
 import { getHistory, getSingleThreadData, getSubThreadIds, updateHistoryMessage, userFeedbackCount } from "@/config";
 import { fetchAllHistoryReducer, fetchSubThreadReducer, fetchThreadReducer, updateHistoryMessageReducer, userFeedbackCountReducer } from "../reducer/historyReducer";
 
-export const getHistoryAction = (id, start, end, page = 1, keyword = '',user_feedback) => async (dispatch) => {
+export const getHistoryAction = (id, start, end, page = 1, keyword = '',user_feedback, isErrorTrue) => async (dispatch) => {
   try {
-    const data = await getHistory(id, page, start, end, keyword,user_feedback);
+    const data = await getHistory(id, page, start, end, keyword,user_feedback, isErrorTrue );
     if (data && data.data) {
       dispatch(fetchAllHistoryReducer({ data: data.data, page }));
       return data.data; // Return the data for further checks
@@ -13,9 +13,9 @@ export const getHistoryAction = (id, start, end, page = 1, keyword = '',user_fee
   }
 };
 
-export const getThread = ({threadId, bridgeId, subThreadId ,nextPage,user_feedback, versionId}) => async (dispatch) => {
+export const getThread = ({threadId, bridgeId, subThreadId ,nextPage,user_feedback, versionId, error}) => async (dispatch) => {
   try {
-    const data = await getSingleThreadData(threadId, bridgeId, subThreadId, nextPage,user_feedback, versionId);
+    const data = await getSingleThreadData(threadId, bridgeId, subThreadId, nextPage,user_feedback, versionId, error);
     dispatch(fetchThreadReducer({ data: data.data, nextPage }));
     return data.data;
   } catch (error) {
@@ -41,9 +41,9 @@ export const userFeedbackCountAction = ({bridge_id,user_feedback}) => async(disp
   }
 }
 
-export const getSubThreadsAction = ({thread_id}) => async (dispatch) =>{
+export const getSubThreadsAction = ({thread_id, error}) => async (dispatch) =>{
   try {
-    const data = await getSubThreadIds({thread_id});
+    const data = await getSubThreadIds({thread_id, error});
     dispatch(fetchSubThreadReducer({data:data.threads}))
 
   } catch (error) {
