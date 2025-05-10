@@ -43,7 +43,7 @@ function FunctionParameterModal({ functionId, params }) {
   const [isModified, setIsModified] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState("");
   const [isTextareaVisible, setIsTextareaVisible] = useState(false);
-  const flattenedParameters = flattenParameters(toolData?.fields);
+  let flattenedParameters = flattenParameters(toolData?.fields);
   const [isOldFieldViewTrue, setIsOldFieldViewTrue] = useState(false);
 
   useEffect(() => {
@@ -55,13 +55,16 @@ function FunctionParameterModal({ functionId, params }) {
     setVariablesPath(variables_path[functionName] || {});
   }, [variables_path, functionName]);
 
-  useEffect(() => {
-    setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
-  }, [toolData, function_details]);
 
   useEffect(() => {
-    setIsModified(!isEqual(variablesPath, variables_path[functionName]));
-  }, [variablesPath]);
+    const isToolDataModified = !isEqual(toolData, function_details);
+    const isVariablesPathModified = !isEqual(
+      variablesPath,
+      variables_path[functionName] || {}
+    );
+    setIsModified(isToolDataModified || isVariablesPathModified);
+  }, [toolData, function_details, variablesPath, variables_path, functionName]);
+
 
   const copyToClipboard = (content) => {
     navigator.clipboard
@@ -287,30 +290,175 @@ function FunctionParameterModal({ functionId, params }) {
       toast.error("Failed to update enum: " + error.message);
     }
   };
+  const handleAddNewParameter = () => {
+    // Create a new parameter with empty key (user will fill it)
+    const tempId = `temp_${Math.random().toString(36).substring(2, 7)}`; // Just for React key purposes
+
+
+    setToolData((prevToolData) => {
+      const newParameter = {
+        type: "string",
+        description: '',
+        required: false,
+        enum: [],
+        isNew: true, // Flag to identify new parameters
+        tempId, // Internal ID for tracking
+        userKey: "", // Empty key for user to fill
+        ...(prevToolData.fields?.new_param_template || {}),
+      };
+
+
+      return {
+        ...prevToolData,
+        fields: {
+          ...prevToolData.fields,
+          [tempId]: newParameter, // Use tempId as the key initially
+        },
+      };
+    });
+
+
+    // Focus the new parameter name field
+    setTimeout(() => {
+      const newRowInputs = document.querySelectorAll(".parameter-name-input");
+      if (newRowInputs.length > 0) {
+        const lastInput = newRowInputs[newRowInputs.length - 1];
+        lastInput.focus();
+      }
+    }, 100);
+  };
+
 
   const handleSaveFunctionData = () => {
-    if (!isEqual(toolData, function_details)) {
-      const { _id, ...dataToSend } = toolData;
-      dispatch(
-        updateFuntionApiAction({
-          function_id: functionId,
-          dataToSend: dataToSend,
-        })
-      );
-      setToolData("");
+    try {
+      // First process the data to convert temporary params to permanent ones
+      const processedData = processBeforeSave(toolData);
+      if (!isEqual(processedData, function_details)) {
+        const { _id, ...dataToSend } = processedData;
+        dispatch(
+          updateFuntionApiAction({
+            function_id: functionId,
+            dataToSend: dataToSend,
+          })
+        );
+        setToolData("");
+      }
+      if (!isEqual(variablesPath, variables_path[functionName])) {
+        // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
+        dispatch(
+          updateBridgeVersionAction({
+            bridgeId: params.id,
+            versionId: params.version,
+            dataToSend: { variables_path: { [functionName]: variablesPath } },
+          })
+        );
+      }
+      resetModalData();
+    } catch (error) {
+      toast.error(error.message);
     }
-    if (!isEqual(variablesPath, variables_path[functionName])) {
-      // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
-      dispatch(
-        updateBridgeVersionAction({
-          bridgeId: params.id,
-          versionId: params.version,
-          dataToSend: { variables_path: { [functionName]: variablesPath } },
-        })
-      );
-    }
-    resetModalData();
   };
+  const processBeforeSave = (data) => {
+    const permanentFields = {};
+    const requiredParams = [];
+    Object.entries(data.fields).forEach(([key, value]) => {
+      // For new parameters that need conversion
+      if (value.isNew) {
+        const permanentKey = value.userKey?.trim();
+
+
+        // Validate the user-provided key
+        if (!permanentKey) {
+          throw new Error("All new parameters must have a name");
+        }
+        if (permanentFields[permanentKey]) {
+          throw new Error(`Parameter '${permanentKey}' already exists`);
+        }
+
+
+        // Create the permanent field
+        permanentFields[permanentKey] = {
+          type: value.type,
+          description: value.description,
+          required: value.required,
+          enum: value.enum,
+          // Copy other necessary fields except temporary ones
+        };
+        // Add to required_params if needed
+        if (value.required) {
+          requiredParams.push(permanentKey);
+        }
+      }
+      // For existing parameters
+      else {
+        permanentFields[key] = value;
+        // Maintain existing required_params
+        if (data.required_params?.includes(key)) {
+          requiredParams.push(key);
+        }
+      }
+    });
+    // Process variablesPath to update keys if needed
+    const updatedVariablesPath = { ...variablesPath };
+    Object.entries(data.fields).forEach(([oldKey, value]) => {
+      if (value.isNew && value.userKey && oldKey in updatedVariablesPath) {
+        updatedVariablesPath[value.userKey] = updatedVariablesPath[oldKey];
+        delete updatedVariablesPath[oldKey];
+      }
+    });
+    // Update the variables path in state
+    setVariablesPath(updatedVariablesPath);
+    return {
+      ...data,
+      fields: permanentFields,
+      required_params: requiredParams,
+    };
+  };
+  const handleDeleteParameter = (keyToDelete) => {
+    // Step 1: Remove from toolData.fields (handles both flat and nested)
+    setToolData((prevToolData) => {
+      const keyParts = keyToDelete.split(".");
+      // For top-level parameters
+      if (keyParts.length === 1) {
+        const updatedFields = { ...prevToolData.fields };
+        delete updatedFields[keyToDelete];
+        return {
+          ...prevToolData,
+          fields: updatedFields,
+          required_params: (prevToolData.required_params || []).filter(
+            (param) => param !== keyToDelete
+          ),
+        };
+      }
+      // For nested parameters
+      const updatedFields = JSON.parse(JSON.stringify(prevToolData.fields)); // Deep clone
+      let current = updatedFields;
+      for (let i = 0; i < keyParts.length - 1; i++) {
+        if (current[keyParts[i]]?.type === "array") {
+          current = current[keyParts[i]].items;
+        } else if (current[keyParts[i]]?.parameter) {
+          current = current[keyParts[i]].parameter;
+        } else {
+          current = current[keyParts[i]];
+        }
+      }
+      delete current[keyParts[keyParts.length - 1]];
+      return {
+        ...prevToolData,
+        fields: updatedFields,
+        required_params: (prevToolData.required_params || []).filter(
+          (param) => param !== keyToDelete
+        ),
+      };
+    });
+    // Step 2: Remove from variablesPath if it exists
+    setVariablesPath((prev) => {
+      const newVariablesPath = { ...prev };
+      delete newVariablesPath[keyToDelete];
+      return newVariablesPath;
+    });
+  };
+
 
   const handleRemoveFunctionFromBridge = () => {
     // dispatch(updateBridgeAction({
@@ -532,7 +680,27 @@ function FunctionParameterModal({ functionId, params }) {
                   return (
                     <tr key={param.key}>
                       <td>{index}</td>
-                      <td>{param.key}</td>
+                      <td>
+                        {currentField?.isNew ? (
+                          <input
+                            type="text"
+                            className="input input-bordered input-sm w-full"
+                            value={currentField.userKey || ""}
+                            onChange={(e) => {
+                              setToolData((prev) => {
+                                const updated = { ...prev };
+                                updated.fields[param.key].userKey =
+                                  e.target.value;
+                                return updated;
+                              });
+                            }}
+                            placeholder="Parameter name"
+                            required
+                          />
+                        ) : (
+                          param.key
+                        )}
+                      </td>
                       <td>
                         <select
                           className="select select-sm select-bordered"
@@ -632,6 +800,15 @@ function FunctionParameterModal({ functionId, params }) {
                           }}
                         />
                       </td>
+                      <td>
+                        <button
+                          onClick={() => handleDeleteParameter(param.key)}
+                          // className="text-red"
+                          title="Delete parameter"
+                        >
+                          <Trash2 size={16} className="font-red" />
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -662,21 +839,42 @@ function FunctionParameterModal({ functionId, params }) {
           </div>
         )}
         <div className="modal-action">
-          <form method="dialog" className="flex flex-row gap-2">
-            <button className="btn" onClick={handleCloseModal}>
-              Close
+          <form
+            method="dialog"
+            className="w-full flex justify-between items-center"
+          >
+            {/* Empty div to balance the flex layout */}
+            <div className="flex-1"></div>
+
+
+            {/* Centered Add New Row button */}
+            <button
+              type="button"
+              className="btn btn-accent mx-auto"
+              onClick={handleAddNewParameter}
+            >
+              Add New Row
             </button>
 
-            {isDataAvailable && (
-              <button
-                className="btn btn-primary"
-                onClick={handleSaveFunctionData}
-                disabled={!isModified || isLoading}
-              >
-                {isLoading && <span className="loading loading-spinner"></span>}
-                Save
+
+            {/* Right-aligned Close and Save buttons */}
+            <div className="flex-1 flex justify-end gap-2">
+              <button className="btn" onClick={handleCloseModal}>
+                Close
               </button>
-            )}
+
+              {isDataAvailable && (
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSaveFunctionData}
+                  disabled={!isModified || isLoading}
+                >
+                  {isLoading && (
+                    <span className="loading loading-spinner"></span>)}
+                  Save
+                </button>
+              )}
+            </div>
           </form>
         </div>
       </div>
