@@ -1,9 +1,9 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
-import { Info, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
-function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => {}, connect_agents = [], shouldToolsShow, modelName }) {
+function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [] }) {
     const { bridges } = useCustomSelector((state) => ({
         bridges: state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
     }));
@@ -20,9 +20,10 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
     const renderBridgeSuggestions = useMemo(() => (
         Object.values(bridges)
             .filter(bridge =>
-                (bridge?.status === 1 || (bridge?.bridge_status && bridge?.bridge_status === 0)) && 
+                (bridge?.status === 1 || (bridge?.bridge_status && bridge?.bridge_status === 0)) &&
                 (bridge.name?.toLowerCase()?.includes(searchQuery.toLowerCase())) &&
                 bridge?.published_version_id
+                && !connect_agents.some(agent => Object.keys(agent)[0] === bridge.name)
             )
             .slice()
             .sort((a, b) => {
