@@ -27,8 +27,8 @@ const ConnectedAgentList = ({ params }) => {
             return;
         }
         dispatch(updateBridgeVersionAction({
-            bridgeId: params.id,
-            versionId: params.version,
+            bridgeId: params?.id,
+            versionId: params?.version,
             dataToSend: {
                 agents: {
                     connected_agents: {
@@ -51,8 +51,8 @@ const ConnectedAgentList = ({ params }) => {
 
     const handleRemoveAgent = (key, value) => {
         dispatch(updateBridgeVersionAction({
-            bridgeId: params.id,
-            versionId: params.version,
+            bridgeId: params?.id,
+            versionId: params?.version,
             dataToSend: {
                 agents: {
                     connected_agents: {
@@ -67,13 +67,13 @@ const ConnectedAgentList = ({ params }) => {
     }
 
     const renderEmbed = useMemo(() => (
-        connect_agents && connect_agents.map((item) => {
-            const key = Object.keys(item)[0];
-            const value = item[key];
+        connect_agents && Array.isArray(connect_agents) ? connect_agents.map((item) => {
+            const key = Object.keys(item)?.[0];
+            const value = item?.[key];
             return (
                 <div
-                    key={value.bridge_id}
-                    id={value.bridge_id}
+                    key={value?.bridge_id}
+                    id={value?.bridge_id}
                     className={`flex w-[280px] flex-col items-start rounded-lg border-2 md:flex-row cursor-pointer bg-base-100 relative transition-all`}
                 >
                     <div className="p-4 w-full h-full flex flex-col justify-between gap-3">
@@ -99,7 +99,8 @@ const ConnectedAgentList = ({ params }) => {
                     </div>
                 </div>
             );
-        })
+        }
+        ) : null
     ), [connect_agents]);
     return (
         <div>

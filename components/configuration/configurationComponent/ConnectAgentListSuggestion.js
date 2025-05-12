@@ -10,7 +10,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
-        setSearchQuery(e.target?.value || "");
+        setSearchQuery(e?.target?.value || "");
     };
 
     const handleItemClick = (bridge) => {
@@ -19,24 +19,25 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
 
     const renderBridgeSuggestions = useMemo(() => (
         Object.values(bridges)
-            .filter(bridge =>
-                (bridge?.status === 1 || (bridge?.bridge_status && bridge?.bridge_status === 0)) &&
-                (bridge.name?.toLowerCase()?.includes(searchQuery.toLowerCase())) &&
-                bridge?.published_version_id
-                && !connect_agents.some(agent => Object.keys(agent)[0] === bridge.name)
-            )
+            .filter(bridge => {
+                const isActive = bridge?.status === 1 || bridge?.bridge_status === 0;
+                const matchesSearch = bridge?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase());
+                const hasPublishedVersion = bridge?.published_version_id;
+                const isNotConnected = Array.isArray(connect_agents) && connect_agents.some(agent => Object.keys(agent)?.[0] === bridge?.name);
+                return isActive && matchesSearch && hasPublishedVersion && !isNotConnected;
+            })
             .slice()
             .sort((a, b) => {
-                if (!a.name) return 1;
-                if (!b.name) return -1;
-                return a.name?.localeCompare(b.name);
+                if (!a?.name) return 1;
+                if (!b?.name) return -1;
+                return a?.name?.localeCompare(b?.name);
             })
             .map((bridge) => {
                 return (
-                    <li key={bridge.id} onClick={() => handleItemClick(bridge)}>
+                    <li key={bridge?.id} onClick={() => handleItemClick(bridge)}>
                         <div className="flex justify-between items-center w-full">
                             <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
-                                {bridge.name || 'Untitled'}
+                                {bridge?.name || 'Untitled'}
                             </p>
                             <div>
                                 <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(bridge?.bridge_status === 1 ? "paused" : bridge?.status === 0 ? "archived" : "active")}`}>
