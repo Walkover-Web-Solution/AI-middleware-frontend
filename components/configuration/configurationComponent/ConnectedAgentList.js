@@ -67,13 +67,11 @@ const ConnectedAgentList = ({ params }) => {
     }
 
     const renderEmbed = useMemo(() => (
-        connect_agents && Array.isArray(connect_agents) ? connect_agents.map((item) => {
-            const key = Object.keys(item)?.[0];
-            const value = item?.[key];
+        connect_agents && Object.entries(connect_agents).map(([name, item]) => {
             return (
                 <div
-                    key={value?.bridge_id}
-                    id={value?.bridge_id}
+                    key={item?.bridge_id}
+                    id={item?.bridge_id} 
                     className={`flex w-[280px] flex-col items-start rounded-lg border-2 md:flex-row cursor-pointer bg-base-100 relative transition-all`}
                 >
                     <div className="p-4 w-full h-full flex flex-col justify-between gap-3">
@@ -81,27 +79,27 @@ const ConnectedAgentList = ({ params }) => {
                             <div className="flex justify-between items-center">
                                 <h1 className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content flex items-center gap-2">
                                     <Bot size={18} className="text-primary" />
-                                    {key}
+                                    {name} {/* This is the agent's name */}
                                 </h1>
                                 <div className="flex items-center gap-2">
                                     <button
                                         className="btn btn-ghost btn-sm p-1 hover:bg-red-50"
-                                        onClick={() => handleRemoveAgent(key, value)}
+                                        onClick={() => handleRemoveAgent(name, item)}
                                     >
                                         <Trash size={16} className="text-red-500" />
                                     </button>
                                 </div>
                             </div>
                             <p className="text-sm text-base-content/80 line-clamp-3">
-                                {value?.description || "A description is required for proper functionality."}
+                                {item?.description || "A description is required for proper functionality."}
                             </p>
                         </div>
                     </div>
                 </div>
             );
-        }
-        ) : null
+        })
     ), [connect_agents]);
+    
     return (
         <div>
             <div className="label flex-col items-start mb-2">

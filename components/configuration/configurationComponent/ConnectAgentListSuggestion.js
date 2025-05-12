@@ -23,7 +23,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
                 const isActive = bridge?.status === 1 || bridge?.bridge_status === 0;
                 const matchesSearch = bridge?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase());
                 const hasPublishedVersion = bridge?.published_version_id;
-                const isNotConnected = Array.isArray(connect_agents) && connect_agents.some(agent => Object.keys(agent)?.[0] === bridge?.name);
+                const isNotConnected = connect_agents && Object.keys(connect_agents).some(agentName => agentName === bridge?.name);
                 return isActive && matchesSearch && hasPublishedVersion && !isNotConnected;
             })
             .slice()
