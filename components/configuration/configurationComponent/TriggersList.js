@@ -56,6 +56,8 @@ export default function TriggersList({ params }) {
                     "inputValues": {
                         "bridge": params?.id,
                         "_bridge": params?.id,
+                        "message":`\${JSON.stringify(context.req.body)}`,
+                        "_message":`\${JSON.stringify(context.req.body)}`,
                     },
                     "authValues": {
                         "pauth_key": authkey
