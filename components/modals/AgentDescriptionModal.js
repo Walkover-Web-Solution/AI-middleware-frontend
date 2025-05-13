@@ -22,7 +22,7 @@ const AgentDescriptionModal = ({ setDescription, handleSaveAgent, description })
                 </div>
                 <div className="modal-action">
                     <button className="btn" onClick={() => closeModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)}>Cancel</button>
-                    <button className="btn btn-primary" onClick={handleSaveAgent}>Save</button>
+                    <button className="btn btn-primary" onClick={() => handleSaveAgent()}>Save</button>
                 </div>
             </div>
             <form method="dialog" className="modal-backdrop">
