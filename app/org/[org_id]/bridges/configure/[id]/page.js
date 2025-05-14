@@ -7,7 +7,6 @@ import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getSingleBridgesAction } from "@/store/action/bridgeAction";
-import { getModelAction } from "@/store/action/modelAction";
 import { useEffect, useRef } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
@@ -19,13 +18,11 @@ const Page = ({ searchParams }) => {
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const { bridgeType, service, isServiceModelsAvailable, versionService, bridgeName } = useCustomSelector((state) => {
+  const { bridgeType,versionService, bridgeName } = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
       bridgeType: bridgeData?.bridgeType,
-      service: versionData?.service,
-      isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[versionData?.service],
       versionService: versionData?.service,
       bridgeName: bridgeData?.name,
     };
@@ -49,12 +46,6 @@ const Page = ({ searchParams }) => {
       }
     }
   }, []);
-
-  useEffect(() => {
-    if (service && !isServiceModelsAvailable) {
-      dispatch(getModelAction({ service }))
-    }
-  }, [service]);
 
   useEffect(() => {
     if (mountRef.current) {
