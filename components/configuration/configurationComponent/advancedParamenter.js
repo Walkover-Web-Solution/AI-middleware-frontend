@@ -35,6 +35,30 @@ const AdvancedParameters = ({ params }) => {
   }));
 
   useEffect(() => {
+  // Only reset response type to "text" when model changes if json_schema isn't supported
+  const currentModelOptions = modelInfoData?.response_type?.options || [];
+  const hasJsonSchemaOption = currentModelOptions.some(option => 
+    option.type === "json_schema" || option === "json_schema"
+  );
+  
+  // Only reset if current response type is json_schema and new model doesn't support it
+  if (configuration?.response_type?.type === "json_schema" && !hasJsonSchemaOption) {
+    dispatch(updateBridgeVersionAction({ 
+      bridgeId: params?.id, 
+      versionId: params?.version, 
+      dataToSend: { 
+        configuration: {
+          "response_type": {
+            "type": "text"
+          }
+        } 
+      } 
+    }));
+    setObjectFieldValue(undefined);
+  }
+}, [model, modelInfoData, configuration?.response_type?.type, dispatch, params?.id, params?.version]);
+
+  useEffect(() => {
     if (configuration?.response_type?.json_schema) {
       setObjectFieldValue(
         JSON.stringify(configuration?.response_type?.json_schema, undefined, 4)
