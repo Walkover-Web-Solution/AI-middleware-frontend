@@ -21,9 +21,7 @@ function CreateNewBridge({ orgid }) {
 
     const { allBridgeList, SERVICES } = useCustomSelector((state) => ({
         SERVICES : state?.serviceReducer?.services,
-        allBridgeLength: (state.bridgeReducer.org[orgid] || [])?.length,
         allBridgeList: (state.bridgeReducer.org[orgid] || [])?.orgs,
-        modelsList: state?.modelReducer?.serviceModels[selectedService],
     }));
 
     useEffect(() => {

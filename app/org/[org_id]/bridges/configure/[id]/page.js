@@ -23,8 +23,6 @@ const Page = ({ searchParams }) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
       bridgeType: bridgeData?.bridgeType,
-      service: versionData?.service,
-      isServiceModelsAvailable: state?.modelReducer?.serviceModels?.[versionData?.service],
       versionService: versionData?.service,
       bridgeName: bridgeData?.name,
     };
