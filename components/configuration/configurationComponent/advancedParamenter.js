@@ -38,7 +38,7 @@ const AdvancedParameters = ({ params }) => {
   // Only reset response type to "text" when model changes if json_schema isn't supported
   const currentModelOptions = modelInfoData?.response_type?.options || [];
   const hasJsonSchemaOption = currentModelOptions.some(option => 
-    option.type === "json_schema" || option === "json_schema"
+    option.type === "json_schema"
   );
   
   // Only reset if current response type is json_schema and new model doesn't support it
