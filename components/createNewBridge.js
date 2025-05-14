@@ -1,5 +1,4 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { DEFAULT_MODEL } from "@/jsonFiles/bridgeParameter";
 import { createBridgeAction, createBridgeWithAiAction } from "@/store/action/bridgeAction";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -20,7 +19,7 @@ function CreateNewBridge({ orgid }) {
     const textAreaPurposeRef = useRef();
     const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState();
 
-    const { allBridgeLength, allBridgeList, modelsList, SERVICES } = useCustomSelector((state) => ({
+    const { allBridgeList, SERVICES } = useCustomSelector((state) => ({
         SERVICES : state?.serviceReducer?.services,
         allBridgeLength: (state.bridgeReducer.org[orgid] || [])?.length,
         allBridgeList: (state.bridgeReducer.org[orgid] || [])?.orgs,
@@ -40,18 +39,18 @@ function CreateNewBridge({ orgid }) {
     const dispatch = useDispatch();
     const route = useRouter();
 
-    const handleService = (e) => {
-        setSelectedService(e.target.value);
-        setSelectedModel(DEFAULT_MODEL[e.target.value]);
-    };
+    // const handleService = (e) => {
+    //     setSelectedService(e.target.value);
+    //     setSelectedModel(DEFAULT_MODEL[e.target.value]);
+    // };
 
-    const handleModel = (e) => {
-        const selectedModel = e.target.value;
-        const selectedModelType = e.target.selectedOptions[0].parentNode.label;
+    // const handleModel = (e) => {
+    //     const selectedModel = e.target.value;
+    //     const selectedModelType = e.target.selectedOptions[0].parentNode.label;
 
-        setSelectedModel(selectedModel);
-        setSelectedType(selectedModelType);
-    };
+    //     setSelectedModel(selectedModel);
+    //     setSelectedType(selectedModelType);
+    // };
 
     // const onDrop = (acceptedFiles) => {
     //     setUploadedFile(acceptedFiles[0]);
@@ -134,9 +133,6 @@ function CreateNewBridge({ orgid }) {
             });
     }
 
-    const toggleMode = () => {
-        setIsManualMode(!isManualMode);
-    };
 
     return (
         <div>

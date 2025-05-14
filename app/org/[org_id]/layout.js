@@ -75,7 +75,6 @@ export default function layoutOrgPage({ children, params }) {
   useEffect(() => {
     if (isValidOrg) {
       SERVICES.map((service) => {
-        console.log("mydata",service?.value, 'service?.value')
         dispatch(getModelAction({ service: service?.value }));
         return null; // to satisfy map's return
       });
