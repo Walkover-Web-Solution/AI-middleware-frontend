@@ -132,24 +132,28 @@ export default function ConfigurationPage({ params }) {
             <div className="absolute right-0 top-0">
                 <div className="flex items-center">
                     <BridgeVersionDropdown params={params} />
-                    <div className="join">
+                    <div className="join group flex">
                         <button
                             onClick={() => handleNavigation('config')}
-                            className={` ${currentView === 'config' ? "btn-primary" : ""} btn join-item `}
+                            className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
-                            <Cog size={16} /> Config
+                            <Cog size={16} className="shrink-0" />
+                            <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Bridge Config</span>
                         </button>
                         <button
-                            onClick={() => handleNavigation('chatbot-config')}
-                            className={` ${currentView === 'chatbot-config' ? "btn-primary" : ""} btn join-item `}
+                            onClick={() => handleNavigation('chatbot-config')} 
+                            className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
-                            <FileSliders size={16} /> Chatbot Config
+                            <Bot size={16} className="shrink-0" />
+                            <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
                         </button>
                         <button
                             onClick={() => handleNavigation('guide')}
-                            className={` ${currentView === 'guide' ? "btn-primary" : ""} btn join-item `}
+                            className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
-                            <Bot size={16} /> Guide
+                            
+                            <FileSliders size={16} className="shrink-0" />
+                            <span className={`${currentView === 'guide' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Integration Guide</span>
                         </button>
                     </div>
                 </div>
