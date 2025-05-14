@@ -21,26 +21,24 @@ const ApiKeyInput = ({ params }) => {
             bridge_apiKey: bridgeMap?.apikey,
             apikeydata: apikeys[params?.org_id] || [], // Ensure apikeydata is an array
             bridgeApikey_object_id: bridgeMap?.apikey_object_id,
-            currentService: bridgeMap?.service,
-            SERVICES : state?.serviceReducer?.services
+            currentService: bridgeMap?.service === 'openai_response' ? 'openai' : bridgeMap?.service,
+            SERVICES: state?.serviceReducer?.services
         };
     });
+
     // Memoize filtered API keys
     const filteredApiKeys = useMemo(() => {
-        return apikeydata.filter(apiKey => 
-            apiKey?.service === bridge?.service || 
-            (apiKey?.service === 'openai' && bridge?.service === 'openai_response') ||
-            (apiKey?.service === 'openai_response' && bridge?.service === 'openai')
+        return apikeydata.filter(apiKey =>
+            apiKey?.service === (bridge?.service === 'openai_response' ? 'openai' : bridge?.service)
         );
     }, [apikeydata, bridge?.service]);
-
 
     useEffect(() => {
         if (bridgeApikey_object_id) {
             if (typeof bridgeApikey_object_id === 'string') {
                 const apiKey = apikeydata.find(apiKey => apiKey?._id === bridgeApikey_object_id);
                 if (apiKey) {
-                    setSelectedApiKeys({ [bridge?.service]: apiKey._id });
+                    setSelectedApiKeys({ [bridge?.service === 'openai_response' ? 'openai' : bridge?.service]: apiKey._id });
                 }
             }
             else
@@ -60,7 +58,6 @@ const ApiKeyInput = ({ params }) => {
     const handleSelectionChange = useCallback((service, apiKeyId) => {
         setSelectedApiKeys(prev => {
             const updated = { ...prev, [service]: apiKeyId };
-            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
             return updated;
         });
@@ -89,8 +86,8 @@ const ApiKeyInput = ({ params }) => {
             openModal(MODAL_TYPE.API_KEY_MODAL);
         } else {
             setSelectedApiKeys(prev => {
-                const updated = { ...prev, [bridge?.service]: selectedApiKeyId };
-                // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { apikey_object_id: selectedApiKeyId } }));
+                const service = bridge?.service === 'openai_response' ? 'openai' : bridge?.service;
+                const updated = { ...prev, [service]: selectedApiKeyId };
                 dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
                 return updated;
             });
@@ -100,7 +97,7 @@ const ApiKeyInput = ({ params }) => {
     // Determine the currently selected value
     const selectedValue = useMemo(() => {
         const serviceApiKeyId = typeof bridgeApikey_object_id === 'object'
-            ? bridgeApikey_object_id?.[bridge?.service]
+            ? bridgeApikey_object_id?.[bridge?.service === 'openai_response' ? 'openai' : bridge?.service]
             : bridgeApikey_object_id;
         const currentApiKey = apikeydata.find(apiKey => apiKey?._id === serviceApiKeyId);
         return currentApiKey ? currentApiKey._id : bridge_apiKey || '';
