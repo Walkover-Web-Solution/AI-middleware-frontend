@@ -235,14 +235,14 @@ function Home({ params }) {
                  description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code." 
                 />
                </MainLayout>
-      <input
-               ref={inputRef}
-               type="text"
-               placeholder="Search for bridges (Ctrl/Cmd + K)"
-               className="input input-bordere input-md w-80 mb-4"
-               value={searchTerm}
-               onChange={(e) => setSearchTerm(e.target.value)}
-              />
+     <input
+        ref={inputRef}
+        type="text"
+        placeholder="Search for bridges (Ctrl/Cmd + K)"
+        className="input input-bordered input-md w-80 mb-4"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+     />
              </div> 
   <div className="join hidden sm:block">
     <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
