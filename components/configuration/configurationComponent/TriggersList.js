@@ -51,8 +51,8 @@ export default function TriggersList({ params }) {
                 bridge_id: params?.id,
             },
             configurationJson: {
-                "rowe6baqarrm": {
-                    "key": "Talk_to_AI",
+                "row4qwo5ot1l": {
+                    "key": "Talk_to_Bridge",
                     "inputValues": {
                         "bridge": params?.id,
                         "_bridge": params?.id,
