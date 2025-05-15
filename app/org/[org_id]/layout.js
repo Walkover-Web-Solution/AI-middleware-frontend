@@ -27,7 +27,7 @@ function layoutOrgPage({ children, params }) {
   const path = pathName.split('?')[0].split('/')
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
-  const [isValidOrg, setIsValidOrg] = useState(false);
+  const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
   const { embedToken, alertingEmbedToken, versionData, organizations, preTools } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
