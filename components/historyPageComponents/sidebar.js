@@ -35,6 +35,34 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
     })
   );
+
+  useEffect(() => {
+  if (
+    expandedThreads?.length &&
+    subThreads?.length > 0 &&
+    params.thread_id &&
+    params.subThread_id === params.thread_id
+  ) {
+    // Check if any subThread matches the thread_id
+    const matchExists = subThreads.some(
+      (sub) => sub.sub_thread_id === params.thread_id
+    );
+
+    if (!matchExists) {
+      const firstSubThreadId = subThreads[0]?.sub_thread_id;
+      if (firstSubThreadId) {
+        router.push(
+          `${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${firstSubThreadId}`,
+          undefined,
+          { shallow: true }
+        );
+      }
+    }
+  }
+}, [subThreads, expandedThreads, params.thread_id, params.subThread_id]);
+
+
+
   const handleVersionChange = async (event) => {
     const version = event.target.value;
     dispatch(setSelectedVersion(version));
