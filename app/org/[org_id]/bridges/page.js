@@ -8,6 +8,8 @@ import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
+import { updateOrgDetails } from "@/store/action/orgAction";
+import { updateOnBoarding } from "@/store/reducer/userDetailsReducer";
 import { MODAL_TYPE } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
 import { Ellipsis, LayoutGrid, Table, TestTubeDiagonal } from "lucide-react";
@@ -17,20 +19,58 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
 export const runtime = 'edge';
-
+export const updateBridgeCreationStatus = () => {
+  
+};
 function Home({ params }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
   const averageResponseTime = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.average_response_time || []);
-
   const { isLoading } = useCustomSelector((state) => ({
     isLoading: state.bridgeReducer.loading,
   }));
 
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
+  const orgId=params.org_id;
+   const isFirstBridgeCreation = useCustomSelector((state) =>
+state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(orgId)).meta?.onboarding.bridgeCreation
+ 
+);
+
+
+const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation
+
+);
+
+ const currentOrg = useCustomSelector((state) =>
+  state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(orgId))
+);
+
+   const handleVideoEnd = async () => {
+    
+  try {
+    setShowTutorial(false);
+
+    
+    const updatedOrgDetails = {
+      ...currentOrg,
+      meta: {
+        ...currentOrg?.meta,
+        onboarding: {
+          ...currentOrg?.meta?.onboarding,
+          bridgeCreation: false,
+        },
+      },
+    };
+   
+    await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
+  } catch (error) {
+    console.error("Failed to update full organization:", error);
+  }
+};
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -106,7 +146,9 @@ function Home({ params }) {
   };
 
   const renderBridgeCard = (item) => {
+
     return (
+      
       <div className="flex rounded-md border cursor-pointer hover:shadow-lg bg-base-100 p-4 relative w-full">
         <div key={item._id} className="flex flex-col items-center w-full" onClick={() => onClickConfigure(item._id, item?.published_version_id || item?.versions?.[0])}>
           <div className="flex flex-col h-[200px] gap-2 w-full">
@@ -165,6 +207,7 @@ function Home({ params }) {
   const EndComponent = ({ row }) => {
     return (
       <div className="flex items-center mr-4">
+         
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button
             className="btn btn-outline btn-ghost btn-sm"
@@ -205,9 +248,39 @@ function Home({ params }) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
-
+ 
   return (
     <div className="w-full">
+{showTutorial && (
+  <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
+    
+    <button
+      onClick={() => handleVideoEnd()}
+      className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
+      aria-label="Close Tutorial"
+    >
+      &times;
+    </button>
+
+   
+       <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
+                  <iframe 
+                    src="https://video-faq.viasocket.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2" 
+                    loading="lazy" 
+                    title="AI-middleware" 
+                    allow="clipboard-write" 
+                    frameBorder="0"
+                    webkitallowfullscreen="true"
+                    mozallowfullscreen="true"
+                    allowFullScreen
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                    className="rounded-xl"
+                  />
+                </div>
+  </div>
+)}
+
+
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />

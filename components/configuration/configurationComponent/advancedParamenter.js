@@ -8,6 +8,7 @@ import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import { updateOrgDetails } from '@/store/action/orgAction';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -27,13 +28,51 @@ const AdvancedParameters = ({ params }) => {
       configuration: versionData?.configuration,
     };
   });
-
+    
   const { tool_choice: tool_choice_data, type, model } = configuration || {};  
 
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
-
+ const orgId = params.org_id;
+   
+   const isFirstParameter = useCustomSelector(
+     (state) =>
+       state.userDetailsReducer.userDetails?.c_companies?.find(
+         (c) => c.id === Number(orgId)
+       )?.meta?.onboarding.AdvanceParameter
+   );
+   const [showTutorial, setShowTutorial] = useState(false);
+   const currentOrg = useCustomSelector((state) =>
+     state.userDetailsReducer.userDetails?.c_companies?.find(
+       (c) => c.id === Number(orgId)
+     )
+   );
+   
+   const handleTutorial = () => {
+     
+     setShowTutorial(isFirstParameter);
+   };
+   const handleVideoEnd = async () => {
+     try {
+       setShowTutorial(false);
+ 
+       const updatedOrgDetails = {
+         ...currentOrg,
+         meta: {
+           ...currentOrg?.meta,
+           onboarding: {
+             ...currentOrg?.meta?.onboarding,
+             AdvanceParameter: false,
+           },
+         },
+       };
+ 
+       await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
+     } catch (error) {
+       console.error("Failed to update full organization:", error);
+     }
+   };
   useEffect(() => {
     if (configuration?.response_type?.json_schema) {
       setObjectFieldValue(
@@ -158,7 +197,11 @@ const AdvancedParameters = ({ params }) => {
 
   return (
     <div className="collapse text-base-content" tabIndex={0}>
-      <input type="radio" name="my-accordion-1" onClick={toggleAccordion} className='cursor-pointer' />
+      <input type="radio" name="my-accordion-1"  onClick={()=>{
+          handleTutorial()
+          toggleAccordion()
+        }}
+         className='cursor-pointer' />
       <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
         <span className="mr-2 cursor-pointer">
           Advanced Parameters
@@ -166,7 +209,48 @@ const AdvancedParameters = ({ params }) => {
 
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </div>
+       {showTutorial && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
+          <button
+            onClick={() => handleVideoEnd()}
+            className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
+            aria-label="Close Tutorial"
+          >
+            &times;
+          </button>
 
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{
+              position: "relative",
+              boxSizing: "content-box",
+              maxHeight: "80vh",
+              width: "100%",
+              aspectRatio: "1.935483870967742",
+              padding: "40px 0",
+            }}
+          >
+            <iframe
+              src="https://video-faq.viasocket.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2"
+              loading="lazy"
+              title="AI-middleware"
+              allow="clipboard-write"
+              frameBorder="0"
+              webkitallowfullscreen="true"
+              mozallowfullscreen="true"
+              allowFullScreen
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+              }}
+              className="rounded-xl"
+            />
+          </div>
+        </div>
+      )}
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {

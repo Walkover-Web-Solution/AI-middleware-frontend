@@ -11,7 +11,32 @@ function ApiKeyMessage({ params }) {
             bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[service]
         };
     });
-
+    
+    const orgId=params.org_id;
+    const isFirstFunction = useCustomSelector(
+        (state) =>
+          state.userDetailsReducer.userDetails?.c_companies?.find(
+            (c) => c.id === Number(orgId)
+          )?.meta?.onboarding.FunctionCreation
+      );
+    const isFirstParameter = useCustomSelector(
+        (state) =>
+          state.userDetailsReducer.userDetails?.c_companies?.find(
+            (c) => c.id === Number(orgId)
+          )?.meta?.onboarding.AdvanceParameter
+      );
+      const isFirstVariable = useCustomSelector(
+        (state) =>
+          state.userDetailsReducer.userDetails?.c_companies?.find(
+            (c) => c.id === Number(orgId)
+          )?.meta?.onboarding.Addvariables
+      );
+  const isFirstKnowledgeBase = useCustomSelector(
+    (state) =>
+      state.userDetailsReducer.userDetails?.c_companies?.find(
+        (c) => c.id === Number(orgId)
+      )?.meta?.onboarding.ServiceSelection
+  );
     useEffect(() => {
         if (!bridgeApiKey && messageRef.current) {
             messageRef.current.style.display = 'none';
@@ -23,8 +48,9 @@ function ApiKeyMessage({ params }) {
         }
     }, [bridgeApiKey]);
 
-    if (!bridgeApiKey) {
+    if (!bridgeApiKey&&!isFirstFunction&&!isFirstKnowledgeBase&&!isFirstParameter&&!isFirstVariable) {
         return (
+            
             <div ref={messageRef} className="absolute inset-0 flex flex-col items-center justify-center bg-base-200 z-[99999] opacity-95 gap-2">
                 <AlertTriangle className="h-12 w-12 text-warning" />
                 <div className="text-lg font-semibold">API Key Required</div>

@@ -35,7 +35,16 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                     meta: {
                         about,
                         identifier:selectedTimezone?.identifier,
-                        offSet:selectedTimezone?.offSet
+                        offSet:selectedTimezone?.offSet,
+                        onboarding:{
+                            bridgeCreation:true,
+                            FunctionCreation:true,
+                            ServiceSelection:true,
+                            Addvariables:true,
+                            AdvanceParameter:true,
+                            PauthKey:true,
+                            CompleteBridgeSetup:true
+                        }
                     },
                     timezone : selectedTimezone?.offSet
                 },

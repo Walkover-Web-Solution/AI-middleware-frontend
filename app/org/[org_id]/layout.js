@@ -36,7 +36,13 @@ export default function layoutOrgPage({ children, params }) {
   }));
   const urlParams = useParams();
   useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
+  const orgId=urlParams.org_id
+   const isFirstBridgeCreation = useCustomSelector((state) =>
+state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(orgId))?.meta?.onboarding.bridgeCreation
+ 
+);
 
+ console.log("firstbridge->",isFirstBridgeCreation)
   useEffect(() => {
     const validateOrg = async () => {
       try {
@@ -61,7 +67,7 @@ export default function layoutOrgPage({ children, params }) {
   useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
-        if (data === 0) {
+        if (data === 0&&!isFirstBridgeCreation) {
           openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
         }
         setLoading(false);
