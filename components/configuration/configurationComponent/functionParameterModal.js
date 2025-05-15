@@ -404,7 +404,7 @@ function FunctionParameterModal({ functionId, params }) {
       console.error("Optimization Error:", error);
     } finally {
       setIsLoading(false);
-    }handleAddParameter 
+    } 
   };
 
   // New function to add a parameter
@@ -421,44 +421,47 @@ function FunctionParameterModal({ functionId, params }) {
   }
 
   // Update toolData with the new parameter (using old field structure)
-  setToolData(prevToolData => {
-    const updatedFields = {
+ setToolData(prevToolData => {
+  const existingField = prevToolData.fields[newParameterName] || {};
+
+  return {
+    ...prevToolData,
+    fields: {
       ...prevToolData.fields,
       [newParameterName]: {
-        type: "string", // default type
-        description: "", // empty description
-        enum: [], // empty enum array
-        required_params: [], // empty required params array
-        ...(prevToolData.fields[newParameterName]?.parameter
-          ? { parameter: {} }
-          : {}),
-      },
-    };
-
-    return {
-      ...prevToolData,
-      fields: updatedFields,
-    };
-  });
-
-  // Update JSON view if it's open
-  if (isTextareaVisible) {
-    try {
-      const currentFields = JSON.parse(objectFieldValue);
-      currentFields[newParameterName] = {
         type: "string",
         description: "",
         enum: [],
         required_params: [],
-        ...(currentFields[newParameterName]?.parameter
-          ? { parameter: {} }
-          : {}),
-      };
-      setObjectFieldValue(JSON.stringify(currentFields, undefined, 4));
-    } catch (error) {
-      console.error("Error updating JSON view:", error);
-    }
+        ...existingField,
+        ...(existingField.parameter ? {} : { parameter: {} }), // only add if missing
+      },
+    },
+  };
+});
+
+
+  // Update JSON view if it's open
+  if (isTextareaVisible) {
+  try {
+    const currentFields = JSON.parse(objectFieldValue);
+    const existingField = currentFields[newParameterName] || {};
+
+    currentFields[newParameterName] = {
+      type: "string",
+      description: "",
+      enum: [],
+      required_params: [],
+      ...existingField, 
+      parameter: existingField.parameter || {},
+    };
+
+    setObjectFieldValue(JSON.stringify(currentFields, null, 4));
+  } catch (error) {
+    console.error("Error updating JSON view:", error);
   }
+}
+
 
   setNewParameterName("");
   setShowAddParameterInput(false);
