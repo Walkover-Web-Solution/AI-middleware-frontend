@@ -318,3 +318,9 @@ export const updateTitle = (newTitle) => {
       document.title = newTitle;
     }
   };
+
+export const pickFields = (obj, fields) =>
+    fields.reduce((acc, field) => {
+      acc[field] = obj[field];
+      return acc;
+    }, {});

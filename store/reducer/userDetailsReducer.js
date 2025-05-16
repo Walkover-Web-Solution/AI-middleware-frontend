@@ -1,3 +1,4 @@
+import { pickFields } from "@/utils/utility";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -7,22 +8,48 @@ const initialState = {
   success: false
 };
 
+const userFields = [
+  "id", "name", "email", "created_at"
+];
+
+
+const companyFields = [
+  "id", "name", "email", "timezone", "created_at",
+  "meta"
+];
+
 export const userDetailsReducer = createSlice({
   name: "user",
   initialState,
   reducers: {
     fetchUserDetails: (state, action) => {
-      state.userDetails = action.payload
-      const org = {}
-      action.payload.c_companies.forEach(element => {
-        org[element.id] = element
-      });
-      state.organizations = org
-      state.success = action.payload.success
+      const user = action.payload;
+
+      // 1. Set trimmed userDetails
+      state.userDetails = pickFields(user, userFields);
+
+      // 2. Map companies with filtered fields
+      state.organizations = (user.c_companies || []).reduce((acc, company) => {
+        acc[company.id] = pickFields(company, companyFields);
+        return acc;
+      }, {});
+
+      // 3. Set currentCompany
+      state.currentCompany = user.currentCompany
+        ? pickFields(user.currentCompany, companyFields)
+        : null;
+
+      // 4. Set success flag
+      state.success = user.success ?? true;
     },
     updateUserDetails: (state, action) => {
       const { orgId, updatedUserDetails } = action.payload;
-      state.organizations[orgId] = updatedUserDetails;
+
+      // Update the organization with only selected fields
+      state.organizations[orgId] = {
+        ...state.organizations[orgId], // Preserve existing values
+        ...pickFields(updatedUserDetails, companyFields), // Merge updates
+      };
     },
     updateToken: (state, action) => {
       const { auth_token, orgId } = action.payload;
