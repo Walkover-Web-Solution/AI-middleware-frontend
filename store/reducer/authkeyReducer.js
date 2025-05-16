@@ -1,3 +1,4 @@
+import { pickFields } from "@/utils/utility";
 import { createSlice } from "@reduxjs/toolkit";
 import { cloneDeep } from "lodash";
 
@@ -6,28 +7,39 @@ const initialState = {
   loading: false
 };
 
+const authFields = [
+  "authkey",
+  "created_at",
+  "name",
+  "id"
+];
+
 export const authDataReducer = createSlice({
   name: "authData",
   initialState,
   reducers: {
-    fetchAllAuthData : (state, action) => {
-      state.authData = action.payload
-    //   state.modelInfo = action.payload.modelInfo
+     fetchAllAuthData : (state, action) => {
+      const cleanedAuthData = action.payload.map(auth =>
+        pickFields(auth, authFields)
+      );
+   
+      state.authData = cleanedAuthData;
     } ,
-    addAuthData : (state, action) => {
-        state.authData = [action.payload.data , ...state.authData]
+     addAuthData : (state, action) => {
+      const newAuth = pickFields(action.payload.data, authFields);
+      state.authData = [newAuth, ...state.authData];
     },
     removeAuthData: (state, action) => {
-      const id = action.payload; 
-      state.authData = state.authData.filter(item => item.id !== id); 
+      const id = action.payload;
+      state.authData = state.authData.filter(item => item.id !== id);
     }
-    
+   
   },
 });
 
 export const {
-    fetchAllAuthData , 
-    addAuthData, 
+    fetchAllAuthData ,
+    addAuthData,
     removeAuthData
 } = authDataReducer.actions;
 export default authDataReducer.reducer;
