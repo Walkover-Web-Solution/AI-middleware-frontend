@@ -5,7 +5,6 @@ import { getModelAction } from "@/store/action/modelAction";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { toast } from "react-toastify";
 import LoadingSpinner from "./loadingSpinner";
 import { closeModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
@@ -20,6 +19,11 @@ function CreateNewBridge({ orgid }) {
     const [isManualMode, setIsManualMode] = useState(false);
     const textAreaPurposeRef = useRef();
     const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState();
+    const [validationErrors, setValidationErrors] = useState({
+        bridgeType: "",
+        purpose: ""
+    });
+    const [globalError, setGlobalError] = useState(""); // New state for global error messages
 
     const { allBridgeLength, allBridgeList, modelsList, SERVICES } = useCustomSelector((state) => ({
         SERVICES : state?.serviceReducer?.services,
@@ -63,14 +67,31 @@ function CreateNewBridge({ orgid }) {
     // const onDrop = (acceptedFiles) => {
     //     setUploadedFile(acceptedFiles[0]);
     // };
+    // Clear validation errors when selecting bridge type
+    const handleBridgeTypeSelection = (type) => {
+        setSelectBridgeTypeCard(type);
+        setValidationErrors(prev => ({...prev, bridgeType: ""}));
+        setGlobalError(""); // Clear global error when making a new selection
+    };
 
-    // const { getRootProps, getInputProps } = useDropzone({ onDrop });
+    // Clear validation error when typing in textarea
+    const handlePurposeInput = () => {
+        setValidationErrors(prev => ({...prev, purpose: ""}));
+        setGlobalError(""); // Clear global error when typing
+    };
 
     const createBridgeHandler = (name, slugname) => {
         name = 'Untitled';
         const matches = allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
         const newCount = matches?.length + 1 || 0;
         name = `Untitled${newCount}`;
+        
+        // Validate bridge type selection
+        if (!selectedBridgeTypeCard) {
+            setValidationErrors(prev => ({...prev, bridgeType: "Select Bridge Type"}));
+            return;
+        }
+        
         if (name.length > 0 && selectedModel && selectedBridgeTypeCard) {
             setIsLoading(true);
             const dataToSend = {
@@ -90,8 +111,6 @@ function CreateNewBridge({ orgid }) {
             })).catch(() => {
                 setIsLoading(false);
             });
-        } else {
-            toast.error("Select Bridge Type");
         }
     };
 
@@ -101,15 +120,17 @@ function CreateNewBridge({ orgid }) {
         setSelectedType("chat");
         setBridgeType("api");
         setIsManualMode(false);
+        setValidationErrors({bridgeType: "", purpose: ""});
+        setGlobalError(""); // Clear global error
         if (textAreaPurposeRef?.current) {
             textAreaPurposeRef.current.value = '';
         }
-        // setUploadedFile(null);
+         // setUploadedFile(null);
         // document.getElementById('bridge-name').value = "";
         // if (document.getElementById('slug-name')) document.getElementById('slug-name').value = "";
         closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
     };
-
+    
     // const handleCreateBridge = e => {
     //     e.preventDefault();
     //     createBridgeHandler(document.getElementById("bridge-name").value, document.getElementById("slug-name")?.value);
@@ -117,14 +138,31 @@ function CreateNewBridge({ orgid }) {
 
     const handleCreateBridgeUsingAI = () => {
         const purpose = textAreaPurposeRef?.current?.value;
+        let hasErrors = false;
+        
+        // Reset validation errors
+        const newValidationErrors = {bridgeType: "", purpose: ""};
+        setGlobalError(""); // Clear any previous global error
+        
+        // Validate purpose
         if (!purpose || purpose.trim() === "") {
-            toast.error("Please enter a bridge purpose");
+            newValidationErrors.purpose = "Please enter a bridge purpose";
+            hasErrors = true;
+        }
+        
+        // Validate bridge type
+        if (!selectedBridgeTypeCard) {
+            newValidationErrors.bridgeType = "Select Bridge Type";
+            hasErrors = true;
+        }
+        
+        // Update validation errors state
+        setValidationErrors(newValidationErrors);
+        
+        if (hasErrors) {
             return;
         }
-        else if (!selectedBridgeTypeCard) {
-            toast.error("Select Bridge Type")
-            return
-        }
+        
         setIsAiLoading(true);
         const dataToSend = { purpose, bridgeType: selectedBridgeTypeCard }
         dispatch(createBridgeWithAiAction({ dataToSend, orgId: orgid }))
@@ -135,9 +173,10 @@ function CreateNewBridge({ orgid }) {
                 setIsAiLoading(false);
                 cleanState();
             })
-            .catch(() => {
+            .catch((error) => {
                 setIsAiLoading(false);
-                toast.error('Error while creating bridge');
+                // Instead of toast.error, set the global error state
+                setGlobalError(error?.response?.data?.message || "Error while creating bridge");
             });
     }
 
@@ -149,7 +188,7 @@ function CreateNewBridge({ orgid }) {
         <div>
             {isLoading && <LoadingSpinner />}
             <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
-                {/* <div className="modal-box">
+                 {/* <div className="modal-box">
                     <h3 className="font-bold text-lg">Create Bridge</h3>
                     <form onSubmit={handleCreateBridge}>
                         <div>
@@ -225,13 +264,30 @@ function CreateNewBridge({ orgid }) {
                 </div> */}
                 <div className="bg-base-100 px-4 md:px-10 py-6 md:py-8 rounded-lg max-w-[90%] md:max-w-[80%] mx-auto">
                     <h3 className="font-bold text-xl md:text-2xl mb-4 md:mb-6 text-gray-800">Create Bridge</h3>
+                    
+                    {/* Global Error Message */}
+                    {globalError && (
+                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-center font-medium">
+                            {globalError}
+                        </div>
+                    )}
+                    
                     <div className="space-y-4 pb-2 p-2">
-                        <label className="text-lg font-semibold text-gray-800">Select Bridge Type</label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto p-2">
+                        <div className="flex justify-between items-center">
+                            <label className="text-lg font-semibold text-gray-800">Select Bridge Type</label>
+                            {validationErrors.bridgeType && (
+                                <span className="text-red-500 text-sm">{validationErrors.bridgeType}</span>
+                            )}
+                        </div>
+                        <div 
+                            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto p-2 ${
+                                validationErrors.bridgeType ? 'border border-red-500 rounded-xl' : ''
+                            }`}
+                        >
                             {/* API Card */}
                             <div
                                 className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === 'api' ? 'ring-2 ring-blue-500' : ''}`}
-                                onClick={() => setSelectBridgeTypeCard('api')}
+                                onClick={() => handleBridgeTypeSelection('api')}
                             >
                                 <div className="card-body p-4 md:p-6">
                                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
@@ -249,7 +305,7 @@ function CreateNewBridge({ orgid }) {
                             {/* Chatbot Card */}
                             <div
                                 className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === 'chatbot' ? 'ring-2 ring-green-500' : ''}`}
-                                onClick={() => setSelectBridgeTypeCard('chatbot')}
+                                onClick={() => handleBridgeTypeSelection('chatbot')}
                             >
                                 <div className="card-body p-4 md:p-6">
                                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
@@ -267,7 +323,7 @@ function CreateNewBridge({ orgid }) {
                             {/* Batch API Card */}
                             <div
                                 className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === 'batch' ? 'ring-2 ring-purple-500' : ''}`}
-                                onClick={() => setSelectBridgeTypeCard('batch')}
+                                onClick={() => handleBridgeTypeSelection('batch')}
                             >
                                 <div className="card-body p-4 md:p-6">
                                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
@@ -285,7 +341,7 @@ function CreateNewBridge({ orgid }) {
                             {/* Triggers Card */}
                             <div
                                 className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === 'triggers' ? 'ring-2 ring-amber-500' : ''}`}
-                                onClick={() => setSelectBridgeTypeCard('triggers')}
+                                onClick={() => handleBridgeTypeSelection('triggers')}
                             >
                                 <div className="card-body p-4 md:p-6">
                                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
@@ -301,8 +357,8 @@ function CreateNewBridge({ orgid }) {
                             </div>
                         </div>
                     </div>
-
-                    {/* <div className="mt-6 md:mt-8 flex justify-center">
+                    
+                     {/* <div className="mt-6 md:mt-8 flex justify-center">
                         <div className="w-full md:w-auto grid grid-cols-2 gap-2 md:flex items-center bg-gray-100 p-2 rounded-lg">
                             <button 
                                 className={`w-full px-3 py-2 md:px-4 md:py-2 rounded-md transition-all text-sm md:text-base whitespace-nowrap ${!isManualMode ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-700'}`}
@@ -319,18 +375,26 @@ function CreateNewBridge({ orgid }) {
                         </div>
                     </div> */}
 
-                    {/* {!isManualMode ? ( */}
+                      {/* {!isManualMode ? ( */}
                     <div className="mt-6 md:mt-8">
                         <div className="form-control">
                             <label className="label pb-1 md:pb-2">
                                 <span className="label-text font-medium text-base md:text-lg text-gray-800">Bridge Purpose</span>
+                                {validationErrors.purpose && (
+                                    <span className="label-text-alt text-red-500">{validationErrors.purpose}</span>
+                                )}
                             </label>
                             <div className="relative">
                                 <textarea
                                     id="bridge-purpose"
                                     placeholder="Describe the purpose of this bridge..."
                                     ref={textAreaPurposeRef}
-                                    className="textarea textarea-bordered w-full min-h-[100px] md:min-h-[120px] bg-white border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 placeholder-gray-400 text-sm md:text-base"
+                                    onChange={handlePurposeInput}
+                                    className={`textarea textarea-bordered w-full min-h-[100px] md:min-h-[120px] bg-white transition-all duration-300 placeholder-gray-400 text-sm md:text-base ${
+                                        validationErrors.purpose 
+                                            ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200' 
+                                            : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+                                    }`}
                                     required
                                     aria-label="Bridge purpose description"
                                 ></textarea>
@@ -435,7 +499,7 @@ function CreateNewBridge({ orgid }) {
                             >
                                 Cancel
                             </button>
-                            {isManualMode ? (
+                             {isManualMode ? (
                                 <button
                                     className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
                                     onClick={handleCreateBridge}
@@ -448,18 +512,18 @@ function CreateNewBridge({ orgid }) {
                                     ) : "Create Bridge"}
                                 </button>
                             ) : (
-                                <button
-                                    className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
-                                    onClick={handleCreateBridgeUsingAI}
-                                    disabled={isAiLoading || isLoading}
-                                >
-                                    {isAiLoading ? (
-                                        <>
-                                            <span className="loading loading-spinner loading-sm"></span>
-                                        </>
-                                    ) : "Create Bridge"}
-                                </button>
-                            )}
+                            <button
+                                className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                                onClick={handleCreateBridgeUsingAI}
+                                disabled={isAiLoading || isLoading}
+                            >
+                                {isAiLoading ? (
+                                    <>
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                    </>
+                                ) : "Create Bridge"}
+                            </button>
+                               )}
                         </div>
                     </div>
                 </div>
