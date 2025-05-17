@@ -13,13 +13,47 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 
-export const runtime = 'edge';
+export const runtime = "edge";
 
-function Page() {
+function Page({ params }) {
   const dispatch = useDispatch();
-  const authData = useCustomSelector((state) => state?.authDataReducer?.authData || [])
-  const [singleAuthData, setSingleAuthData] = useState({})
+  const { authData, isFirstPauthCreation } = useCustomSelector((state) => ({
+    authData: state?.authDataReducer?.authData || [],
+    isFirstPauthCreation: state.userDetailsReducer.userDetails?.c_companies?.find(
+      (c) => c.id === params?.org_id
+    )?.meta?.onboarding?.PauthKey
+  }));
+
+  const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(isFirstPauthCreation);
+
+  const currentOrg = useCustomSelector((state) =>
+    state.userDetailsReducer.userDetails?.c_companies?.find(
+      (c) => c.id === Number(orgId)
+    )
+  );
+
+  const handleVideoEnd = async () => {
+    try {
+      setShowTutorial(false);
+
+      const updatedOrgDetails = {
+        ...currentOrg,
+        meta: {
+          ...currentOrg?.meta,
+          onboarding: {
+            ...currentOrg?.meta?.onboarding,
+            PauthKey: false,
+          },
+        },
+      };
+
+      await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
+    } catch (error) {
+      console.error("Failed to update full organization:", error);
+    }
+  };
 
   useEffect(() => {
     dispatch(getAllAuthData())
@@ -107,7 +141,31 @@ function Page() {
 
   return (
     <div className="h-full">
-
+      {showTutorial && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
+          <button
+            onClick={() => handleVideoEnd()}
+            className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
+            aria-label="Close Tutorial"
+          >
+            &times;
+          </button>
+          <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
+            <iframe
+              src="https://video-faq.viasocket.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2"
+              loading="lazy"
+              title="AI-middleware"
+              allow="clipboard-write"
+              frameBorder="0"
+              webkitallowfullscreen="true"
+              mozallowfullscreen="true"
+              allowFullScreen
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+              className="rounded-xl"
+            />
+          </div>
+        </div>
+      )}
       <MainLayout>
       <PageHeader 
         title="PauthKey" 
@@ -155,7 +213,6 @@ function Page() {
           <div className="modal-action">
             <form method="dialog">
               {/* if there is a button in form, it will close the modal */}
-
               <div className='flex gap-2'>
                 <button className="btn">Cancel</button>
               </div>
@@ -175,7 +232,6 @@ function Page() {
               <button className="btn">Cancel</button>
             </form>
             <button className="btn" onClick={DeleteAuth}>Delete</button>
-
           </div>
         </div>
       </dialog>   
@@ -183,4 +239,4 @@ function Page() {
   )
 }
 
-export default Protected(Page)
+export default Protected(Page);
