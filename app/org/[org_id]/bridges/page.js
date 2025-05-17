@@ -8,6 +8,8 @@ import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
+import { updateOrgDetails } from "@/store/action/orgAction";
+import { updateOnBoarding } from "@/store/reducer/userDetailsReducer";
 import { MODAL_TYPE } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
 import { Ellipsis, LayoutGrid, Table, TestTubeDiagonal } from "lucide-react";
@@ -24,13 +26,46 @@ function Home({ params }) {
   const router = useRouter();
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
   const averageResponseTime = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.average_response_time || []);
-
   const { isLoading } = useCustomSelector((state) => ({
     isLoading: state.bridgeReducer.loading,
   }));
 
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
+  const orgId = params.org_id;
+  const isFirstBridgeCreation = useCustomSelector((state) =>
+    state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === params?.org_id).meta?.onboarding?.bridgeCreation || ""
+
+  );
+
+console.log(isFirstBridgeCreation)
+  const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation
+
+  );
+
+  const currentOrg = useCustomSelector((state) =>
+    state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(orgId))
+  );
+
+  const handleVideoEnd = async () => {
+    try {
+      setShowTutorial(false);
+      const updatedOrgDetails = {
+        ...currentOrg,
+        meta: {
+          ...currentOrg?.meta,
+          onboarding: {
+            ...currentOrg?.meta?.onboarding,
+            bridgeCreation: false,
+          },
+        },
+      };
+
+      await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
+    } catch (error) {
+      console.error("Failed to update full organization:", error);
+    }
+  };
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -208,6 +243,32 @@ function Home({ params }) {
 
   return (
     <div className="w-full">
+      {showTutorial && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
+          <button
+            onClick={() => handleVideoEnd()}
+            className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
+            aria-label="Close Tutorial"
+          >
+            &times;
+          </button>
+
+          <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
+            <iframe
+              src="https://video-faq.viasocket.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"
+              loading="lazy"
+              title="AI-middleware"
+              allow="clipboard-write"
+              frameBorder="0"
+              webkitallowfullscreen="true"
+              mozallowfullscreen="true"
+              allowFullScreen
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+              className="rounded-xl"
+            />
+          </div>
+        </div>
+      )}
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
@@ -228,31 +289,31 @@ function Home({ params }) {
 
               < div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-0' : ''}`}>
                 <div className="px-4 pt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between w-full ">
-               <div className="sm:max-w-4xl w-full">
-                <MainLayout>
-                <PageHeader 
-                 title="Bridges" 
-                 description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code." 
-                />
-               </MainLayout>
-     <input
-        ref={inputRef}
-        type="text"
-        placeholder="Search for bridges (Ctrl/Cmd + K)"
-        className="input input-bordered input-md w-80 mb-4"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-     />
-             </div> 
-  <div className="join hidden sm:block">
-    <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
-      <LayoutGrid className="h-4 w-4" />
-    </a>
-    <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
-      <Table className="h-4 w-4" />
-    </a>
-  </div>
-</div>        
+                  <div className="sm:max-w-4xl w-full">
+                    <MainLayout>
+                      <PageHeader
+                        title="Bridges"
+                        description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code."
+                      />
+                    </MainLayout>
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      placeholder="Search for bridges (Ctrl/Cmd + K)"
+                      className="input input-bordered input-md w-80 mb-4"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div className="join hidden sm:block">
+                    <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
+                      <LayoutGrid className="h-4 w-4" />
+                    </a>
+                    <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
+                      <Table className="h-4 w-4" />
+                    </a>
+                  </div>
+                </div>
                 {viewMode === 'grid' ? (
                   <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
                     {filteredUnArchivedBridges.slice().sort((a, b) => a.name?.localeCompare(b.name)).map((item) => (
