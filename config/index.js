@@ -130,11 +130,12 @@ export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   }
 }
 
-export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, pagelimit = 40) => {
+export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, error, pagelimit = 40) => {
   try {
     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}&version_id=${versionId === 'undefined' ? undefined : versionId}`, {
       params: {
-        user_feedback
+        user_feedback,
+        error
       }
     })
     return getSingleThreadData
@@ -143,7 +144,7 @@ export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextP
   }
 }
 
-export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback) => {
+export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback, isErrorTrue) => {
   try {
 
     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`, {
@@ -153,7 +154,8 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
         startTime: start,
         endTime: end,
         keyword_search: keyword,
-        user_feedback: user_feedback
+        user_feedback: user_feedback,
+        error: isErrorTrue
       }
     });
     return getSingleThreadData.data;
@@ -657,9 +659,13 @@ export const userFeedbackCount = async ({ bridge_id, user_feedback }) => {
   }
 }
 
-export const getSubThreadIds = async ({ thread_id }) => {
+export const getSubThreadIds = async ({ thread_id, error }) => {
   try {
-    const response = await axios.get(`${URL}/api/v1/config/history/sub-thread/${thread_id}`);
+    const response = await axios.get(`${URL}/api/v1/config/history/sub-thread/${thread_id}`, {
+      params: {
+        error
+      }
+    });
     return response.data;
   } catch (error) {
     console.error(error);
