@@ -338,6 +338,9 @@ export const MODAL_TYPE = {
   TESTCASE_MODAL: "TESTCASE_MODAL",
   DEMO_MODAL: "DEMO_MODAL",
   ADD_TEST_CASE_MODAL: "ADD_TEST_CASE_MODAL",
+  HISTORY_PAGE_PROMPT_UPDATE_MODAL : "HISTORY_PAGE_PROMPT_UPDATE_MODAL",
+  AGENT_DESCRIPTION_MODAL: "AGENT_DESCRIPTION_MODAL",
+  AGENT_VARIABLE_MODAL: "AGENT_VARIABLE_MODAL"
 }
 
 export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
@@ -357,7 +360,7 @@ export const KNOWLEDGE_BASE_CUSTOM_SECTION = [
   { value: 'manual', label: 'Manual Chunking' },
   { value: 'recursive', label: 'Recursive Chunking' }
 ];
-export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini'];
+export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini', 'o4-mini'];
 
 export const FAQSIDEBARLINKS = [
   {

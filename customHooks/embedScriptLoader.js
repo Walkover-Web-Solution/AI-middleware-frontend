@@ -1,22 +1,50 @@
+import { getOrCreateNotificationAuthKey } from "@/config";
 import { useEffect } from "react";
 
 export const useEmbedScriptLoader = (embedToken) => {
+
+  async function embedMaker() {
+    const pAuthKey = await getOrCreateNotificationAuthKey('gtwy_bridge_trigger').then(res => res?.authkey)
+    const activeElement = document.activeElement;
+    const script = document.createElement("script");
+    script.setAttribute("embedToken", embedToken);
+    script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
+    script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC;
+    script.setAttribute('parentId', 'alert-embed-parent')
+    const configurationJson = {
+      "rowxvl39hxd0": {
+        "key": "Alert_On_Error",
+        "authValues": {
+          "pauth_key": pAuthKey
+        }
+      },
+      "rowhup02ji8l": {
+        "key": "Alert_On_Fallback",
+        "authValues": {
+          "pauth_key": pAuthKey
+        }
+      },
+      "row3atttp4du": {
+        "key": "Alert_On_Missing_Variables",
+        "authValues": {
+          "pauth_key": pAuthKey
+        }
+      }
+    }
+    script.setAttribute('configurationJson', JSON.stringify(configurationJson))
+
+    document.body.appendChild(script);
+    script.onload = () => {
+      setTimeout(() => {
+        if (activeElement && 'focus' in activeElement) {
+          activeElement.focus();
+        }
+      }, 2000);
+    };
+  }
   useEffect(() => {
     if (embedToken) {
-      const activeElement = document.activeElement;
-      const script = document.createElement("script");
-      script.setAttribute("embedToken", embedToken);
-      script.id = process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID;
-      script.src = process.env.NEXT_PUBLIC_EMBED_SCRIPT_SRC;
-      script.setAttribute('parentId', 'alert-embed-parent')
-      document.body.appendChild(script);
-      script.onload = () => {
-        setTimeout(() => {
-          if (activeElement && 'focus' in activeElement) {
-            activeElement.focus();
-          }
-        }, 2000);
-      };
+      embedMaker()
 
       return () => {
         const script = document.getElementById(process.env.NEXT_PUBLIC_EMBED_SCRIPT_ID)

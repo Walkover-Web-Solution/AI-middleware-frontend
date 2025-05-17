@@ -1,4 +1,4 @@
-import { allAuthKey } from "@/config";
+import { getOrCreateNotificationAuthKey } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateTriggerDataReducer } from "@/store/reducer/bridgeReducer";
 import { Plus } from "lucide-react";
@@ -30,19 +30,18 @@ export default function TriggersList({ params }) {
         triggerData: state?.bridgeReducer?.org?.[params?.org_id]?.triggerData
     }));
     const [triggers, setTriggers] = useState([]);
-    const [authkey, setAuthkey]=useState('')
+    const [authkey, setAuthkey] = useState('')
 
-    async function getAndSetAuthKey(){
-        const data=await allAuthKey()
-        const keytoset=data?.data?.[0]?.authkey
-       if(keytoset) setAuthkey(keytoset)
+    async function getAndSetAuthKey() {
+        const keytoset = await getOrCreateNotificationAuthKey('gtwy_bridge_trigger')
+        if (keytoset) setAuthkey(keytoset?.authkey)
     }
     useEffect(() => {
         if (triggerData) {
             setTriggers(triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []);
         }
         getAndSetAuthKey()
-    }, [triggerData, params?.id]);
+    }, [params?.org_id]);
 
     function openTrigger(triggerId) {
         openViasocket(triggerId, {
@@ -51,18 +50,20 @@ export default function TriggersList({ params }) {
                 type: 'trigger',
                 bridge_id: params?.id,
             },
-            configurationJson:{
-                "rowe6baqarrm": {
-                  "key": "Talk_to_AI",
-                  "inputValues": {
-                    "bridge":params?.id,
-                    "_bridge":params?.id,
-                  },
-                  "authValues": {
-                    "pauth_key": authkey
-                  }
+            configurationJson: {
+                "row4qwo5ot1l": {
+                    "key": "Talk_to_Bridge",
+                    "inputValues": {
+                        "bridge": params?.id,
+                        "_bridge": params?.id,
+                        "message":`\${JSON.stringify(context.req.body)}`,
+                        "_message":`\${JSON.stringify(context.req.body)}`,
+                    },
+                    "authValues": {
+                        "pauth_key": authkey
+                    }
                 }
-              }
+            }
         })
     }
 

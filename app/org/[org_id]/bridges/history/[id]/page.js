@@ -24,10 +24,11 @@ function Page({ searchParams }) {
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
   const searchRef = useRef();
-  const { historyData, thread, selectedVersion } = useCustomSelector((state) => ({
+  const { historyData, thread, selectedVersion, previousPrompt } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
-    selectedVersion: state?.historyReducer?.selectedVersion || 'all'
+    selectedVersion: state?.historyReducer?.selectedVersion || 'all',
+    previousPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
   }));
 
   const [isSliderOpen, setIsSliderOpen] = useState(false);
@@ -172,6 +173,7 @@ function Page({ searchParams }) {
               selectedVersion={selectedVersion}
               setIsErrorTrue={setIsErrorTrue}
               isErrorTrue={isErrorTrue}
+              previousPrompt ={previousPrompt}
             />
           </React.Suspense>
         </div>

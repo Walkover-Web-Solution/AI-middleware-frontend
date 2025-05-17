@@ -40,7 +40,7 @@ const AdvancedParameters = ({ params }) => {
         JSON.stringify(configuration?.response_type?.json_schema, undefined, 4)
       );
     }
-  }, [tool_choice_data]);
+  }, [configuration?.response_type?.json_schema]);
 
   useEffect(() => {
     if (tool_choice_data === "auto" || tool_choice_data === "none" || tool_choice_data === "default" || tool_choice_data === "required") {
@@ -359,7 +359,7 @@ const AdvancedParameters = ({ params }) => {
               {field === 'select' && (
                 <label className='items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
                   <select value={configuration?.[key]?.type ? configuration?.[key]?.type : configuration?.[key] || 'Text'} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
-                    <option disabled>Select response mode</option>
+                    <option>Select response mode</option>
                     {options?.map((service, index) => (
                       <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
                     ))}

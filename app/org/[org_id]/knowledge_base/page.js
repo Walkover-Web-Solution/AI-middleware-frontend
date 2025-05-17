@@ -2,7 +2,9 @@
 import KnowledgeBaseIntegrationSlider from "@/components/configuration/configurationComponent/knowledgeBaseIntegrationSlider";
 import CustomTable from "@/components/customTable/customTable";
 import { truncate } from "@/components/historyPageComponents/assistFile";
+import MainLayout from "@/components/layoutComponents/MainLayout";
 import KnowledgeBaseModal from "@/components/modals/knowledgeBaseModal";
+import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
@@ -89,32 +91,39 @@ const Page = ({ params }) => {
 
   return (
     <div className="">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
-        <input
-          type="text"
-          placeholder="Search knowledge base..."
-          className="input input-bordered w-full md:max-w-xs"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <div className="join">
-          <button className="btn mr-4" onClick={() => setOpenKnowledgeBaseSlider(true)}>
-            <BookText /> Integration Guide
-          </button>
-          <button
-            className={`btn rounded-r-none rounded-md ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
-            onClick={() => setViewMode('grid')}
-          >
-            <LayoutGrid size={16} />
-          </button>
-          <button
-            className={`btn rounded-l-none rounded-md ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
-            onClick={() => setViewMode('table')}
-          >
-            <Table size={16} />
-          </button>
-        </div>
-      </div>
+      <div className="flex flex-col md:flex-row items-start justify-between mb-4 gap-4 p-1">
+  
+      <MainLayout>
+      <PageHeader 
+        title="Knowledge Base" 
+        description="A repository where you can provide reference data that the AI uses to generate accurate and context-aware responses." 
+      />
+       <input
+      type="text"
+      placeholder="Search knowledge base..."
+      className="input input-bordered w-full md:max-w-xs"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
+    </MainLayout>   
+  <div className="flex flex-wrap justify-end items-start gap-2">
+    <button className="btn" onClick={() => setOpenKnowledgeBaseSlider(true)}>
+      <BookText /> Integration Guide
+    </button>
+    <button
+      className={`btn rounded-r-none rounded-md ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
+      onClick={() => setViewMode('grid')}
+    >
+      <LayoutGrid size={16} />
+    </button>
+    <button
+      className={`btn rounded-l-none rounded-md ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
+      onClick={() => setViewMode('table')}
+    >
+      <Table size={16} />
+    </button>
+  </div>
+</div>
 
       {filteredKnowledgeBase.length > 0 ? (
         viewMode === 'grid' ? (

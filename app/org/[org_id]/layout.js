@@ -3,6 +3,7 @@ import ErrorPage from "@/app/not-found";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Navbar from "@/components/navbar";
+import Protected from "@/components/protected";
 import MainSlider from "@/components/sliders/mainSlider";
 import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -17,7 +18,8 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
-export default function layoutOrgPage({ children, params }) {
+function layoutOrgPage({ children, params }) {
+  
   const dispatch = useDispatch();
   const pathName = usePathname();
   const searchParams = useSearchParams();
@@ -25,7 +27,7 @@ export default function layoutOrgPage({ children, params }) {
   const path = pathName.split('?')[0].split('/')
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
-  const [isValidOrg, setIsValidOrg] = useState(false);
+  const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
   const { embedToken, alertingEmbedToken, versionData, organizations, preTools } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
@@ -164,7 +166,7 @@ export default function layoutOrgPage({ children, params }) {
           title: e?.data?.title,
         };
         dispatch(createApiAction(params.org_id, dataFromEmbed)).then((data) => {
-          if (!versionData?.[data?._id] && !preTools?.includes(data?._id)) {
+          if (!versionData?.[data?._id] && (!Array.isArray(preTools) || !preTools?.includes(data?._id))) {
             dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
               versionId: version_id,
@@ -219,3 +221,5 @@ export default function layoutOrgPage({ children, params }) {
     );
   }
 }
+
+export default Protected(layoutOrgPage);

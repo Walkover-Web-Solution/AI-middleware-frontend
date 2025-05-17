@@ -882,13 +882,13 @@ export const runTestCaseApi = async ({ versionId }) => {
   }
 }
 
-export const getOrCreateNotificationAuthKey = async () => {
+export const getOrCreateNotificationAuthKey = async (name) => {
   try {
     // First, get the notification auth key by name
-    const notificationAuthKeys = await allAuthKey("gtwy_trigger");
+    const notificationAuthKeys = await allAuthKey(name);
     
     // Check if the notification auth key exists
-    const notificationAuthKey = notificationAuthKeys?.length > 0 ? notificationAuthKeys[0] : null;
+    const notificationAuthKey = notificationAuthKeys?.data?.length > 0 ? notificationAuthKeys?.data[0] : null;
     
     if (notificationAuthKey) {
       // If it exists, return it
@@ -896,7 +896,7 @@ export const getOrCreateNotificationAuthKey = async () => {
     } else {
       // If it doesn't exist, create it
       const dataToSend = {
-        name: "gtwy_notification",
+        name: name,
         throttle_limit: "60:800",
         temporary_throttle_limit: "60:600",
         temporary_throttle_time: "30"

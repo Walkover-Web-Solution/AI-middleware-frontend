@@ -18,7 +18,6 @@ export const getServiceAction = () => async (dispatch) => {
         return service;
       });
     }
-    console.log(data.services)
     dispatch(fetchServiceReducer({ data: data.services }));
   } catch (error) {
     console.error(error);
