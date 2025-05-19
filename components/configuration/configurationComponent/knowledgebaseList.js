@@ -3,25 +3,34 @@ import { CircleAlert, Plus, Trash2 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { GetFileTypeIcon, openModal } from '@/utils/utility';
+import { GetFileTypeIcon, openModal, updateOnboarding } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import GoogleDocIcon from '@/icons/GoogleDocIcon';
 import { truncate } from '@/components/historyPageComponents/assistFile';
+import { updateOrgDetails } from '@/store/action/orgAction';
+import OnBoarding from '@/components/onBoarding';
 
 const KnowledgebaseList = ({ params }) => {
-    const { knowledgeBaseData, knowbaseVersionData } = useCustomSelector((state) => ({
-        knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
-        knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
-    }));
+   const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, currentOrg } = useCustomSelector((state) => {
+  const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
+  const org = userCompanies.find((c) => c.id === Number(params?.org_id));
+
+  return {
+    knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
+    knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
+    isFirstKnowledgeBase: org?.meta?.onboarding?.knowledgeBase,
+    currentOrg: org,
+  };
+});
+
 
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
-
+    const [showTutorial, setShowTutorial] = useState(false);
     const handleInputChange = (e) => {
         setSearchQuery(e.target?.value || "");
     };
-
     const handleAddKnowledgebase = (id) => {
         if (knowbaseVersionData?.includes(id)) return; // Check if ID already exists
         dispatch(updateBridgeVersionAction({
@@ -29,14 +38,24 @@ const KnowledgebaseList = ({ params }) => {
             dataToSend: { doc_ids: [...(knowbaseVersionData || []), id] }
         }));
     };
-
     const handleDeleteKnowledgebase = (id) => {
         dispatch(updateBridgeVersionAction({
             versionId: params.version,
             dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== id) }
         }));
     };
-
+  
+  const handleTutorial = () => {
+    setShowTutorial(isFirstKnowledgeBase);
+  };
+  const handleVideoEnd = async () => {
+      try {
+        setShowTutorial(false);
+       await updateOnboarding(dispatch,params.org_id,currentOrg,"knowledgeBase");
+      } catch (error) {
+        console.error("Failed to update full organization:", error);
+      }
+    };
     const renderKnowledgebase = useMemo(() => (
         (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
             const item = knowledgeBaseData?.find(kb => kb._id === docId);
@@ -80,9 +99,13 @@ const KnowledgebaseList = ({ params }) => {
                 {renderKnowledgebase}
             </div>
             <div className="dropdown dropdown-right">
-                <button tabIndex={0} className="btn btn-outline btn-sm mt-0">
+                <button tabIndex={0} className="btn btn-outline btn-sm mt-0" onClick={()=>handleTutorial()}>
                     <Plus size={16} />Add Knowledgebase
                 </button>
+                {showTutorial && (
+         <OnBoarding handleVideoEnd={handleVideoEnd} video={"https://video-faq.viasocket.com/embed/cm9tl9dpo0oeh11m7dz1bipq5?embed_v=2"}/>
+      )}
+      {!showTutorial && (
                 <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                     <div className='flex flex-col gap-2 w-full'>
                         <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
@@ -122,6 +145,7 @@ const KnowledgebaseList = ({ params }) => {
                         </li>
                     </div>
                 </ul>
+      )}
             </div>
             <KnowledgeBaseModal params={params} />
         </div>

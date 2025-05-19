@@ -2,24 +2,45 @@
 import CustomTable from '@/components/customTable/customTable'
 import MainLayout from '@/components/layoutComponents/MainLayout'
 import LoadingSpinner from '@/components/loadingSpinner'
+import OnBoarding from '@/components/onBoarding'
 import PageHeader from '@/components/Pageheader'
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
 import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
-import { closeModal, openModal } from '@/utils/utility'
+import { closeModal, openModal, updateOnboarding } from '@/utils/utility'
 import { Copy, Trash2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 
-export const runtime = 'edge';
+export const runtime = "edge";
 
-function Page() {
+function Page({ params }) {
   const dispatch = useDispatch();
-  const authData = useCustomSelector((state) => state?.authDataReducer?.authData || [])
-  const [singleAuthData, setSingleAuthData] = useState({})
+ const { authData, isFirstPauthCreation, currentOrg } = useCustomSelector((state) => {
+  const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
+  const orgFromId = userCompanies.find((c) => c.id ===Number (params.org_id));
+
+  return {
+    authData: state?.authDataReducer?.authData || [],
+    isFirstPauthCreation: orgFromId?.meta?.onboarding?.PauthKey,
+    currentOrg: orgFromId,
+  };
+});
+
+  const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(isFirstPauthCreation);
+
+  const handleVideoEnd = async () => {
+    try {
+      setShowTutorial(false);
+     await updateOnboarding(dispatch,params.org_id,currentOrg,"PauthKey");
+    } catch (error) {
+      console.error("Failed to update full organization:", error);
+    }
+  };
 
   useEffect(() => {
     dispatch(getAllAuthData())
@@ -107,7 +128,9 @@ function Page() {
 
   return (
     <div className="h-full">
-
+      {showTutorial && (
+       <OnBoarding handleVideoEnd={handleVideoEnd} video={"https://video-faq.viasocket.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2"}/>
+      )}
       <MainLayout>
       <PageHeader 
         title="PauthKey" 
@@ -155,7 +178,6 @@ function Page() {
           <div className="modal-action">
             <form method="dialog">
               {/* if there is a button in form, it will close the modal */}
-
               <div className='flex gap-2'>
                 <button className="btn">Cancel</button>
               </div>
@@ -175,7 +197,6 @@ function Page() {
               <button className="btn">Cancel</button>
             </form>
             <button className="btn" onClick={DeleteAuth}>Delete</button>
-
           </div>
         </div>
       </dialog>   
@@ -183,4 +204,4 @@ function Page() {
   )
 }
 
-export default Protected(Page)
+export default Protected(Page);

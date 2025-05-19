@@ -3,13 +3,17 @@ import CreateNewBridge from "@/components/createNewBridge";
 import CustomTable from "@/components/customTable/customTable";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import LoadingSpinner from "@/components/loadingSpinner";
+import OnBoarding from "@/components/onBoarding";
 import PageHeader from "@/components/Pageheader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
+import { updateOrgDetails } from "@/store/action/orgAction";
+import { updateOnBoarding } from "@/store/reducer/userDetailsReducer";
 import { MODAL_TYPE } from "@/utils/enums";
-import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
+import { filterBridges, getIconOfService, openModal, updateOnboarding } from "@/utils/utility";
+import { data } from "autoprefixer";
 import { Ellipsis, LayoutGrid, Table, TestTubeDiagonal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
@@ -22,16 +26,36 @@ function Home({ params }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
-  const averageResponseTime = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.average_response_time || []);
-
-  const { isLoading } = useCustomSelector((state) => ({
+  const {
+  allBridges,
+  averageResponseTime,
+  isLoading,
+  isFirstBridgeCreation,
+  currentOrg
+} = useCustomSelector((state) => {
+  const orgData = state.bridgeReducer.org[params.org_id] || {};
+  const userCompany = state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(params?.org_id)) || {};
+  return {
+    allBridges: (orgData.orgs || []).slice().reverse(),
+    averageResponseTime: orgData.average_response_time || [],
     isLoading: state.bridgeReducer.loading,
-  }));
-
+    isFirstBridgeCreation: userCompany.meta?.onboarding?.bridgeCreation || "",
+    currentOrg:userCompany
+  };
+});
+  const data=allBridges
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
+  const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation );
 
+  const handleVideoEnd = async () => {
+    try {
+      setShowTutorial(false);
+      await updateOnboarding(dispatch,params.org_id,currentOrg,"bridgeCreation");
+    } catch (error) {
+      console.error("Failed to update full organization:", error);
+    }
+  };
   useEffect(() => {
     const updateScreenSize = () => {
       if (window.matchMedia('(max-width: 640px)').matches) {
@@ -40,6 +64,9 @@ function Home({ params }) {
         setViewMode('table');
       }
     };
+    if (data.length === 0&&!isFirstBridgeCreation) {
+          openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
+        }
     updateScreenSize(); // Run on mount
     window.addEventListener('resize', updateScreenSize);
 
@@ -49,8 +76,6 @@ function Home({ params }) {
   const filteredBridges = filterBridges(allBridges, searchTerm);
   const filteredArchivedBridges = filteredBridges?.filter((item) => item.status === 0);
   const filteredUnArchivedBridges = filteredBridges?.filter((item) => item.status === 1 || item.status === undefined);
-
-
   const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
     _id: item._id,
     model: item.configuration?.model || "",
@@ -208,6 +233,9 @@ function Home({ params }) {
 
   return (
     <div className="w-full">
+      {showTutorial && (
+       <OnBoarding handleVideoEnd={handleVideoEnd} video={"https://video-faq.viasocket.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"}/> 
+      )}
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
@@ -228,31 +256,31 @@ function Home({ params }) {
 
               < div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-0' : ''}`}>
                 <div className="px-4 pt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between w-full ">
-               <div className="sm:max-w-4xl w-full">
-                <MainLayout>
-                <PageHeader 
-                 title="Bridges" 
-                 description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code." 
-                />
-               </MainLayout>
-     <input
-        ref={inputRef}
-        type="text"
-        placeholder="Search for bridges (Ctrl/Cmd + K)"
-        className="input input-bordered input-md w-80 mb-4"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-     />
-             </div> 
-  <div className="join hidden sm:block">
-    <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
-      <LayoutGrid className="h-4 w-4" />
-    </a>
-    <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
-      <Table className="h-4 w-4" />
-    </a>
-  </div>
-</div>        
+                  <div className="sm:max-w-4xl w-full">
+                    <MainLayout>
+                      <PageHeader
+                        title="Bridges"
+                        description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code."
+                      />
+                    </MainLayout>
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      placeholder="Search for bridges (Ctrl/Cmd + K)"
+                      className="input input-bordered input-md w-80 mb-4"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div className="join hidden sm:block">
+                    <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
+                      <LayoutGrid className="h-4 w-4" />
+                    </a>
+                    <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
+                      <Table className="h-4 w-4" />
+                    </a>
+                  </div>
+                </div>
                 {viewMode === 'grid' ? (
                   <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
                     {filteredUnArchivedBridges.slice().sort((a, b) => a.name?.localeCompare(b.name)).map((item) => (

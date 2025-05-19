@@ -21,7 +21,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
 function layoutOrgPage({ children, params }) {
-  
   const dispatch = useDispatch();
   const pathName = usePathname();
   const searchParams = useSearchParams();
@@ -41,6 +40,12 @@ function layoutOrgPage({ children, params }) {
   }));
   const urlParams = useParams();
   useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
+  const orgId=urlParams.org_id
+   const isFirstBridgeCreation = useCustomSelector((state) =>
+state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(orgId))?.meta?.onboarding.bridgeCreation
+ 
+);
+
 
   useEffect(() => {
     const validateOrg = async () => {
@@ -66,9 +71,6 @@ function layoutOrgPage({ children, params }) {
   useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
-        if (data === 0) {
-          openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-        }
         setLoading(false);
       }))
       dispatch(getAllFunctions())

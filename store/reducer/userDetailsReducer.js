@@ -24,6 +24,22 @@ export const userDetailsReducer = createSlice({
       const { orgId, updatedUserDetails } = action.payload;
       state.organizations[orgId] = updatedUserDetails;
     },
+  updateOnBoarding: (state, action) => {
+  const { updatedOnboarding, orgId } = action.payload;
+
+  if (state.userDetails?.c_companies) {
+    const targetCompany = state.userDetails.c_companies.find(
+      (c) => c.id === Number(orgId)
+    );
+
+    if (targetCompany?.meta) {
+      targetCompany.meta.onboarding = updatedOnboarding;
+    }
+  }
+}
+
+
+,
     updateToken: (state, action) => {
       const { auth_token, orgId } = action.payload;
       state.organizations[orgId] = {
@@ -40,6 +56,7 @@ export const userDetailsReducer = createSlice({
 export const {
   fetchUserDetails,
   updateUserDetails,
-  updateToken
+  updateToken,
+  updateOnBoarding
 } = userDetailsReducer.actions;
 export default userDetailsReducer.reducer;

@@ -7,7 +7,7 @@ const WebhookPage = () => {
 
   return (
     <div className='w-full h-screen flex flex-col ' id='alert-embed-parent'>
-    
+
     </div>
   );
 };
