@@ -3,6 +3,7 @@ import CreateNewBridge from "@/components/createNewBridge";
 import CustomTable from "@/components/customTable/customTable";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import LoadingSpinner from "@/components/loadingSpinner";
+import OnBoarding from "@/components/onBoarding";
 import PageHeader from "@/components/Pageheader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -12,6 +13,7 @@ import { updateOrgDetails } from "@/store/action/orgAction";
 import { updateOnBoarding } from "@/store/reducer/userDetailsReducer";
 import { MODAL_TYPE } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal, updateOnboarding } from "@/utils/utility";
+import { data } from "autoprefixer";
 import { Ellipsis, LayoutGrid, Table, TestTubeDiagonal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
@@ -41,6 +43,7 @@ function Home({ params }) {
     currentOrg:userCompany
   };
 });
+  const data=allBridges
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
   const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation );
@@ -61,6 +64,9 @@ function Home({ params }) {
         setViewMode('table');
       }
     };
+    if (data.length === 0&&!isFirstBridgeCreation) {
+          openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
+        }
     updateScreenSize(); // Run on mount
     window.addEventListener('resize', updateScreenSize);
 
@@ -228,36 +234,7 @@ function Home({ params }) {
   return (
     <div className="w-full">
       {showTutorial && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
-          <button
-            onClick={() => handleVideoEnd()}
-            className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
-            aria-label="Close Tutorial"
-          >
-            &times;
-          </button>
-
-          <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
-             <iframe
-                src="https://video-faq.viasocket.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"
-                loading="lazy"
-                title="AI-middleware"
-                allow="clipboard-write"
-                frameBorder="0"
-                webkitallowfullscreen="true"
-                mozallowfullscreen="true"
-                allowFullScreen
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                }}
-                className="rounded-xl"
-              />
-          </div>
-        </div>
+       <OnBoarding handleVideoEnd={handleVideoEnd} video={"https://video-faq.viasocket.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"}/> 
       )}
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}

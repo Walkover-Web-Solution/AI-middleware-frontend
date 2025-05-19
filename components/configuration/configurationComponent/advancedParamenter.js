@@ -9,6 +9,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { updateOrgDetails } from '@/store/action/orgAction';
+import OnBoarding from '@/components/onBoarding';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -187,46 +188,7 @@ const AdvancedParameters = ({ params }) => {
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </div>
        {showTutorial && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
-          <button
-            onClick={() => handleVideoEnd()}
-            className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
-            aria-label="Close Tutorial"
-          >
-            &times;
-          </button>
-
-          <div
-            className="rounded-xl overflow-hidden"
-            style={{
-              position: "relative",
-              boxSizing: "content-box",
-              maxHeight: "80vh",
-              width: "100%",
-              aspectRatio: "1.935483870967742",
-              padding: "40px 0",
-            }}
-          >
-            <iframe
-              src="https://video-faq.viasocket.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2"
-              loading="lazy"
-              title="AI-middleware"
-              allow="clipboard-write"
-              frameBorder="0"
-              webkitallowfullscreen="true"
-              mozallowfullscreen="true"
-              allowFullScreen
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-              }}
-              className="rounded-xl"
-            />
-          </div>
-        </div>
+       <OnBoarding handleVideoEnd={handleVideoEnd} video={"https://video-faq.viasocket.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2"}/>
       )}
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 

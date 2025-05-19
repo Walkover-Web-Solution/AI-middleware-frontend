@@ -7,7 +7,7 @@ import { updateOnboarding } from "@/utils/utility";
 import { ChevronDown, ChevronUp, Info, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-
+import OnBoarding from "./onBoarding";
 const AddVariable = ({ params }) => {
   const versionId = params.version;
   const { variablesKeyValue, prompt, isFirstVariable, currentOrg } =
@@ -274,52 +274,7 @@ const AddVariable = ({ params }) => {
         aria-controls="accordion-content"
       >
         {showTutorial && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
-            <button
-              onClick={() => {
-                if (isFirstVariable) {
-                 handleVideoEnd();
-                } else {
-                  toggleAccordion();
-                }
-              }}
-              className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
-              aria-label="Close Tutorial"
-            >
-              &times;
-            </button>
-
-            <div
-              className="rounded-xl overflow-hidden"
-              style={{
-                position: "relative",
-                boxSizing: "content-box",
-                maxHeight: "80vh",
-                width: "100%",
-                aspectRatio: "1.935483870967742",
-                padding: "40px 0",
-              }}
-            >
-              <iframe
-                src="https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2"
-                loading="lazy"
-                title="AI-middleware"
-                allow="clipboard-write"
-                frameBorder="0"
-                webkitallowfullscreen="true"
-                mozallowfullscreen="true"
-                allowFullScreen
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                }}
-                className="rounded-xl"
-              />
-            </div>
-          </div>
+          <OnBoarding handleVideoEnd={handleVideoEnd} video={" https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2"}/>
         )}
         <span className="mr-2 text-nowrap font-medium">Add Variables</span>
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
