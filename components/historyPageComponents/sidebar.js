@@ -158,7 +158,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   );
 
   const handleCheckError = async (isError) => {
-    console.log(isError);
     if(isError === true) {
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.set('error', 'true');
