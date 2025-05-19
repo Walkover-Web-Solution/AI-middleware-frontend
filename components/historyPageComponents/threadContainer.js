@@ -14,7 +14,7 @@ import LoadingSpinner from '../loadingSpinner';
 import HistoryPagePromptUpdateModal from '../modals/historyPagePromptUpdateModal';
 
 
-const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedVersion, previousPrompt}) => {
+const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedVersion, previousPrompt, isErrorTrue}) => {
 
   const integrationData = useCustomSelector(state => state?.bridgeReducer?.org?.[params?.org_id]?.integrationData) || {};
   const historyRef = useRef(null);
@@ -67,7 +67,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       if(!thread_id && historyData &&  historyData?.length > 0) {
         const firstThreadId = historyData?.[0]?.thread_id;
         if (firstThreadId) {
-          router.push(`${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=${params?.error}`, undefined, { shallow: true });
           return;
         }
       }
@@ -75,7 +75,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       // Debounced thread fetching function
       const fetchThread = async (threadId) => {
         try {
-          url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}`;
+          url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}&error=${params?.error}`;
           if (startDate && endDate) {
             url += `&start=${startDate}&end=${endDate}`;
           }
@@ -90,6 +90,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
             user_feedback: filterOption,
             subThreadId: params?.subThread_id || threadId,
             versionId: selectedVersion === "all" ? "" : selectedVersion,
+            error: params?.error || isErrorTrue
           }));
 
           return result;
