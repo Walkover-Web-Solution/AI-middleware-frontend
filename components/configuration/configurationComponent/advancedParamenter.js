@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
-import { openModal } from '@/utils/utility';
+import { openModal, updateOnboarding } from '@/utils/utility';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback } from 'react';
@@ -16,63 +16,40 @@ const AdvancedParameters = ({ params }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [showTutorial, setShowTutorial] = useState(false);
   const dispatch = useDispatch();
-
-  const { service, version_function_data, configuration, integrationData } = useCustomSelector((state) => {
+  
+  const { service, version_function_data, configuration, integrationData,currentOrg,isFirstParameter } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
+    const currentOrg= state.userDetailsReducer.userDetails?.c_companies?.find(
+       (c) => c.id === Number(params.org_id)
+     )
     return {
       version_function_data: versionData?.apiCalls,
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
+      currentOrg:currentOrg,
+      isFirstParameter:currentOrg?.meta?.onboarding.AdvanceParameter
     };
-  });
-    
+  });  
   const { tool_choice: tool_choice_data, type, model } = configuration || {};  
-
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
- const orgId = params.org_id;
-   
-   const isFirstParameter = useCustomSelector(
-     (state) =>
-       state.userDetailsReducer.userDetails?.c_companies?.find(
-         (c) => c.id === Number(orgId)
-       )?.meta?.onboarding.AdvanceParameter
-   );
-   const [showTutorial, setShowTutorial] = useState(false);
-   const currentOrg = useCustomSelector((state) =>
-     state.userDetailsReducer.userDetails?.c_companies?.find(
-       (c) => c.id === Number(orgId)
-     )
-   );
-   
+
    const handleTutorial = () => {
-     
      setShowTutorial(isFirstParameter);
    };
    const handleVideoEnd = async () => {
      try {
        setShowTutorial(false);
- 
-       const updatedOrgDetails = {
-         ...currentOrg,
-         meta: {
-           ...currentOrg?.meta,
-           onboarding: {
-             ...currentOrg?.meta?.onboarding,
-             AdvanceParameter: false,
-           },
-         },
+       await updateOnboarding(dispatch,params.org_id,currentOrg,"AdvanceParameter");
+         } catch (error) {
+           console.error("Failed to update full organization:", error);
+         }
        };
- 
-       await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
-     } catch (error) {
-       console.error("Failed to update full organization:", error);
-     }
-   };
   useEffect(() => {
     if (configuration?.response_type?.json_schema) {
       setObjectFieldValue(

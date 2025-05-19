@@ -3,7 +3,7 @@ import { CircleAlert, Plus, Trash2 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { GetFileTypeIcon, openModal } from '@/utils/utility';
+import { GetFileTypeIcon, openModal, updateOnboarding } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import GoogleDocIcon from '@/icons/GoogleDocIcon';
@@ -11,18 +11,25 @@ import { truncate } from '@/components/historyPageComponents/assistFile';
 import { updateOrgDetails } from '@/store/action/orgAction';
 
 const KnowledgebaseList = ({ params }) => {
-    const { knowledgeBaseData, knowbaseVersionData } = useCustomSelector((state) => ({
-        knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
-        knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
-    }));
+   const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, currentOrg } = useCustomSelector((state) => {
+  const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
+  const org = userCompanies.find((c) => c.id === Number(params?.org_id));
+
+  return {
+    knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
+    knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
+    isFirstKnowledgeBase: org?.meta?.onboarding?.knowledgeBase,
+    currentOrg: org,
+  };
+});
+
 
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
-    
+    const [showTutorial, setShowTutorial] = useState(false);
     const handleInputChange = (e) => {
         setSearchQuery(e.target?.value || "");
     };
-
     const handleAddKnowledgebase = (id) => {
         if (knowbaseVersionData?.includes(id)) return; // Check if ID already exists
         dispatch(updateBridgeVersionAction({
@@ -30,53 +37,24 @@ const KnowledgebaseList = ({ params }) => {
             dataToSend: { doc_ids: [...(knowbaseVersionData || []), id] }
         }));
     };
-
     const handleDeleteKnowledgebase = (id) => {
         dispatch(updateBridgeVersionAction({
             versionId: params.version,
             dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== id) }
         }));
     };
-  const orgId = params.org_id;
-  
-  const isFirstKnowledgeBase = useCustomSelector(
-    (state) =>
-      state.userDetailsReducer.userDetails?.c_companies?.find(
-        (c) => c.id === Number(orgId)
-      )?.meta?.onboarding.ServiceSelection
-  );
-  const [showTutorial, setShowTutorial] = useState(false);
-
-  const currentOrg = useCustomSelector((state) =>
-    state.userDetailsReducer.userDetails?.c_companies?.find(
-      (c) => c.id === Number(orgId)
-    )
-  );
   
   const handleTutorial = () => {
-    
     setShowTutorial(isFirstKnowledgeBase);
   };
   const handleVideoEnd = async () => {
-    try {
-      setShowTutorial(false);
-
-      const updatedOrgDetails = {
-        ...currentOrg,
-        meta: {
-          ...currentOrg?.meta,
-          onboarding: {
-            ...currentOrg?.meta?.onboarding,
-            ServiceSelection: false,
-          },
-        },
-      };
-
-      await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
-    } catch (error) {
-      console.error("Failed to update full organization:", error);
-    }
-  };
+      try {
+        setShowTutorial(false);
+       await updateOnboarding(dispatch,params.org_id,currentOrg,"knowledgeBase");
+      } catch (error) {
+        console.error("Failed to update full organization:", error);
+      }
+    };
     const renderKnowledgebase = useMemo(() => (
         (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
             const item = knowledgeBaseData?.find(kb => kb._id === docId);
@@ -144,7 +122,7 @@ const KnowledgebaseList = ({ params }) => {
               padding: "40px 0",
             }}
           >
-            <iframe
+           <iframe
               src="https://video-faq.viasocket.com/embed/cm9tl9dpo0oeh11m7dz1bipq5?embed_v=2"
               loading="lazy"
               title="AI-middleware"

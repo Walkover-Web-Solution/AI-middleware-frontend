@@ -3,24 +3,35 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { updateOrgDetails } from "@/store/action/orgAction";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
+import { updateOnboarding } from "@/utils/utility";
 import { ChevronDown, ChevronUp, Info, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
 const AddVariable = ({ params }) => {
   const versionId = params.version;
-  const { variablesKeyValue, prompt, isFirstVariable, currentOrg } = useCustomSelector((state) => ({
-    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
-      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-      isFirstVariable: state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(orgId) )?.meta?.onboarding.Addvariables || "",
-      currentOrg : state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(orgId)
-      )
-  }));
-   const [showTutorial, setShowTutorial] = useState(false);  
-   const handleTutorial = () => {
-     setShowTutorial(isFirstVariable);
-     
-   };
+  const { variablesKeyValue, prompt, isFirstVariable, currentOrg } =
+    useCustomSelector((state) => ({
+      variablesKeyValue:
+        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
+          params?.version
+        ]?.variables || [],
+      prompt:
+        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
+          params?.version
+        ]?.configuration?.prompt || "",
+      isFirstVariable:
+        state.userDetailsReducer.userDetails?.c_companies?.find(
+          (c) => c.id === Number(params.org_id)
+        )?.meta?.onboarding.Addvariables || "",
+      currentOrg: state.userDetailsReducer.userDetails?.c_companies?.find(
+        (c) => c.id === Number(params.org_id)
+      ),
+    }));
+  const [showTutorial, setShowTutorial] = useState(false);
+  const handleTutorial = () => {
+    setShowTutorial(isFirstVariable);
+  };
   const [keyValuePairs, setKeyValuePairs] = useState([]);
   const [isFormData, setIsFormData] = useState(true);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
@@ -30,42 +41,36 @@ const AddVariable = ({ params }) => {
   const accordionContentRef = useRef(null); // Ref for the accordion content
   const isOpeningRef = useRef(false); // To track if the accordion is opening
 
-  const handleVideoEnd = async () => {
-    try {
-      setShowTutorial(false);
-      const updatedOrgDetails = {
-        ...currentOrg,
-        meta: {
-          ...currentOrg?.meta,
-          onboarding: {
-            ...currentOrg?.meta?.onboarding,
-            Addvariables: false,
-          },
-        },
-      };
-      await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
-    } catch (error) {
-      console.error("Failed to update full organization:", error);
-    }
-  };
+ const handleVideoEnd = async () => {
+  try {
+    await updateOnboarding(dispatch,params.org_id,currentOrg,"Addvariables");
+    setShowTutorial(false);
+  } catch (error) {
+    console.error("Failed to update full organization:", error);
+  }
+};
 
   const updateVersionVariable = (updatedPairs) => {
-    const filteredPairs = updatedPairs ? updatedPairs?.filter(pair =>
-      prompt?.includes(`{{${pair?.key}}}`)
-    )?.map(pair => ({
-      [pair?.key]: pair?.required ? 'required' : 'optional'
-    })) : variablesKeyValue?.filter(pair =>
-      prompt?.includes(`{{${pair?.key}}}`)
-    )?.map(pair => ({
-      [pair?.key]: pair?.required ? 'required' : 'optional'
-    }));
-    dispatch(updateBridgeVersionAction({
-      versionId: params?.version,
-      dataToSend: {
-        'variables_state': Object.assign({}, ...filteredPairs)
-      }
-    }));
-  }
+    const filteredPairs = updatedPairs
+      ? updatedPairs
+          ?.filter((pair) => prompt?.includes(`{{${pair?.key}}}`))
+          ?.map((pair) => ({
+            [pair?.key]: pair?.required ? "required" : "optional",
+          }))
+      : variablesKeyValue
+          ?.filter((pair) => prompt?.includes(`{{${pair?.key}}}`))
+          ?.map((pair) => ({
+            [pair?.key]: pair?.required ? "required" : "optional",
+          }));
+    dispatch(
+      updateBridgeVersionAction({
+        versionId: params?.version,
+        dataToSend: {
+          variables_state: Object.assign({}, ...filteredPairs),
+        },
+      })
+    );
+  };
 
   const extractVariablesFromPrompt = () => {
     const regex = /{{(.*?)}}/g;
@@ -90,11 +95,13 @@ const AddVariable = ({ params }) => {
     ];
 
     setKeyValuePairs(updatedPairs);
-    dispatch(updateVariables({
-      data: updatedPairs,
-      bridgeId: params.id,
-      versionId
-    }));
+    dispatch(
+      updateVariables({
+        data: updatedPairs,
+        bridgeId: params.id,
+        versionId,
+      })
+    );
     updateVersionVariable(updatedPairs);
   };
 
@@ -111,7 +118,9 @@ const AddVariable = ({ params }) => {
 
   // Helper function to check if all pairs are valid
   const areAllPairsValid = (pairs) => {
-    return pairs.every((pair) => pair.key.trim() !== "" && pair.value.trim() !== "");
+    return pairs.every(
+      (pair) => pair.key.trim() !== "" && pair.value.trim() !== ""
+    );
   };
 
   // Function to handle adding a new key-value pair
@@ -122,7 +131,9 @@ const AddVariable = ({ params }) => {
       setError(false);
       const updatedPairs = [...keyValuePairs, newPair];
       setKeyValuePairs(updatedPairs);
-      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
+      dispatch(
+        updateVariables({ data: updatedPairs, bridgeId: params.id, versionId })
+      );
     } else {
       setError(true);
     }
@@ -132,7 +143,9 @@ const AddVariable = ({ params }) => {
   const handleRemoveKeyValuePair = (index) => {
     const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
     setKeyValuePairs(updatedPairs);
-    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
+    dispatch(
+      updateVariables({ data: updatedPairs, bridgeId: params.id, versionId })
+    );
 
     // Reset error if after removal all remaining pairs are valid
     if (areAllPairsValid(updatedPairs)) {
@@ -148,7 +161,9 @@ const AddVariable = ({ params }) => {
 
     // Dispatch update if the current pair is valid
     if (updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
-      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
+      dispatch(
+        updateVariables({ data: updatedPairs, bridgeId: params.id, versionId })
+      );
     }
 
     setError(false);
@@ -163,17 +178,17 @@ const AddVariable = ({ params }) => {
       required: !updatedPairs[index].required,
     };
     setKeyValuePairs(updatedPairs);
-    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
-    updateVersionVariable(updatedPairs)
+    dispatch(
+      updateVariables({ data: updatedPairs, bridgeId: params.id, versionId })
+    );
+    updateVersionVariable(updatedPairs);
   };
 
   // Function to format key-value pairs for the textarea
   const formatPairsForTextarea = () => {
     return keyValuePairs
       .filter((pair) => pair.required)
-      .map((pair) =>
-        `${pair.key}:${pair.value ? pair.value : ''}`
-      )
+      .map((pair) => `${pair.key}:${pair.value ? pair.value : ""}`)
       .join("\n");
   };
 
@@ -190,7 +205,7 @@ const AddVariable = ({ params }) => {
         }
       });
       data = keyValueArray?.join("\n");
-    } catch (error) { }
+    } catch (error) {}
     const pairs = data
       .trim()
       .split("\n")
@@ -209,7 +224,9 @@ const AddVariable = ({ params }) => {
 
     if (pairs.length > 0) {
       setKeyValuePairs(pairs);
-      dispatch(updateVariables({ data: pairs, bridgeId: params.id, versionId }));
+      dispatch(
+        updateVariables({ data: pairs, bridgeId: params.id, versionId })
+      );
       updateVersionVariable();
       if (areAllPairsValid(pairs)) {
         setError(false);
@@ -249,56 +266,61 @@ const AddVariable = ({ params }) => {
       {/* Accordion Toggle Button */}
       <button
         className="flex items-center cursor-pointer focus:outline-none"
-        onClick={()=>{
-          handleTutorial()
-          toggleAccordion()
-        }
-        }
+        onClick={() => {
+          handleTutorial();
+          toggleAccordion();
+        }}
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
       >
         {showTutorial && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
-          <button
-            onClick={() => handleVideoEnd()}
-            className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
-            aria-label="Close Tutorial"
-          >
-            &times;
-          </button>
-
-          <div
-            className="rounded-xl overflow-hidden"
-            style={{
-              position: "relative",
-              boxSizing: "content-box",
-              maxHeight: "80vh",
-              width: "100%",
-              aspectRatio: "1.935483870967742",
-              padding: "40px 0",
-            }}
-          >
-            <iframe
-              src="https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2"
-              loading="lazy"
-              title="AI-middleware"
-              allow="clipboard-write"
-              frameBorder="0"
-              webkitallowfullscreen="true"
-              mozallowfullscreen="true"
-              allowFullScreen
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
+          <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
+            <button
+              onClick={() => {
+                if (isFirstVariable) {
+                 handleVideoEnd();
+                } else {
+                  toggleAccordion();
+                }
               }}
-              className="rounded-xl"
-            />
+              className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
+              aria-label="Close Tutorial"
+            >
+              &times;
+            </button>
+
+            <div
+              className="rounded-xl overflow-hidden"
+              style={{
+                position: "relative",
+                boxSizing: "content-box",
+                maxHeight: "80vh",
+                width: "100%",
+                aspectRatio: "1.935483870967742",
+                padding: "40px 0",
+              }}
+            >
+              <iframe
+                src="https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2"
+                loading="lazy"
+                title="AI-middleware"
+                allow="clipboard-write"
+                frameBorder="0"
+                webkitallowfullscreen="true"
+                mozallowfullscreen="true"
+                allowFullScreen
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+                className="rounded-xl"
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
         <span className="mr-2 text-nowrap font-medium">Add Variables</span>
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </button>
@@ -324,7 +346,7 @@ const AddVariable = ({ params }) => {
                   className="radio"
                   value="formData"
                   checked={isFormData}
-                  onChange={() => handleRadioChange('formData')}
+                  onChange={() => handleRadioChange("formData")}
                 />
                 <label htmlFor="formData" className="ml-2 cursor-pointer">
                   Form Data
@@ -338,7 +360,7 @@ const AddVariable = ({ params }) => {
                   className="radio"
                   value="rawData"
                   checked={!isFormData}
-                  onChange={() => handleRadioChange('rawData')}
+                  onChange={() => handleRadioChange("rawData")}
                 />
                 <label htmlFor="rawData" className="ml-2 cursor-pointer">
                   Raw Data
@@ -357,17 +379,26 @@ const AddVariable = ({ params }) => {
               />
             ) : (
               <div className="flex flex-col gap-4 max-h-56 overflow-y-auto mt-4 w-full items-start">
-                {keyValuePairs.length > 0 && <div className="flex items-center gap-2 w-full">
-                  <div className="tooltip tooltip-right" data-tip="Mark checkbox if it is required">
-                    <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
-                      <Info className="w-4 h-4 text-base-content/70" />
-                    </button>
+                {keyValuePairs.length > 0 && (
+                  <div className="flex items-center gap-2 w-full">
+                    <div
+                      className="tooltip tooltip-right"
+                      data-tip="Mark checkbox if it is required"
+                    >
+                      <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
+                        <Info className="w-4 h-4 text-base-content/70" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
+                      <span className="text-sm font-medium text-base-content/80">
+                        Key
+                      </span>
+                      <span className="text-sm font-medium text-base-content/80">
+                        Value
+                      </span>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
-                    <span className="text-sm font-medium text-base-content/80">Key</span>
-                    <span className="text-sm font-medium text-base-content/80">Value</span>
-                  </div>
-                </div>}
+                )}
                 {keyValuePairs?.map((pair, index) => (
                   <div key={index} className="flex items-center gap-4 w-full">
                     <input
@@ -406,11 +437,14 @@ const AddVariable = ({ params }) => {
                 ))}
                 {error === true && (
                   <p className="text-red-400 text-sm">
-                    Please fill out all existing key-value pairs before adding a new one.
+                    Please fill out all existing key-value pairs before adding a
+                    new one.
                   </p>
                 )}
                 {variablesKeyValue.length === 0 && (
-                  <p className="text-center text-lg font-semibold w-full">No Variables Found</p>
+                  <p className="text-center text-lg font-semibold w-full">
+                    No Variables Found
+                  </p>
                 )}
                 <button
                   className="btn btn-sm mt-4 self-center border border-base-300 bg-base-100 hover:bg-base-200"

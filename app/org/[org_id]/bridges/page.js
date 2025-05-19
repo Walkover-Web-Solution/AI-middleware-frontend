@@ -11,7 +11,7 @@ import { archiveBridgeAction } from "@/store/action/bridgeAction";
 import { updateOrgDetails } from "@/store/action/orgAction";
 import { updateOnBoarding } from "@/store/reducer/userDetailsReducer";
 import { MODAL_TYPE } from "@/utils/enums";
-import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
+import { filterBridges, getIconOfService, openModal, updateOnboarding } from "@/utils/utility";
 import { Ellipsis, LayoutGrid, Table, TestTubeDiagonal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
@@ -24,49 +24,35 @@ function Home({ params }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
-  const averageResponseTime = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.average_response_time || []);
-  const { isLoading } = useCustomSelector((state) => ({
+  const {
+  allBridges,
+  averageResponseTime,
+  isLoading,
+  isFirstBridgeCreation,
+  currentOrg
+} = useCustomSelector((state) => {
+  const orgData = state.bridgeReducer.org[params.org_id] || {};
+  const userCompany = state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(params?.org_id)) || {};
+  return {
+    allBridges: (orgData.orgs || []).slice().reverse(),
+    averageResponseTime: orgData.average_response_time || [],
     isLoading: state.bridgeReducer.loading,
-  }));
-
+    isFirstBridgeCreation: userCompany.meta?.onboarding?.bridgeCreation || "",
+    currentOrg:userCompany
+  };
+});
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
-  const orgId = params.org_id;
-  const isFirstBridgeCreation = useCustomSelector((state) =>
-    state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === params?.org_id).meta?.onboarding?.bridgeCreation || ""
-
-  );
-
-console.log(isFirstBridgeCreation)
-  const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation
-
-  );
-
-  const currentOrg = useCustomSelector((state) =>
-    state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(orgId))
-  );
+  const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation );
 
   const handleVideoEnd = async () => {
     try {
       setShowTutorial(false);
-      const updatedOrgDetails = {
-        ...currentOrg,
-        meta: {
-          ...currentOrg?.meta,
-          onboarding: {
-            ...currentOrg?.meta?.onboarding,
-            bridgeCreation: false,
-          },
-        },
-      };
-
-      await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
+      await updateOnboarding(dispatch,params.org_id,currentOrg,"bridgeCreation");
     } catch (error) {
       console.error("Failed to update full organization:", error);
     }
   };
-
   useEffect(() => {
     const updateScreenSize = () => {
       if (window.matchMedia('(max-width: 640px)').matches) {
@@ -84,8 +70,6 @@ console.log(isFirstBridgeCreation)
   const filteredBridges = filterBridges(allBridges, searchTerm);
   const filteredArchivedBridges = filteredBridges?.filter((item) => item.status === 0);
   const filteredUnArchivedBridges = filteredBridges?.filter((item) => item.status === 1 || item.status === undefined);
-
-
   const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
     _id: item._id,
     model: item.configuration?.model || "",
@@ -254,18 +238,24 @@ console.log(isFirstBridgeCreation)
           </button>
 
           <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
-            <iframe
-              src="https://video-faq.viasocket.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"
-              loading="lazy"
-              title="AI-middleware"
-              allow="clipboard-write"
-              frameBorder="0"
-              webkitallowfullscreen="true"
-              mozallowfullscreen="true"
-              allowFullScreen
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-              className="rounded-xl"
-            />
+             <iframe
+                src="https://video-faq.viasocket.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"
+                loading="lazy"
+                title="AI-middleware"
+                allow="clipboard-write"
+                frameBorder="0"
+                webkitallowfullscreen="true"
+                mozallowfullscreen="true"
+                allowFullScreen
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+                className="rounded-xl"
+              />
           </div>
         </div>
       )}

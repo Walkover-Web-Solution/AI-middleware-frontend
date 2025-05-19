@@ -7,7 +7,7 @@ import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
 import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
-import { closeModal, openModal } from '@/utils/utility'
+import { closeModal, openModal, updateOnboarding } from '@/utils/utility'
 import { Copy, Trash2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -17,39 +17,25 @@ export const runtime = "edge";
 
 function Page({ params }) {
   const dispatch = useDispatch();
-  const { authData, isFirstPauthCreation } = useCustomSelector((state) => ({
+ const { authData, isFirstPauthCreation, currentOrg } = useCustomSelector((state) => {
+  const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
+  const orgFromId = userCompanies.find((c) => c.id ===Number (params.org_id));
+
+  return {
     authData: state?.authDataReducer?.authData || [],
-    isFirstPauthCreation: state.userDetailsReducer.userDetails?.c_companies?.find(
-      (c) => c.id === params?.org_id
-    )?.meta?.onboarding?.PauthKey
-  }));
+    isFirstPauthCreation: orgFromId?.meta?.onboarding?.PauthKey,
+    currentOrg: orgFromId,
+  };
+});
 
   const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
   const [showTutorial, setShowTutorial] = useState(isFirstPauthCreation);
 
-  const currentOrg = useCustomSelector((state) =>
-    state.userDetailsReducer.userDetails?.c_companies?.find(
-      (c) => c.id === Number(orgId)
-    )
-  );
-
   const handleVideoEnd = async () => {
     try {
       setShowTutorial(false);
-
-      const updatedOrgDetails = {
-        ...currentOrg,
-        meta: {
-          ...currentOrg?.meta,
-          onboarding: {
-            ...currentOrg?.meta?.onboarding,
-            PauthKey: false,
-          },
-        },
-      };
-
-      await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
+     await updateOnboarding(dispatch,params.org_id,currentOrg,"PauthKey");
     } catch (error) {
       console.error("Failed to update full organization:", error);
     }

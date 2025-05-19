@@ -6,7 +6,8 @@ import GroqIcon from "@/icons/GroqIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { WebSearchIcon } from "@/icons/webSearchIcon";
-import { cloneDeep } from "lodash";
+import { updateOrgDetails } from "@/store/action/orgAction";
+import { cloneDeep, update } from "lodash";
 
 export const updatedData = (obj1, obj2 = {}, type) => {
     // Deep clone obj1 to avoid mutating the original object
@@ -318,3 +319,18 @@ export const updateTitle = (newTitle) => {
       document.title = newTitle;
     }
   };
+  
+export const  updateOnboarding = async (dispatch, orgId, currentOrg, flagKey) => {
+  if (!flagKey) throw new Error("flagKey is required");
+  const updatedOrgDetails = {
+    ...currentOrg,
+    meta: {
+      ...currentOrg?.meta,
+      onboarding: {
+        ...currentOrg?.meta?.onboarding,
+        [flagKey]: false,
+      },
+    },
+  };
+  await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
+};

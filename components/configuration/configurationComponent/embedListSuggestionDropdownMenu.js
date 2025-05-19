@@ -1,6 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateOrgDetails } from "@/store/action/orgAction";
-import { getStatusClass } from "@/utils/utility";
+import { getStatusClass, updateOnboarding } from "@/utils/utility";
 import { Info, Plus } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -14,54 +14,33 @@ function EmbedListSuggestionDropdownMenu({
   shouldToolsShow,
   modelName,
 }) {
-  const { integrationData, function_data, embedToken } = useCustomSelector(
-    (state) => ({
-      integrationData:
-        state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
-      function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData,
-      embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
-    })
-  );
-const dispatch=useDispatch();
-  const orgId = params.org_id;
-  const isFirstFunction = useCustomSelector(
-    (state) =>
-      state.userDetailsReducer.userDetails?.c_companies?.find(
-        (c) => c.id === Number(orgId)
-      )?.meta?.onboarding.FunctionCreation
-  );
-  const [showTutorial, setShowTutorial] = useState(false);
+  const dispatch=useDispatch();
+    const [showTutorial, setShowTutorial] = useState(false);
+  const { integrationData, function_data, embedToken, isFirstFunction ,currentOrg} = useCustomSelector((state) => {
+  const orgId = Number(params?.org_id);
+  const orgData = state?.bridgeReducer?.org?.[orgId] || {};
+  const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
+  const currentOrg = userCompanies.find((c) => c.id === orgId);
 
-  const currentOrg = useCustomSelector((state) =>
-    state.userDetailsReducer.userDetails?.c_companies?.find(
-      (c) => c.id === Number(orgId)
-    )
-  );
-
+  return {
+    integrationData: orgData.integrationData,
+    function_data: orgData.functionData,
+    embedToken: orgData.embed_token,
+    isFirstFunction: currentOrg?.meta?.onboarding?.FunctionCreation,
+    currentOrg:currentOrg
+  };
+});
   const handleTutorial = () => {
-    
     setShowTutorial(isFirstFunction);
   };
   const handleVideoEnd = async () => {
-    try {
-      setShowTutorial(false);
-
-      const updatedOrgDetails = {
-        ...currentOrg,
-        meta: {
-          ...currentOrg?.meta,
-          onboarding: {
-            ...currentOrg?.meta?.onboarding,
-            FunctionCreation: false,
-          },
-        },
-      };
-
-      await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
-    } catch (error) {
-      console.error("Failed to update full organization:", error);
-    }
-  };
+      try {
+        setShowTutorial(false);
+       await updateOnboarding(dispatch,params.org_id,currentOrg,"FunctionCreation");
+      } catch (error) {
+        console.error("Failed to update full organization:", error);
+      }
+    };
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleInputChange = (e) => {
@@ -183,7 +162,7 @@ const dispatch=useDispatch();
             }}
           >
             <iframe
-              src="https://video-faq.viasocket.com/embed/cm9tkq1kj0nmb11m7j6kw8r02?embed_v=2"
+              src="https://video-faq.viasocket.com/embed/cm9tkq1kj0nmb11m7j6kw8r02?embed_v=2&autoplay=1&mute=1"
               loading="lazy"
               title="AI-middleware"
               allow="clipboard-write"
