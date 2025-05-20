@@ -40,7 +40,7 @@ function layoutOrgPage({ children, params }) {
     SERVICES:state?.serviceReducer?.services 
   }));
   const urlParams = useParams();
-  useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
+  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
 
   useEffect(() => {
     const validateOrg = async () => {
