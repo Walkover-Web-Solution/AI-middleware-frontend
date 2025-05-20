@@ -12,11 +12,8 @@ import { getServiceAction } from "@/store/action/serviceAction";
 import { Bot, CircleAlert, Clock10, Webhook } from "lucide-react";
 
 function CreateNewBridge({ orgid }) {
-    const [selectedService, setSelectedService] = useState('openai');
-    const [selectedModel, setSelectedModel] = useState("gpt-4o");
     const [selectedType, setSelectedType] = useState("chat");
     const [bridgeType, setBridgeType] = useState("api");
-    const [isManualMode, setIsManualMode] = useState(false);
     const textAreaPurposeRef = useRef();
     const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState();
     const [validationErrors, setValidationErrors] = useState({
@@ -25,9 +22,8 @@ function CreateNewBridge({ orgid }) {
     });
     const [globalError, setGlobalError] = useState(""); // New state for global error messages
 
-    const { allBridgeLength, allBridgeList, modelsList, SERVICES } = useCustomSelector((state) => ({
+    const {allBridgeList, modelsList, SERVICES } = useCustomSelector((state) => ({
         SERVICES: state?.serviceReducer?.services,
-        allBridgeLength: (state.bridgeReducer.org[orgid] || [])?.length,
         allBridgeList: (state.bridgeReducer.org[orgid] || [])?.orgs,
         modelsList: state?.modelReducer?.serviceModels[selectedService],
     }));
@@ -42,25 +38,6 @@ function CreateNewBridge({ orgid }) {
     const [isAiLoading, setIsAiLoading] = useState(false);
     const dispatch = useDispatch();
     const route = useRouter();
-
-    useEffect(() => {
-        if (selectedService && !modelsList) {
-            dispatch(getModelAction({ service: selectedService }))
-        }
-    }, [selectedService]);
-
-    const handleService = (e) => {
-        setSelectedService(e.target.value);
-        setSelectedModel(DEFAULT_MODEL[e.target.value]);
-    };
-
-    const handleModel = (e) => {
-        const selectedModel = e.target.value;
-        const selectedModelType = e.target.selectedOptions[0].parentNode.label;
-
-        setSelectedModel(selectedModel);
-        setSelectedType(selectedModelType);
-    };
 
     const handleBridgeTypeSelection = (type) => {
         setSelectBridgeTypeCard(type);
