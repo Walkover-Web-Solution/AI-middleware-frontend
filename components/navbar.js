@@ -1,6 +1,6 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction, updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction } from '@/store/action/bridgeAction';
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';

@@ -2,7 +2,9 @@
 import CreateNewBridge from "@/components/createNewBridge";
 import CustomTable from "@/components/customTable/customTable";
 import MainLayout from "@/components/layoutComponents/MainLayout";
+import MainLayout from "@/components/layoutComponents/MainLayout";
 import LoadingSpinner from "@/components/loadingSpinner";
+import PageHeader from "@/components/Pageheader";
 import PageHeader from "@/components/Pageheader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -23,6 +25,7 @@ function Home({ params }) {
   const inputRef = useRef(null);
   const router = useRouter();
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
+  const averageResponseTime = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.average_response_time || []);
   const averageResponseTime = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.average_response_time || []);
 
   const { isLoading } = useCustomSelector((state) => ({

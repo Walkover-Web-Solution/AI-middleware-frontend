@@ -145,6 +145,12 @@ function Page({ searchParams }) {
     </div>
   );
 
+  if (loading || !historyData) return (
+    <div>
+      <LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px'/>
+    </div>
+  );
+
   return (
     <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
       <div className="drawer drawer-open">
