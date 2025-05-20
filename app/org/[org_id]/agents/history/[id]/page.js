@@ -3,11 +3,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-"use client";
-
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getHistoryAction, userFeedbackCountAction } from "@/store/action/historyAction";
 import { clearThreadData, clearHistoryData, setSelectedVersion } from "@/store/reducer/historyReducer";
@@ -143,12 +138,6 @@ function Page({ searchParams }) {
     const result = await dispatch(getHistoryAction(params.id, startDate, endDate, nextPage));
     if (result?.length < 40) setHasMore(false);
   }, [dispatch, page, params.id, search]);
-
-  if (loading || !historyData) return (
-    <div>
-      <LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px'/>
-    </div>
-  );
 
   if (loading || !historyData) return (
     <div>
