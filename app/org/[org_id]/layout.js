@@ -138,7 +138,7 @@ function layoutOrgPage({ children, params }) {
   }, [isValidOrg, params.id, versionData, version_id, path]);
 
   async function handleMessage(e) {
-    if(e.data?.metadata?.type==='trigger') return;
+    if(e.data?.metadata?.type!=='tool') return;
     // todo: need to make api call to update the name & description
     if (e?.data?.webhookurl) {
       const dataToSend = {
