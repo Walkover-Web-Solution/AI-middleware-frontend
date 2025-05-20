@@ -47,7 +47,10 @@ const PreEmbedList = ({ params }) => {
 
                 return (
                     <div key={value?._id} id={value?._id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
-                        <div className="p-4 w-full" onClick={() => openViasocket(functionName,{embedToken})}>
+                        <div className="p-4 w-full" onClick={() => openViasocket(functionName,{embedToken, meta: {
+                                type: 'tool',
+                                bridge_id: params?.id,
+                            }})}>
                             <div className="flex justify-between items-center">
                                 <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full text-base-content">
                                     {title}

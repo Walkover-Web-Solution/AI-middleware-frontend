@@ -38,7 +38,9 @@ export default function TriggersList({ params }) {
     }
     useEffect(() => {
         if (triggerData) {
-            setTriggers(triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []);
+            const filteredTriggers=triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
+            setTriggers(filteredTriggers);
+            if(!filteredTriggers?.length && openViasocket) openTrigger()
         }
         getAndSetAuthKey()
     }, [params?.org_id]);
