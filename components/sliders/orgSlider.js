@@ -43,7 +43,7 @@ function OrgSlider() {
                 })
                 localStorage.setItem('local_token', localToken.token);
             }
-            router.push(`/org/${id}/bridges`);
+            router.push(`/org/${id}/agents`);
             dispatch(setCurrentOrgIdAction(id));
             if (response.status !== 200) {
                 console.error('Failed to switch organization', response.data);

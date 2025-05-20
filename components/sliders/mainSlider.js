@@ -17,7 +17,7 @@ function MainSlider() {
 
   const Icons = {
     org: <Building2 />,
-    bridges: <PlugZap />,
+    agents: <PlugZap />,
     chatbot: <Bot />,
     pauthkey: <KeyRound />,
     apikeys: <Key />,
@@ -75,7 +75,7 @@ function MainSlider() {
               </div>
               <ul className="menu space-y-2 p-0">
                 {
-                  ['bridges', 'pauthkey', 'apikeys', 'alerts', 'knowledge_base', 'invite', 'metrics'].map((item) => (
+                  ['agents', 'pauthkey', 'apikeys', 'alerts', 'knowledge_base', 'invite', 'metrics'].map((item) => (
                     <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)} className="transition-transform transform hover:scale-105 flex items-center">
                       <a className={` w-full font-medium ${path[3] === item ? "active text-primary" : "text-gray-700"} `}>
                         {Icons[item]}

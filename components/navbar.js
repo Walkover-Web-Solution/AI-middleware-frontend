@@ -37,30 +37,30 @@ function Navbar() {
         try {
           dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId) => {
             if (newBridgeId) {
-              router.push(`/org/${path[2]}/bridges/configure/${newBridgeId}`)
-              toast.success('Bridge duplicate successfully');
+              router.push(`/org/${path[2]}/agents/configure/${newBridgeId}`)
+              toast.success('Agent duplicate successfully');
             }
           });
         } catch (error) {
-          console.error('Failed to duplicate bridge:', error);
-          toast.error('Error duplicating bridge');
+          console.error('Failed to duplicate agent:', error);
+          toast.error('Error duplicating agent');
         }
         break;
 
       case 'delete':
         // Confirm delete action
-        const confirmDelete = window.confirm('Are you sure you want to delete this bridge?');
+        const confirmDelete = window.confirm('Are you sure you want to delete this agent?');
 
         if (confirmDelete) {
           try {
-            // Dispatch delete bridge action and get all bridges
+            // Dispatch delete bridge action and get all agents
             await dispatch(deleteBridgeAction({ bridgeId, orgId }));
-            router.push(`/org/${orgId}/bridges`);
-            toast.success('Bridge deleted successfully');
+            router.push(`/org/${orgId}/agents`);
+            toast.success('Agent deleted successfully');
             dispatch(getAllBridgesAction());
           } catch (error) {
-            console.error('Failed to delete bridge:', error);
-            toast.error('Error deleting bridge');
+            console.error('Failed to delete agent:', error);
+            toast.error('Error deleting agent');
           }
         }
         break;
@@ -69,14 +69,14 @@ function Navbar() {
         try {
           dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
             if (bridgeStatus === 1) {
-              toast.success('Bridge Unarchived Successfully');
+              toast.success('Agents Unarchived Successfully');
             } else {
-              toast.success('Bridge Archived Successfully');
+              toast.success('Agents Archived Successfully');
             }
-            router.push(`/org/${orgId}/bridges`);
+            router.push(`/org/${orgId}/agents`);
           });
         } catch (error) {
-          console.error('Failed to archive/unarchive bridge', error);
+          console.error('Failed to archive/unarchive Agents', error);
         }
         break;
       default:
@@ -97,7 +97,7 @@ function Navbar() {
     }));
   }
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
-  const toggleBridgeSidebar = () => toggleSidebar('default-bridge-sidebar');
+  const toggleBridgeSidebar = () => toggleSidebar('default-agent-sidebar');
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
   const toggleConfigHistorySidebar = () =>
     toggleSidebar("default-config-history-slider", "right");
@@ -106,7 +106,7 @@ function Navbar() {
     <div className='z-[999]'>
       <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[19] max-h-[4rem] bg-base-100 sticky top-0`}>
         <div className={`flex items-center w-full justify-start gap-2 ${path.length > 4 ? '' : 'hidden'}`}>
-          <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/bridges`)}>
+          <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/agents`)}>
             <Home size={16} />
           </button>
           <button className="btn m-1" onClick={toggleOrgSidebar}>
@@ -115,7 +115,7 @@ function Navbar() {
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDown size={16} /></div>
             <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
-              {['bridges', 'pauthkey', 'apikeys', 'knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
+              {['agents', 'pauthkey', 'apikeys', 'knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
                 <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
                   <a className={path[3] === item ? "active" : ""}>
                     {item === 'knowledge_base' ? 'Knowledge Base' : item.charAt(0).toUpperCase() + item.slice(1)}
@@ -124,17 +124,17 @@ function Navbar() {
               ))}
             </ul>
           </div>
-          {path[3] === 'bridges' && path.length === 6 && <button className="btn m-1" onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service)}  {bridgeData?.name} </button>}
+          {path[3] === 'agents' && path.length === 6 && <button className="btn m-1" onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service)}  {bridgeData?.name} </button>}
           {path[3] === 'chatbot' && path[4] === 'configure' && <button className="btn m-1" onClick={toggleChatbotSidebar}> <Rss size={16} /> {chatbotData?.title} </button>}
         </div>
 
         <div className="justify-end w-full" >
-          {path.length === 6 && path[3] === 'bridges' ? (
+          {path.length === 6 && path[3] === 'agents' ? (
             <>
           {/* Add Pause/Resume Button */}
           <button 
               className={`btn m-1 tooltip tooltip-left ${bridge?.bridge_status === 0 ? 'bg-green-200 hover:bg-green-300' : 'bg-red-200 hover:bg-red-300'}`}
-              data-tip={bridge?.bridge_status === 0 ? 'Resume Bridge' : 'Pause Bridge'}
+              data-tip={bridge?.bridge_status === 0 ? 'Resume Agent' : 'Pause Agent'}
               onClick={() => handlePauseBridge(bridge?.bridge_status === 0 ? 'resume' : 'paused')}
             >
               {bridge?.bridge_status === 0 ? <Play size={16} /> : <Pause size={16} />}
@@ -168,14 +168,14 @@ function Navbar() {
               )}
               <div className="join group flex">
               <button 
-                onClick={() => router.push(`/org/${path[2]}/bridges/configure/${bridgeId}?version=${versionId}`)} 
+                onClick={() => router.push(`/org/${path[2]}/agents/configure/${bridgeId}?version=${versionId}`)} 
                 className={`${path[4] === 'configure' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
               >
                 <FileSliders size={16} className="shrink-0" />
-                <span className={`${path[4] === 'configure' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Configure Bridge</span>
+                <span className={`${path[4] === 'configure' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Configure Agents</span>
               </button>
                 <button 
-                onClick={() => router.push(`/org/${path[2]}/bridges/testcase/${bridgeId}?version=${versionId}`)} 
+                onClick={() => router.push(`/org/${path[2]}/agents/testcase/${bridgeId}?version=${versionId}`)} 
                 className={`${path[4] === 'testcase' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-2 group/btn`}
               >
                 <TestTube size={16} className="shrink-0" />
@@ -183,7 +183,7 @@ function Navbar() {
               </button>
               
                 <button 
-                onClick={() => router.push(`/org/${path[2]}/bridges/history/${bridgeId}?version=${versionId}`)} 
+                onClick={() => router.push(`/org/${path[2]}/agents/history/${bridgeId}?version=${versionId}`)} 
                 className={`${path[4] === 'history' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-2 group/btn`}
               >
                 <MessageCircleMore size={16} className="shrink-0" />
@@ -202,10 +202,10 @@ function Navbar() {
                 path[3] === 'alerts' ?
                   <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.WEBHOOK_MODAL)}>+ create new Alert</button>
                   :
-                  path[3] === 'bridges' ?
+                  path[3] === 'agents' ?
                     <div>
                       <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>
-                        + create new bridge
+                        + create new agent
                       </button>
                     </div> :
                     path[3] === 'metrics' ?
@@ -227,7 +227,7 @@ function Navbar() {
       {/* org slider  */}
       <OrgSlider />
 
-      {/* bridge slider */}
+      {/* Agent slider */}
       <BridgeSlider />
 
       {/* chatbot slider */}

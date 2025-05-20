@@ -43,7 +43,7 @@ export default function ConfigurationPage({ params }) {
 
     const handleNavigation = (target) => {
         setCurrentView(target);
-        router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${params.version}&view=${target}`);
+        router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=${target}`);
     };
 
     const renderNeedHelp = () => {
@@ -138,7 +138,7 @@ export default function ConfigurationPage({ params }) {
                             className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
                             <Cog size={16} className="shrink-0" />
-                            <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Bridge Config</span>
+                            <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
                         </button>
                         <button
                             onClick={() => handleNavigation('chatbot-config')} 

@@ -293,7 +293,7 @@ export default function FormSection({ params, chatbotId = null }) {
             </label>
             <div className="flex flex-col gap-2">
                 <label className="flex items-center gap-2">
-                    <span className="label-text">Allow Bridge Switch</span>
+                    <span className="label-text">Allow Agent Switch</span>
                     <input type="checkbox" className="toggle" onChange={(e) => handleBlur({
                         ...e,
                         target: {
@@ -371,7 +371,7 @@ function BridgesToSwitch({ chatBotId, handleSave ,orgId}) {
     const router = useRouter();
     const path = pathName.split('?')[0].split('/')
     const handleNavigation = (id, versionId) => {
-        router.push(`/org/${path[2]}/bridges/configure/${id}?version=${versionId}`);
+        router.push(`/org/${path[2]}/agents/configure/${id}?version=${versionId}`);
     }
 
     return <div className="border p-2 flex flex-col gap-2">
@@ -383,7 +383,7 @@ function BridgesToSwitch({ chatBotId, handleSave ,orgId}) {
                         <th>
 
                         </th>
-                        <th>Bridge Name</th>
+                        <th>Agent Name</th>
                         <th>Display Name</th>
 
                     </tr>

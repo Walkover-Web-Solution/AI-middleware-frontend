@@ -29,7 +29,7 @@ function PublishBridgeVersionModal({ params }) {
   return (
     <dialog id={MODAL_TYPE.PUBLISH_BRIDGE_VERSION} className="modal">
       <div className="modal-box w-11/12 max-w-2xl">
-        <h3 className="font-bold text-lg mb-4">Publish Bridge Version</h3>
+        <h3 className="font-bold text-lg mb-4">Publish Agent Version</h3>
         <p>
           Are you sure you want to publish this version? Keep in mind these
           points.

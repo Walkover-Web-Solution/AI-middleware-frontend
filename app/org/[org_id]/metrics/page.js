@@ -100,7 +100,7 @@ function Page({ params }) {
   }, [factor, range, bridge?.['bridge_id']]);
 
   const handleLevelChange = (index) => {
-    setLevel(index === 0 ? 'Organization' : 'Bridge');
+    setLevel(index === 0 ? 'Organization' : 'Agent');
     if (index === 0) {
       setBridge(null);
     }
@@ -125,20 +125,20 @@ function Page({ params }) {
           <div className="dropdown dropdown-end z-[999] border rounded-lg">
             <label tabIndex="0" role="button" className="btn capitalize">{level} level</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-              {['Organization', 'Bridge'].map((item, index) => (
+              {['Organization', 'Agent'].map((item, index) => (
                 <li key={index}><a onClick={() => handleLevelChange(index)} className={level === item ? 'active' : ''}>{item} Level</a></li>
               ))}
             </ul>
           </div>
         </div>
         <div className='flex justify-end mb-3 items-center'>
-          <label className="mr-1">Select Bridge:</label>
-          <div className={`dropdown dropdown-end z-[999] border rounded-lg ${level !== 'Bridge' ? 'opacity-50 pointer-events-none' : ''}`}>
-          <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Bridge'}</label>
+          <label className="mr-1">Select Agent:</label>
+          <div className={`dropdown dropdown-end z-[999] border rounded-lg ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}>
+          <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Agent'}</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-row overflow-y-auto max-h-[70vh]">
             <input
                   type="text"
-                  placeholder="Search bridges..."
+                  placeholder="Search Agent..."
                   className="input input-bordered mb-4 w-full"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}

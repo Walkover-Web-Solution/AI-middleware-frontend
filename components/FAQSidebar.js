@@ -78,7 +78,7 @@ const FAQPage = () => {
                       <div className="space-y-8">
                         <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                           <h3 className="text-2xl font-semibold mb-4 text-blue-600">1. How to Use GTWY AI</h3>
-                          <p className="text-gray-700 mb-6 text-lg">Master your bridge settings and optimize performance with our comprehensive guide.</p>
+                          <p className="text-gray-700 mb-6 text-lg">Master your agent settings and optimize performance with our comprehensive guide.</p>
                           <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
                             <iframe
                               src="https://video-faq.viasocket.com/embed/cm60d6r5a031w121t2akjkw9y?embed_v=2"

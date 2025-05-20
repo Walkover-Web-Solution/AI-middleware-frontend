@@ -40,7 +40,7 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
     dispatch(createBridgeReducer({ data: serializableData, orgId: dataToSend.orgid }));
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
-      toast.error("Bridge Name can't be duplicate");
+      toast.error("Agent Name can't be duplicate");
     } else {
       toast.error("Something went wrong");
     }
@@ -56,7 +56,7 @@ export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => as
     return data;
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
-      toast.error("Bridge Name can't be duplicate");
+      toast.error("Agent Name can't be duplicate");
     } else {
       toast.error("Something went wrong");
     }
@@ -79,7 +79,7 @@ export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, g
     }
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
-      toast.error("Bridge Name can't be duplicate");
+      toast.error("Agent Name can't be duplicate");
     } else {
       toast.error("Something went wrong");
     }
@@ -227,7 +227,7 @@ export const publishBridgeVersionAction = ({ bridgeId, versionId, orgId }) => as
     const data = await publishBridgeVersionApi({ versionId });
     if (data?.success) {
       dispatch(publishBrigeVersionReducer({ versionId: data?.version_id, bridgeId, orgId }));
-      toast.success('Bridge Version published successfully');
+      toast.success('Agent Version published successfully');
     }
   } catch (error) {
     console.error(error)

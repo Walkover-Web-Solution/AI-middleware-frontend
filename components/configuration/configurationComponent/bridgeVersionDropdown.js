@@ -31,7 +31,7 @@ function BridgeVersionDropdown({ params }) {
 
     const handleVersionChange = (version) => {
         if(params.version === version) return;
-        router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${version}`);
+        router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${version}`);
         dispatch(getBridgeVersionAction({ versionId: version, version_description:versionDescriptionRef }));
     };
 
@@ -40,7 +40,7 @@ function BridgeVersionDropdown({ params }) {
     const handleCreateNewVersion = () => {
         // create new version
         dispatch(createBridgeVersionAction({ parentVersionId: params?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value }, (data) => {
-            router.push(`/org/${params.org_id}/bridges/configure/${params.id}?version=${data.version_id}`);
+            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${data.version_id}`);
         }))
         versionDescriptionRef.current.value = ''
     }

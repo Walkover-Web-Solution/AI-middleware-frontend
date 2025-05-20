@@ -262,7 +262,7 @@ const InputConfigComponent = ({ params }) => {
               <div
                 className="tooltip tooltip-right"
                 data-tip={
-                  "Prompt summary is only for the bridge not for the Versions"
+                  "Prompt summary is only for the agent not for the Versions"
                 }
               >
                 <Info size={12} className="ml-2" />
@@ -274,7 +274,7 @@ const InputConfigComponent = ({ params }) => {
               className="label cursor-pointer">
 
             <Link
-              href={`/org/${params.org_id}/bridges/testcase/${params.id}?version=${params.version}`}
+              href={`/org/${params.org_id}/agents/testcase/${params.id}?version=${params.version}`}
               target="_blank"
               >
               <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">

@@ -102,7 +102,7 @@ function Home({ params }) {
   }));
 
   const onClickConfigure = (id, versionId) => {
-    router.push(`/org/${params.org_id}/bridges/configure/${id}?version=${versionId}`);
+    router.push(`/org/${params.org_id}/agents/configure/${id}?version=${versionId}`);
   };
 
   const renderBridgeCard = (item) => {
@@ -140,7 +140,7 @@ function Home({ params }) {
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
           <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
             {/* <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li> */}
-            <li><a onClick={(e) => { e.preventDefault(); archiveBridge(item._id, item.status != undefined ? Number(!item?.status) : undefined) }}>{(item?.status === 0) ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
+            <li><a onClick={(e) => { e.preventDefault(); archiveBridge(item._id, item.status != undefined ? Number(!item?.status) : undefined) }}>{(item?.status === 0) ? 'Un-archive Agent' : 'Archive Agent'}</a></li>
           </ul>
         </div>
       </div>
@@ -151,14 +151,14 @@ function Home({ params }) {
     try {
       dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
         if (bridgeStatus === 1) {
-          toast.success('Bridge Unarchived Successfully');
+          toast.success('Agent Unarchived Successfully');
         } else {
-          toast.success('Bridge Archived Successfully');
+          toast.success('Agent Archived Successfully');
         }
-        router.push(`/org/${params.org_id}/bridges`);
+        router.push(`/org/${params.org_id}/agents`);
       });
     } catch (error) {
-      console.error('Failed to archive/unarchive bridge', error);
+      console.error('Failed to archive/unarchive agents', error);
     }
   }
 
@@ -171,7 +171,7 @@ function Home({ params }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              router.push(`/org/${params.org_id}/bridges/testcase/${row._id}?version=${row?.versionId || null}`);
+              router.push(`/org/${params.org_id}/agents/testcase/${row._id}?version=${row?.versionId || null}`);
             }}
           >
             Test Case
@@ -184,7 +184,7 @@ function Home({ params }) {
               e.preventDefault();
               e.stopPropagation();
               archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
-            }}>{(row?.status === 0) ? 'Un-archive Bridge' : 'Archive Bridge'}</a></li>
+            }}>{(row?.status === 0) ? 'Un-archive Agent' : 'Archive Agent'}</a></li>
           </ul>
         </div>
       </div>
@@ -220,8 +220,8 @@ function Home({ params }) {
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="w-16 h-16 text-primary">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  <p className="text-lg font-semibold text-base-content">Create Your First Bridge</p>
-                  <button className="btn mt-2 btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ create new bridge</button>
+                  <p className="text-lg font-semibold text-base-content">Create Your First Agent</p>
+                  <button className="btn mt-2 btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ create new agent</button>
                 </div>
               </div>
             ) : (
@@ -231,14 +231,14 @@ function Home({ params }) {
                <div className="sm:max-w-4xl w-full">
                 <MainLayout>
                 <PageHeader 
-                 title="Bridges" 
+                 title="Agents" 
                  description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code." 
                 />
                </MainLayout>
      <input
         ref={inputRef}
         type="text"
-        placeholder="Search for bridges (Ctrl/Cmd + K)"
+        placeholder="Search for agents (Ctrl/Cmd + K)"
         className="input input-bordered input-md w-80 mb-4"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
@@ -267,7 +267,7 @@ function Home({ params }) {
                   <div className="flex justify-center items-center my-4">
                     <p className="border-t border-base-300 w-full"></p>
                     <p className="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
-                      Archived Bridges
+                      Archived Agents
                     </p>
                     <p className="border-t border-base-300 w-full"></p>
                   </div>

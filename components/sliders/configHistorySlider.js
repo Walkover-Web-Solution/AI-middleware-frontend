@@ -24,7 +24,7 @@ function ConfigHistorySlider({ versionId }) {
         setHasMore(newData.length === pageSize);
       }
     } catch (error) {
-      console.error("Error fetching bridge history:", error);
+      console.error("Error fetching agent history:", error);
     } finally {
       setLoading(false);
     }
