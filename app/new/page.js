@@ -56,7 +56,7 @@ function Page() {
         const { selectedOrg, bridgeName, bridgeType, slugName } = formState;
 
         if (!selectedOrg || !bridgeName.trim()) {
-            return toast.error('Please select an organization and enter a bridge name');
+            return toast.error('Please select an organization and enter a agent name');
         }
 
         if (bridgeType === 'chatbot' && !slugName.trim()) {
@@ -95,7 +95,7 @@ function Page() {
                 dataToSend: bridgeData,
                 orgid: selectedOrg.id
             }, (data) => {
-                route.push(`/org/${selectedOrg.id}/bridges/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+                route.push(`/org/${selectedOrg.id}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
             }));
 
         } catch (error) {
@@ -170,8 +170,8 @@ function Page() {
             <div className="w-2/3 bg-white rounded-lg shadow-lg pt-24 px-44 pb-48 max-auto">
                 <div className="flex flex-col space-y-6 border border-gray-200 rounded-lg p-6">
                     <div className="bg-blue-50 p-4 rounded-lg">
-                        <h2 className="text-xl font-semibold text-blue-800">Create New Bridge</h2>
-                        <p className="text-sm text-blue-600 mt-1">Set up a new bridge to connect your services</p>
+                        <h2 className="text-xl font-semibold text-blue-800">Create New Agent</h2>
+                        <p className="text-sm text-blue-600 mt-1">Set up a new agent to connect your services</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -200,10 +200,10 @@ function Page() {
                         <div className="grid grid-cols-1 gap-6">
                             {[
                                 {
-                                    label: 'Bridge Name',
+                                    label: 'Agent Name',
                                     field: 'bridgeName',
                                     type: 'text',
-                                    placeholder: 'Enter bridge name'
+                                    placeholder: 'Enter agent name'
                                 },
                                 formState.bridgeType === 'chatbot' && {
                                     label: 'Slug Name',
@@ -275,7 +275,7 @@ function Page() {
                             type="submit"
                             className="btn btn-primary w-full mt-6 py-3 text-lg"
                         >
-                            Create Bridge
+                            Create Agent
                         </button>
                     </form>
                 </div>

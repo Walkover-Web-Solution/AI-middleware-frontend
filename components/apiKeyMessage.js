@@ -29,7 +29,7 @@ function ApiKeyMessage({ params }) {
                 <AlertTriangle className="h-12 w-12 text-warning" />
                 <div className="text-lg font-semibold">API Key Required</div>
                 <div className="text-sm text-center">
-                    Please add your API key in the API key section to start using the bridge.
+                    Please add your API key in the API key section to start using the Agent.
                 </div>
             </div>
         );

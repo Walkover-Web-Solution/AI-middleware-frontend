@@ -210,7 +210,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                 ))}
               </div>
               <p className="text-xs text-base-content">
-                {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the bridge is ${userFeedbackCount}`}
+                {`The ${filterOption === "all" ? "All" : filterOption === "1" ? "Good" : "Bad"} User feedback for the agent is ${userFeedbackCount}`}
               </p>
 
               <div className="flex items-center justify-center gap-2 mt-4">

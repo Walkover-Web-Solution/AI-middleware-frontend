@@ -56,7 +56,7 @@ export const deleteBridge = async (bridgeId) => {
     return response;
   } catch (error) {
     console.error(error);
-    toast.error("Failed to delete the bridge");
+    toast.error("Failed to delete the agent");
     throw new Error(error);
   }
 };

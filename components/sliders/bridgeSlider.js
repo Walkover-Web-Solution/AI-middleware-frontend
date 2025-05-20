@@ -24,12 +24,12 @@ function BridgeSlider() {
     const filteredUnArchivedBridges = filteredBridgesList.filter((item) => item.status === 1 || item.status === undefined);
 
     const handleNavigation = (id, versionId) => {
-        router.push(`/org/${path[2]}/bridges/configure/${id}?version=${versionId}`);
-        toggleSidebar('default-bridge-sidebar');
+        router.push(`/org/${path[2]}/agents/configure/${id}?version=${versionId}`);
+        toggleSidebar('default-agent-sidebar');
     }
 
     const handlCloseBridgeSlider = useCallback(() => {
-        toggleSidebar('default-bridge-sidebar');
+        toggleSidebar('default-agent-sidebar');
     }, [])
 
     const renderBridges = (bridges, title) => (
@@ -65,7 +65,7 @@ function BridgeSlider() {
 
     return (
         <aside
-            id="default-bridge-sidebar"
+            id="default-agent-sidebar"
             className="sidebar-container fixed flex flex-col top-0 left-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen -translate-x-full py-4 overflow-y-auto bg-base-200 transition-all duration-300 z-50 border-r"
             aria-label="Sidebar"
         >
@@ -82,7 +82,7 @@ function BridgeSlider() {
                     className="border border-gray-300 rounded p-2 w-full"
                 />
                 <button className="bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>
-                    + Create new bridge
+                    + Create new agent
                 </button>
                 {filteredBridgesList.length === 0 ? (
                     <div className='max-w-full'>
@@ -95,7 +95,7 @@ function BridgeSlider() {
                     </>
                 )}
             </div>
-            <CreateNewBridge orgid={path[2]} Heading="Create New Bridge" />
+            <CreateNewBridge orgid={path[2]} Heading="Create New Agent" />
         </aside>
     )
 }

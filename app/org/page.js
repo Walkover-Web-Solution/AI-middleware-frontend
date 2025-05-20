@@ -29,7 +29,7 @@ function Page() {
         const localToken = await switchUser({ orgId: id, orgName: name });
         localStorage.setItem('local_token', localToken.token);
       }
-      route.push(`/org/${id}/bridges`);
+      route.push(`/org/${id}/agents`);
       dispatch(setCurrentOrgIdAction(id));
       if (response.status === 200) {
         console.log("Organization switched successfully", response.data);
