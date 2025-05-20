@@ -1,5 +1,4 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { DEFAULT_MODEL } from "@/jsonFiles/bridgeParameter";
 import { createBridgeAction, createBridgeWithAiAction } from "@/store/action/bridgeAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { useRouter } from "next/navigation";
@@ -12,8 +11,11 @@ import { getServiceAction } from "@/store/action/serviceAction";
 import { Bot, CircleAlert, Clock10, Webhook } from "lucide-react";
 
 function CreateNewBridge({ orgid }) {
+    const [selectedService, setSelectedService] = useState('openai');
+    const [selectedModel, setSelectedModel] = useState("gpt-4o");
     const [selectedType, setSelectedType] = useState("chat");
     const [bridgeType, setBridgeType] = useState("api");
+    const [isManualMode, setIsManualMode] = useState(false);
     const textAreaPurposeRef = useRef();
     const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState();
     const [validationErrors, setValidationErrors] = useState({
@@ -22,7 +24,7 @@ function CreateNewBridge({ orgid }) {
     });
     const [globalError, setGlobalError] = useState(""); // New state for global error messages
 
-    const {allBridgeList, modelsList, SERVICES } = useCustomSelector((state) => ({
+    const { allBridgeList, modelsList, SERVICES } = useCustomSelector((state) => ({
         SERVICES: state?.serviceReducer?.services,
         allBridgeList: (state.bridgeReducer.org[orgid] || [])?.orgs,
         modelsList: state?.modelReducer?.serviceModels[selectedService],
@@ -39,6 +41,13 @@ function CreateNewBridge({ orgid }) {
     const dispatch = useDispatch();
     const route = useRouter();
 
+    useEffect(() => {
+        if (selectedService && !modelsList) {
+            dispatch(getModelAction({ service: selectedService }))
+        }
+    }, [selectedService]);
+
+    
     const handleBridgeTypeSelection = (type) => {
         setSelectBridgeTypeCard(type);
         setValidationErrors(prev => ({ ...prev, bridgeType: "" }));
@@ -143,15 +152,12 @@ function CreateNewBridge({ orgid }) {
             });
     }
 
-    const toggleMode = () => {
-        setIsManualMode(!isManualMode);
-    };
 
     return (
         <div>
             {isLoading && <LoadingSpinner />}
             <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
-                
+
                 <div className="bg-base-100 px-4 md:px-10 py-6 md:py-8 rounded-lg max-w-[90%] md:max-w-[80%] mx-auto">
                     <h3 className="font-bold text-xl md:text-2xl mb-4 md:mb-6 text-gray-800">Create Bridge</h3>
 
@@ -247,8 +253,6 @@ function CreateNewBridge({ orgid }) {
                         </div>
                     </div>
 
-                    
-
                     {/* {!isManualMode ? ( */}
                     <div className="mt-6 md:mt-8">
                         <div className="form-control">
@@ -277,8 +281,8 @@ function CreateNewBridge({ orgid }) {
                             </p>
                         </div>
                     </div>
+                    
 
-                   
                     <div className="modal-action mt-6 md:mt-8 flex flex-col-reverse md:flex-row justify-between gap-4">
                         <div className="w-full md:w-auto">
                             <button
