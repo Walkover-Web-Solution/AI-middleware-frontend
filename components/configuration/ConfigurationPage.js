@@ -27,6 +27,7 @@ import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import TriggersList from "./configurationComponent/TriggersList";
 import AddVariable from "../addVariable";
 import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
+import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -71,7 +72,10 @@ export default function ConfigurationPage({ params }) {
                         <InputConfigComponent params={params} />
                         <EmbedList params={params} />
                         <hr className="my-0 p-0" />
+                        <ConnectedAgentList params={params} />
+                        <hr className="my-0 p-0" />
                         <KnowledgebaseList params={params} />
+                        <hr className="my-0 p-0" />
                         <PrebuiltToolsList params={params} />
                     </>
                 )}
