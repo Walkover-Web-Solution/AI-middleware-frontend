@@ -42,6 +42,12 @@ function layoutOrgPage({ children, params }) {
   const urlParams = useParams();
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
 
+  useEffect(()=>{
+    if(!SERVICES)
+    {
+      dispatch(getAllServicesAction())
+    }
+  },[])
   useEffect(() => {
     const validateOrg = async () => {
       try {
