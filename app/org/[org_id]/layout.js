@@ -64,6 +64,12 @@ function layoutOrgPage({ children, params }) {
   }, [params, organizations]);
 
   useEffect(() => {
+    if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
+        dispatch(getServiceAction({ orgid: params.orgid }))
+    }
+}, [SERVICES]);
+
+  useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
         if (data === 0) {
@@ -74,9 +80,10 @@ function layoutOrgPage({ children, params }) {
       dispatch(getAllFunctions())
     }
   }, [isValidOrg]);
+  
   useEffect(() => {
     if (isValidOrg) {
-      SERVICES.map((service) => {
+      Array?.isArray(SERVICES) && SERVICES?.map((service) => {
         dispatch(getModelAction({ service: service?.value }));
         return null; // to satisfy map's return
       });
