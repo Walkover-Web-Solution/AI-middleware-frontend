@@ -77,9 +77,8 @@ const Page = ({ searchParams }) => {
         <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
         <div className="w-full md:w-1/2 flex-1 chatPage min-w-[450px] relative">
           <div className="m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
-            <Chatbot params={params} key={params} />
             <ApiKeyMessage params={params} />
-            {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> : <Chat params={params} />}
+            {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> :bridgeType==='chatbot'? <Chatbot params={params} key={params} />: <Chat params={params} />}
           </div>
         </div>
       </div>
