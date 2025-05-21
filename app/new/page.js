@@ -203,13 +203,9 @@ function Page() {
             {/* Creation Form */}
             <div className="flex-1 bg-white rounded-xl shadow-sm p-8">
                 <div className="max-w-2xl mx-auto">
-                    <div className="mb-8">
-                        <h1 className="text-2xl font-bold text-gray-900">Create New Agent</h1>
-                        {templateId && (
-                            <p className="text-sm text-gray-500 mt-2">
-                                Creating from template: {templateId}
-                            </p>
-                        )}
+                     <div className="bg-blue-50 p-4 rounded-lg">
+                        <h2 className="text-xl font-semibold text-blue-800">Create New Agent</h2>
+                        <p className="text-sm text-blue-600 mt-1">Set up a new agent to connect your services</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6 border border-gray-300 rounded p-6">
