@@ -45,7 +45,7 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                 dispatch(userDetails());
                 handleSwitchOrg(data.id, data.name);
                 toast.success('Organization created successfully');
-                route.push(`/org/${data.id}/bridges`);
+                route.push(`/org/${data.id}/agents`);
             }));
         } catch (error) {
             toast.error('Failed to create organization');

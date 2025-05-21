@@ -14,7 +14,7 @@ function BridgeNameInput({ params }) {
         const newValue = e.target.value.trim() || "";
         if (newValue === bridgeName) { e.target.value = bridgeName; return };
         if (newValue?.trim() === "") {
-            toast.error('Bridge name cannot be empty');
+            toast.error('Agent name cannot be empty');
             e.target.value = bridgeName;
             
             return;
@@ -38,7 +38,7 @@ function BridgeNameInput({ params }) {
                     onBlur={handleBridgeNameChange}
                     onKeyDown={handleKeyDown}
                     defaultValue={bridgeName}
-                    placeholder="Enter Bridge Name"
+                    placeholder="Enter Agent Name"
                     key={bridgeName}
                 />
             </div>

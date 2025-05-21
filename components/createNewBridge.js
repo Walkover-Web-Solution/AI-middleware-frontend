@@ -31,7 +31,7 @@ function CreateNewBridge({ orgid }) {
     }));
 
     useEffect(() => {
-        if(!SERVICES) {
+        if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
             dispatch(getServiceAction({ orgid }))
         }
     }, [SERVICES]);
@@ -47,6 +47,7 @@ function CreateNewBridge({ orgid }) {
         }
     }, [selectedService]);
 
+    
     const handleBridgeTypeSelection = (type) => {
         setSelectBridgeTypeCard(type);
         setValidationErrors(prev => ({ ...prev, bridgeType: "" }));
@@ -67,7 +68,7 @@ function CreateNewBridge({ orgid }) {
 
         // Validate bridge type selection
         if (!selectedBridgeTypeCard) {
-            setValidationErrors(prev => ({ ...prev, bridgeType: "Select Bridge Type" }));
+            setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
             return;
         }
 
@@ -83,7 +84,7 @@ function CreateNewBridge({ orgid }) {
             };
             dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
                 // setShowFileUploadModal(false);
-                route.push(`/org/${orgid}/bridges/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+                route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
                 closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
                 setIsLoading(false);
                 cleanState();
@@ -117,13 +118,13 @@ function CreateNewBridge({ orgid }) {
 
         // Validate purpose
         if (!purpose || purpose.trim() === "") {
-            newValidationErrors.purpose = "Please enter a bridge purpose";
+            newValidationErrors.purpose = "Please enter a agent purpose";
             hasErrors = true;
         }
 
         // Validate bridge type
         if (!selectedBridgeTypeCard) {
-            newValidationErrors.bridgeType = "Select Bridge Type";
+            newValidationErrors.bridgeType = "Select Agent Type";
             hasErrors = true;
         }
 
@@ -139,7 +140,7 @@ function CreateNewBridge({ orgid }) {
         dispatch(createBridgeWithAiAction({ dataToSend, orgId: orgid }))
             .then((response) => {
                 const data = response.data;
-                route.push(`/org/${orgid}/bridges/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
+                route.push(`/org/${orgid}/agents/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
                 closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
                 setIsAiLoading(false);
                 cleanState();
@@ -147,7 +148,7 @@ function CreateNewBridge({ orgid }) {
             .catch((error) => {
                 setIsAiLoading(false);
                 // Instead of toast.error, set the global error state
-                setGlobalError(error?.response?.data?.message || "Error while creating bridge");
+                setGlobalError(error?.response?.data?.message || "Error while creating agent");
             });
     }
 
@@ -158,7 +159,7 @@ function CreateNewBridge({ orgid }) {
             <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
 
                 <div className="bg-base-100 px-4 md:px-10 py-6 md:py-8 rounded-lg max-w-[90%] md:max-w-[80%] mx-auto">
-                    <h3 className="font-bold text-xl md:text-2xl mb-4 md:mb-6 text-gray-800">Create Bridge</h3>
+                    <h3 className="font-bold text-xl md:text-2xl mb-4 md:mb-6 text-gray-800">Create Agent</h3>
 
                     {/* Global Error Message */}
                     {globalError && (
@@ -169,7 +170,7 @@ function CreateNewBridge({ orgid }) {
 
                     <div className="space-y-4 pb-2 p-2">
                         <div className="flex justify-between items-center">
-                            <label className="text-lg font-semibold text-gray-800">Select Bridge Type</label>
+                            <label className="text-lg font-semibold text-gray-800">Select Agent Type</label>
                             {validationErrors.bridgeType && (
                                 <span className="text-red-500 text-sm">{validationErrors.bridgeType}</span>
                             )}
@@ -256,15 +257,15 @@ function CreateNewBridge({ orgid }) {
                     <div className="mt-6 md:mt-8">
                         <div className="form-control">
                             <label className="label pb-1 md:pb-2">
-                                <span className="label-text font-medium text-base md:text-lg text-gray-800">Bridge Purpose</span>
+                                <span className="label-text font-medium text-base md:text-lg text-gray-800">Agent Purpose</span>
                                 {validationErrors.purpose && (
                                     <span className="label-text-alt text-red-500">{validationErrors.purpose}</span>
                                 )}
                             </label>
                             <div className="relative">
                                 <textarea
-                                    id="bridge-purpose"
-                                    placeholder="Describe the purpose of this bridge..."
+                                    id="agent-purpose"
+                                    placeholder="Describe the purpose of this agent..."
                                     ref={textAreaPurposeRef}
                                     onChange={handlePurposeInput}
                                     className={`textarea textarea-bordered w-full min-h-[100px] md:min-h-[120px] bg-white transition-all duration-300 placeholder-gray-400 text-sm md:text-base ${validationErrors.purpose
@@ -272,14 +273,15 @@ function CreateNewBridge({ orgid }) {
                                             : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
                                         }`}
                                     required
-                                    aria-label="Bridge purpose description"
+                                    aria-label="Agent purpose description"
                                 ></textarea>
                             </div>
                             <p className="text-xs text-gray-500 mt-1 md:mt-2 italic">
-                                A clear purpose helps AI to understand your bridge's functionality and improves discoverability.
+                                A clear purpose helps AI to understand your agent's functionality and improves discoverability.
                             </p>
                         </div>
                     </div>
+                    
 
                     <div className="modal-action mt-6 md:mt-8 flex flex-col-reverse md:flex-row justify-between gap-4">
                         <div className="w-full md:w-auto">
@@ -319,7 +321,7 @@ function CreateNewBridge({ orgid }) {
                                         <>
                                             <span className="loading loading-spinner loading-sm"></span>
                                         </>
-                                    ) : "Create Bridge"}
+                                    ) : "Create Agent"}
                                 </button>
                             ) : (
                                 <button
@@ -331,13 +333,14 @@ function CreateNewBridge({ orgid }) {
                                         <>
                                             <span className="loading loading-spinner loading-sm"></span>
                                         </>
-                                    ) : "Create Bridge"}
+                                    ) : "Create Agent"}
                                 </button>
                             )}
                         </div>
                     </div>
                 </div>
             </dialog>
+
 
         </div>
     );

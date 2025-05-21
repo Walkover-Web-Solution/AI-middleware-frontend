@@ -24,10 +24,11 @@ function Page({ searchParams }) {
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
   const searchRef = useRef();
-  const { historyData, thread, selectedVersion } = useCustomSelector((state) => ({
+  const { historyData, thread, selectedVersion, previousPrompt } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
-    selectedVersion: state?.historyReducer?.selectedVersion || 'all'
+    selectedVersion: state?.historyReducer?.selectedVersion || 'all',
+    previousPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
   }));
 
   const [isSliderOpen, setIsSliderOpen] = useState(false);
@@ -40,6 +41,7 @@ function Page({ searchParams }) {
   const [filterOption, setFilterOption] = useState("all");
   const [threadPage, setThreadPage] = useState(1);
   const [hasMoreThreadData, setHasMoreThreadData] = useState(true);
+  const [isErrorTrue, setIsErrorTrue] = useState(false);
 
   const closeSliderOnEsc = useCallback((event) => {
     if (event.key === "Escape") setIsSliderOpen(false);
@@ -53,6 +55,10 @@ function Page({ searchParams }) {
 
   useEffect(() => {
     return () => {
+      const cleanUrl = new URL(window.location.href);
+      const version = search.get("version");
+      cleanUrl.search = version ? `version=${version}` : '';
+      window.history.replaceState({}, '', cleanUrl);
       dispatch(clearThreadData());
       dispatch(clearHistoryData());
       dispatch(setSelectedVersion("all"));
@@ -75,21 +81,27 @@ function Page({ searchParams }) {
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
+       dispatch(clearThreadData());
       const startDate = search.get("start");
       const endDate = search.get("end");
-     const result =  await dispatch(getHistoryAction(params.id, startDate, endDate, 1, null, filterOption));
-      dispatch(clearThreadData());
+     const result =  await dispatch(getHistoryAction(params.id, startDate, endDate, 1, null, filterOption, isErrorTrue));
       if(params?.thread_id) {
         const threadId = params?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
         if(thread) {
-          router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${threadId}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${threadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
         }
       }
       else if (!params?.thread_id && result?.length > 0) {
         const firstThreadId = result[0]?.thread_id;
         if (firstThreadId) {
-          router.push(`${pathName}?version=${params.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${params.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
+        }
+      }
+      if(isErrorTrue) {
+        const firstThreadId = result[0]?.thread_id;
+        if (firstThreadId) {
+          router.push(`${pathName}?version=${params.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=true`, undefined, { shallow: true });
         }
       }
       setLoading(false);
@@ -110,10 +122,12 @@ function Page({ searchParams }) {
           console.error("Failed to fetch single message:", error);
         }
       } else {
-        router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}&subThread_id=${thread_id}`, undefined, { shallow: true });
+        const start = search.get("start");
+        const end = search.get("end");
+        router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}&subThread_id=${thread_id}&start=${start}&end=${end}`, undefined, { shallow: true });
       }
     },
-    [pathName, params.id, params.version]
+    [pathName, params.id, params.version, params?.start, params?.end]
   );
 
   const fetchMoreData = useCallback(async () => {
@@ -157,10 +171,13 @@ function Page({ searchParams }) {
               hasMoreThreadData={hasMoreThreadData}
               setHasMoreThreadData={setHasMoreThreadData} 
               selectedVersion={selectedVersion}
+              setIsErrorTrue={setIsErrorTrue}
+              isErrorTrue={isErrorTrue}
+              previousPrompt ={previousPrompt}
             />
           </React.Suspense>
         </div>
-        <React.Suspense fallback={<LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px'/>}>
+        <React.Suspense fallback={<LoadingSpinner/>}>
           <Sidebar
             historyData={historyData}
             threadHandler={threadHandler}
@@ -181,6 +198,8 @@ function Page({ searchParams }) {
             hasMoreThreadData={hasMoreThreadData}
             setHasMoreThreadData={setHasMoreThreadData}
             selectedVersion={selectedVersion}
+            setIsErrorTrue={setIsErrorTrue}
+            isErrorTrue={isErrorTrue}
           />
         </React.Suspense>
       </div>

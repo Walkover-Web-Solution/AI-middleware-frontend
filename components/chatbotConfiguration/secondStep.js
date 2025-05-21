@@ -13,7 +13,7 @@ const DataObject = {
 };
 const headers = ['Parameter', 'Type', 'Description', 'Required'];
 const data = [
-    ['bridgeName', 'string', 'The slug name of the bridge.', 'true'],
+    ['bridgeName', 'string', 'The slug name of the agent.', 'true'],
     ['threadId', 'string', 'The ID corresponding to the chat store.', 'true'],
     ['parentId', 'string', 'The parent container ID in which you want to open chatbot.', 'false'],
     ['fullScreen', 'boolean', 'Whether to open the chatbot in full screen.', 'false'],

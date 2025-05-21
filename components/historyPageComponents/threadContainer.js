@@ -11,9 +11,10 @@ import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import AddTestCaseModal from '../modals/AddTestCaseModal';
 import LoadingSpinner from '../loadingSpinner';
+import HistoryPagePromptUpdateModal from '../modals/historyPagePromptUpdateModal';
 
 
-const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedVersion }) => {
+const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedVersion, previousPrompt, isErrorTrue}) => {
 
   const integrationData = useCustomSelector(state => state?.bridgeReducer?.org?.[params?.org_id]?.integrationData) || {};
   const historyRef = useRef(null);
@@ -27,6 +28,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [threadMessageState, setThreadMessageState] = useState();
   const [testCaseConversation, setTestCaseConversation] = useState([]);
   const [loadingData, setLoadingData] = useState(false); // New state for loading
+  const [promotToUpdate, setPromptToUpdate] = useState(null);
 
   const handleAddTestCase = (item, index, variables = false) => {
     const conversation = [];
@@ -65,7 +67,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       if(!thread_id && historyData &&  historyData?.length > 0) {
         const firstThreadId = historyData?.[0]?.thread_id;
         if (firstThreadId) {
-          router.push(`${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=${params?.error}`, undefined, { shallow: true });
           return;
         }
       }
@@ -73,7 +75,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       // Debounced thread fetching function
       const fetchThread = async (threadId) => {
         try {
-          url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}`;
+          url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}&error=${params?.error}`;
           if (startDate && endDate) {
             url += `&start=${startDate}&end=${endDate}`;
           }
@@ -88,6 +90,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
             user_feedback: filterOption,
             subThreadId: params?.subThread_id || threadId,
             versionId: selectedVersion === "all" ? "" : selectedVersion,
+            error: params?.error || isErrorTrue
           }));
 
           return result;
@@ -165,6 +168,21 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     const { scrollTop, clientHeight } = historyRef?.current;
     setShowScrollToBottom(scrollTop + clientHeight < clientHeight);
   }, []);
+
+
+  useEffect(() => {
+    const handleEvent = (event) => {
+      let data;
+      if (event.data.type === "FRONT_END_ACTION")
+        data = event?.data?.data
+        if(data)
+        {
+          setPromptToUpdate(data?.prompt || data)
+          openModal(MODAL_TYPE?.HISTORY_PAGE_PROMPT_UPDATE_MODAL)
+        }
+    }
+    window.addEventListener('message', handleEvent);
+  }, [])
 
   useEffect(() => {
     if (historyRef?.current) {
@@ -252,7 +270,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         >
           {loadingData && (
             <div>
-              <LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px'/>
+              <LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px' />
             </div>
           )}
           {!loadingData && (!thread || thread.length === 0) ? (
@@ -305,6 +323,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         )}
       </div>
       <AddTestCaseModal testCaseConversation={testCaseConversation} setTestCaseConversation={setTestCaseConversation} />
+      <HistoryPagePromptUpdateModal params={params} promotToUpdate={promotToUpdate} previousPrompt={previousPrompt}/>
     </div>
   );
 };

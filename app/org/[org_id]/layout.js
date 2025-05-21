@@ -3,6 +3,7 @@ import ErrorPage from "@/app/not-found";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Navbar from "@/components/navbar";
+import Protected from "@/components/protected";
 import MainSlider from "@/components/sliders/mainSlider";
 import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -11,13 +12,16 @@ import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
+import { getModelAction } from "@/store/action/modelAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
+import { forEach } from "lodash";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
-export default function layoutOrgPage({ children, params }) {
+function layoutOrgPage({ children, params }) {
+  
   const dispatch = useDispatch();
   const pathName = usePathname();
   const searchParams = useSearchParams();
@@ -27,15 +31,16 @@ export default function layoutOrgPage({ children, params }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, SERVICES} = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
     organizations : state.userDetailsReducer.organizations,
-    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {}
+    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
+    SERVICES:state?.serviceReducer?.services 
   }));
   const urlParams = useParams();
-  useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
+  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
 
   useEffect(() => {
     const validateOrg = async () => {
@@ -59,6 +64,12 @@ export default function layoutOrgPage({ children, params }) {
   }, [params, organizations]);
 
   useEffect(() => {
+    if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
+        dispatch(getServiceAction({ orgid: params.orgid }))
+    }
+}, [SERVICES]);
+
+  useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
         if (data === 0) {
@@ -67,6 +78,15 @@ export default function layoutOrgPage({ children, params }) {
         setLoading(false);
       }))
       dispatch(getAllFunctions())
+    }
+  }, [isValidOrg]);
+  
+  useEffect(() => {
+    if (isValidOrg) {
+      Array?.isArray(SERVICES) && SERVICES?.map((service) => {
+        dispatch(getModelAction({ service: service?.value }));
+        return null; // to satisfy map's return
+      });
     }
   }, [isValidOrg]);
 
@@ -125,7 +145,7 @@ export default function layoutOrgPage({ children, params }) {
   }, [isValidOrg, params.id, versionData, version_id, path]);
 
   async function handleMessage(e) {
-    if(e.data?.metadata?.type==='trigger') return;
+    if(e.data?.metadata?.type!=='tool') return;
     // todo: need to make api call to update the name & description
     if (e?.data?.webhookurl) {
       const dataToSend = {
@@ -219,3 +239,5 @@ export default function layoutOrgPage({ children, params }) {
     );
   }
 }
+
+export default Protected(layoutOrgPage);

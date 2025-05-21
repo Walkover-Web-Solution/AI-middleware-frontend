@@ -38,7 +38,9 @@ export default function TriggersList({ params }) {
     }
     useEffect(() => {
         if (triggerData) {
-            setTriggers(triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []);
+            const filteredTriggers=triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
+            setTriggers(filteredTriggers);
+            if(!filteredTriggers?.length && openViasocket) openTrigger()
         }
         getAndSetAuthKey()
     }, [params?.org_id]);
@@ -51,11 +53,13 @@ export default function TriggersList({ params }) {
                 bridge_id: params?.id,
             },
             configurationJson: {
-                "rowe6baqarrm": {
-                    "key": "Talk_to_AI",
+                "row4qwo5ot1l": {
+                    "key": "Talk_to_Bridge",
                     "inputValues": {
                         "bridge": params?.id,
                         "_bridge": params?.id,
+                        "message":`\${JSON.stringify(context.req.body)}`,
+                        "_message":`\${JSON.stringify(context.req.body)}`,
                     },
                     "authValues": {
                         "pauth_key": authkey

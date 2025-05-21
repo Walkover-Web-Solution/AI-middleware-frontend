@@ -91,7 +91,12 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         <li className="text-center mt-2">No functions found</li>
                     )}
                     {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined, 
-                        {embedToken}
+                        {embedToken,
+                            meta: {
+                                type: 'tool',
+                                bridge_id: params?.id,
+                            }
+                        }
                     )}>
                         <div>
                             <Plus size={16} /><p className='font-semibold'>Add new Function</p>
