@@ -25,8 +25,8 @@ const INITIAL_FORM_STATE = {
     selectedModel: "gpt-4o",
     selectedModelType: 'chat',
     slugName: '',
-    prompt: '',
-    isLoading: false
+    isLoading: false,
+    template_Id: '',
 };
 
 function Page() {
@@ -49,15 +49,14 @@ function Page() {
             if (templateId) {
                 try {
                     setIsInitialLoading(true);
-                    const response = await axios.get(`${URL}/new/${templateId}`);
-                    if (response.data?.status === "success") {
-                        const templateData = response.data.data;
+                    //const response = await axios.get(`${URL}/new/${templateId}`);
+                    // if (response.data?.status === "success") {
+                    //     const templateData = response.data.data;
                         updateFormState({ 
-                            bridgeName: templateData.title || '',
-                            prompt: templateData.prompt || '',
+                            template_Id: templateId,
                         });
                         toast.success('Template loaded successfully');
-                    }
+                    //}
                 } catch (error) {
                     toast.error(error.response?.data?.message || "Error loading template");
                 } finally {
@@ -119,6 +118,7 @@ function Page() {
                 type: formState.selectedModelType,
                 orgid: selectedOrg.id,
                 prompt: formState.prompt,
+                templateId: formState.template_Id,
             };
 
             dispatch(createBridgeAction({
