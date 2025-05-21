@@ -28,30 +28,24 @@ export const userDetailsReducer = createSlice({
   const { updatedOnboarding, orgId } = action.payload;
 
   if (state.userDetails?.c_companies) {
-    const targetCompany = state.userDetails.c_companies.find(
+    const index = state.userDetails.c_companies.findIndex(
       (c) => c.id === Number(orgId)
     );
 
-    if (targetCompany?.meta) {
-      targetCompany.meta.onboarding = updatedOnboarding;
+    if (index !== -1) {
+      const company = state.userDetails.c_companies[index];
+
+      if (!company.meta) {
+        company.meta = {};
+      }
+      company.meta.onboarding = updatedOnboarding;
+
     }
   }
 }
-
-
-,
-    updateToken: (state, action) => {
-      const { auth_token, orgId } = action.payload;
-      state.organizations[orgId] = {
-        ...state.organizations[orgId],
-        meta: {
-          ...state.organizations[orgId]?.meta,
-          auth_token: auth_token
-        }
-      }
-    }
-  },
-});
+  }
+}
+);
 
 export const {
   fetchUserDetails,

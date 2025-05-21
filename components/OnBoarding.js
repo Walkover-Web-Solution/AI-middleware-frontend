@@ -1,6 +1,19 @@
+import { useCustomSelector } from '@/customHooks/customSelector';
+import { updateOnboarding } from '@/utils/utility';
 import React from 'react'
+import { useDispatch } from 'react-redux';
 
-const OnBoarding = ({handleVideoEnd,video}) => {
+const OnBoarding = ({video,setShowTutorial,params,flagKey,currentOrg}) => {
+ const dispatch= useDispatch();
+   const handleVideoEnd =async() => {
+    
+     try {
+         setShowTutorial(false);
+         await updateOnboarding(dispatch,params.org_id,currentOrg,flagKey);
+           } catch (error) {
+             console.error("Failed to update full organization:", error);
+           }
+         };
   return (
    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
           <button

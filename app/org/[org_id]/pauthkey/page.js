@@ -7,8 +7,9 @@ import PageHeader from '@/components/Pageheader'
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
-import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
+import { MODAL_TYPE, ONBOARDING_VIDEOS, PAUTH_KEY_COLUMNS } from '@/utils/enums'
 import { closeModal, openModal, updateOnboarding } from '@/utils/utility'
+import { current } from '@reduxjs/toolkit'
 import { Copy, Trash2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -18,29 +19,20 @@ export const runtime = "edge";
 
 function Page({ params }) {
   const dispatch = useDispatch();
- const { authData, isFirstPauthCreation, currentOrg } = useCustomSelector((state) => {
+ const { authData, isFirstPauthCreation,currentOrg } = useCustomSelector((state) => {
   const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
   const orgFromId = userCompanies.find((c) => c.id ===Number (params.org_id));
 
   return {
     authData: state?.authDataReducer?.authData || [],
     isFirstPauthCreation: orgFromId?.meta?.onboarding?.PauthKey,
-    currentOrg: orgFromId,
+    currentOrg:orgFromId
   };
 });
 
   const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
   const [showTutorial, setShowTutorial] = useState(isFirstPauthCreation);
-
-  const handleVideoEnd = async () => {
-    try {
-      setShowTutorial(false);
-     await updateOnboarding(dispatch,params.org_id,currentOrg,"PauthKey");
-    } catch (error) {
-      console.error("Failed to update full organization:", error);
-    }
-  };
 
   useEffect(() => {
     dispatch(getAllAuthData())
@@ -129,7 +121,7 @@ function Page({ params }) {
   return (
     <div className="h-full">
       {showTutorial && (
-       <OnBoarding handleVideoEnd={handleVideoEnd} video={"https://video-faq.viasocket.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2"}/>
+       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"} currentOrg={currentOrg}/>
       )}
       <MainLayout>
       <PageHeader 

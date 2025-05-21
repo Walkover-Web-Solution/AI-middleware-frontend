@@ -7,7 +7,6 @@ import { updateOnboarding } from "@/utils/utility";
 import { ChevronDown, ChevronUp, Info, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import OnBoarding from "./onBoarding";
 const AddVariable = ({ params }) => {
   const versionId = params.version;
   const { variablesKeyValue, prompt, isFirstVariable, currentOrg } =
@@ -28,19 +27,19 @@ const AddVariable = ({ params }) => {
         (c) => c.id === Number(params.org_id)
       ),
     }));
-  const [showTutorial, setShowTutorial] = useState(false);
-  const handleTutorial = () => {
+    const [showTutorial, setShowTutorial] = useState(false);
+    const [keyValuePairs, setKeyValuePairs] = useState([]);
+    const [isFormData, setIsFormData] = useState(true);
+    const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
+    const [height, setHeight] = useState(0); // Dynamic height state
+    const [error, setError] = useState(false);
+    const dispatch = useDispatch();
+    const accordionContentRef = useRef(null); // Ref for the accordion content
+    const isOpeningRef = useRef(false); // To track if the accordion is opening
+    const handleTutorial = () => {
     setShowTutorial(isFirstVariable);
   };
-  const [keyValuePairs, setKeyValuePairs] = useState([]);
-  const [isFormData, setIsFormData] = useState(true);
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
-  const [height, setHeight] = useState(0); // Dynamic height state
-  const [error, setError] = useState(false);
-  const dispatch = useDispatch();
-  const accordionContentRef = useRef(null); // Ref for the accordion content
-  const isOpeningRef = useRef(false); // To track if the accordion is opening
-
+    
  const handleVideoEnd = async () => {
   try {
     await updateOnboarding(dispatch,params.org_id,currentOrg,"Addvariables");
@@ -274,8 +273,39 @@ const AddVariable = ({ params }) => {
         aria-controls="accordion-content"
       >
         {showTutorial && (
-          <OnBoarding handleVideoEnd={handleVideoEnd} video={" https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2"}/>
-        )}
+         <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
+          <button
+            onClick={() => handleVideoEnd()}
+            className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
+            aria-label="Close Tutorial"
+          >
+            &times;
+          </button>
+
+          <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
+             <iframe
+                src="https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2"
+                loading="lazy"
+                title="AI-middleware"
+                allow="clipboard-write"
+                frameBorder="0"
+                webkitallowfullscreen="true"
+                mozallowfullscreen="true"
+                allowFullScreen
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+                className="rounded-xl"
+              />
+          </div>
+        </div>
+  )
+}
+        
         <span className="mr-2 text-nowrap font-medium">Add Variables</span>
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </button>
@@ -291,7 +321,6 @@ const AddVariable = ({ params }) => {
       >
         <div className="min-h-[300px] w-full border rounded-md p-4">
           <div className="w-full flex flex-col gap-2">
-            {/* Radio Buttons for Form Data and Raw Data */}
             <div className="flex flex-row gap-4">
               <div className="flex items-center">
                 <input

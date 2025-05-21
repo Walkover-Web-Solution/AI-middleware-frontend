@@ -459,4 +459,12 @@ export const FEATURE_DATA = [
     icon: "/live.svg"
   },
 ]
+export const ONBOARDING_VIDEOS={
+     bridgeCreation:"https://video-faq.viasocket.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2",
+     FunctionCreation:"https://video-faq.viasocket.com/embed/cm9tkq1kj0nmb11m7j6kw8r02?embed_v=2&autoplay=1&mute=1", 
+     knowledgeBase:"https://video-faq.viasocket.com/embed/cm9tl9dpo0oeh11m7dz1bipq5?embed_v=2",
+     Addvariables:"https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2",
+     AdvanceParameter:"https://video-faq.viasocket.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2",
+     PauthKey:"https://video-faq.viasocket.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2"
+}
 

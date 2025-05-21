@@ -11,7 +11,7 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
 import { updateOrgDetails } from "@/store/action/orgAction";
 import { updateOnBoarding } from "@/store/reducer/userDetailsReducer";
-import { MODAL_TYPE } from "@/utils/enums";
+import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal, updateOnboarding } from "@/utils/utility";
 import { data } from "autoprefixer";
 import { Ellipsis, LayoutGrid, Table, TestTubeDiagonal } from "lucide-react";
@@ -48,14 +48,6 @@ function Home({ params }) {
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
   const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation );
 
-  const handleVideoEnd = async () => {
-    try {
-      setShowTutorial(false);
-      await updateOnboarding(dispatch,params.org_id,currentOrg,"bridgeCreation");
-    } catch (error) {
-      console.error("Failed to update full organization:", error);
-    }
-  };
   useEffect(() => {
     const updateScreenSize = () => {
       if (window.matchMedia('(max-width: 640px)').matches) {
@@ -234,7 +226,7 @@ function Home({ params }) {
   return (
     <div className="w-full">
       {showTutorial && (
-       <OnBoarding handleVideoEnd={handleVideoEnd} video={"https://video-faq.viasocket.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"}/> 
+       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.bridgeCreation} params={params} flagKey={"bridgeCreation"} currentOrg={currentOrg}/>
       )}
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}

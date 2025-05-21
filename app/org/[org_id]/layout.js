@@ -12,8 +12,10 @@ import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
+import { updateOrgDetails } from "@/store/action/orgAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
+import { update } from "lodash";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -28,22 +30,38 @@ function layoutOrgPage({ children, params }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools,currentOrg } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
     organizations : state.userDetailsReducer.organizations,
-    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {}
+    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
+    currentOrg:state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(params?.org_id)) || {}
+
   }));
-  const urlParams = useParams();
+
+  
+  useEffect(async()=>{
+    if (currentOrg.meta===null) {
+      const updatedOrg = {
+        ...currentOrg,
+        meta: {
+          onboarding: {
+            bridgeCreation: true,
+            FunctionCreation: true,
+            knowledgeBase: true,
+            Addvariables: true,
+            AdvanceParameter: true,
+            PauthKey: true,
+            CompleteBridgeSetup: true,
+          },
+        },
+      };
+      await dispatch(updateOrgDetails(currentOrg.id, updatedOrg));
+    }
+   },[]);
+   
   useEmbedScriptLoader(pathName.includes('bridges') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
-  const orgId=urlParams.org_id
-   const isFirstBridgeCreation = useCustomSelector((state) =>
-state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(orgId))?.meta?.onboarding.bridgeCreation
- 
-);
-
-
   useEffect(() => {
     const validateOrg = async () => {
       try {

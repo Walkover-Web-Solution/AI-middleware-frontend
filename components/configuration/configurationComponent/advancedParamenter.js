@@ -1,7 +1,7 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { MODAL_TYPE } from '@/utils/enums';
+import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import { openModal, updateOnboarding } from '@/utils/utility';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
@@ -20,7 +20,7 @@ const AdvancedParameters = ({ params }) => {
   const [showTutorial, setShowTutorial] = useState(false);
   const dispatch = useDispatch();
   
-  const { service, version_function_data, configuration, integrationData,currentOrg,isFirstParameter } = useCustomSelector((state) => {
+  const { service, version_function_data, configuration, integrationData,isFirstParameter,currentOrg } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
     const currentOrg= state.userDetailsReducer.userDetails?.c_companies?.find(
@@ -34,8 +34,8 @@ const AdvancedParameters = ({ params }) => {
       currentOrg:currentOrg,
       isFirstParameter:currentOrg?.meta?.onboarding.AdvanceParameter
     };
-  });  
-  const { tool_choice: tool_choice_data, type, model } = configuration || {};  
+  }); 
+    const { tool_choice: tool_choice_data, type, model } = configuration || {};  
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
@@ -43,14 +43,7 @@ const AdvancedParameters = ({ params }) => {
    const handleTutorial = () => {
      setShowTutorial(isFirstParameter);
    };
-   const handleVideoEnd = async () => {
-     try {
-       setShowTutorial(false);
-       await updateOnboarding(dispatch,params.org_id,currentOrg,"AdvanceParameter");
-         } catch (error) {
-           console.error("Failed to update full organization:", error);
-         }
-       };
+
   useEffect(() => {
     if (configuration?.response_type?.json_schema) {
       setObjectFieldValue(
@@ -188,7 +181,7 @@ const AdvancedParameters = ({ params }) => {
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </div>
        {showTutorial && (
-       <OnBoarding handleVideoEnd={handleVideoEnd} video={"https://video-faq.viasocket.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2"}/>
+       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.AdvanceParameter} params={params} flagKey={"AdvanceParameter"} currentOrg={currentOrg}/>
       )}
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 

@@ -1,7 +1,9 @@
 import OnBoarding from "@/components/onBoarding";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateOrgDetails } from "@/store/action/orgAction";
+import { ONBOARDING_VIDEOS } from "@/utils/enums";
 import { getStatusClass, updateOnboarding } from "@/utils/utility";
+import { current } from "@reduxjs/toolkit";
 import { Info, Plus } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -34,14 +36,7 @@ function EmbedListSuggestionDropdownMenu({
   const handleTutorial = () => {
     setShowTutorial(isFirstFunction);
   };
-  const handleVideoEnd = async () => {
-      try {
-        setShowTutorial(false);
-       await updateOnboarding(dispatch,params.org_id,currentOrg,"FunctionCreation");
-      } catch (error) {
-        console.error("Failed to update full organization:", error);
-      }
-    };
+  
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleInputChange = (e) => {
@@ -142,8 +137,7 @@ function EmbedListSuggestionDropdownMenu({
         )}
       </div>
       {showTutorial && (
-        <OnBoarding handleVideoEnd={handleVideoEnd} video={" https://video-faq.viasocket.com/embed/cm9tkq1kj0nmb11m7j6kw8r02?embed_v=2&autoplay=1&mute=1"}/>
-      
+       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.FunctionCreation} params={params} flagKey={"FunctionCreation"} currentOrg={currentOrg}/>
       )}
       
       {!showTutorial && (
