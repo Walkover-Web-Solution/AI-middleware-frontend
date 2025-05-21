@@ -65,8 +65,9 @@ function CreateNewBridge({ orgid }) {
         const matches = allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
         const newCount = matches?.length + 1 || 0;
         name = `Untitled${newCount}`;
-
-        // Validate bridge type selection
+        const slugNameMatches=allBridgeList.filter(bridge=>bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
+        const slugNameCount=slugNameMatches?.length+1||0;
+        slugname=`Untitled${slugNameCount}`
         if (!selectedBridgeTypeCard) {
             setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
             return;
