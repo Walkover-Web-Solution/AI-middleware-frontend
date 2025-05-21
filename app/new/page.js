@@ -10,10 +10,12 @@ import { switchOrg } from '@/config';
 import { toast } from 'react-toastify';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { createBridgeAction } from '@/store/action/bridgeAction';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import LoadingSpinner from '@/components/loadingSpinner';
 import { getServiceAction } from '@/store/action/serviceAction';
+import axios from 'axios';
 
+const URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const INITIAL_FORM_STATE = {
     bridgeName: '',
     selectedOrg: null,
@@ -23,13 +25,16 @@ const INITIAL_FORM_STATE = {
     selectedModel: "gpt-4o",
     selectedModelType: 'chat',
     slugName: '',
-    isLoading: false
+    isLoading: false,
+    template_Id: '',
 };
 
 function Page() {
     const dispatch = useDispatch();
     const route = useRouter();
+    const searchParams = useSearchParams();
     const [formState, setFormState] = useState(INITIAL_FORM_STATE);
+    const [isInitialLoading, setIsInitialLoading] = useState(false);
 
     const { organizations, modelsList, SERVICES } = useCustomSelector(state => ({
         organizations: state.userDetailsReducer.organizations,
@@ -37,11 +42,34 @@ function Page() {
         SERVICES: state?.serviceReducer?.services
     }));
 
-    useEffect(() => {
+    const templateId = searchParams.get('template_id');
+
+     useEffect(() => {
         if(!SERVICES || Object?.entries(SERVICES)?.length === 0) {
             dispatch(getServiceAction({ orgid: params.orgid }))
         }
     }, [SERVICES]);
+
+
+    useEffect(() => {
+        const setTemplateData = async () => {
+            if (templateId) {
+                try {
+                    setIsInitialLoading(true);
+                        updateFormState({ 
+                            template_Id: templateId,
+                        });
+                        toast.success('Template loaded successfully');
+                    //}
+                } catch (error) {
+                    toast.error(error.response?.data?.message || "Error loading template");
+                } finally {
+                    setIsInitialLoading(false);
+                }
+            }
+        };
+        setTemplateData();
+    }, [templateId]);
 
     useEffect(() => {
         formState.selectedService && dispatch(getModelAction({ service: formState.selectedService }));
@@ -59,7 +87,7 @@ function Page() {
             return toast.error('Please select an organization and enter a agent name');
         }
 
-        if (bridgeType === 'chatbot' && !slugName.trim()) {
+         if (bridgeType === 'chatbot' && !slugName.trim()) {
             return toast.error('Please enter a slug name for chatbot');
         }
 
@@ -77,7 +105,7 @@ function Page() {
 
             await dispatch(setCurrentOrgIdAction(selectedOrg.id));
 
-            if (response.status !== 200) {
+             if (response.status !== 200) {
                 throw new Error('Failed to switch organization');
             }
 
@@ -88,7 +116,8 @@ function Page() {
                 slugName: slugName || bridgeName,
                 bridgeType,
                 type: formState.selectedModelType,
-                orgid: selectedOrg.id
+                orgid: selectedOrg.id,
+                templateId: formState.template_Id,
             };
 
             dispatch(createBridgeAction({
@@ -138,103 +167,117 @@ function Page() {
             <div
                 key={org.id || index}
                 onClick={() => handleSelectOrg(org.id, org.name)}
-                className={`bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 ${formState.selectedOrg?.id === org.id ? 'ring-2 ring-blue-500' : ''}`}
+                className={`bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 p-6 ${formState.selectedOrg?.id === org.id ? 'ring-2 ring-blue-500' : ''}`}
             >
-                <div className="px-6 py-4">
-                    <div className="font-bold text-xl mb-2">{org.name}</div>
-                </div>
+                <h3 className="font-medium text-gray-900">{org.name}</h3>
+        
             </div>
         ))
     ), [filteredOrganizations, formState.selectedOrg, handleSelectOrg]);
 
-    if (formState.isLoading) {
+    if (formState.isLoading || isInitialLoading) {
         return <LoadingSpinner />;
     }
 
     return (
-        <div className="flex max-h-[100vh] bg-gray-100 p-8">
-            <div className="w-1/3 bg-white rounded-lg shadow-lg p-6 mr-4">
-                <h2 className="text-xl font-semibold mb-4">Select Organization</h2>
-                <input
-                    type="text"
-                    placeholder="Search organizations"
-                    value={formState.searchQuery}
-                    onChange={handleChange('searchQuery')}
-                    className="input w-full p-4 mx-auto border border-base-200 mb-2"
-                />
+        <div className="flex min-h-screen bg-gray-100 p-6 gap-6">
+            {/* Organizations List */}
+            <div className="w-96 bg-white rounded-xl shadow-sm p-4 h-[calc(100vh-3rem)]">
+                <h2 className="text-lg font-semibold mb-4 text-gray-800">Organizations</h2>
+                <div className="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Search organizations..."
+                        value={formState.searchQuery}
+                        onChange={handleChange('searchQuery')}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                </div>
                 <div className="space-y-2 max-h-[78vh] overflow-x-hidden overflow-y-auto p-2">
                     {renderedOrganizations}
                 </div>
+
             </div>
 
-            <div className="w-2/3 bg-white rounded-lg shadow-lg pt-24 px-44 pb-48 max-auto">
-                <div className="flex flex-col space-y-6 border border-gray-200 rounded-lg p-6">
-                    <div className="bg-blue-50 p-4 rounded-lg">
+            {/* Creation Form */}
+            <div className="flex-1 bg-white rounded-xl shadow-sm p-8">
+                <div className="max-w-2xl mx-auto">
+                     <div className="bg-blue-50 p-4 rounded-lg">
                         <h2 className="text-xl font-semibold text-blue-800">Create New Agent</h2>
                         <p className="text-sm text-blue-600 mt-1">Set up a new agent to connect your services</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="form-control">
-                            <div className="label">
-                                <span className="label-text font-medium">Used as</span>
+                    <form onSubmit={handleSubmit} className="space-y-6 border border-gray-300 rounded p-6">
+                        <div className="space-y-4">
+                            {/* Bridge Type Selection */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Agent Type
+                                </label>
+                                <div className="flex gap-4">
+                                    {['api', 'chatbot'].map((type) => (
+                                        <label
+                                            key={type}
+                                            className="flex items-center space-x-2 cursor-pointer"
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="bridgeType"
+                                                value={type}
+                                                checked={formState.bridgeType === type}
+                                                onChange={() => updateFormState({ bridgeType: type })}
+                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="text-gray-700 capitalize">
+                                                {type === 'api' ? 'API' : 'Chat Bot'}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-6">
-                                {['api', 'chatbot'].map(type => (
-                                    <label key={type} className="label cursor-pointer gap-2">
-                                        <input
-                                            type="radio"
-                                            name="bridgeType"
-                                            className={`radio radio-${type === 'api' ? 'primary' : 'black'}`}
-                                            value={type}
-                                            checked={formState.bridgeType === type}
-                                            onChange={() => updateFormState({ bridgeType: type })}
-                                            required
-                                        />
-                                        <span className="label-text">{type === 'api' ? 'API' : 'ChatBot'}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 gap-6">
-                            {[
-                                {
-                                    label: 'Agent Name',
-                                    field: 'bridgeName',
-                                    type: 'text',
-                                    placeholder: 'Enter agent name'
-                                },
-                                formState.bridgeType === 'chatbot' && {
-                                    label: 'Slug Name',
-                                    field: 'slugName',
-                                    type: 'text',
-                                    placeholder: 'Enter slug name'
-                                }
-                            ].filter(Boolean).map(({ label, field, type, placeholder }) => (
-                                <div key={field} className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium">{label}</span>
+                            {/* Name Fields */}
+                            <div className="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Agent Name
                                     </label>
                                     <input
-                                        type={type}
-                                        value={formState[field]}
-                                        onChange={handleChange(field)}
-                                        className="input input-bordered w-full focus:ring-2 focus:ring-blue-500"
-                                        placeholder={placeholder}
+                                        type="text"
+                                        value={formState.bridgeName}
+                                        onChange={handleChange('bridgeName')}
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        placeholder="My Awesome Agent"
                                         required
                                     />
                                 </div>
-                            ))}
+                                
+                                {formState.bridgeType === 'chatbot' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Slug Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formState.slugName}
+                                            onChange={handleChange('slugName')}
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            placeholder="my-awesome-agent"
+                                            required
+                                        />
+                                    </div>
+                                )}
+                            </div>
 
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text font-medium">Select Service</span>
+                            {/* Service Selection */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    AI Service
                                 </label>
                                 <select
                                     value={formState.selectedService}
                                     onChange={handleService}
-                                    className="select select-bordered w-full focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 >
                                     {Array.isArray(SERVICES) ? SERVICES?.map(({ value, displayName }) => (
                                         <option key={value} value={value}>{displayName}</option>
@@ -242,24 +285,25 @@ function Page() {
                                 </select>
                             </div>
 
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text font-medium">Pick a model</span>
+                            {/* Model Selection */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    AI Model
                                 </label>
                                 <select
                                     value={formState.selectedModel}
                                     onChange={handleModelChange}
-                                    className="select select-bordered w-full focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                                     required
                                 >
-                                    <option disabled></option>
-                                    {Object.entries(modelsList || {}).map(([group, options], groupIndex) => (
+                                    <option value="">Select a model</option>
+                                    {Object.entries(modelsList || {}).map(([group, options]) => (
                                         group !== 'models' && (
-                                            <optgroup label={group} key={`group_${groupIndex}`}>
-                                                {Object.keys(options || {}).map((option, optionIndex) => {
+                                            <optgroup label={group} key={group}>
+                                                {Object.keys(options || {}).map((option) => {
                                                     const modelName = options?.[option]?.configuration?.model?.default;
                                                     return modelName && (
-                                                        <option key={`option_${option}_${optionIndex}`}>
+                                                        <option key={modelName} value={modelName}>
                                                             {modelName}
                                                         </option>
                                                     );
@@ -273,9 +317,10 @@ function Page() {
 
                         <button
                             type="submit"
-                            className="btn btn-primary w-full mt-6 py-3 text-lg"
+                            disabled={formState.isLoading}
+                            className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Create Agent
+                            {formState.isLoading ? 'Creating...' : 'Create Agent'}
                         </button>
                     </form>
                 </div>
