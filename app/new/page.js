@@ -72,10 +72,6 @@ function Page() {
     }, [templateId]);
 
     useEffect(() => {
-        dispatch(getServiceAction());
-    }, [dispatch]);
-
-    useEffect(() => {
         formState.selectedService && dispatch(getModelAction({ service: formState.selectedService }));
     }, [formState.selectedService, dispatch]);
 
