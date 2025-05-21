@@ -38,7 +38,7 @@ function Page() {
     }));
 
     useEffect(() => {
-        if(!SERVICES) {
+        if(!SERVICES || Object?.entries(SERVICES)?.length === 0) {
             dispatch(getServiceAction({ orgid: params.orgid }))
         }
     }, [SERVICES]);
