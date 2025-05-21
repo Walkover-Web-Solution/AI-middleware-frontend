@@ -45,13 +45,10 @@ function Page() {
     const templateId = searchParams.get('template_id');
 
     useEffect(() => {
-        const fetchTemplateData = async () => {
+        const setTemplateData = async () => {
             if (templateId) {
                 try {
                     setIsInitialLoading(true);
-                    //const response = await axios.get(`${URL}/new/${templateId}`);
-                    // if (response.data?.status === "success") {
-                    //     const templateData = response.data.data;
                         updateFormState({ 
                             template_Id: templateId,
                         });
@@ -64,7 +61,7 @@ function Page() {
                 }
             }
         };
-        fetchTemplateData();
+        setTemplateData();
     }, [templateId]);
 
     useEffect(() => {
