@@ -13,9 +13,9 @@ import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunct
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { getModelAction } from "@/store/action/modelAction";
+import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
-import { forEach } from "lodash";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
