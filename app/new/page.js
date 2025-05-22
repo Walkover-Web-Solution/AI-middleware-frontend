@@ -203,9 +203,6 @@ function Page() {
             <div className="flex-1 bg-white rounded-xl shadow-sm p-8">
                 <div className="max-w-2xl mx-auto">
                      <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="w-2/3 bg-white rounded-lg shadow-lg pt-24 px-44 pb-48 max-auto">
-                <div className="flex flex-col space-y-6 border border-gray-200 rounded-lg p-6">
-                    <div className="bg-blue-50 p-4 rounded-lg">
                         <h2 className="text-xl font-semibold text-blue-800">Create New Agent</h2>
                         <p className="text-sm text-blue-600 mt-1">Set up a new agent to connect your services</p>
                     </div>
