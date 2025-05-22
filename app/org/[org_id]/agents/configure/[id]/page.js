@@ -79,6 +79,7 @@ const Page = ({ searchParams }) => {
           <div className="m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
             <ApiKeyMessage params={params} />
             {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> :bridgeType==='chatbot'? <Chatbot params={params} key={params} />: <Chat params={params} />}
+
           </div>
         </div>
       </div>
