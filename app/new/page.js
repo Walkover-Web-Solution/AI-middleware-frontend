@@ -117,7 +117,7 @@ function Page() {
                 bridgeType,
                 type: formState.selectedModelType,
                 orgid: selectedOrg.id,
-                templateId: formState.template_Id,
+                ...(formState.template_Id && { templateId: formState.template_Id }),
             };
 
             dispatch(createBridgeAction({
