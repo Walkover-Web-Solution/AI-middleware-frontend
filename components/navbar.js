@@ -4,15 +4,15 @@ import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, dup
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { Building2, ChevronDown, Ellipsis, FileSliders, History, Home, Rss, TestTube, MessageCircleMore, Play, Pause, File } from 'lucide-react';
-import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Building2, ChevronDown, FileSliders, History, Home, Rss, TestTube, MessageCircleMore, Play, Pause, File,BookCheck ,ClipboardX} from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import OrgSlider from './sliders/orgSlider';
 import ConfigHistorySlider from "./sliders/configHistorySlider";
-
+import { truncate } from "@/components/historyPageComponents/assistFile";
 function Navbar() {
   const router = useRouter();
   const searchParams = useSearchParams()
@@ -110,8 +110,8 @@ function Navbar() {
             <Home size={16} />
           </button>
           <button className="btn m-1" onClick={toggleOrgSidebar}>
-            <Building2 size={16} /> {organizations[path[2]]?.name}
-          </button>
+            <Building2 size={16} /> {truncate(organizations[path[2]]?.name,15)}
+     </button>
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDown size={16} /></div>
             <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
@@ -124,7 +124,7 @@ function Navbar() {
               ))}
             </ul>
           </div>
-          {path[3] === 'agents' && path.length === 6 && <button className="btn m-1" onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service)}  {bridgeData?.name} </button>}
+          {path[3] === 'agents' && path.length === 6 && <button className="btn m-1 max-w-44 " onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service)} {truncate(bridgeData?.name, 15)} </button>}
           {path[3] === 'chatbot' && path[4] === 'configure' && <button className="btn m-1" onClick={toggleChatbotSidebar}> <Rss size={16} /> {chatbotData?.title} </button>}
         </div>
 
@@ -151,7 +151,7 @@ function Navbar() {
                           className="btn bg-red-200 m-1 hover:bg-red-300"
                           onClick={handleDiscardChanges}
                         >
-                          <span className='text-black'>Discard Changes</span>
+                         <ClipboardX size={16} /> <span className='text-black'>Discard</span>
                         </button>
                       </div>
                     </div>
@@ -161,8 +161,7 @@ function Navbar() {
                     onClick={() => openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
                     disabled={!isdrafted && publishedVersion === versionId}
                   >
-                    Publish Version
-                  </button>
+                   <BookCheck size={16} /> Publish                  </button>
                   <div className="divider divider-horizontal mx-1"></div>
                 </div>
               )}
