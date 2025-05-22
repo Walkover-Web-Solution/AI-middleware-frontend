@@ -43,7 +43,7 @@ export default function TriggersList({ params }) {
             if(!filteredTriggers?.length && openViasocket) openTrigger()
         }
         getAndSetAuthKey()
-    }, [params?.org_id]);
+    }, [params?.org_id, params?.id, authkey]);
 
     function openTrigger(triggerId) {
         openViasocket(triggerId, {
