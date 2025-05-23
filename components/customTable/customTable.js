@@ -150,7 +150,9 @@ const CustomTable = ({
                                         key={column}
                                         className="py-3 px-4 table-cell w-60"
                                     >
-                                        {keysToWrap.includes(column) && row[column] && typeof row[column] === 'string' ? (
+                                        {
+                                        row[column] === undefined ? ( "not available") :     
+                                        keysToWrap.includes(column) && row[column] && typeof row[column] === 'string' ? (
                                             row[column].length > 30
                                                 ? `${row[column].substring(0, 30)}...`
                                                 : row[column]
