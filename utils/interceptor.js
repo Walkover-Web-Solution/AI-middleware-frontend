@@ -6,6 +6,7 @@ axios.interceptors.request.use(
         config.headers['proxy_auth_token'] = token;
         if (process.env.NEXT_PUBLIC_ENV === 'local')
             config.headers['Authorization'] = localStorage.getItem("local_token");
+        config.headers['Authorization'] = localStorage.getItem("Authorization");
         return config;
     },
     (error) => {
@@ -20,9 +21,9 @@ axios.interceptors.response.use(
     },
     async function (error) {
         if (error?.response?.status === 401) {
-            localStorage.clear();
+            // localStorage.clear();
             localStorage.setItem("previous_url", window.location.href);           
-            window.location.href = "/login";
+            // window.location.href = "/login";
         }
         return Promise.reject(error);
     }
