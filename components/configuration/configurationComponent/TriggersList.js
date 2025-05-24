@@ -34,16 +34,17 @@ export default function TriggersList({ params }) {
 
     async function getAndSetAuthKey() {
         const keytoset = await getOrCreateNotificationAuthKey('gtwy_bridge_trigger')
+        console.log("keytoset", keytoset)
         if (keytoset) setAuthkey(keytoset?.authkey)
     }
     useEffect(() => {
         if (triggerData) {
             const filteredTriggers=triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
             setTriggers(filteredTriggers);
-            if(!filteredTriggers?.length && openViasocket) openTrigger()
+            if(!filteredTriggers?.length && openViasocket && authkey) openTrigger()
         }
         getAndSetAuthKey()
-    }, [params?.org_id]);
+    }, [params?.org_id, authkey]);
 
     function openTrigger(triggerId) {
         openViasocket(triggerId, {

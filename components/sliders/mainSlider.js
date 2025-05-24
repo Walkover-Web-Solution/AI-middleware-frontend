@@ -43,6 +43,27 @@ function MainSlider() {
   };
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleMainSidebar = () => toggleSidebar("main-sidebar");
+  
+  // Fixed handler for switch organization
+  const handleSwitchOrganization = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Close the drawer first
+    const drawer = document.getElementById("my-drawer-2");
+    if (drawer) {
+      drawer.checked = false;
+    }
+    
+    // Small delay to ensure drawer closes properly before toggling org sidebar
+    setTimeout(() => {
+      toggleOrgSidebar();
+    }, 100);
+    
+    // Remove focus to prevent focus issues
+    e.target.blur();
+  };
+
   return (
     <div className="relative">
       <label htmlFor="my-drawer-2" className="drawer-button lg:hidden z-0 absolute top-3 left-1">
@@ -62,16 +83,13 @@ function MainSlider() {
                     ? organizations[path[2]]?.name.substring(0, 15) + '...'
                     : organizations[path[2]]?.name}
                 </h2>
-                <a
-                  href="#"
-                  onClick={() => {
-                    toggleOrgSidebar();
-                    document.getElementById("my-drawer-2").checked = false;
-                  }}
-                  className="text-sm text-blue-500 hover:underline z-[102]"
+                <button
+                  type="button"
+                  onClick={handleSwitchOrganization}
+                  className="text-sm text-blue-500 hover:underline z-[102] bg-transparent border-none p-0 cursor-pointer focus:outline-none"
                 >
                   Switch Organization
-                </a>
+                </button>
               </div>
               <ul className="menu space-y-2 p-0">
                 {
