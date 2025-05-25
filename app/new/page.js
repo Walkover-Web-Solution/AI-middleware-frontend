@@ -13,7 +13,6 @@ import { createBridgeAction } from '@/store/action/bridgeAction';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LoadingSpinner from '@/components/loadingSpinner';
 import { getServiceAction } from '@/store/action/serviceAction';
-import { switchUser } from '@/config';
 import axios from 'axios';
 
 const URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
@@ -36,7 +35,7 @@ function Page() {
     const searchParams = useSearchParams();
     const [formState, setFormState] = useState(INITIAL_FORM_STATE);
     const [isInitialLoading, setIsInitialLoading] = useState(false);
-    const orgid = searchParams.get('orgid');
+
     const { organizations, modelsList, SERVICES } = useCustomSelector(state => ({
         organizations: state.userDetailsReducer.organizations,
         modelsList: state?.modelReducer?.serviceModels[formState.selectedService],
@@ -47,7 +46,7 @@ function Page() {
 
      useEffect(() => {
         if(!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-            dispatch(getServiceAction({orgid}))
+            dispatch(getServiceAction({ orgid: params.orgid }))
         }
     }, [SERVICES]);
 
