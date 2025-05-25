@@ -35,7 +35,7 @@ function Page() {
     const searchParams = useSearchParams();
     const [formState, setFormState] = useState(INITIAL_FORM_STATE);
     const [isInitialLoading, setIsInitialLoading] = useState(false);
-
+    const orgid = searchParams.get('orgid');
     const { organizations, modelsList, SERVICES } = useCustomSelector(state => ({
         organizations: state.userDetailsReducer.organizations,
         modelsList: state?.modelReducer?.serviceModels[formState.selectedService],
@@ -46,7 +46,7 @@ function Page() {
 
      useEffect(() => {
         if(!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-            dispatch(getServiceAction({ orgid: params.orgid }))
+            dispatch(getServiceAction({orgid}))
         }
     }, [SERVICES]);
 
