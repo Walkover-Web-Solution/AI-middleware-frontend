@@ -13,6 +13,7 @@ import { createBridgeAction } from '@/store/action/bridgeAction';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LoadingSpinner from '@/components/loadingSpinner';
 import { getServiceAction } from '@/store/action/serviceAction';
+import { switchUser } from '@/config';
 import axios from 'axios';
 
 const URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
