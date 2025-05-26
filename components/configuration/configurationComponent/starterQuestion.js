@@ -9,7 +9,7 @@ const StarterQuestionToggle = ({ params }) => {
     const IsstarterQuestionEnable = useCustomSelector((state) => 
         state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.IsstarterQuestionEnable || false
     );
-
+    
     const handleToggle = () => {
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
@@ -30,7 +30,7 @@ const StarterQuestionToggle = ({ params }) => {
                 type="checkbox"
                 checked={IsstarterQuestionEnable}
                 onChange={handleToggle}
-                className="toggle toggle-primary"
+                className="toggle"
                 defaultValue={IsstarterQuestionEnable ? "true" : "false"}
             />
         </div>
