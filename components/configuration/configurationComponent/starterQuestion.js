@@ -6,15 +6,15 @@ import { Info } from 'lucide-react';
 
 const StarterQuestionToggle = ({ params }) => {
     const dispatch = useDispatch();
-    const starterQuestionEnabled = useCustomSelector((state) => 
-        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.starter_question_enable || false
+    const IsstarterQuestionEnable = useCustomSelector((state) => 
+        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.IsstarterQuestionEnable || false
     );
 
     const handleToggle = () => {
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
             versionId: params.version,
-            dataToSend: { starter_question_enable: !starterQuestionEnabled }
+            dataToSend: { IsstarterQuestionEnable: !IsstarterQuestionEnable }
         }));
     };
 
@@ -28,10 +28,10 @@ const StarterQuestionToggle = ({ params }) => {
             </div>
             <input
                 type="checkbox"
-                checked={starterQuestionEnabled}
+                checked={IsstarterQuestionEnable}
                 onChange={handleToggle}
                 className="toggle toggle-primary"
-                defaultValue={starterQuestionEnabled ? "true" : "false"}
+                defaultValue={IsstarterQuestionEnable ? "true" : "false"}
             />
         </div>
     );
