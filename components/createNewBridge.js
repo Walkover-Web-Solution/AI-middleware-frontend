@@ -155,195 +155,250 @@ function CreateNewBridge({ orgid }) {
 
 
     return (
-        <div>
-            {isLoading && <LoadingSpinner />}
-            <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
+      <div>
+        {isLoading && <LoadingSpinner />}
+        <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
+          <div className="bg-base-100 px-2 md:px-10 py-4 md:py-4 rounded-lg max-w-[90%] md:max-w-[80%] overflow-auto max-h-[98vh] mx-auto">
+            <h3 className="font-bold text-xl md:text-xl text-gray-800 pl-2">
+              Create Agent
+            </h3>
 
-                <div className="bg-base-100 px-4 md:px-10 py-6 md:py-8 rounded-lg max-w-[90%] md:max-w-[80%] mx-auto">
-                    <h3 className="font-bold text-xl md:text-2xl mb-4 md:mb-6 text-gray-800">Create Agent</h3>
+            {/* Global Error Message */}
+            {globalError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-center font-medium">
+                {globalError}
+              </div>
+            )}
 
-                    {/* Global Error Message */}
-                    {globalError && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-center font-medium">
-                            {globalError}
-                        </div>
-                    )}
-
-                    <div className="space-y-4 pb-2 p-2">
-                        <div className="flex justify-between items-center">
-                            <label className="text-lg font-semibold text-gray-800">Select Agent Type</label>
-                            {validationErrors.bridgeType && (
-                                <span className="text-red-500 text-sm">{validationErrors.bridgeType}</span>
-                            )}
-                        </div>
-                        <div
-                            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto p-2 ${validationErrors.bridgeType ? 'border border-red-500 rounded-xl' : ''
-                                }`}
-                        >
-                            {/* API Card */}
-                            <div
-                                className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === 'api' ? 'ring-2 ring-blue-500' : ''}`}
-                                onClick={() => handleBridgeTypeSelection('api')}
-                            >
-                                <div className="card-body p-4 md:p-6">
-                                    <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                                        <div className="p-2 md:p-3 rounded-lg bg-blue-50">
-                                            <Webhook className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
-                                        </div>
-                                        <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">API</h2>
-                                    </div>
-                                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
-                                        Easily integrate AI into your backend using our API. Send prompts, receive intelligent responses, and automate tasks—no frontend needed. It's fast, flexible, and works with any backend stack.
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Chatbot Card */}
-                            <div
-                                className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === 'chatbot' ? 'ring-2 ring-green-500' : ''}`}
-                                onClick={() => handleBridgeTypeSelection('chatbot')}
-                            >
-                                <div className="card-body p-4 md:p-6">
-                                    <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                                        <div className="p-2 md:p-3 rounded-lg bg-green-50">
-                                            <Bot className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
-                                        </div>
-                                        <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">Chatbot</h2>
-                                    </div>
-                                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
-                                        Quickly embed an AI-powered chatbot into your app or website. It responds in real time, handles user queries, and delivers smart, conversational experiences—fully customizable and easy to deploy.
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Batch API Card */}
-                            <div
-                                className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === 'batch' ? 'ring-2 ring-purple-500' : ''}`}
-                                onClick={() => handleBridgeTypeSelection('batch')}
-                            >
-                                <div className="card-body p-4 md:p-6">
-                                    <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                                        <div className="p-2 md:p-3 rounded-lg bg-purple-50">
-                                            <Clock10 className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
-                                        </div>
-                                        <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">Batch API</h2>
-                                    </div>
-                                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
-                                        Process multiple prompts or data inputs in a single request using the Batch API. Ideal for large-scale tasks like summarization, generation, or classification—fast, efficient, and built for bulk operations.
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Triggers Card */}
-                            <div
-                                className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === 'triggers' ? 'ring-2 ring-amber-500' : ''}`}
-                                onClick={() => handleBridgeTypeSelection('triggers')}
-                            >
-                                <div className="card-body p-4 md:p-6">
-                                    <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                                        <div className="p-2 md:p-3 rounded-lg bg-amber-50">
-                                            <CircleAlert className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
-                                        </div>
-                                        <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">Triggers</h2>
-                                    </div>
-                                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
-                                        Automate workflows using Triggers. Set conditions to auto-run actions like sending prompts, generating responses, or forwarding data—no manual input required. Perfect for real-time automation.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+            <div className="space-y-2 pb-2 p-2 mt-2 ml-4 text-semi-bold">
+              <div className="flex justify-between items-center">
+                <label className="text-md  text-gray-800">
+                  Select Agent Type
+                </label>
+                {validationErrors.bridgeType && (
+                  <span className="text-red-500 text-sm">
+                    {validationErrors.bridgeType}
+                  </span>
+                )}
+              </div>
+              <div
+                className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 overflow-x-auto p-2 ${
+                  validationErrors.bridgeType
+                    ? "border border-red-500 rounded-xl"
+                    : ""
+                }`}
+              >
+                {/* API Card */}
+                <div
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
+                    selectedBridgeTypeCard === "api"
+                      ? "ring-2 ring-blue-500"
+                      : ""
+                  }`}
+                  onClick={() => handleBridgeTypeSelection("api")}
+                >
+                  <div className="card-body p-4 md:p-6">
+                    <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+                      <div className="p-2 md:p-3 rounded-lg bg-blue-50">
+                        <Webhook className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+                      </div>
+                      <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                        API
+                      </h2>
                     </div>
-
-                    {/* {!isManualMode ? ( */}
-                    <div className="mt-6 md:mt-8">
-                        <div className="form-control">
-                            <label className="label pb-1 md:pb-2">
-                                <span className="label-text font-medium text-base md:text-lg text-gray-800">Agent Purpose</span>
-                                {validationErrors.purpose && (
-                                    <span className="label-text-alt text-red-500">{validationErrors.purpose}</span>
-                                )}
-                            </label>
-                            <div className="relative">
-                                <textarea
-                                    id="agent-purpose"
-                                    placeholder="Describe the purpose of this agent..."
-                                    ref={textAreaPurposeRef}
-                                    onChange={handlePurposeInput}
-                                    className={`textarea textarea-bordered w-full min-h-[100px] md:min-h-[120px] bg-white transition-all duration-300 placeholder-gray-400 text-sm md:text-base ${validationErrors.purpose
-                                            ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200'
-                                            : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
-                                        }`}
-                                    required
-                                    aria-label="Agent purpose description"
-                                ></textarea>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1 md:mt-2 italic">
-                                A clear purpose helps AI to understand your agent's functionality and improves discoverability.
-                            </p>
-                        </div>
-                    </div>
-                    
-
-                    <div className="modal-action mt-6 md:mt-8 flex flex-col-reverse md:flex-row justify-between gap-4">
-                        <div className="w-full md:w-auto">
-                            <button
-                                className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full"
-                                onClick={createBridgeHandler}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                    </>
-                                ) : "Create Manually"}
-                            </button>
-                        </div>
-
-                        <div className="flex items-center justify-center gap-2 w-full my-4 md:my-0 md:w-auto">
-                            <hr className="flex-1 border-t-2 border-gray-200 md:w-8" />
-                            <span className="text-gray-400 text-xs sm:text-sm mx-2">or</span>
-                            <hr className="flex-1 border-t-2 border-gray-200 md:w-8" />
-                        </div>
-
-                        <div className="flex flex-col-reverse sm:flex-row items-center gap-3 w-full md:w-auto px-2">
-                            <button
-                                className="btn btn-base-200 text-sm md:text-base w-full sm:w-1/2 md:w-auto"
-                                onClick={() => closeModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}
-                            >
-                                Cancel
-                            </button>
-                            {isManualMode ? (
-                                <button
-                                    className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
-                                    onClick={handleCreateBridge}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <span className="loading loading-spinner loading-sm"></span>
-                                        </>
-                                    ) : "Create Agent"}
-                                </button>
-                            ) : (
-                                <button
-                                    className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
-                                    onClick={handleCreateBridgeUsingAI}
-                                    disabled={isAiLoading || isLoading}
-                                >
-                                    {isAiLoading ? (
-                                        <>
-                                            <span className="loading loading-spinner loading-sm"></span>
-                                        </>
-                                    ) : "Create Agent"}
-                                </button>
-                            )}
-                        </div>
-                    </div>
+                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                      Easily integrate AI into your backend using our API. Send
+                      prompts, receive intelligent responses, and automate
+                      tasks—no frontend needed. It's fast, flexible, and works
+                      with any backend stack.
+                    </p>
+                  </div>
                 </div>
-            </dialog>
 
+                {/* Chatbot Card */}
+                <div
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
+                    selectedBridgeTypeCard === "chatbot"
+                      ? "ring-2 ring-green-500"
+                      : ""
+                  }`}
+                  onClick={() => handleBridgeTypeSelection("chatbot")}
+                >
+                  <div className="card-body p-4 md:p-6">
+                    <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+                      <div className="p-2 md:p-3 rounded-lg bg-green-50">
+                        <Bot className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
+                      </div>
+                      <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                        Chatbot
+                      </h2>
+                    </div>
+                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                      Quickly embed an AI-powered chatbot into your app or
+                      website. It responds in real time, handles user queries,
+                      and delivers smart, conversational experiences—fully
+                      customizable and easy to deploy.
+                    </p>
+                  </div>
+                </div>
 
-        </div>
+                {/* Batch API Card */}
+                <div
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
+                    selectedBridgeTypeCard === "batch"
+                      ? "ring-2 ring-purple-500"
+                      : ""
+                  }`}
+                  onClick={() => handleBridgeTypeSelection("batch")}
+                >
+                  <div className="card-body p-4 md:p-6">
+                    <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+                      <div className="p-2 md:p-3 rounded-lg bg-purple-50">
+                        <Clock10 className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
+                      </div>
+                      <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                        Batch API
+                      </h2>
+                    </div>
+                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                      Process multiple prompts or data inputs in a single
+                      request using the Batch API. Ideal for large-scale tasks
+                      like summarization, generation, or classification—fast,
+                      efficient, and built for bulk operations.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Triggers Card */}
+                <div
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
+                    selectedBridgeTypeCard === "triggers"
+                      ? "ring-2 ring-amber-500"
+                      : ""
+                  }`}
+                  onClick={() => handleBridgeTypeSelection("triggers")}
+                >
+                  <div className="card-body p-4 md:p-6">
+                    <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+                      <div className="p-2 md:p-3 rounded-lg bg-amber-50">
+                        <CircleAlert className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
+                      </div>
+                      <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                        Triggers
+                      </h2>
+                    </div>
+                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                      Automate workflows using Triggers. Set conditions to
+                      auto-run actions like sending prompts, generating
+                      responses, or forwarding data—no manual input required.
+                      Perfect for real-time automation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* {!isManualMode ? ( */}
+            <div className="mt-4 md:mt-4">
+              <div className="form-control">
+                <label className="label pb-1 md:pb-2">
+                  <span className="label-text font-medium text-base md:text-lg text-gray-800">
+                    Agent Purpose
+                  </span>
+                  {validationErrors.purpose && (
+                    <span className="label-text-alt text-red-500">
+                      {validationErrors.purpose}
+                    </span>
+                  )}
+                </label>
+                <div className="relative">
+                  <textarea
+                    id="agent-purpose"
+                    placeholder="Describe the purpose of this agent..."
+                    ref={textAreaPurposeRef}
+                    onChange={handlePurposeInput}
+                    className={`textarea textarea-bordered w-full min-h-[50px] md:min-h-[50px] bg-white transition-all duration-300 placeholder-gray-400 text-sm md:text-base ${
+                      validationErrors.purpose
+                        ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                        : "border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    }`}
+                    required
+                    aria-label="Agent purpose description"
+                  ></textarea>
+                </div>
+                <p className="text-xs text-gray-500 mt-1 md:mt-2 italic">
+                  A clear purpose helps AI to understand your agent's
+                  functionality and improves discoverability.
+                </p>
+              </div>
+            </div>
+
+            <div className="modal-action mb-4 flex flex-col-reverse md:flex-row justify-between gap-4">
+              <div className="w-full md:w-auto">
+                <button
+                  className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full"
+                  onClick={createBridgeHandler}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm"></span>
+                    </>
+                  ) : (
+                    "Create Manually"
+                  )}
+                </button>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 mb-2 w-full my-2 md:my-0 md:w-auto">
+                <hr className="flex-1 border-t-2 border-gray-200 md:w-8" />
+                <span className="text-gray-400 text-xs sm:text-sm mx-2">
+                  or
+                </span>
+                <hr className="flex-1 border-t-2 border-gray-200 md:w-8" />
+              </div>
+
+              <div className="flex flex-col-reverse sm:flex-row items-center gap-3 w-full md:w-auto px-2">
+                <button
+                  className="btn btn-base-200 text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                  onClick={() => closeModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}
+                >
+                  Cancel
+                </button>
+                {isManualMode ? (
+                  <button
+                    className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                    onClick={handleCreateBridge}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <span className="loading loading-spinner loading-sm"></span>
+                      </>
+                    ) : (
+                      "Create Agent"
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                    onClick={handleCreateBridgeUsingAI}
+                    disabled={isAiLoading || isLoading}
+                  >
+                    {isAiLoading ? (
+                      <>
+                        <span className="loading loading-spinner loading-sm"></span>
+                      </>
+                    ) : (
+                      "Create Agent"
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </dialog>
+      </div>
     );
 }
 

@@ -37,7 +37,6 @@ export default function TriggersList({ params }) {
         console.log("keytoset", keytoset)
         if (keytoset) setAuthkey(keytoset?.authkey)
     }
-console.log("sdfdfdf", authkey)
     useEffect(() => {
         if (triggerData) {
             const filteredTriggers=triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
