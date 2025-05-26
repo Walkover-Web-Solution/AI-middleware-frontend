@@ -13,7 +13,7 @@ import { createBridgeAction } from '@/store/action/bridgeAction';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LoadingSpinner from '@/components/loadingSpinner';
 import { getServiceAction } from '@/store/action/serviceAction';
-import axios from 'axios';
+import { switchUser } from '@/config';
 
 const URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const INITIAL_FORM_STATE = {
@@ -29,7 +29,7 @@ const INITIAL_FORM_STATE = {
     template_Id: '',
 };
 
-function Page() {
+function Page({ params }) {
     const dispatch = useDispatch();
     const route = useRouter();
     const searchParams = useSearchParams();
@@ -46,7 +46,7 @@ function Page() {
 
      useEffect(() => {
         if(!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-            dispatch(getServiceAction({ orgid: params.orgid }))
+            dispatch(getServiceAction({ orgid: params?.orgid }))
         }
     }, [SERVICES]);
 
