@@ -80,7 +80,7 @@ export default function ConfigurationPage({ params }) {
                         <PrebuiltToolsList params={params} />
                     </>
                 )}
-            <StarterQuestionToggle params={params}/>   
+     
             <ServiceDropdown params={params} />
             <ModelDropdown params={params} />
             <ApiKeyInput params={params} />
@@ -100,6 +100,7 @@ export default function ConfigurationPage({ params }) {
         <>
             <SlugNameInput params={params} />
             <UserRefernceForRichText params={params} />
+            <StarterQuestionToggle params={params}/>   
             <ActionList params={params} />
         </>
     ), [bridgeType, modelType, params, modelName]);
