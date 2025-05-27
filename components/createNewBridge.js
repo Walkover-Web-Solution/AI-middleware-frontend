@@ -65,7 +65,7 @@ function CreateNewBridge({ orgid }) {
         const matches = allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
         const newCount = matches?.length + 1 || 0;
         name = `Untitled${newCount}`;
-        const slugNameMatches=allBridgeList.filter(bridge=>bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
+        const slugNameMatches=allBridgeList?.filter(bridge=>bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
         const slugNameCount=slugNameMatches?.length+1||0;
         slugname=`Untitled${slugNameCount}`
         if (!selectedBridgeTypeCard) {
