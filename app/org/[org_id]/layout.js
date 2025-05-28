@@ -13,7 +13,6 @@ import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunct
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { getModelAction } from "@/store/action/modelAction";
-import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
 import { forEach } from "lodash";
@@ -63,12 +62,6 @@ function layoutOrgPage({ children, params }) {
       validateOrg();
     }
   }, [params, organizations]);
-
-  useEffect(() => {
-    if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-        dispatch(getServiceAction({ orgid: params.orgid }))
-    }
-}, [SERVICES]);
 
   useEffect(() => {
     if (isValidOrg) {
@@ -146,7 +139,7 @@ function layoutOrgPage({ children, params }) {
   }, [isValidOrg, params.id, versionData, version_id, path]);
 
   async function handleMessage(e) {
-    if(e.data?.metadata?.type!=='tool') return;
+    if(e.data?.metadata?.type==='trigger') return;
     // todo: need to make api call to update the name & description
     if (e?.data?.webhookurl) {
       const dataToSend = {
