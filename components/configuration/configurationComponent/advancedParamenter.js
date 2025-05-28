@@ -170,7 +170,13 @@ const AdvancedParameters = ({ params }) => {
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
-          if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
+          const rowDefaultValue =
+          key === 'response_type'
+           ? (typeof modelInfoData?.[key]?.default === 'object'
+               ? modelInfoData?.[key]?.default?.type
+             : modelInfoData?.[key]?.default )
+           : undefined;
+         if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
           const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
           const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
           let error = false;
@@ -358,8 +364,8 @@ const AdvancedParameters = ({ params }) => {
               )}
               {field === 'select' && (
                 <label className='items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
-                  <select value={configuration?.[key]?.type ? configuration?.[key]?.type : configuration?.[key] || 'Text'} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
-                    <option>Select response mode</option>
+                  <select value={configuration?.[key] === 'default' ? rowDefaultValue: configuration?.[key]?.type || configuration?.[key] } onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
+                  <option value='default' disabled> Select response mode </option>
                     {options?.map((service, index) => (
                       <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
                     ))}
