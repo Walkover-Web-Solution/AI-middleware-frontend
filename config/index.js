@@ -703,7 +703,7 @@ export const optimizeSchemaApi = async ({ data }) => {
 
   try {
     const response = await axios.post(
-      `${PYTHON_URL}/utility/structured_output`,
+      `${PYTHON_URL}/utils/structured_output`,
       data
     );
     return response.data;
