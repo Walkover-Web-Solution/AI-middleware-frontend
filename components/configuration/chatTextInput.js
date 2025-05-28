@@ -194,7 +194,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 }
             }
         },
-        [loading, uploading]
+        [loading, uploading, conversation]
     );
     const handleFileChange = async (e) => {
         const files = fileInputRef.current.files;
