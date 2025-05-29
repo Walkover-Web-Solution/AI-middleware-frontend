@@ -105,7 +105,6 @@ function layoutOrgPage({ children, params }) {
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
   
    useEffect(() => {
-     debugger
     if (docStar_prompt_embed_token) {
         const existingScript = document.getElementById('docstar-main-script');
         if (existingScript) {
