@@ -5,7 +5,9 @@ import { useEffect, useRef } from 'react';
 function ApiKeyMessage({ params }) {
     const messageRef = useRef(null);
     const { bridgeApiKey } = useCustomSelector(state => {
-        const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
+        const rawService = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
+        const service = rawService === 'openai_response' ? 'openai' : rawService;
+        console.log(rawService)
         return {
             service,
             bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[service]
