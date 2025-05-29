@@ -23,7 +23,6 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
         configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
     }));
-
     const dataToSend = {
         configuration: {
             model: modelName,
@@ -56,6 +55,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         if (inputRef.current) {
             inputRef.current.style.height = '40px'; // Set initial height
         }
+        console.log(prompt)
         if (prompt?.trim() === "" && (modelType !== 'completion' && modelType !== 'embedding')) {
             setErrorMessage("Prompt is required");
             return;
@@ -194,7 +194,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 }
             }
         },
-        [loading, uploading, conversation]
+        [loading, uploading, conversation, prompt]
     );
     const handleFileChange = async (e) => {
         const files = fileInputRef.current.files;
