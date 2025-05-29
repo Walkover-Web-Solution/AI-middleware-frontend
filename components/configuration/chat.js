@@ -40,15 +40,39 @@ function Chat({ params }) {
               >
                 <div className="chat-image avatar"></div>
                 <div className="chat-header">
-                  {message.sender}
-                  <time className="text-xs opacity-50 pl-2">{message.time}</time>
-                  {message?.sender === "Assist" && message?.fallback && (
-                    <div className="flex items-center gap-1 bg-base-200/70 text-primary px-2 py-1 rounded-full text-xs my-1">
-                      <span className="text-[0.7rem]">↻</span>
-                      <span>Retried with</span>
-                      <span className="font-medium">{message?.modelName}</span>
-                    </div>
-                  )}
+             {message?.sender === "Assist" && message?.fallback && (
+  <div className="my-1">
+    <div className="w-fit max-w-[30rem] bg-base-200/70 text-primary rounded-lg text-xs overflow-hidden transition-all duration-200 hover:bg-base-200/90">
+      <input type="checkbox" id={`retry-${message.id}`} className="peer hidden" />
+      
+      <label
+        htmlFor={`retry-${message.id}`}
+        className="px-3 py-1.5 min-h-0 h-7 leading-none cursor-pointer flex items-center justify-between w-full gap-2 transition-all duration-200 hover:bg-base-300/20 peer-checked:bg-base-300/30"
+      >
+        {/* Left side - text */}
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          <span className="text-xs opacity-80">↻</span>
+          <span className="truncate">Retried with</span>
+          <span className="font-medium truncate text-primary/90">{message?.modelName}</span>
+        </div>
+
+        {/* Right side - dropdown icon */}
+        <span className="text-xs opacity-70 transform transition-transform duration-200 peer-checked:rotate-90">
+          ▾
+        </span>
+      </label>
+
+      <div className="max-h-0 peer-checked:max-h-96 transition-all duration-300 ease-in-out overflow-hidden bg-base-300/10">
+        <pre className="text-xs text-error/90 whitespace-pre-wrap px-3 py-2 leading-relaxed">
+          {message.firstAttemptError}
+        </pre>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
                 </div>
                 <div>
                   {message?.image_urls && message?.image_urls?.length > 0 && (
