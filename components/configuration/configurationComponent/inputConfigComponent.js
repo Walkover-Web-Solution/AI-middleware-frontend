@@ -19,7 +19,7 @@ const InputConfigComponent = ({ params }) => {
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service || "",
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     }));
-
+    
     const [keyName, setKeyName] = useState('');
     const suggestionListRef = useRef(null);
     const textareaRef = useRef(null);
@@ -188,7 +188,7 @@ const InputConfigComponent = ({ params }) => {
             textarea.setSelectionRange(newCursorPosition, newCursorPosition);
         }, 0);
     }, [prompt]);
-
+      
     const handleMouseDownOnSuggestion = useCallback((e) => {
         e.preventDefault();
     }, []);
@@ -244,6 +244,23 @@ const InputConfigComponent = ({ params }) => {
 
     if (service === "google" && serviceType === "chat") return null;
 
+   const handleScriptLoad = () => {
+  
+    if (typeof window.sendDataToDocstar === 'function') {
+      console.log('he')
+      window.sendDataToDocstar({
+        parentId: 'docStar-embed',
+        page_id: params.version, 
+        content: prompt,      
+      });
+      window.openTechDoc();
+    } else {
+      console.warn('sendDataToDocstar is not defined yet.');
+    }
+  };
+  useEffect(() => {
+  handleScriptLoad();
+}, );
     return (
       <div>
         <div className="flex justify-between items-center mb-2">
@@ -290,19 +307,22 @@ const InputConfigComponent = ({ params }) => {
                 Optimize Prompt
               </span>
             </div>
-          </div>
+          </div> 
         </div>
-        <div className="form-control h-full">
-          <textarea
+
+     
+         <div  className="form-control ">
+           <div id='docStar-embed' className='min-w-full min-h-80 max-h-full z-0'> </div>
+          {/* <textarea
             ref={textareaRef}
             className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-[8] caret-black p-2 rounded-b-none"
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
             onBlur={savePrompt}
-          />
+          />  */}
           {showSuggestions && renderSuggestions()}
-          <div className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 border-t-0 border border-base-300 rounded-t-none">
+          <div className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 ">
             <input type="checkbox" className="min-h-[0.75rem]" />
             <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
               <div className="flex items-center gap-2">
@@ -328,7 +348,7 @@ const InputConfigComponent = ({ params }) => {
                       - To access the current date and time
                     </span>
                   </div>
-                  {/* <div className="flex items-center gap-1">
+                   {/* <div className="flex items-center gap-1">
                                     <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
                                     <span className="">&#123;&#123;memory&#125;&#125;</span>
                                     <span className="">- Access GPT memory context when enabled</span>
@@ -352,10 +372,10 @@ const InputConfigComponent = ({ params }) => {
               <ToneDropdown params={params} />
               <ResponseStyleDropdown params={params} />
             </div>
-            <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
-            <OptimizePromptModal params={params} />
-            <PromptSummaryModal params={params}/>
-        </div>
+             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} /> 
+           <OptimizePromptModal params={params} />
+           <PromptSummaryModal params={params}/>
+         </div>  
     );
 };
 

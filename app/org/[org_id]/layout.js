@@ -18,6 +18,7 @@ import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
 import { forEach } from "lodash";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
+import Script from "next/script";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -32,13 +33,14 @@ function layoutOrgPage({ children, params }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, SERVICES} = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, SERVICES,docStar_prompt_embed_token} = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
     organizations : state.userDetailsReducer.organizations,
     preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
-    SERVICES:state?.serviceReducer?.services 
+    SERVICES:state?.serviceReducer?.services ,
+    docStar_prompt_embed_token:state?.bridgeReducer?.org?.[params.org_id]?.docStar_prompt_embed_token||"",
   }));
   const urlParams = useParams();
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
@@ -101,6 +103,24 @@ function layoutOrgPage({ children, params }) {
 
   const scriptId = "chatbot-main-script";
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
+  
+   useEffect(() => {
+     debugger
+    if (docStar_prompt_embed_token) {
+        const existingScript = document.getElementById('docstar-main-script');
+        if (existingScript) {
+          document.head.removeChild(existingScript);
+        }
+        if (docStar_prompt_embed_token) {
+          const script = document.createElement("script");
+          script.setAttribute("embedToken", docStar_prompt_embed_token);
+          script.id = "docstar-main-script";
+          script.src = "https://app.docstar.io/scriptProd.js";
+          document.head.appendChild(script);
+        }
+    
+    }
+    }, [docStar_prompt_embed_token]);
 
   useEffect(() => {
     if (isValidOrg) {
@@ -217,7 +237,7 @@ function layoutOrgPage({ children, params }) {
   }
   if (isHomePage) {
     return (
-      <div className="flex h-screen">
+      <div className="flex h-screen">  
         <div className=" flex flex-col  h-full">
           <MainSlider />
         </div>
