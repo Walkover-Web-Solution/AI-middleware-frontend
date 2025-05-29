@@ -3,6 +3,7 @@ import { optimizeJsonApi } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { parameterTypes } from "@/jsonFiles/bridgeParameter";
 import {
+  updateApiAction,
   updateBridgeVersionAction,
   updateFuntionApiAction,
 } from "@/store/action/bridgeAction";
@@ -15,7 +16,7 @@ import { useDispatch } from "react-redux";
 import json from "react-syntax-highlighter/dist/esm/languages/prism/json";
 import { toast } from "react-toastify";
 
-function FunctionParameterModal({ functionId, params }) {
+function FunctionParameterModal({preFunction , functionId, params }) {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const { function_details, variables_path } = useCustomSelector((state) => ({
@@ -311,6 +312,14 @@ function FunctionParameterModal({ functionId, params }) {
     }
     resetModalData();
   };
+ const removePreFunction = () => {
+        dispatch(updateApiAction(params.id, {
+            pre_tools: [],
+            version_id: params.version
+        })).then(() => {
+      closeModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL);
+    });
+    }
 
   const handleRemoveFunctionFromBridge = () => {
     // dispatch(updateBridgeAction({
@@ -431,7 +440,7 @@ function FunctionParameterModal({ functionId, params }) {
             </div>
           </span>
           <button
-            onClick={handleRemoveFunctionFromBridge}
+            onClick={() => !preFunction ? handleRemoveFunctionFromBridge() : removePreFunction()}
             className="btn btn-sm btn-error text-white"
           >
             <Trash2 size={16} /> Remove function
@@ -605,33 +614,25 @@ function FunctionParameterModal({ functionId, params }) {
                           }
                         />
                       </td>
-                      <td>
+                     <td>
                         <input
-                          type="checkbox"
-                          className="checkbox"
-                          checked={!(param.key in variablesPath)}
-                          onChange={() => {
-                            const updatedVariablesPath = { ...variablesPath };
-                            if (param.key in updatedVariablesPath) {
-                              delete updatedVariablesPath[param.key];
-                            } else {
-                              updatedVariablesPath[param.key] = ""; // or any default value
-                            }
-                            setVariablesPath(updatedVariablesPath);
-                          }}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          placeholder="name"
-                          className="input input-bordered w-full input-sm"
-                          value={variablesPath[param.key] || ""}
-                          onChange={(e) => {
+                         type="checkbox"
+                        className="checkbox"
+                        checked={false} // always unchecked
+                        disabled // disables checkbox interaction
+                       />
+                       </td>
+                       <td>
+                          <input 
+                          type="text" 
+                          placeholder="name" 
+                          className={`input input-bordered w-full input-sm ${!variablesPath[param.key] ? "border-red-500" : ""}`}
+                           value={variablesPath[param.key] || ""}
+                           onChange={(e) => {
                             handleVariablePathChange(param.key, e.target.value);
-                          }}
-                        />
-                      </td>
+                               }}
+                          />
+                       </td>
                     </tr>
                   );
                 })}
