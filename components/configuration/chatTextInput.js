@@ -55,7 +55,6 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         if (inputRef.current) {
             inputRef.current.style.height = '40px'; // Set initial height
         }
-        console.log(prompt)
         if (prompt?.trim() === "" && (modelType !== 'completion' && modelType !== 'embedding')) {
             setErrorMessage("Prompt is required");
             return;
