@@ -628,22 +628,22 @@ const handleRemove = () => {
                       </td>
                      <td>
                         <input
-                         type="checkbox"
-                        className="checkbox"
-                        checked={false} // always unchecked
-                        disabled // disables checkbox interaction
-                       />
+                        type="checkbox"
+                         className="checkbox"
+                         checked={!preFunction} 
+                         disabled={preFunction}
+                          />
                        </td>
                        <td>
-                          <input 
+                         <input 
                           type="text" 
-                          placeholder="name" 
-                          className={`input input-bordered w-full input-sm ${!variablesPath[param.key] ? "border-red-500" : ""}`}
-                           value={variablesPath[param.key] || ""}
-                           onChange={(e) => {
-                            handleVariablePathChange(param.key, e.target.value);
-                               }}
-                          />
+                         placeholder="name" 
+                         className={`input input-bordered w-full input-sm ${preFunction && !variablesPath[param.key] ? "border-red-500" : "" }`}
+                         value={variablesPath[param.key] || ""}
+                        onChange={(e) => {
+                         handleVariablePathChange(param.key, e.target.value);
+                           }}
+                         />
                        </td>
                     </tr>
                   );
