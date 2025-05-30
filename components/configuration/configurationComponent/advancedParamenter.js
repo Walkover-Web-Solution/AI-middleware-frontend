@@ -35,11 +35,7 @@ const AdvancedParameters = ({ params }) => {
   }));
 
   useEffect(() => {
-    if (configuration?.response_type?.json_schema) {
-      setObjectFieldValue(
-        JSON.stringify(configuration?.response_type?.json_schema, undefined, 4)
-      );
-    }
+    setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) :null ); 
   }, [configuration?.response_type?.json_schema]);
 
   useEffect(() => {
