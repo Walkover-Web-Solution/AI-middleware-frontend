@@ -48,7 +48,7 @@ const EmbedList = ({ params }) => {
     });
     const handleOpenModal = (functionId) => {
         setFunctionId(functionId);
-        openModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL)
+        openModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL)
     }
 
     const bridgeFunctions = useMemo(() => bridge_functions.map((id) => function_data?.[id]), [bridge_functions, function_data]);
@@ -82,7 +82,7 @@ const EmbedList = ({ params }) => {
 
     return (bridge_functions &&
         <div>
-            <FunctionParameterModal preFunction={false} functionId={functionId} params={params} />
+            <FunctionParameterModal preFunction={false} functionId={functionId} params={params} Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL}/>
             <div className="label flex-col items-start mb-2">
                 {
                     shouldToolsShow &&

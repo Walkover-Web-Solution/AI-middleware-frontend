@@ -12,18 +12,11 @@ import { closeModal, flattenParameters } from "@/utils/utility";
 import { isEqual } from "lodash";
 import {  Copy, Info, InfoIcon, Trash2 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
-import { prefetchDNS } from "react-dom";
+
 import { useDispatch } from "react-redux";
-import json from "react-syntax-highlighter/dist/esm/languages/prism/json";
 import { toast } from "react-toastify";
 
-function FunctionParameterModal({preFunction , functionId, params }) {
- console.log('Modal opened with:', { 
-    preFunction, 
-    functionId,
-    isPreFunction: preFunction,
-    modalType: MODAL_TYPE.FUNCTION_PARAMETER_MODAL
-  });
+function FunctionParameterModal({preFunction , functionId, params, Model_Name }) {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const { function_details, variables_path } = useCustomSelector((state) => ({
@@ -207,7 +200,7 @@ function FunctionParameterModal({preFunction , functionId, params }) {
 
   const handleCloseModal = () => {
     resetModalData();
-    closeModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL);
+    closeModal(Model_Name);
   };
 
   const handleTypeChange = (key, newType) => {
@@ -324,7 +317,7 @@ function FunctionParameterModal({preFunction , functionId, params }) {
             pre_tools: [],
             version_id: params.version
         })).then(() => {
-      closeModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL);
+      closeModal(Model_Name);
     });
     }
 
@@ -350,7 +343,7 @@ function FunctionParameterModal({preFunction , functionId, params }) {
         },
       })
     ).then(() => {
-      closeModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL);
+      closeModal(Model_Name);
     });
   };
 useEffect(() => {
@@ -441,7 +434,7 @@ const handleRemove = () => {
   }
 };
   return (
-    <dialog id={MODAL_TYPE.FUNCTION_PARAMETER_MODAL} className="modal">
+    <dialog id={Model_Name} className="modal">
       <div className="modal-box w-11/12 max-w-6xl">
         <div className="flex flex-row justify-between mb-3">
           <span className="flex flex-row items-center gap-4">

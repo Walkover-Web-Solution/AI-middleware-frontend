@@ -33,7 +33,7 @@ const PreEmbedList = ({ params }) => {
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
       const handleOpenModal = (functionId) => {
              setFunctionId(functionId);
-             openModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL)
+             openModal(MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL)
          }
 
     const onFunctionSelect = (id) => {
@@ -55,7 +55,7 @@ const PreEmbedList = ({ params }) => {
 
     return (bridge_pre_tools?.length > 0 ?
         <div>
-            <FunctionParameterModal preFunction={true} functionId={functionId} params={params} />
+            <FunctionParameterModal preFunction={true} functionId={functionId} params={params} Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL}/>
             <div className="form-control inline-block">
                 <div className='flex gap-5 items-center ml-2 '>
                     <label className='label-text font-medium whitespace-nowrap'>Pre functions</label>

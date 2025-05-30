@@ -69,7 +69,7 @@ export default function ConfigurationPage({ params }) {
                 ? PROMPT_SUPPORTED_REASIONING_MODELS?.includes(modelName)
                 : true)) && (
                     <>
-                        <PreEmbedList params={params} />
+                        <PreEmbedList params={params}/>
                         <InputConfigComponent params={params} />
                         <EmbedList params={params} />
                         <hr className="my-0 p-0" />
