@@ -38,7 +38,7 @@ const UserReferenceForRichText = ({ params }) => {
                 <div className='flex flex-row items-center gap-2'>
                     <div className="label">
                         <span className="font-medium mr-2">Rich Text Supported</span>
-                        <div className="tooltip" data-tip="Rich text allows formatting and interactive elements like buttons, tables, and cards.">
+                        <div className="tooltip" data-tip="Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content.">
                          <Info size={14} className="inline-block" /> 
                          </div>
                     </div>
