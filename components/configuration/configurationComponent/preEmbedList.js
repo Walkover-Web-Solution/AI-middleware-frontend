@@ -95,9 +95,18 @@ const PreEmbedList = ({ params }) => {
     return (bridge_pre_tools?.length > 0 ?
         <div>
             <div className="form-control inline-block">
-                <div className='flex gap-5 items-center ml-2 '>
+                <div className='flex items-center ml-2 '>
                     <label className='label-text font-medium whitespace-nowrap'>Pre functions</label>
+                       <div
+                className="tooltip tooltip-right"
+                data-tip={
+                  "A prefunction prepares data before passing it to the main function for the GPT call."
+                }
+              >
+                <Info size={14} className="ml-2" />
+              </div>
                 </div>
+                
                 <div className="label flex-col items-start">
                     {shouldToolsShow &&
                         <div className="flex flex-wrap gap-4">
@@ -109,14 +118,7 @@ const PreEmbedList = ({ params }) => {
         (
             <div className='flex'>
                 <EmbedListSuggestionDropdownMenu params={params} name={"Select Pre function"} hideCreateFunction={true} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} shouldToolsShow={shouldToolsShow} modelName={model} />
-                 <div
-                className="tooltip tooltip-right"
-                data-tip={
-                  "A prefunction prepares data before passing it to the main function for the GPT call."
-                }
-              >
-                <Info size={12} className="ml-2" />
-              </div>
+                 
             </div>
         )
     );
