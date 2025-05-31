@@ -3,6 +3,7 @@ import { optimizeJsonApi } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { parameterTypes } from "@/jsonFiles/bridgeParameter";
 import {
+  updateApiAction,
   updateBridgeVersionAction,
   updateFuntionApiAction,
 } from "@/store/action/bridgeAction";
@@ -11,11 +12,11 @@ import { closeModal, flattenParameters } from "@/utils/utility";
 import { isEqual } from "lodash";
 import {  Copy, Info, InfoIcon, Trash2 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
+import { prefetchDNS } from "react-dom";
 import { useDispatch } from "react-redux";
-import json from "react-syntax-highlighter/dist/esm/languages/prism/json";
 import { toast } from "react-toastify";
 
-function FunctionParameterModal({ functionId, params }) {
+function FunctionParameterModal({preFunction , functionId, params, Model_Name }) {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const { function_details, variables_path } = useCustomSelector((state) => ({
@@ -199,7 +200,7 @@ function FunctionParameterModal({ functionId, params }) {
 
   const handleCloseModal = () => {
     resetModalData();
-    closeModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL);
+    closeModal(Model_Name);
   };
 
   const handleTypeChange = (key, newType) => {
@@ -311,6 +312,14 @@ function FunctionParameterModal({ functionId, params }) {
     }
     resetModalData();
   };
+ const removePreFunction = () => {
+        dispatch(updateApiAction(params.id, {
+            pre_tools: [],
+            version_id: params.version
+        })).then(() => {
+      closeModal(Model_Name);
+    });
+    }
 
   const handleRemoveFunctionFromBridge = () => {
     // dispatch(updateBridgeAction({
@@ -334,7 +343,7 @@ function FunctionParameterModal({ functionId, params }) {
         },
       })
     ).then(() => {
-      closeModal(MODAL_TYPE.FUNCTION_PARAMETER_MODAL);
+      closeModal(Model_Name);
     });
   };
 
@@ -415,9 +424,15 @@ function FunctionParameterModal({ functionId, params }) {
       setIsLoading(false);
     }
   };
-
+const handleRemove = () => {
+  if (preFunction) {
+    removePreFunction();
+  } else {
+    handleRemoveFunctionFromBridge();
+  }
+};
   return (
-    <dialog id={MODAL_TYPE.FUNCTION_PARAMETER_MODAL} className="modal">
+    <dialog id={Model_Name} className="modal">
       <div className="modal-box w-11/12 max-w-6xl">
         <div className="flex flex-row justify-between mb-3">
           <span className="flex flex-row items-center gap-4">
@@ -430,11 +445,8 @@ function FunctionParameterModal({ functionId, params }) {
               </span>
             </div>
           </span>
-          <button
-            onClick={handleRemoveFunctionFromBridge}
-            className="btn btn-sm btn-error text-white"
-          >
-            <Trash2 size={16} /> Remove function
+         <button onClick={handleRemove} className="btn btn-sm btn-error text-white">
+              <Trash2 size={16} /> Remove {preFunction ? "pre-function" : "function"}
           </button>
         </div>
         <div className="flex justify-between items-center">
@@ -605,12 +617,13 @@ function FunctionParameterModal({ functionId, params }) {
                           }
                         />
                       </td>
-                      <td>
+                     <td>
                         <input
-                          type="checkbox"
-                          className="checkbox"
-                          checked={!(param.key in variablesPath)}
-                          onChange={() => {
+                        type="checkbox"
+                         className="checkbox"
+                         checked={!(param.key in variablesPath)}
+                         disabled={preFunction}
+                         onChange={() => {
                             const updatedVariablesPath = { ...variablesPath };
                             if (param.key in updatedVariablesPath) {
                               delete updatedVariablesPath[param.key];
@@ -619,19 +632,19 @@ function FunctionParameterModal({ functionId, params }) {
                             }
                             setVariablesPath(updatedVariablesPath);
                           }}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          placeholder="name"
-                          className="input input-bordered w-full input-sm"
-                          value={variablesPath[param.key] || ""}
-                          onChange={(e) => {
-                            handleVariablePathChange(param.key, e.target.value);
-                          }}
-                        />
-                      </td>
+                          />
+                       </td>
+                       <td>
+                         <input 
+                          type="text" 
+                         placeholder="name" 
+                         className={`input input-bordered w-full input-sm ${preFunction && !variablesPath[param.key] ? "border-red-500" : "" }`}
+                         value={variablesPath[param.key] || ""}
+                        onChange={(e) => {
+                         handleVariablePathChange(param.key, e.target.value);
+                           }}
+                         />
+                       </td>
                     </tr>
                   );
                 })}
