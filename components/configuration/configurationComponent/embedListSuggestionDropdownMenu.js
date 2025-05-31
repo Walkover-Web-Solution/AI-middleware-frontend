@@ -62,7 +62,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
     return (
         <div className="dropdown dropdown-right">
             <div className="flex items-center gap-2">
-                 {name === "Select Pre function" ? (
+                 {name === "Prefunction" ? (
             <div className="flex items-center gap-2">
               <p className="text-base font-semibold">Select Pre function</p>
               <div
@@ -88,7 +88,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
               className="btn btn-outline btn-sm"
             >
               <Plus size={16} />
-              {name || "Connect function"}
+              {"Connect function"}
             </button>
 )}
                 {
@@ -119,6 +119,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined, 
                         {embedToken,
                             meta: {
+                                callType:name,
                                 type: 'tool',
                                 bridge_id: params?.id,
                             }

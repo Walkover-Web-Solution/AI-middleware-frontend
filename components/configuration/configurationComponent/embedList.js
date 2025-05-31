@@ -91,7 +91,7 @@ const EmbedList = ({ params }) => {
                     </div>
                 }
             </div>
-            <EmbedListSuggestionDropdownMenu params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />
+            <EmbedListSuggestionDropdownMenu params={params} name={"Function"} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />
         </div>
     );
 };

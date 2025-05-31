@@ -42,16 +42,16 @@ const PreEmbedList = ({ params }) => {
             version_id: params.version
         }))
     }
-    const removePreFunction = () => {
-        dispatch(updateApiAction(params.id, {
-            pre_tools: [],
-            version_id: params.version
-        }))
-    }
+    // const removePreFunction = () => {
+    //     dispatch(updateApiAction(params.id, {
+    //         pre_tools: [],
+    //         version_id: params.version
+    //     }))
+    // }
 
-    if (Object.keys(function_data).length === 0) {
-        return null;
-    }
+    // if (Object.keys(function_data).length === 0) {
+    //     return null;
+    // }
 
     return (bridge_pre_tools?.length > 0 ?
         <div>
@@ -70,7 +70,7 @@ const PreEmbedList = ({ params }) => {
         </div> :
         (
             <div className='flex'>
-                <EmbedListSuggestionDropdownMenu params={params} name={"Select Pre function"} hideCreateFunction={false} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} shouldToolsShow={shouldToolsShow} modelName={model} />
+                <EmbedListSuggestionDropdownMenu params={params} name={"Prefunction"} hideCreateFunction={false} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} shouldToolsShow={shouldToolsShow} modelName={model} />
             </div>
         )
     );
