@@ -2,6 +2,7 @@ import React from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
+import { Info } from 'lucide-react';
 
 const UserReferenceForRichText = ({ params }) => {
     const dispatch = useDispatch();
@@ -36,8 +37,12 @@ const UserReferenceForRichText = ({ params }) => {
             <label className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center gap-2'>
                     <div className="label">
-                        <span className="font-medium ">Rich Text Supported</span>
+                        <span className="font-medium mr-2">Rich Text Supported</span>
+                        <div className="tooltip" data-tip="Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content.">
+                         <Info size={14} className="inline-block" /> 
+                         </div>
                     </div>
+                      
                     <input
                         type="checkbox"
                         key={is_rich_text}
