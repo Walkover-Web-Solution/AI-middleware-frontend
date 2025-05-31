@@ -32,7 +32,7 @@ function BridgeNameInput({ params }) {
   }, [bridgeName]);
 
   const handleChange = (e) => {
-    const input = e.target.value.slice(0, 30);
+    const input = e.target.value.slice(0, 40);
     setOriginalValue(input);
     setDisplayValue(input);
   };
@@ -92,7 +92,7 @@ function BridgeNameInput({ params }) {
           }}
           ref={textareaRef}
           rows={1}
-          maxLength={30}
+          maxLength={40}
           value={displayValue}
           onChange={handleChange}
           onFocus={handleFocus}
