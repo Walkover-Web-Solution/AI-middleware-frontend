@@ -34,7 +34,6 @@ export default function TriggersList({ params }) {
 
     async function getAndSetAuthKey() {
         const keytoset = await getOrCreateNotificationAuthKey('gtwy_bridge_trigger')
-        console.log("keytoset", keytoset)
         if (keytoset) setAuthkey(keytoset?.authkey)
     }
     useEffect(() => {

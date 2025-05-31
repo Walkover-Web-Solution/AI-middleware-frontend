@@ -48,6 +48,14 @@ const Page = ({ searchParams }) => {
   }, []);
 
   useEffect(() => {
+    if (bridgeType !== "trigger") {
+      if (window?.handleclose) {
+        window.handleclose();
+      }
+    }
+  }, [bridgeType]);
+
+  useEffect(() => {
     if (mountRef.current) {
       if (bridgeType === 'chatbot') {
         if (typeof openChatbot !== 'undefined' && document.getElementById('parentChatbot')) {
