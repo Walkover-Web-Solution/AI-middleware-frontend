@@ -24,6 +24,7 @@ const SlugNameInput = ({ params }) => {
             <input
                 type="text"
                 key={slugName}
+                maxLength={30}
                 placeholder="Type here"
                 className="input input-bordered w-full max-w-xs input-sm"
                 defaultValue={slugName}

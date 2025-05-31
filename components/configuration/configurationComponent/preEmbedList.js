@@ -109,6 +109,14 @@ const PreEmbedList = ({ params }) => {
         (
             <div className='flex'>
                 <EmbedListSuggestionDropdownMenu params={params} name={"Select Pre function"} hideCreateFunction={true} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} shouldToolsShow={shouldToolsShow} modelName={model} />
+                 <div
+                className="tooltip tooltip-right"
+                data-tip={
+                  "A prefunction prepares data before passing it to the main function for the GPT call."
+                }
+              >
+                <Info size={12} className="ml-2" />
+              </div>
             </div>
         )
     );

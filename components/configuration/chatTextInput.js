@@ -23,7 +23,6 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
         configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
     }));
-
     const dataToSend = {
         configuration: {
             model: modelName,
@@ -194,7 +193,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 }
             }
         },
-        [loading, uploading]
+        [loading, uploading, conversation, prompt]
     );
     const handleFileChange = async (e) => {
         const files = fileInputRef.current.files;
