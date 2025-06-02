@@ -78,7 +78,7 @@ const Page = ({ searchParams }) => {
     <>
       {!bridgeType && <LoadingSpinner />}
       <div className="flex flex-col md:flex-row w-full">
-        <div className="w-full md:w-1/2 overflow-auto p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
+        <div className="w-full md:w-1/2 overflow-y-auto overflow-x-hidden p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
           <ConfigurationPage params={params} />
           <div />
         </div>
