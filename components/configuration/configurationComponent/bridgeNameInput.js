@@ -93,7 +93,6 @@ function BridgeNameInput({ params }) {
           }}
           ref={textareaRef}
           rows={1}
-          maxLength={40}
           maxLength={30}
           value={displayValue}
           onChange={handleChange}
