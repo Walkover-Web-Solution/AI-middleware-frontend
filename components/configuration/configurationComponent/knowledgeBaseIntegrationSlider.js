@@ -1,3 +1,4 @@
+import CodeBlock from '@/components/codeBlock/codeBlock';
 import CopyButton from '@/components/copyButton/copyButton';
 import { useCloseSliderOnEsc } from '@/components/historyPageComponents/assistFile';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -86,7 +87,23 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
                     <pre data-prefix=">" className="text-error"><code className="text-error"> id= </code><code className="text-warning">"rag-main-script"</code></pre>
                     <pre data-prefix=">" className="text-error"><code> embedToken=</code><code className="text-warning">"Enter Embed Token here"</code></pre>
                     <pre data-prefix=">" className="text-error"><code> src=</code><code className="text-warning">"{process?.env?.NEXT_PUBLIC_KNOWLEDGEBASE_SCRIPT_SRC}"</code></pre>
+                    <pre data-prefix=">" className="text-error"><code> parentId=</code><code className="text-warning">"Id of parent Container"</code></pre>
+                    <pre data-prefix=">" className="text-error"><code> theme=</code><code className="text-warning">"dark/light"</code></pre>
+                    <pre data-prefix=">" className="text-error"><code> defaultOpen=</code><code className="text-warning">"true/false" /* true for open list by default */</code></pre>
                     <pre data-prefix=">" className="text-error"><code>&lt;/script&gt;</code></pre>
+                </div>
+                
+            </div>
+        );
+    }
+    const renderStepThree = () => {
+        return (
+            <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
+                <Section title="Step 3" caption="Use this function to show list or add Document modal" />
+                <div className="mockup-code">
+                    <pre data-prefix=">" className="text-error" ><code className="text-warning">window.openRag() /* to open add document modal */</code></pre>
+                    <pre data-prefix=">" className="text-error" ><code className="text-warning">window.closeRag() /* to close add document modal */</code></pre>
+                    <pre data-prefix=">" className="text-error"><code className="text-warning">window.showDocuments() /* to show document list */</code></pre>
                 </div>
             </div>
         );
@@ -110,6 +127,9 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
 
             {/* Step 2 */}
             {renderStepTwo()}
+
+            {/* Step 3 */}
+            {renderStepThree()}
         </div>
     );
 }
