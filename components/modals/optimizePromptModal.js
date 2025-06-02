@@ -19,6 +19,7 @@ function OptmizePromptModal({ params }) {
   const [promptHistory, setPromptHistory] = useState(optimizePromptHistory);
   const [currentIndex, setCurrentIndex] = useState(optimizePromptHistory.length);
   const [copyText, setCopyText] = useState("Copy Prompt");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     setPromptRequirement(prompt)
@@ -30,6 +31,12 @@ function OptmizePromptModal({ params }) {
   }, [optimizePromptHistory])
 
   const OptimizePrompt = async (e) => {
+    if(prompt.trim() === "")
+    {
+      e.preventDefault()
+      setErrorMessage("Prompt is required")
+      return 
+    }
     e.preventDefault(); // Prevent default form submission behavior
     setLoading(true)
     // Create a new key-value pair
@@ -40,6 +47,7 @@ function OptmizePromptModal({ params }) {
   };
 
   const handleCloseModal = (e) => {
+    setErrorMessage("")
     e.preventDefault();
     setNewPrompt("");
     closeModal(MODAL_TYPE.OPTIMIZE_PROMPT)
@@ -85,6 +93,7 @@ function OptmizePromptModal({ params }) {
               autoFocus={false}
               readOnly
             />
+            {errorMessage && <span className="text-red-500">{errorMessage}</span>}
           </div>
           {newPrompt ? (
             <div className='w-full'>
