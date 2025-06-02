@@ -38,7 +38,7 @@ const PromptSummaryModal = ({ params }) => {
         } finally {
             setIsGeneratingSummary(false);
         }
-    }, [dispatch, params]);
+    }, [dispatch, params, prompt]);
 
     const handleSaveSummary = useCallback(() => {
         const newValue = textareaRef.current?.value || summary || "";
