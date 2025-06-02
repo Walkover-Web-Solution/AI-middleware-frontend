@@ -58,8 +58,8 @@ function Home({ params }) {
       <div className="flex gap-2 items-center">
         {getIconOfService(item.service, 30, 30)}
       </div>
-      <div className="flex-col">
-        {item.name}
+      <div className="flex-col" title={item.name}>
+        {item.name.length > 20 ? item.name.slice(0, 17) + '...' : item.name}
         <p className="opacity-60 text-xs">
           {item?.slugName || ""}
         </p>
