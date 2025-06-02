@@ -32,7 +32,7 @@ function BridgeNameInput({ params }) {
   }, [bridgeName]);
 
   const handleChange = (e) => {
-    const input = e.target.value.slice(0, 40);
+    const input = e.target.value.slice(0, 30);
     setOriginalValue(input);
     setDisplayValue(input);
   };
@@ -49,6 +49,7 @@ function BridgeNameInput({ params }) {
   };
 
   const handleBridgeNameChange = useCallback(() => {
+
     const trimmed = originalValue.trim();
 
     if (trimmed === "") {
@@ -71,13 +72,13 @@ function BridgeNameInput({ params }) {
     );
   }, [originalValue, bridgeName, dispatch, params.id]);
 
-
     const handleKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             e.target.blur();
         }
     }, [handleBridgeNameChange]);
+
 
   return (
     <div className="flex flex-row items-center">
@@ -93,6 +94,7 @@ function BridgeNameInput({ params }) {
           ref={textareaRef}
           rows={1}
           maxLength={40}
+          maxLength={30}
           value={displayValue}
           onChange={handleChange}
           onFocus={handleFocus}
