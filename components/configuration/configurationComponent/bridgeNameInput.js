@@ -7,22 +7,23 @@ import { toast } from 'react-toastify';
 function BridgeNameInput({ params }) {
   const dispatch = useDispatch();
   const { bridgeName } = useCustomSelector((state) => ({
-      bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
-    }));
-   const textareaRef = useRef(null);
-   const [originalValue, setOriginalValue] = useState(bridgeName);
-   const [displayValue, setDisplayValue] = useState("");
-   const resizeTextarea = () => {
+    bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
+  }));
+  const textareaRef = useRef(null);
+  const [originalValue, setOriginalValue] = useState(bridgeName);
+  const [displayValue, setDisplayValue] = useState("");
+  const resizeTextarea = () => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = "auto"; 
-      textarea.style.height = textarea.scrollHeight + "px"; 
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
     }
   };
 
   useEffect(() => {
-    resizeTextarea(); 
+    resizeTextarea();
   }, [displayValue]);
+
   useEffect(() => {
     setOriginalValue(bridgeName);
     setDisplayValue(
@@ -39,15 +40,16 @@ function BridgeNameInput({ params }) {
   const handleFocus = () => {
     setDisplayValue(originalValue);
     setTimeout(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      const len = textarea.value.length;
-      textarea.setSelectionRange(len, len);
-    }
-  }, 0);
+      const textarea = textareaRef.current;
+      if (textarea) {
+        const len = textarea.value.length;
+        textarea.setSelectionRange(len, len);
+      }
+    }, 0);
   };
 
-   const handleBridgeNameChange = useCallback(() => {
+  const handleBridgeNameChange = useCallback(() => {
+
     const trimmed = originalValue.trim();
 
     if (trimmed === "") {
@@ -70,13 +72,13 @@ function BridgeNameInput({ params }) {
     );
   }, [originalValue, bridgeName, dispatch, params.id]);
 
- 
-  const handleKeyDown = (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-      e.target.blur(); 
-    }
-  };
+    const handleKeyDown = useCallback((e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.target.blur();
+        }
+    }, [handleBridgeNameChange]);
+
 
   return (
     <div className="flex flex-row items-center">

@@ -52,7 +52,7 @@ const SecondStep = () => {
                 <pre data-prefix=">" className="text-error" ><code>&lt;script </code></pre>
                 <pre data-prefix=">" className="text-error"><code className="text-error"> id= </code><code className="text-warning">"chatbot-main-script"</code></pre>
                 <pre data-prefix=">" className="text-error"><code> embedToken=</code><code className="text-warning">"Enter Embed Token here"</code></pre>
-                <pre data-prefix=">" className="text-error"><code> src=</code><code className="text-warning">"https://chatbot-embed.viasocket.com/chatbot-prod.js"</code></pre>
+                <pre data-prefix=">" className="text-error"><code> src=</code><code className="text-warning">"https://chatbot-embed.viasocket.com/chatbot-prod.js"</code><code className='text-error'>&gt;</code></pre>
                 <pre data-prefix=">" className="text-error"><code>&lt;/script&gt;</code></pre>
             </div>
 

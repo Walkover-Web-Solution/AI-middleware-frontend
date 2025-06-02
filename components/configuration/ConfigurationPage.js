@@ -28,6 +28,7 @@ import TriggersList from "./configurationComponent/TriggersList";
 import AddVariable from "../addVariable";
 import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
+import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -79,6 +80,7 @@ export default function ConfigurationPage({ params }) {
                         <PrebuiltToolsList params={params} />
                     </>
                 )}
+     
             <ServiceDropdown params={params} />
             <ModelDropdown params={params} />
             <ApiKeyInput params={params} />
@@ -98,6 +100,7 @@ export default function ConfigurationPage({ params }) {
         <>
             <SlugNameInput params={params} />
             <UserRefernceForRichText params={params} />
+            <StarterQuestionToggle params={params}/>   
             <ActionList params={params} />
         </>
     ), [bridgeType, modelType, params, modelName]);
