@@ -9,19 +9,26 @@ import { toast } from 'react-toastify';
 
 const PromptSummaryModal = ({ params }) => {
     const dispatch = useDispatch();
-    const { bridge_summary } = useCustomSelector((state) => ({
-        bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary
+    const { bridge_summary, prompt } = useCustomSelector((state) => ({
+        bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
+        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
     }));
     const [summary, setSummary] = useState(bridge_summary || "");
     const [isEditing, setIsEditing] = useState(false);
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
     const textareaRef = useRef(null);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         setSummary(bridge_summary);
     }, [bridge_summary, params]);
 
     const handleGenerateSummary = useCallback(async () => {
+        if(prompt.trim() === "")
+        {
+            setErrorMessage("Prompt is required")
+            return 
+        }
         setIsGeneratingSummary(true);
         try {
             const result = await dispatch(genrateSummaryAction({ versionId: params?.version }));
@@ -90,6 +97,7 @@ const PromptSummaryModal = ({ params }) => {
                         </span>
                     </button>
                 </div>
+                {errorMessage && <span className="text-red-500">{errorMessage}</span>}
                 <div className="space-y-2">
                     {isEditing ? (
                         renderSummaryEditor()
@@ -103,10 +111,10 @@ const PromptSummaryModal = ({ params }) => {
                 </div>
                 <div className="modal-action">
                     <div className="flex gap-2">
-                        <button className="btn" onClick={() => closeModal(MODAL_TYPE.PROMPT_SUMMARY)}>Close</button>
+                        <button className="btn" onClick={() => {closeModal(MODAL_TYPE.PROMPT_SUMMARY); setErrorMessage("")}}>Close</button>
                         <button
                             className="btn btn-primary"
-                            disabled={isGeneratingSummary}
+                            disabled={isGeneratingSummary || bridge_summary === summary}
                             onClick={handleSaveSummary}
                         >
                             Save
