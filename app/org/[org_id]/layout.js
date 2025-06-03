@@ -9,7 +9,7 @@ import { getSingleMessage } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
-import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
+import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { getModelAction } from "@/store/action/modelAction";
@@ -185,8 +185,15 @@ function layoutOrgPage({ children, params }) {
           title: e?.data?.title,
         };
         dispatch(createApiAction(params.org_id, dataFromEmbed)).then((data) => {
-          if (!versionData?.[data?._id] && (!Array.isArray(preTools) || !preTools?.includes(data?._id))) {
-            dispatch(updateBridgeVersionAction({
+          if (!versionData?.[data?._id] && (!Array.isArray(preTools) || !preTools?.includes(data?._id))) {        
+           {e?.data?.metadata?.createFrom && e.data.metadata.createFrom==="preFunction"? (
+            dispatch(updateApiAction(path[5], {
+             pre_tools: [data?._id],
+             version_id: version_id
+               }))
+           )
+            :  (
+              dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
               versionId: version_id,
               dataToSend: {
@@ -196,8 +203,9 @@ function layoutOrgPage({ children, params }) {
                 }
               }
             }))
+            )
           }
-        });
+      }});
       }
     }
     if (e.data?.type === 'MESSAGE_CLICK') {

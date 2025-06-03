@@ -62,9 +62,35 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
     return (
         <div className="dropdown dropdown-right">
             <div className="flex items-center gap-2">
-                <button tabIndex={0} disabled={!shouldToolsShow}
-                    className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect function"}
-                </button>
+                 {name === "preFunction" ? (
+            <div className="flex items-center gap-2">
+              <p className="text-base font-semibold">Select Pre function</p>
+              <div
+                className="tooltip tooltip-top"
+                data-tip="A prefunction prepares data before passing it to the main function for the GPT call."
+              >
+                <Info size={12}  />
+              </div>
+
+              {/* Plus Icon Button */}
+              <button
+                disabled={!shouldToolsShow}
+                title="Add Pre Function"
+                className=" border border-gray-300 rounded-lg p-1 hover:bg-gray-100 transition-colors"
+              >
+                <Plus size={18} className="text-black" />
+              </button>
+            </div>
+          ) : (
+            <button
+              tabIndex={0}
+              disabled={!shouldToolsShow}
+              className="btn btn-outline btn-sm"
+            >
+              <Plus size={16} />
+              {name || "Connect function"}
+            </button>
+)}
                 {
                     !shouldToolsShow &&
                     <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
@@ -93,6 +119,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined, 
                         {embedToken,
                             meta: {
+                                createFrom:name,
                                 type: 'tool',
                                 bridge_id: params?.id,
                             }
