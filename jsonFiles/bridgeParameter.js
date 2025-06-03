@@ -31,7 +31,7 @@ export const DEFAULT_MODEL = {
     'anthropic': "claude-3-5-sonnet-latest",
     'groq': "llama3-8b-8192",
     'openai_response': "gpt-4o",
-    'openai_router': "openai/gpt-4o"
+    'open_router': "openai/gpt-4o"
 }
 
 export function getDefaultValues(additionalParams, bridgeParams) {
