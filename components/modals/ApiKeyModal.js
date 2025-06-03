@@ -1,3 +1,4 @@
+import { useCustomSelector } from '@/customHooks/customSelector';
 import { saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { API_KEY_MODAL_INPUT, MODAL_TYPE } from '@/utils/enums';
@@ -11,6 +12,7 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
     const path = pathName?.split('?')[0].split('/');
     const orgId = path[2] || '';
     const dispatch = useDispatch();
+    const { SERVICES } = useCustomSelector((state) => ({ SERVICES: state?.serviceReducer?.services }));
     const handleClose = useCallback(() => {
         closeModal(MODAL_TYPE.API_KEY_MODAL)
         setSelectedApiKey(null);
@@ -94,9 +96,9 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                         disabled={service || (selectedApiKey && selectedApiKey.service)}
                         required
                     >
-                        <option value="openai">OpenAI</option>
-                        <option value="groq">Groq</option>
-                        <option value="anthropic">Anthropic</option>
+                        {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
+                            <option key={value} value={value}>{displayName}</option>
+                        )) : null}
                     </select>
                 </div>
                 <div className="modal-action">
