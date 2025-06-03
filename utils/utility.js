@@ -4,6 +4,7 @@ import GeminiIcon from "@/icons/GeminiIcon";
 import GoogleDocIcon from "@/icons/GoogleDocIcon";
 import GroqIcon from "@/icons/GroqIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
+import OpenRouter from "@/icons/OpenRouter";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { WebSearchIcon } from "@/icons/webSearchIcon";
 import { cloneDeep } from "lodash";
@@ -182,6 +183,8 @@ export const getIconOfService = (service, height, width) => {
             return <GroqIcon height={height} width={width} />;
         case 'google':
             return <GeminiIcon height={height} width={width} />;
+        case 'open_router':
+            return <OpenRouter height={height} width={width} />;
         default:
             return <OpenAiIcon height={height} width={width} />;
     }

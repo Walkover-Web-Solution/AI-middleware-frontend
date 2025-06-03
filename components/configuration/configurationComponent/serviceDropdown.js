@@ -77,11 +77,11 @@ function ServiceDropdown({ params }) {
                         <span className="label-text font-medium items-end">Service</span>
                         <button
                             className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text hover:opacity-80 transition-opacity"
-  onClick={handleGetRecommendations}
-  disabled={isLoadingRecommendations}
->
-    {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
-</button>
+                            onClick={handleGetRecommendations}
+                            disabled={isLoadingRecommendations}
+                        >
+                            {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
+                        </button>
                     </div>
                 </div>
                 {modelRecommendations && (
