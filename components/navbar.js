@@ -124,7 +124,7 @@ function Navbar() {
               ))}
             </ul>
           </div>
-          {path[3] === 'agents' && path.length === 6 && <button className="btn m-1 max-w-44 " onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service)} {truncate(bridgeData?.name, 15)} </button>}
+          {path[3] === 'agents' && path.length === 6 && <button className="btn m-1 max-w-44 " onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service, 18, 18)} {truncate(bridgeData?.name, 15)} </button>}
           {path[3] === 'chatbot' && path[4] === 'configure' && <button className="btn m-1" onClick={toggleChatbotSidebar}> <Rss size={16} /> {chatbotData?.title} </button>}
         </div>
 
