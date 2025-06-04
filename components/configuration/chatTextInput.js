@@ -148,6 +148,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 role: response?.role || "assistant",
                 content: content,
                 fallback : response?.fallback,
+                firstAttemptError: response?.firstAttemptError,
                 image_urls: response?.image_urls || [],
                 model: response?.model
             };
@@ -167,6 +168,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 content: Array.isArray(content) ? content.join(", ") : content.toString(),
                 image_urls: assistConversation.image_urls,
                 fallback : assistConversation?.fallback,
+                firstAttemptError: response?.firstAttemptError,
                 modelName : assistConversation?.model
             };
 
