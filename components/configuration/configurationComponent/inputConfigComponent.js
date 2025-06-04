@@ -11,6 +11,7 @@ import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import Link from 'next/link';
 import ToneDropdown from './toneDropdown'; 
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
+import InfoModel from '@/components/infoModel';
 
 const InputConfigComponent = ({ params }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -252,21 +253,15 @@ const InputConfigComponent = ({ params }) => {
             <div className="h-4 w-px bg-gray-300 mx-2"></div>
             <div className="flex items-center justify-center">
               <button
-                className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
                 onClick={() => {
                   openModal(MODAL_TYPE?.PROMPT_SUMMARY);
                 }}
               >
-                <span>Prompt Summary</span>
+                <InfoModel tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
+                <span className='label-text promptSummary-info capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
+                </InfoModel>
               </button>
-              <div
-                className="tooltip tooltip-right"
-                data-tip={
-                  "Prompt summary is only for the agent not for the Versions"
-                }
-              >
-                <Info size={12} className="ml-2" />
-              </div>
+             
             </div>
           </div>
           <div className='flex gap-4'>
