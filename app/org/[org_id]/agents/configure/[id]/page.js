@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
 import { updateTitle } from "@/utils/utility";
-import ApiKeyMessage from "@/components/apiKeyMessage";
+import AgentSetupGuide from "@/components/AgentSetupGuide";
 
 export const runtime = 'edge';
 const Page = ({ searchParams }) => {
@@ -85,7 +85,7 @@ const Page = ({ searchParams }) => {
         <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
         <div className="w-full md:w-1/2 flex-1 chatPage min-w-[450px] relative">
           <div className="m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
-            <ApiKeyMessage params={params} />
+            <AgentSetupGuide params={params} />
             {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> :bridgeType==='chatbot'? <Chatbot params={params} key={params} />: <Chat params={params} />}
 
           </div>
