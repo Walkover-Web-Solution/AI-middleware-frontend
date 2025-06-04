@@ -7,16 +7,15 @@ import {
   updateBridgeVersionAction,
   updateFuntionApiAction,
 } from "@/store/action/bridgeAction";
-import { MODAL_TYPE } from "@/utils/enums";
 import { closeModal, flattenParameters } from "@/utils/utility";
 import { isEqual } from "lodash";
-import {  Copy, Info, InfoIcon, Trash2 } from "lucide-react";
+import { Copy, Info, InfoIcon, Trash2 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { prefetchDNS } from "react-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
-function FunctionParameterModal({preFunction , functionId, params, Model_Name }) {
+function FunctionParameterModal({ preFunction, functionId, params, Model_Name }) {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const { function_details, variables_path } = useCustomSelector((state) => ({
@@ -312,14 +311,14 @@ function FunctionParameterModal({preFunction , functionId, params, Model_Name })
     }
     resetModalData();
   };
- const removePreFunction = () => {
-        dispatch(updateApiAction(params.id, {
-            pre_tools: [],
-            version_id: params.version
-        })).then(() => {
+  const removePreFunction = () => {
+    dispatch(updateApiAction(params.id, {
+      pre_tools: [],
+      version_id: params.version
+    })).then(() => {
       closeModal(Model_Name);
     });
-    }
+  }
 
   const handleRemoveFunctionFromBridge = () => {
     // dispatch(updateBridgeAction({
@@ -445,8 +444,8 @@ const handleRemove = () => {
               </span>
             </div>
           </span>
-         <button onClick={handleRemove} className="btn btn-sm btn-error text-white">
-              <Trash2 size={16} /> Remove {preFunction ? "pre-function" : "function"}
+          <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
+            <Trash2 size={16} /> Remove {preFunction ? "pre-function" : "function"}
           </button>
         </div>
         <div className="flex justify-between items-center">
@@ -619,11 +618,11 @@ const handleRemove = () => {
                       </td>
                      <td>
                         <input
-                        type="checkbox"
-                         className="checkbox"
-                         checked={!(param.key in variablesPath)}
-                         disabled={preFunction}
-                         onChange={() => {
+                          type="checkbox"
+                          className="checkbox"
+                          checked={!(param.key in variablesPath)}
+                          disabled={preFunction}
+                          onChange={() => {
                             const updatedVariablesPath = { ...variablesPath };
                             if (param.key in updatedVariablesPath) {
                               delete updatedVariablesPath[param.key];
@@ -632,19 +631,19 @@ const handleRemove = () => {
                             }
                             setVariablesPath(updatedVariablesPath);
                           }}
-                          />
-                       </td>
-                       <td>
-                         <input 
-                          type="text" 
-                         placeholder="name" 
-                         className={`input input-bordered w-full input-sm ${preFunction && !variablesPath[param.key] ? "border-red-500" : "" }`}
-                         value={variablesPath[param.key] || ""}
-                        onChange={(e) => {
-                         handleVariablePathChange(param.key, e.target.value);
-                           }}
-                         />
-                       </td>
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          placeholder="name"
+                          className={`input input-bordered w-full input-sm ${preFunction && !variablesPath[param.key] ? "border-red-500" : ""}`}
+                          value={variablesPath[param.key] || ""}
+                          onChange={(e) => {
+                            handleVariablePathChange(param.key, e.target.value);
+                          }}
+                        />
+                      </td>
                     </tr>
                   );
                 })}

@@ -22,7 +22,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
 function layoutOrgPage({ children, params }) {
-  
+
   const dispatch = useDispatch();
   const pathName = usePathname();
   const searchParams = useSearchParams();
@@ -32,13 +32,13 @@ function layoutOrgPage({ children, params }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, SERVICES} = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, SERVICES } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
-    organizations : state.userDetailsReducer.organizations,
+    organizations: state.userDetailsReducer.organizations,
     preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
-    SERVICES:state?.serviceReducer?.services 
+    SERVICES: state?.serviceReducer?.services
   }));
   const urlParams = useParams();
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
@@ -66,9 +66,9 @@ function layoutOrgPage({ children, params }) {
 
   useEffect(() => {
     if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-        dispatch(getServiceAction({ orgid: params.orgid }))
+      dispatch(getServiceAction({ orgid: params.orgid }))
     }
-}, [SERVICES]);
+  }, [SERVICES]);
 
   useEffect(() => {
     if (isValidOrg) {
@@ -81,7 +81,7 @@ function layoutOrgPage({ children, params }) {
       dispatch(getAllFunctions())
     }
   }, [isValidOrg]);
-  
+
   useEffect(() => {
     if (isValidOrg) {
       Array?.isArray(SERVICES) && SERVICES?.map((service) => {
@@ -146,7 +146,7 @@ function layoutOrgPage({ children, params }) {
   }, [isValidOrg, params.id, versionData, version_id, path]);
 
   async function handleMessage(e) {
-    if(e.data?.metadata?.type!=='tool') return;
+    if (e.data?.metadata?.type !== 'tool') return;
     // todo: need to make api call to update the name & description
     if (e?.data?.webhookurl) {
       const dataToSend = {
@@ -185,27 +185,29 @@ function layoutOrgPage({ children, params }) {
           title: e?.data?.title,
         };
         dispatch(createApiAction(params.org_id, dataFromEmbed)).then((data) => {
-          if (!versionData?.[data?._id] && (!Array.isArray(preTools) || !preTools?.includes(data?._id))) {        
-           {e?.data?.metadata?.createFrom && e.data.metadata.createFrom==="preFunction"? (
-            dispatch(updateApiAction(path[5], {
-             pre_tools: [data?._id],
-             version_id: version_id
-               }))
-           )
-            :  (
-              dispatch(updateBridgeVersionAction({
-              bridgeId: path[5],
-              versionId: version_id,
-              dataToSend: {
-                functionData: {
-                  function_id: data?._id,
-                  function_operation: "1"
-                }
-              }
-            }))
-            )
+          if (!versionData?.[data?._id] && (!Array.isArray(preTools) || !preTools?.includes(data?._id))) {
+            {
+              e?.data?.metadata?.createFrom && e.data.metadata.createFrom === "preFunction" ? (
+                dispatch(updateApiAction(path[5], {
+                  pre_tools: [data?._id],
+                  version_id: version_id
+                }))
+              )
+                : (
+                  dispatch(updateBridgeVersionAction({
+                    bridgeId: path[5],
+                    versionId: version_id,
+                    dataToSend: {
+                      functionData: {
+                        function_id: data?._id,
+                        function_operation: "1"
+                      }
+                    }
+                  }))
+                )
+            }
           }
-      }});
+        });
       }
     }
     if (e.data?.type === 'MESSAGE_CLICK') {

@@ -82,12 +82,12 @@ const EmbedList = ({ params }) => {
 
     return (bridge_functions &&
         <div>
-            <FunctionParameterModal preFunction={false} functionId={functionId} params={params} Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL}/>
+            <FunctionParameterModal preFunction={false} functionId={functionId} params={params} Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL} />
             <div className="label flex-col items-start mb-2">
                 {
                     shouldToolsShow &&
                     <div className="flex flex-wrap gap-4">
-                        <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass}  handleOpenModal={handleOpenModal} embedToken={embedToken} params ={params} name="function"/>
+                        <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" />
                     </div>
                 }
             </div>

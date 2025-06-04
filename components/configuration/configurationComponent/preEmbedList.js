@@ -1,7 +1,7 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateApiAction } from '@/store/action/bridgeAction';
 import { getStatusClass, openModal } from '@/utils/utility';
-import { CircleAlert, Info, Settings, Trash2 } from 'lucide-react';
+import { Info } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
@@ -31,10 +31,10 @@ const PreEmbedList = ({ params }) => {
     const [functionId, setFunctionId] = useState(null);
     const dispatch = useDispatch();
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
-      const handleOpenModal = (functionId) => {
-             setFunctionId(functionId);
-             openModal(MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL)
-         }
+    const handleOpenModal = (functionId) => {
+        setFunctionId(functionId);
+        openModal(MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL)
+    }
 
     const onFunctionSelect = (id) => {
         dispatch(updateApiAction(params.id, {
@@ -42,26 +42,27 @@ const PreEmbedList = ({ params }) => {
             version_id: params.version
         }))
     }
-    const removePreFunction = () => {
-        dispatch(updateApiAction(params.id, {
-            pre_tools: [],
-            version_id: params.version
-        }))
-    }
 
-   
+
+
 
     return (bridge_pre_tools?.length > 0 ?
         <div>
-            <FunctionParameterModal preFunction={true} functionId={functionId} params={params} Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL}/>
+            <FunctionParameterModal preFunction={true} functionId={functionId} params={params} Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL} />
             <div className="form-control inline-block">
                 <div className='flex gap-5 items-center ml-2 '>
                     <label className='label-text font-medium whitespace-nowrap'>Pre functions</label>
+                    <div
+                        className="tooltip tooltip-top"
+                        data-tip="A prefunction prepares data before passing it to the main function for the GPT call."
+                    >
+                        <Info size={12} />
+                    </div>
                 </div>
                 <div className="label flex-col items-start">
                     {shouldToolsShow &&
                         <div className="flex flex-wrap gap-4">
-                            <RenderEmbed  bridgeFunctions={bridgePreFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="preFunction"/>
+                            <RenderEmbed bridgeFunctions={bridgePreFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="preFunction" />
                         </div>}
                 </div>
             </div>
