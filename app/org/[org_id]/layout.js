@@ -5,7 +5,7 @@ import LoadingSpinner from "@/components/loadingSpinner";
 import Navbar from "@/components/navbar";
 import Protected from "@/components/protected";
 import MainSlider from "@/components/sliders/mainSlider";
-import { getSingleMessage } from "@/config";
+import { getSingleMessage, switchOrg } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
@@ -135,6 +135,21 @@ function layoutOrgPage({ children, params }) {
       };
     }
   }, [isValidOrg]);
+
+  useEffect(() => {
+    const onFocus = async () => {
+      if (isValidOrg) {
+        const orgId = localStorage.getItem("current_org_id");
+        if (orgId !== params?.org_id) {
+          await switchOrg(params?.org_id);
+        }
+      }
+    };
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+    }
+  }, [isValidOrg, params])
 
   useEffect(() => {
     if (isValidOrg) {
