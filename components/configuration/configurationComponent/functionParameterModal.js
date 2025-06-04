@@ -9,10 +9,9 @@ import {
 import { MODAL_TYPE } from "@/utils/enums";
 import { closeModal, flattenParameters } from "@/utils/utility";
 import { isEqual } from "lodash";
-import {  Copy, Info, InfoIcon, Trash2 } from "lucide-react";
+import { Copy, Info, InfoIcon, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import json from "react-syntax-highlighter/dist/esm/languages/prism/json";
 import { toast } from "react-toastify";
 
 function FunctionParameterModal({ functionId, params }) {
@@ -45,6 +44,8 @@ function FunctionParameterModal({ functionId, params }) {
   const [isTextareaVisible, setIsTextareaVisible] = useState(false);
   const flattenedParameters = flattenParameters(toolData?.fields);
   const [isOldFieldViewTrue, setIsOldFieldViewTrue] = useState(false);
+  const [newParameterName, setNewParameterName] = useState("");
+  const [showAddParameterInput, setShowAddParameterInput] = useState(false);
 
   useEffect(() => {
     setToolData(function_details);
@@ -56,12 +57,10 @@ function FunctionParameterModal({ functionId, params }) {
   }, [variables_path, functionName]);
 
   useEffect(() => {
-    setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
-  }, [toolData, function_details]);
-
-  useEffect(() => {
-    setIsModified(!isEqual(variablesPath, variables_path[functionName]));
-  }, [variablesPath]);
+  const dataModified = !isEqual(toolData, function_details);
+  const pathModified = !isEqual(variablesPath, variables_path[functionName] || {});
+  setIsModified(dataModified || pathModified);
+}, [toolData, function_details, variablesPath, variables_path, functionName]);
 
   const copyToClipboard = (content) => {
     navigator.clipboard
@@ -310,18 +309,10 @@ function FunctionParameterModal({ functionId, params }) {
       );
     }
     resetModalData();
+    setIsModified(false);
   };
 
   const handleRemoveFunctionFromBridge = () => {
-    // dispatch(updateBridgeAction({
-    //     bridgeId: params.id,
-    //     dataToSend: {
-    //         functionData: {
-    //             function_id: functionId,
-    //             function_name: functionName,
-    //         }
-    //     }
-    // })
     dispatch(
       updateBridgeVersionAction({
         bridgeId: params.id,
@@ -413,7 +404,211 @@ function FunctionParameterModal({ functionId, params }) {
       console.error("Optimization Error:", error);
     } finally {
       setIsLoading(false);
+    } 
+  };
+
+  // New function to add a parameter
+  const handleAddParameter = () => {
+  if (!newParameterName.trim()) {
+    toast.error("Parameter name cannot be empty");
+    return;
+  }
+
+  // Check if parameter already exists
+  if (flattenedParameters.some(param => param.key === newParameterName)) {
+    toast.error("Parameter already exists");
+    return;
+  }
+
+  // Split the parameter name by dots to handle nesting
+  const parts = newParameterName.split('.');
+  
+  setToolData(prevToolData => {
+    const newFields = JSON.parse(JSON.stringify(prevToolData.fields || {}));
+    let currentLevel = newFields;
+
+    // Build the nested structure
+    parts.forEach((part, index) => {
+      if (!currentLevel[part]) {
+        // If it's the last part, create a string parameter
+        if (index === parts.length - 1) {
+          currentLevel[part] = {
+            type: "string",
+            description: "",
+            enum: [],
+            required_params: [],
+            parameter: {}
+          };
+        } 
+        // Otherwise create an object parameter
+        else {
+          currentLevel[part] = {
+            type: "object",
+            description: "",
+            enum: [],
+            required_params: [],
+            parameter: {}
+          };
+        }
+      }
+      // Move to the next level
+      if (currentLevel[part].type === "object") {
+        currentLevel = currentLevel[part].parameter;
+      }
+    });
+
+    return {
+      ...prevToolData,
+      fields: newFields
+    };
+  });
+
+  // Update JSON view if it's open
+  if (isTextareaVisible) {
+    try {
+      const currentFields = JSON.parse(objectFieldValue || '{}');
+      let currentLevel = currentFields;
+
+      parts.forEach((part, index) => {
+        if (!currentLevel[part]) {
+          if (index === parts.length - 1) {
+            currentLevel[part] = {
+              type: "string",
+              description: "",
+              enum: [],
+              required_params: [],
+              parameter: {}
+            };
+          } else {
+            currentLevel[part] = {
+              type: "object",
+              description: "",
+              enum: [],
+              required_params: [],
+              parameter: {}
+            };
+          }
+        }
+        if (currentLevel[part].type === "object") {
+          currentLevel = currentLevel[part].parameter;
+        }
+      });
+
+      setObjectFieldValue(JSON.stringify(currentFields, null, 4));
+    } catch (error) {
+      console.error("Error updating JSON view:", error);
     }
+  }
+
+  setNewParameterName("");
+  setShowAddParameterInput(false);
+  setIsModified(true);
+  toast.success("Parameter added successfully");
+};
+
+  // New function to delete a parameter
+  const handleDeleteParameter = (paramKey) => {
+    // Split the key to handle nested parameters
+    const keyParts = paramKey.split(".");
+    
+    if (keyParts.length === 1) {
+      // Top-level parameter
+      setToolData(prevToolData => {
+        const { [paramKey]: removedField, ...remainingFields } = prevToolData.fields;
+        
+        // Also remove from required_params if present
+        const updatedRequiredParams = (prevToolData.required_params || [])
+          .filter(param => param !== paramKey);
+        
+        return {
+          ...prevToolData,
+          fields: remainingFields,
+          required_params: updatedRequiredParams
+        };
+      });
+      
+      // Update variablesPath by removing the parameter
+      setVariablesPath(prevPaths => {
+        const { [paramKey]: removed, ...remaining } = prevPaths;
+        return remaining;
+      });
+      
+    } else {
+      // Handle nested parameter deletion
+      const parentPath = keyParts.slice(0, -1).join(".");
+      const fieldToRemove = keyParts[keyParts.length - 1];
+      
+      setToolData(prevToolData => {
+        const updatedFields = JSON.parse(JSON.stringify(prevToolData.fields));
+        let currentLevel = updatedFields;
+        
+        // Navigate to the parent object
+        for (let i = 0; i < keyParts.length - 1; i++) {
+          const part = keyParts[i];
+          if (currentLevel[part]) {
+            // Determine if we're dealing with an array or object
+            if (currentLevel[part].type === 'array') {
+              currentLevel = currentLevel[part].items;
+            } else if (currentLevel[part].type === 'object') {
+              currentLevel = currentLevel[part].parameter || {};
+            } else {
+              break; // Can't navigate further
+            }
+          }
+        }
+        
+        // Remove the field if we found the parent
+        if (currentLevel && currentLevel[fieldToRemove]) {
+          delete currentLevel[fieldToRemove];
+        }
+        
+        return {
+          ...prevToolData,
+          fields: updatedFields
+        };
+      });
+      
+      // Update variablesPath by removing the parameter
+      setVariablesPath(prevPaths => {
+        const newPaths = { ...prevPaths };
+        delete newPaths[paramKey];
+        return newPaths;
+      });
+    }
+    
+    // Update JSON view if it's open
+    if (isTextareaVisible) {
+      try {
+        const currentFields = JSON.parse(objectFieldValue);
+        
+        // Handle deletion in the JSON representation
+        if (keyParts.length === 1) {
+          delete currentFields[paramKey];
+        } else {
+          let currentLevel = currentFields;
+          for (let i = 0; i < keyParts.length - 1; i++) {
+            const part = keyParts[i];
+            if (currentLevel[part]) {
+              if (currentLevel[part].type === 'array') {
+                currentLevel = currentLevel[part].items;
+              } else {
+                currentLevel = currentLevel[part].parameter || {};
+              }
+            }
+          }
+          
+          if (currentLevel) {
+            delete currentLevel[keyParts[keyParts.length - 1]];
+          }
+        }
+        
+        setObjectFieldValue(JSON.stringify(currentFields, undefined, 4));
+      } catch (error) {
+        console.error("Error updating JSON view:", error);
+      }
+    }
+     setIsModified(true);
+    toast.success("Parameter deleted successfully");
   };
 
   return (
@@ -504,139 +699,188 @@ function FunctionParameterModal({ functionId, params }) {
           )}
         </div>
         {!isDataAvailable ? (
-          <p>No Parameters used in the function</p>
+          <div className="flex flex-col">
+            <p>No Parameters used in the function</p>
+            <div className="flex mt-3">
+              <button 
+                className="btn btn-sm btn-primary" 
+                onClick={() => setShowAddParameterInput(true)}
+              >
+                <Plus size={16} /> Add Parameter
+              </button>
+            </div>
+            {showAddParameterInput && (
+              <div className="mt-4 flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Parameter name"
+                  className="input input-bordered input-sm w-64"
+                  value={newParameterName}
+                  onChange={(e) => setNewParameterName(e.target.value)}
+                />
+                <button 
+                  className="btn btn-sm btn-primary" 
+                  onClick={handleAddParameter}
+                >
+                  Add
+                </button>
+                <button 
+                  className="btn btn-sm btn-ghost" 
+                  onClick={() => {
+                    setShowAddParameterInput(false);
+                    setNewParameterName("");
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
         ) : !isTextareaVisible ? (
-          <div className="overflow-x-auto border rounded-md">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Parameter</th>
-                  <th>Type</th>
-                  <th>Required</th>
-                  <th>Description</th>
-                  <th>Enum: comma separated</th>
-                  <th>Fill with AI</th>
-                  <th>Value Path: your_path</th>
-                </tr>
-              </thead>
-              <tbody>
-                {flattenedParameters.map((param, index) => {
-                  const currentField = getNestedFieldValue(
-                    toolData.fields,
-                    param.key.split(".")
-                  );
-                  const currentType = currentField?.type || param.type || "";
-                  const currentDesc = currentField?.description || "";
-                  const currentEnum = currentField?.enum || [];
-                  return (
-                    <tr key={param.key}>
-                      <td>{index}</td>
-                      <td>{param.key}</td>
-                      <td>
-                        <select
-                          className="select select-sm select-bordered"
-                          value={currentType}
-                          onChange={(e) =>
-                            handleTypeChange(param.key, e.target.value)
-                          }
-                        >
-                          <option value="" disabled>
-                            Select parameter type
-                          </option>
-                          {parameterTypes &&
-                            parameterTypes.map((type, index) => (
-                              <option key={index} value={type}>
-                                {type}
-                              </option>
-                            ))}
-                        </select>
-                      </td>
-                      <td>
-                        <input
-                          type="checkbox"
-                          className="checkbox"
-                          checked={(() => {
-                            const keyParts = param.key.split(".");
-                            if (keyParts.length === 1) {
-                              return (toolData.required_params || []).includes(
-                                param.key
-                              );
-                            } else {
-                              const parentKeyParts = keyParts.slice(0, -1);
-                              const nestedField = getNestedFieldValue(
-                                toolData.fields,
-                                parentKeyParts
-                              );
-                              return (
-                                nestedField?.required_params?.includes(
-                                  keyParts[keyParts.length - 1]
-                                ) || false
-                              );
+          <div>
+            <div className="overflow-x-auto border rounded-md">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Parameter</th>
+                    <th>Type</th>
+                    <th>Required</th>
+                    <th>Description</th>
+                    <th>Enum: comma separated</th>
+                    <th>Fill with AI</th>
+                    <th>Value Path: your_path</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {flattenedParameters.map((param, index) => {
+                    const currentField = getNestedFieldValue(
+                      toolData.fields,
+                      param.key.split(".")
+                    );
+                    const currentType = currentField?.type || param.type || "";
+                    const currentDesc = currentField?.description || "";
+                    const currentEnum = currentField?.enum || [];
+                    return (
+                      <tr key={param.key}>
+                        <td>{index}</td>
+                        <td>{param.key}</td>
+                        <td>
+                          <select
+                            className="select select-sm select-bordered"
+                            value={currentType}
+                            onChange={(e) =>
+                              handleTypeChange(param.key, e.target.value)
                             }
-                          })()}
-                          onChange={() => handleRequiredChange(param.key)}
-                        />
-                      </td>
+                          >
+                            <option value="" disabled>
+                              Select parameter type
+                            </option>
+                            {parameterTypes &&
+                              parameterTypes.map((type, index) => (
+                                <option key={index} value={type}>
+                                  {type}
+                                </option>
+                              ))}
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            type="checkbox"
+                            className="checkbox"
+                            checked={(() => {
+                              const keyParts = param.key.split(".");
+                              if (keyParts.length === 1) {
+                                return (toolData.required_params || []).includes(
+                                  param.key
+                                );
+                              } else {
+                                const parentKeyParts = keyParts.slice(0, -1);
+                                const nestedField = getNestedFieldValue(
+                                  toolData.fields,
+                                  parentKeyParts
+                                );
+                                return (
+                                  nestedField?.required_params?.includes(
+                                    keyParts[keyParts.length - 1]
+                                  ) || false
+                                );
+                              }
+                            })()}
+                            onChange={() => handleRequiredChange(param.key)}
+                          />
+                        </td>
                       {/* {currentType !== 'object' && ( */}
-                      <td>
-                        <input
-                          type="text"
-                          placeholder="Parameter description"
-                          className="input input-bordered w-full input-sm"
-                          value={currentDesc}
-                          disabled={currentType === "object"}
-                          onChange={(e) =>
-                            handleDescriptionChange(param.key, e.target.value)
-                          }
-                        />
-                      </td>
-                      {/* )} */}
-                      <td>
-                        <input
-                          key={currentEnum}
-                          type="text"
-                          placeholder="['a','b','c']"
-                          className="input input-bordered w-full input-sm"
-                          defaultValue={JSON.stringify(currentEnum)}
-                          disabled={currentType === "object"}
-                          onBlur={(e) =>
-                            handleEnumChange(param.key, e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="checkbox"
-                          className="checkbox"
-                          checked={!(param.key in variablesPath)}
-                          onChange={() => {
-                            const updatedVariablesPath = { ...variablesPath };
-                            if (param.key in updatedVariablesPath) {
-                              delete updatedVariablesPath[param.key];
-                            } else {
-                              updatedVariablesPath[param.key] = ""; // or any default value
+                        <td>
+                          <input
+                            type="text"
+                            placeholder="Parameter description"
+                            className="input input-bordered w-full input-sm"
+                            value={currentDesc}
+                            disabled={currentType === "object"}
+                            onChange={(e) =>
+                              handleDescriptionChange(param.key, e.target.value)
                             }
-                            setVariablesPath(updatedVariablesPath);
-                          }}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          placeholder="name"
-                          className="input input-bordered w-full input-sm"
-                          value={variablesPath[param.key] || ""}
-                          onChange={(e) => {
-                            handleVariablePathChange(param.key, e.target.value);
-                          }}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                          />
+                        </td>
+                      {/* )} */}
+                        <td>
+                          <input
+                            key={currentEnum}
+                            type="text"
+                            placeholder="['a','b','c']"
+                            className="input input-bordered w-full input-sm"
+                            defaultValue={JSON.stringify(currentEnum)}
+                            disabled={currentType === "object"}
+                            onBlur={(e) =>
+                              handleEnumChange(param.key, e.target.value)
+                            }
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="checkbox"
+                            className="checkbox"
+                            checked={!(param.key in variablesPath)}
+                            onChange={() => {
+                              const updatedVariablesPath = { ...variablesPath };
+                              if (param.key in updatedVariablesPath) {
+                                delete updatedVariablesPath[param.key];
+                              } else {
+                                updatedVariablesPath[param.key] = ""; // or any default value
+                              }
+                              setVariablesPath(updatedVariablesPath);
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            placeholder="name"
+                            className="input input-bordered w-full input-sm"
+                            value={variablesPath[param.key] || ""}
+                            onChange={(e) => {
+                              handleVariablePathChange(param.key, e.target.value);
+                            }}
+                          />
+                        </td>
+                        
+                        <td>
+                            <button 
+                             className="btn btn-sm btn-square bg-white border-2 border-grey-800 hover:bg-red-50 shadow-sm"
+                            onClick={() => handleDeleteParameter(param.key)}
+                            title="Delete parameter"
+                            >
+                             <Trash2 size={16} className="text-red-500" />
+                            </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className={isOldFieldViewTrue ? "flex items-center gap-2" : ""}>
@@ -661,27 +905,66 @@ function FunctionParameterModal({ functionId, params }) {
             )}
           </div>
         )}
-        <div className="modal-action">
-          <form method="dialog" className="flex flex-row gap-2">
-            <button className="btn" onClick={handleCloseModal}>
-              Close
-            </button>
+        <div className="flex justify-between items-center mb-2 pt-4">
+  {/* Left side: Add Parameter Section */}
+  <div className="flex items-center gap-2">
+    {showAddParameterInput ? (
+      <>
+        <input
+          type="text"
+          placeholder="Parameter name"
+          className="input input-bordered input-sm w-64"
+          value={newParameterName}
+          onChange={(e) => setNewParameterName(e.target.value)}
+        />
+        <button 
+          className="btn btn-sm btn-primary" 
+          onClick={handleAddParameter}
+        >
+          Add
+        </button>
+        <button 
+          className="btn btn-sm btn-ghost" 
+          onClick={() => {
+            setShowAddParameterInput(false);
+            setNewParameterName("");
+          }}
+        >
+          Cancel
+        </button>
+      </>
+    ) : (
+      <button 
+        className="btn btn-sm btn-primary" 
+        onClick={() => setShowAddParameterInput(true)}
+      >
+        <Plus size={16} /> Add Parameter
+      </button>
+    )}
+  </div>
+  <div className="modal-action m-0">
+    <form method="dialog" className="flex flex-row gap-2">
+      <button className="btn" onClick={handleCloseModal}>
+        Close
+      </button>
 
-            {isDataAvailable && (
-              <button
-                className="btn btn-primary"
-                onClick={handleSaveFunctionData}
-                disabled={!isModified || isLoading}
-              >
-                {isLoading && <span className="loading loading-spinner"></span>}
-                Save
-              </button>
-            )}
-          </form>
-        </div>
+      {isDataAvailable && (
+        <button
+          className="btn btn-primary"
+          onClick={handleSaveFunctionData}
+          disabled={!isModified || isLoading}
+        >
+          {isLoading && <span className="loading loading-spinner"></span>}
+          Save
+        </button>
+      )}
+    </form>
+  </div>
+</div>
+
       </div>
     </dialog>
   );
 }
 
-export default FunctionParameterModal;
+export default FunctionParameterModal; 
