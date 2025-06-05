@@ -74,7 +74,7 @@ function ServiceDropdown({ params }) {
             <div className="form-control">
                 <div className="gap-2 max-w-xl">
                     <div className="label max-w-xs flex justify-between items-center gap-10">
-                        <span className="label-text font-medium items-end">Service</span>
+                        <span className="label-text font-medium items-end">LLM Provider</span>
                         <button
                             className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text hover:opacity-80 transition-opacity"
                             onClick={handleGetRecommendations}
