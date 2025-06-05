@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from "@/utils/interceptor"
+import { toast } from 'react-toastify';
 
 const defaultConfig = {
   model_name: 'gpt-4o',
@@ -188,6 +189,12 @@ export default function ModelConfigPage() {
   };
 
   const handleConfigChange = (key, field, value) => {
+    if(key === "model") {
+      setConfig(prev => ({
+        ...prev,
+        model_name: value
+      }));
+    }
     setConfig(prev => {
       const updatedConfig = {
         ...prev.configuration[key],
@@ -886,8 +893,11 @@ export default function ModelConfigPage() {
               onClick={async (event) => {
                 event.preventDefault();
                 try {
-                  const response = await axios.post(`${process.env.NEXT_PUBLIC_PYTHON_SERVER_URL}/modelConfiguration`, config);
-                  console.log('Configuration saved:', response.data);
+                  const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/modelConfiguration`, config);
+                  if(response.status === 200) {
+                    toast.success('Configuration saved successfully');
+                    console.log('Configuration saved:', response.data);
+                  }
                 } catch (error) {
                   console.error('Error saving configuration:', error);
                 }
