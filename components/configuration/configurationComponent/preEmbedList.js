@@ -8,6 +8,7 @@ import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
+import InfoModel from '@/components/infoModel';
 
 const PreEmbedList = ({ params }) => {
     const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken } = useCustomSelector((state) => {
@@ -51,13 +52,9 @@ const PreEmbedList = ({ params }) => {
             <FunctionParameterModal preFunction={true} functionId={functionId} params={params} Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL} />
             <div className="form-control inline-block">
                 <div className='flex gap-5 items-center ml-2 '>
-                    <label className='label-text font-medium whitespace-nowrap'>Pre functions</label>
-                    <div
-                        className="tooltip tooltip-top"
-                        data-tip="A prefunction prepares data before passing it to the main function for the GPT call."
-                    >
-                        <Info size={12} />
-                    </div>
+                    <InfoModel tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
+                        <p className="label-text font-medium whitespace-nowrap info">Pre functions</p>
+                    </InfoModel>
                 </div>
                 <div className="label flex-col items-start">
                     {shouldToolsShow &&
