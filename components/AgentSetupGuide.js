@@ -1,117 +1,124 @@
 import React, { useState } from 'react';
-import { AlertCircle, Rocket } from 'lucide-react';
+import { AlertCircle, Rocket, Sparkles } from 'lucide-react';
+import { AGENT_SETUP_GUIDE_STEPS } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
-const AgentSetupGuide = ({ params }) => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [showError, setShowError] = useState(false);
-  const [hideCard, setHideCard] = useState(false);
+const AgentSetupGuide = ({ params = {} }) => {
 
   // Get API key from Redux store
   const { bridgeApiKey } = useCustomSelector((state) => {
-    const service =
-      state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
+    const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
     return {
-      bridgeApiKey:
-        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]
-          ?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
+      bridgeApiKey:state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
     };
   });
 
+  const [isVisible, setIsVisible] = useState(!bridgeApiKey);
+  const [showError, setShowError] = useState(false);
+  console.log("bridgeApiKey", bridgeApiKey, isVisible);
   const handleStart = () => {
     if (!bridgeApiKey) {
       setShowError(true);
       return;
     }
-
     setIsVisible(false);
-    setTimeout(() => setHideCard(true), 300);
   };
 
-  if ( bridgeApiKey||hideCard) return null;
+  if (!isVisible || bridgeApiKey) return null;
 
   return (
-    <div
-      className={`absolute inset-0 h-full w-full bg-white flex items-center justify-center bg-base-200 z-[999999] transition-opacity duration-300 ${
-        isVisible ? 'opacity-100' : 'opacity-0'
-      }`}
-    >
-      <div
-        className={`bg-white rounded-xl max-w-md w-full mx-4 p-6 transform transition-transform duration-300 ${
-          isVisible ? 'scale-100' : 'scale-95'
-        }`}
-      >
-        {/* Icon */}
-        <div className="flex justify-center mb-4">
-          <div className="bg-blue-50 p-4 rounded-full">
-            <Rocket className="h-12 w-12 text-black" />
+    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-[999999]">
+      <div className="card bg-base-100 w-full h-full shadow-xl">
+        <div className="card-body p-6 h-full flex flex-col">
+
+          {/* Header */}
+          <div className="text-center mb-4 flex-shrink-0">
+            <div className="btn btn-primary btn-circle mb-3">
+              <Rocket className="h-5 w-5" />
+            </div>
+
+            <h1 className="text-2xl font-bold text-base-content mb-2">
+              Agent Setup Guide
+            </h1>
+            <p className="text-base-content/70 text-sm">
+              Everything you need to create your AI agent
+            </p>
           </div>
-        </div>
 
-        {/* Title */}
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">Let’s Get Started</h2>
-        <p className="text-gray-600 text-center mb-6">
-          Follow these simple steps to set up your AI Agent
-        </p>
+          {/* Steps Container */}
+          <div className="flex-1 overflow-y-auto px-4 pt2">
+            <div className="space-y-3">
+              {AGENT_SETUP_GUIDE_STEPS?.map(({ step, title, detail, optional, icon }, index) => (
+                <div
+                  key={step}
+                  className={`card bg-base-200 shadow-sm transition-all duration-300 hover:shadow-md`}
+                >
+                  <div className="card-body p-2">
+                    <div className="flex items-start gap-3">
+                      <div className={`btn btn-sm btn-circle transition-all duration-300 btn-ghost`}>
+                        <span className="text-sm">{icon}</span>
+                      </div>
 
-        {/* Steps */}
-        <ul className="space-y-4 mb-6">
-          {[
-            { step: '1', title: 'Enter your prompt', detail: 'Describe the task for your agent' },
-            {
-              step: '2',
-              title: 'Connect a function',
-              detail: 'Add external capability',
-              optional: true,
-            },
-            {
-              step: '3',
-              title: 'Select a service',
-              detail: 'Choose an AI provider',
-              optional: true,
-            },
-            {
-              step: '4',
-              title: 'Choose a model',
-              detail: 'Pick the model for responses',
-              optional: true,
-            },
-            {
-              step: '5',
-              title: 'Add your API key',
-              detail: 'Required to access services',
-            },
-          ].map(({ step, title, detail, optional }) => (
-            <li className="flex items-start" key={step}>
-              <div className="bg-blue-100 text-black rounded-full h-6 w-6 flex items-center justify-center mr-3">
-                {step}
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-800">
-                  {title} {optional && <span className="text-gray-400">(Optional)</span>}
-                </h3>
-                <p className="text-sm text-gray-500">{detail}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-base-content text-sm mt-1">
+                            {title}
+                          </h3>
+                          {optional && (
+                            <div className="badge badge-primary badge-sm">
+                              Optional
+                            </div>
+                          )}
+                        </div>
 
-        {/* Error */}
-        {showError && (
-          <div className="flex items-center bg-red-50 text-red-600 p-3 rounded-lg mb-4">
-            <AlertCircle className="h-5 w-5 mr-2" />
-            <span>Please add your API key to continue</span>
+                        <p className="text-base-content/70 text-sm mb-2">
+                          {detail}
+                        </p>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        )}
+          {/* Error Message */}
+          {showError && (
+            <div className="card bg-error shadow-sm mt-4 flex-shrink-1 mx-6 text-xs text-base-100">
+              <div className="card-body p-2">
+                <div className="flex items-start gap-3">
+                  <div className={`btn btn-sm btn-circle transition-all duration-300 btn-ghost`}>
+                    <AlertCircle className="h-6 w-6" />
+                  </div>
 
-        {/* Smaller Start Button */}
-        <div className="flex justify-center">
-          <button
-            onClick={handleStart}
-            className="px-6 py-2 bg-black hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200"
-          >
-            Start Building
-          </button>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base-100 text-sm">
+                      API Key Required
+                      <br />
+                      <span className="text-base-100/80">
+                        Please add your API key to continue building
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* CTA Button */}
+          <div className="text-center mt-6 flex-shrink-0">
+            <button
+              onClick={handleStart}
+              className="btn btn-primary btn-lg gap-2"
+            >
+              Get Started
+              <Sparkles className="h-4 w-4" />
+            </button>
+
+            <p className="text-xs text-base-content/60 mt-3">
+              Follow these steps to create your agent successfully
+            </p>
+          </div>
         </div>
       </div>
     </div>
