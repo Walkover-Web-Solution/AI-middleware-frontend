@@ -15,7 +15,7 @@ const orgReducer = createSlice({
       if (!state.organizations) {
         state.organizations = [];
       }
-      state.organizations.push(action.payload);
+      state.organizations.push(action.payload.data.data);
       // return action.payload._id
     },
     organizationsFetched: (state, action) => {
@@ -29,6 +29,7 @@ const orgReducer = createSlice({
     },
     setCurrentOrgId: (state, action) => {
       state.currentOrgId = action.payload;
+       
     },
     clearCurrentOrgId: (state) => {
       state.currentOrgId = null;
