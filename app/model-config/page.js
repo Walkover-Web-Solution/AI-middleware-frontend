@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import axios from "@/utils/interceptor"
 
 const defaultConfig = {
   model_name: 'gpt-4o',
+  service : 'openai',
   specification: {
     input_cost: 2.5,
     output_cost: 10,
@@ -176,6 +178,13 @@ export default function ModelConfigPage() {
         return [...prevSelected, key];
       }
     });
+  };
+
+  const handleServiceChange = (service) => {
+    setConfig(prev => ({
+      ...prev,
+      service
+    }));
   };
 
   const handleConfigChange = (key, field, value) => {
@@ -503,6 +512,8 @@ export default function ModelConfigPage() {
 
     const result = {
       configuration: selectedConfig,
+      service: config.service,
+      model_name: config.model_name,
       specification: config.specification,
       inputConfig: config.inputConfig || {},
       outputConfig: config.outputConfig || {}
@@ -693,16 +704,16 @@ export default function ModelConfigPage() {
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">OpenAI Model Configuration</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Generate Model Configuration</h1>
           <p className="mt-2 text-sm text-gray-600">
-            Customize your OpenAI model parameters and generate the configuration JSON
+            Customize your LLM model parameters and generate the configuration JSON
           </p>
         </div>
 
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex overflow-x-auto">
-              {['keys', 'specification', 'inputConfig', 'outputConfig', 'json'].map((tab) => (
+              {['service', 'keys', 'specification', 'inputConfig', 'outputConfig', 'json'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -732,6 +743,24 @@ export default function ModelConfigPage() {
                 </div>
                 <div className="space-y-4">
                   {renderSelectableKeys()}
+                </div>
+              </div>
+            )}
+            {activeTab === 'service' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">Select Service</h3>
+                  <div className="flex space-x-2">
+                    <select
+                      value={config.service}
+                      onChange={(e) => handleServiceChange(e.target.value)}
+                      className="px-3 py-1 text-xs rounded-md bg-blue-500 text-white"
+                    >
+                      {['openai', 'anthropic', 'openai_response', 'groq', 'open_router'].map((service) => (
+                        <option key={service} value={service}>{service}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             )}
@@ -854,10 +883,18 @@ export default function ModelConfigPage() {
             </button>
             <button
               type="button"
-              onClick={() => console.log('Export', config)}
+              onClick={async (event) => {
+                event.preventDefault();
+                try {
+                  const response = await axios.post(`${process.env.NEXT_PUBLIC_PYTHON_SERVER_URL}/modelConfiguration`, config);
+                  console.log('Configuration saved:', response.data);
+                } catch (error) {
+                  console.error('Error saving configuration:', error);
+                }
+              }}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Export Configuration
+              Save Configuration
             </button>
           </div>
         </div>
