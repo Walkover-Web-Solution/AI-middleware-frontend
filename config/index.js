@@ -264,7 +264,7 @@ export const getAllOrg = async () => {
 export const switchOrg = async (company_ref_id) => {
   try {
     const data = await axios.post(`${PROXY_URL}/api/c/switchCompany`, { company_ref_id });
-
+    localStorage.setItem("current_org_id", company_ref_id);
     return data;
   } catch (error) {
     console.error(error);
