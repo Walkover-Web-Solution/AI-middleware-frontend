@@ -12,9 +12,9 @@ body {
 }
 /* global.css or index.css */
 .info {
-  @apply font-medium text-gray-500 cursor-help underline decoration-dotted underline-offset-2 decoration-gray-400 hover:decoration-gray-600;
+  @apply font-mediums cursor-help underline decoration-dotted underline-offset-2 decoration-gray-400 hover:decoration-gray-600;
 }
-.promptSummary-info {
+.-infopromptSummary {
    @apply cursor-help underline decoration-dotted underline-offset-2 decoration-gray-400 hover:decoration-gray-600;
 }
 :root {
