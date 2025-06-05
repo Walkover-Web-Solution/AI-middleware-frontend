@@ -1,11 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+body {
+  @apply font-sans;
+}
 :root::-webkit-scrollbar {
   display: none;
 }
-
+body {
+  font-family: 'DM Sans', sans-serif;
+}
+/* global.css or index.css */
+.info {
+  @apply font-medium text-gray-500 cursor-help underline decoration-dotted underline-offset-2 decoration-gray-400 hover:decoration-gray-600;
+}
+.promptSummary-info {
+   @apply cursor-help underline decoration-dotted underline-offset-2 decoration-gray-400 hover:decoration-gray-600;
+}
 :root {
   scrollbar-width: none;
   -ms-overflow-style: none;

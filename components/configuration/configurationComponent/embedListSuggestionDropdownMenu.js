@@ -1,3 +1,4 @@
+import InfoModel from '@/components/infoModel';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
 import { Info, Plus } from 'lucide-react';
@@ -64,13 +65,10 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             <div className="flex items-center gap-2">
                 {name === "preFunction" ? (
                     <div className="flex items-center gap-2">
-                        <p className="text-base font-semibold">Select Pre function</p>
-                        <div
-                            className="tooltip tooltip-top"
-                            data-tip="A prefunction prepares data before passing it to the main function for the GPT call."
-                        >
-                            <Info size={12} />
-                        </div>
+                        <InfoModel tooltipContent={"A prefunction prepares data before passing it to the main function for the GPT call"}>
+                        <p className="text-base font-semibold info">Select Pre function</p>
+                       
+                        </InfoModel>
 
                         {/* Plus Icon Button */}
                         <button
