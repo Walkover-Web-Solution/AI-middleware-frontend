@@ -8,7 +8,7 @@ const ComplitionApi = (bridgeId, modelType) => {
   --header 'Content-Type: application/json' \\
   --data '{
     ${modelType === 'embedding' ? '"text": "YOUR_TEXT_HERE",' : '"user": "YOUR_USER_QUESTION",'}
-    "bridge_id": "${bridgeId}",
+    "agent_id": "${bridgeId}",
     "thread_id": "YOUR_THREAD_ID",
     "response_type": "text", // optional
     "variables": {
