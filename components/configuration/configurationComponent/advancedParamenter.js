@@ -1,13 +1,14 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { MODAL_TYPE } from '@/utils/enums';
+import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import OnBoarding from '@/components/OnBoarding';
 import InfoModel from '@/components/infoModel';
 
 const AdvancedParameters = ({ params }) => {
@@ -16,24 +17,32 @@ const AdvancedParameters = ({ params }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [showTutorial, setShowTutorial] = useState(false);
   const dispatch = useDispatch();
-
-  const { service, version_function_data, configuration, integrationData } = useCustomSelector((state) => {
+  
+  const { service, version_function_data, configuration, integrationData,isFirstParameter,currentOrg } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
+    const currentOrg= state.userDetailsReducer.userDetails?.c_companies?.find(
+       (c) => c.id === Number(params.org_id)
+     )
     return {
       version_function_data: versionData?.apiCalls,
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
+      currentOrg:currentOrg,
+      isFirstParameter:currentOrg?.meta?.onboarding.AdvanceParameter
     };
-  });
-
-  const { tool_choice: tool_choice_data, type, model } = configuration || {};  
-
+  }); 
+    const { tool_choice: tool_choice_data, type, model } = configuration || {};  
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
+
+   const handleTutorial = () => {
+     setShowTutorial(isFirstParameter);
+   };
 
   useEffect(() => {
     setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) :null ); 
@@ -155,7 +164,11 @@ const AdvancedParameters = ({ params }) => {
 
   return (
     <div className="collapse text-base-content" tabIndex={0}>
-      <input type="radio" name="my-accordion-1" onClick={toggleAccordion} className='cursor-pointer' />
+      <input type="radio" name="my-accordion-1"  onClick={()=>{
+          handleTutorial()
+          toggleAccordion()
+        }}
+         className='cursor-pointer' />
       <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
         <span className="mr-2 cursor-pointer">
           Advanced Parameters
@@ -163,7 +176,9 @@ const AdvancedParameters = ({ params }) => {
 
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </div>
-
+       {showTutorial && (
+       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.AdvanceParameter} params={params} flagKey={"AdvanceParameter"} currentOrg={currentOrg}/>
+      )}
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {

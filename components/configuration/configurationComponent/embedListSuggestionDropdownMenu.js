@@ -1,16 +1,30 @@
+import OnBoarding from '@/components/OnBoarding';
 import InfoModel from '@/components/infoModel';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import { ONBOARDING_VIDEOS } from '@/utils/enums';
 import { getStatusClass } from '@/utils/utility';
 import { Info, Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
-    const { integrationData, function_data, embedToken } = useCustomSelector((state) => ({
-        integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
-        function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData,
-        embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+    const [showTutorial, setShowTutorial] = useState(false);
+    const { integrationData, function_data, embedToken, isFirstFunction ,currentOrg} = useCustomSelector((state) => {
+  const orgId = Number(params?.org_id);
+  const orgData = state?.bridgeReducer?.org?.[orgId] || {};
+  const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
+  const currentOrg = userCompanies.find((c) => c.id === orgId);
 
-    }));
+  return {
+    integrationData: orgData.integrationData,
+    function_data: orgData.functionData,
+    embedToken: orgData.embed_token,
+    isFirstFunction: currentOrg?.meta?.onboarding?.FunctionCreation,
+    currentOrg:currentOrg
+  };
+});
+  const handleTutorial = () => {
+    setShowTutorial(isFirstFunction);
+  };
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
@@ -44,7 +58,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 const title = integrationData?.[functionName]?.title || 'Untitled';
 
                 return (
-                    <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
+                   <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
                         <div className="flex justify-between items-center w-full">
                             <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
                                 {title}
@@ -83,7 +97,8 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     <button
                         tabIndex={0}
                         disabled={!shouldToolsShow}
-                        className="btn btn-outline btn-sm"
+                        onClick={() => handleTutorial()}
+                    className="btn btn-outline btn-sm"
                     >
                         <Plus size={16} />
                         {"Connect function"}
@@ -99,6 +114,10 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     </div>
                 }
             </div>
+             {showTutorial && (
+       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.FunctionCreation} params={params} flagKey={"FunctionCreation"} currentOrg={currentOrg}/>
+      )}
+       {!showTutorial && (
             <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                 <div className='flex flex-col gap-2 w-full'>
                     <li className="text-sm font-semibold disabled">Suggested Functions</li>
@@ -123,13 +142,14 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                                 bridge_id: params?.id,
                             }
                         }
-                    )}>
+                         )}>
                         <div>
                             <Plus size={16} /><p className='font-semibold'>{name === "preFunction" ? "Add new Pre Function" : "Add new Function"}</p>
                         </div>
                     </li>}
                 </div>
             </ul>
+       )}
         </div>
     )
 }

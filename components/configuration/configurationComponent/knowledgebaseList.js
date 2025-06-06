@@ -4,24 +4,32 @@ import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { GetFileTypeIcon, openModal } from '@/utils/utility';
-import { MODAL_TYPE } from '@/utils/enums';
+import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import GoogleDocIcon from '@/icons/GoogleDocIcon';
 import { truncate } from '@/components/historyPageComponents/assistFile';
+import OnBoarding from '@/components/OnBoarding';
 
 const KnowledgebaseList = ({ params }) => {
-    const { knowledgeBaseData, knowbaseVersionData } = useCustomSelector((state) => ({
-        knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
-        knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
-    }));
+   const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase,currentOrg } = useCustomSelector((state) => {
+  const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
+  const org = userCompanies.find((c) => c.id === Number(params?.org_id));
+
+  return {
+    knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
+    knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
+    isFirstKnowledgeBase: org?.meta?.onboarding?.knowledgeBase,
+    currentOrg:org
+  };
+});
+
 
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
-
+    const [showTutorial, setShowTutorial] = useState(false);
     const handleInputChange = (e) => {
         setSearchQuery(e.target?.value || "");
     };
-
     const handleAddKnowledgebase = (id) => {
         if (knowbaseVersionData?.includes(id)) return; // Check if ID already exists
         dispatch(updateBridgeVersionAction({
@@ -29,12 +37,15 @@ const KnowledgebaseList = ({ params }) => {
             dataToSend: { doc_ids: [...(knowbaseVersionData || []), id] }
         }));
     };
-
     const handleDeleteKnowledgebase = (id) => {
         dispatch(updateBridgeVersionAction({
             versionId: params.version,
             dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== id) }
         }));
+    };
+
+    const handleTutorial = () => {
+        setShowTutorial(isFirstKnowledgeBase);
     };
 
     const renderKnowledgebase = useMemo(() => (
@@ -80,9 +91,13 @@ const KnowledgebaseList = ({ params }) => {
                 {renderKnowledgebase}
             </div>
             <div className="dropdown dropdown-right">
-                <button tabIndex={0} className="btn btn-outline btn-sm mt-0">
+                <button tabIndex={0} className="btn btn-outline btn-sm mt-0" onClick={()=>handleTutorial()}>
                     <Plus size={16} />Add Knowledgebase
                 </button>
+                {showTutorial && (
+                    <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.knowledgeBase} params={params} flagKey={"knowledgeBase"} currentOrg={currentOrg} />
+                )}
+                {!showTutorial && (
                 <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                     <div className='flex flex-col gap-2 w-full'>
                         <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
@@ -122,6 +137,7 @@ const KnowledgebaseList = ({ params }) => {
                         </li>
                     </div>
                 </ul>
+      )}
             </div>
             <KnowledgeBaseModal params={params} />
         </div>
