@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { createTestCaseAction } from '@/store/action/testCasesAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { Bot, User, X } from 'lucide-react';
+import { CloseIcon } from '@/components/Icons';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -130,7 +130,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                                                         className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                                         onClick={() => removeTool(index, idx)}
                                                     >
-                                                        <X size={16} />
+                                                        <CloseIcon size={16} />
                                                     </button>
                                                 )}
                                             </div>

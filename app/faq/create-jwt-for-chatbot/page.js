@@ -1,4 +1,4 @@
-import { LucideBot, LucideBuilding, LucideKey, LucideUser } from "lucide-react";
+import { BuildingIcon, BotIcon, UserIcon, KeyIcon } from '@/components/Icons';
 
 export const metadata = {
   title: "Integrate Chatbot | GTWY AI",
@@ -31,7 +31,7 @@ const CreateJwtToken = () => {
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
               <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                <LucideBuilding className="w-6 h-6 text-blue-600" />
+                <BuildingIcon className="w-6 h-6 text-blue-600" />
               </div>
               <div>
                 <strong className="text-blue-600">org_id</strong>: Your organization's unique identifier.
@@ -39,7 +39,7 @@ const CreateJwtToken = () => {
             </li>
             <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
               <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                <LucideBot className="w-6 h-6 text-blue-600" />
+                <BotIcon className="w-6 h-6 text-blue-600" />
               </div>
               <div>
                 <strong className="text-blue-600">chatbot_id</strong>: The ID of the ChatBot you are integrating.
@@ -47,7 +47,7 @@ const CreateJwtToken = () => {
             </li>
             <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
               <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                <LucideUser className="w-6 h-6 text-blue-600" />
+                <UserIcon className="w-6 h-6 text-blue-600" />
               </div>
               <div>
                 <strong className="text-blue-600">user_id</strong>: The User ID that will be associated with the token.
@@ -55,7 +55,7 @@ const CreateJwtToken = () => {
             </li>
             <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
               <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                <LucideKey className="w-6 h-6 text-blue-600" />
+                <KeyIcon className="w-6 h-6 text-blue-600" />
               </div>
               <div>
                 <strong className="text-blue-600">access key</strong>: A secret key provided by gtwy.ai, used to sign the JWT token.

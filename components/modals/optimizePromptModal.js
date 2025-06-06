@@ -3,7 +3,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { optimizePromptReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { Copy, Redo, Undo } from 'lucide-react';
+import { CopyIcon, RedoIcon, UndoIcon } from '@/components/Icons';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -103,13 +103,13 @@ function OptmizePromptModal({ params }) {
                 </div>
                 <div className="label gap-2">
                   <div className="tooltip cursor-pointer" data-tip="Previous Prompt">
-                    <Undo onClick={handleUndo} className={!currentIndex && "opacity-50 pointer-events-none"} />
+                    <UndoIcon onClick={handleUndo} className={!currentIndex && "opacity-50 pointer-events-none"} />
                   </div>
                   <div className="tooltip tooltip-left cursor-pointer" data-tip="Next Prompt">
-                    <Redo onClick={handleRedo} />
+                    <RedoIcon onClick={handleRedo} />
                   </div>
                   <div className="tooltip tooltip-left cursor-pointer" data-tip={copyText || "Copy Prompt"}>
-                    <Copy onClick={copyToClipboard} size={20} />
+                    <CopyIcon onClick={copyToClipboard} size={20} />
                   </div>
                 </div>
               </div>

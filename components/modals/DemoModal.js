@@ -2,8 +2,9 @@
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import React, { useEffect } from 'react';
-import { CircleX, CalendarDays } from 'lucide-react';
+import { CloseCircleIcon } from '@/components/Icons';
 import { getCalApi } from "@calcom/embed-react";
+import { CalendarIcon } from '@/components/Icons';
 
 const DemoModal = () => {
 
@@ -35,7 +36,7 @@ const DemoModal = () => {
                         onClick={handleClose}
                         className="btn btn-ghost p-2 rounded-full hover:bg-slate-700/50 transition-colors group"
                     >
-                        <CircleX size={26} className="text-slate-400 group-hover:text-purple-300 transition-colors" />
+                        <CloseCircleIcon size={16} className="text-slate-400 group-hover:text-purple-300 transition-colors" />
                     </button>
                 </div>
 
@@ -63,7 +64,7 @@ const DemoModal = () => {
                         onClick={() => handleClose()}
                         className="btn btn-primary px-8 py-3 text-lg font-semibold bg-gradient-to-r from-purple-500 to-blue-500 border-none hover:from-purple-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
                     >
-                        <CalendarDays className="w-5 h-5" />
+                        <CalendarIcon className="w-5 h-5" />
                         <span>Schedule Personalized Demo</span>
                     </button>
                 </div>
