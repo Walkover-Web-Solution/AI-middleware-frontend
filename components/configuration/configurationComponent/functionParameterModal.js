@@ -445,7 +445,7 @@ const handleRemove = () => {
             </div>
           </span>
           <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
-            <Trash2 size={16} /> Remove {preFunction ? "pre-function" : "function"}
+            <Trash2 size={16} /> Remove {preFunction ? "pre-tool" : "tool"}
           </button>
         </div>
         <div className="flex justify-between items-center">
