@@ -43,10 +43,7 @@ export const updateOrgTimeZone = (orgId, orgDetails) => async (dispatch) => {
 export const updateOrgDetails = (orgId, orgDetails) => async (dispatch) => {
   try {
     const response = await updateOrganizationData(orgId, orgDetails);
-    const updatedOnboarding = response.data.data.company.meta.onboarding;
-
-    dispatch(updateOnBoarding({ updatedOnboarding, orgId }));
-    ;
+    dispatch(updateOnBoarding({ updatedOnboarding: response?.data?.data?.company?.meta?.onboarding, orgId }));
   } catch (error) {
     console.error('Error updating organization timezone:', error);
     throw error;

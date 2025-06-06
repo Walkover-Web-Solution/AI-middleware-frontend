@@ -37,20 +37,16 @@ export const userDetailsReducer = createSlice({
 
     updateOnBoarding: (state, action) => {
       const { updatedOnboarding, orgId } = action.payload;
-
       if (state.userDetails?.c_companies) {
         const index = state.userDetails.c_companies.findIndex(
           (c) => c.id === Number(orgId)
         );
-
         if (index !== -1) {
           const company = state.userDetails.c_companies[index];
-
           if (!company.meta) {
             company.meta = {};
           }
           company.meta.onboarding = updatedOnboarding;
-
         }
       }
     }

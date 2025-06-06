@@ -10,7 +10,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
-import { filterBridges, getIconOfService, openModal,  } from "@/utils/utility";
+import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
 import { Ellipsis, LayoutGrid, Table, TestTubeDiagonal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
@@ -23,27 +23,21 @@ function Home({ params }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const {
-  allBridges,
-  averageResponseTime,
-  isLoading,
-  isFirstBridgeCreation,
-  currentOrg
-} = useCustomSelector((state) => {
-  const orgData = state.bridgeReducer.org[params.org_id] || {};
-  const userCompany = state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(params?.org_id)) || {};
-  return {
-    allBridges: (orgData.orgs || []).slice().reverse(),
-    averageResponseTime: orgData.average_response_time || [],
-    isLoading: state.bridgeReducer.loading,
-    isFirstBridgeCreation: userCompany.meta?.onboarding?.bridgeCreation || "",
-    currentOrg:userCompany
-  };
-});
-  const data=allBridges
+  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, currentOrg } = useCustomSelector((state) => {
+    const orgData = state.bridgeReducer.org[params.org_id] || {};
+    const userCompany = state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(params?.org_id)) || {};
+    return {
+      allBridges: (orgData.orgs || []).slice().reverse(),
+      averageResponseTime: orgData.average_response_time || [],
+      isLoading: state.bridgeReducer.loading,
+      isFirstBridgeCreation: userCompany.meta?.onboarding?.bridgeCreation || "",
+      currentOrg: userCompany
+    };
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
-  const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation );
+  const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation);
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -222,7 +216,7 @@ function Home({ params }) {
   return (
     <div className="w-full">
       {showTutorial && (
-       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.bridgeCreation} params={params} flagKey={"bridgeCreation"} currentOrg={currentOrg}/>
+        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.bridgeCreation} params={params} flagKey={"bridgeCreation"} currentOrg={currentOrg} />
       )}
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}
