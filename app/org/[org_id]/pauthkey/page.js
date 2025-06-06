@@ -2,11 +2,12 @@
 import CustomTable from '@/components/customTable/customTable'
 import MainLayout from '@/components/layoutComponents/MainLayout'
 import LoadingSpinner from '@/components/loadingSpinner'
+import OnBoarding from '@/components/OnBoarding'
 import PageHeader from '@/components/Pageheader'
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
-import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
+import { MODAL_TYPE, ONBOARDING_VIDEOS, PAUTH_KEY_COLUMNS } from '@/utils/enums'
 import { closeModal, openModal } from '@/utils/utility'
 import { Copy, Trash2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
@@ -15,11 +16,22 @@ import { toast } from 'react-toastify'
 
 export const runtime = 'edge';
 
-function Page() {
+function Page({ params }) {
   const dispatch = useDispatch();
-  const authData = useCustomSelector((state) => state?.authDataReducer?.authData || [])
-  const [singleAuthData, setSingleAuthData] = useState({})
+ const { authData, isFirstPauthCreation,currentOrg } = useCustomSelector((state) => {
+  const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
+  const orgFromId = userCompanies.find((c) => c.id ===Number (params.org_id));
+
+  return {
+    authData: state?.authDataReducer?.authData || [],
+    isFirstPauthCreation: orgFromId?.meta?.onboarding?.PauthKey,
+    currentOrg:orgFromId
+  };
+});
+
+  const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(isFirstPauthCreation);
 
   useEffect(() => {
     dispatch(getAllAuthData())
@@ -107,7 +119,9 @@ function Page() {
 
   return (
     <div className="h-full">
-
+      {showTutorial && (
+       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"} currentOrg={currentOrg}/>
+      )}
       <MainLayout>
       <PageHeader 
         title="PauthKey" 

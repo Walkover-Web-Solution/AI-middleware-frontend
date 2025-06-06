@@ -2,27 +2,51 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
+import { updateOnBoardingDetails } from "@/utils/utility";
 import { ChevronDown, ChevronUp, Info, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-
 const AddVariable = ({ params }) => {
   const versionId = params.version;
-  const { variablesKeyValue, prompt } = useCustomSelector((state) => ({
-    variablesKeyValue:
-      // state?.bridgeReducer?.allBridgesMap?.[params.id]?.variables || [],
-      state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
-    prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-  }));
-
-  const [keyValuePairs, setKeyValuePairs] = useState([]);
-  const [isFormData, setIsFormData] = useState(true);
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
-  const [height, setHeight] = useState(0); // Dynamic height state
-  const [error, setError] = useState(false);
-  const dispatch = useDispatch();
-  const accordionContentRef = useRef(null); // Ref for the accordion content
-  const isOpeningRef = useRef(false); // To track if the accordion is opening
+  const { variablesKeyValue, prompt, isFirstVariable, currentOrg } =
+    useCustomSelector((state) => ({
+      variablesKeyValue:
+        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
+          params?.version
+        ]?.variables || [],
+      prompt:
+        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
+          params?.version
+        ]?.configuration?.prompt || "",
+      isFirstVariable:
+        state.userDetailsReducer.userDetails?.c_companies?.find(
+          (c) => c.id === Number(params.org_id)
+        )?.meta?.onboarding.Addvariables || "",
+      currentOrg: state.userDetailsReducer.userDetails?.c_companies?.find(
+        (c) => c.id === Number(params.org_id)
+      ),
+    }));
+    const [showTutorial, setShowTutorial] = useState(false);
+    const [keyValuePairs, setKeyValuePairs] = useState([]);
+    const [isFormData, setIsFormData] = useState(true);
+    const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
+    const [height, setHeight] = useState(0); // Dynamic height state
+    const [error, setError] = useState(false);
+    const dispatch = useDispatch();
+    const accordionContentRef = useRef(null); // Ref for the accordion content
+    const isOpeningRef = useRef(false); // To track if the accordion is opening
+    const handleTutorial = () => {
+    setShowTutorial(isFirstVariable);
+  };
+    
+ const handleVideoEnd = async () => {
+  try {
+    await updateOnBoardingDetails(dispatch,params.org_id,currentOrg,"Addvariables");
+    setShowTutorial(false);
+  } catch (error) {
+    console.error("Failed to update full organization:", error);
+  }
+};
 
   const updateVersionVariable = (updatedPairs) => {
     const filteredPairs = updatedPairs ? updatedPairs?.filter(pair =>
@@ -222,13 +246,48 @@ const AddVariable = ({ params }) => {
       {/* Accordion Toggle Button */}
       <button
         className="flex items-center cursor-pointer focus:outline-none"
-        onClick={toggleAccordion}
+        onClick={() => {
+          handleTutorial();
+          toggleAccordion();
+        }}
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
       >
-        <span className="mr-2 text-nowrap font-medium">
-          Add Variables
-        </span>
+        {showTutorial && (
+         <div className="fixed inset-0 z-[99999] bg-black bg-opacity-70 flex items-center justify-center">
+          <button
+            onClick={() => handleVideoEnd()}
+            className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
+            aria-label="Close Tutorial"
+          >
+            &times;
+          </button>
+
+          <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
+             <iframe
+                src="https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2"
+                loading="lazy"
+                title="AI-middleware"
+                allow="clipboard-write"
+                frameBorder="0"
+                webkitallowfullscreen="true"
+                mozallowfullscreen="true"
+                allowFullScreen
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+                className="rounded-xl"
+              />
+          </div>
+        </div>
+  )
+}
+        
+        <span className="mr-2 text-nowrap font-medium">Add Variables</span>
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </button>
 
