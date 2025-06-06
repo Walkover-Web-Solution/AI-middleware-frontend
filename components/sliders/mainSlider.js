@@ -1,7 +1,7 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TestTubeDiagonal, TriangleAlert, UserPlus } from 'lucide-react';
+import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, MessageSquareMore, PlugZap, Settings2, TriangleAlert, UserPlus } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
@@ -43,23 +43,23 @@ function MainSlider() {
   };
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleMainSidebar = () => toggleSidebar("main-sidebar");
-  
+
   // Fixed handler for switch organization
   const handleSwitchOrganization = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Close the drawer first
     const drawer = document.getElementById("my-drawer-2");
     if (drawer) {
       drawer.checked = false;
     }
-    
+
     // Small delay to ensure drawer closes properly before toggling org sidebar
     setTimeout(() => {
       toggleOrgSidebar();
     }, 100);
-    
+
     // Remove focus to prevent focus issues
     e.target.blur();
   };
@@ -104,6 +104,19 @@ function MainSlider() {
               </ul>
             </div>
             <div className='mt-auto'>
+              <a
+                href="https://gtwy.featurebase.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium "
+              >
+                <div className="mt-4 rounded-lg border-t border-base-300 bg-base-100">
+                  <div className="p-4 flex items-center gap-2">
+                    <MessageSquareMore size={16} />
+                    Feedback
+                  </div>
+                </div>
+              </a>
               <details
                 className="overflow-hidden rounded-lg border-t border-gray-300 [&_summary::-webkit-details-marker]:hidden"
               >
@@ -125,7 +138,10 @@ function MainSlider() {
                     <li ><a className='py-2 px-2 rounded-md' onClick={logoutHandler}> <LogOut size={16} />  logout</a></li>
                   </ul>
                 </div>
+                
               </details>
+              
+             
             </div>
           </div >
         </div >
