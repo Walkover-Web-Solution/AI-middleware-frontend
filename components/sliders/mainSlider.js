@@ -43,23 +43,23 @@ function MainSlider() {
   };
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleMainSidebar = () => toggleSidebar("main-sidebar");
-  
+
   // Fixed handler for switch organization
   const handleSwitchOrganization = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Close the drawer first
     const drawer = document.getElementById("my-drawer-2");
     if (drawer) {
       drawer.checked = false;
     }
-    
+
     // Small delay to ensure drawer closes properly before toggling org sidebar
     setTimeout(() => {
       toggleOrgSidebar();
     }, 100);
-    
+
     // Remove focus to prevent focus issues
     e.target.blur();
   };
@@ -105,19 +105,18 @@ function MainSlider() {
             </div>
             <div className='mt-auto'>
               <a
-                    href="https://gtwy.featurebase.app/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium "
-                  >
-              <div className="mt-4 rounded-lg border-t border-gray-300 bg-white">
-                <div className="p-4 flex items-center gap-2">
-                  <MessageSquareMore size={16} />
-                  
-                   Feedback                  
+                href="https://gtwy.featurebase.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium "
+              >
+                <div className="mt-4 rounded-lg border-t border-base-300 bg-base-100">
+                  <div className="p-4 flex items-center gap-2">
+                    <MessageSquareMore size={16} />
+                    Feedback
+                  </div>
                 </div>
-              </div>
-                   </a>
+              </a>
               <details
                 className="overflow-hidden rounded-lg border-t border-gray-300 [&_summary::-webkit-details-marker]:hidden"
               >
