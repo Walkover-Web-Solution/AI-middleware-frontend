@@ -3,7 +3,7 @@ import CopyButton from '@/components/copyButton/copyButton';
 import { useCloseSliderOnEsc } from '@/components/historyPageComponents/assistFile';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { generateAccessKeyAction } from '@/store/action/orgAction';
-import { Copy, Check, CircleX } from 'lucide-react';
+import {  CloseCircleIcon } from '@/components/Icons';
 import React, { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -119,7 +119,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
                 onClick={() => setOpenKnowledgeBaseSlider(false)}
                 className="absolute top-4 right-4 p-2 rounded-full hover:bg-base-300 transition-colors"
             >
-                <CircleX />
+                <CloseCircleIcon />
             </button>
 
             {/* Step 1 */}

@@ -1,9 +1,10 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TestTubeDiagonal, TriangleAlert, UserPlus } from 'lucide-react';
+import { SettingsIcon, KeyIcon, KeyRoundIcon, LineChartIcon, LogoutIcon, MailIcon, PlugIcon, TriangleWarningIcon, AddUserIcon, SettingsAltIcon } from '@/components/Icons';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
+import { AlignIcon, BookIcon, BotIcon, BuildingIcon, ChevronDownIcon } from '@/components/Icons';
 
 function MainSlider() {
   const pathName = usePathname();
@@ -16,15 +17,15 @@ function MainSlider() {
   }));
 
   const Icons = {
-    org: <Building2 />,
-    agents: <PlugZap />,
-    chatbot: <Bot />,
-    pauthkey: <KeyRound />,
-    apikeys: <Key />,
-    alerts: <TriangleAlert />,
-    invite: <UserPlus />,
-    metrics: <LineChart />,
-    knowledge_base: <BookText />
+    org: <BuildingIcon />,
+    agents: <PlugIcon />,
+    chatbot: <BotIcon />,
+    pauthkey: <KeyRoundIcon />,
+    apikeys: <KeyIcon />,
+    alerts: <TriangleWarningIcon />,
+    invite: <AddUserIcon />,
+    metrics: <LineChartIcon />,
+    knowledge_base: <BookIcon />
   }
 
   const logoutHandler = async () => {
@@ -67,7 +68,7 @@ function MainSlider() {
   return (
     <div className="relative">
       <label htmlFor="my-drawer-2" className="drawer-button lg:hidden z-0 absolute top-3 left-1">
-        <AlignJustify size={24} onClick={toggleMainSidebar} />
+        <AlignIcon size={24} onClick={toggleMainSidebar} />
       </label> <div className={`drawer lg:drawer-open relative z-[101] lg:z-0`}>
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col">
@@ -110,19 +111,19 @@ function MainSlider() {
                 <summary
                   className="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition"
                 >
-                  <span className="text-sm font-medium flex justify-center items-center gap-2"> <Settings2 size={16} /> Setting </span>
+                  <span className="text-sm font-medium flex justify-center items-center gap-2"> <SettingsAltIcon size={16} /> Setting </span>
 
                   <span className="transition group-open:-rotate-180">
-                    <ChevronDown strokeWidth={1.25} />
+                    <ChevronDownIcon strokeWidth={1.25} />
                   </span>
                 </summary>
 
                 <div className="border-t border-gray-200 bg-white">
                   <ul className="menu w-full   text-base-content">
-                    <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
-                    <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/userDetails`) }}> <Cog size={16} />Update User Details</a> </li>
-                    <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <Cog size={16} /> Workspace Setting</a> </li>
-                    <li ><a className='py-2 px-2 rounded-md' onClick={logoutHandler}> <LogOut size={16} />  logout</a></li>
+                    <li> <a className='py-2 px-2 rounded-md'> <MailIcon size={16} /> {userdetails.email}</a> </li>
+                    <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/userDetails`) }}> <SettingsIcon size={16} />Update User Details</a> </li>
+                    <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <SettingsIcon size={16} /> Workspace Setting</a> </li>
+                    <li ><a className='py-2 px-2 rounded-md' onClick={logoutHandler}> <LogoutIcon size={16} />  logout</a></li>
                   </ul>
                 </div>
               </details>

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { X, Clock, User, FileText, ShieldCheck } from "lucide-react";
+import { CloseIcon, ClockIcon, UserIcon, FileTextIcon, SecurityIcon } from "@/components/Icons";
 import { toggleSidebar } from "@/utils/utility";
 import { getBridgeConfigHistory } from "@/config";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -73,10 +73,10 @@ function ConfigHistorySlider({ versionId }) {
       <div className="flex flex-col w-full gap-4">
         <div className="flex justify-between items-center border-b pb-4">
           <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
+            <FileTextIcon className="w-5 h-5" />
             <p className="text-xl font-semibold">Updates History</p>
           </div>
-          <X
+          <CloseIcon
             className="cursor-pointer hover:text-error transition-colors"
             onClick={handleCloseConfigHistorySlider}
           />
@@ -114,17 +114,17 @@ function ConfigHistorySlider({ versionId }) {
                     >
                       <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
-                          <ShieldCheck className="w-5 h-5 text-success" />
+                          <SecurityIcon className="h-5 w-5 text-success" />
                           <span className="text-lg font-medium">
                             {item?.type}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <User className="w-4 h-4" />
+                          <UserIcon className="w-4 h-4" />
                           <span>{item?.user_name || "Unknown User"}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <Clock className="w-4 h-4" />
+                          <ClockIcon className="w-4 h-4" />
                           <span>{formatTime(item?.time)}</span>
                         </div>
                       </div>
@@ -132,7 +132,7 @@ function ConfigHistorySlider({ versionId }) {
                   ))
                 ) : (
                   <div className="text-center py-8 text-gray-500">
-                    <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <FileTextIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p>No history available</p>
                   </div>
                 )}

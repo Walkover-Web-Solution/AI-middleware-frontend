@@ -1,6 +1,6 @@
 import { MODAL_TYPE } from '@/utils/enums'
 import { closeModal } from '@/utils/utility'
-import { CircleX } from 'lucide-react'
+import { CloseCircleIcon } from '@/components/Icons'
 import React from 'react'
 
 const flattenMessage = (message) => {
@@ -55,7 +55,7 @@ const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
               className="btn focus:outline:none hover:bg-base-300 transition-colors duration-200 border-0 rounded-full"
               onClick={() => closeModal(MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL)}
             >
-              <CircleX size={24} />
+              <CloseCircleIcon size={24} />
             </button>
           </div>
 

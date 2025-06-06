@@ -1,7 +1,7 @@
 import { getOrCreateNotificationAuthKey } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateTriggerDataReducer } from "@/store/reducer/bridgeReducer";
-import { Plus } from "lucide-react";
+import { AddIcon } from "@/components/Icons";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -98,7 +98,7 @@ export default function TriggersList({ params }) {
 
     return (
         <div className="w-full">
-            <button tabIndex={0} className="btn btn-outline btn-sm mb-2" onClick={() => { openTrigger() }}><Plus size={16} />Connect Trigger</button>
+            <button tabIndex={0} className="btn btn-outline btn-sm mb-2" onClick={() => { openTrigger() }}><AddIcon size={16} />Connect Trigger</button>
             <div className="flex flex-wrap gap-4">
                 {triggers?.length ? (triggers?.map(trigger => {
                     return (

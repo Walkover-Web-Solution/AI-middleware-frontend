@@ -1,4 +1,4 @@
-import { MoveDown } from "lucide-react";
+import { MoveDownIcon } from "@/components/Icons";
 import React, { useState, useMemo } from "react";
 
 const CustomTable = ({
@@ -104,7 +104,7 @@ const CustomTable = ({
                             >
                                 <div className="flex items-center">
                                     {sorting && sortableColumns.includes(column) && (
-                                        <MoveDown
+                                        <MoveDownIcon
                                             className={`w-4 h-4 cursor-pointer ${activeColumn === column
                                                 ? "text-black"
                                                 : "text-[#BCBDBE] group-hover:text-black"

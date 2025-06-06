@@ -1,7 +1,7 @@
 import InfoModel from '@/components/infoModel';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
-import { Info, Plus } from 'lucide-react';
+import { InfoIcon, AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
@@ -76,7 +76,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                             title="Add Pre Function"
                             className=" border border-gray-300 rounded-lg p-1 hover:bg-gray-100 transition-colors"
                         >
-                            <Plus size={18} className="text-black" />
+                            <AddIcon size={18} className="text-black" />
                         </button>
                     </div>
                 ) : (
@@ -85,14 +85,14 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         disabled={!shouldToolsShow}
                         className="btn btn-outline btn-sm"
                     >
-                        <Plus size={16} />
+                        <AddIcon size={16} />
                         {"Connect function"}
                     </button>
                 )}
                 {
                     !shouldToolsShow &&
                     <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                        <Info size={16} className="flex-shrink-0 mt-0.5" />
+                        <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                         <span className='label-text-alt text-xs leading-tight'>
                             {`The ${modelName} does not support ${name?.toLowerCase()?.includes('pre function') ? 'pre functions' : 'functions'} calling`}
                         </span>
@@ -125,7 +125,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         }
                     )}>
                         <div>
-                            <Plus size={16} /><p className='font-semibold'>{name === "preFunction" ? "Add new Pre Function" : "Add new Function"}</p>
+                            <AddIcon size={16} /><p className='font-semibold'>Add new Function</p>
                         </div>
                     </li>}
                 </div>
