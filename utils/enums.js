@@ -339,7 +339,7 @@ export const MODAL_TYPE = {
   TESTCASE_MODAL: "TESTCASE_MODAL",
   DEMO_MODAL: "DEMO_MODAL",
   ADD_TEST_CASE_MODAL: "ADD_TEST_CASE_MODAL",
-  HISTORY_PAGE_PROMPT_UPDATE_MODAL : "HISTORY_PAGE_PROMPT_UPDATE_MODAL",
+  HISTORY_PAGE_PROMPT_UPDATE_MODAL: "HISTORY_PAGE_PROMPT_UPDATE_MODAL",
   AGENT_DESCRIPTION_MODAL: "AGENT_DESCRIPTION_MODAL",
   AGENT_VARIABLE_MODAL: "AGENT_VARIABLE_MODAL"
 }
@@ -460,13 +460,13 @@ export const FEATURE_DATA = [
     icon: "/live.svg"
   },
 ]
-export const ONBOARDING_VIDEOS={
-     bridgeCreation:"https://video-faq.viasocket.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2",
-     FunctionCreation:"https://video-faq.viasocket.com/embed/cm9tkq1kj0nmb11m7j6kw8r02?embed_v=2&autoplay=1&mute=1", 
-     knowledgeBase:"https://video-faq.viasocket.com/embed/cm9tl9dpo0oeh11m7dz1bipq5?embed_v=2",
-     Addvariables:"https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2",
-     AdvanceParameter:"https://video-faq.viasocket.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2",
-     PauthKey:"https://video-faq.viasocket.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2"
+export const ONBOARDING_VIDEOS = {
+  bridgeCreation: "https://app.supademo.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2",
+  FunctionCreation: "https://app.supademo.com/embed/cm9tkq1kj0nmb11m7j6kw8r02?embed_v=2&autoplay=1&mute=1",
+  knowledgeBase: "https://app.supademo.com/embed/cm9tl9dpo0oeh11m7dz1bipq5?embed_v=2",
+  Addvariables: "https://app.supademo.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2",
+  AdvanceParameter: "https://app.supademo.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2",
+  PauthKey: "https://app.supademo.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2"
 }
 
 export const AGENT_SETUP_GUIDE_STEPS = [

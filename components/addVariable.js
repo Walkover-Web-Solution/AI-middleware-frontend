@@ -6,47 +6,29 @@ import { updateOnBoardingDetails } from "@/utils/utility";
 import { ChevronDown, ChevronUp, Info, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import OnBoarding from "./OnBoarding";
+import { ONBOARDING_VIDEOS } from "@/utils/enums";
 const AddVariable = ({ params }) => {
   const versionId = params.version;
-  const { variablesKeyValue, prompt, isFirstVariable, currentOrg } =
-    useCustomSelector((state) => ({
-      variablesKeyValue:
-        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
-          params?.version
-        ]?.variables || [],
-      prompt:
-        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
-          params?.version
-        ]?.configuration?.prompt || "",
-      isFirstVariable:
-        state.userDetailsReducer.userDetails?.c_companies?.find(
-          (c) => c.id === Number(params.org_id)
-        )?.meta?.onboarding.Addvariables || "",
-      currentOrg: state.userDetailsReducer.userDetails?.c_companies?.find(
-        (c) => c.id === Number(params.org_id)
-      ),
-    }));
-    const [showTutorial, setShowTutorial] = useState(false);
-    const [keyValuePairs, setKeyValuePairs] = useState([]);
-    const [isFormData, setIsFormData] = useState(true);
-    const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
-    const [height, setHeight] = useState(0); // Dynamic height state
-    const [error, setError] = useState(false);
-    const dispatch = useDispatch();
-    const accordionContentRef = useRef(null); // Ref for the accordion content
-    const isOpeningRef = useRef(false); // To track if the accordion is opening
-    const handleTutorial = () => {
+  const { variablesKeyValue, prompt, isFirstVariable, currentOrg } = useCustomSelector((state) => ({
+    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
+    prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+    isFirstVariable: state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(params.org_id))?.meta?.onboarding?.Addvariables || "",
+    currentOrg: state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(params.org_id)),
+  }));
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [keyValuePairs, setKeyValuePairs] = useState([]);
+  const [isFormData, setIsFormData] = useState(true);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
+  const [height, setHeight] = useState(0); // Dynamic height state
+  const [error, setError] = useState(false);
+  const dispatch = useDispatch();
+  const accordionContentRef = useRef(null); // Ref for the accordion content
+  const isOpeningRef = useRef(false); // To track if the accordion is opening
+  const handleTutorial = () => {
     setShowTutorial(isFirstVariable);
   };
-    
- const handleVideoEnd = async () => {
-  try {
-    await updateOnBoardingDetails(dispatch,params.org_id,currentOrg,"Addvariables");
-    setShowTutorial(false);
-  } catch (error) {
-    console.error("Failed to update full organization:", error);
-  }
-};
+
 
   const updateVersionVariable = (updatedPairs) => {
     const filteredPairs = updatedPairs ? updatedPairs?.filter(pair =>
@@ -247,8 +229,8 @@ const AddVariable = ({ params }) => {
       <button
         className="flex items-center cursor-pointer focus:outline-none"
         onClick={() => {
-          handleTutorial();
-          toggleAccordion();
+          handleTutorial()
+          toggleAccordion()
         }}
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
@@ -290,6 +272,9 @@ const AddVariable = ({ params }) => {
         <span className="mr-2 text-nowrap font-medium">Add Variables</span>
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </button>
+      {showTutorial && (
+        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.Addvariables} params={params} flagKey={"Addvariables"} currentOrg={currentOrg} />
+      )}
 
       {/* Accordion Content */}
       <div

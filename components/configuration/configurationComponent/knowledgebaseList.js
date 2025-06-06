@@ -11,17 +11,17 @@ import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
 
 const KnowledgebaseList = ({ params }) => {
-   const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase,currentOrg } = useCustomSelector((state) => {
-  const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
-  const org = userCompanies.find((c) => c.id === Number(params?.org_id));
+    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, currentOrg } = useCustomSelector((state) => {
+        const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
+        const org = userCompanies.find((c) => c.id === Number(params?.org_id));
 
-  return {
-    knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
-    knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
-    isFirstKnowledgeBase: org?.meta?.onboarding?.knowledgeBase,
-    currentOrg:org
-  };
-});
+        return {
+            knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
+            knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
+            isFirstKnowledgeBase: org?.meta?.onboarding?.knowledgeBase,
+            currentOrg: org
+        };
+    });
 
 
     const dispatch = useDispatch();
@@ -91,53 +91,53 @@ const KnowledgebaseList = ({ params }) => {
                 {renderKnowledgebase}
             </div>
             <div className="dropdown dropdown-right">
-                <button tabIndex={0} className="btn btn-outline btn-sm mt-0" onClick={()=>handleTutorial()}>
+                <button tabIndex={0} className="btn btn-outline btn-sm mt-0" onClick={() => handleTutorial()}>
                     <Plus size={16} />Add Knowledgebase
                 </button>
                 {showTutorial && (
                     <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.knowledgeBase} params={params} flagKey={"knowledgeBase"} currentOrg={currentOrg} />
                 )}
                 {!showTutorial && (
-                <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
-                    <div className='flex flex-col gap-2 w-full'>
-                        <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
-                        <input
-                            type='text'
-                            placeholder='Search Knowledgebase'
-                            value={searchQuery}
-                            onChange={handleInputChange}
-                            className='input input-bordered w-full input-sm'
-                        />
-                        {(Array.isArray(knowledgeBaseData) ? knowledgeBaseData : [])
-                            .filter(item =>
-                                item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) &&
-                                !knowbaseVersionData?.includes(item?._id)
-                            )
-                            .map(item => (
-                                <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
-                                    <div className="flex justify-between items-center w-full">
-                                        <div className="flex items-center gap-2">
-                                            {GetFileTypeIcon(item?.type, 16, 16)}
-                                            {item?.name.length > 20 ? (
-                                                <div className="tooltip" data-tip={item?.name}>
-                                                    {truncate(item?.name, 20)}
-                                                </div>
-                                            ) : (
-                                                truncate(item?.name, 20)
-                                            )}
+                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+                        <div className='flex flex-col gap-2 w-full'>
+                            <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
+                            <input
+                                type='text'
+                                placeholder='Search Knowledgebase'
+                                value={searchQuery}
+                                onChange={handleInputChange}
+                                className='input input-bordered w-full input-sm'
+                            />
+                            {(Array.isArray(knowledgeBaseData) ? knowledgeBaseData : [])
+                                .filter(item =>
+                                    item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) &&
+                                    !knowbaseVersionData?.includes(item?._id)
+                                )
+                                .map(item => (
+                                    <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
+                                        <div className="flex justify-between items-center w-full">
+                                            <div className="flex items-center gap-2">
+                                                {GetFileTypeIcon(item?.type, 16, 16)}
+                                                {item?.name.length > 20 ? (
+                                                    <div className="tooltip" data-tip={item?.name}>
+                                                        {truncate(item?.name, 20)}
+                                                    </div>
+                                                ) : (
+                                                    truncate(item?.name, 20)
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                </li>
-                            ))
-                        }
-                        <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => { openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL) }}>
-                            <div>
-                                <Plus size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
-                            </div>
-                        </li>
-                    </div>
-                </ul>
-      )}
+                                    </li>
+                                ))
+                            }
+                            <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => { openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL) }}>
+                                <div>
+                                    <Plus size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
+                                </div>
+                            </li>
+                        </div>
+                    </ul>
+                )}
             </div>
             <KnowledgeBaseModal params={params} />
         </div>

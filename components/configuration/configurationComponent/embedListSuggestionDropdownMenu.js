@@ -8,23 +8,23 @@ import React, { useMemo, useState } from 'react';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
     const [showTutorial, setShowTutorial] = useState(false);
-    const { integrationData, function_data, embedToken, isFirstFunction ,currentOrg} = useCustomSelector((state) => {
-  const orgId = Number(params?.org_id);
-  const orgData = state?.bridgeReducer?.org?.[orgId] || {};
-  const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
-  const currentOrg = userCompanies.find((c) => c.id === orgId);
+    const { integrationData, function_data, embedToken, isFirstFunction, currentOrg } = useCustomSelector((state) => {
+        const orgId = Number(params?.org_id);
+        const orgData = state?.bridgeReducer?.org?.[orgId] || {};
+        const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
+        const currentOrg = userCompanies.find((c) => c.id === orgId);
 
-  return {
-    integrationData: orgData.integrationData,
-    function_data: orgData.functionData,
-    embedToken: orgData.embed_token,
-    isFirstFunction: currentOrg?.meta?.onboarding?.FunctionCreation,
-    currentOrg:currentOrg
-  };
-});
-  const handleTutorial = () => {
-    setShowTutorial(isFirstFunction);
-  };
+        return {
+            integrationData: orgData.integrationData,
+            function_data: orgData.functionData,
+            embedToken: orgData.embed_token,
+            isFirstFunction: currentOrg?.meta?.onboarding?.FunctionCreation,
+            currentOrg: currentOrg
+        };
+    });
+    const handleTutorial = () => {
+        setShowTutorial(isFirstFunction);
+    };
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
@@ -114,42 +114,42 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     </div>
                 }
             </div>
-             {showTutorial && (
-       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.FunctionCreation} params={params} flagKey={"FunctionCreation"} currentOrg={currentOrg}/>
-      )}
-       {!showTutorial && (
-            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
-                <div className='flex flex-col gap-2 w-full'>
-                    <li className="text-sm font-semibold disabled">Suggested Functions</li>
-                    <input
-                        type='text'
-                        placeholder='Search Function'
-                        value={searchQuery}
-                        onChange={handleInputChange} // Update search query on input change
-                        className='input input-bordered w-full input-sm'
-                    />
-                    {Object.values(function_data || {})?.length > 0 ? (
-                        renderEmbedSuggestions
-                    ) : (
-                        <li className="text-center mt-2">No functions found</li>
-                    )}
-                    {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined,
-                        {
-                            embedToken,
-                            meta: {
-                                createFrom: name,
-                                type: 'tool',
-                                bridge_id: params?.id,
+            {showTutorial && (
+                <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.FunctionCreation} params={params} flagKey={"FunctionCreation"} currentOrg={currentOrg} />
+            )}
+            {!showTutorial && (
+                <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+                    <div className='flex flex-col gap-2 w-full'>
+                        <li className="text-sm font-semibold disabled">Suggested Functions</li>
+                        <input
+                            type='text'
+                            placeholder='Search Function'
+                            value={searchQuery}
+                            onChange={handleInputChange} // Update search query on input change
+                            className='input input-bordered w-full input-sm'
+                        />
+                        {Object.values(function_data || {})?.length > 0 ? (
+                            renderEmbedSuggestions
+                        ) : (
+                            <li className="text-center mt-2">No functions found</li>
+                        )}
+                        {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined,
+                            {
+                                embedToken,
+                                meta: {
+                                    createFrom: name,
+                                    type: 'tool',
+                                    bridge_id: params?.id,
+                                }
                             }
-                        }
-                         )}>
-                        <div>
-                            <Plus size={16} /><p className='font-semibold'>{name === "preFunction" ? "Add new Pre Function" : "Add new Function"}</p>
-                        </div>
-                    </li>}
-                </div>
-            </ul>
-       )}
+                        )}>
+                            <div>
+                                <Plus size={16} /><p className='font-semibold'>Add new Function</p>
+                            </div>
+                        </li>}
+                    </div>
+                </ul>
+            )}
         </div>
     )
 }
