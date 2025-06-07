@@ -4,7 +4,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import { ChevronDown, Info } from 'lucide-react';
+import { ChevronDown, Info, Wand2 } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
@@ -287,8 +287,9 @@ const InputConfigComponent = ({ params }) => {
               onClick={() => openModal(MODAL_TYPE.OPTIMIZE_PROMPT)}
             >
               <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
-                Optimize Prompt
+                 Improve Prompt           
               </span>
+              <Wand2 size={14} className=' ml-2'/>
             </div>
           </div>
         </div>

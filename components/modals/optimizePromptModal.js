@@ -78,7 +78,7 @@ function OptmizePromptModal({ params }) {
   return (
     <dialog id={MODAL_TYPE.OPTIMIZE_PROMPT} className="modal">
       <div className="modal-box w-11/12 max-w-7xl bg-white">
-        <h3 className="font-bold text-lg mb-4">Optmize or generate prompt</h3>
+        <h3 className="font-bold text-lg mb-4">Improve prompt</h3>
         {/* <form> */}
         <div className='flex gap-3 w-full'>
           <div className='w-full'>
@@ -122,7 +122,7 @@ function OptmizePromptModal({ params }) {
           ) : (
             <div className='w-full flex items-center justify-center'>
               <div className="w-full min-h-96 flex items-center justify-center text-gray-500">
-                Click "Optimize" to generate an AI prompt
+                Click "Improve" to generate an AI prompt
               </div>
             </div>
           )}
@@ -131,7 +131,7 @@ function OptmizePromptModal({ params }) {
           <form method="dialog">
             {/* if there is a button in form, it will close the modal */}
             <button className="btn" onClick={handleCloseModal}>Close</button>
-            <button className="btn btn-primary ml-2" disabled={loading} onClick={OptimizePrompt}>{loading && <span className="loading loading-spinner"></span>}Optimize</button>
+            <button className="btn btn-primary ml-2" disabled={loading} onClick={OptimizePrompt}>{loading && <span className="loading loading-spinner"></span>}Improve</button>
           </form>
         </div>
       </div>
