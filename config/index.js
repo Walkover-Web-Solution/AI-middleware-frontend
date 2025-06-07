@@ -982,3 +982,37 @@ export const getPrebuiltToolsApi = async () => {
     throw new Error(error);
   }
 }
+
+export const getAllAgentsApi = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/agent/all`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
+
+export const publicAgentLoginApi = async () =>{
+  try {
+    const repsonse = await axios.post(`${PYTHON_URL}/agent/public/login`)
+    localStorage.setItem('AgentToken', repsonse?.data?.token)
+    localStorage.setItem('AgentUserId',repsonse?.data?.userid)
+    return repsonse;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error);
+  }
+}
+  
+export const privateAgentLoginApi = async () => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/agent/login`)
+    localStorage.setItem('AgentToken', response?.data?.token)
+    localStorage.setItem('AgentUserId',response?.data?.userid)
+    return response;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error);
+  }
+}  

@@ -14,7 +14,6 @@ import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { updateOrgDetails } from "@/store/action/orgAction";
 import { getModelAction } from "@/store/action/modelAction";
-import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
 
