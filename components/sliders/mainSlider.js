@@ -1,7 +1,7 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, PlugZap, Settings2, TestTubeDiagonal, TriangleAlert, UserPlus } from 'lucide-react';
+import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, MessageSquareMore, PlugZap, Settings2, TriangleAlert, UserPlus } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
@@ -104,6 +104,19 @@ function MainSlider() {
               </ul>
             </div>
             <div className='mt-auto'>
+              <a
+                href="https://gtwy.featurebase.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium "
+              >
+                <div className="mt-4 rounded-lg border-t border-base-300 bg-base-100">
+                  <div className="p-4 flex items-center gap-2">
+                    <MessageSquareMore size={16} />
+                    Feedback
+                  </div>
+                </div>
+              </a>
               <details
                 className="overflow-hidden rounded-lg border-t border-gray-300 [&_summary::-webkit-details-marker]:hidden"
               >
