@@ -26,7 +26,7 @@ const GptMemory = ({ params }) => {
 
     return (
         <div>
-            <label className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
+            <div className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center gap-2'>
                     <div className="label">
                         <InfoModel tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
@@ -41,7 +41,7 @@ const GptMemory = ({ params }) => {
                         className="toggle"
                     />
                 </div>
-            </label>
+            </div>
             {gpt_memory && (
                 <textarea
                     placeholder="Please provide the context for GPT memory (e.g., instructions, preferences)"

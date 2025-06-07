@@ -96,7 +96,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     </div>
                 ) : (
                      <div className="flex flex-col  gap-2">
-                        <InfoModel tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
+                        <InfoModel video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
                         <p className=" label-text info">Configure Tool</p>
                        
                         </InfoModel>
