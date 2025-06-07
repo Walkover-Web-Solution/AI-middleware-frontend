@@ -430,11 +430,8 @@ function FunctionParameterModal({ functionId, params }) {
               </span>
             </div>
           </span>
-          <button
-            onClick={handleRemoveFunctionFromBridge}
-            className="btn btn-sm btn-error text-white"
-          >
-            <Trash2 size={16} /> Remove function
+          <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
+            <Trash2 size={16} /> Remove {preFunction ? "pre-tool" : "tool"}
           </button>
         </div>
         <div className="flex justify-between items-center">

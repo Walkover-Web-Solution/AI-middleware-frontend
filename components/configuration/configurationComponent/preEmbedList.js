@@ -96,7 +96,9 @@ const PreEmbedList = ({ params }) => {
         <div>
             <div className="form-control inline-block">
                 <div className='flex gap-5 items-center ml-2 '>
-                    <label className='label-text font-medium whitespace-nowrap'>Pre functions</label>
+                    <InfoModel tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
+                        <p className="label-text font-medium whitespace-nowrap info">Pre Tool</p>
+                    </InfoModel>
                 </div>
                 <div className="label flex-col items-start">
                     {shouldToolsShow &&

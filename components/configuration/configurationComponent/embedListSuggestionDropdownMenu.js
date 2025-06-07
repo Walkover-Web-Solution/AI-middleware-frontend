@@ -62,9 +62,41 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
     return (
         <div className="dropdown dropdown-right">
             <div className="flex items-center gap-2">
-                <button tabIndex={0} disabled={!shouldToolsShow}
-                    className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect function"}
-                </button>
+{name === "preFunction" ? (
+                    <div className=" flex flex-col  gap-2">
+                        <InfoModel tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
+                        <p className="text-base font-semibold info">Configure Pre Tool</p>
+                       
+                        </InfoModel>
+
+                        {/* Plus Icon Button */}
+                        <button
+                           tabIndex={0}
+                           disabled={!shouldToolsShow}  
+                           className="btn btn-outline btn-sm"                  
+                        >
+                                <Plus size={16} />
+                               {"Connect Pre Tools"}
+                        </button>
+                    </div>
+                ) : (
+                     <div className="flex flex-col  gap-2">
+                        <InfoModel tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
+                        <p className=" label-text info">Configure Tool</p>
+                       
+                        </InfoModel>
+
+                        {/* Plus Icon Button */}
+                       <button
+                        tabIndex={0}
+                        disabled={!shouldToolsShow}
+                        className="btn btn-outline btn-sm"
+                    >
+                        <Plus size={16} />
+                        {"Connect Tool"}
+                    </button>
+                    </div>
+                )}
                 {
                     !shouldToolsShow &&
                     <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
@@ -75,7 +107,8 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     </div>
                 }
             </div>
-            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+
+ <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                 <div className='flex flex-col gap-2 w-full'>
                     <li className="text-sm font-semibold disabled">Suggested Functions</li>
                     <input
