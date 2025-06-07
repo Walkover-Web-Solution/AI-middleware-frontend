@@ -29,6 +29,7 @@ import AddVariable from "../addVariable";
 import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
+import NewInputConfigComponent from "./configurationComponent/newInputConfigComponent";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -70,7 +71,8 @@ export default function ConfigurationPage({ params }) {
                 : true)) && (
                     <>
                         <PreEmbedList params={params} />
-                        <InputConfigComponent params={params} />
+                        {/* <InputConfigComponent params={params} /> */}
+                        <NewInputConfigComponent params={params} />
                         <EmbedList params={params} />
                         <hr className="my-0 p-0" />
                         <ConnectedAgentList params={params} />
