@@ -34,22 +34,17 @@ export const userDetailsReducer = createSlice({
         }
       }
     },
-
-    updateOnBoarding: (state, action) => {
-      const { updatedOnboarding, orgId } = action.payload;
-      if (state.userDetails?.c_companies) {
-        const index = state.userDetails.c_companies.findIndex(
-          (c) => c.id === Number(orgId)
-        );
-        if (index !== -1) {
-          const company = state.userDetails.c_companies[index];
-          if (!company.meta) {
-            company.meta = {};
+   updateUserMeta:(state,action)=>{
+        const {user_id,user} =action.payload;
+        state.userDetails = {
+          ...state.userDetails,
+          meta: {
+            ...state.userDetails.meta,
+            onboarding: user.data.data.data.user.meta.onboarding
           }
-          company.meta.onboarding = updatedOnboarding;
         }
-      }
-    }
+   },
+    
   }
 }
 );
@@ -58,6 +53,6 @@ export const {
   fetchUserDetails,
   updateUserDetails,
   updateToken,
-  updateOnBoarding
+  updateUserMeta
 } = userDetailsReducer.actions;
 export default userDetailsReducer.reducer;

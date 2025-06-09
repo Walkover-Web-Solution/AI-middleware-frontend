@@ -712,7 +712,53 @@ export const optimizeSchemaApi = async ({ data }) => {
     return error;
   }
 };
+export const updateUser = async ({ user_id, user, company_id, company }) => {
+  // Validate required fields
+  if ((company_id && !company) || (user_id && !user)) {
+    throw new Error("Both ID and data are required for either company or user update");
+  }
 
+  // Determine update type
+  const isCompanyUpdate = company_id && company;
+  const isUserUpdate = user_id && user;
+
+  if (!isCompanyUpdate && !isUserUpdate) {
+    throw new Error("Please provide either company_id with company data or user_id with user data");
+  }
+
+  // Prepare update object
+  const updateObject = isCompanyUpdate 
+    ? { company_id, company: {"meta": company?.meta} }
+    : { user_id, user: {"meta": user?.meta} };
+
+  try {
+    // Make API call
+    const response = await axios.put(
+      `${URL}/user/updateDetails`,
+      updateObject,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return {
+      message: isCompanyUpdate ? "Company details updated successfully" : "User details updated successfully",
+      data: response.data
+    };
+
+  } catch (error) {
+    console.error('Error updating details:', {
+      error: error.response?.data?.message || error.message,
+      request: {
+        url: `${URL}/updateDetails`,
+        data: updateObject
+      }
+    });
+    throw new Error(error.response?.data?.message || 'Something went wrong');
+  }
+};
 export const updateOrganizationData = async (orgId, orgDetails) => {
   const updateObject = {
     company_id: orgId,

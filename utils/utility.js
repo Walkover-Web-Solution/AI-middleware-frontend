@@ -7,7 +7,7 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import OpenRouter from "@/icons/OpenRouter";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { WebSearchIcon } from "@/icons/webSearchIcon";
-import { updateOrgDetails } from "@/store/action/orgAction";
+import {  updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { cloneDeep } from "lodash";
 
 export const updatedData = (obj1, obj2 = {}, type) => {
@@ -323,17 +323,18 @@ export const updateTitle = (newTitle) => {
     }
   };
   
-export const  updateOnBoardingDetails = async (dispatch, orgId, currentOrg, flagKey) => {
+export const  updateOnBoardingDetails = async (dispatch, user_id, currentUser, flagKey) => {
+    console.log("done1")
   if (!flagKey) throw new Error("flagKey is required");
   const updatedOrgDetails = {
-    ...currentOrg,
+    ...currentUser,
     meta: {
-      ...currentOrg?.meta,
+      ...currentUser?.meta,
       onboarding: {
-        ...currentOrg?.meta?.onboarding,
+        ...currentUser?.meta?.onboarding,
         [flagKey]: false,
       },
     },
   };
-  await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
+  await dispatch(updateUserMetaOnboarding(user_id, updatedOrgDetails));
 };

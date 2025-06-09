@@ -18,15 +18,15 @@ export const runtime = 'edge';
 
 function Page({ params }) {
   const dispatch = useDispatch();
-  const { authData, isFirstPauthCreation, currentOrg } = useCustomSelector((state) => {
-    const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
-    const orgFromId = userCompanies.find((c) => c.id === Number(params.org_id));
-    return {
-      authData: state?.authDataReducer?.authData || [],
-      isFirstPauthCreation: orgFromId?.meta?.onboarding?.PauthKey,
-      currentOrg: orgFromId
-    };
-  });
+ const { authData, isFirstPauthCreation, } = useCustomSelector((state) => {
+  const user = state.userDetailsReducer.userDetails || [];
+
+
+  return {
+    authData: state?.authDataReducer?.authData || [],
+    isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
+  };
+});
 
   const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
@@ -119,7 +119,7 @@ function Page({ params }) {
   return (
     <div className="h-full">
       {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"} currentOrg={currentOrg} />
+       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"}/>
       )}
       <MainLayout>
         <PageHeader

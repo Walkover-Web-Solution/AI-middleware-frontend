@@ -13,7 +13,7 @@ const AddVariable = ({ params }) => {
   const { variablesKeyValue, prompt, isFirstVariable, currentOrg } = useCustomSelector((state) => ({
     variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-    isFirstVariable: state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(params.org_id))?.meta?.onboarding?.Addvariables || "",
+    isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
     currentOrg: state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(params.org_id)),
   }));
   const [showTutorial, setShowTutorial] = useState(false);
@@ -273,7 +273,7 @@ const AddVariable = ({ params }) => {
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </button>
       {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.Addvariables} params={params} flagKey={"Addvariables"} currentOrg={currentOrg} />
+        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.Addvariables}  flagKey={"Addvariables"}  />
       )}
 
       {/* Accordion Content */}

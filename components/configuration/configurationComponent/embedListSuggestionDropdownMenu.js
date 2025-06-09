@@ -78,31 +78,40 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
         <div className="dropdown dropdown-right">
             <div className="flex items-center gap-2">
                 {name === "preFunction" ? (
-                    <div className="flex items-center gap-2">
-                        <InfoModel tooltipContent={"A prefunction prepares data before passing it to the main function for the GPT call"}>
-                        <p className="text-base font-semibold info">Select Pre function</p>
+                    <div className=" flex flex-col  gap-2">
+                        <InfoModel tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
+                        <p className="text-base font-semibold info">Configure Pre Tool</p>
                        
                         </InfoModel>
 
                         {/* Plus Icon Button */}
                         <button
-                            disabled={!shouldToolsShow}
-                            title="Add Pre Function"
-                            className=" border border-gray-300 rounded-lg p-1 hover:bg-gray-100 transition-colors"
+                           tabIndex={0}
+                           disabled={!shouldToolsShow}  
+                           className="btn btn-outline btn-sm"                  
                         >
-                            <Plus size={18} className="text-black" />
+                                <Plus size={16} />
+                               {"Connect Pre Tools"}
                         </button>
                     </div>
                 ) : (
-                    <button
+                     <div className="flex flex-col  gap-2">
+                        <InfoModel video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
+                        <p className=" label-text info">Configure Tool</p>
+                       
+                        </InfoModel>
+
+                        {/* Plus Icon Button */}
+                       <button
                         tabIndex={0}
                         disabled={!shouldToolsShow}
                         onClick={() => handleTutorial()}
                     className="btn btn-outline btn-sm"
                     >
                         <Plus size={16} />
-                        {"Connect function"}
+                        {"Connect Tool"}
                     </button>
+                    </div>
                 )}
                 {
                     !shouldToolsShow &&
@@ -120,7 +129,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             {!showTutorial && (
                 <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                     <div className='flex flex-col gap-2 w-full'>
-                        <li className="text-sm font-semibold disabled">Suggested Functions</li>
+                        <li className="text-sm font-semibold disabled">Suggested Tools</li>
                         <input
                             type='text'
                             placeholder='Search Function'
@@ -131,7 +140,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         {Object.values(function_data || {})?.length > 0 ? (
                             renderEmbedSuggestions
                         ) : (
-                            <li className="text-center mt-2">No functions found</li>
+                            <li className="text-center mt-2">No tools found</li>
                         )}
                         {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined,
                             {
@@ -144,7 +153,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                             }
                         )}>
                             <div>
-                                <Plus size={16} /><p className='font-semibold'>Add new Function</p>
+                                <Plus size={16} /><p className='font-semibold'>Add new Tools</p>
                             </div>
                         </li>}
                     </div>

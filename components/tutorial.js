@@ -1,25 +1,11 @@
-import { useCustomSelector } from '@/customHooks/customSelector';
-import {updateOnBoardingDetails } from '@/utils/utility';
-import React, { useEffect } from 'react'
-import { useDispatch } from 'react-redux';
+import React from 'react'
 
-const OnBoarding = ({video,setShowTutorial,flagKey}) => {
-  const { currentUser} = useCustomSelector((state) => ({
-    currentUser:state.userDetailsReducer?.userDetails
-  }));
+const Tutorial = ({video,setShowTutorial}) => {
 
- const dispatch= useDispatch();
-  const handleVideoEnd =async() => {
-     try {
-         setShowTutorial(false);
-         await updateOnBoardingDetails(dispatch,currentUser.id,currentUser,flagKey);
+   const handleVideoEnd =async() => {
+        setShowTutorial(false);
          
-           } catch (error) {
-             console.error("Failed to update full organization:", error);
-           }
-};
- 
-  
+ };
   return (
    <div className="fixed inset-0 z-[99999999]  bg-black bg-opacity-70 flex items-center justify-center">
           <button
@@ -55,4 +41,4 @@ const OnBoarding = ({video,setShowTutorial,flagKey}) => {
   )
 }
 
-export default OnBoarding
+export default Tutorial

@@ -9,6 +9,7 @@ import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import GoogleDocIcon from '@/icons/GoogleDocIcon';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
+import InfoModel from '@/components/infoModel';
 
 const KnowledgebaseList = ({ params }) => {
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, currentOrg } = useCustomSelector((state) => {
@@ -90,7 +91,12 @@ const KnowledgebaseList = ({ params }) => {
             <div className="flex flex-wrap gap-4 mb-4">
                 {renderKnowledgebase}
             </div>
+                 <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
+                        <p className=" label-text info mb-2">Configure Knowledgebase</p>
+                 </InfoModel>
             <div className="dropdown dropdown-right">
+                
+                       
                 <button tabIndex={0} className="btn btn-outline btn-sm mt-0" onClick={() => handleTutorial()}>
                     <Plus size={16} />Add Knowledgebase
                 </button>

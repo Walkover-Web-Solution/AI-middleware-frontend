@@ -158,7 +158,7 @@ function CreateNewBridge({ orgid }) {
       <div>
         {isLoading && <LoadingSpinner />}
         <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
-          <div className="bg-base-100 px-2 md:px-10 py-4 md:py-4 rounded-lg max-w-[90%] md:max-w-[80%] overflow-auto max-h-[98vh] mx-auto">
+          <div className="bg-base-100 px-2 z-0 md:px-10 py-4 md:py-4 rounded-lg max-w-[90%] md:max-w-[80%] overflow-auto max-h-[98vh] mx-auto">
             <h3 className="font-bold text-xl md:text-xl text-gray-800 pl-2">
               Create Agent
             </h3>
