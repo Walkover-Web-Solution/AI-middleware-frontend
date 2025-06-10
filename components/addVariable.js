@@ -225,7 +225,6 @@ const AddVariable = ({ params }) => {
 
   return (
     <div className="collapse text-base-content" tabIndex={0}>
-      {/* Accordion Toggle Button */}
       <button
         className="flex items-center cursor-pointer focus:outline-none"
         onClick={() => {
@@ -235,45 +234,11 @@ const AddVariable = ({ params }) => {
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
       >
-        {showTutorial && (
-         <div className="fixed inset-0 z-[99999] bg-black bg-opacity-70 flex items-center justify-center">
-          <button
-            onClick={() => handleVideoEnd()}
-            className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
-            aria-label="Close Tutorial"
-          >
-            &times;
-          </button>
-
-          <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
-             <iframe
-                src="https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2"
-                loading="lazy"
-                title="AI-middleware"
-                allow="clipboard-write"
-                frameBorder="0"
-                webkitallowfullscreen="true"
-                mozallowfullscreen="true"
-                allowFullScreen
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                }}
-                className="rounded-xl"
-              />
-          </div>
-        </div>
-  )
-}
-        
         <span className="mr-2 text-nowrap font-medium">Add Variables</span>
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </button>
       {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.Addvariables}  flagKey={"Addvariables"}  />
+        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
       )}
 
       {/* Accordion Content */}
