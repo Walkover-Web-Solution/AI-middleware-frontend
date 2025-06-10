@@ -23,9 +23,9 @@ axios.interceptors.response.use(
     },
     async function (error) {
         if (error?.response?.status === 401) {
-            // localStorage.clear();
+            localStorage.clear();
             localStorage.setItem("previous_url", window.location.href);           
-            // window.location.href = "/login";
+            window.location.href = "/login";
         }
         return Promise.reject(error);
     }
