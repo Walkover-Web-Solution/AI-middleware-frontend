@@ -10,11 +10,10 @@ import OnBoarding from "./OnBoarding";
 import { ONBOARDING_VIDEOS } from "@/utils/enums";
 const AddVariable = ({ params }) => {
   const versionId = params.version;
-  const { variablesKeyValue, prompt, isFirstVariable, currentOrg } = useCustomSelector((state) => ({
+  const { variablesKeyValue, prompt, isFirstVariable,  } = useCustomSelector((state) => ({
     variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
     isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
-    currentOrg: state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(params.org_id)),
   }));
   const [showTutorial, setShowTutorial] = useState(false);
   const [keyValuePairs, setKeyValuePairs] = useState([]);

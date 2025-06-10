@@ -3,23 +3,23 @@ import InfoModel from '@/components/infoModel';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ONBOARDING_VIDEOS } from '@/utils/enums';
 import { getStatusClass } from '@/utils/utility';
+import { current } from '@reduxjs/toolkit';
 import { Info, Plus } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
     const [showTutorial, setShowTutorial] = useState(false);
-    const { integrationData, function_data, embedToken, isFirstFunction, currentOrg } = useCustomSelector((state) => {
+    const { integrationData, function_data, embedToken, isFirstFunction } = useCustomSelector((state) => {
         const orgId = Number(params?.org_id);
         const orgData = state?.bridgeReducer?.org?.[orgId] || {};
-        const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
-        const currentOrg = userCompanies.find((c) => c.id === orgId);
+        const currentUser = state.userDetailsReducer.userDetails
 
         return {
             integrationData: orgData.integrationData,
             function_data: orgData.functionData,
             embedToken: orgData.embed_token,
-            isFirstFunction: currentOrg?.meta?.onboarding?.FunctionCreation,
-            currentOrg: currentOrg
+            isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
+            
         };
     });
     const handleTutorial = () => {
@@ -124,7 +124,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 }
             </div>
             {showTutorial && (
-                <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.FunctionCreation} params={params} flagKey={"FunctionCreation"} currentOrg={currentOrg} />
+                <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.FunctionCreation}  flagKey={"FunctionCreation"} />
             )}
             {!showTutorial && (
                 <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
