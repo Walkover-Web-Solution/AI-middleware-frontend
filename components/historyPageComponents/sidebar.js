@@ -121,7 +121,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     } else {
       setExpandedThreads([threadId]);
       setLoadingSubThreads(true);
-      await dispatch(getSubThreadsAction({ thread_id: threadId, error: isErrorTrue }));
+      await dispatch(getSubThreadsAction({ thread_id: threadId, error: isErrorTrue, bridge_id: params.id }));
       setLoadingSubThreads(false);
     }
   };
