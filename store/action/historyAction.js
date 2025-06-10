@@ -41,9 +41,9 @@ export const userFeedbackCountAction = ({bridge_id,user_feedback}) => async(disp
   }
 }
 
-export const getSubThreadsAction = ({thread_id, error}) => async (dispatch) =>{
+export const getSubThreadsAction = ({thread_id, error, bridge_id}) => async (dispatch) =>{
   try {
-    const data = await getSubThreadIds({thread_id, error});
+    const data = await getSubThreadIds({thread_id, error, bridge_id});
     dispatch(fetchSubThreadReducer({data:data.threads}))
 
   } catch (error) {
