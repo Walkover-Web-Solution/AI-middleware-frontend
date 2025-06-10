@@ -114,8 +114,7 @@ function Page({ searchParams }) {
       if (item?.role === "assistant") return;
       if ((item?.role === "user" || item?.role === "tools_call") && !thread_id) {
         try {
-          const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
-          setSelectedItem({ variables: item.variables, "System Prompt": systemPromptResponse, ...item, value});
+          setSelectedItem({ variables: item.variables, ...item, value});
           if(value === 'system Prompt' || value === 'more' || item?.[value] === null)
             setIsSliderOpen(true);
         } catch (error) {
