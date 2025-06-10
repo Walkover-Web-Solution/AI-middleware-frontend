@@ -12,15 +12,12 @@ import OnBoarding from '@/components/OnBoarding';
 import InfoModel from '@/components/infoModel';
 
 const KnowledgebaseList = ({ params }) => {
-    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, currentOrg } = useCustomSelector((state) => {
-        const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
-        const org = userCompanies.find((c) => c.id === Number(params?.org_id));
-
+    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, } = useCustomSelector((state) => {
+        const user = state.userDetailsReducer.userDetails||[]
         return {
             knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
             knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
-            isFirstKnowledgeBase: org?.meta?.onboarding?.knowledgeBase,
-            currentOrg: org
+            isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
         };
     });
 
@@ -101,7 +98,7 @@ const KnowledgebaseList = ({ params }) => {
                     <Plus size={16} />Add Knowledgebase
                 </button>
                 {showTutorial && (
-                    <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.knowledgeBase} params={params} flagKey={"knowledgeBase"} currentOrg={currentOrg} />
+                    <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
                 )}
                 {!showTutorial && (
                     <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">

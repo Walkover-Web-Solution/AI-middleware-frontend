@@ -7,7 +7,6 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import OpenRouter from "@/icons/OpenRouter";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { WebSearchIcon } from "@/icons/webSearchIcon";
-import { updateOrgDetails } from "@/store/action/orgAction";
 import { cloneDeep } from "lodash";
 
 export const updatedData = (obj1, obj2 = {}, type) => {
@@ -319,21 +318,7 @@ export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
 
 export const updateTitle = (newTitle) => {
     if (typeof document !== 'undefined' && newTitle) {
-      document.title = newTitle;
+        document.title = newTitle;
     }
   };
   
-export const  updateOnBoardingDetails = async (dispatch, orgId, currentOrg, flagKey) => {
-  if (!flagKey) throw new Error("flagKey is required");
-  const updatedOrgDetails = {
-    ...currentOrg,
-    meta: {
-      ...currentOrg?.meta,
-      onboarding: {
-        ...currentOrg?.meta?.onboarding,
-        [flagKey]: false,
-      },
-    },
-  };
-  await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
-};
