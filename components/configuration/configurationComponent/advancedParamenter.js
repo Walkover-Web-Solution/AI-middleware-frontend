@@ -20,17 +20,16 @@ const AdvancedParameters = ({ params }) => {
   const [showTutorial, setShowTutorial] = useState(false);
   const dispatch = useDispatch();
 
-  const { service, version_function_data, configuration, integrationData, isFirstParameter, currentOrg } = useCustomSelector((state) => {
+  const { service, version_function_data, configuration, integrationData, isFirstParameter } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
-    const currentOrg = state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(params.org_id))
+    const user = state.userDetailsReducer.userDetails
     return {
       version_function_data: versionData?.apiCalls,
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
-      currentOrg: currentOrg,
-      isFirstParameter: currentOrg?.meta?.onboarding?.AdvanceParameter
+      isFirstParameter:user?.meta?.onboarding?.AdvanceParameter
     };
   });
   const { tool_choice: tool_choice_data, type, model } = configuration || {};
@@ -175,7 +174,7 @@ const AdvancedParameters = ({ params }) => {
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </div>
       {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.AdvanceParameter} params={params} flagKey={"AdvanceParameter"} currentOrg={currentOrg} />
+        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.AdvanceParameter}  flagKey={"AdvanceParameter"}  />
       )}
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 

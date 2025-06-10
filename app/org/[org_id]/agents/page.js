@@ -23,18 +23,16 @@ function Home({ params }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, currentOrg } = useCustomSelector((state) => {
+  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[params.org_id] || {};
-    const userCompany = state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(params?.org_id)) || {};
+    const user = state.userDetailsReducer.userDetails
     return {
       allBridges: (orgData.orgs || []).slice().reverse(),
       averageResponseTime: orgData.average_response_time || [],
       isLoading: state.bridgeReducer.loading,
-      isFirstBridgeCreation: userCompany.meta?.onboarding?.bridgeCreation || "",
-      currentOrg: userCompany
+      isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
     };
   });
-
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
   const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation);
@@ -216,7 +214,7 @@ function Home({ params }) {
   return (
     <div className="w-full">
       {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.bridgeCreation} params={params} flagKey={"bridgeCreation"} currentOrg={currentOrg} />
+        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.bridgeCreation} flagKey={"bridgeCreation"} />
       )}
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}

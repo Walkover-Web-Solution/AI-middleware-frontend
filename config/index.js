@@ -713,6 +713,17 @@ export const optimizeSchemaApi = async ({ data }) => {
   }
 };
 
+export const updateUser = async ({ user_id, user }) => {
+  const updateObject = { user_id, user: {"meta": user?.meta} };
+  try {
+    const response = await axios.put(`${URL}/user/updateDetails`, updateObject);
+    return response?.data;
+  } catch (error) {
+    console.error('Error updating details:', error.response?.data?.message || error.message);
+    throw new Error(error.response?.data?.message || 'Something went wrong');
+  }
+};
+
 export const updateOrganizationData = async (orgId, orgDetails) => {
   const updateObject = {
     company_id: orgId,
