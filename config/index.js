@@ -781,6 +781,15 @@ export const getAllKnowBaseData = async () => {
     return error;
   }
 };
+export const getKnowBaseToken = async () => {
+  try {
+    const response = await axios.get(`${URL}/rag/docs/token`);
+    return response?.data?.result;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
 
 export const deleteKnowBaseData = async (data) => {
   try {

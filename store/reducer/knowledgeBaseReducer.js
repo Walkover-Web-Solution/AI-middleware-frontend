@@ -9,6 +9,9 @@ export const knowledgeBaseReducer = createSlice({
   name: "knowledgeBase",
   initialState,
   reducers: {
+    fetchKnowlegdeBaseToken:(state,action)=>{
+      state.knowledgeBaseData[action.payload.orgId]=action.payload.data;
+    },
     fetchAllKnowlegdeBaseData: (state, action) => {
       state.knowledgeBaseData[action.payload.orgId] = action.payload.data;
       state.loading = false;
@@ -42,7 +45,8 @@ export const {
   fetchAllKnowlegdeBaseData,
   addKnowbaseDataReducer,
   deleteKnowledgeBaseReducer,
-  updateKnowledgeBaseReducer
+  updateKnowledgeBaseReducer,
+  fetchKnowlegdeBaseToken
 } = knowledgeBaseReducer.actions;
 
 export default knowledgeBaseReducer.reducer;

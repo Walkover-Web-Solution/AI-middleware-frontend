@@ -11,7 +11,7 @@ import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
-import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
+import { getAllKnowBaseDataAction, getKnowledgeBaseToken } from "@/store/action/knowledgeBaseAction";
 import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
@@ -122,9 +122,41 @@ function layoutOrgPage({ children, params }) {
     }
   }, [isValidOrg, dispatch, params?.org_id]);
 
+  
   const scriptId = "chatbot-main-script";
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
+   useEffect(() => {
+    if (isValidOrg) {
+      const updateScript = (token) => {
+        const existingScript = document.getElementById("rag-main-script");
+        if (existingScript) {
+          document.head.removeChild(existingScript);
+        }
+        if (token) {
+          console.log('hel')
+          const script = document.createElement("script");
+          script.setAttribute("embedToken", token);
+          script.setAttribute("parentId",'knowBase-embed');
+          script.id =  "rag-main-script";
+          script.src = "https://chatbot.gtwy.ai/rag-local.js";
+          document.head.appendChild(script);
+        }
+      };
 
+     dispatch(getKnowledgeBaseToken(params.org_id)).then(e => {
+        const KnowBasetoken = e?.response
+        if (KnowBasetoken ) updateScript(KnowBasetoken);
+      })
+
+      return () => {
+          const existingScript = document.getElementById(scriptId);
+          if (existingScript) {
+            document.head.removeChild(existingScript);
+          }
+        }
+     
+    }
+  }, [isValidOrg]);
   useEffect(() => {
     if (isValidOrg) {
       const updateScript = (token) => {
