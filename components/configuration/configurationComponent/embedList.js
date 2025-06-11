@@ -76,7 +76,7 @@ const EmbedList = ({ params }) => {
         }
     };
 
-    if (modelType === 'reasoning' && !PROMPT_SUPPORTED_REASIONING_MODELS.includes(model)) {
+    if (modelType === 'reasoning') {
         return <></>;
     }
 
