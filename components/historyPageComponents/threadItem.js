@@ -277,7 +277,8 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
             </div>
             
-            <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1`}>
+            <div  className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1 `}
+  style={{ overflowWrap: "anywhere" }}>
               <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`}>
                 {item?.role === "assistant" && item?.image_url && (
                   <div className="chat chat-start">
@@ -380,7 +381,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </div>}
               </div>
             </div>
-            {item?.role === "user" && <div className="flex flex-row-reverse gap-2 m-1 items-center">
+            {item?.role === "user" && <div className="flex flex-row-reverse gap-2 m-1 overflow-wrap: anywhere items-center">
                 <time className="text-xs opacity-50 chat-end">
                   {formatDateAndTime(item.createdAt)}
                 </time> 
@@ -435,7 +436,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             item?.error && (
               <div className="chat chat-start break-all break-words">
                 <div>
-                  <div className="flex flex-row-reverse items-end justify-end gap-1">
+                  <div className="flex  flex-row-reverse items-end justify-end gap-1">
                     <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
                       <span className="font-bold">Error</span>
                       <p>{item?.error}</p>
