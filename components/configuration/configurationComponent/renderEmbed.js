@@ -60,7 +60,7 @@ const RenderEmbed = ({
           </div>
         );
       });
-  }, [bridgeFunctions, integrationData, getStatusClass, handleOpenModal, openViasocket, embedToken, params]);
+  }, [bridgeFunctions, integrationData, getStatusClass, handleOpenModal, embedToken, params]);
 
   return <>{renderEmbed}</>;
 };

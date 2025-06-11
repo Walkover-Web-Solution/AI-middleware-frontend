@@ -92,13 +92,13 @@ const KnowledgebaseList = ({ params }) => {
                 {renderKnowledgebase}
             </div>
                  <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
-                        <p className=" label-text info mb-2">Configure Knowledgebase</p>
+                        <p className=" label-text info mb-2">Knowledgebase Configuration</p>
                  </InfoModel>
             <div className="dropdown dropdown-right">
                 
                        
                 <button tabIndex={0} className="btn btn-outline btn-sm mt-0" onClick={() => handleTutorial()}>
-                    <Plus size={16} />Add Knowledgebase
+                    <Plus size={16} />Connect Knowledgebase
                 </button>
                 {showTutorial && (
                     <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.knowledgeBase} params={params} flagKey={"knowledgeBase"} currentOrg={currentOrg} />

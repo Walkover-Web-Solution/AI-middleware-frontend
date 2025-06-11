@@ -61,7 +61,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
         <div className="dropdown dropdown-right">
             <div className="flex flex-col  gap-2">
                  <InfoModel tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
-                        <p className=" label-text info">Configure Agents </p>
+                        <p className=" label-text info">Agents Configuration</p>
                        
                  </InfoModel>
                 <button tabIndex={0}
