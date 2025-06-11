@@ -80,7 +80,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 {name === "preFunction" ? (
                     <div className=" flex flex-col  gap-2">
                         <InfoModel tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
-                        <p className="text-base font-semibold info">Configure Pre Tool</p>
+                        <p className="text-base font-semibold info">Pre Tool Configuration</p>
                        
                         </InfoModel>
 
@@ -91,13 +91,13 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                            className="btn btn-outline btn-sm"                  
                         >
                                 <Plus size={16} />
-                               {"Connect Pre Tools"}
+                               {"Connect Pre Tool"}
                         </button>
                     </div>
                 ) : (
                      <div className="flex flex-col  gap-2">
                         <InfoModel video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
-                        <p className=" label-text info">Configure Tool</p>
+                        <p className=" label-text info">Tool Configuration</p>
                        
                         </InfoModel>
 
