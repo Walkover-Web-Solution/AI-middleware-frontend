@@ -4,7 +4,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { ONBOARDING_VIDEOS } from '@/utils/enums';
 import { getStatusClass } from '@/utils/utility';
 import { current } from '@reduxjs/toolkit';
-import { Info, Plus } from 'lucide-react';
+import { InfoIcon, AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
@@ -90,7 +90,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                            disabled={!shouldToolsShow}  
                            className="btn btn-outline btn-sm"                  
                         >
-                                <Plus size={16} />
+                                <AddIcon size={16} />
                                {"Connect Pre Tool"}
                         </button>
                     </div>
@@ -108,7 +108,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         onClick={() => handleTutorial()}
                     className="btn btn-outline btn-sm"
                     >
-                        <Plus size={16} />
+                        <AddIcon size={16} />
                         {"Connect Tool"}
                     </button>
                     </div>
@@ -116,7 +116,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 {
                     !shouldToolsShow &&
                     <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                        <Info size={16} className="flex-shrink-0 mt-0.5" />
+                        <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                         <span className='label-text-alt text-xs leading-tight'>
                             {`The ${modelName} does not support ${name?.toLowerCase()?.includes('pre function') ? 'pre functions' : 'functions'} calling`}
                         </span>
@@ -153,7 +153,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                             }
                         )}>
                             <div>
-                                <Plus size={16} /><p className='font-semibold'>Add new Tools</p>
+                                <AddIcon size={16} /><p className='font-semibold'>Add new Tools</p>
                             </div>
                         </li>}
                     </div>

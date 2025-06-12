@@ -1,7 +1,7 @@
 import InfoModel from '@/components/infoModel';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
-import { Plus } from 'lucide-react';
+import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 
 function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [] }) {
@@ -65,7 +65,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
                        
                  </InfoModel>
                 <button tabIndex={0}
-                    className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect Agent"}
+                    className="btn btn-outline btn-sm"><AddIcon size={16} />{name || "Connect Agent"}
                 </button>
             </div>
             <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">

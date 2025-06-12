@@ -9,7 +9,7 @@ import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
 import { MODAL_TYPE, ONBOARDING_VIDEOS, PAUTH_KEY_COLUMNS } from '@/utils/enums'
 import { closeModal, openModal } from '@/utils/utility'
-import { Copy, Trash2 } from 'lucide-react'
+import { CopyIcon, TrashIcon } from '@/components/Icons'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
@@ -100,7 +100,7 @@ function Page({ params }) {
       <div className="flex gap-3 justify-center items-center">
         <div className="tooltip tooltip-primary" data-tip="delete">
           <a onClick={() => deleteModel(row["name"], row["id"], row.index)}>
-            <Trash2 strokeWidth={2} size={20} />
+            <TrashIcon size={16} />
           </a>
         </div>
         <div
@@ -108,7 +108,7 @@ function Page({ params }) {
           onClick={() => copyToClipboard(row["authkey"])}
           data-tip="copy auth key"
         >
-          <Copy size={20} />
+          <CopyIcon size={16} />
         </div>
       </div>
     );

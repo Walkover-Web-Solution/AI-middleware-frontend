@@ -4,13 +4,14 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import { ChevronDown, Info, Wand2 } from 'lucide-react';
+import { InfoIcon, Wand2Icon } from '@/components/Icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import Link from 'next/link';
 import ToneDropdown from './toneDropdown'; 
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
+import { ChevronDownIcon } from '@/components/Icons';
 import InfoModel from '@/components/infoModel';
 
 const InputConfigComponent = ({ params }) => {
@@ -284,7 +285,6 @@ const InputConfigComponent = ({ params }) => {
               <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                  Improve Prompt           
               </span>
-              <Wand2 size={14} className=' ml-2'/>
             </div>
           </div>
         </div>
@@ -304,12 +304,12 @@ const InputConfigComponent = ({ params }) => {
               <div className="flex items-center gap-2">
                 <span className="text-nowrap">Default Variables</span>
                 <p role="alert" className="label-text-alt alert p-2">
-                  <Info size={16} className="" />
+                  <InfoIcon size={16} className="" />
                   Use these variables in prompt to get their functionality
                 </p>
               </div>
               <div className="ml-auto">
-                <ChevronDown className="collapse-arrow" size={12} />
+                <ChevronDownIcon className="collapse-arrow" size={12} />
               </div>
             </div>
             <div className="collapse-content">

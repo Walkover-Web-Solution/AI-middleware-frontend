@@ -1,4 +1,4 @@
-import { Copy } from 'lucide-react';
+import { CopyIcon } from '@/components/Icons';
 import React, { useState } from 'react';
 
 const CopyButton = ({data}) => {
@@ -19,7 +19,7 @@ const CopyButton = ({data}) => {
 
   return (
     <div className='absolute right-5 top-5'>
-      <Copy
+      <CopyIcon
         className=" cursor-pointer text-white"
         size={'20px'}
         onClick={copyToClipboardSendData}

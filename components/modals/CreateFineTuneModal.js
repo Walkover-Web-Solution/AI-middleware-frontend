@@ -1,5 +1,5 @@
 import { downloadFineTuneData } from '@/config'
-import { CircleMinus, CirclePlus, Globe } from 'lucide-react'
+import { CircleMinusIcon, CirclePlusIcon, GlobeIcon } from '@/components/Icons'
 import React from 'react'
 
 function CreateFineTuneModal({params, selectedThreadIds}) {
@@ -54,19 +54,19 @@ function CreateFineTuneModal({params, selectedThreadIds}) {
                 <p className="py-2 text-sm mb-2">Select the category on the basis of user feedback</p>
                 <div className="form-control">
                     <label className="label cursor-pointer">
-                        <span className="label-text flex items-center gap-2"><Globe size={16} color='skyblue' />All Responses &#40; including no feedback &#41;</span>
+                        <span className="label-text flex items-center gap-2"><GlobeIcon size={16} color='skyblue' />All Responses &#40; including no feedback &#41;</span>
                         <input type="checkbox" className="checkbox" onChange={(e) => handleStatusChange(e, 0)} checked={status?.includes(0)} />
                     </label>
                 </div>
                 <div className="form-control">
                     <label className="label cursor-pointer">
-                        <span className="label-text flex items-center gap-2"><CirclePlus size={16} color='green' />Positive Feedback Responses</span>
+                        <span className="label-text flex items-center gap-2"><CirclePlusIcon size={16} color='green' />Positive Feedback Responses</span>
                         <input type="checkbox" className="checkbox" onChange={(e) => handleStatusChange(e, 1)} checked={status?.includes(0) || status?.includes(1)} disabled={status?.includes(0)}/>
                     </label>
                 </div>
                 <div className="form-control">
                     <label className="label cursor-pointer">
-                        <span className="label-text flex items-center gap-2"><CircleMinus size={16} color='red' />Negative Feedback Responses</span>
+                        <span className="label-text flex items-center gap-2"><CircleMinusIcon size={16} color='red' />Negative Feedback Responses</span>
                         <input type="checkbox" className="checkbox" onChange={(e) => handleStatusChange(e, 2)} checked={status?.includes(0) || status?.includes(2)}  disabled={status?.includes(0)}/>
                     </label>
                 </div>

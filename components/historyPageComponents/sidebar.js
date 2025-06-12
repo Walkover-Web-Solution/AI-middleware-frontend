@@ -3,7 +3,7 @@ import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountActi
 import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { openModal } from "@/utils/utility.js";
-import { ChevronDown, ChevronRight, ChevronUp, Download, MessageCircle, ThumbsDown, ThumbsUp, User } from "lucide-react";
+import { DownloadIcon, ThumbsDownIcon, ThumbsUpIcon } from "@/components/Icons";
 import { useEffect, useState, memo, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
@@ -12,6 +12,7 @@ import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 import { usePathname, useRouter, useSearchParams } from "next/navigation.js";
 import { setSelectedVersion } from '@/store/reducer/historyReducer';
+import { ChevronDownIcon, ChevronUpIcon } from "@/components/Icons";
 
 const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion, setIsErrorTrue, isErrorTrue }) => {
   const { subThreads } = useCustomSelector(state => ({
@@ -205,7 +206,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                       onChange={() => handleFilterChange(value)}
                       className={`radio ${value === "all" ? "radio-primary" : value === "1" ? "radio-success" : "radio-error"}`}
                     />
-                    {value === "all" ? <span>All</span> : value === "1" ? <ThumbsUp size={16} /> : <ThumbsDown size={16} />}
+                    {value === "all" ? <span>All</span> : value === "1" ? <ThumbsUpIcon size={16} /> : <ThumbsDownIcon size={16} />}
                   </label>
                 ))}
               </div>
@@ -308,9 +309,9 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                           className="absolute right-4 cursor-pointer"
                         >
                           {!searchQuery && expandedThreads?.includes(item?.thread_id) ? (
-                            <ChevronUp size={16} />
+                            <ChevronUpIcon size={16} />
                           ) : (
-                            <ChevronDown size={16} />
+                            <ChevronDownIcon size={16} />
                           )}
                         </div>
                       )}
@@ -444,7 +445,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
               className="btn btn-primary"
               disabled={selectedThreadIds?.length === 0}
             >
-              Download <Download size={16} />
+              Download <DownloadIcon size={16} />
             </button>
             <button onClick={() => setIsThreadSelectable(false)} className="btn btn-secondary">
               Cancel

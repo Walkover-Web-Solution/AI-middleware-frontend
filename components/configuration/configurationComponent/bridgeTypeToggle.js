@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
-import { Info } from 'lucide-react';
+import { InfoIcon } from '@/components/Icons';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -109,7 +109,7 @@ const BridgeTypeToggle = ({ params }) => {
             <div>
                 {modelType === 'embedding' && (
                     <div role="alert" className="alert p-2">
-                        <Info size={16} />
+                        <InfoIcon size={16} />
                         <span className='label-text-alt'>Embedding models do not support ChatBot.</span>
                     </div>
                 )}
