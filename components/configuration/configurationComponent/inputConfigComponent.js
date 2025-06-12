@@ -4,11 +4,10 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import { ChevronDown, Info, Wand2 } from 'lucide-react';
+import { ChevronDown, Info } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
-import Link from 'next/link';
 import ToneDropdown from './toneDropdown'; 
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
 import InfoModel from '@/components/infoModel';
@@ -284,7 +283,6 @@ const InputConfigComponent = ({ params }) => {
               <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                  Improve Prompt           
               </span>
-              <Wand2 size={14} className=' ml-2'/>
             </div>
           </div>
         </div>
@@ -349,7 +347,7 @@ const InputConfigComponent = ({ params }) => {
               <ResponseStyleDropdown params={params} />
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
-            <OptimizePromptModal params={params} />
+            <OptimizePromptModal savePrompt={savePrompt}setPrompt={setPrompt} params={params} />
             <PromptSummaryModal params={params}/>
         </div>
     );

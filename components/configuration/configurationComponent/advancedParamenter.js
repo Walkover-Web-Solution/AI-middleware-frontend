@@ -403,7 +403,7 @@ const AdvancedParameters = ({ params }) => {
                           openModal(MODAL_TYPE.JSON_SCHEMA);
                         }}
                       >
-                        Optimize Schema
+                        Improve Schema
                       </span>
                       <JsonSchemaModal params={params} />
                     </>
