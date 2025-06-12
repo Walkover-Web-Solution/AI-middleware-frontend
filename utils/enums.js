@@ -1,3 +1,4 @@
+import { BookText, Bot, Key, Settings, Wrench } from "lucide-react";
 export const PAUTH_KEY_COLUMNS = ["name", "authkey", "created_at"];
 export const API_KEY_COLUMNS = ["name", "apikey", "comment", "service"];
 export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers', 'alertType', 'bridges'];
@@ -341,7 +342,8 @@ export const MODAL_TYPE = {
   ADD_TEST_CASE_MODAL: "ADD_TEST_CASE_MODAL",
   HISTORY_PAGE_PROMPT_UPDATE_MODAL: "HISTORY_PAGE_PROMPT_UPDATE_MODAL",
   AGENT_DESCRIPTION_MODAL: "AGENT_DESCRIPTION_MODAL",
-  AGENT_VARIABLE_MODAL: "AGENT_VARIABLE_MODAL"
+  AGENT_VARIABLE_MODAL: "AGENT_VARIABLE_MODAL",
+  TUTORIAL_MODAL:"TUTORIAL_MODAL"
 }
 
 export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
@@ -507,5 +509,38 @@ export const AGENT_SETUP_GUIDE_STEPS = [
     detail: 'Add your API keys and configure authentication to enable your agent.',
     icon: '🔐',
     example: 'Examples: OpenAI API key, Anthropic API key, Custom webhook URLs, Database connection strings'
+  },
+];
+
+export const TUTORIALS = [
+  {
+    title: 'Agent Creation',
+    description: 'Learn how to create and manage agents in GTWY.ai platform',
+    videoUrl: ONBOARDING_VIDEOS?.bridgeCreation, 
+    icon: Bot
+  },
+  {
+    title: 'PAuth Key Setup',
+    description: 'Configure authentication keys for secure access',
+    videoUrl: ONBOARDING_VIDEOS?.PauthKey,
+    icon: Key
+  },
+  {
+    title: 'Tool Configuration',
+    description: 'Set up and configure tools for your workflow',
+    videoUrl: ONBOARDING_VIDEOS?.FunctionCreation,
+    icon: Wrench
+  },
+  {
+    title: 'Variable Management',
+    description: 'Add and manage variables in your environment',
+    videoUrl: ONBOARDING_VIDEOS?.Addvariables,
+    icon: Settings
+  },
+  {
+    title: 'KnowledgeBase Configuration',
+    description: 'Set up and manage your knowledge base for intelligent responses',
+    videoUrl: ONBOARDING_VIDEOS?.knowledgeBase,
+    icon: BookText
   },
 ];
