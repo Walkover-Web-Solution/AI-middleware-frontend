@@ -13,7 +13,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
       selectedItem['AiConfig']?.messages?.[0]?.role === 'developer' || 
       selectedItem['AiConfig']?.messages?.[0]?.role === 'system' 
         ? selectedItem['AiConfig']?.messages?.[0]?.content 
-        : selectedItem['AiConfig']?.system || selectedItem['System Prompt'];
+          : selectedItem['AiConfig']?.system 
   }
   const variablesKeyValue = selectedItem && selectedItem['variables'] ? selectedItem['variables'] : {};
   const [modalContent, setModalContent] = useState(null);
