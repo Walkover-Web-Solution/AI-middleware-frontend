@@ -1,52 +1,8 @@
 'use client';
-import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
+import { MODAL_TYPE, ONBOARDING_VIDEOS, TUTORIALS } from '@/utils/enums';
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Bot, 
-  Key, 
-  Wrench, 
-  Settings, 
-  Play, 
-  ChevronDown, 
-  ChevronRight, 
-  X, 
-  BookOpen,
-  Sparkles,
-  BookText
-} from 'lucide-react';
-
-const tutorials = [
-  {
-    title: 'Agent Creation',
-    description: 'Learn how to create and manage agents in GTWY.ai platform',
-    videoUrl: ONBOARDING_VIDEOS.bridgeCreation, 
-    icon: Bot
-  },
-  {
-    title: 'pAuth Key Setup',
-    description: 'Configure authentication keys for secure access',
-    videoUrl: ONBOARDING_VIDEOS.PauthKey,
-    icon: Key
-  },
-  {
-    title: 'Tool Configuration',
-    description: 'Set up and configure tools for your workflow',
-    videoUrl: ONBOARDING_VIDEOS.FunctionCreation,
-    icon: Wrench
-  },
-  {
-    title: 'Variable Management',
-    description: 'Add and manage variables in your environment',
-    videoUrl: ONBOARDING_VIDEOS.Addvariables,
-    icon: Settings
-  },
-  {
-    title: 'KnowledgeBase Configuration',
-    description: 'Set up and manage your knowledge base for intelligent responses',
-    videoUrl: ONBOARDING_VIDEOS.knowledgeBase,
-    icon: BookText
-  },
-];
+import { Play, ChevronDown, ChevronRight, BookOpen } from 'lucide-react';
+import { closeModal } from '@/utils/utility';
 
 // Video Component using iframe
 const TutorialVideo = ({ videoUrl, title }) => {
@@ -64,23 +20,23 @@ const TutorialVideo = ({ videoUrl, title }) => {
   );
 };
 
-const TutorialModal = ({handleCloseModal}) => {
+const TutorialModal = () => {
   const [activeIndex, setActiveIndex] = useState(null);
   const videoRefs = useRef({});
   const contentAreaRef = useRef(null);
- useEffect(() => {
-  return () => {
+  useEffect(() => {
+    return () => {
+      setActiveIndex(null);
+    };
+  }, []);
+  const internalClose = () => {
     setActiveIndex(null);
+    closeModal(MODAL_TYPE.TUTORIAL_MODAL);
   };
-}, []);
-const internalClose = () => {
-  setActiveIndex(null); 
-  handleCloseModal();  
-};
   const toggleTutorial = (index) => {
     const newActiveIndex = index === activeIndex ? null : index;
     setActiveIndex(newActiveIndex);
-    
+
     // Scroll to video when opened
     if (newActiveIndex !== null) {
       setTimeout(() => {
@@ -100,7 +56,7 @@ const internalClose = () => {
   const setVideoRef = (index, element) => {
     videoRefs.current[index] = element;
   };
-  
+
   return (
     <dialog id={MODAL_TYPE.TUTORIAL_MODAL} className="modal">
       {/* Main Modal */}
@@ -121,37 +77,34 @@ const internalClose = () => {
         </div>
 
         {/* Content Area */}
-        <div 
+        <div
           ref={contentAreaRef}
           className="p-8 max-h-[75vh] overflow-y-auto scroll-smooth"
         >
           <div className="space-y-3">
-            {tutorials.map((tutorial, index) => {
+            {TUTORIALS?.map((tutorial, index) => {
               const IconComponent = tutorial.icon;
               const isActive = activeIndex === index;
-              
+
               return (
                 <div
                   key={index}
-                  className={`border rounded-xl transition-all duration-200 transform hover:scale-[1.01] ${
-                    isActive 
-                      ? 'border-slate-300 shadow-lg bg-slate-50' 
+                  className={`border rounded-xl transition-all duration-200 transform hover:scale-[1.01] ${isActive
+                      ? 'border-slate-300 shadow-lg bg-slate-50'
                       : 'border-slate-200 hover:border-slate-300 hover:shadow-md bg-white hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   <div
                     className="p-4 cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
                       {/* Icon */}
-                      <div className={`p-2.5 bg-slate-100 rounded-lg border border-slate-200 transition-all duration-200 ${
-                        isActive ? 'bg-slate-800 border-slate-700' : 'group-hover:bg-slate-200'
-                      }`}>
-                        <IconComponent className={`h-5 w-5 transition-colors duration-200 ${
-                          isActive ? 'text-white' : 'text-slate-700'
-                        }`} />
+                      <div className={`p-2.5 bg-slate-100 rounded-lg border border-slate-200 transition-all duration-200 ${isActive ? 'bg-slate-800 border-slate-700' : 'group-hover:bg-slate-200'
+                        }`}>
+                        <IconComponent className={`h-5 w-5 transition-colors duration-200 ${isActive ? 'text-white' : 'text-slate-700'
+                          }`} />
                       </div>
-                      
+
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-base text-slate-900 mb-1 truncate">{tutorial.title}</h3>
@@ -172,10 +125,9 @@ const internalClose = () => {
                             Watch
                           </button>
                         )}
-                        
-                        <div className={`text-slate-400 transition-transform duration-200 cursor-pointer ${
-                          isActive ? 'rotate-180' : 'hover:translate-x-1'
-                        }`} onClick={() => toggleTutorial(index)}>
+
+                        <div className={`text-slate-400 transition-transform duration-200 cursor-pointer ${isActive ? 'rotate-180' : 'hover:translate-x-1'
+                          }`} onClick={() => toggleTutorial(index)}>
                           {isActive ? (
                             <ChevronDown className="h-5 w-5" />
                           ) : (
@@ -188,12 +140,12 @@ const internalClose = () => {
 
                   {/* Video Section */}
                   {isActive && (
-                    <div 
+                    <div
                       ref={(el) => setVideoRef(index, el)}
                       className="border-t border-slate-200 bg-slate-50 animate-in slide-in-from-top-2 duration-300"
                     >
                       <div className="p-6">
-                        <TutorialVideo 
+                        <TutorialVideo
                           videoUrl={tutorial.videoUrl}
                           title={tutorial.title}
                         />

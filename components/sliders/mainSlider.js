@@ -3,14 +3,13 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { closeModal, openModal, toggleSidebar } from '@/utils/utility';
 import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, MessageSquareMore, PlugZap, Settings2, TriangleAlert, UserPlus, BookCheck, MonitorPlay } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { useState } from 'react';
+import React from 'react';
 import TutorialModal from '@/components/modals/tutorialModal';
 import { MODAL_TYPE } from '@/utils/enums';
 
 function MainSlider() {
   const pathName = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams()
   const path = pathName.split('?')[0].split('/')
   const { userdetails, organizations } = useCustomSelector((state) => ({
     userdetails: state?.userDetailsReducer?.userDetails,
@@ -28,12 +27,6 @@ function MainSlider() {
     metrics: <LineChart />,
     knowledge_base: <BookText />
   }
- const handleOpenModal=()=>{
-      openModal(MODAL_TYPE.TUTORIAL_MODAL)
- }
- const handleCloseModal=()=>[
-        closeModal(MODAL_TYPE.TUTORIAL_MODAL)
- ]
   const logoutHandler = async () => {
     try {
       await logoutUserFromMsg91({
@@ -112,7 +105,7 @@ function MainSlider() {
               </div>
               <div className='mt-auto'>
                 <div className="mt-4 rounded-lg border-t border-base-300 bg-base-100">
-                  <div className="pb-2 pl-4 pt-4 h-10 flex text-center items-center gap-2 cursor-pointer" onClick={handleOpenModal}>
+                  <div className="pb-2 pl-4 pt-4 h-10 flex text-center items-center gap-2 cursor-pointer" onClick={()=> openModal(MODAL_TYPE.TUTORIAL_MODAL)}>
                     <MonitorPlay size={16} />
                     Tutorial
                   </div>
@@ -155,7 +148,7 @@ function MainSlider() {
           </div>
         </div>
       </div>
-       <TutorialModal handleCloseModal={handleCloseModal}/>
+      <TutorialModal />
     </>
   );
 }
