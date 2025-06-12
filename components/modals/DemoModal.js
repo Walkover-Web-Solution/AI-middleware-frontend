@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { CircleX, CalendarDays } from 'lucide-react';
 import { getCalApi } from "@calcom/embed-react";
 
-const DemoModal = () => {
+const DemoModal = ({speakToUs}) => {
 
     useEffect(() => {
         (async function () {
@@ -25,34 +25,69 @@ const DemoModal = () => {
     };
 
     return (
-        <dialog id={MODAL_TYPE.DEMO_MODAL} className="modal backdrop-blur-lg">
-            <div className="modal-box flex flex-col gap-6 max-w-[95vw] w-[1300px] bg-gradient-to-br from-slate-900 to-slate-800 text-slate-100 border border-slate-700/50 shadow-2xl">
+      <dialog id={MODAL_TYPE.DEMO_MODAL} className="modal backdrop-blur-lg">
+  <div
+    className={`modal-box flex flex-col gap-6  ${
+      speakToUs
+        ? "bg-base-100 text-base-content border max-w-[95vw] w-[700px] border-base-300"
+        : "bg-gradient-to-br from-slate-900 to-slate-800 max-w-[95vw] w-[1300px] text-slate-100 border border-slate-700/50"
+    } shadow-2xl`}
+  >
                 <div className="flex justify-between items-center pb-4 border-b border-slate-700">
-                    <h3 className="font-bold text-2xl bg-gradient-to-r from-blue-400 to-purple-300 bg-clip-text text-transparent">
-                        Discover GTWY AI
+                    <h3 className="font-bold text-2xl">
+                        {speakToUs ? 'Speak to Us' : 'Discover GTWY AI'}
                     </h3>
                     <button
                         onClick={handleClose}
-                        className="btn btn-ghost p-2 rounded-full hover:bg-slate-700/50 transition-colors group"
+                        className="btn btn-ghost p-2 rounded-full hover:bg-gray-100 transition-colors group"
                     >
-                        <CircleX size={26} className="text-slate-400 group-hover:text-purple-300 transition-colors" />
+                        <CircleX size={26} className={`${speakToUs ? 'text-gray-400' : 'text-slate-400 group-hover:text-purple-300'} transition-colors`} />
                     </button>
                 </div>
 
-                <div className="relative group rounded-xl overflow-hidden border-2 border-slate-700/50 shadow-xl hover:border-purple-300/30 transition-all duration-300">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 pointer-events-none" />
-                    <div className="aspect-video w-full overflow-hidden rounded-lg">
-                        <iframe
-                            src="https://video-faq.viasocket.com/embed/cm60d6r5a031w121t2akjkw9y?embed_v=2"
-                            loading="lazy"
-                            title="AI-middleware"
-                            className="w-full h-full transition-transform duration-300"
-                            frameBorder="0"
-                            mozallowfullscreen="true"
-                            allowFullScreen
-                        />
+                {speakToUs ? (
+                    <div className="p-6 bg-base-200 rounded-xl">
+                        <p className="text-base-content mb-4">
+                            Discover how GTWY AI can transform your workflow. With our <strong>“Speak to Us”</strong> option, you’ll:
+                        </p>
+                        <ul className="list-disc list-inside text-base-content space-y-2">
+                            <li className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>Connect directly with our team for personalized guidance</span>
+                            </li>
+                            <li className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>Explore use cases tailored to your business needs</span>
+                            </li>
+                            <li className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>See live demonstrations of GTWY AI in action</span>
+                            </li>
+                            <li className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>Get expert advice on integration—no coding required</span>
+                            </li>
+                        </ul>
+                        <p className="text-base-content mt-4">
+                            Whether you're a developer, business leader, or exploring automation, our team is here to help you unlock the full potential of GTWY AI.
+                        </p>
                     </div>
-                </div>
+                ) : (
+                    <div className="relative group rounded-xl overflow-hidden border-2 border-slate-700/50 shadow-xl hover:border-purple-300/30 transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 pointer-events-none" />
+                        <div className="aspect-video w-full overflow-hidden rounded-lg">
+                            <iframe
+                                src="https://video-faq.viasocket.com/embed/cm60d6r5a031w121t2akjkw9y?embed_v=2"
+                                loading="lazy"
+                                title="AI-middleware"
+                                className="w-full h-full transition-transform duration-300"
+                                frameBorder="0"
+                                mozallowfullscreen="true"
+                                allowFullScreen
+                            />
+                        </div>
+                    </div>
+                )}
 
                 <div className="modal-action mt-4">
                     <button
@@ -61,7 +96,7 @@ const DemoModal = () => {
                         data-cal-origin="https://cal.id"
                         data-cal-config='{"layout":"month_view"}'
                         onClick={() => handleClose()}
-                        className="btn btn-primary px-8 py-3 text-lg font-semibold bg-gradient-to-r from-purple-500 to-blue-500 border-none hover:from-purple-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
+                        className={`btn ${speakToUs ? 'btn-primary' : 'btn-primary'} px-8 py-3 text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2`}
                     >
                         <CalendarDays className="w-5 h-5" />
                         <span>Schedule Personalized Demo</span>

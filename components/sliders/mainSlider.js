@@ -1,11 +1,12 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { closeModal, openModal, toggleSidebar } from '@/utils/utility';
-import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, MessageSquareMore, PlugZap, Settings2, TriangleAlert, UserPlus, BookCheck, MonitorPlay } from 'lucide-react';
+import {  MODAL_TYPE } from '@/utils/enums';
+import { openModal, toggleSidebar } from '@/utils/utility';
+import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, MessageCircleMore, MessageSquareMore, PlugZap, Settings2, TriangleAlert, UserPlus, BookCheck, MonitorPlay } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import TutorialModal from '@/components/modals/tutorialModal';
-import { MODAL_TYPE } from '@/utils/enums';
+import DemoModal from '../modals/DemoModal';
 
 function MainSlider() {
   const pathName = usePathname();
@@ -43,7 +44,14 @@ function MainSlider() {
   };
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleMainSidebar = () => toggleSidebar("main-sidebar");
-
+ const handleOpenModal = (modelName) => {
+       if(modelName=='speakToUs'){
+          openModal(MODAL_TYPE.DEMO_MODAL)
+       }
+       else {
+        openModal(MODAL_TYPE.TUTORIAL_MODAL)
+       }
+      }
   // Fixed handler for switch organization
   const handleSwitchOrganization = (e) => {
     e.preventDefault();
@@ -104,51 +112,103 @@ function MainSlider() {
                 </ul>
               </div>
               <div className='mt-auto'>
-                <div className="mt-4 rounded-lg border-t border-base-300 bg-base-100">
-                  <div className="pb-2 pl-4 pt-4 h-10 flex text-center items-center gap-2 cursor-pointer" onClick={()=> openModal(MODAL_TYPE.TUTORIAL_MODAL)}>
-                    <MonitorPlay size={16} />
-                    Tutorial
-                  </div>
+
+                {/* Speak to Us & Feedback Section */}
+                <div className="border-t border-base-300">
+                  <ul className="menu w-full text-base-content">
+                     <li>
+
+                      <a 
+                        onClick={() => handleOpenModal("tutorial")}
+                        className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
+                      >
+                        <MonitorPlay size={16} className="text-gray-600" />
+                        <span className="flex-1 text-sm font-medium">Tutorial</span>
+                      </a>
+                    </li>
+                    <li>
+
+                      <a 
+                        onClick={() => handleOpenModal("speakToUs")}
+                        className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
+                      >
+                        <MessageCircleMore size={16} className="text-gray-600" />
+                        <span className="flex-1 text-sm font-medium">Speak to Us</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://gtwy.featurebase.app/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors"
+                      >
+                        <MessageSquareMore size={16} className="text-gray-600" />
+                        <span className="flex-1 text-sm font-medium">Feedback</span>
+                      </a>
+                    </li>
+                  </ul>
                 </div>
-                <a
-                  href="https://gtwy.featurebase.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium "
-                >
-                  <div className="mt-4 rounded-lg border-t border-base-300 bg-base-100">
-                    <div className="p-4 flex items-center gap-2">
-                      <MessageSquareMore size={16} />
-                      Feedback
+
+                {/* Settings Section */}
+                <div className="border-t border-base-300">
+                  <details className="overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                    <summary className="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition hover:bg-gray-100">
+                      <span className="text-sm font-medium flex justify-center items-center gap-3"> 
+                        <Settings2 size={16} className="text-gray-600" /> 
+                        Settings 
+                      </span>
+                      <span className="transition group-open:-rotate-180">
+                        <ChevronDown strokeWidth={1.25} size={16} className="text-gray-600" />
+                      </span>
+                    </summary>
+                    <div className="border-t border-gray-200 bg-white">
+                      <ul className="menu w-full text-base-content">
+                        <li>
+                          <a className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors">
+                            <Mail size={16} className="text-gray-600" />
+                            <span className="flex-1 text-sm font-medium">{userdetails.email}</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a 
+                            className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer" 
+                            onClick={() => router.push(`/org/${path[2]}/userDetails`)}
+                          >
+                            <Cog size={16} className="text-gray-600" />
+                            <span className="flex-1 text-sm font-medium">Update User Details</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a 
+                            className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer" 
+                            onClick={() => router.push(`/org/${path[2]}/workspaceSetting`)}
+                          >
+                            <Cog size={16} className="text-gray-600" />
+                            <span className="flex-1 text-sm font-medium">Workspace Settings</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a 
+                            className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer" 
+                            onClick={logoutHandler}
+                          >
+                            <LogOut size={16} className="text-gray-600" />
+                            <span className="flex-1 text-sm font-medium">Logout</span>
+                          </a>
+                        </li>
+                      </ul>
                     </div>
-                  </div>
-                </a>
-                <details
-                  className="overflow-hidden rounded-lg border-t border-gray-300 [&_summary::-webkit-details-marker]:hidden"
-                >
-                  <summary
-                    className="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition"
-                  >
-                    <span className="text-sm font-medium flex justify-center items-center gap-2"> <Settings2 size={16} /> Setting </span>
-                    <span className="transition group-open:-rotate-180">
-                      <ChevronDown strokeWidth={1.25} />
-                    </span>
-                  </summary>
-                  <div className="border-t border-gray-200 bg-white">
-                    <ul className="menu w-full text-base-content">
-                      <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
-                      <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/userDetails`) }}> <Cog size={16} />Update User Details</a> </li>
-                      <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <Cog size={16} /> Workspace Setting</a> </li>
-                      <li ><a className='py-2 px-2 rounded-md' onClick={logoutHandler}> <LogOut size={16} />  logout</a></li>
-                    </ul>
-                  </div>
-                </details>
+                  </details>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <DemoModal speakToUs={true}></DemoModal>
       <TutorialModal />
+      
     </>
   );
 }
