@@ -1,239 +1,377 @@
-"use client"
-import { useCustomSelector } from '@/customHooks/customSelector';
-import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction, updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
-import { MODAL_TYPE } from '@/utils/enums';
-import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { Building2, ChevronDown, FileSliders, History, Home, Rss, TestTube, MessageCircleMore, Play, Pause, File,BookCheck ,ClipboardX} from 'lucide-react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect, useRef } from 'react';
+import { FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck,Settings,MoreVertical,Copy,Archive,Trash2,Bot,Home, Building,} from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { toggleSidebar } from '@/utils/utility';
+import OrgSlider from './sliders/orgSlider';
 import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
-import OrgSlider from './sliders/orgSlider';
-import ConfigHistorySlider from "./sliders/configHistorySlider";
-import { truncate } from "@/components/historyPageComponents/assistFile";
-function Navbar() {
+import ConfigHistorySlider from './sliders/configHistorySlider';
+
+const Navbar = ({ params }) => {
+  const [activeTab, setActiveTab] = useState('configure');
+  const [bridgeStatus, setBridgeStatus] = useState(1); // 1 = active, 0 = paused
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDrafted, setIsDrafted] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  
   const router = useRouter();
-  const searchParams = useSearchParams()
-  const versionId = searchParams.get('version')
-  const dispatch = useDispatch();
-  const pathName = usePathname();
-  const path = pathName.split('?')[0].split('/')
-  const bridgeId = path[5];
-  const { organizations, bridgeData, chatbotData, bridge, publishedVersion, isdrafted } = useCustomSelector((state) => ({
-    organizations: state.userDetailsReducer.organizations,
-    bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
-    chatbotData: state.ChatBot.ChatBotMap[bridgeId],
-    bridge: state.bridgeReducer.allBridgesMap[bridgeId] || [],
-    publishedVersion: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || [],
-    isdrafted: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted,
-  }));
-  const handleDeleteBridge = async (item, newStatus = 0) => {
-    const orgId = path[2];
+  const pathname = usePathname();
+  const dropdownRef = useRef(null);
+  
+  // Mock data for demonstration
+  const agentName = "Customer Support AI";
+  const orgName = "Acme Corp";
+  const currentPath = pathname.split('?')[0].split('/').filter(Boolean);
+  
+  // Click outside handler for dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
 
-    switch (item.trim().toLowerCase()) {
-      case 'duplicate':
-        try {
-          dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId) => {
-            if (newBridgeId) {
-              router.push(`/org/${path[2]}/agents/configure/${newBridgeId}`)
-              toast.success('Agent duplicate successfully');
-            }
-          });
-        } catch (error) {
-          console.error('Failed to duplicate agent:', error);
-          toast.error('Error duplicating agent');
-        }
-        break;
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isDropdownOpen]);
 
+  // Keyboard navigation for dropdown
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (isDropdownOpen && event.key === 'Escape') {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isDropdownOpen]);
+  
+  // Check if we should show the navbar
+  const shouldShowNavbar = () => {
+    if (currentPath.length === 3) return false;
+    return pathname.includes('configure') || pathname.includes('history');
+  };
+
+  // Check if current page is history
+  const isHistoryPage = pathname.includes('history');
+  
+  const handlePauseBridge = async () => {
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setBridgeStatus(prev => prev === 0 ? 1 : 0);
+    } catch (error) {
+      console.error('Failed to toggle bridge status:', error);
+      // Handle error - could show toast notification
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    if (window.confirm('Are you sure you want to discard all changes? This action cannot be undone.')) {
+      setIsDrafted(false);
+      console.log('Discarding changes...');
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!isDrafted) return;
+    
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setIsDrafted(false);
+      console.log('Publishing version...');
+      // Could show success toast
+    } catch (error) {
+      console.error('Failed to publish:', error);
+      // Handle error - could show error toast
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDropdownAction = (action) => {
+    console.log(`Action: ${action}`);
+    setIsDropdownOpen(false);
+    
+    // Handle different actions with confirmations for destructive actions
+    switch (action) {
       case 'delete':
-        // Confirm delete action
-        const confirmDelete = window.confirm('Are you sure you want to delete this agent?');
-
-        if (confirmDelete) {
-          try {
-            // Dispatch delete bridge action and get all agents
-            await dispatch(deleteBridgeAction({ bridgeId, orgId }));
-            router.push(`/org/${orgId}/agents`);
-            toast.success('Agent deleted successfully');
-            dispatch(getAllBridgesAction());
-          } catch (error) {
-            console.error('Failed to delete agent:', error);
-            toast.error('Error deleting agent');
-          }
+        if (window.confirm('Are you sure you want to delete this agent? This action cannot be undone.')) {
+          console.log('Deleting agent...');
         }
         break;
-
-      case "archive":
-        try {
-          dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
-            if (bridgeStatus === 1) {
-              toast.success('Agents Unarchived Successfully');
-            } else {
-              toast.success('Agents Archived Successfully');
-            }
-            router.push(`/org/${orgId}/agents`);
-          });
-        } catch (error) {
-          console.error('Failed to archive/unarchive Agents', error);
+      case 'archive':
+        if (window.confirm('Are you sure you want to archive this agent?')) {
+          console.log('Archiving agent...');
         }
+        break;
+      case 'duplicate':
+        console.log('Duplicating agent...');
         break;
       default:
         break;
     }
   };
 
-  const handleDiscardChanges = async () => {
-    dispatch(updateBridgeVersionReducer({ bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false } }));
-    dispatch(dicardBridgeVersionAction({ bridgeId, versionId }));
-  }
-   const handlePauseBridge = (status) => {
-    dispatch(updateBridgeAction({
-      bridgeId: bridgeId, 
-      dataToSend: {
-        bridge_status: status === 'paused' ? 0 : 1
-      }
-    }));
-  }
+  const tabs = [
+    { id: 'configure', label: 'Configure', icon: FileSliders },
+    { id: 'testcase', label: 'Test Cases', icon: TestTube },
+    { id: 'history', label: 'Chat History', icon: MessageCircleMore }
+  ];
+
+  // Fixed sidebar toggle functions
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleBridgeSidebar = () => toggleSidebar('default-agent-sidebar');
   const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
   const toggleConfigHistorySidebar = () =>
     toggleSidebar("default-config-history-slider", "right");
 
+  // Fixed breadcrumb items with proper click handlers
+  const breadcrumbItems = [
+    { 
+      label: 'org', 
+      icon: Building, 
+      handleClick: (e) => {
+        e.preventDefault();
+        toggleOrgSidebar();
+      }
+    },
+    { 
+      label: orgName, 
+      icon: Settings, 
+      handleClick: (e) => {
+        e.preventDefault();
+        router.push(`/org`);
+      }
+    },
+    { 
+      label: 'Agents', 
+      icon: Bot, 
+      handleClick: (e) => {
+        e.preventDefault();
+        toggleBridgeSidebar();
+      }
+    },
+    { 
+      label: agentName, 
+      icon: null, 
+      handleClick: (e) => {
+        e.preventDefault();
+        // Current page - no action needed
+      }, 
+      current: true 
+    }
+  ];
+
+  // Don't render navbar if conditions aren't met
+  if (!shouldShowNavbar()) {
+    return null;
+  }
+
+  const handleSwitchTab = (tab) => {
+    router.push(`org/${currentPath[1]}/agents/${currentPath[3]}/${currentPath[4]}/${tab.id}`);
+    setActiveTab(tab.id);
+  };
+
   return (
-    <div className='z-[999]'>
-      <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[19] max-h-[4rem] bg-base-100 sticky top-0`}>
-        <div className={`flex items-center w-full justify-start gap-2 ${path.length > 4 ? '' : 'hidden'}`}>
-          <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/agents`)}>
-            <Home size={16} />
-          </button>
-          <button className="btn m-1" onClick={toggleOrgSidebar}>
-            <Building2 size={16} /> {truncate(organizations[path[2]]?.name,15)}
-     </button>
-          <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDown size={16} /></div>
-            <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
-              {['agents', 'pauthkey', 'apikeys', 'knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
-                <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
-                  <a className={path[3] === item ? "active" : ""}>
-                    {item === 'knowledge_base' ? 'Knowledge Base' : item.charAt(0).toUpperCase() + item.slice(1)}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          {path[3] === 'agents' && path.length === 6 && <button className="btn m-1 max-w-44 " onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service, 18, 18)} {truncate(bridgeData?.name, 15)} </button>}
-          {path[3] === 'chatbot' && path[4] === 'configure' && <button className="btn m-1" onClick={toggleChatbotSidebar}> <Rss size={16} /> {chatbotData?.title} </button>}
+    <div className="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50 shadow-sm min-h-16 ml-4">
+      <div className="navbar-start flex-1">
+        {/* Breadcrumb Navigation */}
+        <div className="breadcrumbs text-sm max-w-none">
+          <ul>
+            {breadcrumbItems.map((item, index) => (
+              <li key={index} className={item?.current ? 'font-semibold' : ''}>
+                <a 
+                  href="#" 
+                  className={`flex items-center gap-2 ${
+                    item?.current 
+                      ? 'text-primary cursor-default' 
+                      : 'text-base-content/70 hover:text-base-content transition-colors cursor-pointer'
+                  }`}
+                  onClick={item?.handleClick}
+                >
+                  {item?.icon && <item.icon size={14} />}
+                  <span className="truncate max-w-[120px] sm:max-w-[200px]">{item.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <div className="justify-end w-full" >
-          {path.length === 6 && path[3] === 'agents' ? (
-            <>
-          {/* Add Pause/Resume Button */}
-          <button 
-              className={`btn m-1 tooltip tooltip-left ${bridge?.bridge_status === 0 ? 'bg-green-200 hover:bg-green-300' : 'bg-red-200 hover:bg-red-300'}`}
-              data-tip={bridge?.bridge_status === 0 ? 'Resume Agent' : 'Pause Agent'}
-              onClick={() => handlePauseBridge(bridge?.bridge_status === 0 ? 'resume' : 'paused')}
-            >
-              {bridge?.bridge_status === 0 ? <Play size={16} /> : <Pause size={16} />}
-            </button>
-              <button className="btn m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
-                <History size={16} />
-              </button>
-              {path[4] === 'configure' && (
-                <div className='flex items-center'>
-                  {(isdrafted && publishedVersion === versionId) && (
-                    <div className="tooltip tooltip-left" data-tip="Your changes are discarded & will be synced by publish version.">
-                      <div className='flex items-center gap-2'>
-                        <button
-                          className="btn bg-red-200 m-1 hover:bg-red-300"
-                          onClick={handleDiscardChanges}
-                        >
-                         <ClipboardX size={16} /> <span className='text-black'>Discard</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  <button
-                    className="btn bg-green-200 hover:bg-green-300"
-                    onClick={() => openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
-                    disabled={!isdrafted && publishedVersion === versionId}
-                  >
-                   <BookCheck size={16} /> Publish                  </button>
-                  <div className="divider divider-horizontal mx-1"></div>
-                </div>
-              )}
-              <div className="join group flex">
+        {/* Agent Controls */}
+        {currentPath.includes('agents') && (
+          <div className="flex items-center gap-2 ml-4 pl-4 border-l border-base-300">
+            {/* Pause/Resume Button */}
+            <div className="tooltip" data-tip={bridgeStatus === 0 ? 'Resume Agent' : 'Pause Agent'}>
               <button 
-                onClick={() => router.push(`/org/${path[2]}/agents/configure/${bridgeId}?version=${versionId}`)} 
-                className={`${path[4] === 'configure' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
+                className={`btn btn-sm gap-2 flex-col ${
+                  bridgeStatus === 0 ? 'btn-success' : 'btn-error'
+                } ${isLoading ? 'loading' : ''}`}
+                onClick={handlePauseBridge}
+                disabled={isLoading}
+                aria-label={bridgeStatus === 0 ? 'Resume Agent' : 'Pause Agent'}
               >
-                <FileSliders size={16} className="shrink-0" />
-                <span className={`${path[4] === 'configure' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Configure Agents</span>
+                {!isLoading && (bridgeStatus === 0 ? <Play size={14} /> : <Pause size={14} />)}
+                <span className="hidden sm:inline">
+                  {bridgeStatus === 0 ? 'Resume' : 'Pause'}
+                </span>
               </button>
-                <button 
-                onClick={() => router.push(`/org/${path[2]}/agents/testcase/${bridgeId}?version=${versionId}`)} 
-                className={`${path[4] === 'testcase' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-2 group/btn`}
+            </div>
+
+            {/* Version Control Actions */}
+            {!isHistoryPage && (
+              <div className="flex items-center gap-2">
+                {isDrafted && (
+                  <div className="tooltip" data-tip="Discard all changes">
+                    <button
+                      className="btn btn-sm btn-outline btn-error gap-2 flex-col"
+                      onClick={handleDiscardChanges}
+                      disabled={isLoading}
+                    >
+                      <ClipboardX size={14} />
+                      <span className="hidden sm:inline">Discard</span>
+                    </button>
+                  </div>
+                )}
+                
+                <div className="tooltip tooltip-bottom" data-tip={isDrafted ? "Publish changes" : "No changes to publish"}>
+                  <button
+                    className={`btn btn-sm gap-2 flex-col ${
+                      isDrafted ? 'btn-success' : 'btn-success btn-disabled'
+                    } ${isLoading ? 'loading' : ''}`}
+                    onClick={handlePublish}
+                    disabled={!isDrafted || isLoading}
+                  >
+                    {!isLoading && <BookCheck size={14} />}
+                    <span className="hidden sm:inline">Publish</span>
+                  </button>
+                </div>
+                
+                <div className="divider divider-horizontal"></div>
+              </div>
+            )}
+
+            {/* Agent Actions Dropdown */}
+            {/* <div className="dropdown dropdown-end" ref={dropdownRef}>
+              <div 
+                tabIndex={0} 
+                role="button" 
+                className="btn btn-sm btn-ghost gap-2"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                aria-label="Agent actions"
               >
-                <TestTube size={16} className="shrink-0" />
-                <span className={`${path[4] === 'testcase' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Test Cases</span>
-              </button>
+                <MoreVertical size={14} />
+              </div>
               
-                <button 
-                onClick={() => router.push(`/org/${path[2]}/agents/history/${bridgeId}?version=${versionId}`)} 
-                className={`${path[4] === 'history' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-2 group/btn`}
-              >
-                <MessageCircleMore size={16} className="shrink-0" />
-                <span className={`${path[4] === 'history' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chat History</span>
-              </button>
-              </div>
-              <div className='ml-2'>
-              </div>
-            </>
-          ) : (
-            path[3] === 'apikeys' ?
-              <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>+ Add new Api key</button>
-              : path[3] === 'pauthkey' ?
-                <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new Pauth Key</button>
-                :
-                path[3] === 'alerts' ?
-                  <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.WEBHOOK_MODAL)}>+ create new Alert</button>
-                  :
-                  path[3] === 'agents' ?
-                    <div>
-                      <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>
-                        + create new agent
-                      </button>
-                    </div> :
-                    path[3] === 'metrics' ?
-                      <div>
-                        <button className="btn btn-primary" onClick={() => router.push(`/org/${path[2]}/alerts`)}>
-                          Configure Alerts
-                        </button>
-                      </div> :
-                      (path[3] === 'chatbot' && path.length === 4) ?
-                        <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CHATBOT_MODAL)}>
-                          + create new chatbot
-                        </button> : path[3] === 'knowledge_base' ?
-                          <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>
-                            + Add new Knowledge base
-                          </button> : ""
-          )}
-        </div>
+              {isDropdownOpen && (
+                <ul 
+                  tabIndex={0} 
+                  className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg border border-base-300"
+                >
+                  <li>
+                    <button
+                      className="flex items-center gap-3"
+                      onClick={() => handleDropdownAction('duplicate')}
+                    >
+                      <Copy size={14} />
+                      Duplicate Agent
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      className="flex items-center gap-3"
+                      onClick={() => handleDropdownAction('archive')}
+                    >
+                      <Archive size={14} />
+                      Archive Agent
+                    </button>
+                  </li>
+                  <div className="divider my-1"></div>
+                  <li>
+                    <button
+                      className="flex items-center gap-3 text-error hover:bg-error hover:text-error-content"
+                      onClick={() => handleDropdownAction('delete')}
+                    >
+                      <Trash2 size={14} />
+                      Delete Agent
+                    </button>
+                  </li>
+                </ul>
+              )}
+            </div> */}
+          </div>
+        )}
       </div>
-      {/* org slider  */}
-      <OrgSlider />
 
-      {/* Agent slider */}
-      <BridgeSlider />
+      {/* Navigation Tabs */}
+      {currentPath.includes('agents') && (
+        <div className="navbar-end">
+          <div className="tabs tabs-boxed bg-base-200">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleSwitchTab(tab)}
+                className={`tab gap-2 ${
+                  activeTab === tab.id ? 'tab-active' : ''
+                }`}
+                aria-label={tab.label}
+              >
+                <tab.icon size={16} />
+                <span className="hidden md:inline">{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* chatbot slider */}
-      <ChatBotSlider />
-      <ConfigHistorySlider versionId={versionId} />
+      {/* Agent Status Bar */}
+      {currentPath.includes('agents') && (
+        <div className={`absolute top-full left-0 right-0 px-6 py-2 text-xs mb-3 ${
+          bridgeStatus === 1 
+            ? 'bg-base-300 text-success-content' 
+            : 'bg-error text-error-content'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${
+                bridgeStatus === 1 ? 'bg-success-content' : 'bg-error-content'
+              } animate-pulse`}></div>
+              <span className="font-medium">
+                Agent is currently {bridgeStatus === 1 ? 'active' : 'paused'}
+              </span>
+            </div>
+            
+            {!isHistoryPage && isDrafted && (
+              <div className="badge badge-warning badge-sm gap-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-warning-content"></div>
+                Draft Changes
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+       {/* org slider  */}
+       <OrgSlider />
+
+{/* Agent slider */}
+<BridgeSlider />
+
+{/* chatbot slider */}
+<ChatBotSlider />
+<ConfigHistorySlider versionId={currentPath[4]} />
     </div>
   );
-}
+};
 
 export default Navbar;

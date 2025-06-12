@@ -263,13 +263,13 @@ function layoutOrgPage({ children, params }) {
   if (!isValidOrg) {
     return <ErrorPage></ErrorPage>;
   }
-  if (isHomePage) {
     return (
-      <div className="flex h-screen">
-        <div className=" flex flex-col  h-full">
+      <div className="h-screen">
+        <div className="flex h-screen">
+        <div className=" flex flex-col h-full">
           <MainSlider />
         </div>
-        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto overflow-x-hidden">
+        <div className="flex-1 ml-12 lg:ml-12 overflow-y-auto overflow-x-hidden">
           <Navbar />
           {loading ? <LoadingSpinner /> :
             <main className="px-2">{children}</main>
@@ -277,16 +277,9 @@ function layoutOrgPage({ children, params }) {
         </div>
         <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
       </div>
-    );
-  } else {
-    return (
-      <div className="h-screen">
-        <Navbar />
-        {loading ? <LoadingSpinner /> : children}
-        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
       </div>
     );
   }
-}
+
 
 export default Protected(layoutOrgPage);
