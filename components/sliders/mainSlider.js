@@ -1,7 +1,7 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import { SettingsIcon, KeyIcon, KeyRoundIcon, LineChartIcon, LogoutIcon, MailIcon, PlugIcon, TriangleWarningIcon, AddUserIcon, SettingsAltIcon } from '@/components/Icons';
+import { CogIcon, KeyIcon, KeyRoundIcon, LineChartIcon, LogoutIcon, MailIcon, PlugIcon, TriangleWarningIcon, AddUserIcon, SettingsAltIcon, MessageSquareMoreIcon } from '@/components/Icons';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { AlignIcon, BookIcon, BotIcon, BuildingIcon, ChevronDownIcon } from '@/components/Icons';
@@ -44,23 +44,23 @@ function MainSlider() {
   };
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleMainSidebar = () => toggleSidebar("main-sidebar");
-  
+
   // Fixed handler for switch organization
   const handleSwitchOrganization = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Close the drawer first
     const drawer = document.getElementById("my-drawer-2");
     if (drawer) {
       drawer.checked = false;
     }
-    
+
     // Small delay to ensure drawer closes properly before toggling org sidebar
     setTimeout(() => {
       toggleOrgSidebar();
     }, 100);
-    
+
     // Remove focus to prevent focus issues
     e.target.blur();
   };
@@ -105,6 +105,19 @@ function MainSlider() {
               </ul>
             </div>
             <div className='mt-auto'>
+              <a
+                href="https://gtwy.featurebase.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium "
+              >
+                <div className="mt-4 rounded-lg border-t border-base-300 bg-base-100">
+                  <div className="p-4 flex items-center gap-2">
+                    <MessageSquareMoreIcon size={16} />
+                    Feedback
+                  </div>
+                </div>
+              </a>
               <details
                 className="overflow-hidden rounded-lg border-t border-gray-300 [&_summary::-webkit-details-marker]:hidden"
               >
@@ -121,12 +134,15 @@ function MainSlider() {
                 <div className="border-t border-gray-200 bg-white">
                   <ul className="menu w-full   text-base-content">
                     <li> <a className='py-2 px-2 rounded-md'> <MailIcon size={16} /> {userdetails.email}</a> </li>
-                    <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/userDetails`) }}> <SettingsIcon size={16} />Update User Details</a> </li>
-                    <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <SettingsIcon size={16} /> Workspace Setting</a> </li>
+                    <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/userDetails`) }}> <CogIcon size={16} />Update User Details</a> </li>
+                    <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <CogIcon size={16} /> Workspace Setting</a> </li>
                     <li ><a className='py-2 px-2 rounded-md' onClick={logoutHandler}> <LogoutIcon size={16} />  logout</a></li>
                   </ul>
                 </div>
+                
               </details>
+              
+             
             </div>
           </div >
         </div >

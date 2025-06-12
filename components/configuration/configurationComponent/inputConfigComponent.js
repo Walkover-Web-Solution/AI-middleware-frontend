@@ -4,7 +4,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import { InfoIcon, Wand2 } from '@/components/Icons';
+import { InfoIcon, Wand2Icon } from '@/components/Icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
@@ -285,7 +285,6 @@ const InputConfigComponent = ({ params }) => {
               <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                  Improve Prompt           
               </span>
-              <Wand2 size={14} className=' ml-2'/>
             </div>
           </div>
         </div>

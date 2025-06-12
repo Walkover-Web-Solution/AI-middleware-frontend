@@ -659,11 +659,12 @@ export const userFeedbackCount = async ({ bridge_id, user_feedback }) => {
   }
 }
 
-export const getSubThreadIds = async ({ thread_id, error }) => {
+export const getSubThreadIds = async ({ thread_id, error, bridge_id }) => {
   try {
     const response = await axios.get(`${URL}/api/v1/config/history/sub-thread/${thread_id}`, {
       params: {
-        error
+        error,
+        bridge_id
       }
     });
     return response.data;
@@ -710,6 +711,17 @@ export const optimizeSchemaApi = async ({ data }) => {
   } catch (error) {
     console.error(error);
     return error;
+  }
+};
+
+export const updateUser = async ({ user_id, user }) => {
+  const updateObject = { user_id, user: {"meta": user?.meta} };
+  try {
+    const response = await axios.put(`${URL}/user/updateDetails`, updateObject);
+    return response?.data;
+  } catch (error) {
+    console.error('Error updating details:', error.response?.data?.message || error.message);
+    throw new Error(error.response?.data?.message || 'Something went wrong');
   }
 };
 

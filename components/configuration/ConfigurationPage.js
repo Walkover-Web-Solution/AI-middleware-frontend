@@ -65,9 +65,7 @@ export default function ConfigurationPage({ params }) {
     const renderSetupView = useMemo(() => () => (
         <>
             {bridgeType === 'trigger' && <TriggersList params={params} />}
-            {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING && (modelType === AVAILABLE_MODEL_TYPES.REASONING
-                ? PROMPT_SUPPORTED_REASIONING_MODELS?.includes(modelName)
-                : true)) && (
+            {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
                     <>
                         <PreEmbedList params={params} />
                         <InputConfigComponent params={params} />

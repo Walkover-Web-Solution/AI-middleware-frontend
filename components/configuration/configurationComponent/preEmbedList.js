@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateApiAction } from '@/store/action/bridgeAction';
 import { getStatusClass } from '@/utils/utility';
 import { CircleAlertIcon, InfoIcon, TrashIcon } from '@/components/Icons';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
@@ -53,7 +53,7 @@ const PreEmbedList = ({ params }) => {
             <div className="form-control inline-block">
                 <div className='flex gap-5 items-center ml-2 '>
                     <InfoModel tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
-                        <p className="label-text font-medium whitespace-nowrap info">Pre functions</p>
+                        <p className="label-text font-medium whitespace-nowrap info">Pre Tool</p>
                     </InfoModel>
                 </div>
                 <div className="label flex-col items-start">

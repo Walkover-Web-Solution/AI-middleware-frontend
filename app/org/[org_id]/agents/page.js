@@ -3,13 +3,14 @@ import CreateNewBridge from "@/components/createNewBridge";
 import CustomTable from "@/components/customTable/customTable";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import LoadingSpinner from "@/components/loadingSpinner";
+import OnBoarding from "@/components/OnBoarding";
 import PageHeader from "@/components/Pageheader";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
-import { MODAL_TYPE } from "@/utils/enums";
-import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
+import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
+import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
 import { EllipsisIcon, GridIcon, TableIcon, TestTubeDiagonalIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
@@ -22,15 +23,19 @@ function Home({ params }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
-  const averageResponseTime = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.average_response_time || []);
-
-  const { isLoading } = useCustomSelector((state) => ({
-    isLoading: state.bridgeReducer.loading,
-  }));
-
+  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation } = useCustomSelector((state) => {
+    const orgData = state.bridgeReducer.org[params.org_id] || {};
+    const user = state.userDetailsReducer.userDetails
+    return {
+      allBridges: (orgData.orgs || []).slice().reverse(),
+      averageResponseTime: orgData.average_response_time || [],
+      isLoading: state.bridgeReducer.loading,
+      isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
+    };
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
+  const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation);
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -208,6 +213,9 @@ function Home({ params }) {
 
   return (
     <div className="w-full">
+      {showTutorial && (
+        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.bridgeCreation} flagKey={"bridgeCreation"} />
+      )}
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />

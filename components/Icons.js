@@ -79,6 +79,9 @@ import {
   UserPlus,
   Webhook,
   X,
+  MessageSquareMore,
+  Wand2,
+  Settings,
 } from 'lucide-react';
 
 
@@ -97,10 +100,26 @@ export const RocketIcon=(props)=><Rocket {...props}/>
 export const AlertIcon = (props) => <AlertTriangle {...props} />;
 
 /**
+ * Message square icon showing a chat bubble
+ * Used for messaging and feedback features
+ * Style: Blue or gray for neutral messaging
+ * Context: Chat features, feedback collection
+ */
+export const MessageSquareMoreIcon = (props) => <MessageSquareMore {...props} />;
+
+/**
+ * Magic wand icon showing a wizard's wand
+ * Used for optimization and automation features
+ * Style: Blue or purple for magical/optimization actions
+ * Context: Optimization tools, automation features
+ */
+export const Wand2Icon = (props) => <Wand2 {...props} />;
+
+/**
  * Alignment icon showing three horizontal lines
  * Used for alignment and layout controls
  * Style: Blue or gray for layout indicators
- * Context: Text alignment, layout configuration
+ * Context: Layout and alignment features
  */
 export const AlignIcon = (props) => <AlignJustify {...props} />;
 
@@ -298,7 +317,15 @@ export const ClockTenIcon = (props) => <Clock10 {...props} />;
  * Style: Blue or gray for neutral settings
  * Context: Configuration panels, settings menus
  */
-export const SettingsIcon = (props) => <Cog {...props} />;
+export const CogIcon = (props) => <Cog {...props} />;
+
+/**
+ * Settings icon showing gear/cog
+ * Used for settings and configuration features
+ * Style: Blue or gray for neutral settings
+ * Context: Configuration panels, settings menus
+ */
+export const SettingsIcon = (props) => <Settings {...props} />;
 /**
  * Copy icon showing clipboard and document
  * Used for copying actions

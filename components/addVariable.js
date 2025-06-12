@@ -2,19 +2,20 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
+import { updateOnBoardingDetails } from "@/utils/utility";
 import { ChevronUpIcon, ChevronDownIcon, InfoIcon, TrashIcon } from "@/components/Icons";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-
+import OnBoarding from "./OnBoarding";
+import { ONBOARDING_VIDEOS } from "@/utils/enums";
 const AddVariable = ({ params }) => {
   const versionId = params.version;
-  const { variablesKeyValue, prompt } = useCustomSelector((state) => ({
-    variablesKeyValue:
-      // state?.bridgeReducer?.allBridgesMap?.[params.id]?.variables || [],
-      state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
+  const { variablesKeyValue, prompt, isFirstVariable,  } = useCustomSelector((state) => ({
+    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+    isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
   }));
-
+  const [showTutorial, setShowTutorial] = useState(false);
   const [keyValuePairs, setKeyValuePairs] = useState([]);
   const [isFormData, setIsFormData] = useState(true);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
@@ -23,6 +24,10 @@ const AddVariable = ({ params }) => {
   const dispatch = useDispatch();
   const accordionContentRef = useRef(null); // Ref for the accordion content
   const isOpeningRef = useRef(false); // To track if the accordion is opening
+  const handleTutorial = () => {
+    setShowTutorial(isFirstVariable);
+  };
+
 
   const updateVersionVariable = (updatedPairs) => {
     const filteredPairs = updatedPairs ? updatedPairs?.filter(pair =>
@@ -219,18 +224,21 @@ const AddVariable = ({ params }) => {
 
   return (
     <div className="collapse text-base-content" tabIndex={0}>
-      {/* Accordion Toggle Button */}
       <button
         className="flex items-center cursor-pointer focus:outline-none"
-        onClick={toggleAccordion}
+        onClick={() => {
+          handleTutorial()
+          toggleAccordion()
+        }}
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
       >
-        <span className="mr-2 text-nowrap font-medium">
-          Add Variables
-        </span>
+        <span className="mr-2 text-nowrap font-medium">Add Variables</span>
         {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </button>
+      {showTutorial && (
+        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
+      )}
 
       {/* Accordion Content */}
       <div

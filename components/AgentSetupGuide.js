@@ -16,7 +16,6 @@ const AgentSetupGuide = ({ params = {} }) => {
 
   const [isVisible, setIsVisible] = useState(!bridgeApiKey);
   const [showError, setShowError] = useState(false);
-  console.log("bridgeApiKey", bridgeApiKey, isVisible);
   const handleStart = () => {
     if (!bridgeApiKey) {
       setShowError(true);

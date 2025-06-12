@@ -438,7 +438,7 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name })
             </div>
           </span>
            <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
-            <TrashIcon size={16} /> Remove {preFunction ? "pre-function" : "function"}
+            <TrashIcon size={16} /> Remove {preFunction ? "pre-tool" : "tool"}
           </button>
         </div>
         <div className="flex justify-between items-center">

@@ -2,11 +2,12 @@
 import CustomTable from '@/components/customTable/customTable'
 import MainLayout from '@/components/layoutComponents/MainLayout'
 import LoadingSpinner from '@/components/loadingSpinner'
+import OnBoarding from '@/components/OnBoarding'
 import PageHeader from '@/components/Pageheader'
 import Protected from '@/components/protected'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
-import { MODAL_TYPE, PAUTH_KEY_COLUMNS } from '@/utils/enums'
+import { MODAL_TYPE, ONBOARDING_VIDEOS, PAUTH_KEY_COLUMNS } from '@/utils/enums'
 import { closeModal, openModal } from '@/utils/utility'
 import { CopyIcon, TrashIcon } from '@/components/Icons'
 import React, { useEffect, useState } from 'react'
@@ -15,11 +16,19 @@ import { toast } from 'react-toastify'
 
 export const runtime = 'edge';
 
-function Page() {
+function Page({ params }) {
   const dispatch = useDispatch();
-  const authData = useCustomSelector((state) => state?.authDataReducer?.authData || [])
-  const [singleAuthData, setSingleAuthData] = useState({})
+ const { authData, isFirstPauthCreation, } = useCustomSelector((state) => {
+  const user = state.userDetailsReducer.userDetails || [];
+  return {
+    authData: state?.authDataReducer?.authData || [],
+    isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
+  };
+});
+
+  const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(isFirstPauthCreation);
 
   useEffect(() => {
     dispatch(getAllAuthData())
@@ -85,7 +94,7 @@ function Page() {
     });
     closeModal(MODAL_TYPE.PAUTH_KEY_DELETE_MODAL);
   };
-  
+
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center">
@@ -107,13 +116,15 @@ function Page() {
 
   return (
     <div className="h-full">
-
+      {showTutorial && (
+       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"}/>
+      )}
       <MainLayout>
-      <PageHeader 
-        title="PauthKey" 
-        description="A unique key used to validate API requests for sending and receiving messages securely." 
-      />
-       </MainLayout>  
+        <PageHeader
+          title="PauthKey"
+          description="A unique key used to validate API requests for sending and receiving messages securely."
+        />
+      </MainLayout>
       {isCreating && <LoadingSpinner />}
       <CustomTable
         data={authData.map(item => ({
@@ -178,8 +189,8 @@ function Page() {
 
           </div>
         </div>
-      </dialog>   
-    </div>  
+      </dialog>
+    </div>
   )
 }
 

@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { CircleAlertIcon, SettingsIcon,  } from '@/components/Icons';
+import { CircleAlertIcon, SettingsIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
@@ -76,7 +76,7 @@ const EmbedList = ({ params }) => {
         }
     };
 
-    if (modelType === 'reasoning' && !PROMPT_SUPPORTED_REASIONING_MODELS.includes(model)) {
+    if (modelType === 'reasoning') {
         return <></>;
     }
 

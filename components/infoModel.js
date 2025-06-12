@@ -6,10 +6,11 @@ import {
   shift,
   autoUpdate,
 } from '@floating-ui/react';
+import Tutorial from './tutorial';
 
-const InfoModel = ({ children, tooltipContent }) => {
-  const [visible, setVisible] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
+const InfoModel = ({ video = "", children, tooltipContent }) => {
+  const [open, setOpen] = useState(false); // for hover state
+  const [showTutorial, setShowTutorial] = useState(false);
   const delayTimeout = useRef(null);
 
   const { refs, floatingStyles, update } = useFloating({
@@ -18,61 +19,74 @@ const InfoModel = ({ children, tooltipContent }) => {
     whileElementsMounted: autoUpdate,
   });
 
-  const handleMouseEnter = () => {
-    delayTimeout.current = setTimeout(() => {
-      setVisible(true);
-    }, 300); // Delay appearance
-  };
-
-  const handleMouseLeave = () => {
+  const handleOpenWithDelay = () => {
     clearTimeout(delayTimeout.current);
-    setVisible(false);
-    setShowTooltip(false); // Hide after fade
+    delayTimeout.current = setTimeout(() => {
+      setOpen(true);
+    }, 300);
   };
 
-  // Wait until floating UI has calculated position, then fade
+  const handleClose = () => {
+    clearTimeout(delayTimeout.current);
+    delayTimeout.current = setTimeout(() => {
+      setOpen(false);
+    }, 150);
+  };
+
   useEffect(() => {
-    if (visible&&tooltipContent) {
+    if (open && refs.reference.current && refs.floating.current) {
       const cleanup = autoUpdate(
         refs.reference.current,
         refs.floating.current,
         update
       );
-      requestAnimationFrame(() => {
-        setShowTooltip(true); // fade-in now
-      });
       return () => cleanup();
     }
-  }, [visible, refs.reference, refs.floating, update]);
+  }, [open, update, refs.reference, refs.floating]);
 
   return (
-    <div
-      ref={refs.setReference}
-      className="inline-block relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {children}
-
+    <>
       <div
-        ref={refs.setFloating}
-        style={floatingStyles}
-        className={`
-          z-50
-          w-64
-          p-3
-          border border-gray-700
-          rounded-lg shadow-xl
-          bg-gray-900 text-white text-sm
-          space-y-2
-          transition-all duration-300 ease-out
-          pointer-events-none
-          ${visible && showTooltip ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
-        `}
+        ref={refs.setReference}
+        onMouseEnter={handleOpenWithDelay}
+        onMouseLeave={handleClose}
+        className="inline-block relative"
       >
-        {tooltipContent}
+        {children}
+
+        {open && (
+          <div
+            ref={refs.setFloating}
+            style={floatingStyles}
+            onMouseEnter={() => {
+              clearTimeout(delayTimeout.current);
+              setOpen(true);
+            }}
+            onMouseLeave={handleClose}
+            className="
+              z-50 w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            "
+          >
+            <p className="whitespace-pre-line">{tooltipContent}</p>
+
+          {video !== "" && (
+            <button
+              onClick={() => setShowTutorial(true)}
+              className="mt-1 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 pointer-events-auto"
+            >
+              Watch Video <span aria-hidden>↗</span>
+            </button>
+          )}
+        </div>
+        )}
       </div>
-    </div>
+
+      {showTutorial && (
+        <Tutorial video={video} setShowTutorial={setShowTutorial} />
+      )}
+    </>
   );
 };
 

@@ -7,9 +7,13 @@ const DataObject = {
     event: `window.addEventListener('message', (event) => {
         const receivedData = event.data;
      });`,
-    sendData: `window.SendDataToChatbot({ \n      bridgeName: '<slugName_of_bridge>',\n      threadId: <id>,\n      parentId: '<parent_container_id>',\n      fullScreen: 'true/false',\n      hideCloseButton: 'true/false',\n      hideIcon: 'true/false',\n      variables: {}\n    });`,
-    open: `window.openChatbot()`,
-    close: `window.closeChatbot()`,
+    sendData: `window.Chatbot.sendData({ \n      bridgeName: '<slugName_of_bridge>',\n      threadId: <id>,\n      parentId: '<parent_container_id>',\n      fullScreen: 'true/false',\n      hideCloseButton: 'true/false',\n      hideIcon: 'true/false',\n      variables: {}\n    });`,
+    openChatbot: `window.Chatbot.open();`,
+    closeChatbot: `window.Chatbot.close();`,
+    showIcon: `window.Chatbot.show();`,
+    hideIcon: `window.Chatbot.hide();`,
+    reloadChats: `window.Chatbot.reloadChats();`,
+    askAi: `window.Chatbot.askAi(data);`
 };
 const headers = ['Parameter', 'Type', 'Description', 'Required'];
 const data = [
@@ -40,8 +44,12 @@ const Section = ({ title, caption, children }) => (
 const SecondStep = () => {
     const methods = [
         { label: '1. Use This method to send data when needed', code: DataObject.sendData },
-        { label: '2. Use this method to open chatbot explicitly', code: DataObject.open },
-        { label: '3. Use this method to close chatbot explicitly', code: DataObject.close },
+        { label: '2. Use this method to open chatbot explicitly', code: DataObject.openChatbot },
+        { label: '3. Use this method to close chatbot explicitly', code: DataObject.closeChatbot },
+        { label: '4. Use this method to show chatbot icon explicitly', code: DataObject.showIcon },
+        { label: '5. Use this method to hide chatbot icon explicitly', code: DataObject.hideIcon },
+        { label: '6. Use this method to reload chatbot explicitly', code: DataObject.reloadChats },
+        { label: '7. Use this method to ask ai explicitly', code: DataObject.askAi },
     ];
 
     return (

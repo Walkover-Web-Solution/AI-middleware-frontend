@@ -12,19 +12,20 @@ import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
+import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
-import { forEach } from "lodash";
+
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
 function layoutOrgPage({ children, params }) {
-
   const dispatch = useDispatch();
   const pathName = usePathname();
+  const urlParams = useParams();
   const searchParams = useSearchParams();
   const version_id = searchParams.get('version');
   const path = pathName.split('?')[0].split('/')
@@ -32,17 +33,39 @@ function layoutOrgPage({ children, params }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, SERVICES } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
     organizations: state.userDetailsReducer.organizations,
     preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
-    SERVICES: state?.serviceReducer?.services
+    SERVICES:state?.serviceReducer?.services ,
+    currentUser:state.userDetailsReducer.userDetails
   }));
-  const urlParams = useParams();
-  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
+ useEffect(() => {
+  const updateUserMeta = async () => {
+    if (currentUser.meta===null) {
+      const updatedUser = {
+        ...currentUser,
+        meta: {
+          onboarding: {
+            bridgeCreation: true,
+            FunctionCreation: true,
+            knowledgeBase: true,
+            Addvariables: true,
+            AdvanceParameter: true,
+            PauthKey: true,
+            CompleteBridgeSetup: true,
+          },
+        },
+      };
+      await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+    }
+  };
 
+  updateUserMeta();
+}, []);
+  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
   useEffect(() => {
     const validateOrg = async () => {
       try {
@@ -73,14 +96,14 @@ function layoutOrgPage({ children, params }) {
   useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
-        if (data === 0) {
+        if (data === 0 && !currentUser?.meta?.onboarding?.bridgeCreation) {
           openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
         }
         setLoading(false);
       }))
       dispatch(getAllFunctions())
     }
-  }, [isValidOrg]);
+  }, [isValidOrg, currentUser?.meta?.onboarding?.bridgeCreation]);
 
   useEffect(() => {
     if (isValidOrg) {
