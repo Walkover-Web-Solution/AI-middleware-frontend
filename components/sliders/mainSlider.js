@@ -4,7 +4,7 @@ import { toggleSidebar, getIconOfService } from '@/utils/utility';
 import { truncate } from "@/components/historyPageComponents/assistFile";
 import { AlignJustify, BookOpen, MessageSquare, Building2, ChevronDown, Cog, Database, Shield, BarChart3, LogOut, Mail, MessageSquareMore, Users, Settings2, AlertTriangle, UserPlus, Home, FileSliders, TestTube, History, Rss, Zap, ChevronRight, ChevronLeft } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 function MainSlider() {
   const pathName = usePathname();
@@ -24,14 +24,6 @@ function MainSlider() {
     chatbotData: state.ChatBot.ChatBotMap[bridgeId],
   }));
 
-  useEffect(()=>{
-    if(path.length === 4) setIsExpanded(true)
-  },[path])
-
-  useEffect(()=>{
-    if(path.length > 4) setIsExpanded(false)
-  },[path.length])
-
   const Icons = {
     org: <Building2 />,
     agents: <Users />,
@@ -44,7 +36,7 @@ function MainSlider() {
     knowledge_base: <BookOpen />,
     feedback: <MessageSquareMore />
   }
-console.log(path.length)
+
   // Navigation sections
   const navigationSections = [
     {
@@ -120,7 +112,9 @@ console.log(path.length)
   };
 
   const handleItemLeave = () => {
-    setHoveredItem(null);
+    if (!isExpanded) {
+      setHoveredItem(null);
+    }
   };
 
   // Tooltip component for individual items
@@ -148,21 +142,40 @@ console.log(path.length)
 
   return (
     <div className="relative">
-      <div className={`${path.length === 4 ? '' : 'fixed left-0 top-0'}  h-screen bg-base-100 border-r transition-all duration-300 z-[100] ${
+      <div className={`fixed left-0 top-0 h-screen bg-base-100 border-r transition-all duration-300 z-[100] ${
         isExpanded ? 'w-72' : 'w-16'
       }`}>
         
         {/* Toggle Button at Border */}
-        {path.length !== 4 && <button 
+        <button 
           onClick={toggleExpanded}
           className="absolute -right-3 top-6 w-6 h-6 bg-base-100 border border-base-300 rounded-full flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
         >
           {isExpanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-        </button>}
+        </button>
 
         <div className="flex flex-col h-full py-4">
           {/* Navigation Items */}
           <div className="flex-grow overflow-y-auto px-2">
+            
+            {/* Home Button */}
+            {path.length > 4 && (
+              <div className="mb-4">
+                <ItemTooltip itemKey="home" text="Home">
+                  <button 
+                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                    onClick={() => router.push(`/org/${path[2]}/agents`)}
+                    onMouseEnter={(e) => handleItemHover('home', e)}
+                    onMouseLeave={handleItemLeave}
+                    data-tooltip="home"
+                  >
+                    <Home size={20} className="shrink-0" />
+                    {isExpanded && <span>Home</span>}
+                  </button>
+                </ItemTooltip>
+              </div>
+            )}
+
             {/* Organization */}
             {path.length > 4 && (
               <div className="mb-6">
@@ -330,7 +343,7 @@ console.log(path.length)
       </div>
 
       {/* Content Spacer */}
-      <div className={`${path.length === 3 ? 'relative' : 'absolute'} top-0 left-0 transition-all duration-300`} style={{width: isExpanded ? '288px' : '64px'}}>
+      <div className="absolute top-0 left-0 transition-all duration-300" style={{width: isExpanded ? '288px' : '64px'}}>
         {/* Your main content goes here */}
       </div>
     </div>

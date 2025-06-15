@@ -267,10 +267,10 @@ function layoutOrgPage({ children, params }) {
       <div className="h-screen">
         <div className="flex h-screen">
         <div className=" flex flex-col h-full">
-          <MainSlider />
+          <MainSlider params={params}/>
         </div>
         <div className="flex-1 ml-12 lg:ml-12 overflow-y-auto overflow-x-hidden">
-          <Navbar />
+          <Navbar params={params}/>
           {loading ? <LoadingSpinner /> :
             <main className="px-2">{children}</main>
           }
