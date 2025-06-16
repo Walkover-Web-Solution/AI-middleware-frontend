@@ -3,7 +3,7 @@ import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountActi
 import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { openModal } from "@/utils/utility.js";
-import { ChevronDown, ChevronRight, ChevronUp, Download, MessageCircle, ThumbsDown, ThumbsUp, User } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, MessageCircle, ThumbsDown, ThumbsUp, User } from "lucide-react";
 import { useEffect, useState, memo, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
@@ -347,13 +347,13 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                       )}
                     </>
                   )}
-                  <div className="space-y-6">
-                    <div key={item.id} className="border border-gray-200 rounded-lg shadow-sm bg-white overflow-hidden">
+                  <div className="space-y-6 border-b border-base-300">
+                    <div key={item.id} className="rounded-lg shadow-sm bg-white overflow-hidden">
                       {item?.sub_thread && item.sub_thread?.length > 0 && (
-                        <div className="bg-gray-50 border-b border-gray-200">
+                        <div className="bg-gray-50">
                           <div className="p-4">
                             <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                              <ChevronRight className="w-4 h-4" />
+                              <ChevronDown className="w-4 h-4" />
                               Sub Threads
                             </h4>
                             <div className="space-y-2">
@@ -363,7 +363,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                   <div
                                     onClick={() => handleSelectSubThread(subThread?.sub_thread_id)}
                                     className={`cursor-pointer p-3 rounded-lg transition-all duration-200 border-2 ${params?.subThread_id === subThread?.sub_thread_id
-                                      ? 'bg-base-200 border-primary text-primary shadow-md'
+                                      ? 'bg-base-200 border-primary text-primary'
                                       : 'bg-base-100 border-gray-200 hover:bg-base-200 hover:border-gray-300 text-gray-700'
                                       }`}
                                   >
