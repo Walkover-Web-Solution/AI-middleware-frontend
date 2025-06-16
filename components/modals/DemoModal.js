@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { CircleX, CalendarDays } from 'lucide-react';
 import { getCalApi } from "@calcom/embed-react";
 
-const DemoModal = ({speakToUs}) => {
+const DemoModal = ({ speakToUs }) => {
 
     useEffect(() => {
         (async function () {
@@ -25,14 +25,13 @@ const DemoModal = ({speakToUs}) => {
     };
 
     return (
-      <dialog id={MODAL_TYPE.DEMO_MODAL} className="modal backdrop-blur-lg">
-  <div
-    className={`modal-box flex flex-col gap-6  ${
-      speakToUs
-        ? "bg-base-100 text-base-content border max-w-[95vw] w-[700px] border-base-300"
-        : "bg-gradient-to-br from-slate-900 to-slate-800 max-w-[95vw] w-[1300px] text-slate-100 border border-slate-700/50"
-    } shadow-2xl`}
-  >
+        <dialog id={MODAL_TYPE.DEMO_MODAL} className="modal backdrop-blur-lg">
+            <div
+                className={`modal-box flex flex-col gap-6  ${speakToUs
+                        ? "bg-base-100 text-base-content border max-w-[95vw] w-[700px] border-base-300"
+                        : "bg-gradient-to-br from-slate-900 to-slate-800 max-w-[95vw] w-[1300px] text-slate-100 border border-slate-700/50"
+                    } shadow-2xl`}
+            >
                 <div className="flex justify-between items-center pb-4 border-b border-slate-700">
                     <h3 className="font-bold text-2xl">
                         {speakToUs ? 'Speak to Us' : 'Discover GTWY AI'}
@@ -92,7 +91,7 @@ const DemoModal = ({speakToUs}) => {
                 <div className="modal-action mt-4">
                     <button
                         data-cal-namespace="30min"
-                       data-cal-link={speakToUs ? "team/gtwy.ai/30min-speakToUs" : "team/gtwy.ai/30min"}
+                        data-cal-link={speakToUs ? "team/gtwy.ai/30min-speakToUs" : "team/gtwy.ai/30min"}
                         data-cal-origin="https://cal.id"
                         data-cal-config='{"layout":"month_view"}'
                         onClick={() => handleClose()}
