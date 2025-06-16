@@ -26,6 +26,7 @@ const InputConfigComponent = ({ params }) => {
     const [prompt, setPrompt] = useState(reduxPrompt);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
+    const [messages, setMessages] = useState([]);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -347,7 +348,7 @@ const InputConfigComponent = ({ params }) => {
               <ResponseStyleDropdown params={params} />
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
-            <OptimizePromptModal savePrompt={savePrompt}setPrompt={setPrompt} params={params} />
+            <OptimizePromptModal savePrompt={savePrompt}setPrompt={setPrompt} params={params} messages={messages} setMessages={setMessages}/>
             <PromptSummaryModal params={params}/>
         </div>
     );
