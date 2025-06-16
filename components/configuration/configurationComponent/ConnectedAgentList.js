@@ -4,11 +4,13 @@ import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { Bot, Settings, Trash } from 'lucide-react';
-import { closeModal, openModal } from '@/utils/utility';
+import { closeModal, getStatusClass, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
 import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
 import AgentVariableModal from '@/components/modals/AgentVariableModal';
+import RenderEmbed from './renderEmbed';
+
 
 const ConnectedAgentList = ({ params }) => {
     const dispatch = useDispatch();
@@ -65,64 +67,60 @@ const ConnectedAgentList = ({ params }) => {
     }
 
     const handleRemoveAgent = (key, value) => {
-        dispatch(
-            updateBridgeVersionAction({
-                bridgeId: params?.id,
-                versionId: params?.version,
-                dataToSend: {
-                    agents: {
-                        connected_agents: {
-                            [key]: {
-                                "description": value?.description,
-                                "bridge_id": value?.bridge_id,
-                                "variables_state": value?.variables_state
+        try {
+            dispatch(
+                updateBridgeVersionAction({
+                    bridgeId: params?.id,
+                    versionId: params?.version,
+                    dataToSend: {
+                        agents: {
+                            connected_agents: {
+                                [key]: null
                             }
                         }
                     }
-                }
-            })
-        )
+                })
+            );
+            
+            // Clear states
+            setCurrentVariable(null);
+            setSelectedBridge(null);
+            
+        } catch (error) {
+            console.error('Error removing agent:', error);
+            toast.error('Failed to remove agent');
+        }
     }
 
 
     const renderEmbed = useMemo(() => (
         connect_agents && Object.entries(connect_agents).map(([name, item]) => {
-            return (
-                <div
+            return (<>
+                <RenderEmbed
+                    name={name}
+                    item={item}
                     key={item?.bridge_id}
-                    id={item?.bridge_id}
-                    className={`flex w-[280px] flex-col items-start rounded-lg border-2 md:flex-row cursor-pointer bg-base-100 relative transition-all`}
-                >
-                    <div className="p-4 w-full h-full flex flex-col justify-between gap-3">
-                        <div className="flex flex-col gap-2">
-                            <div className="flex justify-between items-center">
-                                <h1 className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content flex items-center gap-2">
-                                    <Bot size={18} className="text-primary" />
-                                    <div className="tooltip" data-tip={name?.length > 10 ? name : ""}>
-                                        <span>{name?.length > 10 ? `${name.slice(0, 15)}...` : name}</span>
-                                    </div>
-                                </h1>
-                                <div className="flex items-center gap-1">
-                                    <button
-                                        className="btn btn-ghost btn-sm p-1 hover:bg-red-50"
-                                        onClick={() => handleOpenAgentVariable(name, item)}
-                                    >
-                                        {item?.variables_state && <Settings size={16} className="" />}
-                                    </button>
-                                    <button
-                                        className="btn btn-ghost btn-sm p-1 hover:bg-red-50"
-                                        onClick={() => handleRemoveAgent(name, item)}
-                                    >
-                                        <Trash size={16} className="text-red-500" />
-                                    </button>
-                                </div>
-                            </div>
-                            <p className="text-sm text-base-content/80 line-clamp-3">
-                                {item?.description || "A description is required for proper functionality."}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                    bridgeFunctions={[{
+                        _id: item?.bridge_id,
+                        function_name: name,
+                        description: item?.description || "A description is required for proper functionality.",
+                        status: "connected"
+                    }]}
+                    integrationData={{
+                        [name]: {
+                            title: name?.length > 10 ? `${name.slice(0, 15)}...` : name,
+                            description: item?.description,
+                            status: "active"
+                        }
+                    }}
+                    getStatusClass={getStatusClass}
+                    handleOpenModal={() => handleOpenAgentVariable(name, item)}
+                    embedToken={params?.embedToken}
+                    params={{ id: params?.id, version: params?.version }}
+                />
+                            <AgentVariableModal selectedBridge={selectedBridge} currentVariable={currentVariable} handleSaveAgent={handleSaveAgent}name={name} item={item} handleRemoveAgent={handleRemoveAgent}/>
+
+                               </>
             );
         })
     ), [connect_agents]);
@@ -138,8 +136,7 @@ const ConnectedAgentList = ({ params }) => {
             </div>
             <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} />
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
-            <AgentVariableModal currentVariable={currentVariable} handleSaveAgent={handleSaveAgent} />
-        </div>
+       </div>
     );
 }
 

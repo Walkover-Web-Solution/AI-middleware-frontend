@@ -13,6 +13,7 @@
     "@calcom/embed-react": "^1.5.2",
     "@floating-ui/react": "^0.27.12",
     "@reduxjs/toolkit": "^2.2.0",
+    "ai-middleware-frontend-new": "file:",
     "axios": "^1.6.7",
     "debounce": "^2.0.0",
     "interface-chatbot": "^1.0.14",
