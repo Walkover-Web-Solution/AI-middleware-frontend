@@ -1,3 +1,4 @@
+import { SendHorizontal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, setMessages }) {
@@ -110,7 +111,7 @@ function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, set
               onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
             />
             <button className="btn btn-primary" disabled={loading} onClick={handleSend}>
-              {loading && <span className="loading loading-spinner"></span>} Send
+              {loading && <span className="loading loading-spinner"></span>} <SendHorizontal/>
             </button>
           </div>
           {errorMessage && (

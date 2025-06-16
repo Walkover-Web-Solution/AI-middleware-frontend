@@ -9,13 +9,12 @@ import { useDispatch } from 'react-redux';
 import ComparisonCheck from '@/utils/comparisonCheck';
 import Canvas from '../Canvas';
 
-function OptmizePromptModal({ savePrompt, setPrompt, params }) {
+function OptmizePromptModal({ savePrompt, setPrompt, params, messages, setMessages }) {
   const dispatch = useDispatch();
   const { prompt, optimizePromptHistory } = useCustomSelector((state) => ({
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
     optimizePromptHistory: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.optimizePromptHistory || [],
   }));
-  const [messages, setMessages] = useState([]);
   const [diff, setDiff] = useState(false);
   const [promptRequirement, setPromptRequirement] = useState(prompt);
   const [loading, setLoading] = useState(false);
@@ -43,10 +42,6 @@ function OptmizePromptModal({ savePrompt, setPrompt, params }) {
   }, [promptRequirement, newPrompt, streamedPrompt, isStreaming]);
 
   const OptimizePrompt = async (instructionText) => {
-    if (!promptRequirement.trim()) {
-      setErrorMessage("Prompt is required");
-      return "Prompt requirement is empty.";
-    }
     setLoading(true);
     setNewPrompt(""); // Clear previous prompt
     setStreamedPrompt(""); // Clear streamed content
@@ -94,7 +89,6 @@ function OptmizePromptModal({ savePrompt, setPrompt, params }) {
     setNewPrompt("");
     setStreamedPrompt("");
     setIsStreaming(false);
-    setMessages([]);
     setDiff(false);
     closeModal(MODAL_TYPE.OPTIMIZE_PROMPT);
   };
@@ -129,7 +123,7 @@ function OptmizePromptModal({ savePrompt, setPrompt, params }) {
 
   return (
     <dialog id={MODAL_TYPE.OPTIMIZE_PROMPT} className="modal">
-      <div className="modal-box w-11/12 max-w-7xl bg-white overflow-hidden">
+      <div className="modal-box w-full max-w-[100rem] bg-white overflow-hidden">
         <div className="flex justify-between items-center mb-0">
           <h3 className="font-bold text-lg">Improve prompt</h3>
           <button

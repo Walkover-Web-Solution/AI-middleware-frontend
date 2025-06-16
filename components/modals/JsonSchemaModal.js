@@ -10,14 +10,14 @@ import { useDispatch } from "react-redux";
 import ComparisonCheck from "@/utils/comparisonCheck";
 import Canvas from "../Canvas";
 
-function JsonSchemaModal({ params }) {
+function JsonSchemaModal({ params, messages, setMessages }) {
   const [diff, setDiff] = useState(false);
-  const [messages, setMessages] = useState([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedSchema, setStreamedSchema] = useState("");
   const [copyText, setCopyText] = useState("Copy Schema");
   const [loading, setLoading] = useState(false);
   const [newJsonSchema, setNewJsonSchema] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
 
   const { json_schema } = useCustomSelector((state) => ({
@@ -58,7 +58,7 @@ function JsonSchemaModal({ params }) {
           json_schema: jsonSchemaRequirenments,
         },
       });
-      const parsedResult = JSON.stringify(result.updated, undefined, 4);
+      const parsedResult = JSON.stringify(result?.updated, undefined, 4);
 
       // Use streaming to display the result
       simulateStreaming(parsedResult, setStreamedSchema, setIsStreaming, () => {
@@ -74,7 +74,7 @@ function JsonSchemaModal({ params }) {
   };
 
   const handleCloseModal = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     setNewJsonSchema("");
     setStreamedSchema("");
     setIsStreaming(false);
@@ -88,8 +88,8 @@ function JsonSchemaModal({ params }) {
       const schemaToApply = isStreaming ? streamedSchema : newJsonSchema;
       await dispatch(
         updateBridgeVersionAction({
-          bridgeId: params.id,
-          versionId: params.version,
+          bridgeId: params?.id,
+          versionId: params?.version,
           dataToSend: {
             configuration: {
               response_type: {
@@ -124,6 +124,17 @@ function JsonSchemaModal({ params }) {
       return newJsonSchema;
     }
     return jsonSchemaRequirenments;
+  };
+
+  const checkJsonSchema = (schema) => {
+    if (!schema) return;
+    try {
+      JSON.parse(schema);
+      setNewJsonSchema(schema);
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage("Invalid JSON Schema");
+    }
   };
 
   const displaySchema = isStreaming ? streamedSchema : newJsonSchema;
@@ -193,6 +204,11 @@ function JsonSchemaModal({ params }) {
                       setNewJsonSchema(e.target.value);
                     }
                   }}
+                  onBlur={(e) => {
+                    if (!isStreaming) {
+                      checkJsonSchema(e.target.value);
+                    }
+                  }}
                   readOnly={isStreaming}
                 />
                 {isStreaming && (
@@ -206,6 +222,9 @@ function JsonSchemaModal({ params }) {
                   </div>
                 )}
               </div>
+              {errorMessage && (
+                <p className="text-red-500 mt-2">{errorMessage}</p>
+              )}
             </div>
           )}
         </div>

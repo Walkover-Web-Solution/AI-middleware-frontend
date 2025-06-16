@@ -328,9 +328,9 @@ export const updateTitle = (newTitle) => {
     
     let currentIndex = 0;
     const streamInterval = setInterval(() => {
-      if (currentIndex < text.length) {
+      if (currentIndex < text?.length) {
         // Process multiple characters at once
-        const chunk = text.slice(currentIndex, currentIndex + 5); // Process 5 chars at a time
+        const chunk = text?.slice(currentIndex, currentIndex + 5); // Process 5 chars at a time
         setStreamed(prev => prev + chunk);
         currentIndex += 5;
       } else {
@@ -345,9 +345,9 @@ export const updateTitle = (newTitle) => {
   
 
   export const createDiff = (oldText, newText) => {
-    const oldLines = oldText.split('\n');
-    const newLines = newText.split('\n');
-    const maxLines = Math.max(oldLines.length, newLines.length);
+    const oldLines = oldText?.split('\n');
+    const newLines = newText?.split('\n');
+    const maxLines = Math.max(oldLines?.length, newLines?.length);
     
     const diffLines = [];
     
@@ -356,28 +356,28 @@ export const updateTitle = (newTitle) => {
       const newLine = newLines[i] || '';
       
       if (oldLine === newLine) {
-        diffLines.push({
+        diffLines?.push({
           type: 'equal',
           oldLine,
           newLine,
           lineNumber: i + 1
         });
       } else if (!oldLine) {
-        diffLines.push({
+        diffLines?.push({
           type: 'added',
           oldLine: '',
           newLine,
           lineNumber: i + 1
         });
       } else if (!newLine) {
-        diffLines.push({
+        diffLines?.push({
           type: 'deleted',
           oldLine,
           newLine: '',
           lineNumber: i + 1
         });
       } else {
-        diffLines.push({
+        diffLines?.push({
           type: 'modified',
           oldLine,
           newLine,

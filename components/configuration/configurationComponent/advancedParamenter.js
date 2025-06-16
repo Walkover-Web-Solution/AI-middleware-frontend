@@ -18,6 +18,7 @@ const AdvancedParameters = ({ params }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
 
   const { service, version_function_data, configuration, integrationData, isFirstParameter } = useCustomSelector((state) => {
@@ -405,7 +406,7 @@ const AdvancedParameters = ({ params }) => {
                       >
                         Improve Schema
                       </span>
-                      <JsonSchemaModal params={params} />
+                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages}/>
                     </>
                   )}
                 </label>
