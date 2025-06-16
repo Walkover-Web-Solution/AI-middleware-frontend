@@ -30,7 +30,7 @@ const GptMemory = ({ params }) => {
                 <div className='flex flex-row items-center gap-2'>
                     <div className="label">
                         <InfoModel tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
-                        <span className="font-medium text-nowrap info ">Enable Gpt-memory</span>
+                        <span className="font-medium text-nowrap info ">Enable LLM-memory</span>
                         
                         </InfoModel>
                     </div>
