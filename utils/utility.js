@@ -321,4 +321,71 @@ export const updateTitle = (newTitle) => {
         document.title = newTitle;
     }
   };
+
+ export const simulateStreaming = (text, setStreamed, setIsStreaming, callback) => {
+    setIsStreaming(true);
+    setStreamed("");
+    
+    let currentIndex = 0;
+    const streamInterval = setInterval(() => {
+      if (currentIndex < text.length) {
+        // Process multiple characters at once
+        const chunk = text.slice(currentIndex, currentIndex + 5); // Process 5 chars at a time
+        setStreamed(prev => prev + chunk);
+        currentIndex += 5;
+      } else {
+        clearInterval(streamInterval);
+        setIsStreaming(false);
+        // Set final text to ensure we didn't miss any characters
+        setStreamed(text);
+        callback();
+      }
+    }, 5); // Reduced interval to 5ms
+  };
   
+
+  export const createDiff = (oldText, newText) => {
+    const oldLines = oldText.split('\n');
+    const newLines = newText.split('\n');
+    const maxLines = Math.max(oldLines.length, newLines.length);
+    
+    const diffLines = [];
+    
+    for (let i = 0; i < maxLines; i++) {
+      const oldLine = oldLines[i] || '';
+      const newLine = newLines[i] || '';
+      
+      if (oldLine === newLine) {
+        diffLines.push({
+          type: 'equal',
+          oldLine,
+          newLine,
+          lineNumber: i + 1
+        });
+      } else if (!oldLine) {
+        diffLines.push({
+          type: 'added',
+          oldLine: '',
+          newLine,
+          lineNumber: i + 1
+        });
+      } else if (!newLine) {
+        diffLines.push({
+          type: 'deleted',
+          oldLine,
+          newLine: '',
+          lineNumber: i + 1
+        });
+      } else {
+        diffLines.push({
+          type: 'modified',
+          oldLine,
+          newLine,
+          lineNumber: i + 1
+        });
+      }
+    }
+    
+    return diffLines;
+  };
+
