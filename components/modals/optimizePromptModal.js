@@ -28,6 +28,7 @@ function OptmizePromptModal({ savePrompt, setPrompt, params, messages, setMessag
 
   useEffect(() => {
     setPromptRequirement(prompt);
+    setNewPrompt(optimizePromptHistory[optimizePromptHistory?.length - 1]);
   }, [prompt]);
 
   useEffect(() => {
@@ -43,7 +44,6 @@ function OptmizePromptModal({ savePrompt, setPrompt, params, messages, setMessag
 
   const OptimizePrompt = async (instructionText) => {
     setLoading(true);
-    setNewPrompt(""); // Clear previous prompt
     setStreamedPrompt(""); // Clear streamed content
 
     try {
@@ -135,7 +135,7 @@ function OptmizePromptModal({ savePrompt, setPrompt, params, messages, setMessag
           </button>
         </div>
 
-        <div className='flex h-full overflow-hidden gap-3 w-full'>
+        <div className='flex h-full overflow-auto gap-3 w-full max-h-[700px]'>
           <div className='w-full h-full'>
             {!diff ? (
               <>

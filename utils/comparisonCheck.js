@@ -11,7 +11,7 @@ const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handle
                     <div className="label">
                         <span className="label-text font-medium text-red-600">Original Prompt</span>
                     </div>
-                    <div className="flex-1 border border-gray-300 rounded-lg overflow-hidden">
+                    <div className="flex-1 border border-gray-300 rounded-lg overflow-auto">
                         <div className="h-full overflow-y-auto bg-red-50">
                             {diffData.map((line, index) => (
                                 <div
@@ -49,7 +49,7 @@ const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handle
                             )}
                         </span>
                     </div>
-                    <div className="flex-1 border border-gray-300 rounded-lg overflow-hidden relative">
+                    <div className="flex-1 border border-gray-300 rounded-lg overflow-auto relative">
                         <div className="h-full overflow-y-auto bg-green-50">
                             {diffData.map((line, index) => (
                                 <div

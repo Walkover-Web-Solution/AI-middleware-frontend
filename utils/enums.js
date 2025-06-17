@@ -520,7 +520,7 @@ export const TUTORIALS = [
     icon: Bot
   },
   {
-    title: 'PAuth Key Setup',
+    title: 'Pauth Key Setup',
     description: 'Configure authentication keys for secure access',
     videoUrl: ONBOARDING_VIDEOS?.PauthKey,
     icon: Key
