@@ -69,7 +69,7 @@ const TutorialModal = () => {
                 <BookOpen className="h-6 w-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-semibold">GTWY.ai Tutorials</h2>
+                <h2 className="text-2xl font-semibold">GTWY AI Tutorials</h2>
                 <p className="text-gray-600  text-sm mt-1">Learn how to use our platform effectively</p>
               </div>
             </div>
