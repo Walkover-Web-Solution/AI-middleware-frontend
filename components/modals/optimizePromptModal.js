@@ -123,8 +123,9 @@ function OptmizePromptModal({ savePrompt, setPrompt, params, messages, setMessag
 
   return (
     <dialog id={MODAL_TYPE.OPTIMIZE_PROMPT} className="modal">
-      <div className="modal-box w-full max-w-[100rem] bg-white overflow-hidden">
-        <div className="flex justify-between items-center mb-0">
+      <div className="modal-box max-w-[100rem] bg-white flex flex-col">
+        {/* Fixed Header */}
+        <div className="flex justify-between items-center mb-5">
           <h3 className="font-bold text-lg">Improve prompt</h3>
           <button
             className={`btn btn-sm right-20 mr-0 btn-primary`}
@@ -211,17 +212,20 @@ function OptmizePromptModal({ savePrompt, setPrompt, params, messages, setMessag
               </div>
             </div>
           ) : !diff && (
-            <div className='w-full h-full pt-12 '>
-              <textarea
-                className="textarea textarea-bordered border mb-2 focus:border-primary caret-black p-2 w-full"
-                style={{ height: "60vh", width: "100%" }}
-                value={prompt}
-                onChange={(e) => setNewPrompt(e.target.value)}
-              />
+            <div className='w-full h-full flex flex-col min-h-0'>
+              <div className="flex-1 min-h-0">
+                <textarea
+                  className="textarea textarea-bordered border focus:border-primary caret-black p-2 w-full h-full resize-none"
+                  value={prompt}
+                  onChange={(e) => setNewPrompt(e.target.value)}
+                />
+              </div>
             </div>
           )}
         </div>
-        <div className="modal-action mt-1">
+
+        {/* Fixed Footer */}
+        <div className="modal-action mt-4 flex-shrink-0">
           <form method="dialog" className='flex gap-2'>
             <button
               className="btn"
