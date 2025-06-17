@@ -3,7 +3,7 @@ import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountActi
 import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { openModal } from "@/utils/utility.js";
-import { ChevronDown, ChevronRight, ChevronUp, Download, MessageCircle, ThumbsDown, ThumbsUp, User } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, MessageCircle, ThumbsDown, ThumbsUp, User } from "lucide-react";
 import { useEffect, useState, memo, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
@@ -297,8 +297,14 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                       } flex-grow cursor-pointer`}
                     onClick={() => threadHandler(item?.thread_id)}
                   >
-                    <a className={`w-full h-full flex items-center justify-between relative ${item?.thread_id?.length > 35 ? 'tooltip' : ''}`} data-tip={item?.thread_id?.length > 35 ? item?.thread_id : ''}>
-                      <span>{truncate(`${item?.thread_id}`, 35)}</span>
+                    <a className="w-full h-full flex items-center justify-between relative group">
+                      <span className="truncate flex-1 pr-2">{truncate(item?.thread_id, 35)}</span>
+                      {item?.thread_id?.length > 35 && (
+                        <div className="absolute left-0 top-full mt-1 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 max-w-[300px] break-words shadow-lg pointer-events-none">
+                          {item?.thread_id}
+                        </div>
+                      )}
+                      {/* Show chevron button only when no search query */}
                       {!searchQuery && params.thread_id === item?.thread_id && (
                         <div
                           onClick={(e) => {
@@ -307,7 +313,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                           }}
                           className="absolute right-4 cursor-pointer"
                         >
-                          {!searchQuery && expandedThreads?.includes(item?.thread_id) ? (
+                          {expandedThreads?.includes(item?.thread_id) ? (
                             <ChevronUp size={16} />
                           ) : (
                             <ChevronDown size={16} />
@@ -321,7 +327,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                       {loadingSubThreads ? (
                         <SubThreadSkeleton />
                       ) : (
-                        <div className="pl-10 p-2 text-gray-600 text-sm">
+                        <div className="pl-10 p-2 text-gray-600 text-sm rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
                           <ul>
                             {subThreads?.length === 0 ? (
                               <li>No sub thread available</li>
@@ -338,7 +344,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                     }`}
                                   onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, params.thread_id)}
                                 >
-                                  {subThreadId?.display_name || subThreadId?.sub_thread_id}
+                                  {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 35)}
                                 </li>
                               ))
                             )}
@@ -347,15 +353,11 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                       )}
                     </>
                   )}
-                  <div className="space-y-6">
-                    <div key={item.id} className="border border-gray-200 rounded-lg shadow-sm bg-white overflow-hidden">
+                  {params.thread_id === item?.thread_id && <div className="space-y-6">
+                    <div key={item.id} className="rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
                       {item?.sub_thread && item.sub_thread?.length > 0 && (
-                        <div className="bg-gray-50 border-b border-gray-200">
+                        <div className="bg-base-100">
                           <div className="p-4">
-                            <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                              <ChevronRight className="w-4 h-4" />
-                              Sub Threads
-                            </h4>
                             <div className="space-y-2">
                               {item?.sub_thread?.map((subThread, index) => (
                                 <div key={index} className="ml-4">
@@ -363,15 +365,17 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                   <div
                                     onClick={() => handleSelectSubThread(subThread?.sub_thread_id)}
                                     className={`cursor-pointer p-3 rounded-lg transition-all duration-200 border-2 ${params?.subThread_id === subThread?.sub_thread_id
-                                      ? 'bg-base-200 border-primary text-primary shadow-md'
+                                      ? 'bg-base-200 border-primary text-primary'
                                       : 'bg-base-100 border-gray-200 hover:bg-base-200 hover:border-gray-300 text-gray-700'
                                       }`}
                                   >
                                     <div className="flex items-center gap-2">
                                       <MessageCircle className={`w-4 h-4 ${params?.subThread_id === subThread?.sub_thread_id ? 'text-primary' : 'text-gray-500'
                                         }`} />
-                                      <span className="font-medium text-sm">
-                                        {subThread?.display_name || subThread?.sub_thread_id}
+                                      <span 
+                                        className="font-medium text-sm"
+                                      >
+                                        {truncate(subThread?.display_name || subThread?.sub_thread_id, 35)}
                                       </span>
                                     </div>
                                   </div>
@@ -383,7 +387,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                         <div
                                           key={msgIndex}
                                           onClick={() => handleSetMessageId(msg?.message_id)}
-                                          className={`cursor-pointer p-2 rounded-md transition-all duration-200 text-sm bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
+                                          className={`cursor-pointer p-2 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
                                         >
                                           <div className="flex items-start gap-2">
                                             <User className="w-3 h-3 mt-0.5 text-gray-400" />
@@ -403,16 +407,12 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                       {/* Main Messages */}
                       {item?.message && item?.message?.length > 0 && (
                         <div className="p-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                            <MessageCircle className="w-4 h-4" />
-                            Main Thread
-                          </h4>
                           <div className="space-y-2 ml-4">
                             {item?.message?.map((msg, index) => (
                               <div
                                 key={index}
                                 onClick={() => handleSetMessageId(msg?.message_id)}
-                                className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
+                                className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
                               >
                                 <div className="flex items-start gap-2">
                                   <User className="w-3 h-3 mt-0.5 text-gray-400" />
@@ -424,7 +424,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                         </div>
                       )}
                     </div>
-                  </div>
+                  </div>}
                 </div>
               ))}
             </ul>
