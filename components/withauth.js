@@ -1,6 +1,6 @@
 "use client";
 import { loginUser } from "@/config";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLayoutEffect, useState } from "react";
 import { switchOrg } from "@/config";
 import { userDetails } from "@/store/action/userDetailsAction";
@@ -26,7 +26,7 @@ const WithAuth = (Children) => {
   return (props) => {
     const router = useRouter();
     const dispatch = useDispatch();
-
+    const pathName = usePathname();
     const [loading, setLoading] = useState(false);
     const searchParams = useSearchParams();
     const proxy_auth_token = searchParams.get('proxy_auth_token');
@@ -39,8 +39,7 @@ const WithAuth = (Children) => {
       const proxyToken = localStorage.getItem('proxy_token');
       const proxyAuthToken = proxy_auth_token;
       let redirectionUrl = localStorage.getItem("previous_url") || "/org";
-
-      if (proxyToken) {
+      if (proxyToken && !pathName.includes('publicAgent')) {
         router.replace("/org");
         return;
       }
@@ -70,7 +69,7 @@ const WithAuth = (Children) => {
       const configuration = {
         referenceId: process.env.NEXT_PUBLIC_REFERENCEID,
         addInfo: {
-          redirect_path: '/login'
+          redirect_path: pathName.includes('publicAgent') ? '/publicAgent' : '/login'
         },
         success: (data) => {
           console.dir('success response', data);
