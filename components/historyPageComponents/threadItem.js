@@ -277,7 +277,8 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
             </div>
             
-            <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1`}>
+            <div  className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1 `}
+                style={{ overflowWrap: "anywhere" }}>
               <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`}>
                 {item?.role === "assistant" && item?.image_url && (
                   <div className="chat chat-start">
