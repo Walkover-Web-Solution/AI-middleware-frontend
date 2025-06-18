@@ -94,7 +94,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                             className="btn btn-outline btn-sm"
                         >
                             <Plus size={16} />
-                            {"Add Tool"}
+                            {"Connect Tool"}
                         </button>
                     </div>
                 )}
