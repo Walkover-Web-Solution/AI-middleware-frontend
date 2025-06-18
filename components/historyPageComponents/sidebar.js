@@ -3,7 +3,7 @@ import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountActi
 import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { openModal } from "@/utils/utility.js";
-import { DownloadIcon, ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon } from "@/components/Icons";
+import { DownloadIcon, ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon } from "@/components/Icons";
 import { useEffect, useState, memo, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
@@ -390,7 +390,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                           className={`cursor-pointer p-2 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
                                         >
                                           <div className="flex items-start gap-2">
-                                            <User className="w-3 h-3 mt-0.5 text-gray-400" />
+                                            <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />
                                             <span>{truncate(msg?.message, 45)}</span>
                                           </div>
                                         </div>
