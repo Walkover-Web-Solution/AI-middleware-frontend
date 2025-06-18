@@ -97,9 +97,11 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     const history_page_chatbot_token = response?.data?.history_page_chatbot_token
     const triggerEmbedToken = response?.data?.trigger_embed_token;
     const average_response_time = response?.data?.avg_response_time;
+    const doctstar_embed_token=response?.data?.doctstar_embed_token;
+
 
     if (onSuccess) onSuccess(response?.data?.bridge?.length)
-    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
+    dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, embed_token,doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
 
     const integrationData = await integration(embed_token);
     const flowObject = integrationData?.flows?.reduce((obj, item) => {

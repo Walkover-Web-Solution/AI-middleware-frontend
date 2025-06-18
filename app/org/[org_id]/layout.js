@@ -33,18 +33,18 @@ function layoutOrgPage({ children, params }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES , doctstar_embed_token } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
     organizations: state.userDetailsReducer.organizations,
     preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
-    SERVICES:state?.serviceReducer?.services ,
-    currentUser:state.userDetailsReducer.userDetails
+    SERVICES: state?.serviceReducer?.services,
+    doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
  useEffect(() => {
   const updateUserMeta = async () => {
-    if (currentUser.meta===null) {
+    if (currentUser?.meta===null) {
       const updatedUser = {
         ...currentUser,
         meta: {
@@ -173,6 +173,23 @@ function layoutOrgPage({ children, params }) {
       window.removeEventListener('focus', onFocus);
     }
   }, [isValidOrg, params])
+
+  const docstarScriptId = "docstar-main-script";
+  const docstarScriptSrc = process.env.NEXT_PUBLIC_DOCSTAR_SCRIPT_SRC;
+
+  useEffect(() => {
+    const existingScript = document.getElementById(docstarScriptId);
+    if (existingScript) {
+      document.head.removeChild(existingScript);
+    }
+    if (doctstar_embed_token) {
+      const script = document.createElement("script");
+      script.setAttribute("embedToken", doctstar_embed_token);
+      script.id = docstarScriptId;
+      script.src = docstarScriptSrc;
+      document.head.appendChild(script);
+    }
+  }, [doctstar_embed_token]);
 
   useEffect(() => {
     if (isValidOrg) {
