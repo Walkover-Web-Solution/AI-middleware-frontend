@@ -7,6 +7,18 @@ module.exports = {
   ],
   theme: {
     extend: {
+       fontFamily: {
+        sans: ['"DM Sans"', 'sans-serif'], // override default
+      },
+       keyframes: {
+        'fade-in-up': {
+      '0%': { opacity: 0, transform: 'translateY(8px)' },
+      '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
+      },
+         animation: {
+        'fade-in-scale': 'fade-in-scale 300ms ease-out',
+        },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":

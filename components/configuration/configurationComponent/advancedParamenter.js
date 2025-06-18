@@ -8,6 +8,7 @@ import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import InfoModel from '@/components/infoModel';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -185,10 +186,9 @@ const AdvancedParameters = ({ params }) => {
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                    <span className="label-text capitalize">{name || key}</span>
-                    {description && <div className="tooltip tooltip-right" data-tip={description}>
-                      <Info size={12} />
-                    </div>}
+                  <InfoModel tooltipContent={description}>
+                    <span className="label-text capitalize info">{name || key}</span>        
+                    </InfoModel>
                   </div>
                   <div>
                     <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">

@@ -3,13 +3,14 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { Info } from 'lucide-react';
+import InfoModel from '@/components/infoModel';
 
 const StarterQuestionToggle = ({ params }) => {
     const dispatch = useDispatch();
-    const IsstarterQuestionEnable = useCustomSelector((state) => 
+    const IsstarterQuestionEnable = useCustomSelector((state) =>
         state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.IsstarterQuestionEnable || false
     );
-    
+
     const handleToggle = () => {
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
@@ -21,10 +22,9 @@ const StarterQuestionToggle = ({ params }) => {
     return (
         <div className="flex items-center gap-2">
             <div className="label cursor-pointer">
-                <span className="font-medium mr-2">Starter Question</span>
-                <div className="tooltip" data-tip="Toggle to enable/disable starter questions">
-                    <Info size={14} className="inline-block" />
-                </div>
+                <InfoModel tooltipContent={"Toggle to enable/disable starter questions"}>
+                    <span className="font-medium mr-2 info">Starter Question</span>
+                </InfoModel>
             </div>
             <input
                 type="checkbox"

@@ -21,6 +21,8 @@ function page() {
     <div className="bg-black h-full w-full text-white overflow-hidden">
       <Head>
         <link rel="canonical" href="https://gtwy.ai" />
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet" />
+
       </Head>
       <HeroPage />
       <PlatformImage />

@@ -1,3 +1,4 @@
+import InfoModel from '@/components/infoModel';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
 import { Info, Plus } from 'lucide-react';
@@ -62,9 +63,41 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
     return (
         <div className="dropdown dropdown-right">
             <div className="flex items-center gap-2">
-                <button tabIndex={0} disabled={!shouldToolsShow}
-                    className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect function"}
-                </button>
+                {name === "preFunction" ? (
+                    <div className=" flex flex-col  gap-2">
+                        <InfoModel tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
+                            <p className="text-base font-semibold info">Pre Tool Configuration</p>
+
+                        </InfoModel>
+
+                        {/* Plus Icon Button */}
+                        <button
+                            tabIndex={0}
+                            disabled={!shouldToolsShow}
+                            className="btn btn-outline btn-sm"
+                        >
+                            <Plus size={16} />
+                            {"Connect Pre Tool"}
+                        </button>
+                    </div>
+                ) : (
+                    <div className="flex flex-col  gap-2">
+                        <InfoModel video={"https://app.supademo.com/embed/cm9tkq1kj0nmb11m7j6kw8r02?embed_v=2&autoplay=1&mute=1"} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
+                            <p className=" label-text info">Tool Configuration</p>
+
+                        </InfoModel>
+
+                        {/* Plus Icon Button */}
+                        <button
+                            tabIndex={0}
+                            disabled={!shouldToolsShow}
+                            className="btn btn-outline btn-sm"
+                        >
+                            <Plus size={16} />
+                            {"Add Tool"}
+                        </button>
+                    </div>
+                )}
                 {
                     !shouldToolsShow &&
                     <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
@@ -90,16 +123,18 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     ) : (
                         <li className="text-center mt-2">No functions found</li>
                     )}
-                    {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined, 
-                        {embedToken,
+                    {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined,
+                        {
+                            embedToken,
                             meta: {
+                                createFrom: name,
                                 type: 'tool',
                                 bridge_id: params?.id,
                             }
                         }
                     )}>
                         <div>
-                            <Plus size={16} /><p className='font-semibold'>Add new Function</p>
+                            <Plus size={16} /><p className='font-semibold'>{name === "preFunction" ? "Add new Pre Function" : "Add new Function"}</p>
                         </div>
                     </li>}
                 </div>
