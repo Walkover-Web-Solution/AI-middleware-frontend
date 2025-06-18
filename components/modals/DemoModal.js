@@ -2,7 +2,7 @@
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import React, { useEffect } from 'react';
-import { CircleX, CalendarDays } from 'lucide-react';
+import { CloseCircleIcon, CalendarIcon } from '@/components/Icons';
 import { getCalApi } from "@calcom/embed-react";
 
 const DemoModal = ({ speakToUs }) => {
@@ -40,7 +40,7 @@ const DemoModal = ({ speakToUs }) => {
                         onClick={handleClose}
                         className="btn btn-ghost p-2 rounded-full hover:bg-gray-100 transition-colors group"
                     >
-                        <CircleX size={26} className={`${speakToUs ? 'text-gray-400' : 'text-slate-400 group-hover:text-purple-300'} transition-colors`} />
+                        <CloseCircleIcon size={26} className={`${speakToUs ? 'text-gray-400' : 'text-slate-400 group-hover:text-purple-300'} transition-colors`} />
                     </button>
                 </div>
 
@@ -97,7 +97,7 @@ const DemoModal = ({ speakToUs }) => {
                         onClick={() => handleClose()}
                         className={`btn ${speakToUs ? 'btn-primary' : 'btn-primary'} px-8 py-3 text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2`}
                     >
-                        <CalendarDays className="w-5 h-5" />
+                        <CalendarIcon className="w-5 h-5" />
                         <span>Schedule Personalized Demo</span>
                     </button>
                 </div>

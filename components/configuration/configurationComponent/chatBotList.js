@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowUpRight, BarChart, Plus, X, Bot } from 'lucide-react';
+import { AddIcon, CloseIcon, BotIcon, ArrowUpIcon, ChartIcon } from '@/components/Icons';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { addorRemoveBridgeInChatBotAction } from '@/store/action/chatBotAction';
 import { useDispatch } from 'react-redux';
@@ -30,20 +30,20 @@ const ChatBotList = ({ params }) => {
                         <div>
                             <div className="p-4">
                                 <h1 className="inline-flex items-center text-lg font-semibold text-base-content">
-                                    {chatBot.title}<ArrowUpRight className="ml-2 h-4 w-4" />
+                                    {chatBot.title}<ArrowUpIcon className="ml-2 h-4 w-4" />
                                 </h1>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
-            <button className="btn btn-outline btn-sm mt-4 w-fit" onClick={handleAddChatbotClick}><Plus size={16} /> Add ChatBot</button>
+            <button className="btn btn-outline btn-sm mt-4 w-fit" onClick={handleAddChatbotClick}><AddIcon size={16} /> Add ChatBot</button>
 
             {isSliderOpen && <aside className="absolute right-0 top-0 z-[10000] flex h-full w-1/3 flex-col overflow-y-auto bg-base-100 px-5 py-8 shadow-lg ">
 
                 <div className="flex items-center justify-between ">
-                    <h1 className='text-xl font-medium flex items-center gap-2 text-base-content'><Bot /> Chat Bot list</h1>
-                    <button className="btn btn-outline btn-circle btn-xs" onClick={handleAddChatbotClick}><X size={16} /></button>
+                    <h1 className='text-xl font-medium flex items-center gap-2 text-base-content'><BotIcon /> Chat Bot list</h1>
+                    <button className="btn btn-outline btn-circle btn-xs" onClick={handleAddChatbotClick}><CloseIcon size={16} /></button>
                 </div>
 
                 <div className="mt-6 flex flex-1 flex-col justify-between">
@@ -64,7 +64,7 @@ const ChatBotList = ({ params }) => {
                                     style={{ overflow: 'hidden' }}
                                 >
                                     <div className='flex items-center w-full gap-2'>
-                                        <BarChart className="h-5 w-5" aria-hidden="true" />
+                                        <ChartIcon className="h-5 w-5" aria-hidden="true" />
                                         <span className="mx-2 text-sm font-medium truncate">{chatBot?.title}</span>
                                     </div>
                                     <input

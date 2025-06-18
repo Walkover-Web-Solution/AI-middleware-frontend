@@ -1,7 +1,7 @@
 'use client';
 import { MODAL_TYPE, ONBOARDING_VIDEOS, TUTORIALS } from '@/utils/enums';
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, ChevronDown, ChevronRight, BookOpen } from 'lucide-react';
+import { PlayIcon, ChevronDownIcon, ChevronRightIcon, BookIcon } from '@/components/Icons';
 import { closeModal } from '@/utils/utility';
 
 // Video Component using iframe
@@ -66,7 +66,7 @@ const TutorialModal = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-lg">
-                <BookOpen className="h-6 w-6" />
+                <BookIcon size={24} />
               </div>
               <div>
                 <h2 className="text-2xl font-semibold">GTWY AI Tutorials</h2>
@@ -101,8 +101,7 @@ const TutorialModal = () => {
                       {/* Icon */}
                       <div className={`p-2.5 bg-slate-100 rounded-lg border border-slate-200 transition-all duration-200 ${isActive ? 'bg-slate-800 border-slate-700' : 'group-hover:bg-slate-200'
                         }`}>
-                        <IconComponent className={`h-5 w-5 transition-colors duration-200 ${isActive ? 'text-white' : 'text-slate-700'
-                          }`} />
+                        <IconComponent size={20} className={`transition-colors duration-200 ${isActive ? 'text-white' : 'text-slate-700'}`} />
                       </div>
 
                       {/* Content */}
@@ -121,7 +120,7 @@ const TutorialModal = () => {
                             }}
                             className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all duration-200 text-sm font-medium hover:scale-105 shadow-sm hover:shadow-md"
                           >
-                            <Play className="h-3.5 w-3.5" />
+                            <PlayIcon size={20} />
                             Watch
                           </button>
                         )}
@@ -129,9 +128,9 @@ const TutorialModal = () => {
                         <div className={`text-slate-400 transition-transform duration-200 cursor-pointer ${isActive ? 'rotate-180' : 'hover:translate-x-1'
                           }`} onClick={() => toggleTutorial(index)}>
                           {isActive ? (
-                            <ChevronDown className="h-5 w-5" />
+                            <ChevronDownIcon size={20} />
                           ) : (
-                            <ChevronRight className="h-5 w-5" />
+                            <ChevronRightIcon size={20} />
                           )}
                         </div>
                       </div>

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { Info } from "lucide-react";
 import InfoModel from "@/components/infoModel";
 
 const TONES = [

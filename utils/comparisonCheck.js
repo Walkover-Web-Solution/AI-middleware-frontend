@@ -1,4 +1,4 @@
-import { Copy, Redo, Undo } from 'lucide-react'
+import { CopyIcon, RedoIcon, UndoIcon } from '@/components/Icons'
 import React from 'react'
 
 const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handleRedo = () => { }, copyToClipboard = () => { }, copyText = "", currentIndex = 0, promptHistory = [], displayPrompt = "", errorMessage = "", key}) => {
@@ -96,19 +96,19 @@ const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handle
                     </div>
                     {key === "prompt" && <div className="flex gap-2">
                         <div className="tooltip cursor-pointer" data-tip="Previous Prompt">
-                            <Undo
+                            <UndoIcon
                                 onClick={handleUndo}
                                 className={`${(!currentIndex || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
                             />
                         </div>
                         <div className="tooltip tooltip-left cursor-pointer" data-tip="Next Prompt">
-                            <Redo
+                            <RedoIcon
                                 onClick={handleRedo}
                                 className={`${((currentIndex >= promptHistory.length - 1) || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
                             />
                         </div>
                         <div className="tooltip tooltip-left cursor-pointer" data-tip={copyText}>
-                            <Copy
+                            <CopyIcon
                                 onClick={copyToClipboard}
                                 size={20}
                                 className={`${(!displayPrompt || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}

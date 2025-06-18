@@ -2,7 +2,6 @@ import React from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import { Info } from 'lucide-react';
 import InfoModel from '@/components/infoModel';
 
 const UserReferenceForRichText = ({ params }) => {

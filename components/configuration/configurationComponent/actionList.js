@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { createOrRemoveActionBridge } from '@/store/action/chatBotAction';
-import { Trash } from 'lucide-react';
+import { TrashIcon } from '@/components/Icons';
 import { useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import ActionModel from './actionModel';
@@ -55,7 +55,7 @@ function ActionList({ params }) {
                                     {key}
                                 </h1>
                                 <div onClick={(e) => handleRemoveAction(key, value?.type, value?.description, value?.variable, e)} className='hover:scale-125 transition duration-100 ease-in-out'>
-                                    <Trash size={16} className='cursor-pointer text-error' />
+                                    <TrashIcon size={16} className='cursor-pointer text-error' />
                                 </div>
                             </div>
                             <p className="mt-3 text-xs sm:text-sm line-clamp-3">

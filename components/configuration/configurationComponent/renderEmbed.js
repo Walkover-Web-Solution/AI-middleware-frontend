@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { CircleAlert, Settings } from 'lucide-react';
+import { CircleAlertIcon, SettingsIcon } from '@/components/Icons';
 
 const RenderEmbed = ({
   bridgeFunctions,
@@ -40,7 +40,7 @@ const RenderEmbed = ({
                   <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content">
                     {title}
                   </h1>
-                  {value?.description?.trim() === "" && <CircleAlert color='red' size={16} />}
+                  {value?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
                 </div>
                 <p className="mt-3 text-xs sm:text-sm line-clamp-3">
                   {value?.description || value?.api_description || value?.short_description || "A description is required for proper functionality."}
@@ -54,7 +54,7 @@ const RenderEmbed = ({
             </div>
             <div className="dropdown shadow-none border-none absolute right-1 top-1">
               <div role="button" className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200" onClick={() => handleOpenModal(value?._id)}>
-                <Settings size={18} />
+                <SettingsIcon size={18} />
               </div>
             </div>
           </div>

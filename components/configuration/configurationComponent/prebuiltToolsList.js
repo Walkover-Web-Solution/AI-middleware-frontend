@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlert, Plus, Trash2 } from 'lucide-react';
+import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
@@ -59,9 +59,9 @@ const PrebuiltToolsList = ({ params }) => {
                                         }}
                                         className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-red-600"
                                     >
-                                        <Trash2 size={16} />
+                                        <TrashIcon size={16} />
                                     </button>
-                                    {!item?.description && <CircleAlert color='red' size={16} />}
+                                    {!item?.description && <CircleAlertIcon color='red' size={16} />}
                                 </div>
                             </div>
                             <p className="mt-3 text-xs sm:text-sm line-clamp-3">
@@ -91,7 +91,7 @@ const PrebuiltToolsList = ({ params }) => {
                  </InfoModel>
                 <div className="dropdown dropdown-right">
                     <button tabIndex={0} className="btn btn-outline btn-sm mt-0">
-                        <Plus size={16} />Add Prebuilt Tool
+                        <AddIcon size={16} />Add Prebuilt Tool
                     </button>
                     <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                         <div className='flex flex-col gap-2 w-full'>

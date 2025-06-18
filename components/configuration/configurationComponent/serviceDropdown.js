@@ -1,7 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { DEFAULT_MODEL } from "@/jsonFiles/bridgeParameter";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { Info } from "lucide-react";
+import { InfoIcon } from "@/components/Icons";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
@@ -114,7 +114,7 @@ function ServiceDropdown({ params }) {
                     </select>
                     {isDisabled && (
                         <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                            <Info size={16} className="flex-shrink-0 mt-0.5" />
+                            <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                             <span className='label-text-alt text-xs leading-tight'>
                                 Batch API is only applicable for OpenAI services.
                             </span>

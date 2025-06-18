@@ -2,9 +2,9 @@ import { optimizePromptApi } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { optimizePromptReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
-import { closeModal, createDiff, simulateStreaming } from '@/utils/utility';
-import { Copy, Redo, Undo, X } from 'lucide-react';
-import React, { useEffect, useState, useMemo } from 'react';
+import { closeModal } from '@/utils/utility';
+import { CopyIcon, RedoIcon, UndoIcon } from '@/components/Icons';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import ComparisonCheck from '@/utils/comparisonCheck';
 import Canvas from '../Canvas';
@@ -167,23 +167,13 @@ function OptmizePromptModal({ savePrompt, setPrompt, params, messages, setMessag
                 </div>
                 <div className="label gap-2">
                   <div className="tooltip cursor-pointer" data-tip="Previous Prompt">
-                    <Undo
-                      onClick={handleUndo}
-                      className={`${(!currentIndex || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
-                    />
+                    <UndoIcon onClick={handleUndo} className={!currentIndex && "opacity-50 pointer-events-none"} />
                   </div>
                   <div className="tooltip tooltip-left cursor-pointer" data-tip="Next Prompt">
-                    <Redo
-                      onClick={handleRedo}
-                      className={`${((currentIndex >= promptHistory.length - 1) || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
-                    />
+                    <RedoIcon onClick={handleRedo} />
                   </div>
-                  <div className="tooltip tooltip-left cursor-pointer" data-tip={copyText}>
-                    <Copy
-                      onClick={copyToClipboard}
-                      size={20}
-                      className={`${(!displayPrompt || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
-                    />
+                  <div className="tooltip tooltip-left cursor-pointer" data-tip={copyText || "Copy Prompt"}>
+                    <CopyIcon onClick={copyToClipboard} size={20} />
                   </div>
                 </div>
               </div>

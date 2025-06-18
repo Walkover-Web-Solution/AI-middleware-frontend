@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertCircle, Rocket, Sparkles } from 'lucide-react';
+import { CircleAlertIcon, RocketIcon, SparklesIcon } from '@/components/Icons';
 import { AGENT_SETUP_GUIDE_STEPS } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
@@ -33,7 +33,7 @@ const AgentSetupGuide = ({ params = {} }) => {
           {/* Header */}
           <div className="text-center mb-4 flex-shrink-0">
             <div className="btn btn-primary btn-circle mb-3">
-              <Rocket className="h-5 w-5" />
+              <RocketIcon className="h-5 w-5" />
             </div>
 
             <h1 className="text-2xl font-bold text-base-content mb-2">
@@ -87,7 +87,7 @@ const AgentSetupGuide = ({ params = {} }) => {
               <div className="card-body p-2">
                 <div className="flex items-start gap-3">
                   <div className={`btn btn-sm btn-circle transition-all duration-300 btn-ghost`}>
-                    <AlertCircle className="h-6 w-6" />
+                    <CircleAlertIcon className="h-6 w-6" />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -111,7 +111,7 @@ const AgentSetupGuide = ({ params = {} }) => {
               className="btn btn-primary btn-lg gap-2"
             >
               Get Started
-              <Sparkles className="h-4 w-4" />
+              <SparklesIcon className="h-4 w-4" />
             </button>
 
             <p className="text-xs text-base-content/60 mt-3">

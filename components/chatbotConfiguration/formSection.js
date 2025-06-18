@@ -1,6 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getChatBotDetailsAction, updateChatBotConfigAction } from "@/store/action/chatBotAction";
-import { RefreshCw } from "lucide-react";
+import { RefreshIcon } from "@/components/Icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -310,7 +310,7 @@ export default function FormSection({ params, chatbotId = null }) {
             <div className="">
                 <div className="label">
                     <span className="label-text">ChatBot Preview </span>
-                    <span className="flex flex-row items-center gap-3 cursor-pointer" onClick={handleRefreshConfiguration}>Refresh <RefreshCw className={isRefreshing ? 'animate-spin' : ''} size={16} /></span>
+                    <span className="flex flex-row items-center gap-3 cursor-pointer" onClick={handleRefreshConfiguration}>Refresh <RefreshIcon className={isRefreshing ? 'animate-spin' : ''} size={16} /></span>
                 </div>
                 <div className="shadow-sm border">
                     <iframe

@@ -1,4 +1,4 @@
-import { BookText, Bot, Key, Settings, Wrench } from "lucide-react";
+import { BookIcon, BotIcon, KeyIcon, SettingsIcon, WrenchIcon } from "@/components/Icons";
 export const PAUTH_KEY_COLUMNS = ["name", "authkey", "created_at"];
 export const API_KEY_COLUMNS = ["name", "apikey", "comment", "service"];
 export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers', 'alertType', 'bridges'];
@@ -517,30 +517,31 @@ export const TUTORIALS = [
     title: 'Agent Creation',
     description: 'Learn how to create and manage agents in GTWY.ai platform',
     videoUrl: ONBOARDING_VIDEOS?.bridgeCreation, 
-    icon: Bot
+    icon: BotIcon
   },
   {
     title: 'Pauth Key Setup',
     description: 'Configure authentication keys for secure access',
     videoUrl: ONBOARDING_VIDEOS?.PauthKey,
-    icon: Key
+    icon: KeyIcon
   },
   {
     title: 'Tool Configuration',
     description: 'Set up and configure tools for your workflow',
     videoUrl: ONBOARDING_VIDEOS?.FunctionCreation,
-    icon: Wrench
+    icon: WrenchIcon
+
   },
   {
     title: 'Variable Management',
     description: 'Add and manage variables in your environment',
     videoUrl: ONBOARDING_VIDEOS?.Addvariables,
-    icon: Settings
+    icon: SettingsIcon
   },
   {
     title: 'KnowledgeBase Configuration',
     description: 'Set up and manage your knowledge base for intelligent responses',
     videoUrl: ONBOARDING_VIDEOS?.knowledgeBase,
-    icon: BookText
+    icon: BookIcon
   },
 ];

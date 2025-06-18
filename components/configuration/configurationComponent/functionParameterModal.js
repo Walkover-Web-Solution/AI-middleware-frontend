@@ -9,9 +9,8 @@ import {
 } from "@/store/action/bridgeAction";
 import { closeModal, flattenParameters } from "@/utils/utility";
 import { isEqual } from "lodash";
-import { Copy, Info, InfoIcon, Trash2 } from "lucide-react";
+import { CopyIcon, InfoIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState } from "react";
-import { prefetchDNS } from "react-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -423,13 +422,6 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name })
       setIsLoading(false);
     }
   };
-const handleRemove = () => {
-  if (preFunction) {
-    removePreFunction();
-  } else {
-    handleRemoveFunctionFromBridge();
-  }
-};
   return (
     <dialog id={Model_Name} className="modal">
       <div className="modal-box w-11/12 max-w-6xl">
@@ -437,15 +429,15 @@ const handleRemove = () => {
           <span className="flex flex-row items-center gap-4">
             <h3 className="font-bold text-lg">Configure fields</h3>
             <div className="flex flex-row gap-1">
-              <Info size={16} />
+              <InfoIcon size={16} />
               <span className="label-text-alt">
                 Function used in {(function_details?.bridge_ids || [])?.length}{" "}
                 bridges, changes may affect all bridges.
               </span>
             </div>
           </span>
-          <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
-            <Trash2 size={16} /> Remove {preFunction ? "pre-tool" : "tool"}
+           <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
+            <TrashIcon size={16} /> Remove {preFunction ? "pre-tool" : "tool"}
           </button>
         </div>
         <div className="flex justify-between items-center">
@@ -462,7 +454,7 @@ const handleRemove = () => {
               {isTextareaVisible && (
                 <div className="flex items-center gap-2">
                   <p>Copy tool call format: </p>
-                  <Copy
+                  <CopyIcon
                     size={16}
                     onClick={copyToolCallFormat}
                     className="cursor-pointer"

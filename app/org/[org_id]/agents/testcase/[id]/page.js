@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
 import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction, updateTestCaseAction } from '@/store/action/testCasesAction';
-import { ChevronDown, ChevronRight, Edit, Play, Trash2 } from 'lucide-react';
+import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon } from '@/components/Icons';
 
 export const runtime = 'edge';
 
@@ -102,7 +102,7 @@ function TestCases({ params }) {
                             onClick={() => handleRunTestCase(version)}
                             disabled={!params?.id || isloading}
                           >
-                            <Play className="w-3 h-3" />
+                            <PlayIcon size={12} />
                           </button>
                         </div>
                         <span className={`font-medium text-gray-800 `}>
@@ -137,7 +137,7 @@ function TestCases({ params }) {
                         <td className="p-2 font-medium text-gray-900">
                           <div className="flex items-center">
                             <span className="mr-2 text-gray-500">
-                              {isExpanded ? <ChevronDown /> : <ChevronRight />}
+                              {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
                             </span>
                             <span>{index + 1}</span>
                           </div>
@@ -230,7 +230,7 @@ function TestCases({ params }) {
                                     }}
                                     className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 text-sm flex items-center gap-1.5 transition-colors"
                                   >
-                                    <Edit className="w-4 h-4" /> Edit
+                                    <PencilIcon className="w-4 h-4" /> Edit
                                   </button>
                                 )}
                                 <button
@@ -240,7 +240,7 @@ function TestCases({ params }) {
                                   }}
                                   className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-sm flex items-center gap-1.5 transition-colors"
                                 >
-                                  <Trash2 className="w-4 h-4" /> Delete
+                                  <TrashIcon className="w-4 h-4" /> Delete
                                 </button>
                               </div>
 
