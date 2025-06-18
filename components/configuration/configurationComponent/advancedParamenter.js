@@ -3,7 +3,7 @@ import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bri
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
@@ -172,7 +172,7 @@ const AdvancedParameters = ({ params }) => {
           Advanced Parameters
         </span>
 
-        {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
+        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </div>
       {showTutorial && (
         <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.AdvanceParameter}  flagKey={"AdvanceParameter"}  />
@@ -224,7 +224,7 @@ const AdvancedParameters = ({ params }) => {
                           : 'Select an tool choice option...'}
                       </span>
                       <div className="ml-auto">
-                        {showDropdown ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        {showDropdown ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                       </div>
                     </div>
 

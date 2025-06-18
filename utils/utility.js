@@ -319,6 +319,7 @@ export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
 export const updateTitle = (newTitle) => {
     if (typeof document !== 'undefined' && newTitle) {
         document.title = newTitle;
+        document.title = newTitle;
     }
   };
 

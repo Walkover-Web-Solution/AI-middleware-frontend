@@ -3,7 +3,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
 import { updateOnBoardingDetails } from "@/utils/utility";
-import { ChevronDown, ChevronUp, Info, Trash2 } from "lucide-react";
+import { ChevronUpIcon, ChevronDownIcon, InfoIcon, TrashIcon } from "@/components/Icons";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import OnBoarding from "./OnBoarding";
@@ -234,7 +234,7 @@ const AddVariable = ({ params }) => {
         aria-controls="accordion-content"
       >
         <span className="mr-2 text-nowrap font-medium">Add Variables</span>
-        {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
+        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </button>
       {showTutorial && (
         <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
@@ -297,7 +297,7 @@ const AddVariable = ({ params }) => {
                 {keyValuePairs.length > 0 && <div className="flex items-center gap-2 w-full">
                   <div className="tooltip tooltip-right" data-tip="Mark checkbox if it is required">
                     <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
-                      <Info className="w-4 h-4 text-base-content/70" />
+                      <InfoIcon className="w-4 h-4 text-base-content/70" />
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
@@ -337,7 +337,7 @@ const AddVariable = ({ params }) => {
                       onClick={() => handleRemoveKeyValuePair(index)}
                       aria-label="Remove Variable"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <TrashIcon className="w-4 h-4" />
                     </button>
                   </div>
                 ))}

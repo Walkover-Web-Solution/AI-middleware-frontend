@@ -1,47 +1,47 @@
 import React from 'react'
 import { 
-  BrainCircuit, 
-  Mic, 
-  Bot, 
-  LayoutTemplate, 
-  FileText, 
-  Globe, 
-  Plus
-} from 'lucide-react'
+  BrainIcon,
+  MicIcon,
+  BotIcon,
+  TemplateIcon,
+  FileTextIcon,
+  GlobeIcon,
+  AddIcon
+} from "@/components/Icons"
 
 const features = [
   {
-    icon: <BrainCircuit className="w-8 h-8 text-purple-500" />,
+    icon: <BrainIcon className="w-8 h-8 text-purple-500" />,
     title: "Smart Model Choice",
     description: "Analyzes prompts and settings to recommend the optimal AI model—balancing cost and accuracy to reduce compute expenses by 20–30%."
   },
   {
-    icon: <Mic className="w-8 h-8 text-blue-500" />,
+    icon: <MicIcon className="w-8 h-8 text-blue-500" />,
     title: "Voice Models",
     description: "Supports end-to-end speech input and output with noise reduction, multi-language transcription, and customizable voice personas."
   },
   {
-    icon: <Bot className="w-8 h-8 text-green-500" />,
+    icon: <BotIcon className="w-8 h-8 text-green-500" />,
     title: "Chatbot Deployment",
     description: "Packages AI agents as fully hosted chatbots with one-click deployment, auto-scaling, and built-in analytics."
   },
   {
-    icon: <LayoutTemplate className="w-8 h-8 text-yellow-500" />,
+    icon: <TemplateIcon className="w-8 h-8 text-yellow-500" />,
     title: "Templates",
     description: "Library of 50+ domain-specific prompt templates with editable fields and usage examples for instant high-quality prompts."
   },
   {
-    icon: <FileText className="w-8 h-8 text-pink-500" />,
+    icon: <FileTextIcon className="w-8 h-8 text-pink-500" />,
     title: "File Upload Support",
     description: "Upload documents directly in chat for automatic parsing, data extraction, and contextual responses."
   },
   {
-    icon: <Globe className="w-8 h-8 text-indigo-500" />,
+    icon: <GlobeIcon className="w-8 h-8 text-indigo-500" />,
     title: "Web Crawling",
     description: "Real-time web crawling fetches, parses, and ranks information from live websites with source citations."
   },
   {
-    icon: <Plus className="w-8 h-8 text-gray-500" />,
+    icon: <AddIcon className="w-8 h-8 text-gray-500" />,
     title: "And Much More...",
     description: "We're continuously developing new features to enhance your workflow."
   }

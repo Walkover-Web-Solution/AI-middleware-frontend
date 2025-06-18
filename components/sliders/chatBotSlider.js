@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import { X } from 'lucide-react';
+import { CloseIcon } from '@/components/Icons';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 
@@ -37,7 +37,7 @@ function ChatBotSlider() {
             <div className="flex flex-col overflow-hidden gap-4 w-full">
                 <div className='flex flex-row justify-between'>
                     <p className='text-xl font-semibold'>Chatbots</p>
-                    <X className="block md:hidden" onClick={handleCloseChatbotSlider} />
+                    <CloseIcon className="block md:hidden" onClick={handleCloseChatbotSlider} />
                 </div>
                 {/* Input field for chatbot search */}
                 <input

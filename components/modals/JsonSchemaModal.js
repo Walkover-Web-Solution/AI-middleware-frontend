@@ -3,12 +3,12 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { closeModal, createDiff, simulateStreaming } from "@/utils/utility";
-import { Copy, Redo, Undo } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 
 import ComparisonCheck from "@/utils/comparisonCheck";
 import Canvas from "../Canvas";
+import { CopyIcon } from "../Icons";
 
 function JsonSchemaModal({ params, messages, setMessages }) {
   const [diff, setDiff] = useState(false);
@@ -184,7 +184,7 @@ function JsonSchemaModal({ params, messages, setMessages }) {
                 {displaySchema && (
                   <div className="label gap-2">
                     <div className="tooltip tooltip-left cursor-pointer" data-tip={copyText}>
-                      <Copy
+                      <CopyIcon
                         onClick={copyToClipboard}
                         size={20}
                         className={`${(!displaySchema || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}

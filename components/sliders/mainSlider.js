@@ -1,12 +1,12 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { MODAL_TYPE } from '@/utils/enums';
 import { openModal, toggleSidebar } from '@/utils/utility';
-import { AlignJustify, BookText, Bot, Building2, ChevronDown, Cog, Key, KeyRound, LineChart, LogOut, Mail, MessageCircleMore, MessageSquareMore, PlugZap, Settings2, TriangleAlert, UserPlus, BookCheck, MonitorPlay } from 'lucide-react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { BuildingIcon, BotIcon, BookIcon, CogIcon, KeyIcon, KeyRoundIcon, LineChartIcon, LogoutIcon, MailIcon, PlugIcon, TriangleWarningIcon, AddUserIcon, SettingsAltIcon, MessageSquareMoreIcon, MonitorPlayIcon, ChevronDownIcon, AlignIcon, MessageCircleMoreIcon } from '@/components/Icons';
+import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import TutorialModal from '@/components/modals/tutorialModal';
 import DemoModal from '../modals/DemoModal';
+import { MODAL_TYPE } from '@/utils/enums';
 
 function MainSlider() {
   const pathName = usePathname();
@@ -18,15 +18,15 @@ function MainSlider() {
   }));
 
   const Icons = {
-    org: <Building2 />,
-    agents: <PlugZap />,
-    chatbot: <Bot />,
-    pauthkey: <KeyRound />,
-    apikeys: <Key />,
-    alerts: <TriangleAlert />,
-    invite: <UserPlus />,
-    metrics: <LineChart />,
-    knowledge_base: <BookText />
+    org: <BuildingIcon size={24} />,
+    agents: <PlugIcon size={24} />,
+    chatbot: <BotIcon size={24} />,
+    pauthkey: <KeyRoundIcon size={24} />,
+    apikeys: <KeyIcon size={24} />,
+    alerts: <TriangleWarningIcon size={24} />,
+    invite: <AddUserIcon size={24} />,
+    metrics: <LineChartIcon size={24} />,
+    knowledge_base: <BookIcon size={24} />
   }
   const logoutHandler = async () => {
     try {
@@ -76,7 +76,7 @@ function MainSlider() {
     <>
       <div className="relative">
         <label htmlFor="my-drawer-2" className="drawer-button lg:hidden z-0 absolute top-3 left-1">
-          <AlignJustify size={24} onClick={toggleMainSidebar} />
+          <AlignIcon size={24} onClick={toggleMainSidebar} />
         </label>
         <div className={`drawer lg:drawer-open relative z-[101] lg:z-0`}>
           <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
@@ -121,7 +121,7 @@ function MainSlider() {
                         onClick={() => openModal(MODAL_TYPE.TUTORIAL_MODAL)}
                         className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
                       >
-                        <MonitorPlay size={16} className="text-gray-600" />
+                        <MonitorPlayIcon size={16} className="text-gray-600" />
                         <span className="flex-1 text-sm font-medium">Tutorial</span>
                       </a>
                     </li>
@@ -130,7 +130,7 @@ function MainSlider() {
                         onClick={() => { openModal(MODAL_TYPE.DEMO_MODAL) }}
                         className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
                       >
-                        <MessageCircleMore size={16} className="text-gray-600" />
+                        <MessageCircleMoreIcon size={16} className="text-gray-600" />
                         <span className="flex-1 text-sm font-medium">Speak to Us</span>
                       </a>
                     </li>
@@ -141,7 +141,7 @@ function MainSlider() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors"
                       >
-                        <MessageSquareMore size={16} className="text-gray-600" />
+                        <MessageSquareMoreIcon size={16} className="text-gray-600" />
                         <span className="flex-1 text-sm font-medium">Feedback</span>
                       </a>
                     </li>
@@ -152,15 +152,15 @@ function MainSlider() {
                 <div className="border-t border-base-300">
                   <details className="overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                     <summary className="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition hover:bg-gray-100">
-                      <span className="text-sm font-medium flex justify-center items-center gap-3"><Settings2 size={16} className="text-gray-600" />Settings</span>
-                      <span className="transition group-open:-rotate-180"><ChevronDown strokeWidth={1.25} size={16} className="text-gray-600" /></span>
+                      <span className="text-sm font-medium flex justify-center items-center gap-3"><SettingsAltIcon size={16} className="text-gray-600" />Settings</span>
+                      <span className="transition group-open:-rotate-180"><ChevronDownIcon strokeWidth={1.25} size={16} className="text-gray-600" /></span>
                     </summary>
                     <div className="border-t border-gray-200 bg-white">
                       <ul className="menu w-full text-base-content">
-                        <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
-                        <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/userDetails`) }}> <Cog size={16} />Update User Details</a> </li>
-                        <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <Cog size={16} /> Workspace Setting</a> </li>
-                        <li ><a className='py-2 px-2 rounded-md' onClick={logoutHandler}> <LogOut size={16} />  logout</a></li>
+                        <li> <a className='py-2 px-2 rounded-md'> <MailIcon size={16} /> {userdetails.email}</a> </li>
+                        <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/userDetails`) }}> <CogIcon size={16} />Update User Details</a> </li>
+                        <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <CogIcon size={16} /> Workspace Setting</a> </li>
+                        <li ><a className='py-2 px-2 rounded-md' onClick={logoutHandler}> <LogoutIcon size={16} />  logout</a></li>
                       </ul>
                     </div>
                   </details>

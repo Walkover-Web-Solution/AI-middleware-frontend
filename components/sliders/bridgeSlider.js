@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { filterBridges, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { X } from 'lucide-react';
+import { CloseIcon } from '@/components/Icons';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateNewBridge from '../createNewBridge';
@@ -72,7 +72,7 @@ function BridgeSlider() {
             <div className="flex w-full flex-col gap-4">
                 <div className='flex flex-row justify-between'>
                     <p className='text-xl font-semibold'> Bridges </p>
-                    <X className="block md:hidden" onClick={handlCloseBridgeSlider} />
+                    <CloseIcon className="block md:hidden" onClick={handlCloseBridgeSlider} />
                 </div>
                 <input
                     type="text"

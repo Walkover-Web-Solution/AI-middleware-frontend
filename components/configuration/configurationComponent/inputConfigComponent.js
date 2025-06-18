@@ -4,12 +4,12 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import { ChevronDown, Info } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import ToneDropdown from './toneDropdown'; 
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
+import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoModel from '@/components/infoModel';
 
 const InputConfigComponent = ({ params }) => {
@@ -303,12 +303,12 @@ const InputConfigComponent = ({ params }) => {
               <div className="flex items-center gap-2">
                 <span className="text-nowrap">Default Variables</span>
                 <p role="alert" className="label-text-alt alert p-2">
-                  <Info size={16} className="" />
+                  <InfoIcon size={16} className="" />
                   Use these variables in prompt to get their functionality
                 </p>
               </div>
               <div className="ml-auto">
-                <ChevronDown className="collapse-arrow" size={12} />
+                <ChevronDownIcon className="collapse-arrow" size={12} />
               </div>
             </div>
             <div className="collapse-content">

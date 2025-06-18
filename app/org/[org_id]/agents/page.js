@@ -11,7 +11,7 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
-import { Ellipsis, LayoutGrid, Table, TestTubeDiagonal } from "lucide-react";
+import { EllipsisIcon, LayoutGridIcon, TableIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -142,7 +142,7 @@ function Home({ params }) {
           </div>
         </div>
         <div className="dropdown bg-transparent absolute right-3 top-2">
-          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
+          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
           <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
             {/* <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li> */}
             <li><a onClick={(e) => { e.preventDefault(); archiveBridge(item._id, item.status != undefined ? Number(!item?.status) : undefined) }}>{(item?.status === 0) ? 'Un-archive Agent' : 'Archive Agent'}</a></li>
@@ -183,7 +183,7 @@ function Home({ params }) {
           </button>
         </div>
         <div className="dropdown dropdown-left bg-transparent">
-          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
+          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
           <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
             <li><a onClick={(e) => {
               e.preventDefault();
@@ -254,10 +254,10 @@ function Home({ params }) {
                   </div>
                   <div className="join hidden sm:block">
                     <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
-                      <LayoutGrid className="h-4 w-4" />
+                      <LayoutGridIcon className="h-4 w-4" />
                     </a>
                     <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
-                      <Table className="h-4 w-4" />
+                      <TableIcon className="h-4 w-4" />
                     </a>
                   </div>
                 </div>

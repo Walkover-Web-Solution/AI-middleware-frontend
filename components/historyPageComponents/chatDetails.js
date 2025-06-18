@@ -1,7 +1,7 @@
 'use client';
 import { MODAL_TYPE } from "@/utils/enums";
 import { allowedAttributes, openModal } from "@/utils/utility";
-import { CircleX, Copy } from "lucide-react";
+import { CloseCircleIcon, CopyIcon } from "@/components/Icons";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
@@ -99,7 +99,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                 onClick={() => setIsSliderOpen(false)} 
                 className="btn btn-ghost btn-circle hover:bg-base-100 transition-colors duration-200"
               >
-                <CircleX size={20} className="bg-base-100" />
+                <CloseCircleIcon size={20} className="bg-base-100" />
               </button>
             </div>
             <div className="bg-base-100 rounded-md shadow-sm">
@@ -146,7 +146,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                                   onClick={(e) => copyToClipboard(displayValue)}
                                   data-tip="Copy variables"
                                 >
-                                  <Copy size={18} className="text-base-content" />
+                                  <CopyIcon size={18} className="text-base-content" />
                                 </div>
                               )}
                             </div>

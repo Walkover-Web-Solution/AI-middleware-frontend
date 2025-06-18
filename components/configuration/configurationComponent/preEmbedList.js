@@ -1,7 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateApiAction } from '@/store/action/bridgeAction';
-import { getStatusClass, openModal } from '@/utils/utility';
-import { Info } from 'lucide-react';
+import { getStatusClass } from '@/utils/utility';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';

@@ -2,7 +2,6 @@ import InfoModel from '@/components/infoModel';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from '@/utils/enums';
-import { Info } from 'lucide-react';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
