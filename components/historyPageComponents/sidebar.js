@@ -3,7 +3,7 @@ import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountActi
 import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { openModal } from "@/utils/utility.js";
-import { ChevronDown, ChevronUp, Download, ThumbsDown, ThumbsUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, MessageCircle, ThumbsDown, ThumbsUp, User } from "lucide-react";
 import { useEffect, useState, memo, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
@@ -13,7 +13,7 @@ import DateRangePicker from "./dateRangePicker.js";
 import { usePathname, useRouter, useSearchParams } from "next/navigation.js";
 import { setSelectedVersion } from '@/store/reducer/historyReducer';
 
-const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion, setIsErrorTrue, isErrorTrue}) => {
+const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion, setIsErrorTrue, isErrorTrue }) => {
   const { subThreads } = useCustomSelector(state => ({
     subThreads: state?.historyReducer?.subThreads || [],
   }));
@@ -39,29 +39,29 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   );
 
   useEffect(() => {
-  if (
-    expandedThreads?.length &&
-    subThreads?.length > 0 &&
-    params.thread_id &&
-    params.subThread_id === params.thread_id
-  ) {
-    // Check if any subThread matches the thread_id
-    const matchExists = subThreads.some(
-      (sub) => sub.sub_thread_id === params.thread_id
-    );
+    if (
+      expandedThreads?.length &&
+      subThreads?.length > 0 &&
+      params.thread_id &&
+      params.subThread_id === params.thread_id
+    ) {
+      // Check if any subThread matches the thread_id
+      const matchExists = subThreads.some(
+        (sub) => sub.sub_thread_id === params.thread_id
+      );
 
-    if (!matchExists) {
-      const firstSubThreadId = subThreads[0]?.sub_thread_id;
-      if (firstSubThreadId) {
-        router.push(
-          `${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${firstSubThreadId}`,
-          undefined,
-          { shallow: true }
-        );
+      if (!matchExists) {
+        const firstSubThreadId = subThreads[0]?.sub_thread_id;
+        if (firstSubThreadId) {
+          router.push(
+            `${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${firstSubThreadId}`,
+            undefined,
+            { shallow: true }
+          );
+        }
       }
     }
-  }
-}, [subThreads, expandedThreads, params.thread_id, params.subThread_id]);
+  }, [subThreads, expandedThreads, params.thread_id, params.subThread_id]);
 
 
 
@@ -138,7 +138,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setExpandedThreads([threadId]);
     const start = searchParams.get('start');
     const end = searchParams.get('end');
-    router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=${start}&end=${end}`, undefined, { shallow: true });
+    router.push(`${pathName}?version=${params.version}&thread_id=${threadId ? threadId : params.thread_id}&subThread_id=${subThreadId}&start=${start}&end=${end}`, undefined, { shallow: true });
   };
 
   const handleFilterChange = async user_feedback => {
@@ -158,7 +158,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   );
 
   const handleCheckError = async (isError) => {
-    if(isError === true) {
+    if (isError === true) {
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.set('error', 'true');
       const queryString = newSearchParams.toString();
@@ -191,7 +191,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
             Advance Filter
           </div>
           <div className="collapse-content">
-            <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage}/>
+            <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} />
             <div className="p-2 mt-4 bg-base-300 rounded-md text-center">
               <p className="text-center m-2 font-semibold">Filter Response</p>
               <div className="flex items-center justify-center mb-2 gap-4">
@@ -214,11 +214,11 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
               </p>
 
               <div className="flex items-center justify-center gap-2 mt-4">
-              <span className="text-sm">
-                Show Error Chat History
-              </span>
-              <input type="checkbox" className="toggle" checked={isErrorTrue} onChange={() => handleCheckError(!isErrorTrue)} />
-            </div>
+                <span className="text-sm">
+                  Show Error Chat History
+                </span>
+                <input type="checkbox" className="toggle" checked={isErrorTrue} onChange={() => handleCheckError(!isErrorTrue)} />
+              </div>
             </div>
           </div>
         </div>
@@ -297,8 +297,14 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                       } flex-grow cursor-pointer`}
                     onClick={() => threadHandler(item?.thread_id)}
                   >
-                    <a className={`w-full h-full flex items-center justify-between relative ${item?.thread_id?.length > 35 ? 'tooltip' : ''}`} data-tip={item?.thread_id?.length > 35 ? item?.thread_id : ''}>
-                      <span>{truncate(`${item?.thread_id}`, 35)}</span>
+                    <a className="w-full h-full flex items-center justify-between relative group">
+                      <span className="truncate flex-1 pr-2">{truncate(item?.thread_id, 35)}</span>
+                      {item?.thread_id?.length > 35 && (
+                        <div className="absolute left-0 top-full mt-1 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 max-w-[300px] break-words shadow-lg pointer-events-none">
+                          {item?.thread_id}
+                        </div>
+                      )}
+                      {/* Show chevron button only when no search query */}
                       {!searchQuery && params.thread_id === item?.thread_id && (
                         <div
                           onClick={(e) => {
@@ -307,7 +313,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                           }}
                           className="absolute right-4 cursor-pointer"
                         >
-                          {!searchQuery && expandedThreads?.includes(item?.thread_id) ? (
+                          {expandedThreads?.includes(item?.thread_id) ? (
                             <ChevronUp size={16} />
                           ) : (
                             <ChevronDown size={16} />
@@ -321,7 +327,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                       {loadingSubThreads ? (
                         <SubThreadSkeleton />
                       ) : (
-                        <div className="pl-10 p-2 text-gray-600 text-sm">
+                        <div className="pl-10 p-2 text-gray-600 text-sm rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
                           <ul>
                             {subThreads?.length === 0 ? (
                               <li>No sub thread available</li>
@@ -338,7 +344,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                     }`}
                                   onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, params.thread_id)}
                                 >
-                                  {subThreadId?.display_name || subThreadId?.sub_thread_id}
+                                  {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 35)}
                                 </li>
                               ))
                             )}
@@ -347,19 +353,78 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                       )}
                     </>
                   )}
-                  {item?.message && item?.message?.length > 0 && (
-                    <div className="pl-10 pb-2 text-gray-600 text-sm">
-                      {item?.message?.map((msg, index) => (
-                        <div
-                          key={index}
-                          onClick={() => handleSetMessageId(msg?.message_id)}
-                          className="cursor-pointer hover:bg-gray-100 hover:text-gray-800 p-2 rounded-md transition-all duration-200"
-                        >
-                          {truncate(msg?.message, 45)}
+                  {params.thread_id === item?.thread_id && <div className="space-y-6">
+                    <div key={item.id} className="rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
+                      {item?.sub_thread && item.sub_thread?.length > 0 && (
+                        <div className="bg-base-100">
+                          <div className="p-4">
+                            <div className="space-y-2">
+                              {item?.sub_thread?.map((subThread, index) => (
+                                <div key={index} className="ml-4">
+                                  {/* Sub Thread Header */}
+                                  <div
+                                    onClick={() => handleSelectSubThread(subThread?.sub_thread_id)}
+                                    className={`cursor-pointer p-3 rounded-lg transition-all duration-200 border-2 ${params?.subThread_id === subThread?.sub_thread_id
+                                      ? 'bg-base-200 border-primary text-primary'
+                                      : 'bg-base-100 border-gray-200 hover:bg-base-200 hover:border-gray-300 text-gray-700'
+                                      }`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <MessageCircle className={`w-4 h-4 ${params?.subThread_id === subThread?.sub_thread_id ? 'text-primary' : 'text-gray-500'
+                                        }`} />
+                                      <span 
+                                        className="font-medium text-sm"
+                                      >
+                                        {truncate(subThread?.display_name || subThread?.sub_thread_id, 35)}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Sub Thread Messages */}
+                                  {subThread?.messages?.length > 0 && (
+                                    <div className="mt-2 ml-6 space-y-1">
+                                      {subThread?.messages?.map((msg, msgIndex) => (
+                                        <div
+                                          key={msgIndex}
+                                          onClick={() => handleSetMessageId(msg?.message_id)}
+                                          className={`cursor-pointer p-2 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
+                                        >
+                                          <div className="flex items-start gap-2">
+                                            <User className="w-3 h-3 mt-0.5 text-gray-400" />
+                                            <span>{truncate(msg?.message, 45)}</span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      ))}
+                      )}
+
+                      {/* Main Messages */}
+                      {item?.message && item?.message?.length > 0 && (
+                        <div className="p-4">
+                          <div className="space-y-2 ml-4">
+                            {item?.message?.map((msg, index) => (
+                              <div
+                                key={index}
+                                onClick={() => handleSetMessageId(msg?.message_id)}
+                                className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
+                              >
+                                <div className="flex items-start gap-2">
+                                  <User className="w-3 h-3 mt-0.5 text-gray-400" />
+                                  <span>{truncate(msg?.message, 45)}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>}
                 </div>
               ))}
             </ul>

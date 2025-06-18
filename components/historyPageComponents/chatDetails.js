@@ -114,45 +114,6 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
 
                     let displayValue = value;
                     
-                    if (displayKey === "Latency" && typeof value === "object") {
-                      let callCounter = 1; // To track the call number
-                      let isGptCall = true; // Toggle between gpt and function call
-                    
-                      const formattedSteps = Object.entries(value.execution_time_logs).reduce((acc, [step, time]) => {
-                        const suffix = 
-                          callCounter === 1 ? '1st' :
-                          callCounter === 2 ? '2nd' :
-                          callCounter === 3 ? '3rd' :
-                          `${callCounter}th`;
-                    
-                        const callType = isGptCall ? 'gpt call' : 'function call';
-                    
-                        acc[`${suffix} ${callType}`] = {
-                          time_taken: Number(time.toFixed(2)),
-                          description: `Time taken during ${suffix} ${callType}.`
-                        };
-                    
-                        callCounter++;
-                        isGptCall = !isGptCall; // Toggle gpt <-> function
-                        return acc;
-                      }, {});
-                    
-                      displayValue = {
-                        over_all_time: {
-                          total_time_taken_in_seconds: Number(value.over_all_time.toFixed(2)),
-                          description: "Total time including all steps and overhead."
-                        },
-                        execution_details: {
-                          individual_step_times_in_seconds: formattedSteps,
-                          overall_model_execution_time: {
-                            time_taken: Number(value.model_execution_time.toFixed(2)),
-                            description: "Time taken by the model to generate output."
-                          }
-                        }
-                      };
-                    }
-                    
-
                     if (key === "system Prompt" && typeof value === "string") {
                       displayValue = replaceVariablesInPrompt(value);
                       displayValue = displayValue.replace(/\n/g, '<br />');

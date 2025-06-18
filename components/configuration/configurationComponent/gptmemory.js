@@ -28,7 +28,7 @@ const GptMemory = ({ params }) => {
             <label className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center gap-2'>
                     <div className="label">
-                        <span className="font-medium text-nowrap ">Enable Gpt-memory</span>
+                        <span className="font-medium text-nowrap ">Enable LLM-memory</span>
                         <div className="tooltip tooltip-right" data-tip={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
                             <Info size={12} className='ml-2' />
                         </div>
@@ -43,7 +43,7 @@ const GptMemory = ({ params }) => {
             </label>
             {gpt_memory && (
                 <textarea
-                    placeholder="Please provide the context for GPT memory (e.g., instructions, preferences)"
+                    placeholder="Please provide the context for LLM memory (e.g., instructions, preferences)"
                     className="textarea textarea-bordered w-full min-h-[10rem] border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-primary"
                     defaultValue={gpt_memory_context}
                     key={gpt_memory_context}
