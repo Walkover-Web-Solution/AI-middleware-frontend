@@ -1,3 +1,4 @@
+import InfoModel from '@/components/infoModel';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
 import { Plus } from 'lucide-react';
@@ -58,7 +59,10 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
 
     return (
         <div className="dropdown dropdown-right">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col  gap-2">
+                 <InfoModel tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
+                        <p className=" label-text info">Agents Configuration</p>       
+                 </InfoModel>
                 <button tabIndex={0}
                     className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect Agent"}
                 </button>

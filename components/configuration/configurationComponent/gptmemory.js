@@ -3,6 +3,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { Info } from 'lucide-react';
+import InfoModel from '@/components/infoModel';
 
 const GptMemory = ({ params }) => {
     const dispatch = useDispatch();
@@ -28,10 +29,10 @@ const GptMemory = ({ params }) => {
             <label className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center gap-2'>
                     <div className="label">
-                        <span className="font-medium text-nowrap ">Enable LLM-memory</span>
-                        <div className="tooltip tooltip-right" data-tip={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
-                            <Info size={12} className='ml-2' />
-                        </div>
+                        <InfoModel tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
+                            <span className="font-medium text-nowrap info ">Enable LLM-memory</span>
+
+                        </InfoModel>
                     </div>
                     <input
                         type="checkbox"
