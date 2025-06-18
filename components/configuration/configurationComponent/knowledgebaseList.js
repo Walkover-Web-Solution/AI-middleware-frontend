@@ -10,6 +10,7 @@ import GoogleDocIcon from '@/icons/GoogleDocIcon';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
 import InfoModel from '@/components/infoModel';
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 
 const KnowledgebaseList = ({ params }) => {
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, } = useCustomSelector((state) => {
@@ -24,7 +25,10 @@ const KnowledgebaseList = ({ params }) => {
 
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
-    const [showTutorial, setShowTutorial] = useState(false);
+    const [tutorialState, setTutorialState] = useState({
+       showTutorial: false,
+       showSuggestion: false
+     });
     const handleInputChange = (e) => {
         setSearchQuery(e.target?.value || "");
     };
@@ -43,7 +47,10 @@ const KnowledgebaseList = ({ params }) => {
     };
 
     const handleTutorial = () => {
-        setShowTutorial(isFirstKnowledgeBase);
+        setTutorialState(prev=>({
+            ...prev,
+            showSuggestion:isFirstKnowledgeBase
+        }))
     };
 
     const renderKnowledgebase = useMemo(() => (
@@ -97,10 +104,13 @@ const KnowledgebaseList = ({ params }) => {
                 <button tabIndex={0} className="btn btn-outline btn-sm mt-0" onClick={() => handleTutorial()}>
                     <AddIcon size={16} />Connect Knowledgebase
                 </button>
-                {showTutorial && (
-                    <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
+                {tutorialState.showSuggestion && (
+                    <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"}/>
                 )}
-                {!showTutorial && (
+                {tutorialState.showTutorial && (
+                    <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
+                )}
+                {!tutorialState.showTutorial && (
                     <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                         <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>

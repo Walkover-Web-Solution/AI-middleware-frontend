@@ -6,6 +6,7 @@ import LoadingSpinner from "@/components/loadingSpinner";
 import OnBoarding from "@/components/OnBoarding";
 import PageHeader from "@/components/Pageheader";
 import Protected from "@/components/protected";
+import TutorialSuggestionToast from "@/components/tutorialSuggestoinToast";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
@@ -34,8 +35,11 @@ function Home({ params }) {
     };
   });
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
-  const [showTutorial, setShowTutorial] = useState(isFirstBridgeCreation);
+  const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: isFirstBridgeCreation
+  });
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -45,16 +49,16 @@ function Home({ params }) {
         setViewMode('table');
       }
     };
-    updateScreenSize(); // Run on mount
+    updateScreenSize();
     window.addEventListener('resize', updateScreenSize);
 
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
+  
   const filteredBridges = filterBridges(allBridges, searchTerm);
   const filteredArchivedBridges = filteredBridges?.filter((item) => item.status === 0);
   const filteredUnArchivedBridges = filteredBridges?.filter((item) => item.status === 1 || item.status === undefined);
-
 
   const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
     _id: item._id,
@@ -144,7 +148,6 @@ function Home({ params }) {
         <div className="dropdown bg-transparent absolute right-3 top-2">
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
           <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-            {/* <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li> */}
             <li><a onClick={(e) => { e.preventDefault(); archiveBridge(item._id, item.status != undefined ? Number(!item?.status) : undefined) }}>{(item?.status === 0) ? 'Un-archive Agent' : 'Archive Agent'}</a></li>
           </ul>
         </div>
@@ -213,8 +216,17 @@ function Home({ params }) {
 
   return (
     <div className="w-full">
-      {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.bridgeCreation} flagKey={"bridgeCreation"} />
+      {/* Tutorial Suggestion Toast */}
+      {tutorialState.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} />}
+      
+      {/* OnBoarding Component */}
+      {tutorialState.showTutorial && (
+        <OnBoarding 
+          setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} 
+          video={ONBOARDING_VIDEOS.bridgeCreation} 
+          flagKey={"bridgeCreation"}
+          
+        />
       )}
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}

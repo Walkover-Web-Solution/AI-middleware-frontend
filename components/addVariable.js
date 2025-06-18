@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import OnBoarding from "./OnBoarding";
 import { ONBOARDING_VIDEOS } from "@/utils/enums";
+import TutorialSuggestionToast from "./tutorialSuggestoinToast";
 const AddVariable = ({ params }) => {
   const versionId = params.version;
   const { variablesKeyValue, prompt, isFirstVariable,  } = useCustomSelector((state) => ({
@@ -15,7 +16,10 @@ const AddVariable = ({ params }) => {
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
     isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
   }));
-  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: false
+  });
   const [keyValuePairs, setKeyValuePairs] = useState([]);
   const [isFormData, setIsFormData] = useState(true);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
@@ -25,7 +29,10 @@ const AddVariable = ({ params }) => {
   const accordionContentRef = useRef(null); // Ref for the accordion content
   const isOpeningRef = useRef(false); // To track if the accordion is opening
   const handleTutorial = () => {
-    setShowTutorial(isFirstVariable);
+     setTutorialState(prev => ({
+        ...prev,
+        showSuggestion: isFirstVariable
+      }));
   };
 
 
@@ -236,8 +243,9 @@ const AddVariable = ({ params }) => {
         <span className="mr-2 text-nowrap font-medium">Add Variables</span>
         {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </button>
-      {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
+      {tutorialState.showSuggestion&&(<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"}/>)}
+      {tutorialState.showTutorial && (
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}  video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
       )}
 
       {/* Accordion Content */}

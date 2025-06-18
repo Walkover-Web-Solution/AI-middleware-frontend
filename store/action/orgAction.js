@@ -41,7 +41,6 @@ export const updateOrgTimeZone = (orgId, orgDetails) => async (dispatch) => {
   }
 }
 export const updateUserMetaOnboarding = (userId, user) => async (dispatch) => {
-
   try {
     const response = await updateUser({ user_id: userId, user });
     dispatch(updateUserMeta({ userId, user: response?.data?.data?.user }))
