@@ -35,7 +35,6 @@ function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, set
     try {
       const response = await OptimizePrompt(instruction);
       const result = typeof response === 'string' ? JSON.parse(response) : response;
-
       const assistantMessage = {
         id: Date.now() + 1,
         sender: "assistant",
