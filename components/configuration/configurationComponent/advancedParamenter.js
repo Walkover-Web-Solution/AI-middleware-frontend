@@ -30,7 +30,7 @@ const AdvancedParameters = ({ params }) => {
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
-      isFirstParameter:user?.meta?.onboarding?.AdvanceParameter
+      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter
     };
   });
   const { tool_choice: tool_choice_data, type, model } = configuration || {};
@@ -43,7 +43,7 @@ const AdvancedParameters = ({ params }) => {
   };
 
   useEffect(() => {
-    setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) :null ); 
+    setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) : null);
   }, [configuration?.response_type?.json_schema]);
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const AdvancedParameters = ({ params }) => {
     }
   };
 
-  const handleSelectChange = (e, key) => {
+  const handleSelectChange = (e, key, checkType) => {
     let newValue;
     let is_json = false
     try {
@@ -93,7 +93,7 @@ const AdvancedParameters = ({ params }) => {
     }
     let updatedDataToSend = {
       configuration: {
-        [key]: newValue,
+        [checkType]: newValue,
       }
     };
     if (key === "size") {
@@ -175,7 +175,7 @@ const AdvancedParameters = ({ params }) => {
         {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
       </div>
       {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.AdvanceParameter}  flagKey={"AdvanceParameter"}  />
+        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 
@@ -195,8 +195,8 @@ const AdvancedParameters = ({ params }) => {
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                  <InfoModel tooltipContent={description}>
-                    <span className="label-text capitalize info">{name || key}</span>        
+                    <InfoModel tooltipContent={description}>
+                      <span className="label-text capitalize info">{name || key}</span>
                     </InfoModel>
                   </div>
                   <div>
@@ -371,46 +371,62 @@ const AdvancedParameters = ({ params }) => {
                   />
                 </label>
               )}
-              {field === 'select' && (
-                <label className='items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
-                  <select value={configuration?.[key] === 'default' ? rowDefaultValue : configuration?.[key]?.type || configuration?.[key]} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
-                    <option value='default' disabled> Select response mode </option>
-                    {options?.map((service, index) => (
-                      <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
-                    ))}
-                  </select>
-                  {configuration?.[key]?.type === "json_schema" && (
-                    <>
-                      <textarea
-                        key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
-                        type="input"
-                        defaultValue={
-                          objectFieldValue ||
-                          JSON.stringify(
-                            configuration?.[key]?.json_schema,
-                            undefined,
-                            4
-                          )
-                        }
-                        className="mt-5 textarea textarea-bordered border w-full min-h-96 resize-y z-[1]"
-                        onBlur={(e) =>
-                          handleSelectChange(e, "json_schema")
-                        }
-                        placeholder="Enter valid JSON object here..."
-                      />
-                      <span
-                        className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
-                        onClick={() => {
-                          openModal(MODAL_TYPE.JSON_SCHEMA);
-                        }}
-                      >
-                        Improve Schema
-                      </span>
-                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages}/>
-                    </>
-                  )}
-                </label>
-              )}
+              {field === 'select' && (() => {
+                const checkType = options?.[0]?.['key'] || options?.[0];
+                const selectedValue =
+                  configuration?.[key] === 'default'
+                    ? rowDefaultValue
+                    : configuration?.[key]?.[checkType] || configuration?.[key];
+
+                return (
+                  <label className="items-center justify-start w-fit gap-4 bg-base-100 text-base-content">
+                    <select
+                      value={selectedValue}
+                      onChange={(e) => handleSelectChange(e, key, checkType)}
+                      className="select select-sm max-w-xs select-bordered capitalize"
+                    >
+                      <option value="default" disabled>
+                        Select response mode
+                      </option>
+                      {options?.map((service, index) => {
+                        const optionKey = service?.[checkType] || service;
+                        return (
+                          <option key={index} value={optionKey}>
+                            {optionKey}
+                          </option>
+                        );
+                      })}
+                    </select>
+
+                    {configuration?.[key]?.type === 'json_schema' && (
+                      <>
+                        <textarea
+                          key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
+                          defaultValue={
+                            objectFieldValue ||
+                            JSON.stringify(configuration?.[key]?.json_schema, null, 4)
+                          }
+                          className="mt-5 textarea textarea-bordered border w-full min-h-96 resize-y z-[1]"
+                          onBlur={(e) => handleSelectChange(e, 'json_schema')}
+                          placeholder="Enter valid JSON object here..."
+                        />
+                        <span
+                          className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer"
+                          onClick={() => openModal(MODAL_TYPE.JSON_SCHEMA)}
+                        >
+                          Improve Schema
+                        </span>
+                        <JsonSchemaModal
+                          params={params}
+                          messages={messages}
+                          setMessages={setMessages}
+                        />
+                      </>
+                    )}
+                  </label>
+                );
+              })()}
+
             </div>
           );
         })}
