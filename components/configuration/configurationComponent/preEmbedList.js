@@ -42,8 +42,8 @@ const PreEmbedList = ({ params }) => {
             version_id: params.version
         }))
     }
-    
-    return (bridge_pre_tools?.length > 0 && shouldToolsShow?
+
+    return (bridge_pre_tools?.length > 0 ?
         <div>
             <FunctionParameterModal preFunction={true} functionId={functionId} params={params} Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL} embedToken={embedToken} />
             <div className="form-control inline-block">
@@ -62,7 +62,7 @@ const PreEmbedList = ({ params }) => {
         </div> :
         (
             <div className='flex'>
-                <EmbedListSuggestionDropdownMenu params={params} name={"preFunction"} hideCreateFunction={false} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} shouldToolsShow={shouldToolsShow} modelName={model} />
+                <EmbedListSuggestionDropdownMenu params={params} name={"preFunction"} hideCreateFunction={false} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} shouldToolsShow={true} modelName={model} />
             </div>
         )
     );

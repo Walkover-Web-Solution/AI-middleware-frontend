@@ -94,7 +94,6 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         {/* Plus Icon Button */}
                         <button
                            tabIndex={0}
-                           disabled={!shouldToolsShow}  
                            className="btn btn-outline btn-sm"                  
                         >
                                 <AddIcon size={16} />
@@ -121,7 +120,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     </div>
                 )}
                 {
-                    !shouldToolsShow &&
+                    !shouldToolsShow && name !== "preFunction"&&
                     <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
                         <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                         <span className='label-text-alt text-xs leading-tight'>

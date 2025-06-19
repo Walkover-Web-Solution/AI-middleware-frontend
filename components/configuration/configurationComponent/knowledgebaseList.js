@@ -11,14 +11,22 @@ import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
 import InfoModel from '@/components/infoModel';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
+import { InfoIcon } from 'lucide-react';
 
 const KnowledgebaseList = ({ params }) => {
-    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, } = useCustomSelector((state) => {
-        const user = state.userDetailsReducer.userDetails||[]
+    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
+        const user = state.userDetailsReducer.userDetails || []
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
         return {
             knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
             knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
             isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            model: modelName
         };
     });
 
@@ -26,9 +34,9 @@ const KnowledgebaseList = ({ params }) => {
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
     const [tutorialState, setTutorialState] = useState({
-       showTutorial: false,
-       showSuggestion: false
-     });
+        showTutorial: false,
+        showSuggestion: false
+    });
     const handleInputChange = (e) => {
         setSearchQuery(e.target?.value || "");
     };
@@ -47,9 +55,9 @@ const KnowledgebaseList = ({ params }) => {
     };
 
     const handleTutorial = () => {
-        setTutorialState(prev=>({
+        setTutorialState(prev => ({
             ...prev,
-            showSuggestion:isFirstKnowledgeBase
+            showSuggestion: isFirstKnowledgeBase
         }))
     };
 
@@ -95,17 +103,28 @@ const KnowledgebaseList = ({ params }) => {
             <div className="flex flex-wrap gap-4 mb-4">
                 {renderKnowledgebase}
             </div>
-                 <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
-                        <p className=" label-text info mb-2">Knowledgebase Configuration</p>
-                 </InfoModel>
+            <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
+                <p className=" label-text info mb-2">Knowledgebase Configuration</p>
+            </InfoModel>
             <div className="dropdown dropdown-right">
-                
-                       
-                <button tabIndex={0} className="btn btn-outline btn-sm mt-0" onClick={() => handleTutorial()}>
-                    <AddIcon size={16} />Connect Knowledgebase
-                </button>
+                <div className='flex items-center gap-2'>
+                    <button tabIndex={0} className="btn btn-outline btn-sm mt-0" 
+                    disabled={!shouldToolsShow}
+                    onClick={() => handleTutorial()}>
+                        <AddIcon size={16} />Connect Knowledgebase
+                    </button>
+                    {
+                        !shouldToolsShow && name !== "preFunction" &&
+                        <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
+                            <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
+                            <span className='label-text-alt text-xs leading-tight'>
+                                {`The ${model} does not support knowledgebase`}
+                            </span>
+                        </div>
+                    }
+                </div>
                 {tutorialState?.showSuggestion && (
-                    <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"}/>
+                    <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
                 )}
                 {tutorialState?.showTutorial && (
                     <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
