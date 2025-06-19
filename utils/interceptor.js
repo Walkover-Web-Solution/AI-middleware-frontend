@@ -27,7 +27,6 @@ axios.interceptors.response.use(
         return response;
     },
     async function (error) {
-        console.log(error);
         if (error?.response?.status === 401 && !error?.config?.url?.includes("publicAgent")) {
             localStorage.clear();
             localStorage.setItem("previous_url", window.location.href);           

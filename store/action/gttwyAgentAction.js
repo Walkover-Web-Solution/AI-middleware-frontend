@@ -18,7 +18,6 @@ export const getAllAgentAction = () => async (dispatch) => {
 export const publicAgentLoginAction = () => async (dispatch) => {
   try {
     const response = await publicAgentLoginApi();
-    console.log("publicAgentLoginAction", response)
     localStorage.setItem('AgentToken', response?.data?.token)
     localStorage.setItem('AgentUserId',response?.data?.userid)
     if (response) {
