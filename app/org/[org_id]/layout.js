@@ -124,7 +124,7 @@ function layoutOrgPage({ children, params }) {
   }, [isValidOrg, dispatch, params?.org_id]);
 
   const scriptId = "chatbot-main-script";
-  const scriptSrc = "https://app.docstar.io/scriptProd.js";
+  const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
 
   useEffect(() => {
     if (isValidOrg) {
@@ -176,7 +176,7 @@ function layoutOrgPage({ children, params }) {
   }, [isValidOrg, params])
 
   const docstarScriptId = "docstar-main-script";
-  const docstarScriptSrc = process.env.NEXT_PUBLIC_DOCSTAR_SCRIPT_SRC;
+  const docstarScriptSrc = "https://app.docstar.io/scriptProd.js";
 
   useEffect(() => {
     const existingScript = document.getElementById(docstarScriptId);
