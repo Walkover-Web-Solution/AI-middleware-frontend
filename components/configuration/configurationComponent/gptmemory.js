@@ -43,7 +43,7 @@ const GptMemory = ({ params }) => {
             </label>
             {gpt_memory && (
                 <textarea
-                    placeholder="Please provide the context for GPT memory (e.g., instructions, preferences)"
+                    placeholder="Please provide the context for LLM memory (e.g., instructions, preferences)"
                     className="textarea textarea-bordered w-full min-h-[10rem] border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-primary"
                     defaultValue={gpt_memory_context}
                     key={gpt_memory_context}
