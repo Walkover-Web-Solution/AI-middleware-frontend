@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateApiAction } from '@/store/action/bridgeAction';
-import { getStatusClass } from '@/utils/utility';
+import { getStatusClass, openModal } from '@/utils/utility';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
@@ -42,11 +42,8 @@ const PreEmbedList = ({ params }) => {
             version_id: params.version
         }))
     }
-
-
-
-
-    return (bridge_pre_tools?.length > 0 ?
+    
+    return (bridge_pre_tools?.length > 0 && shouldToolsShow?
         <div>
             <FunctionParameterModal preFunction={true} functionId={functionId} params={params} Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL} embedToken={embedToken} />
             <div className="form-control inline-block">

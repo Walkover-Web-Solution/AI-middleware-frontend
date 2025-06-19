@@ -416,7 +416,7 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
           example_json: reqJson,
         },
       });
-      setObjectFieldValue(result.result);
+      setObjectFieldValue(JSON.stringify(result?.result, undefined, 4));
     } catch (error) {
       console.error("Optimization Error:", error);
     } finally {
@@ -491,20 +491,6 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
               value={toolData?.description}
               onChange={(e) => setToolData({ ...toolData, description: e.target.value })}
             />
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={handleSaveDescription}
-                className="btn btn-sm btn-primary"
-                disabled={toolData?.description === function_details?.description}
-              >Save Description
-              </button>
-              <button
-                onClick={() => {setIsDescriptionEditing(false); setToolData({ ...toolData, description: function_details?.description })}}
-                className="btn btn-sm"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
         )}
 
@@ -738,8 +724,6 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
             <button className="btn" onClick={handleCloseModal}>
               Close
             </button>
-
-            {isDataAvailable && (
               <button
                 className="btn btn-primary"
                 onClick={handleSaveFunctionData}
@@ -748,7 +732,6 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
                 {isLoading && <span className="loading loading-spinner"></span>}
                 Save
               </button>
-            )}
           </form>
         </div>
       </div>

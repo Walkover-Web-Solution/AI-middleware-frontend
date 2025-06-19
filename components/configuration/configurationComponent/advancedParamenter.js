@@ -204,9 +204,9 @@ const AdvancedParameters = ({ params }) => {
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                  <InfoModel tooltipContent={description}>
+                  {description ? <InfoModel tooltipContent={description}>
                     <span className="label-text capitalize info">{name || key}</span>        
-                    </InfoModel>
+                    </InfoModel> : <span className="label-text capitalize">{name || key}</span>}
                   </div>
                   <div>
                     <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
