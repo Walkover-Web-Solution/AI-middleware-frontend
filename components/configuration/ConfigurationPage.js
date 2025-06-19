@@ -69,8 +69,8 @@ export default function ConfigurationPage({ params }) {
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
                     <>
                         <PreEmbedList params={params} />
-                        {/* <InputConfigComponent params={params} /> */}
-                        <NewInputConfigComponent params={params} />
+                        <InputConfigComponent params={params} />
+                        {/* <NewInputConfigComponent params={params} /> */}
                         <EmbedList params={params} />
                         <hr className="my-0 p-0" />
                         <ConnectedAgentList params={params} />

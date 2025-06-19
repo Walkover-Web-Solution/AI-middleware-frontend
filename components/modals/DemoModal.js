@@ -91,7 +91,7 @@ const DemoModal = ({ speakToUs }) => {
                 <div className="modal-action mt-4">
                     <button
                         data-cal-namespace="30min"
-                        data-cal-link={speakToUs ? "team/gtwy.ai/30min-speakToUs" : "team/gtwy.ai/30min"}
+                        data-cal-link={speakToUs ? "team/gtwy.ai/ai-consultation" : "team/gtwy.ai/30min"}
                         data-cal-origin="https://cal.id"
                         data-cal-config='{"layout":"month_view"}'
                         onClick={() => handleClose()}

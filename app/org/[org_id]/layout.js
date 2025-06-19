@@ -175,22 +175,22 @@ function layoutOrgPage({ children, params }) {
     }
   }, [isValidOrg, params])
 
-  const docstarScriptId = "docstar-main-script";
-  const docstarScriptSrc = "https://app.docstar.io/scriptProd.js";
+  // const docstarScriptId = "docstar-main-script";
+  // const docstarScriptSrc = "https://app.docstar.io/scriptProd.js";
 
-  useEffect(() => {
-    const existingScript = document.getElementById(docstarScriptId);
-    if (existingScript) {
-      document.head.removeChild(existingScript);
-    }
-    if (doctstar_embed_token) {
-      const script = document.createElement("script");
-      script.setAttribute("embedToken", doctstar_embed_token);
-      script.id = docstarScriptId;
-      script.src = docstarScriptSrc;
-      document.head.appendChild(script);
-    }
-  }, [doctstar_embed_token]);
+  // useEffect(() => {
+  //   const existingScript = document.getElementById(docstarScriptId);
+  //   if (existingScript) {
+  //     document.head.removeChild(existingScript);
+  //   }
+  //   if (doctstar_embed_token) {
+  //     const script = document.createElement("script");
+  //     script.setAttribute("embedToken", doctstar_embed_token);
+  //     script.id = docstarScriptId;
+  //     script.src = docstarScriptSrc;
+  //     document.head.appendChild(script);
+  //   }
+  // }, [doctstar_embed_token]);
 
   useEffect(() => {
     if (isValidOrg) {

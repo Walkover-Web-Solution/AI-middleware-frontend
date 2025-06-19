@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateApiAction } from '@/store/action/bridgeAction';
-import { getStatusClass } from '@/utils/utility';
+import { getStatusClass, openModal } from '@/utils/utility';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
@@ -43,9 +43,6 @@ const PreEmbedList = ({ params }) => {
         }))
     }
 
-
-
-
     return (bridge_pre_tools?.length > 0 ?
         <div>
             <FunctionParameterModal preFunction={true} functionId={functionId} params={params} Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL} embedToken={embedToken} />
@@ -65,7 +62,7 @@ const PreEmbedList = ({ params }) => {
         </div> :
         (
             <div className='flex'>
-                <EmbedListSuggestionDropdownMenu params={params} name={"preFunction"} hideCreateFunction={false} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} shouldToolsShow={shouldToolsShow} modelName={model} />
+                <EmbedListSuggestionDropdownMenu params={params} name={"preFunction"} hideCreateFunction={false} onSelect={onFunctionSelect} connectedFunctions={bridge_pre_tools} shouldToolsShow={true} modelName={model} />
             </div>
         )
     );

@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import OptimiseBaseModal from './OptimiseBaseModal';
 
-function OptimizePromptModal({ savePrompt, params, messages, setMessages }) {
+function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessages }) {
   const dispatch = useDispatch();
   const { prompt, optimizePromptHistory } = useCustomSelector((state) => ({
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
@@ -35,7 +35,8 @@ function OptimizePromptModal({ savePrompt, params, messages, setMessages }) {
   };
 
   const handleApply = async (promptToInsert) => {
-    // savePrompt(promptToInsert);
+    savePrompt(promptToInsert);
+    setPrompt(promptToInsert);
   };
 
   const handleUndo = () => {
@@ -53,7 +54,7 @@ function OptimizePromptModal({ savePrompt, params, messages, setMessages }) {
   };
 
   return (
-   <OptimiseBaseModal
+    <OptimiseBaseModal
       modalType={MODAL_TYPE.OPTIMIZE_PROMPT}
       title="Improve prompt"
       contentLabel="Prompt"

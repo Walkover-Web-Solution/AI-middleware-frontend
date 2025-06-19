@@ -83,9 +83,9 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
     ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, params.version]);
     return (
         <div className="dropdown dropdown-right">
-            <div className="flex items-center gap-2">
+            <div className="flex items-end gap-2">
                 {name === "preFunction" ? (
-                    <div className=" flex flex-col  gap-2">
+                    <div className=" flex flex-col items-start gap-2">
                         <InfoModel tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
                         <p className="text-base font-semibold info">Pre Tool Configuration</p>
                        
@@ -94,7 +94,6 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         {/* Plus Icon Button */}
                         <button
                            tabIndex={0}
-                           disabled={!shouldToolsShow}  
                            className="btn btn-outline btn-sm"                  
                         >
                                 <AddIcon size={16} />
@@ -102,7 +101,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         </button>
                     </div>
                 ) : (
-                     <div className="flex flex-col  gap-2">
+                     <div className="flex flex-col items-start gap-2">
                         <InfoModel video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
                         <p className=" label-text info">Tool Configuration</p>
                        
@@ -121,7 +120,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     </div>
                 )}
                 {
-                    !shouldToolsShow &&
+                    !shouldToolsShow && name !== "preFunction"&&
                     <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
                         <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                         <span className='label-text-alt text-xs leading-tight'>

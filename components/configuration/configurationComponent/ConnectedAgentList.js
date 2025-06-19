@@ -15,10 +15,16 @@ const ConnectedAgentList = ({ params }) => {
     const [description, setDescription] = useState("");
     const [selectedBridge, setSelectedBridge] = useState(null);
     const [currentVariable, setCurrentVariable] = useState(null);
-    const { connect_agents } = useCustomSelector((state) => {
+    const { connect_agents, shouldToolsShow, model } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
         return {
-            connect_agents: versionData?.connected_agents || {}
+            connect_agents: versionData?.connected_agents || {},
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            model: modelName
         };
     });
 
@@ -136,7 +142,7 @@ const ConnectedAgentList = ({ params }) => {
                     </div>
                 }
             </div>
-            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} />
+            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} />
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
             <AgentVariableModal currentVariable={currentVariable} handleSaveAgent={handleSaveAgent} />
         </div>
