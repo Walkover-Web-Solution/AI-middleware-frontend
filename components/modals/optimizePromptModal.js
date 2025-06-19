@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import OptimiseBaseModal from './OptimiseBaseModal';
 
-function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessages }) {
+function OptimizePromptModal({ savePrompt, params, messages, setMessages }) {
   const dispatch = useDispatch();
   const { prompt, optimizePromptHistory } = useCustomSelector((state) => ({
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
@@ -35,11 +35,7 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
   };
 
   const handleApply = async (promptToInsert) => {
-    const syntheticEvent = {
-      target: { value: promptToInsert }
-    };
-    setPrompt(promptToInsert);
-    savePrompt(syntheticEvent);
+    // savePrompt(promptToInsert);
   };
 
   const handleUndo = () => {
