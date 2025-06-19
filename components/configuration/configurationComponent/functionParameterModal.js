@@ -8,7 +8,7 @@ import {
 } from "@/store/action/bridgeAction";
 import { closeModal, flattenParameters } from "@/utils/utility";
 import { isEqual } from "lodash";
-import { CopyIcon, InfoIcon, TrashIcon, Pencil, Save, X, PencilIcon, CloseIcon, SaveIcon } from "@/components/Icons";
+import { CopyIcon, InfoIcon, TrashIcon, PencilIcon, CloseIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
@@ -477,11 +477,11 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
             </div>
           </span>
           <div className="flex gap-2">
-            <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
-              <TrashIcon size={16} /> Remove {preFunction ? "pre-tool" : "tool"}
-            </button>
             <button onClick={handleUpdateDescription} className="btn btn-sm btn-primary">
               <PencilIcon size={16} /> Update Description
+            </button>
+            <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
+              <TrashIcon size={16} /> Remove {preFunction ? "pre-tool" : "tool"}
             </button>
           </div>
         </div>
@@ -508,12 +508,11 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
               <button
                 onClick={handleSaveDescription}
                 className="btn btn-sm btn-primary"
-              >
-                <SaveIcon size={16} /> Save Description
+              >Save Description
               </button>
               <button
                 onClick={handleCancelDescriptionEdit}
-                className="btn btn-sm btn-outline"
+                className="btn btn-sm"
               >
                 Cancel
               </button>
