@@ -16,7 +16,6 @@ import { toast } from "react-toastify";
 function FunctionParameterModal({ preFunction, functionId, params, Model_Name, embedToken }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
-  const [tempDescription, setTempDescription] = useState("");
   const dispatch = useDispatch();
   const { function_details, variables_path } = useCustomSelector((state) => ({
     function_details:
@@ -49,7 +48,6 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
   useEffect(() => {
     setToolData(function_details);
     setIsDataAvailable(Object.keys(properties).length > 0);
-    setTempDescription(function_details.description || "");
   }, [function_details, properties]);
 
   useEffect(() => {
@@ -197,7 +195,6 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
     setObjectFieldValue("");
     setIsTextareaVisible(false);
     setIsDescriptionEditing(false);
-    setTempDescription(function_details.description || "");
   };
 
   const handleCloseModal = () => {
@@ -426,19 +423,14 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
       setIsLoading(false);
     }
   };
-
-  const handleUpdateDescription = () => {
-    setIsDescriptionEditing(true);
-    setTempDescription(toolData.description || "");
-  };
-
+  
   const handleSaveDescription = async () => {
-    if (!tempDescription.trim()) {
+    if (!toolData?.description.trim()) {
       toast.error('Description cannot be empty');
       return;
     }
     try {
-      const flowResponse = await updateFlowDescription(embedToken, toolData.function_name, tempDescription);
+      const flowResponse = await updateFlowDescription(embedToken, toolData.function_name, toolData?.description);
       if (flowResponse?.metadata?.description) {
         const { _id, description, ...dataToSend } = toolData;
         await dispatch(updateFuntionApiAction({
@@ -477,7 +469,7 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
             </div>
           </span>
           <div className="flex gap-2">
-            <button onClick={handleUpdateDescription} className="btn btn-sm btn-primary">
+            <button onClick={() => setIsDescriptionEditing(true)} className="btn btn-sm btn-primary">
               <PencilIcon size={16} /> Update Description
             </button>
             <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
@@ -501,8 +493,8 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
             <textarea
               className="textarea textarea-bordered w-full min-h-24 resize-y"
               placeholder="Enter function description..."
-              value={tempDescription}
-              onChange={(e) => setTempDescription(e.target.value)}
+              value={toolData?.description}
+              onChange={(e) => setToolData({ ...toolData, description: e.target.value })}
             />
             <div className="flex gap-2 mt-2">
               <button

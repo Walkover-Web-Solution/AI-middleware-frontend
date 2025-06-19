@@ -62,7 +62,6 @@ import {
   Redo,
   RefreshCw,
   Rss,
-  Save,
   Settings2,
   ShieldCheck,
   SquareFunction,
@@ -742,14 +741,6 @@ export const AddUserIcon = (props) => <UserPlus {...props} />;
  * Context: API integrations, webhook configurations
  */
 export const WebhookIcon = (props) => <Webhook {...props} />;
-
-/**
- * Save icon showing disk with arrow
- * Used for saving actions and operations
- * Style: Green for successful save, blue for neutral
- * Context: Save buttons, form submissions, data persistence
- */
-export const SaveIcon = (props) => <Save {...props} />;
 
 /**
  * Close icon showing X
