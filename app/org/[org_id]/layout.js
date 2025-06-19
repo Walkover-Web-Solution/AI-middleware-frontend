@@ -40,6 +40,7 @@ function layoutOrgPage({ children, params }) {
     organizations: state.userDetailsReducer.organizations,
     preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
     SERVICES: state?.serviceReducer?.services,
+    currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
  useEffect(() => {
