@@ -35,7 +35,6 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
   };
 
   const handleApply = async (promptToInsert) => {
-    console.log(promptToInsert);
     savePrompt(promptToInsert);
     setPrompt(promptToInsert);
   };

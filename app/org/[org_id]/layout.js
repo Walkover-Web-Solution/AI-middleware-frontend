@@ -45,7 +45,7 @@ function layoutOrgPage({ children, params }) {
   }));
  useEffect(() => {
   const updateUserMeta = async () => {
-    if (currentUser?.meta===null) {
+    if (currentUser?.meta!==null) {
       const updatedUser = {
         ...currentUser,
         meta: {
