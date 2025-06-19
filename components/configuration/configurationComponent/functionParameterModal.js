@@ -1,5 +1,4 @@
-
-import { optimizeJsonApi } from "@/config";
+import { optimizeJsonApi, updateFlowDescription } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { parameterTypes } from "@/jsonFiles/bridgeParameter";
 import {
@@ -9,13 +8,14 @@ import {
 } from "@/store/action/bridgeAction";
 import { closeModal, flattenParameters } from "@/utils/utility";
 import { isEqual } from "lodash";
-import { CopyIcon, InfoIcon, TrashIcon } from "@/components/Icons";
+import { CopyIcon, InfoIcon, TrashIcon, PencilIcon, CloseIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
-function FunctionParameterModal({ preFunction, functionId, params, Model_Name }) {
+function FunctionParameterModal({ preFunction, functionId, params, Model_Name, embedToken }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const dispatch = useDispatch();
   const { function_details, variables_path } = useCustomSelector((state) => ({
     function_details:
@@ -194,6 +194,7 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name })
     setToolData(function_details);
     setObjectFieldValue("");
     setIsTextareaVisible(false);
+    setIsDescriptionEditing(false);
   };
 
   const handleCloseModal = () => {
@@ -422,6 +423,32 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name })
       setIsLoading(false);
     }
   };
+
+  const handleSaveDescription = async () => {
+    if (!toolData?.description.trim()) {
+      toast.error('Description cannot be empty');
+      return;
+    }
+    try {
+      const flowResponse = await updateFlowDescription(embedToken, toolData.function_name, toolData?.description);
+      if (flowResponse?.metadata?.description) {
+        const { _id, description, ...dataToSend } = toolData;
+        await dispatch(updateFuntionApiAction({
+          function_id: functionId,
+          dataToSend: { ...dataToSend, description: flowResponse?.metadata?.description }
+        }));
+        setToolData(prev => ({ ...prev, description: flowResponse.metadata.description }));
+        toast.success('Description updated successfully');
+        setIsDescriptionEditing(false);
+      } else {
+        throw new Error('Failed to get updated description from flow API');
+      }
+    } catch (error) {
+      console.error('Failed to update description:', error);
+      toast.error('Failed to update description. Please try again.');
+    }
+  };
+
   return (
     <dialog id={Model_Name} className="modal">
       <div className="modal-box w-11/12 max-w-6xl">
@@ -436,10 +463,51 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name })
               </span>
             </div>
           </span>
-           <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
-            <TrashIcon size={16} /> Remove {preFunction ? "pre-tool" : "tool"}
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => setIsDescriptionEditing(true)} className="btn btn-sm btn-primary">
+              <PencilIcon size={16} /> Update Description
+            </button>
+            <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
+              <TrashIcon size={16} /> Remove {preFunction ? "pre-tool" : "tool"}
+            </button>
+          </div>
         </div>
+
+        {/* Description Editor Section */}
+        {isDescriptionEditing && (
+          <div className="mb-4 p-4 border rounded-lg bg-base-100">
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="font-semibold">Update Function Description</h4>
+              <button
+                onClick={() => {setIsDescriptionEditing(false); setToolData({ ...toolData, description: function_details?.description })}}
+                className="btn btn-sm btn-ghost"
+              >
+                <CloseIcon size={16} />
+              </button>
+            </div>
+            <textarea
+              className="textarea textarea-bordered w-full min-h-24 resize-y"
+              placeholder="Enter function description..."
+              value={toolData?.description}
+              onChange={(e) => setToolData({ ...toolData, description: e.target.value })}
+            />
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={handleSaveDescription}
+                className="btn btn-sm btn-primary"
+                disabled={toolData?.description === function_details?.description}
+              >Save Description
+              </button>
+              <button
+                onClick={() => {setIsDescriptionEditing(false); setToolData({ ...toolData, description: function_details?.description })}}
+                className="btn btn-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center">
           {isDataAvailable && (
             <div className="flex items-center text-sm gap-3 mb-4">
