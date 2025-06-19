@@ -1,5 +1,6 @@
 import OnBoarding from '@/components/OnBoarding';
 import InfoModel from '@/components/infoModel';
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ONBOARDING_VIDEOS } from '@/utils/enums';
 import { getStatusClass } from '@/utils/utility';
@@ -8,7 +9,10 @@ import { InfoIcon, AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
-    const [showTutorial, setShowTutorial] = useState(false);
+     const [tutorialState, setTutorialState] = useState({
+        showTutorial: false,
+        showSuggestion: false
+      });
     const { integrationData, function_data, embedToken, isFirstFunction } = useCustomSelector((state) => {
         const orgId = Number(params?.org_id);
         const orgData = state?.bridgeReducer?.org?.[orgId] || {};
@@ -23,7 +27,10 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
         };
     });
     const handleTutorial = () => {
-        setShowTutorial(isFirstFunction);
+        setTutorialState(prev=>({
+            ...prev,
+            showSuggestion:isFirstFunction
+        }));
     };
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -123,10 +130,13 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     </div>
                 }
             </div>
-            {showTutorial && (
-                <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.FunctionCreation}  flagKey={"FunctionCreation"} />
+            {tutorialState?.showSuggestion && (
+                <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"FunctionCreation"} TutorialDetails={"Tool Configuration"}/>
             )}
-            {!showTutorial && (
+            {tutorialState?.showTutorial && (
+                <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.FunctionCreation}  flagKey={"FunctionCreation"} />
+            )}
+            {!tutorialState?.showTutorial && (
                 <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                     <div className='flex flex-col gap-2 w-full'>
                         <li className="text-sm font-semibold disabled">Suggested Tools</li>

@@ -544,4 +544,10 @@ export const TUTORIALS = [
     videoUrl: ONBOARDING_VIDEOS?.knowledgeBase,
     icon: BookIcon
   },
+  {
+    title: 'Advanced Parameters',
+    description: 'Set up and update advanced parameters for your workflow',
+    videoUrl: ONBOARDING_VIDEOS?.AdvanceParameter,
+    icon: BookIcon
+  },
 ];

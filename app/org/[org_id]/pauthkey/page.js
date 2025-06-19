@@ -5,6 +5,7 @@ import LoadingSpinner from '@/components/loadingSpinner'
 import OnBoarding from '@/components/OnBoarding'
 import PageHeader from '@/components/Pageheader'
 import Protected from '@/components/protected'
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
 import { MODAL_TYPE, ONBOARDING_VIDEOS, PAUTH_KEY_COLUMNS } from '@/utils/enums'
@@ -28,7 +29,10 @@ function Page({ params }) {
 
   const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(isFirstPauthCreation);
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: isFirstPauthCreation
+  });
 
   useEffect(() => {
     dispatch(getAllAuthData())
@@ -116,8 +120,9 @@ function Page({ params }) {
 
   return (
     <div className="h-full">
-      {showTutorial && (
-       <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"}/>
+      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"PauthKey"} TutorialDetails={"Pauth Key Setup"}/>}
+      {tutorialState?.showTutorial && (
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"} />
       )}
       <MainLayout>
         <PageHeader

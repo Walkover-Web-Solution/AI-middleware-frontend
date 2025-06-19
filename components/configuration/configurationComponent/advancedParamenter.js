@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
 import InfoModel from '@/components/infoModel';
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -17,7 +18,10 @@ const AdvancedParameters = ({ params }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
-  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: false
+  });
   const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
 
@@ -39,7 +43,11 @@ const AdvancedParameters = ({ params }) => {
   }));
 
   const handleTutorial = () => {
-    setShowTutorial(isFirstParameter);
+    setTutorialState(prev=>({
+      ...prev,
+      showSuggestion:isFirstParameter
+
+    }))
   };
 
   useEffect(() => {
@@ -174,8 +182,9 @@ const AdvancedParameters = ({ params }) => {
 
         {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </div>
-      {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.AdvanceParameter}  flagKey={"AdvanceParameter"}  />
+      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"}/>)}
+      {tutorialState.showTutorial && (
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 
