@@ -81,7 +81,7 @@ const EmbedList = ({ params }) => {
 
     return (bridge_functions &&
         <div>
-            <FunctionParameterModal preFunction={false} functionId={functionId} params={params} Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL} />
+            <FunctionParameterModal preFunction={false} functionId={functionId} params={params} Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL} embedToken={embedToken}/>
             <div className="label flex-col items-start mb-2">
                 {
                     shouldToolsShow &&

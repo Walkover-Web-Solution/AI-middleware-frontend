@@ -306,7 +306,27 @@ export const getMetricsData = async (org_id, startDate, endDate) => {
     return error;
   }
 }
+export const updateFlowDescription = async (embed_token, functionId, description) => {
+  try {
+    const response = await fetch(`https://flow-api.viasocket.com/projects/updateflowembed/${functionId}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": embed_token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "description": description
+      })
+    });
+    
+    const data = await response.json();
+    return data.data;
 
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 export const integration = async (embed_token) => {
 
   try {
