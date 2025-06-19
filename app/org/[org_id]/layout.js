@@ -124,7 +124,7 @@ function layoutOrgPage({ children, params }) {
   }, [isValidOrg, dispatch, params?.org_id]);
 
   const scriptId = "chatbot-main-script";
-  const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
+  const scriptSrc = "https://app.docstar.io/scriptProd.js";
 
   useEffect(() => {
     if (isValidOrg) {
