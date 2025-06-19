@@ -423,7 +423,7 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
       setIsLoading(false);
     }
   };
-  
+
   const handleSaveDescription = async () => {
     if (!toolData?.description.trim()) {
       toast.error('Description cannot be empty');
@@ -447,11 +447,6 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
       console.error('Failed to update description:', error);
       toast.error('Failed to update description. Please try again.');
     }
-  };
-
-  const handleCancelDescriptionEdit = () => {
-    setIsDescriptionEditing(false);
-    setTempDescription(toolData.description || "");
   };
 
   return (
@@ -484,7 +479,7 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-semibold">Update Function Description</h4>
               <button
-                onClick={handleCancelDescriptionEdit}
+                onClick={() => {setIsDescriptionEditing(false); setToolData({ ...toolData, description: function_details?.description })}}
                 className="btn btn-sm btn-ghost"
               >
                 <CloseIcon size={16} />
@@ -500,10 +495,11 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
               <button
                 onClick={handleSaveDescription}
                 className="btn btn-sm btn-primary"
+                disabled={toolData?.description === function_details?.description}
               >Save Description
               </button>
               <button
-                onClick={handleCancelDescriptionEdit}
+                onClick={() => {setIsDescriptionEditing(false); setToolData({ ...toolData, description: function_details?.description })}}
                 className="btn btn-sm"
               >
                 Cancel
