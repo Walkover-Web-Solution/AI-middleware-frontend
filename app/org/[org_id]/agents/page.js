@@ -216,16 +216,13 @@ function Home({ params }) {
 
   return (
     <div className="w-full">
-      {/* Tutorial Suggestion Toast */}
-      {tutorialState.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} />}
-      
-      {/* OnBoarding Component */}
-      {tutorialState.showTutorial && (
-        <OnBoarding 
-          setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} 
-          video={ONBOARDING_VIDEOS.bridgeCreation} 
+      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"}/>}
+      {tutorialState?.showTutorial && (
+        <OnBoarding
+          setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
+          video={ONBOARDING_VIDEOS.bridgeCreation}
           flagKey={"bridgeCreation"}
-          
+
         />
       )}
       <CreateNewBridge />

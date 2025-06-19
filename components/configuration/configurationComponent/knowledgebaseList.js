@@ -104,13 +104,13 @@ const KnowledgebaseList = ({ params }) => {
                 <button tabIndex={0} className="btn btn-outline btn-sm mt-0" onClick={() => handleTutorial()}>
                     <AddIcon size={16} />Connect Knowledgebase
                 </button>
-                {tutorialState.showSuggestion && (
-                    <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"}/>
+                {tutorialState?.showSuggestion && (
+                    <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"}/>
                 )}
-                {tutorialState.showTutorial && (
+                {tutorialState?.showTutorial && (
                     <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
                 )}
-                {!tutorialState.showTutorial && (
+                {!tutorialState?.showTutorial && (
                     <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                         <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>

@@ -243,9 +243,9 @@ const AddVariable = ({ params }) => {
         <span className="mr-2 text-nowrap font-medium">Add Variables</span>
         {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </button>
-      {tutorialState.showSuggestion&&(<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"}/>)}
-      {tutorialState.showTutorial && (
-        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}  video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
+      {tutorialState?.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"} TutorialDetails={"Variable Management"}/>)}
+      {tutorialState?.showTutorial && (
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
       )}
 
       {/* Accordion Content */}

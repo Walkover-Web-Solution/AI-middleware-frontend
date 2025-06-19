@@ -29,7 +29,7 @@ function Page({ params }) {
 
   const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
- const [tutorialState, setTutorialState] = useState({
+  const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
     showSuggestion: isFirstPauthCreation
   });
@@ -120,10 +120,9 @@ function Page({ params }) {
 
   return (
     <div className="h-full">
-       {tutorialState.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"PauthKey"} />}
-      
-      {tutorialState.showTutorial && (
-       <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"}/>
+      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"PauthKey"} TutorialDetails={"Pauth Key Setup"}/>}
+      {tutorialState?.showTutorial && (
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"} />
       )}
       <MainLayout>
         <PageHeader
