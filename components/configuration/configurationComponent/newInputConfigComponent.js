@@ -20,6 +20,7 @@ const NewInputConfigComponent = ({ params }) => {
     const dispatch = useDispatch();
     const [height, setHeight] = useState(500); // 96 * 4 = 384px (h-96 equivalent)
     const [isResizing, setIsResizing] = useState(false);
+    const [messages, setMessages] = useState([]);
 
     const savePrompt = useCallback((data) => {
         if (data !== prompt) {
@@ -103,7 +104,7 @@ const NewInputConfigComponent = ({ params }) => {
                         </div>
                     </div>
                 </div>
-                <div className='flex gap-4'>
+                <div className='flex gap-4 '>
                     <div
                         className="label cursor-pointer"
                         onClick={() => openModal(MODAL_TYPE.OPTIMIZE_PROMPT)}
@@ -117,7 +118,7 @@ const NewInputConfigComponent = ({ params }) => {
             <div className="form-control">
                 <div
                     ref={divRef}
-                    className={`relative transition-all duration-300 min-h-[500px] ${isFullscreen
+                    className={`relative transition-all duration-300 min-h-[500px] border border-gray-300 rounded-r-lg rounded-l-lg rounded-t-md ${isFullscreen
                         ? 'fixed inset-0 w-full h-screen z-50'
                         : 'w-full'
                         }`}
@@ -211,7 +212,7 @@ const NewInputConfigComponent = ({ params }) => {
                 <ResponseStyleDropdown params={params} />
             </div>
             {/* <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} /> */}
-            <OptimizePromptModal params={params} />
+            <OptimizePromptModal params={params} messages={messages} setMessages={setMessages} savePrompt={savePrompt} setPrompt={prompt}/>
             <PromptSummaryModal params={params} />
         </div>
     );
