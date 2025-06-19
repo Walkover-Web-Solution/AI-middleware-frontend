@@ -982,3 +982,33 @@ export const getPrebuiltToolsApi = async () => {
     throw new Error(error);
   }
 }
+
+export const getAllAgentsApi = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/publicAgent/all`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
+
+export const publicAgentLoginApi = async () =>{
+  try {
+    const repsonse = await axios.post(`${PYTHON_URL}/publicAgent/public/login`)
+    return repsonse;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error);
+  }
+}
+  
+export const privateAgentLoginApi = async () => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/publicAgent/login`)
+    return response;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error);
+  }
+}  
