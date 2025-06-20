@@ -42,7 +42,7 @@ function FunctionParameterModal({ functionId, params }) {
   const [isModified, setIsModified] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState("");
   const [isTextareaVisible, setIsTextareaVisible] = useState(false);
-  const flattenedParameters = flattenParameters(toolData?.fields);
+  const [flattenedParameters, setFlattenedParameters] = useState(flattenParameters(toolData?.fields));
   const [isOldFieldViewTrue, setIsOldFieldViewTrue] = useState(false);
   const [newParameterName, setNewParameterName] = useState("");
   const [showAddParameterInput, setShowAddParameterInput] = useState(false);
@@ -51,6 +51,10 @@ function FunctionParameterModal({ functionId, params }) {
     setToolData(function_details);
     setIsDataAvailable(Object.keys(properties).length > 0);
   }, [function_details, properties]);
+
+  useEffect(() => {
+    setFlattenedParameters(flattenParameters(toolData?.fields));
+  }, [toolData]);
 
   useEffect(() => {
     setVariablesPath(variables_path[functionName] || {});
@@ -296,7 +300,7 @@ function FunctionParameterModal({ functionId, params }) {
           dataToSend: dataToSend,
         })
       );
-      setToolData("");
+      // setToolData("");
     }
     if (!isEqual(variablesPath, variables_path[functionName])) {
       // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
@@ -406,6 +410,218 @@ function FunctionParameterModal({ functionId, params }) {
       setIsLoading(false);
     } 
   };
+  const handleRemove = () => {
+    if (preFunction) {
+      removePreFunction();
+    } else {
+      handleRemoveFunctionFromBridge();
+    }
+  };
+  // New function to add a parameter
+  const handleAddParameter = () => {
+    if (!newParameterName.trim()) {
+      toast.error("Parameter name cannot be empty");
+      return;
+    }
+
+    // Check if parameter already exists
+    if (flattenedParameters.some(param => param.key === newParameterName)) {
+      toast.error("Parameter already exists");
+      return;
+    }
+
+    // Split the parameter name by dots to handle nesting
+    const parts = newParameterName.split('.');
+
+    setToolData(prevToolData => {
+      const newFields = JSON.parse(JSON.stringify(prevToolData.fields || {}));
+      let currentLevel = newFields;
+
+      // Build the nested structure
+      parts.forEach((part, index) => {
+        if (!currentLevel[part]) {
+          // If it's the last part, create a string parameter
+          if (index === parts.length - 1) {
+            currentLevel[part] = {
+              type: "string",
+              description: "",
+              enum: [],
+              required_params: [],
+              parameter: {}
+            };
+          }
+          // Otherwise create an object parameter
+          else {
+            currentLevel[part] = {
+              type: "object",
+              description: "",
+              enum: [],
+              required_params: [],
+              parameter: {}
+            };
+          }
+        }
+        // Move to the next level
+        if (currentLevel[part].type === "object") {
+          currentLevel = currentLevel[part].parameter;
+        }
+      });
+
+      return {
+        ...prevToolData,
+        fields: newFields
+      };
+    });
+
+    // Update JSON view if it's open
+    if (isTextareaVisible) {
+      try {
+        const currentFields = JSON.parse(objectFieldValue || '{}');
+        let currentLevel = currentFields;
+
+        parts.forEach((part, index) => {
+          if (!currentLevel[part]) {
+            if (index === parts.length - 1) {
+              currentLevel[part] = {
+                type: "string",
+                description: "",
+                enum: [],
+                required_params: [],
+                parameter: {}
+              };
+            } else {
+              currentLevel[part] = {
+                type: "object",
+                description: "",
+                enum: [],
+                required_params: [],
+                parameter: {}
+              };
+            }
+          }
+          if (currentLevel[part].type === "object") {
+            currentLevel = currentLevel[part].parameter;
+          }
+        });
+
+        setObjectFieldValue(JSON.stringify(currentFields, null, 4));
+      } catch (error) {
+        console.error("Error updating JSON view:", error);
+      }
+    }
+
+    setNewParameterName("");
+    setShowAddParameterInput(false);
+    setIsModified(true);
+    toast.success("Parameter added successfully");
+  };
+
+  // New function to delete a parameter
+  const handleDeleteParameter = (paramKey) => {
+    // Split the key to handle nested parameters
+    const keyParts = paramKey.split(".");
+
+    if (keyParts.length === 1) {
+      // Top-level parameter
+      setToolData(prevToolData => {
+        const { [paramKey]: removedField, ...remainingFields } = prevToolData.fields;
+
+        // Also remove from required_params if present
+        const updatedRequiredParams = (prevToolData.required_params || [])
+          .filter(param => param !== paramKey);
+
+        return {
+          ...prevToolData,
+          fields: remainingFields,
+          required_params: updatedRequiredParams
+        };
+      });
+
+      // Update variablesPath by removing the parameter
+      setVariablesPath(prevPaths => {
+        const { [paramKey]: removed, ...remaining } = prevPaths;
+        return remaining;
+      });
+
+    } else {
+      // Handle nested parameter deletion
+      const parentPath = keyParts.slice(0, -1).join(".");
+      const fieldToRemove = keyParts[keyParts.length - 1];
+
+      setToolData(prevToolData => {
+        const updatedFields = JSON.parse(JSON.stringify(prevToolData.fields));
+        let currentLevel = updatedFields;
+
+        // Navigate to the parent object
+        for (let i = 0; i < keyParts.length - 1; i++) {
+          const part = keyParts[i];
+          if (currentLevel[part]) {
+            // Determine if we're dealing with an array or object
+            if (currentLevel[part].type === 'array') {
+              currentLevel = currentLevel[part].items;
+            } else if (currentLevel[part].type === 'object') {
+              currentLevel = currentLevel[part].parameter || {};
+            } else {
+              break; // Can't navigate further
+            }
+          }
+        }
+
+        // Remove the field if we found the parent
+        if (currentLevel && currentLevel[fieldToRemove]) {
+          delete currentLevel[fieldToRemove];
+        }
+
+        return {
+          ...prevToolData,
+          fields: updatedFields
+        };
+      });
+
+      // Update variablesPath by removing the parameter
+      setVariablesPath(prevPaths => {
+        const newPaths = { ...prevPaths };
+        delete newPaths[paramKey];
+        return newPaths;
+      });
+    }
+
+    // Update JSON view if it's open
+    if (isTextareaVisible) {
+      try {
+        const currentFields = JSON.parse(objectFieldValue);
+
+        // Handle deletion in the JSON representation
+        if (keyParts.length === 1) {
+          delete currentFields[paramKey];
+        } else {
+          let currentLevel = currentFields;
+          for (let i = 0; i < keyParts.length - 1; i++) {
+            const part = keyParts[i];
+            if (currentLevel[part]) {
+              if (currentLevel[part].type === 'array') {
+                currentLevel = currentLevel[part].items;
+              } else {
+                currentLevel = currentLevel[part].parameter || {};
+              }
+            }
+          }
+
+          if (currentLevel) {
+            delete currentLevel[keyParts[keyParts.length - 1]];
+          }
+        }
+
+        setObjectFieldValue(JSON.stringify(currentFields, undefined, 4));
+      } catch (error) {
+        console.error("Error updating JSON view:", error);
+      }
+    }
+    setIsModified(true);
+    toast.success("Parameter deleted successfully");
+  };
+
+
 
   // New function to add a parameter
   const handleAddParameter = () => {
@@ -701,15 +917,15 @@ function FunctionParameterModal({ functionId, params }) {
         {!isDataAvailable ? (
           <div className="flex flex-col">
             <p>No Parameters used in the function</p>
-            <div className="flex mt-3">
-              <button 
-                className="btn btn-sm btn-primary" 
+            {/* <div className="flex mt-3">
+              <button
+                className="btn btn-sm btn-primary"
                 onClick={() => setShowAddParameterInput(true)}
               >
                 <Plus size={16} /> Add Parameter
               </button>
-            </div>
-            {showAddParameterInput && (
+            </div> */}
+            {/* {isDataAvailable && showAddParameterInput && (
               <div className="mt-4 flex items-center gap-2">
                 <input
                   type="text"
@@ -718,14 +934,14 @@ function FunctionParameterModal({ functionId, params }) {
                   value={newParameterName}
                   onChange={(e) => setNewParameterName(e.target.value)}
                 />
-                <button 
-                  className="btn btn-sm btn-primary" 
+                <button
+                  className="btn btn-sm btn-primary"
                   onClick={handleAddParameter}
                 >
                   Add
                 </button>
-                <button 
-                  className="btn btn-sm btn-ghost" 
+                <button
+                  className="btn btn-sm btn-ghost"
                   onClick={() => {
                     setShowAddParameterInput(false);
                     setNewParameterName("");
@@ -734,7 +950,7 @@ function FunctionParameterModal({ functionId, params }) {
                   Cancel
                 </button>
               </div>
-            )}
+            )} */}
           </div>
         ) : !isTextareaVisible ? (
           <div>
@@ -811,7 +1027,7 @@ function FunctionParameterModal({ functionId, params }) {
                             onChange={() => handleRequiredChange(param.key)}
                           />
                         </td>
-                      {/* {currentType !== 'object' && ( */}
+                        {/* {currentType !== 'object' && ( */}
                         <td>
                           <input
                             type="text"
@@ -824,7 +1040,7 @@ function FunctionParameterModal({ functionId, params }) {
                             }
                           />
                         </td>
-                      {/* )} */}
+                        {/* )} */}
                         <td>
                           <input
                             key={currentEnum}
@@ -843,6 +1059,7 @@ function FunctionParameterModal({ functionId, params }) {
                             type="checkbox"
                             className="checkbox"
                             checked={!(param.key in variablesPath)}
+                            disabled={preFunction}
                             onChange={() => {
                               const updatedVariablesPath = { ...variablesPath };
                               if (param.key in updatedVariablesPath) {
@@ -865,15 +1082,15 @@ function FunctionParameterModal({ functionId, params }) {
                             }}
                           />
                         </td>
-                        
+
                         <td>
-                            <button 
-                             className="btn btn-sm btn-square bg-white border-2 border-grey-800 hover:bg-red-50 shadow-sm"
+                          <button
+                            className={`input input-bordered w-full input-sm ${preFunction && !variablesPath[param.key] ? "border-red-500" : ""}`}
                             onClick={() => handleDeleteParameter(param.key)}
                             title="Delete parameter"
-                            >
-                             <Trash2 size={16} className="text-red-500" />
-                            </button>
+                          >
+                            <Trash2 size={16} className="text-red-500" />
+                          </button>
                         </td>
                       </tr>
                     );
@@ -906,61 +1123,61 @@ function FunctionParameterModal({ functionId, params }) {
           </div>
         )}
         <div className="flex justify-between items-center mb-2 pt-4">
-  {/* Left side: Add Parameter Section */}
-  <div className="flex items-center gap-2">
-    {showAddParameterInput ? (
-      <>
-        <input
-          type="text"
-          placeholder="Parameter name"
-          className="input input-bordered input-sm w-64"
-          value={newParameterName}
-          onChange={(e) => setNewParameterName(e.target.value)}
-        />
-        <button 
-          className="btn btn-sm btn-primary" 
-          onClick={handleAddParameter}
-        >
-          Add
-        </button>
-        <button 
-          className="btn btn-sm btn-ghost" 
-          onClick={() => {
-            setShowAddParameterInput(false);
-            setNewParameterName("");
-          }}
-        >
-          Cancel
-        </button>
-      </>
-    ) : (
-      <button 
-        className="btn btn-sm btn-primary" 
-        onClick={() => setShowAddParameterInput(true)}
-      >
-        <Plus size={16} /> Add Parameter
-      </button>
-    )}
-  </div>
-  <div className="modal-action m-0">
-    <form method="dialog" className="flex flex-row gap-2">
-      <button className="btn" onClick={handleCloseModal}>
-        Close
-      </button>
+          {/* Left side: Add Parameter Section */}
+         {isDataAvailable && <div className="flex items-center gap-2">
+          {showAddParameterInput ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="Parameter name"
+                  className="input input-bordered input-sm w-64"
+                  value={newParameterName}
+                  onChange={(e) => setNewParameterName(e.target.value)}
+                />
+                <button
+                  className="btn btn-sm btn-primary"
+                  onClick={handleAddParameter}
+                >
+                  <Plus size={16} /> Add
+                </button>
+                <button
+                  className="btn btn-sm btn-ghost"
+                  onClick={() => {
+                    setShowAddParameterInput(false);
+                    setNewParameterName("");
+                  }}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={() => setShowAddParameterInput(true)}
+              >
+                <Plus size={16} /> Add Parameter
+              </button>
+            )}
+          </div>}
+          <div className="modal-action m-0">
+            <form method="dialog" className="flex flex-row gap-2">
+              <button className="btn" onClick={handleCloseModal}>
+                Close
+              </button>
 
-      {isDataAvailable && (
-        <button
-          className="btn btn-primary"
-          onClick={handleSaveFunctionData}
-          disabled={!isModified || isLoading}
-        >
-          {isLoading && <span className="loading loading-spinner"></span>}
-          Save
-        </button>
-      )}
-    </form>
-  </div>
-</div>
+              {isDataAvailable && (
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSaveFunctionData}
+                  disabled={!isModified || isLoading}
+                >
+                  {isLoading && <span className="loading loading-spinner"></span>}
+                  Save
+                </button>
+              )}
+            </form>
+          </div>
+        </div>
 
       </div>
     </dialog>
