@@ -35,10 +35,10 @@ function OptimiseBaseModal({
   const [streamedContent, setStreamedContent] = useState("");
 
   useEffect(() => {
-    setNewContent("");
+    setNewContent(history[currentIndex]);
     setStreamedContent("");
     setIsStreaming(false);
-  }, [content]);
+  }, [content,currentIndex]);
 
   const diffData = useMemo(() => {
     const displayContent = isStreaming ? streamedContent : newContent;
