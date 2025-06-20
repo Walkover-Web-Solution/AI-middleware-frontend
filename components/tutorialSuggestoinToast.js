@@ -85,7 +85,7 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed top-1 right-1 z-[99999999]">
       <div className="card w-80 bg-base-100 shadow-xl border border-base-300 animate-in slide-in-from-top-2 duration-300">
         {/* Progress indicator */}
         <div className="w-full h-1 bg-base-300 rounded-t-2xl overflow-hidden">
@@ -95,41 +95,35 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
           />
         </div>
         
-        <div className="card-body p-4">
+        <div className="card-body p-3"> 
           {/* Header */}
-          <div className="flex items-start justify-between mb-3">
+          <div className="flex items-start justify-between mb-2"> 
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                <span className="text-lg" role="img" aria-label="target">🎯</span>
+              <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center"> 
+                <span className="text-sm" role="img" aria-label="target">🎯</span>
               </div>
-              <h3 className="card-title text-base font-semibold text-base-content">
+              <h3 className="card-title text-sm font-semibold text-base-content"> 
                 Welcome!
               </h3>
             </div>
-            <button 
-              onClick={() => handleTutorialAction('skip')}
-              className="btn btn-ghost btn-xs btn-circle"
-              aria-label="Close tutorial suggestion"
-            >
-              <X className="h-3 w-3" />
-            </button>
+           
           </div>
 
           {/* Content */}
-          <div className="space-y-2 mb-4">
-            <h4 className="font-medium text-sm text-base-content">
+          <div className="space-y-1 mb-2">
+            <h4 className="font-medium text-xs text-base-content">
               {currentTutorial.title}
             </h4>
-            <p className="text-xs text-base-content/70 leading-relaxed">
+            <p className="text-xs text-base-content/70 leading-tight"> 
               {currentTutorial.description}
             </p>
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2"> 
             <button
               onClick={() => handleTutorialAction('start')}
-              className="btn btn-primary btn-sm flex-1 gap-1"
+              className="btn btn-primary btn-xs flex-1 gap-1" 
               aria-label="Start tutorial"
             >
               <Play className="h-3 w-3" fill="currentColor" />
@@ -137,7 +131,7 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
             </button>
             <button
               onClick={() => handleTutorialAction('skip')}
-              className="btn btn-ghost btn-sm"
+              className="btn btn-ghost btn-xs"
               aria-label="Skip tutorial"
             >
               Skip
