@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { createTestCaseAction } from '@/store/action/testCasesAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { Bot, User, X } from 'lucide-react';
+import { CloseIcon } from '@/components/Icons';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -12,12 +12,18 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
     const params = useParams();
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
-    const { mongoIdsOfTools } = useCustomSelector((state) => ({
-        mongoIdsOfTools: Object.values(state.bridgeReducer.org?.[params.org_id]?.functionData)?.reduce((acc, item) => {
-            acc[item?.function_name] = item?._id;
-            return acc;
-        }, {})
-    }));
+    const { mongoIdsOfTools } = useCustomSelector((state) => {
+        const functionData = state.bridgeReducer.org?.[params.org_id]?.functionData;
+        const mongoIds = functionData ? Object.values(functionData).reduce((acc, item) => {
+                if (item?.function_name && item?._id) {
+                    acc[item.function_name] = item._id;
+                }
+                return acc;
+            }, {})
+            : {};
+
+        return { mongoIdsOfTools: mongoIds };
+    });
     // Ensure testCaseConversation is not undefined or null
     const initialTestCases = testCaseConversation && testCaseConversation.length > 0 ? testCaseConversation.map((message) => {
         if (message.role === "user") {
@@ -119,7 +125,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                                     <div className="space-y-3">
                                         {message.tools?.map((item, idx) => (
                                             <div key={idx} className="flex gap-3 items-start group relative bg-base-100 rounded-lg p-3 shadow-sm">
-                                                <textarea 
+                                                <textarea
                                                     defaultValue={JSON.stringify(item, null, 2)}
                                                     className="textarea w-full font-mono text-sm p-2 bg-transparent focus:outline-none min-h-20 h-auto max-h-72 overflow-y-auto"
                                                     onBlur={(e) => handleChange(e.target.value, index, idx)}
@@ -130,7 +136,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                                                         className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                                         onClick={() => removeTool(index, idx)}
                                                     >
-                                                        <X size={16} />
+                                                        <CloseIcon size={16} />
                                                     </button>
                                                 )}
                                             </div>

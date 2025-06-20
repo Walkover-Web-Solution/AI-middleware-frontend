@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -171,7 +171,7 @@ const ModelDropdown = ({ params }) => {
         <div className="flex items-start gap-4 relative">
             <div className="w-full max-w-xs z-[9]">
                 <div className="label">
-                    <span className="label-text text-gray-700">Model</span>
+                    <span className="label-text text-gray-700">LLM Model</span>
                 </div>
                 <div className="dropdown w-full font-normal" ref={dropdownRef}>
                     <div
@@ -181,7 +181,7 @@ const ModelDropdown = ({ params }) => {
                         onClick={toggleDropdown}
                     >
                         {model || "Select a Model"}
-                        {isDropdownOpen ? <ChevronUp className="h-4 w-4 text-gray-500" /> : <ChevronDown className="h-4 w-4 text-gray-500" />}
+                        {isDropdownOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                     </div>
                     {isDropdownOpen && (
                         <ul

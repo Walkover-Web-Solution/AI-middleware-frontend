@@ -2,7 +2,7 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateOrgTimeZone } from '@/store/action/orgAction';
 import timezoneData from '@/utils/timezoneData';
-import { Pencil, Building2, Globe2, Mail } from 'lucide-react';
+import { PencilIcon, GlobeIcon, MailIcon, BuildingIcon } from '@/components/Icons';
 import React, { useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -57,7 +57,7 @@ export default function SettingsPage({ params }) {
     <main className="max-w-4xl mx-auto p-4 my-20">
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center gap-3 mb-6">
-          <Building2 className="h-6 w-6 text-primary" />
+          <BuildingIcon className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-semibold">Workspace Settings</h1>
         </div>
 
@@ -65,7 +65,7 @@ export default function SettingsPage({ params }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-3 bg-base-100 rounded">
               <div className="flex items-center gap-2">
-                <Globe2 className="h-4 w-4 text-primary" />
+                <GlobeIcon className="h-4 w-4 text-primary" />
                 <span className="text-sm text-gray-500">Domain</span>
               </div>
               <p className="mt-1">{userDetails?.domain || 'gtwy.ai'}</p>
@@ -73,7 +73,7 @@ export default function SettingsPage({ params }) {
 
             <div className="p-3 bg-base-100 rounded">
               <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-primary" />
+                <BuildingIcon className="h-4 w-4 text-primary" />
                 <span className="text-sm text-gray-500">Organization Name</span>
               </div>
               <p className="mt-1">{userDetails?.name || 'N/A'}</p>
@@ -81,7 +81,7 @@ export default function SettingsPage({ params }) {
 
             <div className="p-3 bg-base-100 rounded">
               <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-primary" />
+                <MailIcon className="h-4 w-4 text-primary" />
                 <span className="text-sm text-gray-500">Email Address</span>
               </div>
               <p className="mt-1">{userDetails?.email || 'N/A'}</p>
@@ -90,10 +90,10 @@ export default function SettingsPage({ params }) {
             <div className="p-3 bg-base-100 rounded cursor-pointer" onClick={handleContentOpen}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Globe2 className="h-4 w-4 text-primary" />
+                  <GlobeIcon  className="h-4 w-4 text-primary" />
                   <span className="text-sm text-gray-500">Timezone</span>
                 </div>
-                <Pencil size={14} className="text-primary" />
+                <PencilIcon size={14} className="text-primary" />
               </div>
               <p className="mt-1">{selectedTimezone?.identifier} ({selectedTimezone?.offSet})</p>
             </div>

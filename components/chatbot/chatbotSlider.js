@@ -1,6 +1,5 @@
 import { useCustomSelector } from "@/customHooks/customSelector"
 import { addorRemoveBridgeInChatBotAction } from "@/store/action/chatBotAction"
-import { BarChart, Bot, Plus, X } from "lucide-react"
 import { useState } from "react"
 import { useDispatch } from "react-redux"
 
@@ -22,12 +21,12 @@ export default function ChatbotSlider({ params }) {
     }
     return (
         <div>
-            {/* <button className="btn btn-outline btn-sm w-fit" onClick={SliderClickHandler} ><Plus size={16} />Add Bridge</button> */}
+            {/* <button className="btn btn-outline btn-sm w-fit" onClick={SliderClickHandler} ><AddIcon size={16} />Add Bridge</button> */}
             {/* {isSliderOpen && <aside className="absolute  right-0 top-0 flex h-full w-1/3 flex-col overflow-y-auto bg-white px-5 py-8 shadow-lg z-10">
 
                 <div className="flex items-center justify-between ">
-                    <h1 className='text-xl font-medium flex items-center gap-2'><Bot /> Bridge list</h1>
-                    <button className="btn btn-outline btn-circle btn-xs" onClick={SliderClickHandler}><X size={16} /></button>
+                    <h1 className='text-xl font-medium flex items-center gap-2'><BotIcon /> Bridge list</h1>
+                    <button className="btn btn-outline btn-circle btn-xs" onClick={SliderClickHandler}><XIcon size={16} /></button>
                 </div>
                 <div className="mt-6 flex flex-1 flex-col justify-between">
                     <nav className="-mx-3 space-y-6 ">
@@ -48,7 +47,7 @@ export default function ChatbotSlider({ params }) {
                                     style={{ overflow: 'hidden' }}
                                 >
                                     <div className='flex items-center w-full gap-2'>
-                                        <BarChart className="h-5 w-5" aria-hidden="true" />
+                                        <BarChartIcon className="h-5 w-5" aria-hidden="true" />
                                         <span className="mx-2 text-sm font-medium truncate">{Bridge?.name}</span>
                                     </div>
                                     <input

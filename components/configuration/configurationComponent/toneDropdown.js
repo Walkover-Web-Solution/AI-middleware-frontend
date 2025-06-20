@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { Info } from "lucide-react";
+import InfoModel from "@/components/infoModel";
 
 const TONES = [
   {
@@ -105,17 +105,11 @@ const ToneDropdown = ({ params }) => {
   return (
     <label className="form-control w-full">
       <div className="flex items-center pb-1">
-        <div className="label">
-          <span className="label-text font-medium">Tone</span>
+        <InfoModel tooltipContent={"Select your response tone (optional)."}>
+        <div className="label-text info">
+          Tone
         </div>
-        <div
-          className="tooltip tooltip-right"
-          data-tip={
-            "Select your response tone (optional)."
-          }
-        >
-          <Info size={14} className="ml-1" />
-        </div>
+        </InfoModel>
       </div>
       <div className="flex items-center gap-2">
         <select

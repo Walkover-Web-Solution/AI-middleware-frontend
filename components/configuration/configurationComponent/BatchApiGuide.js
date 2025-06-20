@@ -17,7 +17,7 @@ const BatchApi = (bridgeId, versionId) => {
         `        "YOUR QUESTION 2",\n` +
         `        "YOUR QUESTION 3"\n` +
         `    ],\n` +
-        `    "bridge_id": "${bridgeId || ''}",\n` +
+        `    "agent_id": "${bridgeId || ''}",\n` +
         `    "version_id": "${versionId || ''}"\n` +
         `}'`
     );

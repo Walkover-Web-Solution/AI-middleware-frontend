@@ -1,15 +1,37 @@
+import OnBoarding from '@/components/OnBoarding';
+import InfoModel from '@/components/infoModel';
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import { ONBOARDING_VIDEOS } from '@/utils/enums';
 import { getStatusClass } from '@/utils/utility';
-import { Info, Plus } from 'lucide-react';
+import { current } from '@reduxjs/toolkit';
+import { InfoIcon, AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
-    const { integrationData, function_data, embedToken } = useCustomSelector((state) => ({
-        integrationData: state?.bridgeReducer?.org?.[params?.org_id]?.integrationData,
-        function_data: state?.bridgeReducer?.org?.[params?.org_id]?.functionData,
-        embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
+     const [tutorialState, setTutorialState] = useState({
+        showTutorial: false,
+        showSuggestion: false
+      });
+    const { integrationData, function_data, embedToken, isFirstFunction } = useCustomSelector((state) => {
+        const orgId = Number(params?.org_id);
+        const orgData = state?.bridgeReducer?.org?.[orgId] || {};
+        const currentUser = state.userDetailsReducer.userDetails
 
-    }));
+        return {
+            integrationData: orgData.integrationData,
+            function_data: orgData.functionData,
+            embedToken: orgData.embed_token,
+            isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
+            
+        };
+    });
+    const handleTutorial = () => {
+        setTutorialState(prev=>({
+            ...prev,
+            showSuggestion:isFirstFunction
+        }));
+    };
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
@@ -43,7 +65,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 const title = integrationData?.[functionName]?.title || 'Untitled';
 
                 return (
-                    <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
+                   <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
                         <div className="flex justify-between items-center w-full">
                             <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
                                 {title}
@@ -61,49 +83,91 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
     ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, params.version]);
     return (
         <div className="dropdown dropdown-right">
-            <div className="flex items-center gap-2">
-                <button tabIndex={0} disabled={!shouldToolsShow}
-                    className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect function"}
-                </button>
+            <div className="flex items-end gap-2">
+                {name === "preFunction" ? (
+                    <div className=" flex flex-col items-start gap-2">
+                        <InfoModel tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
+                        <p className="text-base font-semibold info">Pre Tool Configuration</p>
+                       
+                        </InfoModel>
+
+                        {/* Plus Icon Button */}
+                        <button
+                           tabIndex={0}
+                           className="btn btn-outline btn-sm"                  
+                        >
+                                <AddIcon size={16} />
+                               {"Connect Pre Tool"}
+                        </button>
+                    </div>
+                ) : (
+                     <div className="flex flex-col items-start gap-2">
+                        <InfoModel video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
+                        <p className=" label-text info">Tool Configuration</p>
+                       
+                        </InfoModel>
+
+                        {/* Plus Icon Button */}
+                       <button
+                        tabIndex={0}
+                        disabled={!shouldToolsShow}
+                        onClick={() => handleTutorial()}
+                    className="btn btn-outline btn-sm"
+                    >
+                        <AddIcon size={16} />
+                        {"Connect Tool"}
+                    </button>
+                    </div>
+                )}
                 {
-                    !shouldToolsShow &&
+                    !shouldToolsShow && name !== "preFunction"&&
                     <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                        <Info size={16} className="flex-shrink-0 mt-0.5" />
+                        <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                         <span className='label-text-alt text-xs leading-tight'>
                             {`The ${modelName} does not support ${name?.toLowerCase()?.includes('pre function') ? 'pre functions' : 'functions'} calling`}
                         </span>
                     </div>
                 }
             </div>
-            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
-                <div className='flex flex-col gap-2 w-full'>
-                    <li className="text-sm font-semibold disabled">Suggested Functions</li>
-                    <input
-                        type='text'
-                        placeholder='Search Function'
-                        value={searchQuery}
-                        onChange={handleInputChange} // Update search query on input change
-                        className='input input-bordered w-full input-sm'
-                    />
-                    {Object.values(function_data || {})?.length > 0 ? (
-                        renderEmbedSuggestions
-                    ) : (
-                        <li className="text-center mt-2">No functions found</li>
-                    )}
-                    {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined, 
-                        {embedToken,
-                            meta: {
-                                type: 'tool',
-                                bridge_id: params?.id,
+            {tutorialState?.showSuggestion && (
+                <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"FunctionCreation"} TutorialDetails={"Tool Configuration"}/>
+            )}
+            {tutorialState?.showTutorial && (
+                <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.FunctionCreation}  flagKey={"FunctionCreation"} />
+            )}
+            {!tutorialState?.showTutorial && (
+                <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+                    <div className='flex flex-col gap-2 w-full'>
+                        <li className="text-sm font-semibold disabled">Suggested Tools</li>
+                        <input
+                            type='text'
+                            placeholder='Search Function'
+                            value={searchQuery}
+                            onChange={handleInputChange} // Update search query on input change
+                            className='input input-bordered w-full input-sm'
+                        />
+                        {Object.values(function_data || {})?.length > 0 ? (
+                            renderEmbedSuggestions
+                        ) : (
+                            <li className="text-center mt-2">No tools found</li>
+                        )}
+                        {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined,
+                            {
+                                embedToken,
+                                meta: {
+                                    createFrom: name,
+                                    type: 'tool',
+                                    bridge_id: params?.id,
+                                }
                             }
-                        }
-                    )}>
-                        <div>
-                            <Plus size={16} /><p className='font-semibold'>Add new Function</p>
-                        </div>
-                    </li>}
-                </div>
-            </ul>
+                        )}>
+                            <div>
+                                <AddIcon size={16} /><p className='font-semibold'>Add new Tools</p>
+                            </div>
+                        </li>}
+                    </div>
+                </ul>
+            )}
         </div>
     )
 }

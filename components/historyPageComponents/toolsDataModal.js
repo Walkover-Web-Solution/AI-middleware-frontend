@@ -1,4 +1,4 @@
-import { CircleX } from "lucide-react";
+import { CloseCircleIcon } from "@/components/Icons";
 
 const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integrationData }) => {
   const formatValue = (value) => {
@@ -50,7 +50,7 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
             className="hover:scale-110 transition-transform duration-300 ease-in-out focus:outline-none focus:border-none"
             onClick={handleClose}
           >
-            <CircleX size={24} />
+            <CloseCircleIcon size={24} />
           </button>
         </div>
       </div>

@@ -1,13 +1,16 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { MODAL_TYPE } from '@/utils/enums';
+import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import OnBoarding from '@/components/OnBoarding';
+import InfoModel from '@/components/infoModel';
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -15,31 +18,40 @@ const AdvancedParameters = ({ params }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: false
+  });
+  const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
 
-  const { service, version_function_data, configuration, integrationData } = useCustomSelector((state) => {
+  const { service, version_function_data, configuration, integrationData, isFirstParameter } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
+    const user = state.userDetailsReducer.userDetails
     return {
       version_function_data: versionData?.apiCalls,
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
+      isFirstParameter:user?.meta?.onboarding?.AdvanceParameter
     };
   });
-
-  const { tool_choice: tool_choice_data, type, model } = configuration || {};  
-
+  const { tool_choice: tool_choice_data, type, model } = configuration || {};
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
 
+  const handleTutorial = () => {
+    setTutorialState(prev=>({
+      ...prev,
+      showSuggestion:isFirstParameter
+
+    }))
+  };
+
   useEffect(() => {
-    if (configuration?.response_type?.json_schema) {
-      setObjectFieldValue(
-        JSON.stringify(configuration?.response_type?.json_schema, undefined, 4)
-      );
-    }
+    setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) :null ); 
   }, [configuration?.response_type?.json_schema]);
 
   useEffect(() => {
@@ -158,25 +170,32 @@ const AdvancedParameters = ({ params }) => {
 
   return (
     <div className="collapse text-base-content" tabIndex={0}>
-      <input type="radio" name="my-accordion-1" onClick={toggleAccordion} className='cursor-pointer' />
+      <input type="radio" name="my-accordion-1" onClick={() => {
+        handleTutorial()
+        toggleAccordion()
+      }}
+        className='cursor-pointer' />
       <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
         <span className="mr-2 cursor-pointer">
           Advanced Parameters
         </span>
 
-        {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
+        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </div>
-
+      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"}/>)}
+      {tutorialState.showTutorial && (
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
+      )}
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
           const rowDefaultValue =
-          key === 'response_type'
-           ? (typeof modelInfoData?.[key]?.default === 'object'
-               ? modelInfoData?.[key]?.default?.type
-             : modelInfoData?.[key]?.default )
-           : undefined;
-         if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
+            key === 'response_type'
+              ? (typeof modelInfoData?.[key]?.default === 'object'
+                ? modelInfoData?.[key]?.default?.type
+                : modelInfoData?.[key]?.default)
+              : undefined;
+          if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
           const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
           const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
           let error = false;
@@ -185,10 +204,9 @@ const AdvancedParameters = ({ params }) => {
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                    <span className="label-text capitalize">{name || key}</span>
-                    {description && <div className="tooltip tooltip-right" data-tip={description}>
-                      <Info size={12} />
-                    </div>}
+                  {description ? <InfoModel tooltipContent={description}>
+                    <span className="label-text capitalize info">{name || key}</span>        
+                    </InfoModel> : <span className="label-text capitalize">{name || key}</span>}
                   </div>
                   <div>
                     <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
@@ -215,7 +233,7 @@ const AdvancedParameters = ({ params }) => {
                           : 'Select an tool choice option...'}
                       </span>
                       <div className="ml-auto">
-                        {showDropdown ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        {showDropdown ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                       </div>
                     </div>
 
@@ -364,8 +382,8 @@ const AdvancedParameters = ({ params }) => {
               )}
               {field === 'select' && (
                 <label className='items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
-                  <select value={configuration?.[key] === 'default' ? rowDefaultValue: configuration?.[key]?.type || configuration?.[key] } onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
-                  <option value='default' disabled> Select response mode </option>
+                  <select value={configuration?.[key] === 'default' ? rowDefaultValue : configuration?.[key]?.type || configuration?.[key]} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
+                    <option value='default' disabled> Select response mode </option>
                     {options?.map((service, index) => (
                       <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
                     ))}
@@ -395,9 +413,9 @@ const AdvancedParameters = ({ params }) => {
                           openModal(MODAL_TYPE.JSON_SCHEMA);
                         }}
                       >
-                        Optimize Schema
+                        Improve Schema
                       </span>
-                      <JsonSchemaModal params={params} />
+                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages}/>
                     </>
                   )}
                 </label>

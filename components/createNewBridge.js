@@ -8,7 +8,7 @@ import LoadingSpinner from "./loadingSpinner";
 import { closeModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
 import { getServiceAction } from "@/store/action/serviceAction";
-import { Bot, CircleAlert, Clock10, Webhook } from "lucide-react";
+import { BotIcon, CircleAlertIcon, ClockTenIcon, WebhookIcon } from "@/components/Icons";
 
 function CreateNewBridge({ orgid }) {
     const [selectedService, setSelectedService] = useState('openai');
@@ -200,7 +200,7 @@ function CreateNewBridge({ orgid }) {
                   <div className="card-body p-4 md:p-6">
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-blue-50">
-                        <Webhook className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+                        <WebhookIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         API
@@ -227,7 +227,7 @@ function CreateNewBridge({ orgid }) {
                   <div className="card-body p-4 md:p-6">
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-green-50">
-                        <Bot className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
+                        <BotIcon className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         Chatbot
@@ -254,7 +254,7 @@ function CreateNewBridge({ orgid }) {
                   <div className="card-body p-4 md:p-6">
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-purple-50">
-                        <Clock10 className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
+                        <ClockTenIcon className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         Batch API
@@ -281,7 +281,7 @@ function CreateNewBridge({ orgid }) {
                   <div className="card-body p-4 md:p-6">
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-amber-50">
-                        <CircleAlert className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
+                        <CircleAlertIcon className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         Triggers

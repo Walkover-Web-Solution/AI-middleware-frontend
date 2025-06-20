@@ -3,7 +3,7 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { Bot, Settings, Trash } from 'lucide-react';
+import { BotIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
@@ -15,10 +15,16 @@ const ConnectedAgentList = ({ params }) => {
     const [description, setDescription] = useState("");
     const [selectedBridge, setSelectedBridge] = useState(null);
     const [currentVariable, setCurrentVariable] = useState(null);
-    const { connect_agents } = useCustomSelector((state) => {
+    const { connect_agents, shouldToolsShow, model } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
         return {
-            connect_agents: versionData?.connected_agents || {}
+            connect_agents: versionData?.connected_agents || {},
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            model: modelName
         };
     });
 
@@ -97,7 +103,7 @@ const ConnectedAgentList = ({ params }) => {
                         <div className="flex flex-col gap-2">
                             <div className="flex justify-between items-center">
                                 <h1 className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content flex items-center gap-2">
-                                    <Bot size={18} className="text-primary" />
+                                    <BotIcon size={20} className="text-primary" />
                                     <div className="tooltip" data-tip={name?.length > 10 ? name : ""}>
                                         <span>{name?.length > 10 ? `${name.slice(0, 15)}...` : name}</span>
                                     </div>
@@ -107,13 +113,13 @@ const ConnectedAgentList = ({ params }) => {
                                         className="btn btn-ghost btn-sm p-1 hover:bg-red-50"
                                         onClick={() => handleOpenAgentVariable(name, item)}
                                     >
-                                        {item?.variables_state && <Settings size={16} className="" />}
+                                        {item?.variables_state && <SettingsIcon size={16} className="" />}
                                     </button>
                                     <button
                                         className="btn btn-ghost btn-sm p-1 hover:bg-red-50"
                                         onClick={() => handleRemoveAgent(name, item)}
                                     >
-                                        <Trash size={16} className="text-red-500" />
+                                        <TrashIcon size={18} className="text-red-500" />
                                     </button>
                                 </div>
                             </div>
@@ -136,7 +142,7 @@ const ConnectedAgentList = ({ params }) => {
                     </div>
                 }
             </div>
-            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} />
+            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} />
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
             <AgentVariableModal currentVariable={currentVariable} handleSaveAgent={handleSaveAgent} />
         </div>

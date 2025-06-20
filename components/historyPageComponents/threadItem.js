@@ -1,6 +1,6 @@
 import { getSingleMessage } from "@/config";
 import { updateContentHistory } from "@/store/action/historyAction";
-import { AlertCircle, Bot, BotMessageSquare, ChevronDown, FileClock, MessageCircleCode, Parentheses, Pencil, Plus, SquareFunction, User } from "lucide-react";
+import { CircleAlertIcon, BotIcon, ChevronDownIcon, FileClockIcon, ParenthesesIcon, PencilIcon, AddIcon, SquareFunctionIcon, UserIcon, CodeMessageIcon, BotMessageIcon } from "@/components/Icons";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -120,7 +120,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         </div>
         <div className="flex gap-3">
           <div className="tooltip tooltip-top relative" data-tip="function logs">
-            <SquareFunction size={22}
+            <SquareFunctionIcon size={22}
               onClick={() => openViasocket(tool.id, { flowHitId: tool?.metadata?.flowHitId, embedToken,  meta: {
                 type: 'tool',
                 bridge_id: params?.id,
@@ -128,7 +128,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               className="opacity-80 cursor-pointer" />
           </div>
           <div className="tooltip tooltip-top pr-2 relative" data-tip="function data">
-            <FileClock
+            <FileClockIcon
               size={22}
               onClick={() => {
                 setToolsData(tool);
@@ -154,7 +154,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         </div>
       </div>
       <div className="tooltip tooltip-top pr-2" data-tip="function logs">
-        <SquareFunction size={22}
+        <SquareFunctionIcon size={22}
           onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken,  meta: {
             type: 'tool',
             bridge_id: params?.id,
@@ -192,7 +192,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       {item?.role === "tools_call" ? (
         <div className="mb-2 flex flex-col justify-center items-center show-on-hover">
           <h1 className="p-1">
-            <span className="flex justify-center items-center gap-2 font-semibold"><Parentheses size={16} />Functions Executed Successfully</span>
+            <span className="flex justify-center items-center gap-2 font-semibold"><ParenthesesIcon size={16} />Functions Executed Successfully</span>
           </h1>
           <div className="flex h-full gap-2 justify-center items-center flex-wrap">
             {item?.tools_call_data ? item.tools_call_data.map(renderToolData) : Object.keys(item.function).map(renderFunctionData)}
@@ -201,7 +201,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               onClick={() => handleAddTestCase(item, index)}
             >
               <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                <Plus className="h-3 w-3" />
+                <AddIcon className="h-3 w-3" />
                 <span>Test Case</span>
               </div>
             </button>
@@ -215,13 +215,13 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                   {item.role === "assistant" ? (
                     <div>
-                      <Bot
+                      <BotIcon
                         className=" cursor-pointer bot-icon"
                         size={20}
                         onClick={() => setIsDropupOpen(!isDropupOpen)}
                       /></div>
                   ) : (
-                    <User size={20} />
+                    <UserIcon size={20} />
                   )}
                 </div>
                 {isDropupOpen && item.role === "assistant" && (
@@ -239,7 +239,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                             onClick={() => selectMessageType(0)}
                           >
                             <div className="tooltip tooltip-left" data-tip="Chatbot Response">
-                              <Bot className="" size={16} />
+                              <BotIcon className="" size={16} />
                             </div>
                           </button>
                         </li>
@@ -251,7 +251,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                           onClick={() => selectMessageType(1)}
                         >
                           <div className="tooltip tooltip-left" data-tip="Normal Response">
-                            <MessageCircleCode className="" size={16} />
+                            <CodeMessageIcon className="" size={16} />
                           </div>
                         </button>
                       </li>
@@ -263,7 +263,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                             onClick={() => selectMessageType(2)}
                           >
                             <div className="tooltip tooltip-left" data-tip="Updated Message">
-                              <Pencil className="" size={16} />
+                              <PencilIcon className="" size={16} />
                             </div>
                           </button>
                         </li>
@@ -278,7 +278,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             </div>
             
             <div  className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1 `}
-                style={{ overflowWrap: "anywhere" }}>
+  style={{ overflowWrap: "anywhere" }}>
               <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`}>
                 {item?.role === "assistant" && item?.image_url && (
                   <div className="chat chat-start">
@@ -324,9 +324,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                       className="collapse-title text-sm font-medium cursor-pointer flex items-center justify-between  hover:bg-base-300/50 transition-colors p-0"
                     >
                       <span className="flex items-center gap-4">
-                        <AlertCircle className="w-4 h-4 text-warning" />
+                        <CircleAlertIcon className="w-4 h-4 text-warning" />
                         <span className="font-light">Retry Attempt with {item?.model}</span>
-                        <ChevronDown className="w-4 h-4 transform peer-checked:rotate-180 transition-transform" />
+                        <ChevronDownIcon className="w-4 h-4 transform peer-checked:rotate-180 transition-transform" />
                       </span>
                      
                     </label>
@@ -353,7 +353,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </ReactMarkdown>
                 {!item.image_url && item?.role === 'assistant' && (
                   <div className="flex gap-2 tooltip absolute top-2 right-2 text-sm cursor-pointer" data-tip="Edit response">
-                    <Pencil
+                    <PencilIcon
                       size={16}
                       onClick={handleEdit}
                     />
@@ -365,7 +365,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     onClick={() => handleAddTestCase(item, index)}
                   >
                     <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <Plus className="h-3 w-3" />
+                      <AddIcon className="h-3 w-3" />
                       <span>Test Case</span>
                     </div>
                   </button>
@@ -374,14 +374,14 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     onClick={() => handleAskAi(item)}
                   >
                     <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <BotMessageSquare className="h-3 w-3" />
+                      <BotMessageIcon className="h-3 w-3" />
                       <span>Ask AI</span>
                     </div>
                   </button>
                 </div>}
               </div>
             </div>
-            {item?.role === "user" && <div className="flex flex-row-reverse gap-2 m-1 items-center">
+            {item?.role === "user" && <div className="flex flex-row-reverse gap-2 m-1 overflow-wrap: anywhere items-center">
                 <time className="text-xs opacity-50 chat-end">
                   {formatDateAndTime(item.createdAt)}
                 </time> 
@@ -391,7 +391,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     onClick={() => handleUserButtonClick("AiConfig")}
                   >
                     <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <SquareFunction className="h-3 w-3" />
+                      <SquareFunctionIcon className="h-3 w-3" />
                       <span>Ai config</span>
                     </div>
                   </button>
@@ -400,7 +400,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     onClick={() => handleUserButtonClick("variables")}
                   >
                     <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <Parentheses className="h-3 w-3" />
+                      <ParenthesesIcon className="h-3 w-3" />
                       <span>Variables</span>
                     </div>
                   </button>
@@ -409,7 +409,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     onClick={() => handleUserButtonClick("system Prompt")}
                   >
                     <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <FileClock className="h-3 w-3" />
+                      <FileClockIcon className="h-3 w-3" />
                       <span>System Prompt</span>
                     </div>
                   </button>
@@ -418,7 +418,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     onClick={() => handleUserButtonClick("more")}
                   >
                     <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <Plus className="h-3 w-3" />
+                      <AddIcon className="h-3 w-3" />
                       <span>More...</span>
                     </div>
                   </button>
@@ -436,12 +436,12 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             item?.error && (
               <div className="chat chat-start break-all break-words">
                 <div>
-                  <div className="flex flex-row-reverse items-end justify-end gap-1">
+                  <div className="flex  flex-row-reverse items-end justify-end gap-1">
                     <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
                       <span className="font-bold">Error</span>
                       <p>{item?.error}</p>
                     </div>
-                    <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center"><Bot size={20} /></div>
+                    <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center"><BotIcon size={20} /></div>
                   </div>
                 </div>
               </div>

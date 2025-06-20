@@ -33,13 +33,26 @@ export const userDetailsReducer = createSlice({
           auth_token: auth_token
         }
       }
-    }
-  },
-});
+    },
+    updateUserMeta: (state, action) => {
+      const { user_id, user } = action.payload;
+      state.userDetails = {
+        ...state.userDetails,
+        meta: {
+          ...state.userDetails.meta,
+          onboarding: user?.meta?.onboarding
+        }
+      }
+    },
+
+  }
+}
+);
 
 export const {
   fetchUserDetails,
   updateUserDetails,
-  updateToken
+  updateToken,
+  updateUserMeta
 } = userDetailsReducer.actions;
 export default userDetailsReducer.reducer;

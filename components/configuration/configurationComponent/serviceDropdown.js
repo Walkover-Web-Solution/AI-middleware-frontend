@@ -1,7 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { DEFAULT_MODEL } from "@/jsonFiles/bridgeParameter";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { Info } from "lucide-react";
+import { InfoIcon } from "@/components/Icons";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
@@ -71,10 +71,10 @@ function ServiceDropdown({ params }) {
 
     return (
         <div className="space-y-4 w-full">
-            <label className="form-control">
+            <div className="form-control">
                 <div className="gap-2 max-w-xl">
                     <div className="label max-w-xs flex justify-between items-center gap-10">
-                        <span className="label-text font-medium items-end">Service</span>
+                        <span className="label-text font-medium items-end">LLM Provider</span>
                         <button
                             className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text hover:opacity-80 transition-opacity"
                             onClick={handleGetRecommendations}
@@ -114,14 +114,14 @@ function ServiceDropdown({ params }) {
                     </select>
                     {isDisabled && (
                         <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                            <Info size={16} className="flex-shrink-0 mt-0.5" />
+                            <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                             <span className='label-text-alt text-xs leading-tight'>
                                 Batch API is only applicable for OpenAI services.
                             </span>
                         </div>
                     )}
                 </div>
-            </label>
+            </div>
         </div>
     );
 }

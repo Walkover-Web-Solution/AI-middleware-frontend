@@ -9,7 +9,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
 import { GetFileTypeIcon, openModal } from "@/utils/utility";
-import { BookText, EllipsisVertical, LayoutGrid, SquarePen, Table, Trash2 } from "lucide-react";
+import { BookIcon, EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
 
@@ -66,14 +66,14 @@ const Page = ({ params }) => {
           data-tip="delete"
           onClick={() => handleDelete(row.actual_name, row._id)}
         >
-          <Trash2 strokeWidth={2} size={20} />
+          <TrashIcon strokeWidth={2} size={20} />
         </div>
         <div
           className="tooltip tooltip-primary"
           data-tip="Update"
           onClick={() => handleUpdateKnowledgeBase(row)}
         >
-          <SquarePen size={20} />
+          <SquarePenIcon size={20} />
         </div>
       </div>
     );
@@ -92,38 +92,37 @@ const Page = ({ params }) => {
   return (
     <div className="">
       <div className="flex flex-col md:flex-row items-start justify-between mb-4 gap-4 p-1">
-  
-      <MainLayout>
-      <PageHeader 
-        title="Knowledge Base" 
-        description="A repository where you can provide reference data that the AI uses to generate accurate and context-aware responses." 
-      />
-       <input
-      type="text"
-      placeholder="Search knowledge base..."
-      className="input input-bordered w-full md:max-w-xs"
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-    />
-    </MainLayout>   
-  <div className="flex flex-wrap justify-end items-start gap-2">
-    <button className="btn" onClick={() => setOpenKnowledgeBaseSlider(true)}>
-      <BookText /> Integration Guide
-    </button>
-    <button
-      className={`btn rounded-r-none rounded-md ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
-      onClick={() => setViewMode('grid')}
-    >
-      <LayoutGrid size={16} />
-    </button>
-    <button
-      className={`btn rounded-l-none rounded-md ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
-      onClick={() => setViewMode('table')}
-    >
-      <Table size={16} />
-    </button>
-  </div>
-</div>
+        <MainLayout>
+          <PageHeader
+            title="Knowledge Base"
+            description="A repository where you can provide reference data that the AI uses to generate accurate and context-aware responses."
+          />
+          <input
+            type="text"
+            placeholder="Search knowledge base..."
+            className="input input-bordered w-full md:max-w-xs"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </MainLayout>
+        <div className="flex flex-wrap justify-end items-start gap-2">
+          <button className="btn" onClick={() => setOpenKnowledgeBaseSlider(true)}>
+            <BookIcon /> Integration Guide
+          </button>
+          <button
+            className={`btn rounded-r-none rounded-md ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
+            onClick={() => setViewMode('grid')}
+          >
+            <LayoutGridIcon size={16} />
+          </button>
+          <button
+            className={`btn rounded-l-none rounded-md ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
+            onClick={() => setViewMode('table')}
+          >
+            <TableIcon size={16} />
+          </button>
+        </div>
+      </div>
 
       {filteredKnowledgeBase.length > 0 ? (
         viewMode === 'grid' ? (
@@ -135,7 +134,7 @@ const Page = ({ params }) => {
               >
                 <div className="dropdown dropdown-right absolute top-2 right-2">
                   <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>
-                    <EllipsisVertical size={16} />
+                    <EllipsisVerticalIcon size={16} />
                   </div>
                   <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
                     <li><a onClick={() => handleDelete(item.name, item?._id)} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>

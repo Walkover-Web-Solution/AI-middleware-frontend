@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { genrateSummaryAction, updateBridgeAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { Pencil } from 'lucide-react';
+import { PencilIcon } from '@/components/Icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -60,7 +60,7 @@ const PromptSummaryModal = ({ params }) => {
             <div className="flex items-center justify-between">
                 <div className="flex gap-2">
                     <button className="btn btn-ghost btn-sm" onClick={() => setIsEditing(true)} disabled={isGeneratingSummary}>
-                        <Pencil size={16} />
+                        <PencilIcon size={16} />
                         Edit
                     </button>
                 </div>

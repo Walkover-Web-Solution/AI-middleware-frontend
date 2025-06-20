@@ -1,3 +1,4 @@
+import { BookIcon, BotIcon, KeyIcon, SettingsIcon, WrenchIcon } from "@/components/Icons";
 export const PAUTH_KEY_COLUMNS = ["name", "authkey", "created_at"];
 export const API_KEY_COLUMNS = ["name", "apikey", "comment", "service"];
 export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers', 'alertType', 'bridges'];
@@ -325,7 +326,8 @@ export const MODAL_TYPE = {
   API_KEY_MODAL: "API_KEY_MODAL",
   PAUTH_KEY_MODAL: "PAUTH_KEY_MODAL",
   FINE_TUNE_MODAL: "fine-tune-modal",
-  FUNCTION_PARAMETER_MODAL: "function-parameter-modal",
+  PRE_FUNCTION_PARAMETER_MODAL: "pre-function-parameter-modal",
+  TOOL_FUNCTION_PARAMETER_MODAL: "tool-function-parameter-modal",
   ACTION_MODAL: "actionModel",
   CHATBOT_MODAL: "chatBot_model",
   CREATE_ORG_MODAL: "create-org-modal",
@@ -338,9 +340,10 @@ export const MODAL_TYPE = {
   TESTCASE_MODAL: "TESTCASE_MODAL",
   DEMO_MODAL: "DEMO_MODAL",
   ADD_TEST_CASE_MODAL: "ADD_TEST_CASE_MODAL",
-  HISTORY_PAGE_PROMPT_UPDATE_MODAL : "HISTORY_PAGE_PROMPT_UPDATE_MODAL",
+  HISTORY_PAGE_PROMPT_UPDATE_MODAL: "HISTORY_PAGE_PROMPT_UPDATE_MODAL",
   AGENT_DESCRIPTION_MODAL: "AGENT_DESCRIPTION_MODAL",
-  AGENT_VARIABLE_MODAL: "AGENT_VARIABLE_MODAL"
+  AGENT_VARIABLE_MODAL: "AGENT_VARIABLE_MODAL",
+  TUTORIAL_MODAL:"TUTORIAL_MODAL"
 }
 
 export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
@@ -459,6 +462,14 @@ export const FEATURE_DATA = [
     icon: "/live.svg"
   },
 ]
+export const ONBOARDING_VIDEOS = {
+  bridgeCreation: "https://app.supademo.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2",
+  FunctionCreation: "https://app.supademo.com/embed/cm9tkq1kj0nmb11m7j6kw8r02?embed_v=2&autoplay=1&mute=1",
+  knowledgeBase: "https://app.supademo.com/embed/cm9tl9dpo0oeh11m7dz1bipq5?embed_v=2",
+  Addvariables: "https://app.supademo.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2",
+  AdvanceParameter: "https://app.supademo.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2",
+  PauthKey: "https://app.supademo.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2"
+}
 
 export const AGENT_SETUP_GUIDE_STEPS = [
   {
@@ -498,5 +509,45 @@ export const AGENT_SETUP_GUIDE_STEPS = [
     detail: 'Add your API keys and configure authentication to enable your agent.',
     icon: '🔐',
     example: 'Examples: OpenAI API key, Anthropic API key, Custom webhook URLs, Database connection strings'
+  },
+];
+
+export const TUTORIALS = [
+  {
+    title: 'Agent Creation',
+    description: 'Learn how to create and manage agents in GTWY.ai platform',
+    videoUrl: ONBOARDING_VIDEOS?.bridgeCreation, 
+    icon: BotIcon
+  },
+  {
+    title: 'Pauth Key Setup',
+    description: 'Configure authentication keys for secure access',
+    videoUrl: ONBOARDING_VIDEOS?.PauthKey,
+    icon: KeyIcon
+  },
+  {
+    title: 'Tool Configuration',
+    description: 'Set up and configure tools for your workflow',
+    videoUrl: ONBOARDING_VIDEOS?.FunctionCreation,
+    icon: WrenchIcon
+
+  },
+  {
+    title: 'Variable Management',
+    description: 'Add and manage variables in your environment',
+    videoUrl: ONBOARDING_VIDEOS?.Addvariables,
+    icon: SettingsIcon
+  },
+  {
+    title: 'KnowledgeBase Configuration',
+    description: 'Set up and manage your knowledge base for intelligent responses',
+    videoUrl: ONBOARDING_VIDEOS?.knowledgeBase,
+    icon: BookIcon
+  },
+  {
+    title: 'Advanced Parameters',
+    description: 'Set up and update advanced parameters for your workflow',
+    videoUrl: ONBOARDING_VIDEOS?.AdvanceParameter,
+    icon: BookIcon
   },
 ];

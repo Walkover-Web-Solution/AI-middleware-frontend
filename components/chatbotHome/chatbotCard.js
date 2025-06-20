@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getChatBotDetailsAction } from "@/store/action/chatBotAction";
-import { Bot } from "lucide-react";
+import { BotIcon } from "@/components/Icons";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 
@@ -18,7 +18,7 @@ function ChatBotCard({ item, onFetchDetails }) {
     <div onClick={() => onFetchDetails(item._id)} className="flex flex-col items-start gap-7 rounded-md border cursor-pointer hover:shadow-lg">
       <div className="p-4 flex flex-col justify-between w-full items-start">
         <div className="w-full flex items-center gap-2 justify-start">
-          <Bot />
+        <BotIcon/>
           <h1 className="inline-flex w-full items-center truncate gap-2 text-lg font-semibold">
             <span className="truncate">{item.title}</span>
           </h1>
