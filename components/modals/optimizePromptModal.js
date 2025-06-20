@@ -1,4 +1,3 @@
-// OptimizePromptModal.jsx
 import { optimizePromptApi } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { optimizePromptReducer } from '@/store/reducer/bridgeReducer';
@@ -41,15 +40,15 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
 
   const handleUndo = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      return promptHistory[currentIndex - 1];
+      const newIndex = currentIndex - 1;
+      setCurrentIndex(newIndex);
     }
   };
 
   const handleRedo = () => {
     if (currentIndex < promptHistory.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      return promptHistory[currentIndex + 1];
+      const newIndex = currentIndex + 1;
+      setCurrentIndex(newIndex);
     }
   };
 
