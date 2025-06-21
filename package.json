@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:pages": "npx @cloudflare/next-on-pages"
+    "build:pages": "npx @cloudflare/next-on-pages",
+    "format": "prettier --write .",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.2",
@@ -36,9 +38,19 @@
     "@cloudflare/next-on-pages": "^1.11.3",
     "autoprefixer": "^10.0.1",
     "daisyui": "^4.7.0",
-    "eslint": "^8",
+    "eslint": "^8.57.1",
     "eslint-config-next": "14.1.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "postcss": "^8",
+    "prettier": "^3.5.3",
     "tailwindcss": "^3.3.0"
-  }
+  },
+  "lint-staged": {
+  "**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+    "prettier --write --ignore-unknown"
+  ]
+}
 }

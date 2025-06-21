@@ -1,8 +1,14 @@
 {
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
   "extends": [
     "next",
-    "next/core-web-vitals"
+    "next/core-web-vitals",
+    "plugin:prettier/recommended" // Enables eslint-plugin-prettier and eslint-config-prettier
   ],
+  "plugins": ["prettier"],
   "rules": {
     "react/no-unescaped-entities": "off",
     // Ignore "missing dependency" warnings in useEffect
@@ -12,6 +18,7 @@
     // Ignore missing "key" prop for elements in iterators
     "react/jsx-key": "off",
     // Ignore missing display name for component definitions
-    "react/display-name": "off"
+    "react/display-name": "off",
+    "prettier/prettier": "error"
   }
 }
