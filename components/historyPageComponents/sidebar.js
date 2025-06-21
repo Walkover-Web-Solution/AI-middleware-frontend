@@ -300,7 +300,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                     <a className="w-full h-full flex items-center justify-between relative group">
                       <span className="truncate flex-1 pr-2">{truncate(item?.thread_id, 35)}</span>
                       {item?.thread_id?.length > 35 && (
-                        <div className="absolute left-0 top-full mt-1 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 max-w-[300px] break-words shadow-lg pointer-events-none">
+                        <div className="absolute left-0 top-full mt-1 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-low max-w-[300px] break-words shadow-lg pointer-events-none">
                           {item?.thread_id}
                         </div>
                       )}
