@@ -5,6 +5,7 @@ import { MODAL_TYPE } from "@/utils/enums";
 import { closeModal } from "@/utils/utility";
 import React, {  useCallback } from "react";
 import { useDispatch } from "react-redux";
+import Modal from "../UI/Modal";
 ``
 
 function PublishBridgeVersionModal({ params }) {
@@ -27,7 +28,7 @@ function PublishBridgeVersionModal({ params }) {
   }, [dispatch, params]);
 
   return (
-    <dialog id={MODAL_TYPE.PUBLISH_BRIDGE_VERSION} className="modal">
+    <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
       <div className="modal-box w-11/12 max-w-2xl">
         <h3 className="font-bold text-lg mb-4">Publish Agent Version</h3>
         <p>
@@ -57,7 +58,7 @@ function PublishBridgeVersionModal({ params }) {
           </form>
         </div>
       </div>
-    </dialog>
+    </Modal>
   );
 }
 

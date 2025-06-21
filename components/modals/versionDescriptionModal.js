@@ -1,10 +1,11 @@
 import { MODAL_TYPE } from '@/utils/enums'
 import { closeModal } from '@/utils/utility'
 import React from 'react'
+import Modal from '../UI/Modal'
 
 const VersionDescriptionModal = ({ versionDescriptionRef, handleCreateNewVersion }) => {
   return (
-    <dialog id={MODAL_TYPE.VERSION_DESCRIPTION_MODAL} className="modal">
+    <Modal MODAL_ID={MODAL_TYPE.VERSION_DESCRIPTION_MODAL}>
       <div className='modal-box'>
         <h3 className="font-bold text-lg mb-4">Create New Version</h3>
         <input
@@ -20,7 +21,7 @@ const VersionDescriptionModal = ({ versionDescriptionRef, handleCreateNewVersion
           </form>
         </div>
       </div>
-    </dialog>
+    </Modal>
   )
 }
 

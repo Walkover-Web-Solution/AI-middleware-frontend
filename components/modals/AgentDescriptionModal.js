@@ -1,10 +1,11 @@
 import { MODAL_TYPE } from '@/utils/enums'
 import { closeModal } from '@/utils/utility'
 import React from 'react'
+import Modal from '../UI/Modal'
 
 const AgentDescriptionModal = ({ setDescription, handleSaveAgent, description }) => {
     return (
-        <dialog id={MODAL_TYPE?.AGENT_DESCRIPTION_MODAL} className="modal">
+        <Modal MODAL_ID={MODAL_TYPE?.AGENT_DESCRIPTION_MODAL}>
             <div className="modal-box max-w-2xl">
                 <h3 className="font-bold text-lg">Add Agent Description</h3>
                 <div className="py-4">
@@ -28,7 +29,7 @@ const AgentDescriptionModal = ({ setDescription, handleSaveAgent, description })
             <form method="dialog" className="modal-backdrop">
                 <button>close</button>
             </form>
-        </dialog>
+        </Modal>
     )
 }
 

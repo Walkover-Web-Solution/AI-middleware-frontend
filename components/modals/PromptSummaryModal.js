@@ -6,6 +6,7 @@ import { PencilIcon } from '@/components/Icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import Modal from '../UI/Modal';
 
 const PromptSummaryModal = ({ params }) => {
     const dispatch = useDispatch();
@@ -83,7 +84,7 @@ const PromptSummaryModal = ({ params }) => {
     );
 
     return (
-        <dialog id={MODAL_TYPE.PROMPT_SUMMARY} className="modal">
+        <Modal MODAL_ID={MODAL_TYPE.PROMPT_SUMMARY}>
             <div className="modal-box w-11/12 max-w-5xl">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-lg">Prompt Summary</h3>
@@ -122,7 +123,7 @@ const PromptSummaryModal = ({ params }) => {
                     </div>
                 </div>
             </div>
-        </dialog>
+        </Modal>
     );
 }
 
