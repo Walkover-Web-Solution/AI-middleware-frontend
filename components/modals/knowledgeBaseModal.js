@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { KNOWLEDGE_BASE_CUSTOM_SECTION, KNOWLEDGE_BASE_SECTION_TYPES, MODAL_TYPE } from '@/utils/enums';
 import { closeModal, openModal } from '@/utils/utility';
 import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/store/action/knowledgeBaseAction';
+import Modal from '../UI/Modal';
 
 const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {} }) => {
   const dispatch = useDispatch();
@@ -94,7 +95,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
   };
 
   return (
-    <dialog id={MODAL_TYPE.KNOWLEDGE_BASE_MODAL} className="modal backdrop-blur-sm">
+    <Modal MODAL_ID={MODAL_TYPE.KNOWLEDGE_BASE_MODAL}>
       <div className="modal-box w-11/12 max-w-3xl border-2">
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
           <h3 className="font-bold text-xl">{selectedKnowledgeBase ? 'Update' : 'New'} Knowledge Base Configuration</h3>
@@ -298,7 +299,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
           </div>
         </form>
       </div>
-    </dialog>
+    </Modal>
   );
 };
 

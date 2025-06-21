@@ -1,6 +1,8 @@
 import { downloadFineTuneData } from '@/config'
 import { CircleMinusIcon, CirclePlusIcon, GlobeIcon } from '@/components/Icons'
 import React from 'react'
+import Modal from '../UI/Modal'
+import { MODAL_TYPE } from '@/utils/enums'
 
 function CreateFineTuneModal({params, selectedThreadIds}) {
     const [status, setStatus] = React.useState([0])
@@ -48,7 +50,7 @@ function CreateFineTuneModal({params, selectedThreadIds}) {
         }
     }
     return (
-        <dialog id="fine-tune-modal" className="modal">
+        <Modal MODAL_ID={MODAL_TYPE.FINE_TUNE_MODAL}>
             <div className="modal-box">
                 <h3 className="font-bold text-lg">Choose Response Category</h3>
                 <p className="py-2 text-sm mb-2">Select the category on the basis of user feedback</p>
@@ -82,7 +84,7 @@ function CreateFineTuneModal({params, selectedThreadIds}) {
                     </form>
                 </div>
             </div>
-        </dialog>
+        </Modal>
     )
 }
 
