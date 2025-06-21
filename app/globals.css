@@ -142,3 +142,23 @@ html {
 #iframe-parent-container {
   z-index: 99;
 }
+
+
+.z-very-low {
+  z-index: 0;
+}
+.z-low {
+  z-index: 1;
+}
+.z-low-medium {
+  z-index: 50;
+}
+.z-medium {
+  z-index: 999;
+}
+.z-high {
+  z-index: 9999;
+}
+.z-very-high {
+  z-index: 999999;
+}

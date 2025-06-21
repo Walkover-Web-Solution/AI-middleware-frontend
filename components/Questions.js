@@ -23,7 +23,7 @@ const Questions = () => {
               Everything you need to know about AIMiddleWare. Can't find the
               answer you're looking for? Feel free to{" "}
             </span>
-            <a href="mailto:support@gtwy.ai" className="cursor-pointer text-blue-500 border-b-2 border-blue-600 z-10 opacity-90 hover:text-blue-700 transition-colors">
+            <a href="mailto:support@gtwy.ai" className="cursor-pointer text-blue-500 border-b-2 border-blue-600 z-low opacity-90 hover:text-blue-700 transition-colors">
               contact us
             </a>
           </p>

@@ -196,8 +196,8 @@ function InvitePage({ params }) {
         {/* Modal for Confirmation */}
         {isModalOpen && (
           <>
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-            <dialog className="modal z-50 open">
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-low-medium"></div>
+            <dialog className="modal z-low-medium open">
               <div className="modal-box rounded-lg shadow-lg">
                 <h3 className="font-bold text-lg">Invite Member</h3>
                 <p className="text-sm text-gray-600 mb-4">Confirm sending an invite to {email}?</p>
@@ -236,8 +236,8 @@ function InvitePage({ params }) {
           </button>
           {isModalOpen && (
             <>
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-              <dialog className="modal z-50" open>
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-low-medium"></div>
+              <dialog className="modal z-low-medium" open>
                 <div className="modal-box bg-white rounded-lg shadow-lg p-6">
                   <h3 className="font-bold text-2xl text-gray-800 mb-4">Invite Member</h3>
                   <input

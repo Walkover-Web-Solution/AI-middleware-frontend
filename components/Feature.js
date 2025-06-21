@@ -4,7 +4,7 @@ import { FEATURE_DATA } from "@/utils/enums";
 
 const Feature = () => {
   return (
-    <div className="flex flex-col gap-4 w-3/4 mx-auto mt-20 z-10">
+    <div className="flex flex-col gap-4 w-3/4 mx-auto mt-20 z-low">
       {Array.from(
         { length: Math.ceil(FEATURE_DATA.length / 2) },
         (_, rowIndex) => (
@@ -17,7 +17,7 @@ const Feature = () => {
               .map((feature, index) => (
                 <div
                   key={index}
-                  className="flex-1 rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:z-0 hover:bg-zoom"
+                  className="flex-1 rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:z-very-low hover:bg-zoom"
                 >
                   <div className="flex items-center mb-2 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4">
                     <Image

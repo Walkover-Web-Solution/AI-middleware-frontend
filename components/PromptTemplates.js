@@ -30,7 +30,7 @@ const PromptTemplates = () => {
           </button>
         </Link>
       </div>
-      <div className="absolute inset-0 flex justify-center items-center overflow-visible z-0">
+      <div className="absolute inset-0 flex justify-center items-center overflow-visible">
         <Image
           src="/Ellipse.svg"
           alt="Ellipse Logo"

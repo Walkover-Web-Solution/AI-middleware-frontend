@@ -29,9 +29,9 @@ const DisplayCards = () => {
   ];
 
   return (
-    <div className="flex flex-col items-stretch w-3/4 mx-auto mt-20 gap-4 z-10">
+    <div className="flex flex-col items-stretch w-3/4 mx-auto mt-20 gap-4 z-low">
       <div className="flex flex-col md:flex-row justify-between gap-4">
-        <div className="flex-1 w-full md:max-w-[48%] rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:z-0  hover:bg-zoom">
+        <div className="flex-1 w-full md:max-w-[48%] rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:z-very-low  hover:bg-zoom">
           <div className="flex items-center mb-2 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4 ">
             <Image
               src="/Settings.svg"
@@ -52,7 +52,7 @@ const DisplayCards = () => {
             <Autoscroll items={items} />
           </div>
         </div>
-        <div className="flex-1 rounded-md pb-0 p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:z-0  hover:bg-zoom">
+        <div className="flex-1 rounded-md pb-0 p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:z-very-low  hover:bg-zoom">
           <div className="flex items-center mb-2 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4 ">
             <Image
               src="/Bubble.svg"
@@ -82,7 +82,7 @@ const DisplayCards = () => {
         </div>
       </div>
       <div className="flex flex-col md:flex-row justify-between gap-4">
-        <div className="flex-1 w-full md:max-w-[48%] rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:z-0 hover:bg-zoom">
+        <div className="flex-1 w-full md:max-w-[48%] rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:z-very-low hover:bg-zoom">
           <div className="flex items-center mb-2 transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4">
             <Image
               src="/live.svg"
@@ -110,7 +110,7 @@ const DisplayCards = () => {
             />
           </div>
         </div>
-        <div className="flex-1 w-full md:max-w-[54%] rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:z-0 hover:bg-zoom">
+        <div className="flex-1 w-full md:max-w-[54%] rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:z-very-low hover:bg-zoom">
           <div className="flex mb-4 items-center transition-all ease-in-out duration-300 group-hover:scale-110 group-hover:pl-4">
             <Image
               src="/live.svg"

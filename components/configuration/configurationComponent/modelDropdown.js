@@ -9,7 +9,7 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs }) => {
     if (!hoveredModel || !modelSpecs) return null;
 
     return (
-        <div className="max-w-[500px] bg-white border border-gray-200 rounded-lg shadow-lg p-6 mt-8 top-0 absolute left-[320px] transition-transform duration-300 ease-in-out z-[99] transform hover:scale-105">
+        <div className="max-w-[500px] bg-white border border-gray-200 rounded-lg shadow-lg p-6 mt-8 top-0 absolute left-[320px] transition-transform duration-300 ease-in-out z-low-medium transform hover:scale-105">
             <div className="space-y-4">
                 <div className="border-b pb-3">
                     <h3 className="text-xl font-bold text-gray-800">{hoveredModel}</h3>
@@ -169,7 +169,7 @@ const ModelDropdown = ({ params }) => {
 
     return (
         <div className="flex items-start gap-4 relative">
-            <div className="w-full max-w-xs z-[9]">
+            <div className="w-full max-w-xs z-low">
                 <div className="label">
                     <span className="label-text text-gray-700">LLM Model</span>
                 </div>
@@ -186,7 +186,7 @@ const ModelDropdown = ({ params }) => {
                     {isDropdownOpen && (
                         <ul
                             tabIndex={0}
-                            className="dropdown-content dropdown-left z-[1] p-2 shadow bg-white rounded-lg w-full mt-1 max-h-[500px] overflow-y-auto border border-gray-100"
+                            className="dropdown-content dropdown-left z-low p-2 shadow bg-white rounded-lg w-full mt-1 max-h-[500px] overflow-y-auto border border-gray-100"
                             onMouseLeave={() => setHoveredModel(null)}
                         >
                             {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {

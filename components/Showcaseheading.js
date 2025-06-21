@@ -5,7 +5,7 @@ import Link from "next/link";
 const Showcaseheading = () => {
   return (
     <div className="relative flex w-3/4 mx-auto py-20 ">
-      <div className="w-full md:w-1/2 z-10 ">
+      <div className="w-full md:w-1/2 z-low">
         <div className="flex items-center mb-2">
           <Image
             src="/live.svg"

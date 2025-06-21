@@ -75,10 +75,10 @@ function MainSlider() {
   return (
     <>
       <div className="relative">
-        <label htmlFor="my-drawer-2" className="drawer-button lg:hidden z-0 absolute top-3 left-1">
+        <label htmlFor="my-drawer-2" className="drawer-button lg:hidden absolute top-3 left-1">
           <AlignIcon size={24} onClick={toggleMainSidebar} />
         </label>
-        <div className={`drawer lg:drawer-open relative z-[101] lg:z-0`}>
+        <div className={`drawer lg:drawer-open relative z-low-medium lg:z-very-low`}>
           <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
           <div className="drawer-content flex flex-col"></div>
           <div className="drawer-side">

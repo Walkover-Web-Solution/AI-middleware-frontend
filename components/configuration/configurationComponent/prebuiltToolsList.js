@@ -93,7 +93,7 @@ const PrebuiltToolsList = ({ params }) => {
                     <button tabIndex={0} className="btn btn-outline btn-sm mt-0">
                         <AddIcon size={16} />Add Prebuilt Tool
                     </button>
-                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                         <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Tools</li>
                             <input

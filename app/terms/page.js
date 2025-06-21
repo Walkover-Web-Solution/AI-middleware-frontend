@@ -17,8 +17,8 @@ const Terms = () => {
       <Head>
         <link rel="canonical" href="https://gtwy.ai" />
       </Head>
-      <div className="hero-bg absolute top-0 left-0 w-full h-screen z-10"></div>
-      <div className="px-20 z-20">
+      <div className="hero-bg absolute top-0 left-0 w-full h-screen z-low"></div>
+      <div className="px-20 z-low">
         <Header />
 
         <style
