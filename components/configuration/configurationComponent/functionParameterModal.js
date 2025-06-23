@@ -1,81 +1,99 @@
 import { optimizeJsonApi, updateFlowDescription } from "@/config";
-import { useCustomSelector } from "@/customHooks/customSelector";
 import { parameterTypes } from "@/jsonFiles/bridgeParameter";
 import {
-  updateApiAction,
   updateBridgeVersionAction,
   updateFuntionApiAction,
 } from "@/store/action/bridgeAction";
 import { closeModal, flattenParameters } from "@/utils/utility";
 import { isEqual } from "lodash";
 import { CopyIcon, InfoIcon, TrashIcon, PencilIcon, CloseIcon } from "@/components/Icons";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import { MODAL_TYPE } from "@/utils/enums";
 
-function FunctionParameterModal({ preFunction, functionId, params, Model_Name, embedToken }) {
+function FunctionParameterModal({
+  name = "",
+  functionId = "",
+  params,
+  Model_Name,
+  embedToken = "",
+  handleRemove = () => { },
+  handleSave = () => { },
+  toolData = {},
+  setToolData = () => { },
+  function_details = {},
+  variables_path = {},
+  functionName = "",
+  variablesPath = {},
+  setVariablesPath = () => {}
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const dispatch = useDispatch();
-  const { function_details, variables_path } = useCustomSelector((state) => ({
-    function_details:
-      state?.bridgeReducer?.org?.[params?.org_id]?.functionData?.[functionId] ||
-      {},
-    variables_path:
-      state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
-        params?.version
-      ]?.variables_path || {},
-  }));
 
-  const functionName = useMemo(
-    () => function_details["endpoint"] || function_details["function_name"],
-    [function_details]
+  // Memoize properties to prevent unnecessary re-renders
+  const properties = useMemo(() => function_details?.fields || {}, [function_details?.fields]);
+
+  // Memoize isDataAvailable calculation
+  const isDataAvailable = useMemo(() =>
+    Object.keys(properties).length > 0,
+    [properties]
   );
-  const properties = function_details.fields || {};
-  const [toolData, setToolData] = useState(function_details || {});
-  const [variablesPath, setVariablesPath] = useState(
-    variables_path[functionName] || {}
-  );
-  const [isDataAvailable, setIsDataAvailable] = useState(
-    Object.keys(properties).length > 0
-  );
+
   const [isModified, setIsModified] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState("");
   const [isTextareaVisible, setIsTextareaVisible] = useState(false);
-  const flattenedParameters = flattenParameters(toolData?.fields);
+
+  // Memoize flattenedParameters to prevent recalculation
+  const flattenedParameters = useMemo(() =>
+    flattenParameters(toolData?.fields || {}),
+    [toolData?.fields]
+  );
+
   const [isOldFieldViewTrue, setIsOldFieldViewTrue] = useState(false);
 
+  // Fix: Add proper dependencies and use useCallback to prevent infinite loops
   useEffect(() => {
-    setToolData(function_details);
-    setIsDataAvailable(Object.keys(properties).length > 0);
-  }, [function_details, properties]);
+    // Only update if function_details actually changed
+    if (!isEqual(toolData, function_details)) {
+      setToolData(function_details);
+    }
+  }, [function_details, setToolData]); // Add setToolData to dependencies
 
   useEffect(() => {
-    setVariablesPath(variables_path[functionName] || {});
-  }, [variables_path, functionName]);
+    // Only update if variables_path[functionName] actually changed
+    const newVariablesPath = variables_path[functionName] || {};
+    if (!isEqual(variablesPath, newVariablesPath)) {
+      setVariablesPath(newVariablesPath);
+    }
+  }, [variables_path, functionName]); // Remove variablesPath from dependencies to prevent loop
 
+  // Fix: Separate the isModified calculations into different effects
   useEffect(() => {
-    setIsModified(!isEqual(toolData, function_details)); // Compare toolData and function_details
+    setIsModified(!isEqual(toolData, function_details));
   }, [toolData, function_details]);
 
   useEffect(() => {
-    setIsModified(!isEqual(variablesPath, variables_path[functionName]));
-  }, [variablesPath]);
+    // Only check if variablesPath is different from the original
+    const originalVariablesPath = variables_path[functionName] || {};
+    if (!isEqual(variablesPath, originalVariablesPath)) {
+      setIsModified(true);
+    }
+  }, [variablesPath, variables_path, functionName]);
 
-  const copyToClipboard = (content) => {
+  const copyToClipboard = useCallback((content) => {
     navigator.clipboard
       .writeText(content)
       .then(() => {
         toast.success("Content copied to clipboard");
-        // Optionally, you can show a success message to the user
       })
       .catch((error) => {
         console.error("Error copying content to clipboard:", error);
-        // Optionally, you can show an error message to the user
       });
-  };
+  }, []);
 
-  const copyToolCallFormat = () => {
+  const copyToolCallFormat = useCallback(() => {
     const toolCallFormat = {
       type: "function",
       function: {
@@ -95,8 +113,9 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
       },
     };
     copyToClipboard(JSON.stringify(toolCallFormat, undefined, 4));
-  };
-  const handleRequiredChange = (key) => {
+  }, [function_details, objectFieldValue, copyToClipboard]);
+
+  const handleRequiredChange = useCallback((key) => {
     const keyParts = key.split(".");
     if (keyParts.length === 1) {
       // Top-level field
@@ -144,9 +163,9 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
         };
       });
     }
-  };
+  }, []);
 
-  const handleDescriptionChange = (key, newDescription) => {
+  const handleDescriptionChange = useCallback((key, newDescription) => {
     setToolData((prevToolData) => {
       const updatedFields = updateField(
         prevToolData.fields,
@@ -161,9 +180,9 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
         fields: updatedFields,
       };
     });
-  };
+  }, []);
 
-  const updateField = (fields, keyParts, updateFn) => {
+  const updateField = useCallback((fields, keyParts, updateFn) => {
     const fieldClone = JSON.parse(JSON.stringify(fields)); // Deep clone the fields
 
     const _updateField = (currentFields, remainingKeyParts) => {
@@ -188,21 +207,22 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
     };
 
     return _updateField(fieldClone, keyParts);
-  };
+  }, []);
+
   // Reset the modal data to the original function_details
-  const resetModalData = () => {
+  const resetModalData = useCallback(() => {
     setToolData(function_details);
     setObjectFieldValue("");
     setIsTextareaVisible(false);
     setIsDescriptionEditing(false);
-  };
+  }, [function_details, setToolData]);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     resetModalData();
     closeModal(Model_Name);
-  };
+  }, [resetModalData, Model_Name]);
 
-  const handleTypeChange = (key, newType) => {
+  const handleTypeChange = useCallback((key, newType) => {
     let updatedField;
     if (newType === "array") {
       updatedField = updateField(
@@ -234,9 +254,9 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
       ...prevToolData,
       fields: updatedField,
     }));
-  };
+  }, [toolData?.fields, updateField]);
 
-  const handleEnumChange = (key, newEnum) => {
+  const handleEnumChange = useCallback((key, newEnum) => {
     try {
       if (!newEnum.trim()) {
         setToolData((prevToolData) => {
@@ -286,67 +306,9 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
     } catch (error) {
       toast.error("Failed to update enum: " + error.message);
     }
-  };
+  }, [updateField]);
 
-  const handleSaveFunctionData = () => {
-    if (!isEqual(toolData, function_details)) {
-      const { _id, ...dataToSend } = toolData;
-      dispatch(
-        updateFuntionApiAction({
-          function_id: functionId,
-          dataToSend: dataToSend,
-        })
-      );
-      setToolData("");
-    }
-    if (!isEqual(variablesPath, variables_path[functionName])) {
-      // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { variables_path: { [functionName]: variablesPath } } }));
-      dispatch(
-        updateBridgeVersionAction({
-          bridgeId: params.id,
-          versionId: params.version,
-          dataToSend: { variables_path: { [functionName]: variablesPath } },
-        })
-      );
-    }
-    resetModalData();
-  };
-  const removePreFunction = () => {
-    dispatch(updateApiAction(params.id, {
-      pre_tools: [],
-      version_id: params.version
-    })).then(() => {
-      closeModal(Model_Name);
-    });
-  }
-
-  const handleRemoveFunctionFromBridge = () => {
-    // dispatch(updateBridgeAction({
-    //     bridgeId: params.id,
-    //     dataToSend: {
-    //         functionData: {
-    //             function_id: functionId,
-    //             function_name: functionName,
-    //         }
-    //     }
-    // })
-    dispatch(
-      updateBridgeVersionAction({
-        bridgeId: params.id,
-        versionId: params.version,
-        dataToSend: {
-          functionData: {
-            function_id: functionId,
-            function_name: functionName,
-          },
-        },
-      })
-    ).then(() => {
-      closeModal(Model_Name);
-    });
-  };
-
-  const getNestedFieldValue = (fields, keyParts) => {
+  const getNestedFieldValue = useCallback((fields, keyParts) => {
     return keyParts?.reduce((currentField, key) => {
       if (!currentField) return {};
       // Use 'items' if the current field is 'array', else 'parameter'
@@ -355,9 +317,9 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
       }
       return currentField?.parameter?.[key] || currentField?.[key] || {}; // Ensure fallback to an empty object
     }, fields);
-  };
+  }, []);
 
-  const handleToggleChange = (e) => {
+  const handleToggleChange = useCallback((e) => {
     if (e.target.checked) {
       setObjectFieldValue(JSON.stringify(toolData["fields"], undefined, 4));
       setIsTextareaVisible((prev) => !prev);
@@ -379,9 +341,9 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
     } else {
       toast.error("Must be valid json");
     }
-  };
+  }, [toolData, objectFieldValue]);
 
-  const handleTextFieldChange = () => {
+  const handleTextFieldChange = useCallback(() => {
     try {
       const updatedField = JSON.parse(objectFieldValue);
       // Validate that the parsed value is an object
@@ -396,18 +358,18 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
       toast.error("Invalid JSON format. Please correct the data.");
       console.error("JSON Parsing Error:", error.message);
     }
-  };
+  }, [objectFieldValue]);
 
-  const handleVariablePathChange = (key, value = "") => {
+  const handleVariablePathChange = useCallback((key, value = "") => {
     setVariablesPath((prevVariablesPath) => {
       return {
         ...prevVariablesPath,
         [key]: value || "",
       };
     });
-  };
+  }, []);
 
-  const handleOptimizeRawJson = async () => {
+  const handleOptimizeRawJson = useCallback(async () => {
     try {
       setIsLoading(true);
       const reqJson = JSON.parse(objectFieldValue);
@@ -422,32 +384,71 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [objectFieldValue]);
 
-  const handleSaveDescription = async () => {
+  const handleSaveDescription = useCallback(async () => {
     if (!toolData?.description.trim()) {
       toast.error('Description cannot be empty');
       return;
     }
-    try {
-      const flowResponse = await updateFlowDescription(embedToken, toolData.function_name, toolData?.description);
-      if (flowResponse?.metadata?.description) {
-        const { _id, description, ...dataToSend } = toolData;
-        await dispatch(updateFuntionApiAction({
-          function_id: functionId,
-          dataToSend: { ...dataToSend, description: flowResponse?.metadata?.description }
-        }));
-        setToolData(prev => ({ ...prev, description: flowResponse.metadata.description }));
-        toast.success('Description updated successfully');
-        setIsDescriptionEditing(false);
-      } else {
-        throw new Error('Failed to get updated description from flow API');
+    if (name !== "Agent") {
+      try {
+        const flowResponse = await updateFlowDescription(embedToken, toolData.function_name, toolData?.description);
+        if (flowResponse?.metadata?.description) {
+          const { _id, description, ...dataToSend } = toolData;
+          await dispatch(updateFuntionApiAction({
+            function_id: functionId,
+            dataToSend: { ...dataToSend, description: flowResponse?.metadata?.description }
+          }));
+          setToolData(prev => ({ ...prev, description: flowResponse.metadata.description }));
+          toast.success('Description updated successfully');
+          setIsDescriptionEditing(false);
+        } else {
+          throw new Error('Failed to get updated description from flow API');
+        }
+      } catch (error) {
+        console.error('Failed to update description:', error);
+        toast.error('Failed to update description. Please try again.');
       }
-    } catch (error) {
-      console.error('Failed to update description:', error);
-      toast.error('Failed to update description. Please try again.');
     }
-  };
+    else {
+      try {
+        if (!toolData?.description && !function_details?.description) {
+          toast?.error("Description Required")
+          return;
+        }
+        dispatch(updateBridgeVersionAction({
+          bridgeId: params?.id,
+          versionId: params?.version,
+          dataToSend: {
+            agents: {
+              connected_agents: {
+                [function_details?.name]: {
+                  "description": toolData?.description ? toolData?.description : function_details?.description,
+                  "bridge_id": functionId
+                }
+              },
+              agent_status: "1"
+            }
+          }
+        }))
+        resetModalData();
+        closeModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL);
+      } catch (error) {
+        toast?.error("Failed to save agent")
+        console.error(error)
+      }
+    }
+  }, [toolData, functionId]);
+
+  const handleSaveData = useCallback(() => {
+    if (toolData?.description?.trim() != function_details?.description?.trim()) {
+      handleSaveDescription()
+    }
+    handleSave()
+    resetModalData()
+    closeModal(Model_Name)
+  }, [toolData?.description, function_details?.description, handleSaveDescription, handleSave, resetModalData, Model_Name]);
 
   return (
     <dialog id={Model_Name} className="modal">
@@ -467,8 +468,8 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
             <button onClick={() => setIsDescriptionEditing(true)} className="btn btn-sm btn-primary">
               <PencilIcon size={16} /> Update Description
             </button>
-            <button onClick={() => preFunction ? removePreFunction() : handleRemoveFunctionFromBridge()} className="btn btn-sm btn-error text-white">
-              <TrashIcon size={16} /> Remove {preFunction ? "pre-tool" : "tool"}
+            <button onClick={() => handleRemove()} className="btn btn-sm btn-error text-white">
+              <TrashIcon size={16} /> Remove {name}
             </button>
           </div>
         </div>
@@ -479,7 +480,7 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-semibold">Update Function Description</h4>
               <button
-                onClick={() => {setIsDescriptionEditing(false); setToolData({ ...toolData, description: function_details?.description })}}
+                onClick={() => { setIsDescriptionEditing(false); setToolData({ ...toolData, description: function_details?.description }) }}
                 className="btn btn-sm btn-ghost"
               >
                 <CloseIcon size={16} />
@@ -518,7 +519,7 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
             </div>
           )}
           <div>
-            {toolData.old_fields && isTextareaVisible && (
+            {toolData?.old_fields && isTextareaVisible && (
               <div className="flex items-center text-sm gap-3">
                 <p>Check for old data</p>
                 <input
@@ -662,12 +663,12 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
                           }
                         />
                       </td>
-                     <td>
+                      <td>
                         <input
                           type="checkbox"
                           className="checkbox"
                           checked={!(param.key in variablesPath)}
-                          disabled={preFunction}
+                          disabled={name === "Pre Tool"}
                           onChange={() => {
                             const updatedVariablesPath = { ...variablesPath };
                             if (param.key in updatedVariablesPath) {
@@ -683,7 +684,7 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
                         <input
                           type="text"
                           placeholder="name"
-                          className={`input input-bordered w-full input-sm ${preFunction && !variablesPath[param.key] ? "border-red-500" : ""}`}
+                          className={`input input-bordered w-full input-sm ${name === "Pre Tool" && !variablesPath[param.key] ? "border-red-500" : ""}`}
                           value={variablesPath[param.key] || ""}
                           onChange={(e) => {
                             handleVariablePathChange(param.key, e.target.value);
@@ -724,14 +725,14 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
             <button className="btn" onClick={handleCloseModal}>
               Close
             </button>
-              <button
-                className="btn btn-primary"
-                onClick={handleSaveFunctionData}
-                disabled={!isModified || isLoading}
-              >
-                {isLoading && <span className="loading loading-spinner"></span>}
-                Save
-              </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleSaveData}
+              disabled={!isModified || isLoading}
+            >
+              {isLoading && <span className="loading loading-spinner"></span>}
+              Save
+            </button>
           </form>
         </div>
       </div>
@@ -739,4 +740,4 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
   );
 }
 
-export default FunctionParameterModal;
+export default React.memo(FunctionParameterModal);
