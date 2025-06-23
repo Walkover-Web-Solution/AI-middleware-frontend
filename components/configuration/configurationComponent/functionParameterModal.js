@@ -439,39 +439,78 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
   const handleTypeChange = (key, newType) => {
     setToolData((prevToolData) => {
       const updatedFields = updateField(prevToolData.fields, key.split("."), (field) => {
-        if (newType === "array") {
-          return {
-            ...field,
-            type: newType,
-            items: { type: "string" },
-            required_params: field.required_params || [],
-            parameter: field.parameter || {}, // Preserve existing parameter
-          };
-        }
-
-        // For other types, preserve existing parameter if it exists
-        return {
+        const updatedField = {
           ...field,
           type: newType,
-          items: field.items || undefined,
-          parameter: field.parameter || undefined,
-          enum: field.enum || [],
           description: field.description || "",
+          enum: field.enum || [],
+          required_params: field.required_params || []
         };
+
+        if (newType === "array") {
+          return {
+            ...updatedField,
+            items: field.items || { type: "string" },
+            parameter: undefined
+          };
+        } else if (newType === "object") {
+          return {
+            ...updatedField,
+            parameter: field.parameter || {},
+            items: undefined
+          };
+        } else {
+          return {
+            ...updatedField,
+            parameter: undefined,
+            items: undefined
+          };
+        }
       });
 
       return {
         ...prevToolData,
-        fields: updatedFields,
+        fields: updatedFields
       };
     });
 
-    // Update JSON view if it's open
     if (isTextareaVisible) {
       try {
         const currentFields = JSON.parse(objectFieldValue || '{}');
-        const updatedJson = JSON.stringify(currentFields, null, 4);
-        setObjectFieldValue(updatedJson);
+        const keyParts = key.split('.');
+        let targetObject = currentFields;
+        
+        for (let i = 0; i < keyParts.length - 1; i++) {
+          const part = keyParts[i];
+          if (targetObject[part]) {
+            if (targetObject[part].type === 'object') {
+              targetObject = targetObject[part].parameter || {};
+            } else if (targetObject[part].type === 'array') {
+              targetObject = targetObject[part].items || {};
+            }
+          }
+        }
+        
+        const fieldKey = keyParts[keyParts.length - 1];
+        if (targetObject[fieldKey]) {
+          targetObject[fieldKey] = {
+            ...targetObject[fieldKey],
+            type: newType
+          };
+          
+          if (newType === 'array') {
+            targetObject[fieldKey].items = { type: 'string' };
+            delete targetObject[fieldKey].parameter;
+          } else if (newType === 'object') {
+            targetObject[fieldKey].parameter = targetObject[fieldKey].parameter || {};
+            delete targetObject[fieldKey].items;
+          } else {
+            delete targetObject[fieldKey].parameter;
+            delete targetObject[fieldKey].items;
+          }
+        }
+        
+        setObjectFieldValue(JSON.stringify(currentFields, null, 4));
       } catch (error) {
         console.error('Error updating JSON view:', error);
       }
@@ -579,12 +618,20 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
   };
 
   const getNestedFieldValue = (fields, keyParts) => {
-    return keyParts?.reduce((currentField, key) => {
+    if (!fields || !keyParts) return {};
+    
+    return keyParts.reduce((currentField, key) => {
       if (!currentField) return {};
-      if (currentField?.type === "array") {
-        return currentField?.items?.[key] || {};
+      
+      if (currentField.type === 'array') {
+        return currentField.items?.[key] || {};
       }
-      return currentField?.parameter?.[key] || currentField?.[key] || {};
+      
+      if (currentField.type === 'object') {
+        return currentField.parameter?.[key] || {};
+      }
+      
+      return currentField[key] || {};
     }, fields);
   };
 
@@ -809,49 +856,21 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
             </thead>
             <tbody>
               {nestedParameters.map((nestedParam, i) => {
-                const nestedField = getNestedFieldValue(toolData.fields, nestedParam.key.split("."));
-                console.log("he",nestedField)
+                const fullPath = `${param.key}.${nestedParam.key}`;
+                const nestedField = getNestedFieldValue(toolData.fields, fullPath.split('.'));
+                
                 return (
-                  <tr key={nestedParam.key}>
+                  <tr key={fullPath}>
                     <td>{i + 1}</td>
                     <td>
                       <input
                         type="text"
                         className="input input-bordered input-sm w-32"
-                        value={nestedParam.key.split('.').pop()}
+                        value={nestedParam.key}
                         onChange={(e) => {
                           const newName = e.target.value;
                           if (newName.trim()) {
-                            const parentKey = param.key;
-                            const oldKey = nestedParam.key.split('.').pop();
-                            if (oldKey !== newName) {
-                              const existingParams = getNestedParameters(parentKey);
-                              if (existingParams.some(p => p.key.split('.').pop() === newName)) {
-                                toast.error("Parameter name already exists in this object");
-                                return;
-                              }
-                              
-                              setToolData(prev => {
-                                const updatedFields = { ...prev.fields };
-                                const parentField = getNestedFieldValue(updatedFields, parentKey.split('.'));
-                                
-                                if (parentField?.parameter?.[oldKey]) {
-                                  parentField.parameter[newName] = parentField.parameter[oldKey];
-                                  delete parentField.parameter[oldKey];
-                                  
-                                  if (parentField.required_params?.includes(oldKey)) {
-                                    parentField.required_params = parentField.required_params.map(
-                                      p => p === oldKey ? newName : p
-                                    );
-                                  }
-                                }
-                                
-                                return {
-                                  ...prev,
-                                  fields: updatedFields
-                                };
-                              });
-                            }
+                            handleNestedParameterNameChange(param.key, nestedParam.key, newName);
                           }
                         }}
                       />
@@ -863,23 +882,16 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
                         onChange={(e) => {
                           const newType = e.target.value;
                           setToolData(prev => {
-                            const updatedFields = { ...prev.fields };
-                            const targetField = getNestedFieldValue(updatedFields, nestedParam.key.split('.'));
-                            
-                            if (targetField) {
-                              targetField.type = newType;
-                              if (newType === "array") {
-                                targetField.items = { type: "string" };
-                                targetField.parameter = undefined;
-                              } else if (newType === "object") {
-                                targetField.parameter = {};
-                                targetField.items = undefined;
-                              } else {
-                                targetField.parameter = undefined;
-                                targetField.items = undefined;
-                              }
-                            }
-                            
+                            const updatedFields = updateField(
+                              prev.fields,
+                              fullPath.split('.'),
+                              (field) => ({
+                                ...field,
+                                type: newType,
+                                ...(newType === 'object' ? { parameter: field.parameter || {} } : {}),
+                                ...(newType === 'array' ? { items: field.items || { type: 'string' } } : {})
+                              })
+                            );
                             return {
                               ...prev,
                               fields: updatedFields
@@ -891,10 +903,10 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
                           <option key={idx} value={type}>{type}</option>
                         ))}
                       </select>
-                      {nestedField.type === 'object' && (
+                      {nestedField?.type === 'object' && (
                         <NestedParamComp 
-                          nestedParameters={getNestedParameters(nestedParam.fullKey)} 
-                          param={{ key: nestedParam.fullKey }}
+                          nestedParameters={getNestedParameters(fullPath)} 
+                          param={{ key: fullPath }}
                         />
                       )}
                     </td>
@@ -905,22 +917,24 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
                         checked={nestedParam.required}
                         onChange={() => {
                           const parentKey = param.key;
-                          const paramName = nestedParam.key.split('.').pop();
+                          const paramName = nestedParam.key;
                           
                           setToolData(prev => {
-                            const updatedFields = { ...prev.fields };
-                            const parentField = getNestedFieldValue(updatedFields, parentKey.split('.'));
-                            
-                            if (parentField) {
-                              parentField.required_params = parentField.required_params || [];
-                              if (parentField.required_params.includes(paramName)) {
-                                parentField.required_params = parentField.required_params.filter(
-                                  p => p !== paramName
-                                );
-                              } else {
-                                parentField.required_params = [...parentField.required_params, paramName];
+                            const updatedFields = updateField(
+                              prev.fields,
+                              parentKey.split('.'),
+                              (field) => {
+                                const updatedRequiredParams = field.required_params || [];
+                                const newRequiredParams = updatedRequiredParams.includes(paramName)
+                                  ? updatedRequiredParams.filter(p => p !== paramName)
+                                  : [...updatedRequiredParams, paramName];
+                                
+                                return {
+                                  ...field,
+                                  required_params: newRequiredParams
+                                };
                               }
-                            }
+                            );
                             
                             return {
                               ...prev,
@@ -937,13 +951,14 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
                         value={nestedField?.description || ""}
                         onChange={(e) => {
                           setToolData(prev => {
-                            const updatedFields = { ...prev.fields };
-                            const targetField = getNestedFieldValue(updatedFields, nestedParam.key.split('.'));
-                            
-                            if (targetField) {
-                              targetField.description = e.target.value;
-                            }
-                            
+                            const updatedFields = updateField(
+                              prev.fields,
+                              fullPath.split('.'),
+                              (field) => ({
+                                ...field,
+                                description: e.target.value
+                              })
+                            );
                             return {
                               ...prev,
                               fields: updatedFields
@@ -970,13 +985,14 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
                             }
                             
                             setToolData(prev => {
-                              const updatedFields = { ...prev.fields };
-                              const targetField = getNestedFieldValue(updatedFields, nestedParam.key.split('.'));
-                              
-                              if (targetField) {
-                                targetField.enum = parsedEnum;
-                              }
-                              
+                              const updatedFields = updateField(
+                                prev.fields,
+                                fullPath.split('.'),
+                                (field) => ({
+                                  ...field,
+                                  enum: parsedEnum
+                                })
+                              );
                               return {
                                 ...prev,
                                 fields: updatedFields
@@ -991,7 +1007,7 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
                     <td>
                       <button
                         className="btn btn-xs btn-error"
-                        onClick={() => handleDeleteParameter(nestedParam.key)}
+                        onClick={() => handleDeleteParameter(fullPath)}
                       >
                         <TrashIcon size={14} />
                       </button>
@@ -1168,80 +1184,23 @@ function FunctionParameterModal({ preFunction, functionId, params, Model_Name, e
                               className="input input-bordered input-sm w-32"
                               value={param.key}
                               onChange={(e) => {
-                                const newName = e.target.value;
-                                if (handleParameterNameChange(param.key, newName)) {
-                                  e.target.value = newName;
-                                  // Update JSON view immediately
-                                  if (isTextareaVisible) {
-                                    try {
-                                      const currentFields = JSON.parse(objectFieldValue || '{}');
-                                      const keyParts = param.key.split('.');
-                                      const newKeyParts = newName.split('.');
-                                      
-                                      // Find the parent object
-                                      let currentLevel = currentFields;
-                                      for (let i = 0; i < keyParts.length - 1; i++) {
-                                        const part = keyParts[i];
-                                        if (currentLevel[part]) {
-                                          currentLevel = currentLevel[part].parameter || {};
-                                        }
-                                      }
-                                      
-                                      // Update the field name
-                                      const field = currentLevel[keyParts[keyParts.length - 1]];
-                                      delete currentLevel[keyParts[keyParts.length - 1]];
-                                      currentLevel[newKeyParts[newKeyParts.length - 1]] = field;
-                                      
-                                      setObjectFieldValue(JSON.stringify(currentFields, null, 4));
-                                    } catch (error) {
-                                      console.error('Error updating JSON view:', error);
-                                    }
-                                  }
-                                } else {
-                                  e.target.value = param.key;
-                                }
+                                const success = handleParameterNameChange(param.key, e.target.value);
+                                if (!success) e.target.value = param.key;
                               }}
                               placeholder="Parameter name"
                             />
                           </td>
                           <td>
                             <select
-                            className="select select-sm select-bordered"
-                            value={currentType}
-                            onChange={(e) => {
-                              const newType = e.target.value;
-                              handleTypeChange(param.key, newType);
-                              // Update JSON view immediately
-                              if (isTextareaVisible) {
-                                try {
-                                  const currentFields = JSON.parse(objectFieldValue || '{}');
-                                  const keyParts = param.key.split('.');
-                                  let currentLevel = currentFields;
-                                  
-                                  for (let i = 0; i < keyParts.length - 1; i++) {
-                                    const part = keyParts[i];
-                                    if (currentLevel[part]) {
-                                      currentLevel = currentLevel[part].parameter || {};
-                                    }
-                                  }
-                                  
-                                  currentLevel[keyParts[keyParts.length - 1]] = {
-                                    ...currentLevel[keyParts[keyParts.length - 1]],
-                                    type: newType
-                                  };
-                                  
-                                  setObjectFieldValue(JSON.stringify(currentFields, null, 4));
-                                } catch (error) {
-                                  console.error('Error updating JSON view:', error);
-                                }
-                              }
-                            }}
-                          >
-                            <option value="" disabled>Select parameter type</option>
-                            {parameterTypes?.map((type, idx) => (
-                              <option key={idx} value={type}>{type}</option>
-                            ))}
-                          </select>
+                              className="select select-sm select-bordered"
+                              value={currentType}
+                              onChange={(e) => handleTypeChange(param.key, e.target.value)}
+                            >
+                              <option value="" disabled>Select parameter type</option>
+                              {parameterTypes?.map((type, idx) => (
+                                <option key={idx} value={type}>{type}</option>
+                              ))}
+                            </select>
                           </td>
                           <td>
                             <input
