@@ -212,7 +212,14 @@ const ModelDropdown = ({ params }) => {
                                                             }}
                                                             className="hover:bg-gray-50 rounded-md py-1"
                                                         >
-                                                            <a className="text-gray-700 hover:text-gray-900 px-2 py-3">{modelName}</a>
+                                                               
+
+                                                            <a
+                                                                className="flex justify-between items-center px-2 py-3 hover:bg-primary hover:text-white text-gray-70"
+                                                            >
+                                                                {modelName}
+                                                                {modelName === model && <span className="ml-2">✓</span>}
+                                                            </a>
                                                         </li>
                                                     );
                                                 })}
