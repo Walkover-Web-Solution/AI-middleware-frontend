@@ -130,7 +130,7 @@ const ModelDropdown = ({ params }) => {
         Object.entries(modelsList || {}).forEach(([group, options]) => {
             Object.entries(options || {}).forEach(([option, config]) => {
                 if (config?.configuration?.model?.default === modelName) {
-                    modelSpec = config?.configuration?.additional_parameters?.specification;
+                    modelSpec = config?.validationConfig?.specification;
                 }
             });
         });
@@ -212,14 +212,7 @@ const ModelDropdown = ({ params }) => {
                                                             }}
                                                             className="hover:bg-gray-50 rounded-md py-1"
                                                         >
-                                                               
-
-                                                            <a
-                                                                className="flex justify-between items-center px-2 py-3 hover:bg-primary hover:text-white text-gray-70"
-                                                            >
-                                                                {modelName}
-                                                                {modelName === model && <span className="ml-2">✓</span>}
-                                                            </a>
+                                                            <a className={`text-gray-700 hover:text-gray-900 px-2 py-2 ${modelName === model && 'font-bold w-full rounded-md '}`}>{modelName}{modelName === model && <span className="ml-2">✓</span>}</a>
                                                         </li>
                                                     );
                                                 })}
