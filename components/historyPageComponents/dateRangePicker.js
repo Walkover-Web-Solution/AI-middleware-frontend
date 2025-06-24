@@ -31,7 +31,7 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage}) => {
     newSearchParams.set('start', startingDate);
     newSearchParams.set('end', endingDate);
     const thread_id = searchParams.get('thread_id');
-    await dispatch(getHistoryAction(params.id, startingDate, endingDate, 1));
+    await dispatch(getHistoryAction(params.id,'', startingDate, endingDate, 1));
     setHasMore(true);
     setPage(1);
     const queryString = newSearchParams.toString();

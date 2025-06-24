@@ -89,11 +89,14 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
 
   const handleSearch = async (e) => {
     e?.preventDefault();
+    const currentUrl = new URL(window.location.href);
+    const start = currentUrl.searchParams.get('start');
+    const end = currentUrl.searchParams.get('end');  
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
     dispatch(clearSubThreadData());
-    const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
+    const result = await dispatch(getHistoryAction(params?.id, selectedVersion === 'all' ? '' : selectedVersion, start, end, 1, searchRef?.current?.value || ""));
     if (result?.length < 40) setHasMore(false);
   };
 
@@ -103,7 +106,11 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
-    const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
+    const currentUrl = new URL(window.location.href);
+    const start = currentUrl.searchParams.get('start');
+    const end = currentUrl.searchParams.get('end');
+    
+    const result = await dispatch(getHistoryAction(params?.id, selectedVersion === 'all' ? '' : selectedVersion, start, end, 1, searchRef?.current?.value || ""));
     await dispatch(getThread(params.thread_id, params?.id, params.subThread_id || params.thread_id, 1, "all"));
     if (result?.length < 40) setHasMore(false);
   };
@@ -136,8 +143,11 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const handleSelectSubThread = async (subThreadId, threadId) => {
     setThreadPage(1);
     setExpandedThreads([threadId]);
-    const start = searchParams.get('start');
-    const end = searchParams.get('end');
+    
+    const currentUrl = new URL(window.location.href);
+    const start = currentUrl.searchParams.get('start');
+    const end = currentUrl.searchParams.get('end');
+    
     router.push(`${pathName}?version=${params.version}&thread_id=${threadId ? threadId : params.thread_id}&subThread_id=${subThreadId}&start=${start}&end=${end}`, undefined, { shallow: true });
   };
 
@@ -158,8 +168,9 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   );
 
   const handleCheckError = async (isError) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+   
     if (isError === true) {
-      const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.set('error', 'true');
       const queryString = newSearchParams.toString();
       await dispatch(getHistoryAction(params.id, null, null, 1, null, filterOption, true));
@@ -171,7 +182,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     }
     else {
       setIsErrorTrue(false);
-      const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.delete('error');
       const queryString = newSearchParams.toString();
       await dispatch(getHistoryAction(params.id, null, null, 1, null, filterOption));
