@@ -4,13 +4,13 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
-import { ChevronDown, Info, Wand2 } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
-import Link from 'next/link';
 import ToneDropdown from './toneDropdown'; 
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
+import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
+import InfoModel from '@/components/infoModel';
 
 const InputConfigComponent = ({ params }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -26,6 +26,7 @@ const InputConfigComponent = ({ params }) => {
     const [prompt, setPrompt] = useState(reduxPrompt);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
+    const [messages, setMessages] = useState([]);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -46,7 +47,7 @@ const InputConfigComponent = ({ params }) => {
     }, [prompt, reduxPrompt]);
 
     const savePrompt = useCallback((e) => {
-        const newValue = e.target?.value || "";
+        const newValue = e?.target?.value || e || "";
         setShowSuggestions(false);
         if (newValue !== reduxPrompt) {
             // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { prompt: newValue } } }));
@@ -252,21 +253,15 @@ const InputConfigComponent = ({ params }) => {
             <div className="h-4 w-px bg-gray-300 mx-2"></div>
             <div className="flex items-center justify-center">
               <button
-                className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
                 onClick={() => {
                   openModal(MODAL_TYPE?.PROMPT_SUMMARY);
                 }}
               >
-                <span>Prompt Summary</span>
+                <InfoModel tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
+                <span className='label-text promptSummary-info capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
+                </InfoModel>
               </button>
-              <div
-                className="tooltip tooltip-right"
-                data-tip={
-                  "Prompt summary is only for the agent not for the Versions"
-                }
-              >
-                <Info size={12} className="ml-2" />
-              </div>
+             
             </div>
           </div>
           <div className='flex gap-4'>
@@ -289,7 +284,6 @@ const InputConfigComponent = ({ params }) => {
               <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                  Improve Prompt           
               </span>
-              <Wand2 size={14} className=' ml-2'/>
             </div>
           </div>
         </div>
@@ -309,12 +303,12 @@ const InputConfigComponent = ({ params }) => {
               <div className="flex items-center gap-2">
                 <span className="text-nowrap">Default Variables</span>
                 <p role="alert" className="label-text-alt alert p-2">
-                  <Info size={16} className="" />
+                  <InfoIcon size={16} className="" />
                   Use these variables in prompt to get their functionality
                 </p>
               </div>
               <div className="ml-auto">
-                <ChevronDown className="collapse-arrow" size={12} />
+                <ChevronDownIcon className="collapse-arrow" size={12} />
               </div>
             </div>
             <div className="collapse-content">
@@ -354,7 +348,7 @@ const InputConfigComponent = ({ params }) => {
               <ResponseStyleDropdown params={params} />
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
-            <OptimizePromptModal params={params} />
+            <OptimizePromptModal savePrompt={savePrompt}setPrompt={setPrompt} params={params} messages={messages} setMessages={setMessages}/>
             <PromptSummaryModal params={params}/>
         </div>
     );

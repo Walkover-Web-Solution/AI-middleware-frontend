@@ -4,6 +4,7 @@ import GeminiIcon from "@/icons/GeminiIcon";
 import GoogleDocIcon from "@/icons/GoogleDocIcon";
 import GroqIcon from "@/icons/GroqIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
+import OpenRouter from "@/icons/OpenRouter";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { WebSearchIcon } from "@/icons/webSearchIcon";
 import { cloneDeep } from "lodash";
@@ -182,6 +183,8 @@ export const getIconOfService = (service, height, width) => {
             return <GroqIcon height={height} width={width} />;
         case 'google':
             return <GeminiIcon height={height} width={width} />;
+        case 'open_router':
+            return <OpenRouter height={height} width={width} />;
         default:
             return <OpenAiIcon height={height} width={width} />;
     }
@@ -315,6 +318,75 @@ export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
 
 export const updateTitle = (newTitle) => {
     if (typeof document !== 'undefined' && newTitle) {
-      document.title = newTitle;
+        document.title = newTitle;
+        document.title = newTitle;
     }
   };
+
+ export const simulateStreaming = (text, setStreamed, setIsStreaming, callback) => {
+    setIsStreaming(true);
+    setStreamed("");
+    
+    let currentIndex = 0;
+    const streamInterval = setInterval(() => {
+      if (currentIndex < text?.length) {
+        // Process multiple characters at once
+        const chunk = text?.slice(currentIndex, currentIndex + 5); // Process 5 chars at a time
+        setStreamed(prev => prev + chunk);
+        currentIndex += 5;
+      } else {
+        clearInterval(streamInterval);
+        setIsStreaming(false);
+        // Set final text to ensure we didn't miss any characters
+        setStreamed(text);
+        callback();
+      }
+    }, 5); // Reduced interval to 5ms
+  };
+  
+
+  export const createDiff = (oldText, newText) => {
+    const oldLines = oldText?.split('\n');
+    const newLines = newText?.split('\n');
+    const maxLines = Math.max(oldLines?.length, newLines?.length);
+    
+    const diffLines = [];
+    
+    for (let i = 0; i < maxLines; i++) {
+      const oldLine = oldLines[i] || '';
+      const newLine = newLines[i] || '';
+      
+      if (oldLine === newLine) {
+        diffLines?.push({
+          type: 'equal',
+          oldLine,
+          newLine,
+          lineNumber: i + 1
+        });
+      } else if (!oldLine) {
+        diffLines?.push({
+          type: 'added',
+          oldLine: '',
+          newLine,
+          lineNumber: i + 1
+        });
+      } else if (!newLine) {
+        diffLines?.push({
+          type: 'deleted',
+          oldLine,
+          newLine: '',
+          lineNumber: i + 1
+        });
+      } else {
+        diffLines?.push({
+          type: 'modified',
+          oldLine,
+          newLine,
+          lineNumber: i + 1
+        });
+      }
+    }
+    
+    return diffLines;
+  };
+

@@ -9,22 +9,23 @@ import { getSingleMessage, switchOrg } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
-import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
+import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
+import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
-import { forEach } from "lodash";
+
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
 function layoutOrgPage({ children, params }) {
-  
   const dispatch = useDispatch();
   const pathName = usePathname();
+  const urlParams = useParams();
   const searchParams = useSearchParams();
   const version_id = searchParams.get('version');
   const path = pathName.split('?')[0].split('/')
@@ -32,17 +33,40 @@ function layoutOrgPage({ children, params }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, SERVICES} = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES , doctstar_embed_token } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
-    organizations : state.userDetailsReducer.organizations,
+    organizations: state.userDetailsReducer.organizations,
     preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
-    SERVICES:state?.serviceReducer?.services 
+    SERVICES: state?.serviceReducer?.services,
+    currentUser: state.userDetailsReducer.userDetails,
+    doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
-  const urlParams = useParams();
-  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
+ useEffect(() => {
+  const updateUserMeta = async () => {
+    if (currentUser?.meta===null) {
+      const updatedUser = {
+        ...currentUser,
+        meta: {
+          onboarding: {
+            bridgeCreation: true,
+            FunctionCreation: true,
+            knowledgeBase: true,
+            Addvariables: true,
+            AdvanceParameter: true,
+            PauthKey: true,
+            CompleteBridgeSetup: true,
+          },
+        },
+      };
+      await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+    }
+  };
 
+  updateUserMeta();
+}, []);
+  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
   useEffect(() => {
     const validateOrg = async () => {
       try {
@@ -66,22 +90,22 @@ function layoutOrgPage({ children, params }) {
 
   useEffect(() => {
     if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-        dispatch(getServiceAction({ orgid: params.orgid }))
+      dispatch(getServiceAction({ orgid: params.orgid }))
     }
-}, [SERVICES]);
+  }, [SERVICES]);
 
   useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
-        if (data === 0) {
+        if (data === 0 && !currentUser?.meta?.onboarding?.bridgeCreation) {
           openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
         }
         setLoading(false);
       }))
       dispatch(getAllFunctions())
     }
-  }, [isValidOrg]);
-  
+  }, [isValidOrg, currentUser?.meta?.onboarding?.bridgeCreation]);
+
   useEffect(() => {
     if (isValidOrg) {
       Array?.isArray(SERVICES) && SERVICES?.map((service) => {
@@ -151,6 +175,23 @@ function layoutOrgPage({ children, params }) {
     }
   }, [isValidOrg, params])
 
+  // const docstarScriptId = "docstar-main-script";
+  // const docstarScriptSrc = "https://app.docstar.io/scriptProd.js";
+
+  // useEffect(() => {
+  //   const existingScript = document.getElementById(docstarScriptId);
+  //   if (existingScript) {
+  //     document.head.removeChild(existingScript);
+  //   }
+  //   if (doctstar_embed_token) {
+  //     const script = document.createElement("script");
+  //     script.setAttribute("embedToken", doctstar_embed_token);
+  //     script.id = docstarScriptId;
+  //     script.src = docstarScriptSrc;
+  //     document.head.appendChild(script);
+  //   }
+  // }, [doctstar_embed_token]);
+
   useEffect(() => {
     if (isValidOrg) {
       window.addEventListener("message", handleMessage);
@@ -161,7 +202,7 @@ function layoutOrgPage({ children, params }) {
   }, [isValidOrg, params.id, versionData, version_id, path]);
 
   async function handleMessage(e) {
-    if(e.data?.metadata?.type!=='tool') return;
+    if (e.data?.metadata?.type !== 'tool') return;
     // todo: need to make api call to update the name & description
     if (e?.data?.webhookurl) {
       const dataToSend = {
@@ -201,16 +242,26 @@ function layoutOrgPage({ children, params }) {
         };
         dispatch(createApiAction(params.org_id, dataFromEmbed)).then((data) => {
           if (!versionData?.[data?._id] && (!Array.isArray(preTools) || !preTools?.includes(data?._id))) {
-            dispatch(updateBridgeVersionAction({
-              bridgeId: path[5],
-              versionId: version_id,
-              dataToSend: {
-                functionData: {
-                  function_id: data?._id,
-                  function_operation: "1"
-                }
-              }
-            }))
+            {
+              e?.data?.metadata?.createFrom && e.data.metadata.createFrom === "preFunction" ? (
+                dispatch(updateApiAction(path[5], {
+                  pre_tools: [data?._id],
+                  version_id: version_id
+                }))
+              )
+                : (
+                  dispatch(updateBridgeVersionAction({
+                    bridgeId: path[5],
+                    versionId: version_id,
+                    dataToSend: {
+                      functionData: {
+                        function_id: data?._id,
+                        function_operation: "1"
+                      }
+                    }
+                  }))
+                )
+            }
           }
         });
       }

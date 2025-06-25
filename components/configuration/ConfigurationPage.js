@@ -1,7 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { Bot, Cog, FileSliders } from "lucide-react";
+import { BotIcon, SettingsIcon, FilterSliderIcon } from "@/components/Icons";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
@@ -29,6 +29,7 @@ import AddVariable from "../addVariable";
 import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
+import NewInputConfigComponent from "./configurationComponent/newInputConfigComponent";
 
 export default function ConfigurationPage({ params }) {
     const router = useRouter();
@@ -69,6 +70,7 @@ export default function ConfigurationPage({ params }) {
                     <>
                         <PreEmbedList params={params} />
                         <InputConfigComponent params={params} />
+                        {/* <NewInputConfigComponent params={params} /> */}
                         <EmbedList params={params} />
                         <hr className="my-0 p-0" />
                         <ConnectedAgentList params={params} />
@@ -138,14 +140,14 @@ export default function ConfigurationPage({ params }) {
                             onClick={() => handleNavigation('config')}
                             className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
-                            <Cog size={16} className="shrink-0" />
+                            <SettingsIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
                         </button>
                         <button
                             onClick={() => handleNavigation('chatbot-config')} 
                             className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
-                            <Bot size={16} className="shrink-0" />
+                            <BotIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
                         </button>
                         <button
@@ -153,7 +155,7 @@ export default function ConfigurationPage({ params }) {
                             className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
                             
-                            <FileSliders size={16} className="shrink-0" />
+                            <FilterSliderIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'guide' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Integration Guide</span>
                         </button>
                     </div>

@@ -4,7 +4,7 @@ import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, dup
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { Building2, ChevronDown, FileSliders, History, Home, Rss, TestTube, MessageCircleMore, Play, Pause, File,BookCheck ,ClipboardX} from 'lucide-react';
+import { FilterSliderIcon, HistoryIcon, HomeIcon, RSSIcon, TestTubeIcon, MessageCircleMoreIcon, PlayIcon, PauseIcon, ClipboardXIcon, ChevronDownIcon, BuildingIcon, ChecklistIcon } from '@/components/Icons';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -107,13 +107,13 @@ function Navbar() {
       <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[19] max-h-[4rem] bg-base-100 sticky top-0`}>
         <div className={`flex items-center w-full justify-start gap-2 ${path.length > 4 ? '' : 'hidden'}`}>
           <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/agents`)}>
-            <Home size={16} />
+            <HomeIcon size={16} />
           </button>
           <button className="btn m-1" onClick={toggleOrgSidebar}>
-            <Building2 size={16} /> {truncate(organizations[path[2]]?.name,15)}
-     </button>
+            <BuildingIcon size={16} /> {truncate(organizations[path[2]]?.name,15)}
+          </button>
           <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDown size={16} /></div>
+            <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDownIcon size={16} /></div>
             <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
               {['agents', 'pauthkey', 'apikeys', 'knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
                 <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
@@ -124,8 +124,8 @@ function Navbar() {
               ))}
             </ul>
           </div>
-          {path[3] === 'agents' && path.length === 6 && <button className="btn m-1 max-w-44 " onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service)} {truncate(bridgeData?.name, 15)} </button>}
-          {path[3] === 'chatbot' && path[4] === 'configure' && <button className="btn m-1" onClick={toggleChatbotSidebar}> <Rss size={16} /> {chatbotData?.title} </button>}
+          {path[3] === 'agents' && path.length === 6 && <button className="btn m-1 max-w-44 " onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service, 18, 18)} {truncate(bridgeData?.name, 15)} </button>}
+          {path[3] === 'chatbot' && path[4] === 'configure' && <button className="btn m-1" onClick={toggleChatbotSidebar}> <RSSIcon size={16} /> {chatbotData?.title} </button>}
         </div>
 
         <div className="justify-end w-full" >
@@ -137,10 +137,10 @@ function Navbar() {
               data-tip={bridge?.bridge_status === 0 ? 'Resume Agent' : 'Pause Agent'}
               onClick={() => handlePauseBridge(bridge?.bridge_status === 0 ? 'resume' : 'paused')}
             >
-              {bridge?.bridge_status === 0 ? <Play size={16} /> : <Pause size={16} />}
+              {bridge?.bridge_status === 0 ? <PlayIcon size={16} /> : <PauseIcon size={16} />}
             </button>
               <button className="btn m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
-                <History size={16} />
+                <HistoryIcon size={16} />
               </button>
               {path[4] === 'configure' && (
                 <div className='flex items-center'>
@@ -151,7 +151,7 @@ function Navbar() {
                           className="btn bg-red-200 m-1 hover:bg-red-300"
                           onClick={handleDiscardChanges}
                         >
-                         <ClipboardX size={16} /> <span className='text-black'>Discard</span>
+                         <ClipboardXIcon size={16} /> <span className='text-black'>Discard</span>
                         </button>
                       </div>
                     </div>
@@ -161,7 +161,7 @@ function Navbar() {
                     onClick={() => openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
                     disabled={!isdrafted && publishedVersion === versionId}
                   >
-                   <BookCheck size={16} /> Publish                  </button>
+                   <ChecklistIcon size={16} /> Publish                  </button>
                   <div className="divider divider-horizontal mx-1"></div>
                 </div>
               )}
@@ -170,14 +170,14 @@ function Navbar() {
                 onClick={() => router.push(`/org/${path[2]}/agents/configure/${bridgeId}?version=${versionId}`)} 
                 className={`${path[4] === 'configure' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
               >
-                <FileSliders size={16} className="shrink-0" />
+                <FilterSliderIcon size={16} className="shrink-0" />
                 <span className={`${path[4] === 'configure' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Configure Agents</span>
               </button>
                 <button 
                 onClick={() => router.push(`/org/${path[2]}/agents/testcase/${bridgeId}?version=${versionId}`)} 
                 className={`${path[4] === 'testcase' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-2 group/btn`}
               >
-                <TestTube size={16} className="shrink-0" />
+                <TestTubeIcon size={16} className="shrink-0" />
                 <span className={`${path[4] === 'testcase' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Test Cases</span>
               </button>
               
@@ -185,7 +185,7 @@ function Navbar() {
                 onClick={() => router.push(`/org/${path[2]}/agents/history/${bridgeId}?version=${versionId}`)} 
                 className={`${path[4] === 'history' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-2 group/btn`}
               >
-                <MessageCircleMore size={16} className="shrink-0" />
+                <MessageCircleMoreIcon size={16} className="shrink-0" />
                 <span className={`${path[4] === 'history' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chat History</span>
               </button>
               </div>

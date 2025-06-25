@@ -3,7 +3,7 @@ import { getHistoryAction, getSubThreadsAction, getThread, userFeedbackCountActi
 import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyReducer.js";
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { openModal } from "@/utils/utility.js";
-import { ChevronDown, ChevronUp, Download, MessageCircle, ThumbsDown, ThumbsUp, User } from "lucide-react";
+import { DownloadIcon, ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon, MessageCircleIcon } from "@/components/Icons";
 import { useEffect, useState, memo, useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
@@ -205,7 +205,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                       onChange={() => handleFilterChange(value)}
                       className={`radio ${value === "all" ? "radio-primary" : value === "1" ? "radio-success" : "radio-error"}`}
                     />
-                    {value === "all" ? <span>All</span> : value === "1" ? <ThumbsUp size={16} /> : <ThumbsDown size={16} />}
+                    {value === "all" ? <span>All</span> : value === "1" ? <ThumbsUpIcon size={16} /> : <ThumbsDownIcon size={16} />}
                   </label>
                 ))}
               </div>
@@ -314,9 +314,9 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                           className="absolute right-4 cursor-pointer"
                         >
                           {expandedThreads?.includes(item?.thread_id) ? (
-                            <ChevronUp size={16} />
+                            <ChevronUpIcon size={16} />
                           ) : (
-                            <ChevronDown size={16} />
+                            <ChevronDownIcon size={16} />
                           )}
                         </div>
                       )}
@@ -370,7 +370,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                       }`}
                                   >
                                     <div className="flex items-center gap-2">
-                                      <MessageCircle className={`w-4 h-4 ${params?.subThread_id === subThread?.sub_thread_id ? 'text-primary' : 'text-gray-500'
+                                      <MessageCircleIcon className={`w-4 h-4 ${params?.subThread_id === subThread?.sub_thread_id ? 'text-primary' : 'text-gray-500'
                                         }`} />
                                       <span 
                                         className="font-medium text-sm"
@@ -390,7 +390,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                           className={`cursor-pointer p-2 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
                                         >
                                           <div className="flex items-start gap-2">
-                                            <User className="w-3 h-3 mt-0.5 text-gray-400" />
+                                            <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />
                                             <span>{truncate(msg?.message, 45)}</span>
                                           </div>
                                         </div>
@@ -415,7 +415,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                 className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
                               >
                                 <div className="flex items-start gap-2">
-                                  <User className="w-3 h-3 mt-0.5 text-gray-400" />
+                                  <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />
                                   <span>{truncate(msg?.message, 45)}</span>
                                 </div>
                               </div>
@@ -444,7 +444,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
               className="btn btn-primary"
               disabled={selectedThreadIds?.length === 0}
             >
-              Download <Download size={16} />
+              Download <DownloadIcon size={16} />
             </button>
             <button onClick={() => setIsThreadSelectable(false)} className="btn btn-secondary">
               Cancel

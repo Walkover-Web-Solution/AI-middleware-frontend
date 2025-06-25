@@ -3,7 +3,7 @@ import { getInvitedUsers, inviteUser } from '@/config';
 import Protected from '@/components/protected';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { CircleUser } from 'lucide-react';
+import { UserCircleIcon } from '@/components/Icons';
 
 export const runtime = 'edge';
 
@@ -180,7 +180,7 @@ function InvitePage({ params }) {
                   className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all"
                 >
                   <div className="flex items-center gap-4">
-                    <CircleUser className="text-blue-500 text-2xl" />
+                    <UserCircleIcon size={16} className="text-blue-500 text-2xl" />
                     <span className="text-lg font-medium text-gray-700">{member.name}</span>
                   </div>
                 </div>
@@ -275,7 +275,7 @@ function InvitePage({ params }) {
                   key={index}
                   className="flex items-center justify-start space-x-4 bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition duration-300"
                 >
-                  <CircleUser className="text-blue-500" />
+                  <UserCircleIcon size={16} className="text-blue-500" />
                   <span className="text-lg font-medium text-gray-700">{member.name}</span>
                 </div>
               ))}

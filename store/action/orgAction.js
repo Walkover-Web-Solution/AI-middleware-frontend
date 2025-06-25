@@ -1,6 +1,6 @@
-import { createOrg, generateAccessKey, getAllOrg, updateOrganizationData } from "@/config";
+import { createOrg, generateAccessKey, getAllOrg, updateOrganizationData, updateUser } from "@/config";
 import { organizationCreated, organizationsFetched, setCurrentOrgId } from "../reducer/orgReducer";
-import { updateToken, updateUserDetails } from "../reducer/userDetailsReducer";
+import {  updateToken, updateUserDetails, updateUserMeta } from "../reducer/userDetailsReducer";
 
 export const createOrgAction = (dataToSend, onSuccess) => async (dispatch) => {
   try {
@@ -40,10 +40,22 @@ export const updateOrgTimeZone = (orgId, orgDetails) => async (dispatch) => {
     throw error;
   }
 }
+export const updateUserMetaOnboarding = (userId, user) => async (dispatch) => {
+  try {
+    const response = await updateUser({ user_id: userId, user });
+    dispatch(updateUserMeta({ userId, user: response?.data?.data?.user }))
+  }
+  catch (error) {
+    console.error("error updating user meta");
+    throw error
+  }
+}
 
 export const generateAccessKeyAction = (orgId) => async (dispatch) => {
   try {
     const response = await generateAccessKey();
+
+
     dispatch(updateToken({ orgId, auth_token: response?.data?.auth_token }));
   } catch (error) {
     console.error('Error updating organization timezone:', error);

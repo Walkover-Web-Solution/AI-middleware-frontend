@@ -2,19 +2,24 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
-import { ChevronDown, ChevronUp, Info, Trash2 } from "lucide-react";
+import { updateOnBoardingDetails } from "@/utils/utility";
+import { ChevronUpIcon, ChevronDownIcon, InfoIcon, TrashIcon } from "@/components/Icons";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-
+import OnBoarding from "./OnBoarding";
+import { ONBOARDING_VIDEOS } from "@/utils/enums";
+import TutorialSuggestionToast from "./tutorialSuggestoinToast";
 const AddVariable = ({ params }) => {
   const versionId = params.version;
-  const { variablesKeyValue, prompt } = useCustomSelector((state) => ({
-    variablesKeyValue:
-      // state?.bridgeReducer?.allBridgesMap?.[params.id]?.variables || [],
-      state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
+  const { variablesKeyValue, prompt, isFirstVariable,  } = useCustomSelector((state) => ({
+    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+    isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
   }));
-
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: false
+  });
   const [keyValuePairs, setKeyValuePairs] = useState([]);
   const [isFormData, setIsFormData] = useState(true);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
@@ -23,6 +28,13 @@ const AddVariable = ({ params }) => {
   const dispatch = useDispatch();
   const accordionContentRef = useRef(null); // Ref for the accordion content
   const isOpeningRef = useRef(false); // To track if the accordion is opening
+  const handleTutorial = () => {
+     setTutorialState(prev => ({
+        ...prev,
+        showSuggestion: isFirstVariable
+      }));
+  };
+
 
   const updateVersionVariable = (updatedPairs) => {
     const filteredPairs = updatedPairs ? updatedPairs?.filter(pair =>
@@ -219,18 +231,22 @@ const AddVariable = ({ params }) => {
 
   return (
     <div className="collapse text-base-content" tabIndex={0}>
-      {/* Accordion Toggle Button */}
       <button
         className="flex items-center cursor-pointer focus:outline-none"
-        onClick={toggleAccordion}
+        onClick={() => {
+          handleTutorial()
+          toggleAccordion()
+        }}
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
       >
-        <span className="mr-2 text-nowrap font-medium">
-          Add Variables
-        </span>
-        {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
+        <span className="mr-2 text-nowrap font-medium">Add Variables</span>
+        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </button>
+      {tutorialState?.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"} TutorialDetails={"Variable Management"}/>)}
+      {tutorialState?.showTutorial && (
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
+      )}
 
       {/* Accordion Content */}
       <div
@@ -289,7 +305,7 @@ const AddVariable = ({ params }) => {
                 {keyValuePairs.length > 0 && <div className="flex items-center gap-2 w-full">
                   <div className="tooltip tooltip-right" data-tip="Mark checkbox if it is required">
                     <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
-                      <Info className="w-4 h-4 text-base-content/70" />
+                      <InfoIcon className="w-4 h-4 text-base-content/70" />
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
@@ -329,7 +345,7 @@ const AddVariable = ({ params }) => {
                       onClick={() => handleRemoveKeyValuePair(index)}
                       aria-label="Remove Variable"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <TrashIcon className="w-4 h-4" />
                     </button>
                   </div>
                 ))}

@@ -2,11 +2,11 @@ import { dryRun } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { uploadImageAction } from '@/store/action/bridgeAction';
 import _ from 'lodash';
-import { CircleX, ImageUpIcon } from 'lucide-react';
 import Image from 'next/image';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import { CloseCircleIcon, ImageUploadIcon } from '@/components/Icons';
 
 function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation }) {
     const [loading, setLoading] = useState(false);
@@ -237,7 +237,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                                     setUploadedImages(newImages);
                                 }}
                             >
-                                <CircleX className='text-base-content bg-base-200 rounded-full' size={20} />
+                                <CloseCircleIcon className='text-base-content bg-base-200 rounded-full' size={20} />
                             </button>
                         </div>
                     ))}
@@ -268,7 +268,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 onClick={() => fileInputRef.current.click()}
                 disabled={loading || uploading}
             >
-                <ImageUpIcon />
+                <ImageUploadIcon  />
             </button>}
             <button
                 className="btn"

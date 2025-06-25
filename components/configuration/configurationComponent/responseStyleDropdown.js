@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { Info } from "lucide-react";
+import InfoModel from "@/components/infoModel";
 
 const RESPONSE_STYLES = [
   {
@@ -75,16 +75,15 @@ const ResponseStyleDropdown = ({ params }) => {
   return (
     <label className="form-control w-full">
       <div className="flex items-center pb-1">
-        <div className="label">
-          <span className="label-text font-medium">Response Style</span>
-        </div>
-        <div
-          className="tooltip tooltip-right"
-          data-tip={"Select the depth of response (optional)."}
-        >
-          <Info size={14} className="ml-1" />
-        </div>
-      </div>
+   <InfoModel tooltipContent={"Select the depth of response (optional)."} >
+    <div
+      className="label-text info"
+    >
+      Response Style
+    </div>
+  </InfoModel>
+</div>
+
 
       <div className="flex items-center gap-2">
         <select

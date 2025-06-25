@@ -34,10 +34,10 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                     name,
                     meta: {
                         about,
-                        identifier:selectedTimezone?.identifier,
-                        offSet:selectedTimezone?.offSet
+                        identifier: selectedTimezone?.identifier,
+                        offSet: selectedTimezone?.offSet,
                     },
-                    timezone : selectedTimezone?.offSet
+                    timezone: selectedTimezone?.offSet
                 },
             };
 

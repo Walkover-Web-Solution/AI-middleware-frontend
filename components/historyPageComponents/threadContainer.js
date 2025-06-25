@@ -1,4 +1,4 @@
-import { CircleChevronDown } from 'lucide-react';
+import { CircleDownIcon } from '@/components/Icons';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ThreadItem from './threadItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -318,7 +318,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
             onClick={() => scrollToBottom(historyRef)}
             className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-10"
           >
-            <CircleChevronDown size={24} />
+            <CircleDownIcon size={24} />
           </button>
         )}
       </div>

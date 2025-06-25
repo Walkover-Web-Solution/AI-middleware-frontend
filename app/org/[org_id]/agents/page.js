@@ -3,14 +3,16 @@ import CreateNewBridge from "@/components/createNewBridge";
 import CustomTable from "@/components/customTable/customTable";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import LoadingSpinner from "@/components/loadingSpinner";
+import OnBoarding from "@/components/OnBoarding";
 import PageHeader from "@/components/Pageheader";
 import Protected from "@/components/protected";
+import TutorialSuggestionToast from "@/components/tutorialSuggestoinToast";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
-import { MODAL_TYPE } from "@/utils/enums";
-import { filterBridges, getIconOfService, openModal } from "@/utils/utility";
-import { Ellipsis, LayoutGrid, Table, TestTubeDiagonal } from "lucide-react";
+import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
+import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
+import { EllipsisIcon, LayoutGridIcon, TableIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -22,15 +24,22 @@ function Home({ params }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
-  const averageResponseTime = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.average_response_time || []);
-
-  const { isLoading } = useCustomSelector((state) => ({
-    isLoading: state.bridgeReducer.loading,
-  }));
-
+  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation } = useCustomSelector((state) => {
+    const orgData = state.bridgeReducer.org[params.org_id] || {};
+    const user = state.userDetailsReducer.userDetails
+    return {
+      allBridges: (orgData.orgs || []).slice().reverse(),
+      averageResponseTime: orgData.average_response_time || [],
+      isLoading: state.bridgeReducer.loading,
+      isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
+    };
+  });
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table'); // State to manage view mode based on screen size
+  const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: isFirstBridgeCreation
+  });
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -40,16 +49,16 @@ function Home({ params }) {
         setViewMode('table');
       }
     };
-    updateScreenSize(); // Run on mount
+    updateScreenSize();
     window.addEventListener('resize', updateScreenSize);
 
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
+  
   const filteredBridges = filterBridges(allBridges, searchTerm);
   const filteredArchivedBridges = filteredBridges?.filter((item) => item.status === 0);
   const filteredUnArchivedBridges = filteredBridges?.filter((item) => item.status === 1 || item.status === undefined);
-
 
   const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
     _id: item._id,
@@ -137,9 +146,8 @@ function Home({ params }) {
           </div>
         </div>
         <div className="dropdown bg-transparent absolute right-3 top-2">
-          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
+          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
           <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-            {/* <li><a onClick={(e) => { e.preventDefault(); handleDuplicateBridge(item._id) }}>Duplicate Bridge</a></li> */}
             <li><a onClick={(e) => { e.preventDefault(); archiveBridge(item._id, item.status != undefined ? Number(!item?.status) : undefined) }}>{(item?.status === 0) ? 'Un-archive Agent' : 'Archive Agent'}</a></li>
           </ul>
         </div>
@@ -178,7 +186,7 @@ function Home({ params }) {
           </button>
         </div>
         <div className="dropdown dropdown-left bg-transparent">
-          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><Ellipsis className="rotate-90" size={16} /></div>
+          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
           <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
             <li><a onClick={(e) => {
               e.preventDefault();
@@ -208,6 +216,15 @@ function Home({ params }) {
 
   return (
     <div className="w-full">
+      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"}/>}
+      {tutorialState?.showTutorial && (
+        <OnBoarding
+          setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
+          video={ONBOARDING_VIDEOS.bridgeCreation}
+          flagKey={"bridgeCreation"}
+
+        />
+      )}
       <CreateNewBridge />
       {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
@@ -246,10 +263,10 @@ function Home({ params }) {
                   </div>
                   <div className="join hidden sm:block">
                     <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
-                      <LayoutGrid className="h-4 w-4" />
+                      <LayoutGridIcon className="h-4 w-4" />
                     </a>
                     <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
-                      <Table className="h-4 w-4" />
+                      <TableIcon className="h-4 w-4" />
                     </a>
                   </div>
                 </div>

@@ -7,7 +7,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, getAllApikeyAction } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
 import { getIconOfService, openModal } from '@/utils/utility';
-import { SquarePen, Trash2 } from 'lucide-react';
+import { SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -77,14 +77,14 @@ const Page = () => {
           data-tip="delete"
           onClick={() => deleteApikey(row)}
         >
-          <Trash2 strokeWidth={2} size={20} />
+          <TrashIcon size={16} />
         </div>
         <div
           className="tooltip tooltip-primary"
           data-tip="Update"
           onClick={() => handleUpdateClick(row)}
         >
-          <SquarePen size={20} />
+          <SquarePenIcon size={16} />
         </div>
       </div>
     );

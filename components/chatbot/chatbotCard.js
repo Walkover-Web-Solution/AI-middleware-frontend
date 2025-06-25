@@ -1,8 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector"
-import { ArrowUpRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react";
-
 
 
 export default function ChatbotCard({ params }) {
@@ -60,7 +58,7 @@ export default function ChatbotCard({ params }) {
         //                                     className="checkbox checkbox-sm"
         //                                     checked={checkedCard === index} // Check the card if its index matches the checkedCard state
         //                                 />
-        //                                 <ArrowUpRight className="ml-2 h-4 w-4 flex-shrink-0" />
+        //                                 <ArrowUpRightIcon className="ml-2 h-4 w-4 flex-shrink-0" />
         //                             </div>
         //                             <p className="mt-3 text-sm text-gray-600">
         //                                 Service Used: {data?.service}
