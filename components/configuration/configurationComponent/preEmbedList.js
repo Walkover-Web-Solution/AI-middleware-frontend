@@ -24,10 +24,11 @@ const PreEmbedList = ({ params }) => {
             modelType: modelTypeName,
             model: modelName,
             service: serviceName,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName].validationConfig?.tools,
             embedToken: orgData?.embed_token,
         };
     });
+    console.log('dkl',shouldToolsShow)
     const [functionId, setFunctionId] = useState(null);
     const dispatch = useDispatch();
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
@@ -53,10 +54,10 @@ const PreEmbedList = ({ params }) => {
                     </InfoModel>
                 </div>
                 <div className="label flex-col items-start">
-                    {shouldToolsShow &&
+                    
                         <div className="flex flex-wrap gap-4">
                             <RenderEmbed bridgeFunctions={bridgePreFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="preFunction" />
-                        </div>}
+                        </div>
                 </div>
             </div>
         </div> :
