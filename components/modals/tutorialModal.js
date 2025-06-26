@@ -61,7 +61,7 @@ const TutorialModal = () => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.TUTORIAL_MODAL}>
       {/* Main Modal */}
-      <div className="relative z-10 w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
+      <div className="relative z-low w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
         {/* Header */}
         <div className=" px-8 py-6 ">
           <div className="flex items-center justify-between">

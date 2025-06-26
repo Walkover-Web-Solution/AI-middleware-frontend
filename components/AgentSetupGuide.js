@@ -26,7 +26,7 @@ const AgentSetupGuide = ({ params = {} }) => {
   if (!isVisible || bridgeApiKey) return null;
 
   return (
-    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-[999999]">
+    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-high">
       <div className="card bg-base-100 w-full h-full shadow-xl">
         <div className="card-body p-6 h-full flex flex-col">
 

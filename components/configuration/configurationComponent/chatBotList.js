@@ -39,7 +39,7 @@ const ChatBotList = ({ params }) => {
             </div>
             <button className="btn btn-outline btn-sm mt-4 w-fit" onClick={handleAddChatbotClick}><AddIcon size={16} /> Add ChatBot</button>
 
-            {isSliderOpen && <aside className="absolute right-0 top-0 z-[10000] flex h-full w-1/3 flex-col overflow-y-auto bg-base-100 px-5 py-8 shadow-lg ">
+            {isSliderOpen && <aside className="absolute right-0 top-0 z-high flex h-full w-1/3 flex-col overflow-y-auto bg-base-100 px-5 py-8 shadow-lg ">
 
                 <div className="flex items-center justify-between ">
                     <h1 className='text-xl font-medium flex items-center gap-2 text-base-content'><BotIcon /> Chat Bot list</h1>

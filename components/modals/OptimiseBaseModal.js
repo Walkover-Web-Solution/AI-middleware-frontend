@@ -116,7 +116,7 @@ function OptimiseBaseModal({
     <Modal MODAL_ID={modalType}>
       <div className="modal-box max-w-screen-xl w-[calc(100%-8rem)] mx-auto bg-white overflow-hidden flex flex-col">
         {/* Fixed Header */}
-        <div className="flex justify-between items-center pb-2 pt-2 bg-white z-10">
+        <div className="flex justify-between items-center pb-2 pt-2 bg-white z-low">
           <h3 className="font-bold text-lg">{title}</h3>
           <button
             className="btn btn-sm btn-primary"
