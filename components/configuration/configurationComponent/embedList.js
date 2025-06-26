@@ -41,7 +41,7 @@ const EmbedList = ({ params }) => {
             bridge_functions: versionData?.function_ids || [],
             modelType: modelTypeName,
             model: modelName,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
         };
     });
