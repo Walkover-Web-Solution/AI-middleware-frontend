@@ -1,6 +1,7 @@
 import { MODAL_TYPE } from '@/utils/enums'
 import React, { useState, useEffect } from 'react'
 import { closeModal } from '@/utils/utility'
+import Modal from '../UI/Modal';
 
 const AgentVariableModal = ({ currentVariable, setCurrentVariable, handleSaveAgent }) => {
     const [variables, setVariables] = useState([]);
@@ -32,7 +33,7 @@ const AgentVariableModal = ({ currentVariable, setCurrentVariable, handleSaveAge
     }
 
     return (
-        <dialog id={MODAL_TYPE?.AGENT_VARIABLE_MODAL} className="modal">
+        <Modal MODAL_ID={MODAL_TYPE?.AGENT_VARIABLE_MODAL}>
             <div className="modal-box w-11/12 max-w-5xl">
                 <h3 className="font-bold text-lg">Agent Variables</h3>
                 <div className="py-4">
@@ -75,7 +76,7 @@ const AgentVariableModal = ({ currentVariable, setCurrentVariable, handleSaveAge
                     </button>
                 </div>
             </div>
-        </dialog>
+        </Modal>
     )
 }
 

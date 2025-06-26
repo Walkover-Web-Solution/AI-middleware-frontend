@@ -7,10 +7,10 @@ const Tutorial = ({video,setShowTutorial}) => {
          
  };
   return (
-   <div className="fixed inset-0 z-[99999999] bg-black bg-opacity-70 flex items-center justify-center">
+   <div className="fixed inset-0 z-very-high bg-black bg-opacity-70 flex items-center justify-center">
           <button
             onClick={() => handleVideoEnd()}
-            className="absolute top-4 right-4 text-white text-4xl hover:text-gray-700 z-50"
+            className="absolute top-4 right-4 text-white text-4xl hover:text-gray-700 z-low-medium"
             aria-label="Close Tutorial"
           >
             &times;

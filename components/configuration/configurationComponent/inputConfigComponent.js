@@ -196,7 +196,7 @@ const InputConfigComponent = ({ params }) => {
 
     const renderSuggestions = () => {
         return (
-            <div className="dropdown dropdown-open z-[9999999]" style={{
+            <div className="dropdown dropdown-open z-high" style={{
                 position: 'absolute',
                 top: getCaretCoordinatesAdjusted().top + 4,
                 left: getCaretCoordinatesAdjusted().left + 8,
@@ -205,7 +205,7 @@ const InputConfigComponent = ({ params }) => {
                     ref={suggestionListRef}
                     tabIndex={0}
                     role="listbox"
-                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-[999999] w-60 p-2 shadow-xl border overflow-scroll overflow-y-auto"
+                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-high w-60 p-2 shadow-xl border overflow-scroll overflow-y-auto"
                 >
                     <div className="flex flex-col w-full">
                         <label className="label label-text-alt">Available variables</label>
@@ -290,7 +290,7 @@ const InputConfigComponent = ({ params }) => {
         <div className="form-control h-full">
           <textarea
             ref={textareaRef}
-            className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-[8] caret-black p-2 rounded-b-none"
+            className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-low caret-black p-2 rounded-b-none"
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}

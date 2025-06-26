@@ -41,8 +41,8 @@ export default function PricingPage() {
       <Head>
         <link rel="canonical" href="https://gtwy.ai" />
       </Head>
-      <div className="hero-bg absolute w-full top-[-10px] h-screen z-10"></div>
-      <div className="z-20">
+      <div className="hero-bg absolute w-full top-[-10px] h-screen z-low-medium"></div>
+      <div className="z-low-medium">
         <Header />
 
         {/* Pricing Section */}
