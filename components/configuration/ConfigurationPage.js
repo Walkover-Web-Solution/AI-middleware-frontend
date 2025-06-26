@@ -50,7 +50,7 @@ export default function ConfigurationPage({ params }) {
 
     const renderNeedHelp = () => {
         return (
-            <div className="mb-4">
+            <div className="mb-4 mt-4">
                 <a
                     href="/faq/how-to-use-gtwy-ai"
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
