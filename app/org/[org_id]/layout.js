@@ -67,7 +67,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     updateUserMeta();
   }, []);
 
-  !isEmbedUser && useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
+  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   
   useEffect(() => {
     const validateOrg = async () => {
