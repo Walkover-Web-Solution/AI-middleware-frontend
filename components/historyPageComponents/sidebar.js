@@ -4,7 +4,7 @@ import { clearSubThreadData, clearThreadData } from "@/store/reducer/historyRedu
 import { MODAL_TYPE, USER_FEEDBACK_FILTER_OPTIONS } from "@/utils/enums.js";
 import { openModal } from "@/utils/utility.js";
 import { DownloadIcon, ThumbsDownIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon, UserIcon, MessageCircleIcon } from "@/components/Icons";
-import { useEffect, useState, memo, useCallback } from "react";
+import { useEffect, useState, memo, useCallback, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
@@ -68,6 +68,17 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const handleVersionChange = async (event) => {
     const version = event.target.value;
     dispatch(setSelectedVersion(version));
+    
+    // Fetch history with new version
+    const currentUrl = new URL(window.location.href);
+    const start = currentUrl.searchParams.get('start');
+    const end = currentUrl.searchParams.get('end');
+    setPage(1);
+    setHasMore(true);
+    setFilterOption("all");
+    dispatch(clearSubThreadData());
+    const result = await dispatch(getHistoryAction(params?.id, version === 'all' ? '' : version, start, end, 1, searchRef?.current?.value || ""));
+    if (result?.length < 40) setHasMore(false);
   };
 
   useEffect(() => {
@@ -85,9 +96,10 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const handleChange = useCallback(debounce((e) => {
     setSearchQuery(e?.target?.value);
     handleSearch(e);
-  }, 500), [setSearchQuery]);
+  }, 500), [setSearchQuery,selectedVersion]);
 
   const handleSearch = async (e) => {
+   
     e?.preventDefault();
     const currentUrl = new URL(window.location.href);
     const start = currentUrl.searchParams.get('start');
@@ -96,6 +108,8 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setHasMore(true);
     setFilterOption("all");
     dispatch(clearSubThreadData());
+    
+    
     const result = await dispatch(getHistoryAction(params?.id, selectedVersion === 'all' ? '' : selectedVersion, start, end, 1, searchRef?.current?.value || ""));
     if (result?.length < 40) setHasMore(false);
   };
@@ -201,7 +215,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
             Advance Filter
           </div>
           <div className="collapse-content">
-            <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} />
+            <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} selectedVersion={selectedVersion} searchRef={searchRef} />
             <div className="p-2 mt-4 bg-base-300 rounded-md text-center">
               <p className="text-center m-2 font-semibold">Filter Response</p>
               <div className="flex items-center justify-center mb-2 gap-4">

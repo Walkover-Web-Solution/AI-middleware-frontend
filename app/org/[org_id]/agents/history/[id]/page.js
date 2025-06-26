@@ -84,7 +84,7 @@ function Page({ searchParams }) {
        dispatch(clearThreadData());
       const startDate = search.get("start");
       const endDate = search.get("end");
-     const result =  await dispatch(getHistoryAction(params.id, startDate, endDate, 1, null, filterOption, isErrorTrue));
+     const result =  await dispatch(getHistoryAction(params.id,selectedVersion === 'all' ? '' : selectedVersion, startDate, endDate, 1, searchRef?.current?.value, filterOption, isErrorTrue));
       if(params?.thread_id) {
         const threadId = params?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
@@ -107,7 +107,7 @@ function Page({ searchParams }) {
       setLoading(false);
     };
     if (!searchRef?.current?.value) fetchInitialData();
-  }, [params.id, filterOption]);
+  }, [params.id, filterOption,selectedVersion]);
 
   const threadHandler = useCallback(
     async (thread_id, item, value) => {

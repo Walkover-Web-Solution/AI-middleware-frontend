@@ -12,7 +12,7 @@ import { useSearchParams } from 'next/navigation';
     return date.toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
   };
 
-const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage}) => {
+const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage, selectedVersion, searchRef }) => {
   const dispatch = useDispatch();
   const [startingDate, setStartingDate] = useState(getDefaultDate());
   const [endingDate, setEndingDate] = useState(getDefaultDate());
@@ -31,7 +31,7 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage}) => {
     newSearchParams.set('start', startingDate);
     newSearchParams.set('end', endingDate);
     const thread_id = searchParams.get('thread_id');
-    await dispatch(getHistoryAction(params.id,'', startingDate, endingDate, 1));
+    await dispatch(getHistoryAction(params.id,selectedVersion==='all'?'':selectedVersion, startingDate, endingDate, 1, searchRef?.current?.value || ""));
     setHasMore(true);
     setPage(1);
     const queryString = newSearchParams.toString();
@@ -49,7 +49,7 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage}) => {
     newSearchParams.delete('end');
     newSearchParams.delete('thread_id');
     const thread_id = searchParams.get('thread_id');
-    await dispatch(getHistoryAction(params.id, null, null, 1));
+    await dispatch(getHistoryAction(params.id,selectedVersion==='all'?'':selectedVersion, null, null, 1, searchRef?.current?.value || ""));
     const queryString = newSearchParams.toString();
     window.history.replaceState(null, '', `?${queryString}`);
     setHasMore(true);
