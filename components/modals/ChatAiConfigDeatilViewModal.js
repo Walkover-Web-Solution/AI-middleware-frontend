@@ -2,6 +2,7 @@ import { MODAL_TYPE } from '@/utils/enums'
 import { closeModal } from '@/utils/utility'
 import { CloseCircleIcon } from '@/components/Icons'
 import React from 'react'
+import Modal from '../UI/Modal'
 
 const flattenMessage = (message) => {
   if (typeof message !== 'object' || message === null) {
@@ -46,7 +47,7 @@ const renderFlattenedMessage = (message) => {
 
 const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
   return (
-    <dialog id={MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL} className="modal">
+    <Modal MODAL_ID={MODAL_TYPE.CHAT_DETAILS_VIEW_MODAL}>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-low-medium min-w-[100vw] min-h-[100vh] overflow-auto py-4">
         <div className="bg-base-100 rounded-lg shadow-2xl max-w-6xl w-[90vw] h-auto overflow-auto relative flex flex-col">
           <div className="flex items-start justify-between p-6 border-b">
@@ -99,7 +100,7 @@ const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
           </div>
         </div>
       </div>
-    </dialog>
+    </Modal>
   )
 }
 

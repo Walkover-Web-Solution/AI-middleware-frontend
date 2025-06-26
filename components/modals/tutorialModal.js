@@ -3,6 +3,7 @@ import { MODAL_TYPE, ONBOARDING_VIDEOS, TUTORIALS } from '@/utils/enums';
 import React, { useState, useRef, useEffect } from 'react';
 import { PlayIcon, ChevronDownIcon, ChevronRightIcon, BookIcon } from '@/components/Icons';
 import { closeModal } from '@/utils/utility';
+import Modal from '../UI/Modal';
 
 // Video Component using iframe
 const TutorialVideo = ({ videoUrl, title }) => {
@@ -58,7 +59,7 @@ const TutorialModal = () => {
   };
 
   return (
-    <dialog id={MODAL_TYPE.TUTORIAL_MODAL} className="modal">
+    <Modal MODAL_ID={MODAL_TYPE.TUTORIAL_MODAL}>
       {/* Main Modal */}
       <div className="relative z-low w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
         {/* Header */}
@@ -181,7 +182,7 @@ const TutorialModal = () => {
           </div>
         </div>
       </div>
-    </dialog>
+    </Modal>
   );
 };
 

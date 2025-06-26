@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import ComparisonCheck from '@/utils/comparisonCheck';
 import Canvas from '../Canvas';
+import Modal from '../UI/Modal';
 
 function OptimiseBaseModal({
   modalType,
@@ -112,7 +113,7 @@ function OptimiseBaseModal({
   const hasContent = displayContent || isStreaming;
 
   return (
-    <dialog id={modalType} className="modal">
+    <Modal MODAL_ID={modalType}>
       <div className="modal-box max-w-screen-xl w-[calc(100%-8rem)] mx-auto bg-white overflow-hidden flex flex-col">
         {/* Fixed Header */}
         <div className="flex justify-between items-center pb-2 pt-2 bg-white z-low">
@@ -254,7 +255,7 @@ function OptimiseBaseModal({
           </button>
         </div>
       </div>
-    </dialog>
+    </Modal>
   );
 }
 
