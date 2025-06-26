@@ -103,8 +103,8 @@ function Navbar() {
     toggleSidebar("default-config-history-slider", "right");
 
   return (
-    <div className='z-[999]'>
-      <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-[19] max-h-[4rem] bg-base-100 sticky top-0`}>
+    <div className='z-medium'>
+      <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : 'flex items-center justify-between '} w-full navbar border flex-wrap md:flex-nowrap z-low-medium max-h-[4rem] bg-base-100 sticky top-0`}>
         <div className={`flex items-center w-full justify-start gap-2 ${path.length > 4 ? '' : 'hidden'}`}>
           <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/agents`)}>
             <HomeIcon size={16} />
@@ -114,7 +114,7 @@ function Navbar() {
           </button>
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDownIcon size={16} /></div>
-            <ul tabIndex={0} className="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
+            <ul tabIndex={0} className="dropdown-content z-low-medium menu p-2 shadow bg-base-100 rounded-box w-52">
               {['agents', 'pauthkey', 'apikeys', 'knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
                 <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
                   <a className={path[3] === item ? "active" : ""}>

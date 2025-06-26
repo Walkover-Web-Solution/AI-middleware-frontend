@@ -238,7 +238,7 @@ const AdvancedParameters = ({ params }) => {
                     </div>
 
                     {showDropdown && (
-                      <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-10 max-h-[200px] overflow-y-auto mt-1 p-2">
+                      <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-low max-h-[200px] overflow-y-auto mt-1 p-2">
 
                         <div className="p-2 top-0 bg-base-100">
                           <input
@@ -401,7 +401,7 @@ const AdvancedParameters = ({ params }) => {
                             4
                           )
                         }
-                        className="mt-5 textarea textarea-bordered border w-full min-h-96 resize-y z-[1]"
+                        className="mt-5 textarea textarea-bordered border w-full min-h-96 resize-y"
                         onBlur={(e) =>
                           handleSelectChange(e, "json_schema")
                         }
