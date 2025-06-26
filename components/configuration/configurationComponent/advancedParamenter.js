@@ -169,7 +169,7 @@ const AdvancedParameters = ({ params }) => {
   }, [dispatch, params?.id, params?.version]);
 
   return (
-    <div className="collapse text-base-content" tabIndex={0}>
+    <div className="collapse z-very-low  text-base-content" tabIndex={0}>
       <input type="radio" name="my-accordion-1" onClick={() => {
         handleTutorial()
         toggleAccordion()
