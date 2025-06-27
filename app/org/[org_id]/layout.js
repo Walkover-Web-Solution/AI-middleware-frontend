@@ -298,7 +298,7 @@ function layoutOrgPage({ children, params }) {
     );
   } else {
     return (
-      <div className="h-screen overflow-hidden">
+      <div className="h-screen lg:overflow-hidden">
         <Navbar />
         {loading ? <LoadingSpinner /> : children}
         <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
