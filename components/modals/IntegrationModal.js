@@ -3,6 +3,7 @@ import { MODAL_TYPE } from '@/utils/enums'
 import { closeModal } from '@/utils/utility'
 import React from 'react'
 import { useDispatch } from 'react-redux'
+import Modal from '@/components/UI/Modal'
 
 const IntegrationModal = ({ orgId }) => {
   const integrationNameRef = React.useRef('');
@@ -17,7 +18,7 @@ const IntegrationModal = ({ orgId }) => {
   }
   return (
 
-    <dialog id={MODAL_TYPE.INTEGRATION_MODAL} className="modal">
+    <Modal MODAL_ID={MODAL_TYPE.INTEGRATION_MODAL}>
       <div className='modal-box'>
         <h3 className="font-bold text-lg mb-4">Enter Integration Name</h3>
         <input
@@ -33,7 +34,7 @@ const IntegrationModal = ({ orgId }) => {
           </form>
         </div>
       </div>
-    </dialog>
+    </Modal>
   )
 }
 

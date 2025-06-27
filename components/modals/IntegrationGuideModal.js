@@ -5,6 +5,7 @@ import { CheckCircleIcon, CloseIcon, CopyIcon } from '../Icons';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { generateGtwyAccessTokenAction } from '@/store/action/orgAction';
 import { useDispatch } from 'react-redux';
+import Modal from '@/components/UI/Modal';
 
 const IntegrationGuideModal = ({ selectedIntegration = {}, params }) => {
     const dispatch = useDispatch();
@@ -62,7 +63,7 @@ const IntegrationGuideModal = ({ selectedIntegration = {}, params }) => {
 
 
     return (
-        <dialog id={MODAL_TYPE?.INTEGRATION_GUIDE_MODAL} className="modal">
+        <Modal MODAL_ID={MODAL_TYPE?.INTEGRATION_GUIDE_MODAL}>
             <div className="modal-box max-w-7xl w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
@@ -183,7 +184,7 @@ const IntegrationGuideModal = ({ selectedIntegration = {}, params }) => {
                     </div>
                 </div>
             </div>
-        </dialog>
+        </Modal>
     );
 };
 
