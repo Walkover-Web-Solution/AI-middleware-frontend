@@ -31,7 +31,7 @@ import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import NewInputConfigComponent from "./configurationComponent/newInputConfigComponent";
 
-export default function ConfigurationPage({ params }) {
+export default function ConfigurationPage({ params ,apiKeySectionRef}) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const view = searchParams.get('view') || 'config';
@@ -83,7 +83,7 @@ export default function ConfigurationPage({ params }) {
      
             <ServiceDropdown params={params} />
             <ModelDropdown params={params} />
-            <ApiKeyInput params={params} />
+            <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
             <AdvancedParameters params={params} />
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
