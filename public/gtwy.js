@@ -16,7 +16,7 @@
             };
             this.urls = {
                 gtwyUrl: 'https://gtwy.ai/embed',
-                login: 'https://db.gtwy.ai/gtwy_embed/login'
+                login: 'https://db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {
                 bodyLoaded: false,
