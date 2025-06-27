@@ -1017,7 +1017,7 @@ export const getPrebuiltToolsApi = async () => {
 
 export const createIntegrationApi = async (name) => {
   try {
-    const response = await axios.post(`${URL}/gtwy_embed/`, {name});
+    const response = await axios.post(`${URL}/gtwyEmbed/`, {name});
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -1026,7 +1026,7 @@ export const createIntegrationApi = async (name) => {
 }
 export const getAllIntegrationApi = async () => {
   try {
-    const response = await axios.get(`${URL}/gtwy_embed/`);
+    const response = await axios.get(`${URL}/gtwyEmbed/`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -1036,7 +1036,7 @@ export const getAllIntegrationApi = async () => {
   
 export const generateGtwyAccessTokenApi = async () => {
   try {
-    const response = await axios.get(`${URL}/gtwy_embed/token`);
+    const response = await axios.get(`${URL}/gtwyEmbed/token`);
     return response;
   } catch (error) {
     console.error(error);

@@ -16,7 +16,7 @@
             };
             this.urls = {
                 gtwyUrl: 'http://localhost:3000/embed',
-                login: 'http://localhost:7072/gtwy_embed/login'
+                login: 'http://localhost:7072/gtwyEmbed/login'
             };
             this.state = {
                 bodyLoaded: false,

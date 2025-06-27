@@ -16,7 +16,7 @@
             };
             this.urls = {
                 gtwyUrl: 'https://dev-ai.viasocket.com/embed',
-                login: 'https://dev-db.gtwy.ai/gtwy_embed/login'
+                login: 'https://dev-db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {
                 bodyLoaded: false,
