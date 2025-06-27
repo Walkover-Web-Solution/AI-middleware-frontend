@@ -210,12 +210,12 @@ const ModelDropdown = ({ params }) => {
                                                             onClick={() => {
                                                                 handleModelClick(group, modelName);
                                                             }}
-                                                            className="hover:bg-base-200 rounded-md py-1"
+                                                            className={`hover:bg-base-200 rounded-md py-1 ${modelName === model && 'bg-base-200'}`}
                                                         >
-                                                            <span className="truncate flex-1 pr-2">
+                                                            {modelName === model && <span className="flex-shrink-0 ml-2">✓</span>}
+                                                            <span className={`truncate flex-1 pl-2 ${modelName !== model && 'ml-4'}`}>
                                                                 {modelName?.length > 30 ? `${modelName.substring(0, 30)}...` : modelName}
                                                             </span>
-                                                            {modelName === model && <span className="flex-shrink-0 ml-2">✓</span>}
                                                         </li>
                                                     );
                                                 })}
