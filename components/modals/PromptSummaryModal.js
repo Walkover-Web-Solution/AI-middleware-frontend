@@ -73,8 +73,8 @@ const PromptSummaryModal = ({ params }) => {
         <div className="space-y-2">
             <textarea
                 ref={textareaRef}
-                defaultValue={summary}
-                key={summary}
+                value={summary}
+                onChange={(e)=>setSummary(e.target.value)}
                 className="textarea textarea-bordered w-full min-h-96 resize-y focus:border-primary caret-black p-2"
             />
             <button className="btn btn-ghost btn-sm" onClick={() => { setIsEditing(false); }}>
