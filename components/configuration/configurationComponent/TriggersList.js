@@ -24,7 +24,7 @@ function getStatusClass(status) {
     }
 };
 
-export default function TriggersList({ params }) {
+export default function TriggersList({ params, isEmbedUser }) {
     const dispatch = useDispatch();
     const { triggerEmbedToken, triggerData } = useCustomSelector((state) => ({
         triggerEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.triggerEmbedToken,
@@ -43,7 +43,7 @@ export default function TriggersList({ params }) {
             setTriggers(filteredTriggers);
             if (!filteredTriggers?.length && openViasocket && authkey) openTrigger()
         }
-        getAndSetAuthKey()
+        if (!isEmbedUser) getAndSetAuthKey()
     }, [params?.org_id, authkey]);
 
     function openTrigger(triggerId) {

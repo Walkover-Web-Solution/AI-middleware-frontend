@@ -343,7 +343,9 @@ export const MODAL_TYPE = {
   HISTORY_PAGE_PROMPT_UPDATE_MODAL: "HISTORY_PAGE_PROMPT_UPDATE_MODAL",
   AGENT_DESCRIPTION_MODAL: "AGENT_DESCRIPTION_MODAL",
   AGENT_VARIABLE_MODAL: "AGENT_VARIABLE_MODAL",
-  TUTORIAL_MODAL:"TUTORIAL_MODAL"
+  TUTORIAL_MODAL: "TUTORIAL_MODAL",
+  INTEGRATION_MODAL: "INTEGRATION_MODAL",
+  INTEGRATION_GUIDE_MODAL: "INTEGRATION_GUIDE_MODAL"
 }
 
 export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
@@ -516,7 +518,7 @@ export const TUTORIALS = [
   {
     title: 'Agent Creation',
     description: 'Learn how to create and manage agents in GTWY.ai platform',
-    videoUrl: ONBOARDING_VIDEOS?.bridgeCreation, 
+    videoUrl: ONBOARDING_VIDEOS?.bridgeCreation,
     icon: BotIcon
   },
   {
