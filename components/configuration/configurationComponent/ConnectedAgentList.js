@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { SettingsIcon } from '@/components/Icons';
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
@@ -17,14 +17,14 @@ const ConnectedAgentList = ({ params }) => {
     const [currentVariable, setCurrentVariable] = useState(null);
     const [agentTools, setAgentTools] = useState(null);
     let { connect_agents, shouldToolsShow, model, bridgeData } = useCustomSelector((state) => {
-        const bridgeData = state?.bridgeReducer?.bridges;
+        const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
         const modelTypeName = versionData?.configuration?.type?.toLowerCase();
         const modelName = versionData?.configuration?.model;
         return {
-            bridgeData: bridgeData,
+            bridgeData: bridges,
             connect_agents: versionData?.connected_agents || {},
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
             model: modelName
@@ -45,7 +45,9 @@ const ConnectedAgentList = ({ params }) => {
                         connected_agents: {
                             [selectedBridge?.name]: {
                                 "description": description ? description : selectedBridge?.description,
-                                "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id
+                                "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
+                                "agent_variables": selectedBridge?.agent_variables,
+                                "variables": {fields:agentTools?.fields, required_params: agentTools?.required_params}
                             }
                         },
                         agent_status: "1"
@@ -66,13 +68,13 @@ const ConnectedAgentList = ({ params }) => {
         openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
     }
 
-    const handleOpenAgentVariable = (name, item) => {
+    const handleOpenAgentVariable = useCallback((name, item) => {
         setSelectedBridge({ name: name, ...item })
-        const formattedVariables = transformAgentVariableToToolCallFormat(bridgeData?.[name]?.agent_variables || {})
-        setCurrentVariable({name:name,description: item?.description, fields: formattedVariables})
-        setAgentTools({name:name,description: item?.description, fields: formattedVariables})
+        const formattedVariables = item?.variable || transformAgentVariableToToolCallFormat(item?.agent_variables || {})
+        setCurrentVariable({name:name,description: item?.description, fields: formattedVariables?.fields ||formattedVariables, required_params: formattedVariables?.required_params})
+        setAgentTools({name:name,description: item?.description, fields: formattedVariables?.fields ||formattedVariables, required_params: formattedVariables?.required_params})
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
-    }
+    }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
     const handleRemoveAgent = () => {
         dispatch(
@@ -85,7 +87,8 @@ const ConnectedAgentList = ({ params }) => {
                             [selectedBridge?.name]: {
                                 "description": selectedBridge?.description,
                                 "bridge_id": selectedBridge?.bridge_id,
-                                "variables_state": selectedBridge?.variables_state
+                                "agent_variables": selectedBridge?.agent_variables,
+                                "variables": {fields:agentTools?.fields, required_params: agentTools?.required_params}
                             }
                         }
                     }
@@ -100,10 +103,21 @@ const ConnectedAgentList = ({ params }) => {
 
     const handleSaveAgentVariable = () => {
         try {
-            dispatch(updateBridgeAction({
+            dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
+                versionId: params?.version,
                 dataToSend: {
-                    agent_variables: {fields:agentTools?.fields}
+                    agents: {
+                        connected_agents: {
+                            [selectedBridge?.name]: {
+                                "description": agentTools?.description ? agentTools?.description : selectedBridge?.description,
+                                "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
+                                "agent_variables": selectedBridge?.agent_variables,
+                                "variables": {fields:agentTools?.fields, required_params: agentTools?.required_params}
+                            }
+                        },
+                        agent_status: "1"
+                    }
                 }
             }))
             closeModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL)
@@ -155,8 +169,8 @@ const ConnectedAgentList = ({ params }) => {
                 </div>
             );
         })
-    ), [connect_agents]);
-console.log(selectedBridge)
+    ), [connect_agents, bridgeData]);
+
     return (
         <div>
             <div className="label flex-col items-start mb-2">
@@ -166,7 +180,7 @@ console.log(selectedBridge)
                     </div>
                 }
             </div>
-            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} />
+            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} bridges={bridgeData}/>
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
             <FunctionParameterModal
                 name="Agent"

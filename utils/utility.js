@@ -390,18 +390,16 @@ export const updateTitle = (newTitle) => {
     return diffLines;
   };
 
-export const transformAgentVariableToToolCallFormat = (inputData) => {
+  export const transformAgentVariableToToolCallFormat = (inputData) => {
     const result = {};
-    
-    // Helper function to set nested value
+
     function setNestedValue(obj, path, value, isRequired) {
         const parts = path.split('.');
         let current = obj;
-        
-        // Navigate/create the nested structure
+
         for (let i = 0; i < parts.length - 1; i++) {
             const part = parts[i];
-            
+
             if (!current[part]) {
                 current[part] = {
                     type: "object",
@@ -410,66 +408,59 @@ export const transformAgentVariableToToolCallFormat = (inputData) => {
                     required_params: [],
                     parameter: {}
                 };
+            } else if (!current[part].parameter) {
+                current[part].parameter = {};
             }
-            
+
             current = current[part].parameter;
         }
-        
-        // Set the final property
+
         const finalKey = parts[parts.length - 1];
-        
-        // Determine type based on key name
+
         let paramType = "string";
         if (path.toLowerCase().includes('number') || path.toLowerCase().includes('num')) {
             paramType = "number";
         } else if (path.toLowerCase().includes('bool') || path.toLowerCase().includes('flag')) {
             paramType = "boolean";
         }
-        
+
         current[finalKey] = {
             type: paramType,
             description: "",
             enum: [],
             required_params: []
         };
-        
-        // If this parameter is required, add all nested keys to their respective parents
+
         if (isRequired && parts.length > 1) {
-            // Start from the root and traverse down, adding each child to its parent's required_params
             for (let i = 0; i < parts.length - 1; i++) {
-                // Navigate to the current level
                 let currentLevel = obj;
                 for (let j = 0; j < i; j++) {
                     currentLevel = currentLevel[parts[j]].parameter;
                 }
-                
+
                 const parentKey = parts[i];
                 const childKey = parts[i + 1];
-                
-                // Add the child key to parent's required_params if not already present
+
                 if (!currentLevel[parentKey].required_params.includes(childKey)) {
                     currentLevel[parentKey].required_params.push(childKey);
                 }
             }
         }
     }
-    
-    // Process each input parameter
+
     for (const [key, value] of Object.entries(inputData)) {
         const isRequired = value === "required";
-        
+
         if (key.includes('.')) {
-            // Nested parameter - handle any depth
             setNestedValue(result, key, value, isRequired);
         } else {
-            // Simple parameter
             let paramType = "string";
             if (key.toLowerCase().includes('number') || key.toLowerCase().includes('num')) {
                 paramType = "number";
             } else if (key.toLowerCase().includes('bool') || key.toLowerCase().includes('flag')) {
                 paramType = "boolean";
             }
-            
+
             result[key] = {
                 type: paramType,
                 description: "",
@@ -478,6 +469,6 @@ export const transformAgentVariableToToolCallFormat = (inputData) => {
             };
         }
     }
-    
+
     return result;
-}
+};

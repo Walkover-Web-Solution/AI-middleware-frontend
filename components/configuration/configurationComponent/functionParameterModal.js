@@ -411,34 +411,6 @@ function FunctionParameterModal({
         toast.error('Failed to update description. Please try again.');
       }
     }
-    else {
-      try {
-        if (!toolData?.description && !function_details?.description) {
-          toast?.error("Description Required")
-          return;
-        }
-        dispatch(updateBridgeVersionAction({
-          bridgeId: params?.id,
-          versionId: params?.version,
-          dataToSend: {
-            agents: {
-              connected_agents: {
-                [function_details?.name]: {
-                  "description": toolData?.description ? toolData?.description : function_details?.description,
-                  "bridge_id": functionId
-                }
-              },
-              agent_status: "1"
-            }
-          }
-        }))
-        resetModalData();
-        closeModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL);
-      } catch (error) {
-        toast?.error("Failed to save agent")
-        console.error(error)
-      }
-    }
   }, [toolData, functionId]);
 
   const handleSaveData = useCallback(() => {
