@@ -76,11 +76,18 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                         </label>
                         <input
                             id={field}
+                            required
                             type={field === 'apikey' && isEditing ? 'password' : 'text'}
                             className="input input-bordered"
                             name={field}
                             placeholder={`Enter ${field}`}
-                            defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
+                            value={selectedApiKey ? selectedApiKey[field] : ''}
+                            onChange={(e) => {
+                                setSelectedApiKey(prev => ({
+                                    ...prev,
+                                    [field]: e.target.value
+                                }));
+                            }}
                         />
                     </div>
                 ))}
@@ -103,8 +110,8 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                     </select>
                 </div>
                 <div className="modal-action">
-                    <button type="button" className="btn" onClick={handleClose}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">{isEditing ? 'Update' : 'Create'}</button>
+                    <button type="reset" className="btn" onClick={handleClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">{isEditing ? 'Update' : 'Add'}</button>
                 </div>
             </form>
         </Modal>
