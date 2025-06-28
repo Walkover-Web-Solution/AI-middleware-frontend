@@ -3,7 +3,7 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { SettingsIcon } from '@/components/Icons';
+import { CircleAlertIcon, SettingsIcon } from '@/components/Icons';
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
