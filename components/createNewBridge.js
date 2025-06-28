@@ -9,8 +9,9 @@ import { closeModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { BotIcon, CircleAlertIcon, ClockTenIcon, WebhookIcon } from "@/components/Icons";
+import Protected from "./protected";
 
-function CreateNewBridge({ orgid }) {
+  function CreateNewBridge({ orgid, isEmbedUser }) {
     const [selectedService, setSelectedService] = useState('openai');
     const [selectedModel, setSelectedModel] = useState("gpt-4o");
     const [selectedType, setSelectedType] = useState("chat");
@@ -61,38 +62,38 @@ function CreateNewBridge({ orgid }) {
     };
 
     const createBridgeHandler = (name, slugname) => {
-        name = 'Untitled';
-        const matches = allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
-        const newCount = matches?.length + 1 || 0;
-        name = `Untitled${newCount}`;
-        const slugNameMatches=allBridgeList?.filter(bridge=>bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
-        const slugNameCount=slugNameMatches?.length+1||0;
-        slugname=`Untitled${slugNameCount}`
-        if (!selectedBridgeTypeCard) {
-            setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
-            return;
-        }
+      name = isEmbedUser ? 'untitled' : 'Untitled';
+      const matches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.name?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
+      const newCount = matches?.length + 1 || 0;
+      name = isEmbedUser ? `untitled${newCount}` : `Untitled${newCount}`;
+      const slugNameMatches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.slugName?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
+      const slugNameCount = slugNameMatches?.length + 1 || 0;
+      slugname = isEmbedUser ? `untitled${slugNameCount}` : `Untitled${slugNameCount}`
+      if (!selectedBridgeTypeCard) {
+        setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
+        return;
+      }
 
-        if (name.length > 0 && selectedModel && selectedBridgeTypeCard) {
-            setIsLoading(true);
-            const dataToSend = {
-                "service": selectedService,
-                "model": selectedModel,
-                "name": name,
-                "slugName": slugname || name,
-                "bridgeType": selectedBridgeTypeCard || bridgeType,
-                "type": selectedType,
-            };
-            dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
-                // setShowFileUploadModal(false);
-                route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
-                closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-                setIsLoading(false);
-                cleanState();
-            })).catch(() => {
-                setIsLoading(false);
-            });
-        }
+      if (name.length > 0 && selectedModel && selectedBridgeTypeCard) {
+        setIsLoading(true);
+        const dataToSend = {
+          "service": selectedService,
+          "model": selectedModel,
+          "name": name,
+          "slugName": slugname || name,
+          "bridgeType": selectedBridgeTypeCard || bridgeType,
+          "type": selectedType,
+        };
+        dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
+          // setShowFileUploadModal(false);
+          route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+          closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
+          setIsLoading(false);
+          cleanState();
+        })).catch(() => {
+          setIsLoading(false);
+        });
+      }
     };
 
     const cleanState = () => {
@@ -402,4 +403,4 @@ function CreateNewBridge({ orgid }) {
     );
 }
 
-export default CreateNewBridge;
+export default Protected(CreateNewBridge);

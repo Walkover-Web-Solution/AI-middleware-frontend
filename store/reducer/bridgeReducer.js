@@ -289,7 +289,8 @@ export const {
   updateTriggerDataReducer,
   removeFunctionDataReducer,
   webhookURLForBatchAPIReducer,
-  getPrebuiltToolsReducer
+  getPrebuiltToolsReducer, 
+  updateAllBridgeReducerAgentVariable
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;

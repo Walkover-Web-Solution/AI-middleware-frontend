@@ -30,8 +30,9 @@ import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import NewInputConfigComponent from "./configurationComponent/newInputConfigComponent";
+import Protected from "../protected";
 
-export default function ConfigurationPage({ params ,apiKeySectionRef}) {
+const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const view = searchParams.get('view') || 'config';
@@ -65,22 +66,22 @@ export default function ConfigurationPage({ params ,apiKeySectionRef}) {
 
     const renderSetupView = useMemo(() => () => (
         <>
-            {bridgeType === 'trigger' && <TriggersList params={params} />}
+            {bridgeType === 'trigger' && !isEmbedUser && <TriggersList params={params} />}
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
-                    <>
-                        <PreEmbedList params={params} />
-                        <InputConfigComponent params={params} />
-                        {/* <NewInputConfigComponent params={params} /> */}
-                        <EmbedList params={params} />
-                        <hr className="my-0 p-0" />
-                        <ConnectedAgentList params={params} />
-                        <hr className="my-0 p-0" />
-                        <KnowledgebaseList params={params} />
-                        <hr className="my-0 p-0" />
-                        <PrebuiltToolsList params={params} />
-                    </>
-                )}
-     
+                <>
+                    <PreEmbedList params={params} />
+                    <InputConfigComponent params={params} />
+                    {/* <NewInputConfigComponent params={params} /> */}
+                    <EmbedList params={params} />
+                    <hr className="my-0 p-0" />
+                    <ConnectedAgentList params={params} />
+                    <hr className="my-0 p-0" />
+                    <KnowledgebaseList params={params} />
+                    <hr className="my-0 p-0" />
+                    <PrebuiltToolsList params={params} />
+                </>
+            )}
+
             <ServiceDropdown params={params} />
             <ModelDropdown params={params} />
             <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
@@ -100,7 +101,7 @@ export default function ConfigurationPage({ params ,apiKeySectionRef}) {
         <>
             <SlugNameInput params={params} />
             <UserRefernceForRichText params={params} />
-            <StarterQuestionToggle params={params}/>   
+            <StarterQuestionToggle params={params} />
             <ActionList params={params} />
         </>
     ), [bridgeType, modelType, params, modelName]);
@@ -144,7 +145,7 @@ export default function ConfigurationPage({ params ,apiKeySectionRef}) {
                             <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
                         </button>
                         <button
-                            onClick={() => handleNavigation('chatbot-config')} 
+                            onClick={() => handleNavigation('chatbot-config')}
                             className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
                             <BotIcon size={16} className="shrink-0" />
@@ -166,3 +167,5 @@ export default function ConfigurationPage({ params ,apiKeySectionRef}) {
         </div>
     );
 }
+
+export default Protected(ConfigurationPage);

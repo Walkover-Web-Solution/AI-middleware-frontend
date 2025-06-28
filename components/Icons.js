@@ -84,7 +84,10 @@ import {
   MonitorPlay,
   Wrench,
   SendHorizontal,
-  MessageCircle
+  MessageCircle,
+  Blocks,
+  ChevronLast,
+  CheckCircle
 } from 'lucide-react';
 
 /**
@@ -757,3 +760,9 @@ export const SparklesIcon = (props) => <Sparkles {...props} />;
 export const RocketIcon = (props) => <Rocket {...props} />;
 
 export const MessageCircleIcon = (props) => <MessageCircle {...props} />;
+
+export const BlocksIcon = (props) => <Blocks {...props} />;
+
+export const ChevronLastIcon = (props) => <ChevronLast {...props} />;
+
+export const CheckCircleIcon = (props) => <CheckCircle {...props} />;
