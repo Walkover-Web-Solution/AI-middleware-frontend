@@ -5,10 +5,7 @@ import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { InfoIcon } from 'lucide-react';
 
-function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [], shouldToolsShow, modelName }) {
-    const { bridges } = useCustomSelector((state) => ({
-        bridges: state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
-    }));
+function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [], shouldToolsShow, modelName, bridges }) {
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {

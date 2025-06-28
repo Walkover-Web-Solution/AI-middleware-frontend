@@ -1,34 +1,39 @@
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
-import { useCustomSelector } from '@/customHooks/customSelector';
+import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { BotIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
-import { closeModal, openModal } from '@/utils/utility';
+import { SettingsIcon } from '@/components/Icons';
+import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
 import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
-import AgentVariableModal from '@/components/modals/AgentVariableModal';
+import FunctionParameterModal from './functionParameterModal';
 
 const ConnectedAgentList = ({ params }) => {
     const dispatch = useDispatch();
     const [description, setDescription] = useState("");
     const [selectedBridge, setSelectedBridge] = useState(null);
     const [currentVariable, setCurrentVariable] = useState(null);
-    const { connect_agents, shouldToolsShow, model } = useCustomSelector((state) => {
+    const [agentTools, setAgentTools] = useState(null);
+    const [variablesPath, setVariablesPath] = useState({});
+    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
+        const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
         const modelTypeName = versionData?.configuration?.type?.toLowerCase();
         const modelName = versionData?.configuration?.model;
         return {
+            bridgeData: bridges,
             connect_agents: versionData?.connected_agents || {},
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
-            model: modelName
+            model: modelName,
+            variables_path: versionData?.variables_path || {},
         };
     });
 
-    const handleSaveAgent = (updatedVariables = null) => {
+    const handleSaveAgent = () => {
         try {
             if (!description && !selectedBridge?.description) {
                 toast?.error("Description Required")
@@ -43,7 +48,8 @@ const ConnectedAgentList = ({ params }) => {
                             [selectedBridge?.name]: {
                                 "description": description ? description : selectedBridge?.description,
                                 "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
-                                "variables_state": updatedVariables ? updatedVariables : selectedBridge?.variables_state
+                                "agent_variables": selectedBridge?.agent_variables,
+                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
                             }
                         },
                         agent_status: "1"
@@ -64,13 +70,15 @@ const ConnectedAgentList = ({ params }) => {
         openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
     }
 
-    const handleOpenAgentVariable = (name, item) => {
+    const handleOpenAgentVariable = useCallback((name, item) => {
         setSelectedBridge({ name: name, ...item })
-        setCurrentVariable(item?.variables_state)
+        const formattedVariables = item?.variables || transformAgentVariableToToolCallFormat(item?.agent_variables || {})
+        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: formattedVariables?.fields || formattedVariables, required_params: formattedVariables?.required_params || [] })
+        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: formattedVariables?.fields || formattedVariables, required_params: formattedVariables?.required_params || [] })
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
-    }
+    }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
-    const handleRemoveAgent = (key, value) => {
+    const handleRemoveAgent = () => {
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params?.id,
@@ -78,16 +86,58 @@ const ConnectedAgentList = ({ params }) => {
                 dataToSend: {
                     agents: {
                         connected_agents: {
-                            [key]: {
-                                "description": value?.description,
-                                "bridge_id": value?.bridge_id,
-                                "variables_state": value?.variables_state
+                            [selectedBridge?.name]: {
+                                "description": selectedBridge?.description,
+                                "bridge_id": selectedBridge?.bridge_id,
+                                "agent_variables": selectedBridge?.agent_variables,
+                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
                             }
                         }
                     }
                 }
             })
-        )
+        ).then(() => {
+            closeModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL)
+            setCurrentVariable(null)
+            setSelectedBridge(null)
+        })
+    }
+
+    const handleSaveAgentVariable = () => {
+        try {
+            dispatch(updateBridgeVersionAction({
+                bridgeId: params?.id,
+                versionId: params?.version,
+                dataToSend: {
+                    agents: {
+                        connected_agents: {
+                            [selectedBridge?.name]: {
+                                "description": agentTools?.description ? agentTools?.description : selectedBridge?.description,
+                                "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
+                                "agent_variables": selectedBridge?.agent_variables,
+                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
+                            }
+                        },
+                        agent_status: "1"
+                    }
+                }
+            }))
+            if (!isEqual(variablesPath, variables_path[selectedBridge?.bridge_id])) {
+                dispatch(
+                    updateBridgeVersionAction({
+                        bridgeId: params.id,
+                        versionId: params.version,
+                        dataToSend: { variables_path: { [selectedBridge?.bridge_id]: variablesPath } },
+                    })
+                );
+            }
+            closeModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL)
+            setCurrentVariable(null)
+            setSelectedBridge(null)
+        } catch (error) {
+            toast?.error("Failed to save agent")
+            console.error(error)
+        }
     }
 
 
@@ -97,41 +147,40 @@ const ConnectedAgentList = ({ params }) => {
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`flex w-[280px] flex-col items-start rounded-lg border-2 md:flex-row cursor-pointer bg-base-100 relative transition-all`}
+                    className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200`}
                 >
-                    <div className="p-4 w-full h-full flex flex-col justify-between gap-3">
-                        <div className="flex flex-col gap-2">
+                    <div
+                        className="p-4 w-full h-full flex flex-col justify-between"
+
+                    >
+                        <div>
                             <div className="flex justify-between items-center">
-                                <h1 className="text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content flex items-center gap-2">
-                                    <BotIcon size={20} className="text-primary" />
+                                <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content flex items-center gap-2">
                                     <div className="tooltip" data-tip={name?.length > 10 ? name : ""}>
                                         <span>{name?.length > 10 ? `${name.slice(0, 15)}...` : name}</span>
                                     </div>
                                 </h1>
-                                <div className="flex items-center gap-1">
-                                    <button
-                                        className="btn btn-ghost btn-sm p-1 hover:bg-red-50"
-                                        onClick={() => handleOpenAgentVariable(name, item)}
-                                    >
-                                        {item?.variables_state && <SettingsIcon size={16} className="" />}
-                                    </button>
-                                    <button
-                                        className="btn btn-ghost btn-sm p-1 hover:bg-red-50"
-                                        onClick={() => handleRemoveAgent(name, item)}
-                                    >
-                                        <TrashIcon size={18} className="text-red-500" />
-                                    </button>
-                                </div>
+                                {item?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
                             </div>
-                            <p className="text-sm text-base-content/80 line-clamp-3">
+                            <p className="mt-3 text-xs sm:text-sm line-clamp-3">
                                 {item?.description || "A description is required for proper functionality."}
                             </p>
                         </div>
+                        <div className="mt-4">
+                            <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content bg-green-100`}>
+                                {!item?.description ? "Description Required" : "Active"}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-center absolute right-1 top-1">
+                        <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleOpenAgentVariable(name, item)}>
+                            <SettingsIcon size={18} />
+                        </button>
                     </div>
                 </div>
             );
         })
-    ), [connect_agents]);
+    ), [connect_agents, bridgeData]);
 
     return (
         <div>
@@ -142,9 +191,23 @@ const ConnectedAgentList = ({ params }) => {
                     </div>
                 }
             </div>
-            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} />
+            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} bridges={bridgeData} />
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
-            <AgentVariableModal currentVariable={currentVariable} handleSaveAgent={handleSaveAgent} />
+            <FunctionParameterModal
+                name="Agent"
+                Model_Name={MODAL_TYPE?.AGENT_VARIABLE_MODAL}
+                params={params}
+                function_details={currentVariable}
+                functionName={currentVariable?.name}
+                handleRemove={handleRemoveAgent}
+                handleSave={handleSaveAgentVariable}
+                toolData={agentTools}
+                setToolData={setAgentTools}
+                functionId={selectedBridge?.bridge_id}
+                variablesPath={variablesPath}
+                setVariablesPath={setVariablesPath}
+                variables_path={variables_path}
+            />
         </div>
     );
 }

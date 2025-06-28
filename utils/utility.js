@@ -390,3 +390,85 @@ export const updateTitle = (newTitle) => {
     return diffLines;
   };
 
+  export const transformAgentVariableToToolCallFormat = (inputData) => {
+    const result = {};
+
+    function setNestedValue(obj, path, value, isRequired) {
+        const parts = path.split('.');
+        let current = obj;
+
+        for (let i = 0; i < parts.length - 1; i++) {
+            const part = parts[i];
+
+            if (!current[part]) {
+                current[part] = {
+                    type: "object",
+                    description: "",
+                    enum: [],
+                    required_params: [],
+                    parameter: {}
+                };
+            } else if (!current[part].parameter) {
+                current[part].parameter = {};
+            }
+
+            current = current[part].parameter;
+        }
+
+        const finalKey = parts[parts.length - 1];
+
+        let paramType = "string";
+        if (path.toLowerCase().includes('number') || path.toLowerCase().includes('num')) {
+            paramType = "number";
+        } else if (path.toLowerCase().includes('bool') || path.toLowerCase().includes('flag')) {
+            paramType = "boolean";
+        }
+
+        current[finalKey] = {
+            type: paramType,
+            description: "",
+            enum: [],
+            required_params: []
+        };
+
+        if (isRequired && parts.length > 1) {
+            for (let i = 0; i < parts.length - 1; i++) {
+                let currentLevel = obj;
+                for (let j = 0; j < i; j++) {
+                    currentLevel = currentLevel[parts[j]].parameter;
+                }
+
+                const parentKey = parts[i];
+                const childKey = parts[i + 1];
+
+                if (!currentLevel[parentKey].required_params.includes(childKey)) {
+                    currentLevel[parentKey].required_params.push(childKey);
+                }
+            }
+        }
+    }
+
+    for (const [key, value] of Object.entries(inputData)) {
+        const isRequired = value === "required";
+
+        if (key.includes('.')) {
+            setNestedValue(result, key, value, isRequired);
+        } else {
+            let paramType = "string";
+            if (key.toLowerCase().includes('number') || key.toLowerCase().includes('num')) {
+                paramType = "number";
+            } else if (key.toLowerCase().includes('bool') || key.toLowerCase().includes('flag')) {
+                paramType = "boolean";
+            }
+
+            result[key] = {
+                type: paramType,
+                description: "",
+                enum: [],
+                required_params: isRequired ? [key] : []
+            };
+        }
+    }
+
+    return result;
+};
