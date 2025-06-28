@@ -26,7 +26,7 @@ function FunctionParameterModal({
   variables_path = {},
   functionName = "",
   variablesPath = {},
-  setVariablesPath = () => {}
+  setVariablesPath = () => { }
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);

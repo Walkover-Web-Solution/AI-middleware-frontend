@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
-import { useCustomSelector } from '@/customHooks/customSelector';
+import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { SettingsIcon } from '@/components/Icons';
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
@@ -16,7 +16,8 @@ const ConnectedAgentList = ({ params }) => {
     const [selectedBridge, setSelectedBridge] = useState(null);
     const [currentVariable, setCurrentVariable] = useState(null);
     const [agentTools, setAgentTools] = useState(null);
-    let { connect_agents, shouldToolsShow, model, bridgeData } = useCustomSelector((state) => {
+    const [variablesPath, setVariablesPath] = useState({});
+    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -27,7 +28,8 @@ const ConnectedAgentList = ({ params }) => {
             bridgeData: bridges,
             connect_agents: versionData?.connected_agents || {},
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
-            model: modelName
+            model: modelName,
+            variables_path: versionData?.variables_path || {},
         };
     });
 
@@ -47,7 +49,7 @@ const ConnectedAgentList = ({ params }) => {
                                 "description": description ? description : selectedBridge?.description,
                                 "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
                                 "agent_variables": selectedBridge?.agent_variables,
-                                "variables": {fields:agentTools?.fields, required_params: agentTools?.required_params}
+                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
                             }
                         },
                         agent_status: "1"
@@ -70,9 +72,9 @@ const ConnectedAgentList = ({ params }) => {
 
     const handleOpenAgentVariable = useCallback((name, item) => {
         setSelectedBridge({ name: name, ...item })
-        const formattedVariables = item?.variable || transformAgentVariableToToolCallFormat(item?.agent_variables || {})
-        setCurrentVariable({name:name,description: item?.description, fields: formattedVariables?.fields ||formattedVariables, required_params: formattedVariables?.required_params})
-        setAgentTools({name:name,description: item?.description, fields: formattedVariables?.fields ||formattedVariables, required_params: formattedVariables?.required_params})
+        const formattedVariables = item?.variables || transformAgentVariableToToolCallFormat(item?.agent_variables || {})
+        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: formattedVariables?.fields || formattedVariables, required_params: formattedVariables?.required_params || [] })
+        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: formattedVariables?.fields || formattedVariables, required_params: formattedVariables?.required_params || [] })
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
@@ -88,7 +90,7 @@ const ConnectedAgentList = ({ params }) => {
                                 "description": selectedBridge?.description,
                                 "bridge_id": selectedBridge?.bridge_id,
                                 "agent_variables": selectedBridge?.agent_variables,
-                                "variables": {fields:agentTools?.fields, required_params: agentTools?.required_params}
+                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
                             }
                         }
                     }
@@ -113,13 +115,22 @@ const ConnectedAgentList = ({ params }) => {
                                 "description": agentTools?.description ? agentTools?.description : selectedBridge?.description,
                                 "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
                                 "agent_variables": selectedBridge?.agent_variables,
-                                "variables": {fields:agentTools?.fields, required_params: agentTools?.required_params}
+                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
                             }
                         },
                         agent_status: "1"
                     }
                 }
             }))
+            if (!isEqual(variablesPath, variables_path[selectedBridge?.bridge_id])) {
+                dispatch(
+                    updateBridgeVersionAction({
+                        bridgeId: params.id,
+                        versionId: params.version,
+                        dataToSend: { variables_path: { [selectedBridge?.bridge_id]: variablesPath } },
+                    })
+                );
+            }
             closeModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL)
             setCurrentVariable(null)
             setSelectedBridge(null)
@@ -156,15 +167,15 @@ const ConnectedAgentList = ({ params }) => {
                             </p>
                         </div>
                         <div className="mt-4">
-                            <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content bg-base-200`}>
+                            <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content bg-green-100`}>
                                 {!item?.description ? "Description Required" : "Active"}
                             </span>
                         </div>
                     </div>
-                        <div className="flex items-center justify-center absolute right-1 top-1">
-                            <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleOpenAgentVariable(name, item)}>
-                                <SettingsIcon size={18} />
-                            </button>
+                    <div className="flex items-center justify-center absolute right-1 top-1">
+                        <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleOpenAgentVariable(name, item)}>
+                            <SettingsIcon size={18} />
+                        </button>
                     </div>
                 </div>
             );
@@ -180,7 +191,7 @@ const ConnectedAgentList = ({ params }) => {
                     </div>
                 }
             </div>
-            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} bridges={bridgeData}/>
+            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} bridges={bridgeData} />
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
             <FunctionParameterModal
                 name="Agent"
@@ -193,6 +204,9 @@ const ConnectedAgentList = ({ params }) => {
                 toolData={agentTools}
                 setToolData={setAgentTools}
                 functionId={selectedBridge?.bridge_id}
+                variablesPath={variablesPath}
+                setVariablesPath={setVariablesPath}
+                variables_path={variables_path}
             />
         </div>
     );
