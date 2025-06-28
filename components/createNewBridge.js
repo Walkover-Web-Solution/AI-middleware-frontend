@@ -63,10 +63,10 @@ import Protected from "./protected";
 
     const createBridgeHandler = (name, slugname) => {
       name = isEmbedUser ? 'untitled' : 'Untitled';
-      const matches = allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
+      const matches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.name?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
       const newCount = matches?.length + 1 || 0;
       name = isEmbedUser ? `untitled${newCount}` : `Untitled${newCount}`;
-      const slugNameMatches = allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
+      const slugNameMatches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.slugName?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
       const slugNameCount = slugNameMatches?.length + 1 || 0;
       slugname = isEmbedUser ? `untitled${slugNameCount}` : `Untitled${slugNameCount}`
       if (!selectedBridgeTypeCard) {

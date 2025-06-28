@@ -35,7 +35,7 @@ const IntegrationGuideModal = ({ selectedIntegration = {}, params }) => {
     const jwtPayload = `{
   "org_id": "${integrationItem.org_id}",
   "folder_id": "${integrationItem.folder_id}",
-  "user_id": "Your_user_id",
+  "user_id": "Your_user_id"
   }`;
 
     const integrationScript =
@@ -43,8 +43,9 @@ const IntegrationGuideModal = ({ selectedIntegration = {}, params }) => {
     id="gtwy-main-script"
     embedToken="Your embed token"
     src="https://gtwy.ai/gtwy.js"
-    slide="left/right/full"
-    defaultOpen="true"  //open by default
+    slide="left/right/full /* adjust the position of the gtwy */"
+    defaultOpen="true /* open by default */"
+    parentId="Your_parent_id /* parent id of the element where the gtwy will be embedded */"
    ></script>`;
 
     const helperFunctions =

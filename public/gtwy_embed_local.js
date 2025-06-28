@@ -32,7 +32,7 @@
         extractScriptProps() {
             const interfaceScript = document.getElementById('gtwy-main-script');
             if (!interfaceScript) {
-                console.log('Script tag not found');
+                //console.log('Script tag not found');
                 return {};
             }
 
@@ -49,7 +49,11 @@
                             console.error(`Error parsing ${attr}:`, e);
                         }
                     }
-                    if (attr === 'slide') {
+                    if (attr === 'defaultOpen') {
+                        this.config.defaultOpen = value || false;
+                    }
+
+                    if (attr === 'slide' && (value === 'full' || value === 'left' || value === 'right')) {
                         this.config.slide = value || 'full';
                     }
 
@@ -100,18 +104,14 @@
 
         setupMessageListeners() {
             window.addEventListener('message', (event) => {
-                // Only process messages from trusted origins
-                const trustedOrigins = ["*"];
-
-                if (trustedOrigins.includes(event.origin)) {
-                    this.handleIncomingMessages(event);
-                }
+                this.handleIncomingMessages(event);
             });
         }
 
         handleIncomingMessages(event) {
             const { type, data } = event.data || {};
-
+            //console.log(type)
+            //console.log(data)   
             switch (type) {
                 case 'CLOSE_GTWY_EMBED':
                 case 'CLOSE_GTWY':
@@ -189,7 +189,7 @@
             });
 
             // Assemble header
-            if (this.config.slide !== 'full') buttonsContainer.appendChild(fullscreenBtn);
+            if (this?.config?.slide !== 'full') buttonsContainer.appendChild(fullscreenBtn);
             buttonsContainer.appendChild(closeBtn);
             headerContent.appendChild(poweredBy);
             headerContent.appendChild(buttonsContainer);
@@ -377,11 +377,11 @@
         }
 
         openGtwy() {
-            console.log('Opening GTWY Embed...'); // Debug log
+            //console.log('Opening GTWY Embed...'); // Debug log
 
             // Check if initialized
             if (!this.state.isInitialized) {
-                console.log('GTWY Embed not initialized yet, initializing...');
+                //console.log('GTWY Embed not initialized yet, initializing...');
                 this.initializeGtwyEmbed().then(() => {
                     this.openGtwy(); // Retry after initialization
                 });
@@ -391,8 +391,8 @@
             const gtwyInterfaceEmbed = document.getElementById('gtwyInterfaceEmbed');
             const iframeContainer = document.getElementById('gtwy-iframe-parent-container');
 
-            console.log('gtwyInterfaceEmbed:', gtwyInterfaceEmbed);
-            console.log('iframeContainer:', iframeContainer);
+            //console.log('gtwyInterfaceEmbed:', gtwyInterfaceEmbed);
+            //console.log('iframeContainer:', iframeContainer);
 
             if (iframeContainer) {
                 if (gtwyInterfaceEmbed) {
@@ -403,7 +403,7 @@
                 // Only apply slide behavior if not in parent container
                 if (!this.state.hasParentContainer) {
                     const slideType = this.props?.slide || this.config.slide || 'full';
-                    console.log('slideType:', slideType);
+                    //console.log('slideType:', slideType);
                     this.applySlideStyles(slideType);
 
                     // Trigger slide animation
@@ -412,7 +412,7 @@
                     });
                 }
 
-                console.log('GTWY Embed opened successfully');
+                //console.log('GTWY Embed opened successfully');
             } else {
                 console.error('gtwy-iframe-parent-container not found');
             }
@@ -465,7 +465,7 @@
         toggleFullscreen(enable) {
             // Don't allow fullscreen if we have a parent container
             if (this.state.hasParentContainer) {
-                console.log('Fullscreen not available in parent container');
+                //console.log('Fullscreen not available in parent container');
                 return;
             }
 
@@ -479,7 +479,7 @@
 
             // If already in the desired state, do nothing
             if (this.state.fullscreen === enable) {
-                console.log(`Already ${enable ? 'in fullscreen' : 'not in fullscreen'} mode`);
+                //console.log(`Already ${enable ? 'in fullscreen' : 'not in fullscreen'} mode`);
                 return;
             }
 
@@ -533,7 +533,7 @@
         }
 
         async initializeGtwyEmbed() {
-            console.log('Initializing GTWY Embed...');
+            //console.log('Initializing GTWY Embed...');
 
             return new Promise((resolve) => {
                 const initialize = () => {
@@ -544,7 +544,7 @@
 
                     this.loadContent();
                     this.state.isInitialized = true;
-                    console.log('GTWY Embed initialized');
+                    //console.log('GTWY Embed initialized');
                     resolve();
                 };
 
@@ -685,9 +685,9 @@
             if (!iframeComponent) return;
             let encodedData = '';
             encodedData = encodeURIComponent(JSON.stringify(data.data));
-            console.log(encodedData);
+            //console.log(encodedData);
             const modifiedUrl = `${this.urls.gtwyUrl}?interfaceDetails=${encodedData}`;
-            console.log(modifiedUrl);
+            //console.log(modifiedUrl);
             iframeComponent.src = modifiedUrl;
 
             this.props.config = { ...this.config, ...(data?.data?.config || {}) };
@@ -745,12 +745,12 @@
             if (newprops.fullScreen === true || newprops.fullScreen === 'true') {
                 document.getElementById('gtwy-iframe-parent-container')?.classList.add('full-screen-gtwyInterfaceEmbed')
                 this.state.tempDataToSend = { ...this.state.tempDataToSend, hideFullScreenButton: true }
-                sendMessageToGtwy({ type: 'interfaceData', data: { hideFullScreenButton: true } });
+                sendMessageToGtwy({ type: 'gtwyInterfaceData', data: { hideFullScreenButton: true } });
             }
             if (newprops.fullScreen === false || newprops.fullScreen === 'false') {
                 document.getElementById('gtwy-iframe-parent-container')?.classList.remove('full-screen-gtwyInterfaceEmbed')
                 this.state.tempDataToSend = { ...this.state.tempDataToSend, hideFullScreenButton: false }
-                sendMessageToGtwy({ type: 'interfaceData', data: { hideFullScreenButton: false } });
+                sendMessageToGtwy({ type: 'gtwyInterfaceData', data: { hideFullScreenButton: false } });
             }
             // Handle slide property
             if ('slide' in newprops) {
@@ -760,8 +760,8 @@
 
         sendInitialData() {
             if (this.state.tempDataToSend) {
-                sendMessageToGtwy({ type: 'interfaceData', data: this.state.tempDataToSend });
-                if (this.state.tempDataToSend?.defaultOpen === true || this.state.tempDataToSend?.defaultOpen === "true") {
+                sendMessageToGtwy({ type: 'gtwyInterfaceData', data: this.state.tempDataToSend });
+                if (this?.state?.tempDataToSend?.defaultOpen === true || this?.state?.tempDataToSend?.defaultOpen === "true" || this?.state?.config?.defaultOpen === true || this?.state?.config?.defaultOpen === "true") {
                     this.openGtwy();
                 }
                 this.state.tempDataToSend = null;
@@ -840,12 +840,7 @@
                     ...gtwyEmbedManager.state.tempDataToSend,
                     ...data
                 };
-                sendMessageToGtwy({ type: 'interfaceData', data: data });
-            }
-
-            // Handle askAi specifically
-            if (data.askAi) {
-                sendMessageToGtwy({ type: 'askAi', data: data || {} });
+                sendMessageToGtwy({ type: 'gtwyInterfaceData', data: data });
             }
         }
 
@@ -859,7 +854,7 @@
 
     // New GTWY specific functions - FIXED WITH PROPER INITIALIZATION
     window.openGtwy = () => {
-        console.log('window.openGtwy called');
+        //console.log('window.openGtwy called');
         gtwyEmbedManager.openGtwy();
     };
     window.closeGtwy = () => gtwyEmbedManager.closeGtwy();
