@@ -16,6 +16,7 @@ import userDetailsReducer from "./reducer/userDetailsReducer";
 import webhookAlertReducer from "./reducer/webhookAlertReducer";
 import testCasesReducer from "./reducer/testCasesReducer";
 import serviceReducer  from "./reducer/serviceReducer";
+import integrationReducer from "./reducer/integrationReducer";
 
 const createNoopStorage = () => {
     return {
@@ -48,7 +49,8 @@ const rootReducer = combineReducers({
     webhookAlertReducer,
     knowledgeBaseReducer,
     testCasesReducer,
-    serviceReducer
+    serviceReducer,
+    integrationReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

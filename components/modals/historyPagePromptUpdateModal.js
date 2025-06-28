@@ -3,6 +3,7 @@ import { MODAL_TYPE } from '@/utils/enums'
 import { closeModal } from '@/utils/utility'
 import React from 'react'
 import { useDispatch } from 'react-redux'
+import Modal from '../UI/Modal'
 
 const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, onSave }) => {
   const dispatch  = useDispatch();
@@ -21,7 +22,7 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
   }
 
   return (
-    <dialog id={MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL} className="modal">
+    <Modal MODAL_ID={MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL}>
       <div className="modal-box w-11/12 max-w-7xl bg-white">
         <h3 className="font-bold text-lg mb-4">Update Prompt</h3>
         <div className='flex gap-3 w-full'>
@@ -53,7 +54,7 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
           </form>
         </div>
       </div>
-    </dialog>
+    </Modal>
   )
 }
 

@@ -4,12 +4,10 @@ import { optimizeSchemaApi } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { closeModal, createDiff, simulateStreaming } from "@/utils/utility";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import OptimiseBaseModal from "./OptimiseBaseModal";
 import { toast } from "react-toastify";
-import { CopyIcon } from "../Icons";
 
 function JsonSchemaModal({ params, messages, setMessages }) {
   const dispatch = useDispatch();

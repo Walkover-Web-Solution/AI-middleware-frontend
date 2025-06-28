@@ -60,8 +60,12 @@ function Page({ params }) {
    * @param {Event} e Event object
    * @param {string} name Name of the new auth key
    */
-  const createAuthKeyHandler = async (e, name) => {
-    if (name.length > 0) {
+  const createAuthKeyHandler = async (e, name) => { 
+    const isDuplicate = authData.some(item => item.name === name);
+    if (isDuplicate) {
+      toast.error("The name has already been taken")
+    }
+    else  if (name.length > 2) {
       setIsCreating(true); // Start loading
       try {
         await dispatch(createNewAuthData({
@@ -79,7 +83,7 @@ function Page({ params }) {
         setIsCreating(false); // End loading
       }
     } else {
-      toast.error("Input field cannot be empty");
+      toast.error("The name must be at least 3 characters. ")
     }
     closeModal(MODAL_TYPE.PAUTH_KEY_MODAL)
     document.getElementById('authNameInput').value = ''

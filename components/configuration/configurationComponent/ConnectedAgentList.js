@@ -27,7 +27,7 @@ const ConnectedAgentList = ({ params }) => {
         return {
             bridgeData: bridges,
             connect_agents: versionData?.connected_agents || {},
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName,
             variables_path: versionData?.variables_path || {},
         };
@@ -187,7 +187,7 @@ const ConnectedAgentList = ({ params }) => {
             <div className="label flex-col items-start mb-2">
                 {
                     <div className="flex flex-wrap gap-4">
-                        {renderEmbed}
+                        {shouldToolsShow&&renderEmbed}
                     </div>
                 }
             </div>

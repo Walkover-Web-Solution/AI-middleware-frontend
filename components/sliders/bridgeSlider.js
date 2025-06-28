@@ -66,7 +66,7 @@ function BridgeSlider() {
     return (
         <aside
             id="default-agent-sidebar"
-            className="sidebar-container fixed flex flex-col top-0 left-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen -translate-x-full py-4 overflow-y-auto bg-base-200 transition-all duration-300 z-50 border-r"
+            className="sidebar-container fixed flex flex-col top-0 left-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen -translate-x-full py-4 overflow-y-auto bg-base-200 transition-all duration-300 z-low-medium border-r"
             aria-label="Sidebar"
         >
             <div className="flex w-full flex-col gap-4">

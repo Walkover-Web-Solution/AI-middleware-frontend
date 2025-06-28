@@ -255,7 +255,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   };
 
   return (
-    <div className="drawer-content flex flex-col items-center overflow-scroll justify-center">
+    <div className="drawer-content flex flex-col items-center overflow-hidden justify-center">
       <div className="w-full min-h-screen">
         <div
           id="scrollableDiv"
@@ -316,7 +316,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         {showScrollToBottom && (
           <button
             onClick={() => scrollToBottom(historyRef)}
-            className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-10"
+            className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-low"
           >
             <CircleDownIcon size={24} />
           </button>

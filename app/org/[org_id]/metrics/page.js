@@ -122,7 +122,7 @@ function Page({ params }) {
       <div className='flex gap-8 justify-center'>
         <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Level:</label>
-          <div className="dropdown dropdown-end z-[999] border rounded-lg">
+          <div className="dropdown dropdown-end z-medium border rounded-lg">
             <label tabIndex="0" role="button" className="btn capitalize">{level} level</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
               {['Organization', 'Agent'].map((item, index) => (
@@ -133,7 +133,7 @@ function Page({ params }) {
         </div>
         <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Select Agent:</label>
-          <div className={`dropdown dropdown-end z-[999] border rounded-lg ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`dropdown dropdown-end z-medium border rounded-lg ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}>
           <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Agent'}</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-row overflow-y-auto max-h-[70vh]">
             <input
@@ -154,7 +154,7 @@ function Page({ params }) {
       <div className="flex justify-end items-center mb-6 gap-3">
         <span className={`${loading ? 'loading loading-ring loading-lg' : ""}`}></span>
         {loading && <span className="text-gray-600">Loading...</span>}
-        <div className="dropdown border rounded-lg z-[99]">
+        <div className="dropdown border rounded-lg z-medium">
           <label tabIndex="0" role="button" className="btn">{TIME_RANGE_OPTIONS?.[range]}</label>
           <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
             {TIME_RANGE_OPTIONS.map((item, index) => (

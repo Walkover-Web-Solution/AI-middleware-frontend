@@ -1,14 +1,15 @@
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { openModal, toggleSidebar } from '@/utils/utility';
-import { BuildingIcon, BotIcon, BookIcon, CogIcon, KeyIcon, KeyRoundIcon, LineChartIcon, LogoutIcon, MailIcon, PlugIcon, TriangleWarningIcon, AddUserIcon, SettingsAltIcon, MessageSquareMoreIcon, MonitorPlayIcon, ChevronDownIcon, AlignIcon, MessageCircleMoreIcon } from '@/components/Icons';
+import { BuildingIcon, BotIcon, BookIcon, CogIcon, KeyIcon, KeyRoundIcon, LineChartIcon, LogoutIcon, MailIcon, PlugIcon, TriangleWarningIcon, AddUserIcon, SettingsAltIcon, MessageSquareMoreIcon, MonitorPlayIcon, ChevronDownIcon, AlignIcon, MessageCircleMoreIcon, BlocksIcon } from '@/components/Icons';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import TutorialModal from '@/components/modals/tutorialModal';
 import DemoModal from '../modals/DemoModal';
 import { MODAL_TYPE } from '@/utils/enums';
+import Protected from '../protected';
 
-function MainSlider() {
+function MainSlider({ isEmbedUser }) {
   const pathName = usePathname();
   const router = useRouter();
   const path = pathName.split('?')[0].split('/')
@@ -26,7 +27,8 @@ function MainSlider() {
     alerts: <TriangleWarningIcon size={24} />,
     invite: <AddUserIcon size={24} />,
     metrics: <LineChartIcon size={24} />,
-    knowledge_base: <BookIcon size={24} />
+    knowledge_base: <BookIcon size={24} />,
+    integration: <BlocksIcon size={24} />,
   }
   const logoutHandler = async () => {
     try {
@@ -44,14 +46,14 @@ function MainSlider() {
   };
   const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
   const toggleMainSidebar = () => toggleSidebar("main-sidebar");
- const handleOpenModal = (modelName) => {
-       if(modelName=='speakToUs'){
-          openModal(MODAL_TYPE.DEMO_MODAL)
-       }
-       else {
-        openModal(MODAL_TYPE.TUTORIAL_MODAL)
-       }
-      }
+  const handleOpenModal = (modelName) => {
+    if (modelName == 'speakToUs') {
+      openModal(MODAL_TYPE.DEMO_MODAL)
+    }
+    else {
+      openModal(MODAL_TYPE.TUTORIAL_MODAL)
+    }
+  }
   // Fixed handler for switch organization
   const handleSwitchOrganization = (e) => {
     e.preventDefault();
@@ -75,10 +77,10 @@ function MainSlider() {
   return (
     <>
       <div className="relative">
-        <label htmlFor="my-drawer-2" className="drawer-button lg:hidden z-0 absolute top-3 left-1">
+        <label htmlFor="my-drawer-2" className="drawer-button lg:hidden absolute top-3 left-1">
           <AlignIcon size={24} onClick={toggleMainSidebar} />
         </label>
-        <div className={`drawer lg:drawer-open relative z-[101] lg:z-0`}>
+        <div className={`drawer lg:drawer-open relative z-low-medium lg:z-very-low`}>
           <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
           <div className="drawer-content flex flex-col"></div>
           <div className="drawer-side">
@@ -91,17 +93,17 @@ function MainSlider() {
                       ? organizations[path[2]]?.name.substring(0, 15) + '...'
                       : organizations[path[2]]?.name}
                   </h2>
-                  <button
+                  {!isEmbedUser && <button
                     type="button"
                     onClick={handleSwitchOrganization}
                     className="text-sm text-blue-500 hover:underline z-[102] bg-transparent border-none p-0 cursor-pointer focus:outline-none"
                   >
                     Switch Organization
-                  </button>
+                  </button>}
                 </div>
                 <ul className="menu space-y-2 p-0">
                   {
-                    ['agents', 'pauthkey', 'apikeys', 'alerts', 'knowledge_base', 'invite', 'metrics'].map((item) => (
+                    ['agents', 'pauthkey', 'apikeys', 'alerts', 'knowledge_base', 'integration', 'invite', 'metrics'].map((item) => (
                       <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)} className="transition-transform transform hover:scale-105 flex items-center">
                         <a className={` w-full font-medium ${path[3] === item ? "active text-primary" : "text-gray-700"} `}>
                           {Icons[item]}
@@ -177,4 +179,4 @@ function MainSlider() {
   );
 }
 
-export default MainSlider;
+export default Protected(MainSlider);

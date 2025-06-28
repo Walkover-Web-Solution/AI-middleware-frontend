@@ -28,7 +28,7 @@ const PreEmbedList = ({ params }) => {
             modelType: modelTypeName,
             model: modelName,
             service: serviceName,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName].validationConfig?.tools,
             embedToken: orgData?.embed_token,
         };
     });
@@ -90,7 +90,7 @@ const PreEmbedList = ({ params }) => {
                     </InfoModel>
                 </div>
                 <div className="label flex-col items-start">
-                    {shouldToolsShow &&
+                    
                         <div className="flex flex-wrap gap-4">
                             <RenderEmbed
                                 bridgeFunctions={bridgePreFunctions}
@@ -101,7 +101,7 @@ const PreEmbedList = ({ params }) => {
                                 params={params}
                                 name="preFunction"
                             />
-                        </div>}
+                        </div>
                 </div>
             </div>
         </div> :

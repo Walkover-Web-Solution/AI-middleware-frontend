@@ -25,7 +25,7 @@ const KnowledgebaseList = ({ params }) => {
             knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
             knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
             isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName
         };
     });
@@ -101,7 +101,7 @@ const KnowledgebaseList = ({ params }) => {
     return (
         <div className="label flex-col items-start p-0">
             <div className="flex flex-wrap gap-4 mb-4">
-                {renderKnowledgebase}
+                {shouldToolsShow&&renderKnowledgebase}
             </div>
             <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
                 <p className=" label-text info mb-2">Knowledgebase Configuration</p>
@@ -130,7 +130,7 @@ const KnowledgebaseList = ({ params }) => {
                     <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
                 )}
                 {!tutorialState?.showTutorial && (
-                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                         <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
                             <input

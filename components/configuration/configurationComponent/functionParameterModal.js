@@ -674,7 +674,7 @@ function FunctionParameterModal({
             <textarea
               type="input"
               value={objectFieldValue}
-              className="textarea textarea-bordered border w-full min-h-96 resize-y z-[1]"
+              className="textarea textarea-bordered border w-full min-h-96 resize-y"
               onChange={(e) => setObjectFieldValue(e.target.value)}
               onBlur={handleTextFieldChange}
               placeholder="Enter valid JSON object here..."
@@ -687,7 +687,7 @@ function FunctionParameterModal({
                     ? JSON.stringify(toolData["old_fields"], undefined, 4)
                     : ""
                 }
-                className="textarea textarea-bordered border w-full min-h-96 resize-y z-[1]"
+                className="textarea textarea-bordered border w-full min-h-96 resize-y"
               />
             )}
           </div>

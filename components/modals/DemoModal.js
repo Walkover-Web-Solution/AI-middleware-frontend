@@ -4,6 +4,7 @@ import { closeModal } from '@/utils/utility';
 import React, { useEffect } from 'react';
 import { CloseCircleIcon, CalendarIcon } from '@/components/Icons';
 import { getCalApi } from "@calcom/embed-react";
+import Modal from '../UI/Modal';
 
 const DemoModal = ({ speakToUs }) => {
 
@@ -25,7 +26,7 @@ const DemoModal = ({ speakToUs }) => {
     };
 
     return (
-        <dialog id={MODAL_TYPE.DEMO_MODAL} className="modal backdrop-blur-lg">
+        <Modal MODAL_ID={MODAL_TYPE.DEMO_MODAL}>
             <div
                 className={`modal-box flex flex-col gap-6  ${speakToUs
                         ? "bg-base-100 text-base-content border max-w-[95vw] w-[700px] border-base-300"
@@ -102,7 +103,7 @@ const DemoModal = ({ speakToUs }) => {
                     </button>
                 </div>
             </div>
-        </dialog>
+        </Modal>
     );
 };
 
