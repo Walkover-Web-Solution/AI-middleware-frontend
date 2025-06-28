@@ -10,7 +10,7 @@ import { CopyIcon, InfoIcon, TrashIcon, PencilIcon, CloseIcon } from "@/componen
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { MODAL_TYPE } from "@/utils/enums";
+import Modal from "@/components/UI/Modal";
 
 function FunctionParameterModal({
   name = "",
@@ -423,7 +423,7 @@ function FunctionParameterModal({
   }, [toolData?.description, function_details?.description, handleSaveDescription, handleSave, resetModalData, Model_Name]);
 
   return (
-    <dialog id={Model_Name} className="modal">
+    <Modal MODAL_ID={Model_Name}>
       <div className="modal-box w-11/12 max-w-6xl">
         <div className="flex flex-row justify-between mb-3">
           <span className="flex flex-row items-center gap-4">
@@ -708,7 +708,7 @@ function FunctionParameterModal({
           </form>
         </div>
       </div>
-    </dialog>
+    </Modal>
   );
 }
 
