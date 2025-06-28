@@ -72,9 +72,9 @@ const ConnectedAgentList = ({ params }) => {
 
     const handleOpenAgentVariable = useCallback((name, item) => {
         setSelectedBridge({ name: name, ...item })
-        const formattedVariables = item?.variables || transformAgentVariableToToolCallFormat(item?.agent_variables || {})
-        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: formattedVariables?.fields || formattedVariables, required_params: formattedVariables?.required_params || [] })
-        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: formattedVariables?.fields || formattedVariables, required_params: formattedVariables?.required_params || [] })
+        const {fields, required_params} = Object.keys(item?.variables)?.length>0 ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
+        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
+        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 

@@ -391,7 +391,8 @@ export const updateTitle = (newTitle) => {
   };
 
   export const transformAgentVariableToToolCallFormat = (inputData) => {
-    const result = {};
+    const fields = {};
+    const required_params = [];
 
     function setNestedValue(obj, path, value, isRequired) {
         const parts = path.split('.');
@@ -418,9 +419,9 @@ export const updateTitle = (newTitle) => {
         const finalKey = parts[parts.length - 1];
 
         let paramType = "string";
-        if (path.toLowerCase().includes('number') || path.toLowerCase().includes('num')) {
+        if (finalKey.toLowerCase().includes('number') || finalKey.toLowerCase().includes('num')) {
             paramType = "number";
-        } else if (path.toLowerCase().includes('bool') || path.toLowerCase().includes('flag')) {
+        } else if (finalKey.toLowerCase().includes('bool') || finalKey.toLowerCase().includes('flag')) {
             paramType = "boolean";
         }
 
@@ -431,7 +432,7 @@ export const updateTitle = (newTitle) => {
             required_params: []
         };
 
-        if (isRequired && parts.length > 1) {
+        if (isRequired) {
             for (let i = 0; i < parts.length - 1; i++) {
                 let currentLevel = obj;
                 for (let j = 0; j < i; j++) {
@@ -445,6 +446,11 @@ export const updateTitle = (newTitle) => {
                     currentLevel[parentKey].required_params.push(childKey);
                 }
             }
+
+            // Add top-level key to required_params
+            if (!required_params.includes(parts[0])) {
+                required_params.push(parts[0]);
+            }
         }
     }
 
@@ -452,7 +458,7 @@ export const updateTitle = (newTitle) => {
         const isRequired = value === "required";
 
         if (key.includes('.')) {
-            setNestedValue(result, key, value, isRequired);
+            setNestedValue(fields, key, value, isRequired);
         } else {
             let paramType = "string";
             if (key.toLowerCase().includes('number') || key.toLowerCase().includes('num')) {
@@ -461,14 +467,19 @@ export const updateTitle = (newTitle) => {
                 paramType = "boolean";
             }
 
-            result[key] = {
+            fields[key] = {
                 type: paramType,
                 description: "",
                 enum: [],
-                required_params: isRequired ? [key] : []
+                required_params: []
             };
+
+            if (isRequired && !required_params.includes(key)) {
+                required_params.push(key);
+            }
         }
     }
 
-    return result;
+    return { fields, required_params };
 };
+
