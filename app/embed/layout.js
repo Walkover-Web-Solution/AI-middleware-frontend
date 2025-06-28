@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation';
 import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReducer';
 import { useDispatch } from 'react-redux';
+import { getServiceAction } from '@/store/action/serviceAction';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -14,6 +15,14 @@ const Layout = ({ children }) => {
   const interfaceDetailsParam = searchParams.get('interfaceDetails');
   const decodedParam = interfaceDetailsParam ? decodeURIComponent(interfaceDetailsParam) : null;
   const urlParamsObj = decodedParam ? JSON.parse(decodedParam) : {};
+
+  useEffect(() => {
+    window.parent.postMessage({type: 'gtwyLoaded', data: 'gtwyLoaded'}, '*');
+  }, []);
+
+  useEffect(()=>{
+    dispatch(getServiceAction())
+  },[])
 
   useEffect(() => {
     if (urlParamsObj.org_id && urlParamsObj.token && urlParamsObj.folder_id) {
@@ -28,9 +37,7 @@ const Layout = ({ children }) => {
     }
   }, [urlParamsObj, router, dispatch]);
 
-  // useEffect(() => {
-  //   window.postMessage('gtwyLoaded', '*');
-  // }, []);
+ 
 
   if (isLoading) {
     return (
