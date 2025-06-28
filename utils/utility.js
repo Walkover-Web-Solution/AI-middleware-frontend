@@ -390,3 +390,96 @@ export const updateTitle = (newTitle) => {
     return diffLines;
   };
 
+  export const transformAgentVariableToToolCallFormat = (inputData) => {
+    const fields = {};
+    const required_params = [];
+
+    function setNestedValue(obj, path, value, isRequired) {
+        const parts = path.split('.');
+        let current = obj;
+
+        for (let i = 0; i < parts.length - 1; i++) {
+            const part = parts[i];
+
+            if (!current[part]) {
+                current[part] = {
+                    type: "object",
+                    description: "",
+                    enum: [],
+                    required_params: [],
+                    parameter: {}
+                };
+            } else if (!current[part].parameter) {
+                current[part].parameter = {};
+            }
+
+            current = current[part].parameter;
+        }
+
+        const finalKey = parts[parts.length - 1];
+
+        let paramType = "string";
+        if (finalKey.toLowerCase().includes('number') || finalKey.toLowerCase().includes('num')) {
+            paramType = "number";
+        } else if (finalKey.toLowerCase().includes('bool') || finalKey.toLowerCase().includes('flag')) {
+            paramType = "boolean";
+        }
+
+        current[finalKey] = {
+            type: paramType,
+            description: "",
+            enum: [],
+            required_params: []
+        };
+
+        if (isRequired) {
+            for (let i = 0; i < parts.length - 1; i++) {
+                let currentLevel = obj;
+                for (let j = 0; j < i; j++) {
+                    currentLevel = currentLevel[parts[j]].parameter;
+                }
+
+                const parentKey = parts[i];
+                const childKey = parts[i + 1];
+
+                if (!currentLevel[parentKey].required_params.includes(childKey)) {
+                    currentLevel[parentKey].required_params.push(childKey);
+                }
+            }
+
+            // Add top-level key to required_params
+            if (!required_params.includes(parts[0])) {
+                required_params.push(parts[0]);
+            }
+        }
+    }
+
+    for (const [key, value] of Object.entries(inputData)) {
+        const isRequired = value === "required";
+
+        if (key.includes('.')) {
+            setNestedValue(fields, key, value, isRequired);
+        } else {
+            let paramType = "string";
+            if (key.toLowerCase().includes('number') || key.toLowerCase().includes('num')) {
+                paramType = "number";
+            } else if (key.toLowerCase().includes('bool') || key.toLowerCase().includes('flag')) {
+                paramType = "boolean";
+            }
+
+            fields[key] = {
+                type: paramType,
+                description: "",
+                enum: [],
+                required_params: []
+            };
+
+            if (isRequired && !required_params.includes(key)) {
+                required_params.push(key);
+            }
+        }
+    }
+
+    return { fields, required_params };
+};
+

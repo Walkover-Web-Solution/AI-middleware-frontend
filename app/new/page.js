@@ -3,7 +3,6 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { filterOrganizations } from '@/utils/utility';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { DEFAULT_MODEL } from '@/jsonFiles/bridgeParameter';
 import Protected from '@/components/protected';
 import { getModelAction } from '@/store/action/modelAction';
 import { switchOrg } from '@/config';
@@ -36,10 +35,11 @@ function Page({ params }) {
     const [formState, setFormState] = useState(INITIAL_FORM_STATE);
     const [isInitialLoading, setIsInitialLoading] = useState(false);
 
-    const { organizations, modelsList, SERVICES } = useCustomSelector(state => ({
+    const { organizations, modelsList, SERVICES, DEFAULT_MODEL } = useCustomSelector(state => ({
         organizations: state.userDetailsReducer.organizations,
         modelsList: state?.modelReducer?.serviceModels[formState.selectedService],
-        SERVICES: state?.serviceReducer?.services
+        SERVICES: state?.serviceReducer?.services,
+        DEFAULT_MODEL: state?.serviceReducer?.default_model
     }));
 
     const templateId = searchParams.get('template_id');
@@ -142,7 +142,7 @@ function Page({ params }) {
         const service = e.target.value;
         updateFormState({
             selectedService: service,
-            selectedModel: DEFAULT_MODEL[service],
+            selectedModel: DEFAULT_MODEL[service]?.model,
             selectedModelType: "chat"
         });
     }, [updateFormState]);

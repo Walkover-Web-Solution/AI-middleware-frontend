@@ -3,8 +3,9 @@ import { updateBridgeAction } from '@/store/action/bridgeAction';
 import { InfoIcon } from '@/components/Icons';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import Protected from '@/components/protected';
 
-const BridgeTypeToggle = ({ params }) => {
+const BridgeTypeToggle = ({ params, isEmbedUser }) => {
     const dispatch = useDispatch();
     const { bridgeType, modelType, service } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
@@ -88,7 +89,7 @@ const BridgeTypeToggle = ({ params }) => {
                                 </div>
                             </label>
                         </div>
-                        <label className="flex items-center cursor-pointer">
+                        {!isEmbedUser && <label className="flex items-center cursor-pointer">
                             <input
                                 type="radio"
                                 name="bridgeType"
@@ -101,7 +102,7 @@ const BridgeTypeToggle = ({ params }) => {
                                 disabled={modelType === 'embedding'}
                             />
                             <span className="label-text ml-2">Triggers</span>
-                        </label>
+                        </label>}
                     </>
 
                 </div>
@@ -118,4 +119,4 @@ const BridgeTypeToggle = ({ params }) => {
     );
 };
 
-export default BridgeTypeToggle;
+export default Protected(BridgeTypeToggle);

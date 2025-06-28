@@ -282,7 +282,7 @@ const InputConfigComponent = ({ params }) => {
               onClick={() => openModal(MODAL_TYPE.OPTIMIZE_PROMPT)}
             >
               <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
-                 Improve Prompt           
+                Prompt Builder
               </span>
             </div>
           </div>

@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 
 export const runtime = 'edge';
 
-function Home({ params }) {
+function Home({ params, isEmbedUser }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
@@ -174,7 +174,7 @@ function Home({ params }) {
     return (
       <div className="flex items-center mr-4">
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button
+          {!isEmbedUser && <button
             className="btn btn-outline btn-ghost btn-sm"
             onClick={(e) => {
               e.preventDefault();
@@ -183,7 +183,7 @@ function Home({ params }) {
             }}
           >
             Test Case
-          </button>
+          </button>}
         </div>
         <div className="dropdown dropdown-left bg-transparent">
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
@@ -216,7 +216,7 @@ function Home({ params }) {
 
   return (
     <div className="w-full">
-      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"}/>}
+      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"} />}
       {tutorialState?.showTutorial && (
         <OnBoarding
           setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}

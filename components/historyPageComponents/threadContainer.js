@@ -255,7 +255,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   };
 
   return (
-    <div className="drawer-content flex flex-col items-center overflow-scroll justify-center">
+    <div className="drawer-content flex flex-col items-center overflow-hidden justify-center">
       <div className="w-full min-h-screen">
         <div
           id="scrollableDiv"

@@ -15,6 +15,7 @@ import AgentSetupGuide from "@/components/AgentSetupGuide";
 
 export const runtime = 'edge';
 const Page = ({ searchParams }) => {
+  const apiKeySectionRef= useRef(null)
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
@@ -79,13 +80,13 @@ const Page = ({ searchParams }) => {
       {!bridgeType && <LoadingSpinner />}
       <div className="flex flex-col md:flex-row w-full">
         <div className="w-full md:w-1/2 overflow-y-auto overflow-x-hidden p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
-          <ConfigurationPage params={params} />
+          <ConfigurationPage apiKeySectionRef={apiKeySectionRef} params={params} />
           <div />
         </div>
         <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
         <div className="w-full md:w-1/2 flex-1 chatPage min-w-[450px] relative">
           <div className="m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
-            <AgentSetupGuide params={params} />
+            <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} params={params} />
             {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> :bridgeType==='chatbot'? <Chatbot params={params} key={params} />: <Chat params={params} />}
 
           </div>

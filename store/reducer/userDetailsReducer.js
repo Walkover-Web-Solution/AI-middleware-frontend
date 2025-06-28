@@ -34,6 +34,16 @@ export const userDetailsReducer = createSlice({
         }
       }
     },
+    updateGtwyAccessToken: (state, action) => {
+      const { gtwyAccessToken, orgId } = action.payload;
+      state.organizations[orgId] = {
+        ...state.organizations[orgId],
+        meta: {
+          ...state.organizations[orgId]?.meta,
+          gtwyAccessToken: gtwyAccessToken
+        }
+      }
+    },
     updateUserMeta: (state, action) => {
       const { user_id, user } = action.payload;
       state.userDetails = {
@@ -42,6 +52,13 @@ export const userDetailsReducer = createSlice({
           ...state.userDetails.meta,
           onboarding: user?.meta?.onboarding
         }
+      }
+    },
+    updateUserDetialsForEmbedUser: (state, action) => {
+      const { isEmbedUser } = action.payload;
+      state.userDetails = {
+        ...state.userDetails,
+        isEmbedUser: isEmbedUser
       }
     },
 
@@ -53,6 +70,8 @@ export const {
   fetchUserDetails,
   updateUserDetails,
   updateToken,
-  updateUserMeta
+  updateGtwyAccessToken,
+  updateUserMeta,
+  updateUserDetialsForEmbedUser
 } = userDetailsReducer.actions;
 export default userDetailsReducer.reducer;

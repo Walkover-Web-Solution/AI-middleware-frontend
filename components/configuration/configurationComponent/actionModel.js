@@ -85,7 +85,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
 
     return (
         <div className="cursor-pointer">
-            <button className="btn btn-outline btn-sm mt-4 w-fit" onClick={() => {
+            <button className="btn btn-outline btn-sm w-fit" onClick={() => {
                 document.getElementById('actionModel').showModal();
                 clearInputFields();
             }}>

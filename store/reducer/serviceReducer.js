@@ -9,8 +9,9 @@ export const serviceReducer = createSlice({
   initialState,
   reducers: {
     fetchServiceReducer: (state, action) => {
-      const { data } = action.payload;
-      state.services = data;
+      const { services, default_model } = action.payload;
+      state.services = services;
+      state.default_model = default_model;
     }
   },
 });

@@ -1,5 +1,4 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { DEFAULT_MODEL } from "@/jsonFiles/bridgeParameter";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { InfoIcon } from "@/components/Icons";
 import { useCallback, useEffect, useState } from "react";
@@ -8,8 +7,9 @@ import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
 
 function ServiceDropdown({ params }) {
-    const { bridgeType, service, SERVICES } = useCustomSelector((state) => ({
+    const { bridgeType, service, SERVICES, DEFAULT_MODEL } = useCustomSelector((state) => ({
         SERVICES: state?.serviceReducer?.services,
+        DEFAULT_MODEL: state?.serviceReducer?.default_model,
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
     }));
@@ -32,7 +32,7 @@ function ServiceDropdown({ params }) {
 
     const handleServiceChange = useCallback((e) => {
         const newService = e.target.value;
-        const defaultModel = DEFAULT_MODEL?.[newService];
+        const defaultModel = DEFAULT_MODEL?.[newService]?.model;
         setSelectedService(newService);
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,

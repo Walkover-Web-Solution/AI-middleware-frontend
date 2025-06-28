@@ -1,4 +1,5 @@
 import React from 'react'
+import { MODAL_TYPE } from '@/utils/enums'
 import Modal from '../UI/Modal'
 
 const EditMessageModal = ({modalRef,setModalInput,handleClose,handleSave,modalInput}) => {
