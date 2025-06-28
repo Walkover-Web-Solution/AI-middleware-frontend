@@ -388,8 +388,21 @@ const AdvancedParameters = ({ params }) => {
                       <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
                     ))}
                   </select>
+
                   {configuration?.[key]?.type === "json_schema" && (
                     <>
+                      <div className="flex justify-end mb-2 mt-5">
+                        <span
+                          className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => {
+                            openModal(MODAL_TYPE.JSON_SCHEMA);
+                          }}
+                        >
+                          Response Builder
+                        </span>
+                      </div>
+
+                      {/* Textarea */}
                       <textarea
                         key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
                         type="input"
@@ -401,23 +414,17 @@ const AdvancedParameters = ({ params }) => {
                             4
                           )
                         }
-                        className="mt-5 textarea textarea-bordered border w-full min-h-96 resize-y"
+                        className="textarea textarea-bordered border w-[450px] min-h-96 resize-y"
                         onBlur={(e) =>
                           handleSelectChange(e, "json_schema")
                         }
                         placeholder="Enter valid JSON object here..."
                       />
-                      <span
-                        className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
-                        onClick={() => {
-                          openModal(MODAL_TYPE.JSON_SCHEMA);
-                        }}
-                      >
-                        Improve Schema
-                      </span>
+
                       <JsonSchemaModal params={params} messages={messages} setMessages={setMessages}/>
                     </>
                   )}
+
                 </label>
               )}
             </div>
