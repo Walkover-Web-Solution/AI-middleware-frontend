@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import InfoModel from '@/components/infoModel';
+import { PencilIcon } from '@/components/Icons';
 
 const UserReferenceForRichText = ({ params }) => {
     const dispatch = useDispatch();
+    const [showInput, setShowInput] = useState(false);
     const { is_rich_text = true, user_reference } = useCustomSelector((state) => ({
         is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.is_rich_text,
         user_reference: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.user_reference || "",
@@ -34,7 +36,7 @@ const UserReferenceForRichText = ({ params }) => {
 
     return (
         <div>
-            <label className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
+            <div className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center gap-2'>
                     <div className="label">
                         <InfoModel tooltipContent={"Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content."}>
@@ -47,14 +49,27 @@ const UserReferenceForRichText = ({ params }) => {
                         key={is_rich_text}
                         className="toggle"
                         defaultChecked={isRichText}
-                        onChange={(e) => handleInputChange(e, "bridgeType")}
+                        onChange={handleInputChange}
                     />
                 </div>
-            </label>
-            {is_rich_text && (
+                    <div className='tooltip tooltip-top flex justify-end ' data-tip={"Enhance rich text"}>
+                        {is_rich_text && (
+                            <button
+                                onClick={() => setShowInput(!showInput)}
+                                className="text-sm text-primary hover:text-primary-focus flex items-center gap-1 cursor-pointer"
+                            >
+                                customize
+                                <PencilIcon size={12} />
+
+                            </button>
+
+                        )}
+                    </div>
+            </div>
+            {is_rich_text && showInput && (
                 <textarea
                     placeholder="Please provide a user reference for the rich text"
-                    className="textarea textarea-bordered w-full min-h-[10rem] border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-primary"
+                    className="textarea textarea-bordered border w-full min-h-[10rem] resize-y"
                     defaultValue={user_reference}
                     key={user_reference}
                     onBlur={handleUserReferenceChange}

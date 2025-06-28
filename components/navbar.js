@@ -108,7 +108,7 @@ function Navbar({ isEmbedUser }) {
   return (
     <div className='z-medium'>
       <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : (!isEmbedUser ? 'flex items-center justify-between flex-wrap' : ' ')} w-full navbar border md:flex-nowrap z-low-medium max-h-[4rem] bg-base-100 sticky top-0`}>
-        <div className={`${(path.length > 5 ? 'flex items-center justify-start gap-2' : 'hidden')}`}>
+        <div className={`${(path.length > 5 ? 'flex w-full items-center justify-start gap-2' : 'hidden')}`}>
           <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/agents`)}>
             <HomeIcon size={16} />
           </button>
