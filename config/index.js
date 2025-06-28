@@ -1014,3 +1014,12 @@ export const getPrebuiltToolsApi = async () => {
     throw new Error(error);
   }
 }
+export const getTutorial =async ()=>{
+  try {
+    const response=await axios.get("https://flow.sokt.io/func/scri33jNs1M1");
+    return response;
+  }
+  catch(error){
+    throw new Error(error);
+  }
+}
