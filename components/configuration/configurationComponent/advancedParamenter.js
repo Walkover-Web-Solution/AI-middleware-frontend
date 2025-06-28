@@ -389,7 +389,7 @@ const AdvancedParameters = ({ params }) => {
                     ))}
                   </select>
 
-                                    {configuration?.[key]?.type === "json_schema" && (
+                  {configuration?.[key]?.type === "json_schema" && (
                     <>
                       <div className="flex justify-end mb-2 mt-5">
                         <span
@@ -401,7 +401,7 @@ const AdvancedParameters = ({ params }) => {
                           Response Builder
                         </span>
                       </div>
-                      
+
                       {/* Textarea */}
                       <textarea
                         key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
@@ -420,7 +420,7 @@ const AdvancedParameters = ({ params }) => {
                         }
                         placeholder="Enter valid JSON object here..."
                       />
-                     
+
                       <JsonSchemaModal params={params} messages={messages} setMessages={setMessages}/>
                     </>
                   )}
