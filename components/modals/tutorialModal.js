@@ -1,10 +1,10 @@
 'use client';
-import { MODAL_TYPE, ONBOARDING_VIDEOS, TUTORIALS } from '@/utils/enums';
+import { MODAL_TYPE } from '@/utils/enums';
 import React, { useState, useRef, useEffect } from 'react';
-import { PlayIcon, ChevronDownIcon, ChevronRightIcon, BookIcon } from '@/components/Icons';
+import { PlayIcon, ChevronDownIcon, ChevronRightIcon, BookIcon, BotIcon, KeyIcon, WrenchIcon, SettingsIcon } from '@/components/Icons';
 import { closeModal } from '@/utils/utility';
 import Modal from '../UI/Modal';
-
+import { getTutorial } from '@/config';
 // Video Component using iframe
 const TutorialVideo = ({ videoUrl, title }) => {
   return (
@@ -20,8 +20,16 @@ const TutorialVideo = ({ videoUrl, title }) => {
     </div>
   );
 };
-
+const iconMap = {
+  "bot": BotIcon,
+  "key": KeyIcon,
+  "wrench": WrenchIcon,
+  "settings": SettingsIcon,
+  "book-text": BookIcon
+};
 const TutorialModal = () => {
+  
+  const [tutorialData,setTutorialData]=useState([])
   const [activeIndex, setActiveIndex] = useState(null);
   const videoRefs = useRef({});
   const contentAreaRef = useRef(null);
@@ -30,6 +38,20 @@ const TutorialModal = () => {
       setActiveIndex(null);
     };
   }, []);
+ useEffect(() => {
+  const fetchTutorials = async () => {
+    try {
+      const response = await getTutorial();
+      const data= response.data;
+      setTutorialData(data);    
+    } catch (error) {
+      console.error('Failed to fetch tutorials:', error);
+      setTutorialData([]); 
+    }
+  };
+
+  fetchTutorials();
+}, []);
   const internalClose = () => {
     setActiveIndex(null);
     closeModal(MODAL_TYPE.TUTORIAL_MODAL);
@@ -83,8 +105,8 @@ const TutorialModal = () => {
           className="p-8 max-h-[75vh] overflow-y-auto scroll-smooth"
         >
           <div className="space-y-3">
-            {TUTORIALS?.map((tutorial, index) => {
-              const IconComponent = tutorial.icon;
+            {tutorialData?.map((tutorial, index) => {
+              const IconComponent = iconMap[tutorial.icon];
               const isActive = activeIndex === index;
 
               return (

@@ -1015,6 +1015,16 @@ export const getPrebuiltToolsApi = async () => {
   }
 }
 
+export const getTutorial =async ()=>{
+  try {
+    const response=await axios.get("https://flow.sokt.io/func/scri33jNs1M1");
+    return response;
+  }
+  catch(error){
+    throw new Error(error);
+  }
+}
+
 export const createIntegrationApi = async (name) => {
   try {
     const response = await axios.post(`${URL}/gtwyEmbed/`, {name});
@@ -1041,5 +1051,6 @@ export const generateGtwyAccessTokenApi = async () => {
   } catch (error) {
     console.error(error);
     return error;
+
   }
 }
