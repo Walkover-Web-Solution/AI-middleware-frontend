@@ -88,6 +88,7 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                                     [field]: e.target.value
                                 }));
                             }}
+                            disabled={field === 'apikey' && isEditing}
                         />
                     </div>
                 ))}
