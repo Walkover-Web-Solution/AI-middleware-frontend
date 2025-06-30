@@ -13,6 +13,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase }) => {
   const dispatch = useDispatch();
+   const editModalRef = useRef(null); // Add ref for edit modal
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
@@ -29,13 +30,14 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   }, [item]);
 
   const handleEdit = useCallback(() => {
-    setModalInput(item.updated_message || item.content);
-    modalRef.current?.showModal() || console.error("Modal element not found");
+    const messageToEdit = item.updated_message || item.content;
+    setModalInput(messageToEdit);
+    editModalRef.current?.showModal();
   }, [item]);
 
   const handleClose = useCallback(() => {
     setModalInput("");
-    modalRef.current?.close() || console.error("Modal element not found");
+    editModalRef.current?.close();
   }, []);
 
   const handleSave = useCallback(() => {
@@ -451,7 +453,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       )}
 
       <ToolsDataModal toolsData={toolsData} handleClose={handleCloseToolsDataModal} toolsDataModalRef={toolsDataModalRef} integrationData={integrationData} />
-      <EditMessageModal modalRef={modalRef} setModalInput={setModalInput} handleClose={handleClose} handleSave={handleSave} modalInput={modalInput} />
+      <EditMessageModal modalRef={editModalRef} setModalInput={setModalInput} handleClose={handleClose} handleSave={handleSave} modalInput={modalInput} />
     </div >
   );
 };
