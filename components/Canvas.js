@@ -39,6 +39,7 @@ function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, set
         id: Date.now() + 1,
         sender: "assistant",
         content: result.description,
+        optimized:result.updated,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages(prev => [...prev, assistantMessage]);
