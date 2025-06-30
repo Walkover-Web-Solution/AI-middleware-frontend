@@ -48,7 +48,7 @@ function ActionList({ params }) {
                 {action && Object.entries(action).sort().map(([key, value]) => (
                     <div
                         key={key}
-                        className="flex w-[250px] flex-col items-start rounded-md border hover:bg-base-200 md:flex-row cursor-pointer"
+                        className="flex w-[250px] mb-4 flex-col items-start rounded-md border hover:bg-base-200 md:flex-row cursor-pointer"
                         onClick={() => {
                             setSelectedKey(key);
                             openModal(MODAL_TYPE.ACTION_MODAL)

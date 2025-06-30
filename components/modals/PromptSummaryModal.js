@@ -40,7 +40,11 @@ const PromptSummaryModal = ({ params }) => {
             setIsGeneratingSummary(false);
         }
     }, [dispatch, params, prompt]);
-
+    const handleClose=()=>{
+        closeModal(MODAL_TYPE.PROMPT_SUMMARY); 
+        setErrorMessage("");
+        setSummary(bridge_summary)
+    }
     const handleSaveSummary = useCallback(() => {
         const newValue = textareaRef.current?.value || summary || "";
         const dataToSend = { bridge_summary: newValue };
@@ -77,7 +81,7 @@ const PromptSummaryModal = ({ params }) => {
                 onChange={(e)=>setSummary(e.target.value)}
                 className="textarea textarea-bordered w-full min-h-96 resize-y focus:border-primary caret-black p-2"
             />
-            <button className="btn btn-ghost btn-sm" onClick={() => { setIsEditing(false); }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => { setIsEditing(false); setSummary(bridge_summary) }}>
                 Cancel
             </button>
         </div>
@@ -112,7 +116,7 @@ const PromptSummaryModal = ({ params }) => {
                 </div>
                 <div className="modal-action">
                     <div className="flex gap-2">
-                        <button className="btn" onClick={() => {closeModal(MODAL_TYPE.PROMPT_SUMMARY); setErrorMessage("")}}>Close</button>
+                        <button className="btn" onClick={() => {handleClose()}}>Close</button>
                         <button
                             className="btn btn-primary"
                             disabled={isGeneratingSummary || bridge_summary === summary}
