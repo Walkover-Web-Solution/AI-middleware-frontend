@@ -1,248 +1,401 @@
-"use client"
-import { useCustomSelector } from '@/customHooks/customSelector';
-import { archiveBridgeAction, deleteBridgeAction, dicardBridgeVersionAction, duplicateBridgeAction, getAllBridgesAction, updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
-import { MODAL_TYPE } from '@/utils/enums';
-import { getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { FilterSliderIcon, HistoryIcon, HomeIcon, RSSIcon, TestTubeIcon, MessageCircleMoreIcon, PlayIcon, PauseIcon, ClipboardXIcon, ChevronDownIcon, BuildingIcon, ChecklistIcon } from '@/components/Icons';
+'use client'
+import React, {useState, useEffect, useRef, useCallback, useMemo} from 'react';
+import {FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap} from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
+import { useCustomSelector } from '@/customHooks/customSelector';
+import {updateBridgeAction, dicardBridgeVersionAction, publishBridgeVersionAction} from '@/store/action/bridgeAction';
+import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
+import {MODAL_TYPE} from '@/utils/enums';
+import { openModal, toggleSidebar } from '@/utils/utility';
 import { toast } from 'react-toastify';
+import OrgSlider from './sliders/orgSlider';
 import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
-import OrgSlider from './sliders/orgSlider';
-import ConfigHistorySlider from "./sliders/configHistorySlider";
-import { truncate } from "@/components/historyPageComponents/assistFile";
-import Protected from './protected';
-import IntegrationModal from './modals/IntegrationModal';
+import ConfigHistorySlider from './sliders/configHistorySlider';
 
-function Navbar({ isEmbedUser }) {
-  const router = useRouter();
-  const searchParams = useSearchParams()
-  const versionId = searchParams.get('version')
+
+const TABS = [
+  { id: 'configure', label: 'Configure', icon: FileSliders, shortLabel: 'Config' },
+  { id: 'testcase',  label: 'Test Cases', icon: TestTube,   shortLabel: 'Tests'  },
+  { id: 'history',   label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
+];
+
+const BRIDGE_STATUS = {
+  ACTIVE: 1,
+  PAUSED: 0
+};
+
+
+const SimpleNavbar = () => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isScrolled,     setIsScrolled]     = useState(false);
+  const [isMobile,       setIsMobile]       = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const dropdownRef = useRef(null);
+  const router       = useRouter();
+  const pathname     = usePathname();             
+  const searchParams = useSearchParams();
+  const versionId  = searchParams.get('version'); 
+  const pathParts  = pathname.split('?')[0].split('/');
+  const orgId      = pathParts[2];                 
+  const bridgeId   = pathParts[5];
   const dispatch = useDispatch();
-  const pathName = usePathname();
-  const path = pathName.split('?')[0].split('/')
-  const bridgeId = path[5];
-  const { organizations, bridgeData, chatbotData, bridge, publishedVersion, isdrafted } = useCustomSelector((state) => ({
-    organizations: state.userDetailsReducer.organizations,
-    bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
-    chatbotData: state.ChatBot.ChatBotMap[bridgeId],
-    bridge: state.bridgeReducer.allBridgesMap[bridgeId] || [],
-    publishedVersion: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || [],
-    isdrafted: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted,
+  const {organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, isPublishing, isUpdatingBridge, activeTab} = useCustomSelector(state => ({
+    organizations   : state.userDetailsReducer.organizations,
+    bridgeData      : state.bridgeReducer.allBridgesMap[bridgeId],
+    bridge          : state.bridgeReducer.allBridgesMap[bridgeId] || {},
+    publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
+    isDrafted       : state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted ?? false,
+    bridgeStatus    : state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridge_status ?? BRIDGE_STATUS.ACTIVE,
+    isPublishing    : state.bridgeReducer.isPublishing ?? false,
+    isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
+    activeTab       :pathname.includes('configure') ? 'configure' :pathname.includes('testcase')  ? 'testcase'  :pathname.includes('history')   ? 'history'   :'configure'
   }));
-  const handleDeleteBridge = async (item, newStatus = 0) => {
-    const orgId = path[2];
 
-    switch (item.trim().toLowerCase()) {
-      case 'duplicate':
-        try {
-          dispatch(duplicateBridgeAction(bridgeId)).then((newBridgeId) => {
-            if (newBridgeId) {
-              router.push(`/org/${path[2]}/agents/configure/${newBridgeId}`)
-              toast.success('Agent duplicate successfully');
-            }
-          });
-        } catch (error) {
-          console.error('Failed to duplicate agent:', error);
-          toast.error('Error duplicating agent');
-        }
-        break;
+  const agentName = useMemo(() => bridgeData?.name || 'Customer Support AI', [bridgeData?.name]);
+  const orgName = useMemo(() => organizations?.[orgId]?.name || 'Acme Corp', [organizations, orgId]);
 
-      case 'delete':
-        // Confirm delete action
-        const confirmDelete = window.confirm('Are you sure you want to delete this agent?');
+  const shouldShowNavbar = useCallback(() => {
+    const depth = pathParts.length;
+    if (depth === 3) return false;
+    return ['configure', 'history', 'testcase'].some(seg => pathname.includes(seg));
+  }, [pathParts.length, pathname]);
 
-        if (confirmDelete) {
-          try {
-            // Dispatch delete bridge action and get all agents
-            await dispatch(deleteBridgeAction({ bridgeId, orgId }));
-            router.push(`/org/${orgId}/agents`);
-            toast.success('Agent deleted successfully');
-            dispatch(getAllBridgesAction());
-          } catch (error) {
-            console.error('Failed to delete agent:', error);
-            toast.error('Error deleting agent');
-          }
-        }
-        break;
-
-      case "archive":
-        try {
-          dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
-            if (bridgeStatus === 1) {
-              toast.success('Agents Unarchived Successfully');
-            } else {
-              toast.success('Agents Archived Successfully');
-            }
-            router.push(`/org/${orgId}/agents`);
-          });
-        } catch (error) {
-          console.error('Failed to archive/unarchive Agents', error);
-        }
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleDiscardChanges = async () => {
-    dispatch(updateBridgeVersionReducer({ bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false } }));
-    dispatch(dicardBridgeVersionAction({ bridgeId, versionId }));
-  }
-  const handlePauseBridge = (status) => {
-    dispatch(updateBridgeAction({
-      bridgeId: bridgeId,
-      dataToSend: {
-        bridge_status: status === 'paused' ? 0 : 1
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
       }
-    }));
-  }
-  const toggleOrgSidebar = () => toggleSidebar('default-org-sidebar');
-  const toggleBridgeSidebar = () => toggleSidebar('default-agent-sidebar');
-  const toggleChatbotSidebar = () => toggleSidebar('default-chatbot-sidebar');
-  const toggleConfigHistorySidebar = () =>
-    toggleSidebar("default-config-history-slider", "right");
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  /* Mobile detection */
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  /* Close dropdown when clicked outside */
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDropdownOpen]);
+
+  const handlePauseBridge = useCallback(async () => {
+    const newStatus = bridgeStatus === BRIDGE_STATUS.PAUSED
+      ? BRIDGE_STATUS.ACTIVE
+      : BRIDGE_STATUS.PAUSED;
+
+    try {
+      await dispatch(updateBridgeAction({
+        bridgeId,
+        dataToSend: { bridge_status: newStatus }
+      }));
+      toast.success(`Agent ${newStatus === BRIDGE_STATUS.ACTIVE ? 'resumed' : 'paused'} successfully`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update agent status');
+    }
+  }, [dispatch, bridgeId, bridgeStatus]);
+
+  /* Discard drafts */
+  const handleDiscardChanges = useCallback(async () => {
+    if (!window.confirm('Are you sure you want to discard all changes? This action cannot be undone.')) return;
+
+    try {
+      /* optimistic update */
+      dispatch(updateBridgeVersionReducer({
+        bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false }
+      }));
+      await dispatch(dicardBridgeVersionAction({ bridgeId, versionId }));
+      toast.success('Changes discarded successfully');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to discard changes');
+    }
+  }, [dispatch, bridge, versionId, bridgeId]);
+
+  /* Publish draft */
+  const handlePublish = useCallback(async () => {
+    if (!isDrafted) {
+      toast.info('Nothing to publish');
+      return;
+    }
+    try {
+      await dispatch(publishBridgeVersionAction({ bridgeId, versionId }));
+      toast.success('Version published successfully');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to publish version');
+    }
+  }, [dispatch, isDrafted, bridgeId, versionId]);
+
+  /* Tab switch */
+  const handleTabChange = useCallback((tabId) => {
+    setShowMobileMenu(false);
+    const base = `/org/${orgId}/agents/${tabId}/${bridgeId}`;
+    router.push(base + (versionId ? `?version=${versionId}` : ''));
+  }, [router, orgId, bridgeId, versionId]);
+
+  /* Sidebar toggles */
+  const toggleOrgSidebar          = useCallback(() => toggleSidebar('default-org-sidebar'), []);
+  const toggleBridgeSidebar       = useCallback(() => toggleSidebar('default-agent-sidebar'), []);
+  const toggleConfigHistorySidebar= useCallback(() => toggleSidebar('default-config-history-slider', 'right'), []);
+
+  const breadcrumbItems = useMemo(() => ([
+    {
+      label: orgName,
+      icon: Building,
+      handleClick: toggleOrgSidebar,
+      isClickable: true
+    },
+    {
+      label: 'Agents',
+      icon: Bot,
+      handleClick: toggleBridgeSidebar,
+      isClickable: true
+    },
+    {
+      label: agentName,
+      icon : null,
+      handleClick: undefined,
+      isClickable: false,
+      current: true
+    }
+  ]), [orgName, agentName, toggleOrgSidebar, toggleBridgeSidebar]);
+
+  const StatusIndicator = ({ status }) => (
+    status === BRIDGE_STATUS.ACTIVE ? null : (
+      <div className="flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium bg-warning/20 text-warning border border-warning/30">
+        <Clock size={12}/>
+        <span>Paused</span>
+      </div>
+    )
+  );
+
+  const DraftBadge = () => (
+    !isDrafted ? null : (
+      <div className="badge badge-warning gap-2 animate-pulse">
+        <Zap size={12}/>
+        <span className="hidden sm:inline font-medium">Draft Changes</span>
+        <span className="sm:hidden">Draft</span>
+      </div>
+    )
+  );
+
+  if (!shouldShowNavbar()) return null;
 
   return (
-    <div className='z-medium'>
-      <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : (!isEmbedUser ? 'flex items-center justify-between flex-wrap' : ' ')} w-full navbar border md:flex-nowrap z-low-medium max-h-[4rem] bg-base-100 sticky top-0`}>
-        <div className={`${(path.length > 5 ? 'flex items-center justify-start gap-2' : 'hidden')}`}>
-          <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/agents`)}>
-            <HomeIcon size={16} />
-          </button>
-          {!isEmbedUser && <>
-            <button className="btn m-1" onClick={toggleOrgSidebar}>
-              <BuildingIcon size={16} /> {truncate(organizations[path[2]]?.name, 15)}
-            </button>
-            <div className="dropdown">
-              <div tabIndex={0} role="button" className="btn capitalize m-1 ">{path[3] === 'apikeys' ? 'API Keys' : path[3]}<ChevronDownIcon size={16} /></div>
-              <ul tabIndex={0} className="dropdown-content z-low-medium menu p-2 shadow bg-base-100 rounded-box w-52">
-                {['agents', 'pauthkey', 'apikeys', 'knowledge_base', 'alerts', 'invite', 'metrics'].map((item) => (
-                  <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)}>
-                    <a className={path[3] === item ? "active" : ""}>
-                      {item === 'knowledge_base' ? 'Knowledge Base' : item.charAt(0).toUpperCase() + item.slice(1)}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {path[3] === 'agents' && path.length === 6 && <button className="btn m-1 max-w-44 " onClick={toggleBridgeSidebar}> {getIconOfService(bridgeData?.service, 18, 18)} {truncate(bridgeData?.name, 15)} </button>}
-            {path[3] === 'chatbot' && path[4] === 'configure' && <button className="btn m-1" onClick={toggleChatbotSidebar}> <RSSIcon size={16} /> {chatbotData?.title} </button>}
-          </>}</div>
+    <div className="bg-base-100">
+      {/* Main nav bar */}
+      <div className={`navbar sticky top-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-base-100/95 backdrop-blur-md shadow-lg border-b border-base-300'
+          : 'bg-base-100   shadow-sm  border-b border-base-200'
+      }`}>
 
-        <div className="justify-end w-full" >
-          {path.length === 6 && path[3] === 'agents' ? (
-            <>
-              {/* Add Pause/Resume Button */}
-              {!isEmbedUser && <button
-                className={`btn m-1 tooltip tooltip-left ${bridge?.bridge_status === 0 ? 'bg-green-200 hover:bg-green-300' : 'bg-red-200 hover:bg-red-300'}`}
-                data-tip={bridge?.bridge_status === 0 ? 'Resume Agent' : 'Pause Agent'}
-                onClick={() => handlePauseBridge(bridge?.bridge_status === 0 ? 'resume' : 'paused')}
-              >
-                {bridge?.bridge_status === 0 ? <PlayIcon size={16} /> : <PauseIcon size={16} />}
-              </button>}
-              <button className="btn m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
-                <HistoryIcon size={16} />
-              </button>
-              {path[4] === 'configure' && (
-                <div className='flex items-center'>
-                  {(isdrafted && publishedVersion === versionId) && (
-                    <div className="tooltip tooltip-left" data-tip="Your changes are discarded & will be synced by publish version.">
-                      <div className='flex items-center gap-2'>
-                        <button
-                          className="btn bg-red-200 m-1 hover:bg-red-300"
-                          onClick={handleDiscardChanges}
-                        >
-                          <ClipboardXIcon size={16} /> <span className='text-black'>Discard</span>
-                        </button>
-                      </div>
+        {/* Left section */}
+        <div className="navbar-start flex-1 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1 px-3">
+            <StatusIndicator status={bridgeStatus}/>
+            {/* Breadcrumb */}
+            <nav className="flex items-center space-x-1 min-w-0 flex-1" aria-label="Breadcrumb">
+              {breadcrumbItems.map((item, idx) => (
+                <React.Fragment key={idx}>
+                  {idx > 0 && (
+                    <ChevronRight size={12} className="text-base-content/40 flex-shrink-0 mx-0.5"/>
+                  )}
+                  {item.isClickable ? (
+                    <button
+                      onClick={item.handleClick}
+                      className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md transition-all duration-200 min-w-0 group ${
+                        item.current
+                          ? 'bg-primary/10 text-primary font-semibold cursor-default'
+                          : 'text-base-content/70 hover:text-base-content hover:bg-base-200/70 cursor-pointer hover:scale-105'
+                      }`}
+                      disabled={item.current}
+                    >
+                      {item.icon && <item.icon size={14} className="flex-shrink-0 transition-transform group-hover:scale-110"/>}
+                      <span className={`truncate ${isMobile ? 'max-w-[60px]' : 'max-w-[100px] sm:max-w-[150px]'} ${item.current ? 'font-semibold' : ''}`}>
+                        {item.label}
+                      </span>
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-primary/10 text-primary min-w-0">
+                      <span className={`truncate font-semibold ${isMobile ? 'max-w-[80px]' : 'max-w-[120px] sm:max-w-[180px]'}`} title={item.label}>
+                        {item.label}
+                      </span>
                     </div>
                   )}
-                  <button
-                    className="btn bg-green-200 hover:bg-green-300"
-                    onClick={() => openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
-                    disabled={!isdrafted && publishedVersion === versionId}
-                  >
-                    <ChecklistIcon size={16} /> Publish                  </button>
-                  <div className="divider divider-horizontal mx-1"></div>
-                </div>
-              )}
-              <div className="join group flex">
-                <button
-                  onClick={() => router.push(`/org/${path[2]}/agents/configure/${bridgeId}?version=${versionId}`)}
-                  className={`${path[4] === 'configure' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
-                >
-                  <FilterSliderIcon size={16} className="shrink-0" />
-                  <span className={`${path[4] === 'configure' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Configure Agents</span>
-                </button>
-                {!isEmbedUser && <button
-                  onClick={() => router.push(`/org/${path[2]}/agents/testcase/${bridgeId}?version=${versionId}`)}
-                  className={`${path[4] === 'testcase' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-2 group/btn`}
-                >
-                  <TestTubeIcon size={16} className="shrink-0" />
-                  <span className={`${path[4] === 'testcase' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Test Cases</span>
-                </button>}
+                </React.Fragment>
+              ))}
+             {pathParts.includes('configure') &&  <DraftBadge/>}
+            </nav>
+          </div>
+        </div>
 
+        {/* Right section (desktop) */}
+        <div className="navbar-end">
+          {!isMobile ? (
+            <div className="flex items-center gap-2 px-3">
+              {/* Pause / Resume */}
+              {pathParts?.includes('configure') && <>
+              <button
+                className={`btn btn-sm gap-2 transition-all duration-200 hover:scale-105 ${
+                  bridgeStatus === BRIDGE_STATUS.PAUSED ? 'btn-success' : 'btn-error'
+                } ${isUpdatingBridge ? 'loading' : ''}`}
+                onClick={handlePauseBridge}
+                disabled={isUpdatingBridge}
+              >
+                {!isUpdatingBridge && (bridgeStatus === BRIDGE_STATUS.PAUSED ? <Play size={14}/> : <Pause size={14}/>)}
+                <span className="hidden lg:inline">{bridgeStatus === BRIDGE_STATUS.PAUSED ? 'Resume' : 'Pause'}</span>
+              </button>
+
+              {/* Discard */}
+              {isDrafted && (
                 <button
-                  onClick={() => router.push(`/org/${path[2]}/agents/history/${bridgeId}?version=${versionId}`)}
-                  className={`${path[4] === 'history' ? "btn-primary w-32" : "w-14"} btn join-item  hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-2 group/btn`}
+                  className="btn btn-sm btn-outline btn-error gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={handleDiscardChanges}
+                  disabled={isUpdatingBridge || isPublishing}
                 >
-                  <MessageCircleMoreIcon size={16} className="shrink-0" />
-                  <span className={`${path[4] === 'history' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chat History</span>
+                  <ClipboardX size={14}/>
+                  <span className="hidden lg:inline">Discard</span>
                 </button>
+              )}
+
+              {/* Publish */}
+              <button
+                className={`btn btn-sm gap-2 transition-all duration-200 hover:scale-105 btn-success ${
+                  isPublishing ? 'loading' : ''
+                }`}
+                onClick={() => openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
+                disabled={!isDrafted || isPublishing}
+              >
+                {!isPublishing && <BookCheck size={14}/>}
+                <span className="hidden lg:inline">{isPublishing ? 'Publishing…' : 'Publish'}</span>
+              </button></>}
+
+              {/* Tabs */}
+              <div className="tabs tabs-boxed bg-base-200/50 backdrop-blur-sm">
+                {TABS.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`${activeTab === tab.id ? 'tab-active w-32' : 'w-14'} tab gap-2 hover:w-32 transition-all duration-300 overflow-hidden flex flex-col items-center group/tab hover:bg-base-300/50`}
+                    title={activeTab !== tab.id ? tab.label : undefined}
+                  >
+                    <tab.icon size={16} className="shrink-0 transition-transform group-hover/tab:scale-110"/>
+                    <span className={`${activeTab === tab.id ? 'opacity-100' : 'opacity-0 group-hover/tab:opacity-100'} transition-opacity duration-300 whitespace-nowrap font-medium text-sm`}>
+                      {tab.label}
+                    </span>
+                  </button>
+                ))}
               </div>
-              <div className='ml-2'>
-              </div>
-            </>
+
+              {/* History slider */}
+              {/* <button
+                className="btn btn-sm btn-ghost gap-2 hover:scale-105 transition-all duration-200"
+                onClick={toggleConfigHistorySidebar}
+                title="Updates History"
+              >
+                <History size={16}/>
+              </button> */}
+            </div>
           ) : (
-            path[3] === 'apikeys' ?
-              <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>+ Add new Api key</button>
-              : path[3] === 'pauthkey' ?
-                <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new Pauth Key</button>
-                :
-                path[3] === 'alerts' ?
-                  <button className="btn  btn-primary" onClick={() => openModal(MODAL_TYPE.WEBHOOK_MODAL)}>+ create new Alert</button>
-                  :
-                  path[3] === 'agents' ?
-                    <div>
-                      <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>
-                        + create new agent
-                      </button>
-                    </div> :
-                    path[3] === 'metrics' ?
-                      <div>
-                        <button className="btn btn-primary" onClick={() => router.push(`/org/${path[2]}/alerts`)}>
-                          Configure Alerts
-                        </button>
-                      </div> :
-                      (path[3] === 'chatbot' && path.length === 4) ?
-                        <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CHATBOT_MODAL)}>
-                          + create new chatbot
-                        </button> : path[3] === 'knowledge_base' ?
-                          <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>
-                            + Add new Knowledge base
-                          </button> :
-                          path[3] === 'integration' ?
-                            <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}>
-                              + Add new Integration
-                            </button> : ""
+            /* Mobile menu button */
+            <div className="px-3">
+              <button
+                className="btn btn-square btn-ghost btn-sm"
+                onClick={() => setShowMobileMenu(v => !v)}
+              >
+                <MoreVertical size={18}/>
+              </button>
+            </div>
           )}
         </div>
       </div>
-      {/* org slider  */}
-      <OrgSlider />
 
-      {/* Agent slider */}
-      <BridgeSlider />
+      {/* Mobile controls */}
+      {isMobile && (
+        <>
+          <div className="bg-base-100 border-b border-base-300 shadow-sm">
+            {pathParts.includes('configure') && <div className="flex items-center gap-1.5">
+              {/* Pause / Resume */}
+              <button
+                className={`btn gap-2 flex-1 transition-all duration-200 ${
+                  bridgeStatus === BRIDGE_STATUS.PAUSED ? 'btn-success' : 'btn-error'
+                } ${isUpdatingBridge ? 'loading' : ''}`}
+                onClick={handlePauseBridge}
+                disabled={isUpdatingBridge}
+              >
+                {!isUpdatingBridge && (bridgeStatus === BRIDGE_STATUS.PAUSED ? <Play size={14}/> : <Pause size={14}/>)}
+                {bridgeStatus === BRIDGE_STATUS.PAUSED ? 'Resume' : 'Pause'}
+              </button>
 
-      {/* chatbot slider */}
-      <ChatBotSlider />
-      <ConfigHistorySlider versionId={versionId} />
-      <IntegrationModal orgId={path[2]}/>
+              {/* Discard */}
+              {isDrafted && (
+                <button
+                  className="btn btn-outline btn-error gap-2 flex-1"
+                  onClick={handleDiscardChanges}
+                  disabled={isUpdatingBridge || isPublishing}
+                >
+                  <ClipboardX size={14}/>
+                  Discard
+                </button>
+              )}
+
+              {/* Publish */}
+              <button
+                className={`btn btn-success ${isPublishing ? 'loading' : ''}`}
+                onClick={handlePublish}
+                disabled={!isDrafted || isPublishing}
+              >
+                {!isPublishing && <BookCheck size={14}/>}
+                {isPublishing ? 'Publishing…' : 'Publish'}
+              </button>
+            </div>}
+          </div>
+
+          <div className="bg-base-100 border-b border-base-300 px-3 py-2">
+            <div className="tabs w-full bg-base-200/50">
+              {TABS.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`tab flex-1 gap-1.5 ${activeTab === tab.id ? 'tab-active' : ''}`}
+                >
+                  <tab.icon size={14}/>
+                  <span className="text-xs font-medium">{tab.shortLabel}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Sliders */}
+      <OrgSlider/>
+      <BridgeSlider/>
+      <ChatBotSlider/>
+      <ConfigHistorySlider versionId={versionId}/>
     </div>
   );
-}
+};
 
-export default Protected(Navbar);
+export default SimpleNavbar;

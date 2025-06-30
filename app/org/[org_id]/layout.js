@@ -285,25 +285,19 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   }
   if (isHomePage && !isEmbedUser) {
     return (
-      <div className="flex h-screen">
-        <div className=" flex flex-col  h-full">
-          <MainSlider />
+      <div className="h-screen">
+        <div className="flex h-screen">
+        <div className=" flex flex-col h-full">
+          <MainSlider params={params}/>
         </div>
-        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto overflow-x-hidden">
-          <Navbar />
+        <div className="flex-1 ml-12 lg:ml-12 overflow-y-auto overflow-x-hidden">
+          <Navbar params={params}/>
           {loading ? <LoadingSpinner /> :
             <main className="px-2">{children}</main>
           }
         </div>
         <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
       </div>
-    );
-  } else {
-    return (
-      <div className="h-screen overflow-hidden">
-        <Navbar />
-        {loading ? <LoadingSpinner /> : children}
-        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
       </div>
     );
   }
