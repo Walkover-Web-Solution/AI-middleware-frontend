@@ -158,12 +158,11 @@ const ConnectedAgentList = ({ params }) => {
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    onClick={() => handleAgentClicked(item)}
                     className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200`}
                 >
                     <div
                         className="p-4 w-full h-full flex flex-col justify-between"
-
+                        onClick={() => handleAgentClicked(item)}
                     >
                         <div>
                             <div className="flex justify-between items-center">
