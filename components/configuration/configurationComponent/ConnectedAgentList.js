@@ -9,6 +9,7 @@ import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
 import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
 import FunctionParameterModal from './functionParameterModal';
+import { useRouter } from 'next/navigation';
 
 const ConnectedAgentList = ({ params }) => {
     const dispatch = useDispatch();
@@ -17,6 +18,7 @@ const ConnectedAgentList = ({ params }) => {
     const [currentVariable, setCurrentVariable] = useState(null);
     const [agentTools, setAgentTools] = useState(null);
     const [variablesPath, setVariablesPath] = useState({});
+    const router = useRouter();
     let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
@@ -140,6 +142,15 @@ const ConnectedAgentList = ({ params }) => {
         }
     }
 
+    const handleAgentClicked = (item) => {
+        console.log(item)
+        const bridge = bridgeData?.find((bridge) => bridge?._id === item?.bridge_id)
+        console.log(bridge)
+        if (bridge) {
+            router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
+        }
+    }
+
 
     const renderEmbed = useMemo(() => (
         connect_agents && Object.entries(connect_agents).map(([name, item]) => {
@@ -151,7 +162,7 @@ const ConnectedAgentList = ({ params }) => {
                 >
                     <div
                         className="p-4 w-full h-full flex flex-col justify-between"
-
+                        onClick={() => handleAgentClicked(item)}
                     >
                         <div>
                             <div className="flex justify-between items-center">
