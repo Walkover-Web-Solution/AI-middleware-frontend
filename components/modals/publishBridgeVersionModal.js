@@ -1,4 +1,5 @@
 import {
+  getAllBridgesAction,
   publishBridgeVersionAction,
 } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
@@ -24,6 +25,7 @@ function PublishBridgeVersionModal({ params }) {
         orgId: params?.org_id,
       })
     );
+    dispatch(getAllBridgesAction());
     closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
   }, [dispatch, params]);
 

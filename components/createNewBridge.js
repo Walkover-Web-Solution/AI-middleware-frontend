@@ -183,7 +183,7 @@ import Protected from "./protected";
                 )}
               </div>
               <div
-                className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 overflow-x-auto p-2 ${
+                className={`flex flex-col md:flex-row gap-2 justify-center mx-auto overflow-x-auto p-2 ${
                   validationErrors.bridgeType
                     ? "border border-red-500 rounded-xl"
                     : ""
@@ -271,7 +271,7 @@ import Protected from "./protected";
                 </div>
 
                 {/* Triggers Card */}
-                <div
+                {!isEmbedUser && <div
                   className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "triggers"
                       ? "ring-2 ring-amber-500"
@@ -295,7 +295,7 @@ import Protected from "./protected";
                       Perfect for real-time automation.
                     </p>
                   </div>
-                </div>
+                </div>}
               </div>
             </div>
 

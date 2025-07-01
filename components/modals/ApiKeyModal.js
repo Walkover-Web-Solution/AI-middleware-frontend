@@ -81,14 +81,8 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                             className="input input-bordered"
                             name={field}
                             placeholder={`Enter ${field}`}
-                            value={selectedApiKey ? selectedApiKey[field] : ''}
-                            onChange={(e) => {
-                                setSelectedApiKey(prev => ({
-                                    ...prev,
-                                    [field]: e.target.value
-                                }));
-                            }}
-                            disabled={field === 'apikey' && isEditing}
+                            defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
+                            readOnly={field === 'apikey' && isEditing}
                         />
                     </div>
                 ))}

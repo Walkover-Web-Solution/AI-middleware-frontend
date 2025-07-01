@@ -2,7 +2,7 @@ import React from 'react'
 import { MODAL_TYPE } from '@/utils/enums'
 import Modal from '../UI/Modal'
 
-const EditMessageModal = ({modalRef,setModalInput,handleClose,handleSave,modalInput}) => {
+const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput}) => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.EDIT_MESSAGE_MODAL}>
     <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6">
@@ -13,8 +13,12 @@ const EditMessageModal = ({modalRef,setModalInput,handleClose,handleSave,modalIn
         </label>
         <textarea
           className="input input-bordered textarea min-h-[200px]"
-          value={modalInput}
-          onChange={(e) => setModalInput(e.target.value)}
+          defaultValue={modalInput?.content}
+          key={modalInput?.Id}
+          onBlur={(e) => setModalInput({
+            ...modalInput,
+            content: e.target.value
+          })}
         />
       </div>
       <div className="flex justify-end gap-2">

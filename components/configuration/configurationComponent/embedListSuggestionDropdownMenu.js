@@ -107,16 +107,17 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                        
                         </InfoModel>
 
-                        {/* Plus Icon Button */}
-                       <button
-                        tabIndex={0}
-                        disabled={!shouldToolsShow}
-                        onClick={() => handleTutorial()}
-                    className="btn btn-outline btn-sm"
-                    >
-                        <AddIcon size={16} />
-                        {"Connect Tool"}
-                    </button>
+                        <div className='flex flex-wrap items-center gap-2 w-full lg:mr-0 mr-5'>
+                            <button
+                                tabIndex={0}
+                                disabled={!shouldToolsShow}
+                                onClick={() => handleTutorial()}
+                                className="btn btn-outline btn-sm "
+                            >
+                                <AddIcon size={16} />
+                                <span className="truncate">Connect Tool</span>
+                            </button>
+                        </div>
                     </div>
                 )}
                 {

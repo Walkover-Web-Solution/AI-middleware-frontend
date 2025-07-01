@@ -180,7 +180,7 @@ const ModelDropdown = ({ params }) => {
                         className="btn btn-sm w-full justify-between border border-gray-300 bg-white hover:bg-gray-50 font-normal"
                         onClick={toggleDropdown}
                     >
-                        {model || "Select a Model"}
+                        {model?.length > 30 ? `${model.substring(0, 30)}...` : model|| "Select a Model"}
                         {isDropdownOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                     </div>
                     {isDropdownOpen && (
@@ -198,7 +198,7 @@ const ModelDropdown = ({ params }) => {
                                 if (!isInvalidGroup) {
                                     return (
                                         <li key={`group_${groupIndex}`} className="px-2 py-1 cursor-pointer">
-                                            <span className="text-sm text-gray-500">{group}</span>
+                                            <span className="text-sm  text-gray-500">{group}</span>
                                             <ul className="">
                                                 {Object.keys(options || {}).map((option, optionIndex) => {
                                                     const modelName = options?.[option]?.configuration?.model?.default;

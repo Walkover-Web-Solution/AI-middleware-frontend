@@ -1,27 +1,23 @@
 import { getSingleMessage } from "@/config";
-import { updateContentHistory } from "@/store/action/historyAction";
 import { CircleAlertIcon, BotIcon, ChevronDownIcon, FileClockIcon, ParenthesesIcon, PencilIcon, AddIcon, SquareFunctionIcon, UserIcon, CodeMessageIcon, BotMessageIcon } from "@/components/Icons";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { useDispatch } from "react-redux";
 import CodeBlock from "../codeBlock/codeBlock";
-import EditMessageModal from "../modals/EditMessageModal";
 import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
 import { useCustomSelector } from "@/customHooks/customSelector";
+import { openModal } from "@/utils/utility";
+import { MODAL_TYPE } from "@/utils/enums";
 
-const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase }) => {
-  const dispatch = useDispatch();
+const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase, setModalInput }) => {
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   const [toolsData, setToolsData] = useState([]);
   const toolsDataModalRef = useRef(null);
-  const [modalInput, setModalInput] = useState("");
-   const { embedToken } = useCustomSelector((state) => ({
+  const { embedToken } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
   }));
   const [isDropupOpen, setIsDropupOpen] = useState(false);
-  const modalRef = useRef(null);
   const dropupRef = useRef(null);
 
   useEffect(() => {
@@ -29,29 +25,15 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   }, [item]);
 
   const handleEdit = useCallback(() => {
-    setModalInput(item.updated_message || item.content);
-    modalRef.current?.showModal() || console.error("Modal element not found");
+    setModalInput({
+      content: item.updated_message || item.content,
+      index,
+      Id: item.Id
+    });
+    openModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
   }, [item]);
 
-  const handleClose = useCallback(() => {
-    setModalInput("");
-    modalRef.current?.close() || console.error("Modal element not found");
-  }, []);
 
-  const handleSave = useCallback(() => {
-    if (modalInput.trim() === "") {
-      alert("Message cannot be empty.");
-      return;
-    }
-    dispatch(updateContentHistory({
-      id: item?.Id,
-      bridge_id: params.id,
-      message: modalInput,
-      index
-    }));
-    setModalInput("");
-    modalRef.current?.close() || console.error("Modal element not found");
-  }, [dispatch, item.id, params.id, modalInput, index]);
 
   const getMessageToDisplay = useCallback(() => {
     switch (messageType) {
@@ -109,10 +91,12 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   const renderToolData = (toolData, index) => (
     Object.entries(toolData).map(([key, tool]) => (
       <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1 shadow-sm">
-        <div onClick={() => openViasocket(tool?.id, { flowHitId: tool?.metadata?.flowHitId, embedToken,  meta: {
-                                type: 'tool',
-                                bridge_id: params?.id,
-                            } })}
+        <div onClick={() => openViasocket(tool?.id, {
+          flowHitId: tool?.metadata?.flowHitId, embedToken, meta: {
+            type: 'tool',
+            bridge_id: params?.id,
+          }
+        })}
           className="cursor-pointer flex items-center justify-center py-4 pl-2">
           <div className="text-center">
             {truncate(integrationData?.[tool.name]?.title || tool?.name, 20)}
@@ -121,10 +105,12 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         <div className="flex gap-3">
           <div className="tooltip tooltip-top relative" data-tip="function logs">
             <SquareFunctionIcon size={22}
-              onClick={() => openViasocket(tool.id, { flowHitId: tool?.metadata?.flowHitId, embedToken,  meta: {
-                type: 'tool',
-                bridge_id: params?.id,
-            } })}
+              onClick={() => openViasocket(tool.id, {
+                flowHitId: tool?.metadata?.flowHitId, embedToken, meta: {
+                  type: 'tool',
+                  bridge_id: params?.id,
+                }
+              })}
               className="opacity-80 cursor-pointer" />
           </div>
           <div className="tooltip tooltip-top pr-2 relative" data-tip="function data">
@@ -144,10 +130,12 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
 
   const renderFunctionData = (funcName, index) => (
     <div key={index} className="bg-base-200 rounded-lg flex gap-4 duration-200 items-center justify-between hover:bg-base-300 p-1">
-      <div onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken,  meta: {
-                                type: 'tool',
-                                bridge_id: params?.id,
-                            } })}
+      <div onClick={() => openViasocket(funcName, {
+        flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken, meta: {
+          type: 'tool',
+          bridge_id: params?.id,
+        }
+      })}
         className="cursor-pointer flex items-center justify-center py-4 pl-2">
         <div className="font-semibold text-center">
           {truncate(integrationData?.[funcName]?.title || funcName, 20)}
@@ -155,10 +143,12 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       </div>
       <div className="tooltip tooltip-top pr-2" data-tip="function logs">
         <SquareFunctionIcon size={22}
-          onClick={() => openViasocket(funcName, { flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken,  meta: {
-            type: 'tool',
-            bridge_id: params?.id,
-        } })}
+          onClick={() => openViasocket(funcName, {
+            flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken, meta: {
+              type: 'tool',
+              bridge_id: params?.id,
+            }
+          })}
           className="opacity-80 cursor-pointer" />
       </div>
     </div>
@@ -166,7 +156,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
 
   const handleAskAi = async (item) => {
     const aiconfig = handleAddTestCase(item, index, true)
-    let variables = {aiconfig, response: item?.chatbot_message ? item?.chatbot_message : item?.content}
+    let variables = { aiconfig, response: item?.chatbot_message ? item?.chatbot_message : item?.content }
     try {
       const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
       variables = { "System Prompt": systemPromptResponse, ...variables }
@@ -179,7 +169,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       "threadId": item?.id,
       variables,
       version_id: 'null',
-      hideCloseButton : 'false'
+      hideCloseButton: 'false'
     });
     setTimeout(() => window.openChatbot(), 100)
   }
@@ -276,9 +266,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             <div className="chat-header flex gap-4 items-center mb-1">
               {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
             </div>
-            
-            <div  className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1 `}
-  style={{ overflowWrap: "anywhere" }}>
+
+            <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1 `}
+              style={{ overflowWrap: "anywhere" }}>
               <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`}>
                 {item?.role === "assistant" && item?.image_url && (
                   <div className="chat chat-start">
@@ -317,7 +307,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     <input
                       type="checkbox"
                       className="peer"
-                      // id={`errorCollapse-${item.id || index}`}
+                    // id={`errorCollapse-${item.id || index}`}
                     />
                     <label
                       htmlFor={`errorCollapse-${item.id || index}`}
@@ -328,7 +318,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                         <span className="font-light">Retry Attempt with {item?.model}</span>
                         <ChevronDownIcon className="w-4 h-4 transform peer-checked:rotate-180 transition-transform" />
                       </span>
-                     
+
                     </label>
                     <div className="collapse-content bg-base-100/50 rounded-b-md text-sm  border-t border-base-300">
                       <div className="text-error font-mono break-words bg-base-200/50 rounded-md p-2">
@@ -382,48 +372,48 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             </div>
             {item?.role === "user" && <div className="flex flex-row-reverse gap-2 m-1 overflow-wrap: anywhere items-center">
-                <time className="text-xs opacity-50 chat-end">
-                  {formatDateAndTime(item.createdAt)}
-                </time> 
-                <div className="flex gap-1">
-                  <button
-                    className="btn btn-xs see-on-hover"
-                    onClick={() => handleUserButtonClick("AiConfig")}
-                  >
-                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <SquareFunctionIcon className="h-3 w-3" />
-                      <span>Ai config</span>
-                    </div>
-                  </button>
-                  <button
-                    className="btn btn-xs see-on-hover"
-                    onClick={() => handleUserButtonClick("variables")}
-                  >
-                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <ParenthesesIcon className="h-3 w-3" />
-                      <span>Variables</span>
-                    </div>
-                  </button>
-                  <button
-                    className="btn btn-xs see-on-hover"
-                    onClick={() => handleUserButtonClick("system Prompt")}
-                  >
-                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <FileClockIcon className="h-3 w-3" />
-                      <span>System Prompt</span>
-                    </div>
-                  </button>
-                  <button
-                    className="btn btn-xs see-on-hover"
-                    onClick={() => handleUserButtonClick("more")}
-                  >
-                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
-                      <AddIcon className="h-3 w-3" />
-                      <span>More...</span>
-                    </div>
-                  </button>
-                </div>
-              </div>}
+              <time className="text-xs opacity-50 chat-end">
+                {formatDateAndTime(item.createdAt)}
+              </time>
+              <div className="flex gap-1">
+                <button
+                  className="btn btn-xs see-on-hover"
+                  onClick={() => handleUserButtonClick("AiConfig")}
+                >
+                  <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                    <SquareFunctionIcon className="h-3 w-3" />
+                    <span>Ai config</span>
+                  </div>
+                </button>
+                <button
+                  className="btn btn-xs see-on-hover"
+                  onClick={() => handleUserButtonClick("variables")}
+                >
+                  <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                    <ParenthesesIcon className="h-3 w-3" />
+                    <span>Variables</span>
+                  </div>
+                </button>
+                <button
+                  className="btn btn-xs see-on-hover"
+                  onClick={() => handleUserButtonClick("system Prompt")}
+                >
+                  <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                    <FileClockIcon className="h-3 w-3" />
+                    <span>System Prompt</span>
+                  </div>
+                </button>
+                <button
+                  className="btn btn-xs see-on-hover"
+                  onClick={() => handleUserButtonClick("more")}
+                >
+                  <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                    <AddIcon className="h-3 w-3" />
+                    <span>More...</span>
+                  </div>
+                </button>
+              </div>
+            </div>}
           </div>
           {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div className="flex justify-center items-center my-4">
             <p className="border-t border-base-300 w-full"></p>
@@ -451,7 +441,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
       )}
 
       <ToolsDataModal toolsData={toolsData} handleClose={handleCloseToolsDataModal} toolsDataModalRef={toolsDataModalRef} integrationData={integrationData} />
-      <EditMessageModal modalRef={modalRef} setModalInput={setModalInput} handleClose={handleClose} handleSave={handleSave} modalInput={modalInput} />
     </div >
   );
 };
