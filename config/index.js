@@ -50,6 +50,7 @@ export const getBridgeVersionApi = async ({ bridgeVersionId = null }) => {
   }
 }
 
+
 export const deleteBridge = async (bridgeId) => {
   try {
     const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`);

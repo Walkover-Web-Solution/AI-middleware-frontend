@@ -4,7 +4,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PlayIcon, ChevronDownIcon, ChevronRightIcon, BookIcon, BotIcon, KeyIcon, WrenchIcon, SettingsIcon } from '@/components/Icons';
 import { closeModal } from '@/utils/utility';
 import Modal from '../UI/Modal';
-import { getTutorial } from '@/config';
+import { useCustomSelector } from '@/customHooks/customSelector';
+import { useDispatch } from 'react-redux';
+import { getTutorialDataAction } from '@/store/action/tutotrialAction';
 // Video Component using iframe
 const TutorialVideo = ({ videoUrl, title }) => {
   return (
@@ -28,30 +30,20 @@ const iconMap = {
   "book-text": BookIcon
 };
 const TutorialModal = () => {
-  
-  const [tutorialData,setTutorialData]=useState([])
+  const {tutorialData}=useCustomSelector((state)=>({
+    tutorialData:state.tutorialReducer?.tutorialData
+  }))
   const [activeIndex, setActiveIndex] = useState(null);
   const videoRefs = useRef({});
   const contentAreaRef = useRef(null);
+  const dispatch=useDispatch();
   useEffect(() => {
+    dispatch(getTutorialDataAction());
     return () => {
       setActiveIndex(null);
     };
   }, []);
- useEffect(() => {
-  const fetchTutorials = async () => {
-    try {
-      const response = await getTutorial();
-      const data= response.data;
-      setTutorialData(data);    
-    } catch (error) {
-      console.error('Failed to fetch tutorials:', error);
-      setTutorialData([]); 
-    }
-  };
 
-  fetchTutorials();
-}, []);
   const internalClose = () => {
     setActiveIndex(null);
     closeModal(MODAL_TYPE.TUTORIAL_MODAL);
