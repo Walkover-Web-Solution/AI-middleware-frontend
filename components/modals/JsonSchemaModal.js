@@ -81,6 +81,7 @@ function JsonSchemaModal({ params, messages, setMessages }) {
       textareaProps={{
         onBlur: (e) => validateJsonSchema(e.target.value)
       }}
+      jsonOptimize={true}
       errorMessage={errorMessage}
       setErrorMessage={setErrorMessage}
       key="json_schema"

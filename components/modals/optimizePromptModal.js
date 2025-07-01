@@ -71,7 +71,7 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
   };
 
   const handleRedo = () => {
-    if (currentIndex < promptHistory.length - 1) {
+    if (currentIndex < promptHistory.length) {
       setCurrentIndex(currentIndex + 1);
       return promptHistory[currentIndex + 1];
     }
@@ -90,6 +90,7 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
       setMessages={setMessages}
       showHistory={true}
       history={promptHistory}
+      setCurrentIndex={setCurrentIndex}
       currentIndex={currentIndex}
       onUndo={handleUndo}
       onRedo={handleRedo}
