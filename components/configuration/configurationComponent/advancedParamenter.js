@@ -34,24 +34,43 @@ const AdvancedParameters = ({ params }) => {
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
-      isFirstParameter:user?.meta?.onboarding?.AdvanceParameter
+      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter
     };
   });
+  
   const { tool_choice: tool_choice_data, type, model } = configuration || {};
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
 
-  const handleTutorial = () => {
-    setTutorialState(prev=>({
-      ...prev,
-      showSuggestion:isFirstParameter
+  // Filter parameters by level
+  const getParametersByLevel = (level) => {
+    debugger
+    if (!modelInfoData) return [];
+    
+    return Object.entries(modelInfoData || {}).filter(([key, paramConfig]) => {
+      // Skip keys that shouldn't be displayed
+      if (KEYS_NOT_TO_DISPLAY?.includes(key)) return false;
+      
+      // Get level from ADVANCED_BRIDGE_PARAMETERS or default to 1
+      const paramLevel = paramConfig?.level ?? 1;
+      return paramLevel === level;
+    });
+  };
 
+  const level0Parameters = getParametersByLevel(0); // Hidden parameters
+  const level1Parameters = getParametersByLevel(1); // Accordion parameters  
+  const level2Parameters = getParametersByLevel(2); // Outside accordion parameters
+
+  const handleTutorial = () => {
+    setTutorialState(prev => ({
+      ...prev,
+      showSuggestion: isFirstParameter
     }))
   };
 
   useEffect(() => {
-    setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) :null ); 
+    setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) : null);
   }, [configuration?.response_type?.json_schema]);
 
   useEffect(() => {
@@ -168,95 +187,125 @@ const AdvancedParameters = ({ params }) => {
     dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: updatedDataToSend }));
   }, [dispatch, params?.id, params?.version]);
 
-  return (
-    <div className="collapse z-very-low  text-base-content" tabIndex={0}>
-      <input type="radio" name="my-accordion-1" onClick={() => {
-        handleTutorial()
-        toggleAccordion()
-      }}
-        className='cursor-pointer' />
-      <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
-        <span className="mr-2 cursor-pointer">
-          Advanced Parameters
-        </span>
+  // Component to render parameter fields
+  const renderParameterField = (key, paramConfig) => {
+    const { field, min, max, step, default: defaultValue, options } = paramConfig;
+    const rowDefaultValue =
+      key === 'response_type'
+        ? (typeof modelInfoData?.[key]?.default === 'object'
+          ? modelInfoData?.[key]?.default?.type
+          : modelInfoData?.[key]?.default)
+        : undefined;
+    
+    const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
+    const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
+    let error = false;
 
-        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-      </div>
-      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"}/>)}
-      {tutorialState.showTutorial && (
-        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
-      )}
-      {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
+    return (
+      <div key={key} className="form-control">
+        <label className="label">
+          <div className='flex gap-2'>
+            <div className='flex flex-row gap-2 items-center'>
+              {description ? <InfoModel tooltipContent={description}>
+                <span className="label-text capitalize info">{name || key}</span>
+              </InfoModel> : <span className="label-text capitalize">{name || key}</span>}
+            </div>
+            <div>
+              <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
+                {field === 'slider' && (<li><a onClick={() => setSliderValue("min", key)} className={configuration?.[key] === "min" ? 'bg-base-content text-base-100' : ''}>Min</a></li>)}
+                <div className="tooltip" data-tip="If you set default, this key will not be send"><li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li></div>
+                {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
+              </ul>
+            </div>
+          </div>
+          {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
+          {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
+            modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
+        </label>
 
-        {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
-          const rowDefaultValue =
-            key === 'response_type'
-              ? (typeof modelInfoData?.[key]?.default === 'object'
-                ? modelInfoData?.[key]?.default?.type
-                : modelInfoData?.[key]?.default)
-              : undefined;
-          if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
-          const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
-          const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
-          let error = false;
-          return (
-            <div key={key} className="form-control">
-              <label className="label">
-                <div className='flex gap-2'>
-                  <div className='flex flex-row gap-2 items-center'>
-                  {description ? <InfoModel tooltipContent={description}>
-                    <span className="label-text capitalize info">{name || key}</span>        
-                    </InfoModel> : <span className="label-text capitalize">{name || key}</span>}
-                  </div>
-                  <div>
-                    <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
-                      {field === 'slider' && (<li><a onClick={() => setSliderValue("min", key)} className={configuration?.[key] === "min" ? 'bg-base-content text-base-100' : ''}>Min</a></li>)}
-                      <div className="tooltip" data-tip="If you set default, this key will not be send"><li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li></div>
-                      {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
-                    </ul>
-                  </div>
+        {/* Render different field types */}
+        {field === 'dropdown' && (
+          <div className="w-full">
+            <div className="relative">
+              <div
+                className="flex items-center gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer"
+                onClick={() => setShowDropdown(!showDropdown)}
+              >
+                <span className="text-base-content">
+                  {selectedOptions?.length > 0
+                    ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
+                    : 'Select an tool choice option...'}
+                </span>
+                <div className="ml-auto">
+                  {showDropdown ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                 </div>
-                {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
-                {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
-                  modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
-              </label>
-              {field === 'dropdown' && (
-                <div className="w-full">
-                  <div className="relative">
+              </div>
+
+              {showDropdown && (
+                <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-10 max-h-[200px] overflow-y-auto mt-1 p-2">
+                  <div className="p-2 top-0 bg-base-100">
+                    <input
+                      type="text"
+                      placeholder="Search functions..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  {/* Add option data to show in dropdown */}
+                  {options && options.map(option => (
                     <div
-                      className="flex items-center gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer"
-                      onClick={() => setShowDropdown(!showDropdown)}
+                      key={option?.id}
+                      className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
+                      onClick={() => {
+                        setSelectedOptions([{ name: option, id: option }]);
+                        handleDropdownChange(option, key);
+                        setShowDropdown(false);
+                      }}
                     >
-                      <span className="text-base-content">
-                        {selectedOptions?.length > 0
-                          ? (integrationData?.[selectedOptions?.[0]?.name]?.title || selectedOptions?.[0]?.name)
-                          : 'Select an tool choice option...'}
-                      </span>
-                      <div className="ml-auto">
-                        {showDropdown ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
-                      </div>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="function-select"
+                          checked={selectedOptions?.some(opt => opt?.name === option)}
+                          className="radio radio-sm"
+                        />
+                        <span className="font-semibold">{option}</span>
+                        <span className="text-gray-500 text-xs">
+                          {option === 'none'
+                            ? "Model won't call a function; it will generate a message."
+                            : option === 'auto'
+                              ? "Model can generate a response or call a function."
+                              : "One or more specific functions must be called"}
+                        </span>
+                      </label>
                     </div>
-
-                    {showDropdown && (
-                      <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-low max-h-[200px] overflow-y-auto mt-1 p-2">
-
-                        <div className="p-2 top-0 bg-base-100">
-                          <input
-                            type="text"
-                            placeholder="Search functions..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="input input-bordered input-sm w-full"
-                          />
-                        </div>
-                        {/* Add option data to show in dropdown */}
-                        {options && options.map(option => (
+                  ))}
+                  {version_function_data && typeof version_function_data === 'object' && (
+                    Object.values(version_function_data)
+                      .filter(value => {
+                        const functionName = value?.function_name || value?.endpoint_name;
+                        const title = integrationData?.[functionName]?.title || value?.endpoint_name || 'Untitled';
+                        return title?.toLowerCase()?.includes(searchQuery?.toLowerCase());
+                      })
+                      .sort((a, b) => {
+                        const aName = a?.function_name || a?.endpoint_name;
+                        const bName = b?.function_name || b?.endpoint_name;
+                        const aTitle = integrationData?.[aName]?.title || aName || 'Untitled';
+                        const bTitle = integrationData?.[bName]?.title || bName || 'Untitled';
+                        return aTitle?.localeCompare(bTitle);
+                      })
+                      .map((value) => {
+                        const functionName = value?.function_name || value?.endpoint_name;
+                        const title = integrationData?.[functionName]?.title || value?.endpoint_name || 'Untitled';
+                        const isSelected = selectedOptions?.some(opt => opt?.id === value?._id);
+                        return (
                           <div
-                            key={option?.id}
-                            className="p-2 hover:bg-base-200 cursor-pointer max-h-[80px] overflow-y-auto"
+                            key={value?._id}
+                            className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
                             onClick={() => {
-                              setSelectedOptions([{ name: option, id: option }]);
-                              handleDropdownChange(option, key);
+                              setSelectedOptions(isSelected ? [] : [{ name: functionName, id: value?._id }]);
+                              handleDropdownChange(isSelected ? null : value?._id, key);
                               setShowDropdown(false);
                             }}
                           >
@@ -264,173 +313,166 @@ const AdvancedParameters = ({ params }) => {
                               <input
                                 type="radio"
                                 name="function-select"
-                                checked={selectedOptions?.some(opt => opt?.name === option)}
+                                checked={isSelected}
                                 className="radio radio-sm"
                               />
-                              <span className="font-semibold">{option}</span>
-                              <span className="text-gray-500 text-xs">
-                                {option === 'none'
-                                  ? "Model won't call a function; it will generate a message."
-                                  : option === 'auto'
-                                    ? "Model can generate a response or call a function."
-                                    : "One or more specific functions must be called"}
-                              </span>
+                              <span>{title}</span>
                             </label>
                           </div>
-                        ))}
-                        {version_function_data && typeof version_function_data === 'object' && (
-                          Object.values(version_function_data)
-                            .filter(value => {
-                              const functionName = value?.function_name || value?.endpoint_name;
-                              const title = integrationData?.[functionName]?.title || value?.endpoint_name || 'Untitled';
-                              return title?.toLowerCase()?.includes(searchQuery?.toLowerCase());
-                            })
-                            .sort((a, b) => {
-                              const aName = a?.function_name || a?.endpoint_name;
-                              const bName = b?.function_name || b?.endpoint_name;
-                              const aTitle = integrationData?.[aName]?.title || aName || 'Untitled';
-                              const bTitle = integrationData?.[bName]?.title || bName || 'Untitled';
-                              return aTitle?.localeCompare(bTitle);
-                            })
-                            .map((value) => {
-                              const functionName = value?.function_name || value?.endpoint_name;
-                              const title = integrationData?.[functionName]?.title || value?.endpoint_name || 'Untitled';
-                              const isSelected = selectedOptions?.some(opt => opt?.id === value?._id);
-                              return (
-                                <div
-                                  key={value?._id}
-                                  className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
-                                  onClick={() => {
-                                    setSelectedOptions(isSelected ? [] : [{ name: functionName, id: value?._id }]);
-                                    handleDropdownChange(isSelected ? null : value?._id, key);
-                                    setShowDropdown(false);
-                                  }}
-                                >
-                                  <label className="flex items-center gap-2">
-                                    <input
-                                      type="radio"
-                                      name="function-select"
-                                      checked={isSelected}
-                                      className="radio radio-sm"
-                                    />
-                                    <span>{title}</span>
-                                  </label>
-                                </div>
-                              );
-                            })
-                        )}
-
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {field === 'slider' && (
-                <div>
-                  <input
-                    type="range"
-                    min={min || 0}
-                    max={max || 100}
-                    step={step || 1}
-                    key={`${key}-${configuration?.[key]}-${service}-${model}`}
-                    defaultValue={
-                      (configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
-                        modelInfoData?.[key]?.[configuration?.[key]] :
-                        configuration?.[key]
-                    }
-                    onBlur={(e) => handleInputChange(e, key, true)}
-                    onInput={(e) => {
-                      document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
-                    }}
-                    className="range range-xs w-full"
-                    name={key}
-                  />
-                </div>
-              )}
-              {field === 'text' && (
-                <input
-                  type="text"
-                  defaultValue={configuration?.[key] === 'default' ? '' : configuration?.[key] || ''}
-                  onBlur={(e) => handleInputChange(e, key)}
-                  className="input input-bordered input-sm w-full"
-                  name={key}
-                />
-              )}
-              {field === 'number' && (
-                <input
-                  type="number"
-                  min={min}
-                  max={max}
-                  step={step}
-                  defaultValue={configuration?.[key] || 0}
-                  onBlur={(e) => handleInputChange(e, key)}
-                  className="input input-bordered input-sm w-full"
-                  name={key}
-                />
-              )}
-              {field === 'boolean' && (
-                <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
-                  <input
-                    name={key}
-                    type="checkbox"
-                    className="toggle"
-                    defaultChecked={configuration?.[key] || false}
-                    onChange={(e) => handleInputChange(e, key)}
-                  />
-                </label>
-              )}
-              {field === 'select' && (
-                <label className='items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
-                  <select value={configuration?.[key] === 'default' ? rowDefaultValue : configuration?.[key]?.type || configuration?.[key]} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
-                    <option value='default' disabled> Select response mode </option>
-                    {options?.map((service, index) => (
-                      <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
-                    ))}
-                  </select>
-
-                  {configuration?.[key]?.type === "json_schema" && (
-                    <>
-                      <div className="flex justify-end mb-2 mt-5">
-                        <span
-                          className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity"
-                          onClick={() => {
-                            openModal(MODAL_TYPE.JSON_SCHEMA);
-                          }}
-                        >
-                          Response Builder
-                        </span>
-                      </div>
-
-                      {/* Textarea */}
-                      <textarea
-                        key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
-                        type="input"
-                        defaultValue={
-                          objectFieldValue ||
-                          JSON.stringify(
-                            configuration?.[key]?.json_schema,
-                            undefined,
-                            4
-                          )
-                        }
-                        className="textarea textarea-bordered border w-[450px] min-h-96 resize-y"
-                        onBlur={(e) =>
-                          handleSelectChange(e, "json_schema")
-                        }
-                        placeholder="Enter valid JSON object here..."
-                      />
-
-                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages}/>
-                    </>
+                        );
+                      })
                   )}
-
-                </label>
+                </div>
               )}
             </div>
-          );
-        })}
-      </div>}
+          </div>
+        )}
+
+        {field === 'slider' && (
+          <div>
+            <input
+              type="range"
+              min={min || 0}
+              max={max || 100}
+              step={step || 1}
+              key={`${key}-${configuration?.[key]}-${service}-${model}`}
+              defaultValue={
+                (configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
+                  modelInfoData?.[key]?.[configuration?.[key]] :
+                  configuration?.[key]
+              }
+              onBlur={(e) => handleInputChange(e, key, true)}
+              onInput={(e) => {
+                document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
+              }}
+              className="range range-xs w-full"
+              name={key}
+            />
+          </div>
+        )}
+        {field === 'text' && (
+          <input
+            type="text"
+            defaultValue={configuration?.[key] === 'default' ? '' : configuration?.[key] || ''}
+            onBlur={(e) => handleInputChange(e, key)}
+            className="input input-bordered input-sm w-full"
+            name={key}
+          />
+        )}
+        {field === 'number' && (
+          <input
+            type="number"
+            min={min}
+            max={max}
+            step={step}
+            defaultValue={configuration?.[key] || 0}
+            onBlur={(e) => handleInputChange(e, key)}
+            className="input input-bordered input-sm w-full"
+            name={key}
+          />
+        )}
+        {field === 'boolean' && (
+          <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+            <input
+              name={key}
+              type="checkbox"
+              className="toggle"
+              defaultChecked={configuration?.[key] || false}
+              onChange={(e) => handleInputChange(e, key)}
+            />
+          </label>
+        )}
+        {field === 'select' && (
+          <label className='items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+            <select value={configuration?.[key] === 'default' ? rowDefaultValue : configuration?.[key]?.type || configuration?.[key]} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
+              <option value='default' disabled> Select response mode </option>
+              {options?.map((service, index) => (
+                <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
+              ))}
+            </select>
+            {configuration?.[key]?.type === "json_schema" && (
+              <>
+                <textarea
+                  key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
+                  type="input"
+                  defaultValue={
+                    objectFieldValue ||
+                    JSON.stringify(
+                      configuration?.[key]?.json_schema,
+                      undefined,
+                      4
+                    )
+                  }
+                  className="mt-5 textarea textarea-bordered border w-full min-h-96 resize-y z-[1]"
+                  onBlur={(e) =>
+                    handleSelectChange(e, "json_schema")
+                  }
+                  placeholder="Enter valid JSON object here..."
+                />
+                <span
+                  className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
+                  onClick={() => {
+                    openModal(MODAL_TYPE.JSON_SCHEMA);
+                  }}
+                >
+                  Improve Schema
+                </span>
+                <JsonSchemaModal params={params} messages={messages} setMessages={setMessages} />
+              </>
+            )}
+          </label>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="">
+      {/* Level 2 Parameters - Always visible outside accordion */}
+      
+
+      {/* Level 1 Parameters - Inside accordion */}
+      {level1Parameters.length > 0 && (
+        <div className="collapse text-base-content" tabIndex={0}>
+          <input type="radio" name="my-accordion-1" onClick={() => {
+            handleTutorial()
+            toggleAccordion()
+          }}
+            className='cursor-pointer' />
+          <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
+            <span className="mr-2 cursor-pointer">
+              Advanced Parameters
+            </span>
+            {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+          </div>
+          {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"} />)}
+          {tutorialState.showTutorial && (
+            <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
+          )}
+          {isAccordionOpen && (
+            <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
+              {level1Parameters.map(([key, paramConfig]) => renderParameterField(key, paramConfig))}
+            </div>
+          )}
+        </div>
+      )}
+
+{level2Parameters.length > 0 && (
+        <div className="">
+          <div className="flex flex-col gap-3 p-3 border rounded-md">
+            {level2Parameters.map(([key, paramConfig]) => renderParameterField(key, paramConfig))}
+          </div>
+        </div>
+      )}
+
+      {/* Debug info - remove in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="text-xs text-gray-500">
+          <p>Level 0 (hidden): {level0Parameters.length} parameters</p>
+          <p>Level 1 (accordion): {level1Parameters.length} parameters</p>
+          <p>Level 2 (visible): {level2Parameters.length} parameters</p>
+        </div>
+      )}
     </div>
   );
 };
