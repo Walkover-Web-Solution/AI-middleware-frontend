@@ -21,6 +21,7 @@ import { openModal } from "@/utils/utility";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
+import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -68,6 +69,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   }, []);
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+  useRtLayerEventHandler();
   
   useEffect(() => {
     const validateOrg = async () => {
