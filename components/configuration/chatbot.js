@@ -4,13 +4,15 @@ import LoadingSpinner from "@/components/loadingSpinner";
 
 const Chatbot = ({ params }) => {
   const [isLoading, setIsLoading] = useState(true); 
-  const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration } = useCustomSelector((state) => ({
+  const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration, modelInfo, service } = useCustomSelector((state) => ({
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
     bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     chatbot_token: state?.ChatBot?.chatbot_token || '',
     variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
-    configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration
+    configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
+    service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
+    modelInfo: state?.modelReducer?.serviceModels
   }));
 
   // Convert variables array to object
