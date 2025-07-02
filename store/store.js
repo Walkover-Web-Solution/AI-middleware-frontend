@@ -15,7 +15,7 @@ import responseTypeReducer from "./reducer/responseTypeReducer";
 import userDetailsReducer from "./reducer/userDetailsReducer";
 import webhookAlertReducer from "./reducer/webhookAlertReducer";
 import testCasesReducer from "./reducer/testCasesReducer";
-import serviceReducer  from "./reducer/serviceReducer";
+import serviceReducer from "./reducer/serviceReducer";
 import integrationReducer from "./reducer/integrationReducer";
 
 const createNoopStorage = () => {

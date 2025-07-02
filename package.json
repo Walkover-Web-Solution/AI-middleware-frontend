@@ -30,7 +30,8 @@
     "react-syntax-highlighter": "^15.5.0",
     "react-toastify": "^10.0.4",
     "redux-persist": "^6.0.0",
-    "redux-thunk": "^3.1.0"
+    "redux-thunk": "^3.1.0",
+    "rtlayer-client": "^1.5.5"
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.11.3",
