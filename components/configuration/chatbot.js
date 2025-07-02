@@ -33,7 +33,7 @@ const Chatbot = ({ params }) => {
   useEffect(() => {
     if (bridgeName && window?.SendDataToChatbot) {
       window.SendDataToChatbot({ 
-        "threadId": bridgeName 
+        "threadId": bridgeName?.replaceAll(" ", "_"), 
       });
     }
   }, [bridgeName]);

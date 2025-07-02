@@ -85,7 +85,7 @@ function Chat({ params }) {
                     </div>
                   )}
                 </div>
-                <div className="chat-bubble break-keep inline-block">
+                <div className="chat-bubble inline-block break-all">
                   <ReactMarkdown components={{
                     code: ({ node, inline, className, children, ...props }) => (
                       <CodeBlock
