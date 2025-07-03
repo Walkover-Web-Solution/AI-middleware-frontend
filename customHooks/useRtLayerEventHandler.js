@@ -72,7 +72,7 @@ function useRtLayerEventHandler() {
             console.log('dlkjf',Messages);
             // Dispatch actions to Redux store
             dispatch(addThreadUsingRtLayer({ Thread: cleanThread }));
-            dispatch(addThreadNMessageUsingRtLayer({Messages}))
+            dispatch(addThreadNMessageUsingRtLayer({thread_id:cleanThread.thread_id, sub_thread_id:cleanThread.sub_thread_id, Messages}))
             
         } catch (error) {
             console.error("Error parsing message data:", error);
