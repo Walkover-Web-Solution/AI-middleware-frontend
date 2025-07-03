@@ -9,7 +9,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 
 const AdvancedParameters = ({ params }) => {
@@ -204,16 +204,16 @@ const AdvancedParameters = ({ params }) => {
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                  {description ? <InfoModel tooltipContent={description}>
+                  {description ? <InfoTooltip tooltipContent={description}>
                     <span className="label-text capitalize info">{name || key}</span>        
-                    </InfoModel> : <span className="label-text capitalize">{name || key}</span>}
+                    </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
                   </div>
                   <div>
                     <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
                       {field === 'slider' && (<li><a onClick={() => setSliderValue("min", key)} className={configuration?.[key] === "min" ? 'bg-base-content text-base-100' : ''}>Min</a></li>)}
-                      <InfoModel tooltipContent={"If you set default, this key will not be send"}>
+                      <InfoTooltip tooltipContent={"If you set default, this key will not be send"}>
                       <li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li>
-                      </InfoModel>
+                      </InfoTooltip>
                       {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
                     </ul>
                   </div>

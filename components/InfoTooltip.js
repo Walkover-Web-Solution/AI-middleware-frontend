@@ -8,7 +8,7 @@ import {
 } from '@floating-ui/react';
 import Tutorial from './tutorial';
 
-const InfoModel = ({ video = "", children, tooltipContent }) => {
+const InfoTooltip = ({ video = "", children, tooltipContent }) => {
   const [open, setOpen] = useState(false); // for hover state
   const [showTutorial, setShowTutorial] = useState(false);
   const delayTimeout = useRef(null);
@@ -90,4 +90,4 @@ const InfoModel = ({ video = "", children, tooltipContent }) => {
   );
 };
 
-export default InfoModel;
+export default InfoTooltip;
