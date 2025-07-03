@@ -59,14 +59,16 @@ function useRtLayerEventHandler() {
             {
                 console.error("Missing Message")
             }
-
-            // Clean the data to reduce serialization overhead
+            Object.keys(Messages).forEach(key => {
+                Messages[key].fromRTLayer = true;
+            });
+          // Clean the data to reduce serialization overhead
             const cleanThread = {
                 thread_id: Thread.thread_id,
                 sub_thread_id: Thread.sub_thread_id,
                 bridge_id: Thread.bridge_id
             };
-            
+
             
             // Dispatch actions to Redux store
             dispatch(addThreadUsingRtLayer({ Thread: cleanThread }));
