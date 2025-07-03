@@ -1,12 +1,12 @@
 'use client'
-import React, {useState, useEffect, useRef, useCallback, useMemo} from 'react';
-import {FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap, Home} from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap, Home, HistoryIcon, ArchiveRestore, Archive } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import {updateBridgeAction, dicardBridgeVersionAction, publishBridgeVersionAction} from '@/store/action/bridgeAction';
+import { updateBridgeAction, dicardBridgeVersionAction, publishBridgeVersionAction, archiveBridgeAction } from '@/store/action/bridgeAction';
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
-import {MODAL_TYPE} from '@/utils/enums';
+import { MODAL_TYPE } from '@/utils/enums';
 import { openModal, toggleSidebar } from '@/utils/utility';
 import { toast } from 'react-toastify';
 import OrgSlider from './sliders/orgSlider';
@@ -20,12 +20,12 @@ const BRIDGE_STATUS = {
   PAUSED: 0
 };
 
-const Navbar = ({isEmbedUser}) => {
+const Navbar = ({ isEmbedUser }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
   const ellipsisMenuRef = useRef(null);
-  
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -34,14 +34,15 @@ const Navbar = ({isEmbedUser}) => {
   const orgId = pathParts[2];
   const bridgeId = pathParts[5];
   const dispatch = useDispatch();
-  
-  const {organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, isPublishing, isUpdatingBridge, activeTab} = useCustomSelector(state => ({
+
+  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, isPublishing, isUpdatingBridge, activeTab, isArchived } = useCustomSelector(state => ({
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
     publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
     isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted ?? false,
     bridgeStatus: state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridge_status ?? BRIDGE_STATUS.ACTIVE,
+    isArchived: state.bridgeReducer.allBridgesMap?.[bridgeId]?.status ?? false,
     isPublishing: state.bridgeReducer.isPublishing ?? false,
     isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
     activeTab: pathname.includes('configure') ? 'configure' : pathname.includes('history') ? 'history' : pathname.includes('testcase') ? 'testcase' : 'configure'
@@ -53,12 +54,12 @@ const Navbar = ({isEmbedUser}) => {
       { id: 'configure', label: 'Configure', icon: FileSliders, shortLabel: 'Config' },
       { id: 'history', label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
     ];
-    
+
     // Only add test cases for non-embed users
     if (!isEmbedUser) {
       baseTabs.splice(1, 0, { id: 'testcase', label: 'Test Cases', icon: TestTube, shortLabel: 'Tests' });
     }
-    
+
     return baseTabs;
   }, [isEmbedUser]);
 
@@ -78,7 +79,7 @@ const Navbar = ({isEmbedUser}) => {
         setShowEllipsisMenu(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -160,6 +161,7 @@ const Navbar = ({isEmbedUser}) => {
 
   const toggleOrgSidebar = useCallback(() => toggleSidebar('default-org-sidebar'), []);
   const toggleBridgeSidebar = useCallback(() => toggleSidebar('default-agent-sidebar'), []);
+  const toggleConfigHistorySidebar = () => toggleSidebar("default-config-history-slider", "right");
   const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router]);
 
   const breadcrumbItems = useMemo(() => ([
@@ -187,7 +189,7 @@ const Navbar = ({isEmbedUser}) => {
   const StatusIndicator = ({ status }) => (
     status === BRIDGE_STATUS.ACTIVE ? null : (
       <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
-        <Clock size={12}/>
+        <Clock size={12} />
         <span className="hidden sm:inline">Paused</span>
       </div>
     )
@@ -196,11 +198,25 @@ const Navbar = ({isEmbedUser}) => {
   const DraftBadge = () => (
     !isDrafted ? null : (
       <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-yellow-200 text-yellow-800 border border-yellow-200 animate-pulse">
-        <Zap size={12}/>
+        <Zap size={12} />
         <span className="hidden sm:inline">Draft changes</span>
       </div>
     )
   );
+
+  const handleArchiveBridge = (bridgeId, newStatus = 0) => {
+    try {
+      dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
+        if (bridgeStatus === 1) {
+          toast.success('Agent Unarchived Successfully');
+        } else {
+          toast.success('Agent Archived Successfully');
+        }
+      });
+    } catch (error) {
+      console.error('Failed to archive/unarchive agents', error);
+    }
+  }
 
   // Ellipsis Menu Component
   const EllipsisMenu = () => (
@@ -212,16 +228,15 @@ const Navbar = ({isEmbedUser}) => {
       >
         <MoreVertical size={16} />
       </button>
-      
+
       {showEllipsisMenu && (
-        <div className="absolute right-0 mt-2 w-48 bg-base-100 border border-base-300 rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 mt-2 w-48 bg-base-100 border border-base-300 rounded-lg shadow-lg z-medium">
           <div className="py-1">
             <button
               onClick={handlePauseBridge}
               disabled={isUpdatingBridge}
-              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 ${
-                isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
             >
               {bridgeStatus === BRIDGE_STATUS.PAUSED ? (
                 <>
@@ -236,6 +251,26 @@ const Navbar = ({isEmbedUser}) => {
               )}
             </button>
           </div>
+          <div className="py-1">
+            <button
+              onClick={() => handleArchiveBridge(bridgeId, isArchived ? 1 : 0)}
+              disabled={isUpdatingBridge}
+              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+            >
+              {isArchived ? (
+                <>
+                  <Archive size={14} className="text-green-600" />
+                  Archive Agent
+                </>
+              ) : (
+                <>
+                  <ArchiveRestore size={14} className="text-red-600" />
+                  Unarchive Agent
+                </>
+              )}
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -244,27 +279,26 @@ const Navbar = ({isEmbedUser}) => {
   if (!shouldShowNavbar()) return null;
 
   return (
-    <div className="bg-base-100 ml-2">
+    <div className="bg-base-100 ml-2 z-medium">
       {/* Main navigation header */}
-      <div className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-base-100/95 backdrop-blur-sm shadow-md border-b border-base-300'
-          : 'bg-base-100 shadow-sm border-b border-base-200'
-      }`}>
-        
+      <div className={`sticky top-0 z-high transition-all duration-300 ${isScrolled
+        ? 'bg-base-100/95 backdrop-blur-sm shadow-md border-b border-base-300'
+        : 'bg-base-100 shadow-sm border-b border-base-200'
+        }`}>
+
         {/* Top bar with breadcrumb/home and actions */}
         <div className="flex items-center justify-between px-4 py-3">
           {/* Left: Breadcrumb or Home */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <StatusIndicator status={bridgeStatus}/>
-            
+            <StatusIndicator status={bridgeStatus} />
+
             {isEmbedUser ? (
               <button
                 onClick={handleHomeClick}
                 className="btn btn-sm gap-2 hover:bg-base-200"
                 title="Go to Home"
               >
-                <Home size={16}/>
+                <Home size={16} />
                 <span className="hidden sm:inline">Home</span>
               </button>
             ) : (
@@ -272,14 +306,14 @@ const Navbar = ({isEmbedUser}) => {
                 {breadcrumbItems.map((item, idx) => (
                   <React.Fragment key={idx}>
                     {idx > 0 && (
-                      <ChevronRight size={12} className="text-base-content/40 flex-shrink-0"/>
+                      <ChevronRight size={12} className="text-base-content/40 flex-shrink-0" />
                     )}
                     {item.isClickable ? (
                       <button
                         onClick={item.handleClick}
                         className="flex items-center gap-1.5 px-2 py-1 rounded-md text-sm transition-all hover:bg-base-200 text-base-content/70 hover:text-base-content min-w-0"
                       >
-                        {item.icon && <item.icon size={14} className="flex-shrink-0"/>}
+                        {item.icon && <item.icon size={14} className="flex-shrink-0" />}
                         <span className="truncate max-w-[100px] sm:max-w-[150px]">
                           {item.label}
                         </span>
@@ -293,7 +327,7 @@ const Navbar = ({isEmbedUser}) => {
                     )}
                   </React.Fragment>
                 ))}
-                {activeTab === 'configure' && <DraftBadge/>}
+                {activeTab === 'configure' && <DraftBadge />}
               </nav>
             )}
           </div>
@@ -302,6 +336,9 @@ const Navbar = ({isEmbedUser}) => {
           <div className="flex items-center gap-2">
             {/* Desktop view - show buttons for both users */}
             <div className="hidden md:flex items-center gap-2">
+              {activeTab === 'configure' && <button className="btn  btn-sm m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
+                <HistoryIcon size={16} />
+              </button>}
               {/* Discard button */}
               {isDrafted && activeTab === 'configure' && (
                 <button
@@ -309,7 +346,7 @@ const Navbar = ({isEmbedUser}) => {
                   onClick={handleDiscardChanges}
                   disabled={isUpdatingBridge || isPublishing}
                 >
-                  <ClipboardX size={14}/>
+                  <ClipboardX size={14} />
                   <span>Discard</span>
                 </button>
               )}
@@ -321,7 +358,7 @@ const Navbar = ({isEmbedUser}) => {
                   onClick={handlePublish}
                   disabled={!isDrafted || isPublishing}
                 >
-                  {!isPublishing && <BookCheck size={14}/>}
+                  {!isPublishing && <BookCheck size={14} />}
                   <span>{isPublishing ? 'Publishing...' : 'Publish'}</span>
                 </button>
               )}
@@ -339,7 +376,7 @@ const Navbar = ({isEmbedUser}) => {
                       disabled={isUpdatingBridge || isPublishing}
                       title="Discard changes"
                     >
-                      <span><ClipboardX size={16}/></span>
+                      <span><ClipboardX size={16} /></span>
                       <span>Discard</span>
                     </button>
                   )}
@@ -351,7 +388,7 @@ const Navbar = ({isEmbedUser}) => {
                     disabled={!isDrafted || isPublishing}
                     title={isPublishing ? 'Publishing...' : 'Publish'}
                   >
-                    <span>{!isPublishing && <BookCheck size={16}/>}</span>
+                    <span>{!isPublishing && <BookCheck size={16} />}</span>
                     <span>{isPublishing ? 'Publishing...' : 'Publish'}</span>
                   </button>
                 </>
@@ -371,13 +408,12 @@ const Navbar = ({isEmbedUser}) => {
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`tab gap-2 ${
-                    activeTab === tab.id 
-                      ? 'tab-active [--tab-bg:theme(colors.base-200)] [--tab-border-color:theme(colors.base-300)] bg-base-200' 
-                      : 'hover:bg-base-200/50'
-                  }`}
+                  className={`tab gap-2 ${activeTab === tab.id
+                    ? 'tab-active [--tab-bg:theme(colors.base-200)] [--tab-border-color:theme(colors.base-300)] bg-base-200'
+                    : 'hover:bg-base-200/50'
+                    }`}
                 >
-                  <tab.icon size={16} className="flex-shrink-0"/>
+                  <tab.icon size={16} className="flex-shrink-0" />
                   <span className="font-medium">
                     {isMobile ? tab.shortLabel : tab.label}
                   </span>
@@ -403,15 +439,18 @@ const Navbar = ({isEmbedUser}) => {
               {!isUpdatingBridge && (bridgeStatus === BRIDGE_STATUS.PAUSED ? <Play size={14}/> : <Pause size={14}/>)}
               {bridgeStatus === BRIDGE_STATUS.PAUSED ? 'Resume' : 'Pause'}
             </button> */}
+            {activeTab === 'configure' && <button className="btn btn-sm m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
+              <HistoryIcon size={16} />
+            </button>}
 
             {/* Discard button */}
             {isDrafted && (
               <button
-                className="btn btn-sm btn btn-sm-outline bg-red-200 hover:bg-red-300 flex-1 gap-2"
+                className="btn btn-sm btn-sm-outline bg-red-200 hover:bg-red-300 flex-1 gap-2"
                 onClick={handleDiscardChanges}
                 disabled={isUpdatingBridge || isPublishing}
               >
-                <ClipboardX size={14}/>
+                <ClipboardX size={14} />
                 Discard
               </button>
             )}
@@ -422,7 +461,7 @@ const Navbar = ({isEmbedUser}) => {
               onClick={handlePublish}
               disabled={!isDrafted || isPublishing}
             >
-              {!isPublishing && <BookCheck size={14}/>}
+              {!isPublishing && <BookCheck size={14} />}
               {isPublishing ? 'Publishing...' : 'Publish'}
             </button>
           </div>
@@ -432,10 +471,10 @@ const Navbar = ({isEmbedUser}) => {
       {/* Sliders - only for non-embed users */}
       {!isEmbedUser && (
         <>
-          <OrgSlider/>
-          <BridgeSlider/>
-          <ChatBotSlider/>
-          <ConfigHistorySlider versionId={versionId}/>
+          <OrgSlider />
+          <BridgeSlider />
+          <ChatBotSlider />
+          <ConfigHistorySlider versionId={versionId} />
         </>
       )}
     </div>

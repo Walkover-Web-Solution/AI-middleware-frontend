@@ -43,7 +43,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
-  
+
   useEffect(() => {
     const updateUserMeta = async () => {
       if (currentUser?.meta === null) {
@@ -69,7 +69,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   }, []);
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
-  
+
   useEffect(() => {
     const validateOrg = async () => {
       try {
@@ -283,23 +283,23 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   if (!isValidOrg && !isEmbedUser) {
     return <ErrorPage></ErrorPage>;
   }
-  
+
   if (!isEmbedUser) {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden z-medium">
           {/* Sidebar */}
-          <div className="flex flex-col h-full">
-            <MainSlider params={params}/>
+          <div className="flex flex-col h-full z-medium">
+            <MainSlider params={params} />
           </div>
-          
+
           {/* Main Content Area */}
-          <div className="flex-1 ml-12 lg:ml-12 flex flex-col overflow-hidden">
+          <div className="flex-1 ml-12 lg:ml-12 flex flex-col overflow-hidden z-low">
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-10 bg-white border-b">
-              <Navbar params={params}/>
+            <div className="sticky top-0 z-low bg-white border-b">
+              <Navbar params={params} />
             </div>
-            
+
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
               {loading ? (
@@ -307,17 +307,17 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
                   <LoadingSpinner />
                 </div>
               ) : (
-                <main className="px-2 h-full max-h-[calc(100vh-4rem)] overflow-hidden">{children}</main>
+                <main className={`px-2 h-full max-h-[calc(100vh-4rem)] ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
               )}
             </div>
           </div>
         </div>
-        
+
         {/* Chat Details Sidebar */}
-        <ChatDetails 
-          selectedItem={selectedItem} 
-          setIsSliderOpen={setIsSliderOpen} 
-          isSliderOpen={isSliderOpen} 
+        <ChatDetails
+          selectedItem={selectedItem}
+          setIsSliderOpen={setIsSliderOpen}
+          isSliderOpen={isSliderOpen}
         />
       </div>
     );
@@ -329,10 +329,10 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           {/* Main Content Area for Embed Users */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-10 bg-white border-b">
-              <Navbar params={params}/>
+            <div className="sticky top-0 z-low bg-white border-b">
+              <Navbar params={params} />
             </div>
-            
+
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
               {loading ? (
@@ -345,13 +345,6 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
             </div>
           </div>
         </div>
-        
-        {/* Chat Details Sidebar */}
-        <ChatDetails 
-          selectedItem={selectedItem} 
-          setIsSliderOpen={setIsSliderOpen} 
-          isSliderOpen={isSliderOpen} 
-        />
       </div>
     );
   }

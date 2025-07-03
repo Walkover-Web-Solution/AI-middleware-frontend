@@ -1,16 +1,15 @@
 'use client'
 import React, {
   useState,
-  useRef,
   useEffect,
   useCallback,
   MouseEvent as ReactMouseEvent,
   useMemo
 } from 'react';
 import {
-  AlignJustify, BookOpen, MessageSquare, Building2, ChevronDown,
+  BookOpen, MessageSquare, Building2, ChevronDown,
   Cog, Database, Shield, BarChart3, LogOut, Mail, MessageSquareMore,
-  Users, Settings2, AlertTriangle, UserPlus, Home, History, Rss,
+  Settings2, AlertTriangle, UserPlus,
   ChevronRight, ChevronLeft,
   Bot,
   MonitorPlayIcon,
@@ -28,6 +27,7 @@ import TutorialModal from '@/components/modals/tutorialModal';
 import DemoModal from '../modals/DemoModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import Protected from '../protected';
+import BridgeSlider from './bridgeSlider';
 
 /* -------------------------------------------------------------------------- */
 /*                                    Consts                                  */
@@ -50,9 +50,9 @@ const ITEM_ICONS = {
 const NAV_SECTIONS = [
   { items: ['agents'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
-  { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics', 'knowledge_base'] },
-  { title: 'TEAM & COLLABORATION', items: ['invite'] },
-  { title: 'INTEGRATION', items: ['integration'] },
+  { title: 'INTEGRATION', items: ['integration', 'knowledge_base'] },
+  { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
+  { title: 'TEAM & COLLABORATION', items: ['invite'] }
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -86,6 +86,7 @@ function MainSlider({ isEmbedUser }) {
   const [hovered, setHovered] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
   const [isMobile, setIsMobile] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   /* --------------------------- Responsive logic --------------------------- */
   useEffect(() => {
@@ -114,7 +115,8 @@ function MainSlider({ isEmbedUser }) {
       'feedback': 'Feedback',
       'tutorial': 'Tutorial',
       'speak-to-us': 'Speak to Us',
-      'integration': 'Integration'
+      'integration': 'Integration',
+      'settings': 'Settings'
     };
     return names[key] || key.charAt(0).toUpperCase() + key.slice(1);
   };
@@ -164,6 +166,18 @@ function MainSlider({ isEmbedUser }) {
     }
   };
 
+  // Handle settings click
+  const handleSettingsClick = () => {
+    if (!isOpen) {
+      // If sidebar is collapsed, expand it and open settings
+      setIsOpen(true);
+      setIsSettingsOpen(true);
+    } else {
+      // If sidebar is open, toggle settings accordion
+      setIsSettingsOpen(prev => !prev);
+    }
+  };
+
   /* ------------------------------------------------------------------------ */
   /*                                  Render                                  */
   /* ------------------------------------------------------------------------ */
@@ -177,7 +191,7 @@ function MainSlider({ isEmbedUser }) {
       {/* Mobile backdrop */}
       {isMobile && isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-[90] lg:hidden"
+          className="fixed inset-0 bg-black/50 lg:hidden"
           onClick={handleBackdropClick}
         />
       )}
@@ -187,7 +201,7 @@ function MainSlider({ isEmbedUser }) {
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div className={`
-          fixed left-0 top-0 h-screen bg-base-100 border-r transition-all duration-300 z-[100]
+          fixed left-0 top-0 h-screen bg-base-100 border-r transition-all duration-300
           ${barWidth}
           ${isMobile ? 'shadow-xl' : ''}
           flex flex-col
@@ -198,7 +212,7 @@ function MainSlider({ isEmbedUser }) {
             className={`
               absolute -right-3 top-10 w-8 h-8 bg-base-100 border border-base-300
               rounded-full flex items-center justify-center hover:bg-base-200
-              transition-colors z-10 shadow-sm
+              transition-colors z-low shadow-sm
               ${isMobile ? 'hidden' : ''}
             `}
           >
@@ -210,7 +224,7 @@ function MainSlider({ isEmbedUser }) {
             <button
               onClick={() => setIsOpen(false)}
               className="absolute right-4 top-4 w-8 h-8 bg-base-200 rounded-full 
-                         flex items-center justify-center hover:bg-base-300 transition-colors z-10"
+                         flex items-center justify-center hover:bg-base-300 transition-colors z-low"
             >
               <ChevronLeft size={16} />
             </button>
@@ -225,10 +239,7 @@ function MainSlider({ isEmbedUser }) {
                 {pathParts.length >= 4 && (
                   <div>
                     <button
-                      onClick={() => {
-                        toggleSidebar('default-org-sidebar');
-                        if (isMobile) setIsOpen(false);
-                      }}
+                      onClick={() => { router.push(`/org`); if (isMobile) setIsOpen(false); }}
                       onMouseEnter={e => onItemEnter('org', e)}
                       onMouseLeave={onItemLeave}
                       className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
@@ -262,7 +273,7 @@ function MainSlider({ isEmbedUser }) {
                           onMouseEnter={e => onItemEnter(key, e)}
                           onMouseLeave={onItemLeave}
                           className={`btn btn-ghost btn-sm flex items-center justify-start gap-2 w-full
-                                      ${activeKey === key ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`}
+                                      ${activeKey === key ? 'bg-primary text-primary-content hover:text-black' : 'hover:bg-base-200 text-black'}`}
                         >
                           <div className="shrink-0">{ITEM_ICONS[key]}</div>
                           {isOpen && <span className="font-medium truncate">{displayName(key)}</span>}
@@ -321,14 +332,27 @@ function MainSlider({ isEmbedUser }) {
             </div>
 
             {/* ------------------------- SETTINGS / BOTTOM ---------------------- */}
-            {isOpen && (
-              <div className="border-t border-base-300 pt-4 px-2 pb-4">
-                <details className="w-full">
-                  <summary className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors cursor-pointer list-none">
-                    <Settings2 size={16} className="shrink-0" />
-                    <span className="flex-1 truncate">Settings</span>
-                    <ChevronDown size={16} className="shrink-0" />
-                  </summary>
+            <div className="border-t border-base-300 pt-4 px-2 pb-4">
+              <div className="w-full">
+                <button
+                  onClick={handleSettingsClick}
+                  onMouseEnter={e => onItemEnter('settings', e)}
+                  onMouseLeave={onItemLeave}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                >
+                  <Settings2 size={16} className="shrink-0" />
+                  {isOpen && (
+                    <>
+                      <span className="flex-1 truncate">Settings</span>
+                      <ChevronDown
+                        size={16}
+                        className={`shrink-0 transition-transform ${isSettingsOpen ? 'rotate-180' : ''}`}
+                      />
+                    </>
+                  )}
+                </button>
+
+                {isOpen && isSettingsOpen && (
                   <div className="mt-2 space-y-1 bg-base-200 rounded-lg p-2">
                     <div className="flex items-center gap-3 p-2 text-sm">
                       <Mail size={16} className="shrink-0" />
@@ -365,9 +389,9 @@ function MainSlider({ isEmbedUser }) {
                       <span className="truncate">Logout</span>
                     </button>
                   </div>
-                </details>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -384,7 +408,7 @@ function MainSlider({ isEmbedUser }) {
         {/* ------------------------------------------------------------------ */}
         {hovered && !isOpen && !isMobile && (
           <div
-            className="fixed z-[200] bg-base-300 text-base-content px-3 py-2 rounded-lg
+            className="fixed bg-base-300 text-base-content px-3 py-2 rounded-lg
                        shadow-lg whitespace-nowrap border pointer-events-none"
             style={{ top: tooltipPos.top - 20, left: tooltipPos.left }}
           >
@@ -398,6 +422,7 @@ function MainSlider({ isEmbedUser }) {
         {/*                               MODALS                               */}
         {/* ------------------------------------------------------------------ */}
         <OrgSlider />
+        <BridgeSlider />
         <TutorialModal />
         <DemoModal speakToUs={true} />
       </div>
