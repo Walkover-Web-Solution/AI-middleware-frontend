@@ -68,8 +68,6 @@ function useRtLayerEventHandler() {
                 sub_thread_id: Thread.sub_thread_id,
                 bridge_id: Thread.bridge_id
             };
-
-            console.log('dlkjf',Messages);
             // Dispatch actions to Redux store
             dispatch(addThreadUsingRtLayer({ Thread: cleanThread }));
             dispatch(addThreadNMessageUsingRtLayer({Messages}))
