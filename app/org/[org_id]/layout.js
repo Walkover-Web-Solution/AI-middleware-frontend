@@ -43,6 +43,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
+  
   useEffect(() => {
     const updateUserMeta = async () => {
       if (currentUser?.meta === null) {
@@ -279,25 +280,78 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     }
   }
 
-  const isHomePage = useMemo(() => path?.length < 5, [path]);
   if (!isValidOrg && !isEmbedUser) {
     return <ErrorPage></ErrorPage>;
   }
-  if (isHomePage && !isEmbedUser) {
+  
+  if (!isEmbedUser) {
     return (
-      <div className="h-screen">
-        <div className="flex h-screen">
-        <div className=" flex flex-col h-full">
-          <MainSlider params={params}/>
+      <div className="h-screen flex flex-col overflow-hidden">
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <div className="flex flex-col h-full">
+            <MainSlider params={params}/>
+          </div>
+          
+          {/* Main Content Area */}
+          <div className="flex-1 ml-12 lg:ml-12 flex flex-col overflow-hidden">
+            {/* Sticky Navbar */}
+            <div className="sticky top-0 z-10 bg-white border-b">
+              <Navbar params={params}/>
+            </div>
+            
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <LoadingSpinner />
+                </div>
+              ) : (
+                <main className="px-2 h-full max-h-[calc(100vh-4rem)] overflow-hidden">{children}</main>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="flex-1 ml-12 lg:ml-12 overflow-y-auto overflow-x-hidden">
-          <Navbar params={params}/>
-          {loading ? <LoadingSpinner /> :
-            <main className="px-2">{children}</main>
-          }
-        </div>
-        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
+        
+        {/* Chat Details Sidebar */}
+        <ChatDetails 
+          selectedItem={selectedItem} 
+          setIsSliderOpen={setIsSliderOpen} 
+          isSliderOpen={isSliderOpen} 
+        />
       </div>
+    );
+  }
+  else {
+    return (
+      <div className="h-screen flex flex-col overflow-hidden">
+        <div className="flex flex-1 overflow-hidden">
+          {/* Main Content Area for Embed Users */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Sticky Navbar */}
+            <div className="sticky top-0 z-10 bg-white border-b">
+              <Navbar params={params}/>
+            </div>
+            
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <LoadingSpinner />
+                </div>
+              ) : (
+                <main className="px-4 h-full max-h-[calc(100vh-4rem)]">{children}</main>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* Chat Details Sidebar */}
+        <ChatDetails 
+          selectedItem={selectedItem} 
+          setIsSliderOpen={setIsSliderOpen} 
+          isSliderOpen={isSliderOpen} 
+        />
       </div>
     );
   }

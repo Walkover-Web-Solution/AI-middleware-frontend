@@ -1,6 +1,6 @@
 'use client'
 import React, {useState, useEffect, useRef, useCallback, useMemo} from 'react';
-import {FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap} from 'lucide-react';
+import {FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap, Home} from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -13,45 +13,54 @@ import OrgSlider from './sliders/orgSlider';
 import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import ConfigHistorySlider from './sliders/configHistorySlider';
-
-
-const TABS = [
-  { id: 'configure', label: 'Configure', icon: FileSliders, shortLabel: 'Config' },
-  { id: 'testcase',  label: 'Test Cases', icon: TestTube,   shortLabel: 'Tests'  },
-  { id: 'history',   label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
-];
+import Protected from './protected';
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,
   PAUSED: 0
 };
 
-
-const SimpleNavbar = () => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isScrolled,     setIsScrolled]     = useState(false);
-  const [isMobile,       setIsMobile]       = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const dropdownRef = useRef(null);
-  const router       = useRouter();
-  const pathname     = usePathname();             
+const Navbar = ({isEmbedUser}) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showEllipsisMenu, setShowEllipsisMenu] = useState(false);
+  const ellipsisMenuRef = useRef(null);
+  
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const versionId  = searchParams.get('version'); 
-  const pathParts  = pathname.split('?')[0].split('/');
-  const orgId      = pathParts[2];                 
-  const bridgeId   = pathParts[5];
+  const versionId = searchParams.get('version');
+  const pathParts = pathname.split('?')[0].split('/');
+  const orgId = pathParts[2];
+  const bridgeId = pathParts[5];
   const dispatch = useDispatch();
+  
   const {organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, isPublishing, isUpdatingBridge, activeTab} = useCustomSelector(state => ({
-    organizations   : state.userDetailsReducer.organizations,
-    bridgeData      : state.bridgeReducer.allBridgesMap[bridgeId],
-    bridge          : state.bridgeReducer.allBridgesMap[bridgeId] || {},
+    organizations: state.userDetailsReducer.organizations,
+    bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
+    bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
     publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
-    isDrafted       : state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted ?? false,
-    bridgeStatus    : state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridge_status ?? BRIDGE_STATUS.ACTIVE,
-    isPublishing    : state.bridgeReducer.isPublishing ?? false,
+    isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted ?? false,
+    bridgeStatus: state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridge_status ?? BRIDGE_STATUS.ACTIVE,
+    isPublishing: state.bridgeReducer.isPublishing ?? false,
     isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
-    activeTab       :pathname.includes('configure') ? 'configure' :pathname.includes('testcase')  ? 'testcase'  :pathname.includes('history')   ? 'history'   :'configure'
+    activeTab: pathname.includes('configure') ? 'configure' : pathname.includes('history') ? 'history' : pathname.includes('testcase') ? 'testcase' : 'configure'
   }));
+
+  // Define tabs based on user type
+  const TABS = useMemo(() => {
+    const baseTabs = [
+      { id: 'configure', label: 'Configure', icon: FileSliders, shortLabel: 'Config' },
+      { id: 'history', label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
+    ];
+    
+    // Only add test cases for non-embed users
+    if (!isEmbedUser) {
+      baseTabs.splice(1, 0, { id: 'testcase', label: 'Test Cases', icon: TestTube, shortLabel: 'Tests' });
+    }
+    
+    return baseTabs;
+  }, [isEmbedUser]);
 
   const agentName = useMemo(() => bridgeData?.name || 'Customer Support AI', [bridgeData?.name]);
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Acme Corp', [organizations, orgId]);
@@ -62,12 +71,25 @@ const SimpleNavbar = () => {
     return ['configure', 'history', 'testcase'].some(seg => pathname.includes(seg));
   }, [pathParts.length, pathname]);
 
+  // Close ellipsis menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ellipsisMenuRef.current && !ellipsisMenuRef.current.contains(event.target)) {
+        setShowEllipsisMenu(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Scroll detection
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 20);
+          setIsScrolled(window.scrollY > 10);
           ticking = false;
         });
         ticking = true;
@@ -77,25 +99,13 @@ const SimpleNavbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  /* Mobile detection */
+  // Mobile detection
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  /* Close dropdown when clicked outside */
-  useEffect(() => {
-    if (!isDropdownOpen) return;
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isDropdownOpen]);
 
   const handlePauseBridge = useCallback(async () => {
     const newStatus = bridgeStatus === BRIDGE_STATUS.PAUSED
@@ -108,18 +118,17 @@ const SimpleNavbar = () => {
         dataToSend: { bridge_status: newStatus }
       }));
       toast.success(`Agent ${newStatus === BRIDGE_STATUS.ACTIVE ? 'resumed' : 'paused'} successfully`);
+      setShowEllipsisMenu(false); // Close menu after action
     } catch (err) {
       console.error(err);
       toast.error('Failed to update agent status');
     }
   }, [dispatch, bridgeId, bridgeStatus]);
 
-  /* Discard drafts */
   const handleDiscardChanges = useCallback(async () => {
     if (!window.confirm('Are you sure you want to discard all changes? This action cannot be undone.')) return;
 
     try {
-      /* optimistic update */
       dispatch(updateBridgeVersionReducer({
         bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false }
       }));
@@ -131,32 +140,27 @@ const SimpleNavbar = () => {
     }
   }, [dispatch, bridge, versionId, bridgeId]);
 
-  /* Publish draft */
   const handlePublish = useCallback(async () => {
     if (!isDrafted) {
       toast.info('Nothing to publish');
       return;
     }
     try {
-      await dispatch(publishBridgeVersionAction({ bridgeId, versionId }));
-      toast.success('Version published successfully');
+      openModal(MODAL_TYPE?.PUBLISH_BRIDGE_VERSION)
     } catch (err) {
       console.error(err);
       toast.error('Failed to publish version');
     }
   }, [dispatch, isDrafted, bridgeId, versionId]);
 
-  /* Tab switch */
   const handleTabChange = useCallback((tabId) => {
-    setShowMobileMenu(false);
     const base = `/org/${orgId}/agents/${tabId}/${bridgeId}`;
     router.push(base + (versionId ? `?version=${versionId}` : ''));
   }, [router, orgId, bridgeId, versionId]);
 
-  /* Sidebar toggles */
-  const toggleOrgSidebar          = useCallback(() => toggleSidebar('default-org-sidebar'), []);
-  const toggleBridgeSidebar       = useCallback(() => toggleSidebar('default-agent-sidebar'), []);
-  const toggleConfigHistorySidebar= useCallback(() => toggleSidebar('default-config-history-slider', 'right'), []);
+  const toggleOrgSidebar = useCallback(() => toggleSidebar('default-org-sidebar'), []);
+  const toggleBridgeSidebar = useCallback(() => toggleSidebar('default-agent-sidebar'), []);
+  const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router]);
 
   const breadcrumbItems = useMemo(() => ([
     {
@@ -173,7 +177,7 @@ const SimpleNavbar = () => {
     },
     {
       label: agentName,
-      icon : null,
+      icon: null,
       handleClick: undefined,
       isClickable: false,
       current: true
@@ -182,220 +186,260 @@ const SimpleNavbar = () => {
 
   const StatusIndicator = ({ status }) => (
     status === BRIDGE_STATUS.ACTIVE ? null : (
-      <div className="flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium bg-warning/20 text-warning border border-warning/30">
+      <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
         <Clock size={12}/>
-        <span>Paused</span>
+        <span className="hidden sm:inline">Paused</span>
       </div>
     )
   );
 
   const DraftBadge = () => (
     !isDrafted ? null : (
-      <div className="badge badge-warning gap-2 animate-pulse">
+      <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-yellow-200 text-yellow-800 border border-yellow-200 animate-pulse">
         <Zap size={12}/>
-        <span className="hidden sm:inline font-medium">Draft Changes</span>
-        <span className="sm:hidden">Draft</span>
+        <span className="hidden sm:inline">Draft changes</span>
       </div>
     )
+  );
+
+  // Ellipsis Menu Component
+  const EllipsisMenu = () => (
+    <div className="relative" ref={ellipsisMenuRef}>
+      <button
+        onClick={() => setShowEllipsisMenu(!showEllipsisMenu)}
+        className="btn btn-sm p-2 hover:bg-base-200"
+        title="More options"
+      >
+        <MoreVertical size={16} />
+      </button>
+      
+      {showEllipsisMenu && (
+        <div className="absolute right-0 mt-2 w-48 bg-base-100 border border-base-300 rounded-lg shadow-lg z-50">
+          <div className="py-1">
+            <button
+              onClick={handlePauseBridge}
+              disabled={isUpdatingBridge}
+              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 ${
+                isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {bridgeStatus === BRIDGE_STATUS.PAUSED ? (
+                <>
+                  <Play size={14} className="text-green-600" />
+                  Resume Agent
+                </>
+              ) : (
+                <>
+                  <Pause size={14} className="text-red-600" />
+                  Pause Agent
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 
   if (!shouldShowNavbar()) return null;
 
   return (
-    <div className="bg-base-100">
-      {/* Main nav bar */}
-      <div className={`navbar sticky top-0 z-50 transition-all duration-300 ${
+    <div className="bg-base-100 ml-2">
+      {/* Main navigation header */}
+      <div className={`sticky top-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-base-100/95 backdrop-blur-md shadow-lg border-b border-base-300'
-          : 'bg-base-100   shadow-sm  border-b border-base-200'
+          ? 'bg-base-100/95 backdrop-blur-sm shadow-md border-b border-base-300'
+          : 'bg-base-100 shadow-sm border-b border-base-200'
       }`}>
-
-        {/* Left section */}
-        <div className="navbar-start flex-1 min-w-0">
-          <div className="flex items-center gap-2 min-w-0 flex-1 px-3">
+        
+        {/* Top bar with breadcrumb/home and actions */}
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Left: Breadcrumb or Home */}
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <StatusIndicator status={bridgeStatus}/>
-            {/* Breadcrumb */}
-            <nav className="flex items-center space-x-1 min-w-0 flex-1" aria-label="Breadcrumb">
-              {breadcrumbItems.map((item, idx) => (
-                <React.Fragment key={idx}>
-                  {idx > 0 && (
-                    <ChevronRight size={12} className="text-base-content/40 flex-shrink-0 mx-0.5"/>
-                  )}
-                  {item.isClickable ? (
-                    <button
-                      onClick={item.handleClick}
-                      className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md transition-all duration-200 min-w-0 group ${
-                        item.current
-                          ? 'bg-primary/10 text-primary font-semibold cursor-default'
-                          : 'text-base-content/70 hover:text-base-content hover:bg-base-200/70 cursor-pointer hover:scale-105'
-                      }`}
-                      disabled={item.current}
-                    >
-                      {item.icon && <item.icon size={14} className="flex-shrink-0 transition-transform group-hover:scale-110"/>}
-                      <span className={`truncate ${isMobile ? 'max-w-[60px]' : 'max-w-[100px] sm:max-w-[150px]'} ${item.current ? 'font-semibold' : ''}`}>
-                        {item.label}
-                      </span>
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-primary/10 text-primary min-w-0">
-                      <span className={`truncate font-semibold ${isMobile ? 'max-w-[80px]' : 'max-w-[120px] sm:max-w-[180px]'}`} title={item.label}>
-                        {item.label}
-                      </span>
-                    </div>
-                  )}
-                </React.Fragment>
-              ))}
-             {pathParts.includes('configure') &&  <DraftBadge/>}
-            </nav>
-          </div>
-        </div>
-
-        {/* Right section (desktop) */}
-        <div className="navbar-end">
-          {!isMobile ? (
-            <div className="flex items-center gap-2 px-3">
-              {/* Pause / Resume */}
-              {pathParts?.includes('configure') && <>
+            
+            {isEmbedUser ? (
               <button
-                className={`btn btn-sm gap-2 transition-all duration-200 hover:scale-105 ${
-                  bridgeStatus === BRIDGE_STATUS.PAUSED ? 'btn-success' : 'btn-error'
-                } ${isUpdatingBridge ? 'loading' : ''}`}
-                onClick={handlePauseBridge}
-                disabled={isUpdatingBridge}
+                onClick={handleHomeClick}
+                className="btn btn-sm gap-2 hover:bg-base-200"
+                title="Go to Home"
               >
-                {!isUpdatingBridge && (bridgeStatus === BRIDGE_STATUS.PAUSED ? <Play size={14}/> : <Pause size={14}/>)}
-                <span className="hidden lg:inline">{bridgeStatus === BRIDGE_STATUS.PAUSED ? 'Resume' : 'Pause'}</span>
+                <Home size={16}/>
+                <span className="hidden sm:inline">Home</span>
               </button>
-
-              {/* Discard */}
-              {isDrafted && (
-                <button
-                  className="btn btn-sm btn-outline btn-error gap-2 hover:scale-105 transition-all duration-200"
-                  onClick={handleDiscardChanges}
-                  disabled={isUpdatingBridge || isPublishing}
-                >
-                  <ClipboardX size={14}/>
-                  <span className="hidden lg:inline">Discard</span>
-                </button>
-              )}
-
-              {/* Publish */}
-              <button
-                className={`btn btn-sm gap-2 transition-all duration-200 hover:scale-105 btn-success ${
-                  isPublishing ? 'loading' : ''
-                }`}
-                onClick={() => openModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION)}
-                disabled={!isDrafted || isPublishing}
-              >
-                {!isPublishing && <BookCheck size={14}/>}
-                <span className="hidden lg:inline">{isPublishing ? 'Publishing…' : 'Publish'}</span>
-              </button></>}
-
-              {/* Tabs */}
-              <div className="tabs tabs-boxed bg-base-200/50 backdrop-blur-sm">
-                {TABS.map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`${activeTab === tab.id ? 'tab-active w-32' : 'w-14'} tab gap-2 hover:w-32 transition-all duration-300 overflow-hidden flex flex-col items-center group/tab hover:bg-base-300/50`}
-                    title={activeTab !== tab.id ? tab.label : undefined}
-                  >
-                    <tab.icon size={16} className="shrink-0 transition-transform group-hover/tab:scale-110"/>
-                    <span className={`${activeTab === tab.id ? 'opacity-100' : 'opacity-0 group-hover/tab:opacity-100'} transition-opacity duration-300 whitespace-nowrap font-medium text-sm`}>
-                      {tab.label}
-                    </span>
-                  </button>
+            ) : (
+              <nav className="flex items-center gap-1 min-w-0 flex-1" aria-label="Breadcrumb">
+                {breadcrumbItems.map((item, idx) => (
+                  <React.Fragment key={idx}>
+                    {idx > 0 && (
+                      <ChevronRight size={12} className="text-base-content/40 flex-shrink-0"/>
+                    )}
+                    {item.isClickable ? (
+                      <button
+                        onClick={item.handleClick}
+                        className="flex items-center gap-1.5 px-2 py-1 rounded-md text-sm transition-all hover:bg-base-200 text-base-content/70 hover:text-base-content min-w-0"
+                      >
+                        {item.icon && <item.icon size={14} className="flex-shrink-0"/>}
+                        <span className="truncate max-w-[100px] sm:max-w-[150px]">
+                          {item.label}
+                        </span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 text-primary min-w-0">
+                        <span className="truncate font-medium text-sm max-w-[120px] sm:max-w-[200px]" title={item.label}>
+                          {item.label}
+                        </span>
+                      </div>
+                    )}
+                  </React.Fragment>
                 ))}
-              </div>
+                {activeTab === 'configure' && <DraftBadge/>}
+              </nav>
+            )}
+          </div>
 
-              {/* History slider */}
-              {/* <button
-                className="btn btn-sm btn-ghost gap-2 hover:scale-105 transition-all duration-200"
-                onClick={toggleConfigHistorySidebar}
-                title="Updates History"
-              >
-                <History size={16}/>
-              </button> */}
-            </div>
-          ) : (
-            /* Mobile menu button */
-            <div className="px-3">
-              <button
-                className="btn btn-square btn-ghost btn-sm"
-                onClick={() => setShowMobileMenu(v => !v)}
-              >
-                <MoreVertical size={18}/>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile controls */}
-      {isMobile && (
-        <>
-          <div className="bg-base-100 border-b border-base-300 shadow-sm">
-            {pathParts.includes('configure') && <div className="flex items-center gap-1.5">
-              {/* Pause / Resume */}
-              <button
-                className={`btn gap-2 flex-1 transition-all duration-200 ${
-                  bridgeStatus === BRIDGE_STATUS.PAUSED ? 'btn-success' : 'btn-error'
-                } ${isUpdatingBridge ? 'loading' : ''}`}
-                onClick={handlePauseBridge}
-                disabled={isUpdatingBridge}
-              >
-                {!isUpdatingBridge && (bridgeStatus === BRIDGE_STATUS.PAUSED ? <Play size={14}/> : <Pause size={14}/>)}
-                {bridgeStatus === BRIDGE_STATUS.PAUSED ? 'Resume' : 'Pause'}
-              </button>
-
-              {/* Discard */}
-              {isDrafted && (
+          {/* Right: Action buttons */}
+          <div className="flex items-center gap-2">
+            {/* Desktop view - show buttons for both users */}
+            <div className="hidden md:flex items-center gap-2">
+              {/* Discard button */}
+              {isDrafted && activeTab === 'configure' && (
                 <button
-                  className="btn btn-outline btn-error gap-2 flex-1"
+                  className="btn btn-sm bg-red-200 hover:bg-red-300 gap-2"
                   onClick={handleDiscardChanges}
                   disabled={isUpdatingBridge || isPublishing}
                 >
                   <ClipboardX size={14}/>
-                  Discard
+                  <span>Discard</span>
                 </button>
               )}
 
-              {/* Publish */}
-              <button
-                className={`btn btn-success ${isPublishing ? 'loading' : ''}`}
-                onClick={handlePublish}
-                disabled={!isDrafted || isPublishing}
-              >
-                {!isPublishing && <BookCheck size={14}/>}
-                {isPublishing ? 'Publishing…' : 'Publish'}
-              </button>
-            </div>}
-          </div>
+              {/* Publish button */}
+              {activeTab === 'configure' && (
+                <button
+                  className={`btn btn-sm   bg-green-200 hover:bg-green-300 gap-2 ${isPublishing ? 'loading' : ''}`}
+                  onClick={handlePublish}
+                  disabled={!isDrafted || isPublishing}
+                >
+                  {!isPublishing && <BookCheck size={14}/>}
+                  <span>{isPublishing ? 'Publishing...' : 'Publish'}</span>
+                </button>
+              )}
+            </div>
 
-          <div className="bg-base-100 border-b border-base-300 px-3 py-2">
-            <div className="tabs w-full bg-base-200/50">
+            {/* Mobile view - icons only for embed users */}
+            <div className="md:hidden flex items-center gap-2">
+              {isEmbedUser && activeTab === 'configure' && (
+                <>
+                  {/* Discard icon - only show if there are drafts */}
+                  {isDrafted && (
+                    <button
+                      className="btn btn-sm flex gap-2 bg-red-200 hover:bg-red-300"
+                      onClick={handleDiscardChanges}
+                      disabled={isUpdatingBridge || isPublishing}
+                      title="Discard changes"
+                    >
+                      <span><ClipboardX size={16}/></span>
+                      <span>Discard</span>
+                    </button>
+                  )}
+
+                  {/* Publish icon */}
+                  <button
+                    className={`btn btn-sm bg-green-200 hover:bg-green-300  flex gap-2 ${isPublishing ? 'loading' : ''}`}
+                    onClick={handlePublish}
+                    disabled={!isDrafted || isPublishing}
+                    title={isPublishing ? 'Publishing...' : 'Publish'}
+                  >
+                    <span>{!isPublishing && <BookCheck size={16}/>}</span>
+                    <span>{isPublishing ? 'Publishing...' : 'Publish'}</span>
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Ellipsis menu - only for normal users */}
+            {!isEmbedUser && pathname.includes("configure") && <EllipsisMenu />}
+          </div>
+        </div>
+
+        {/* Tabs section */}
+        <div className="border-t border-base-200">
+          <div className="px-4">
+            <div className="tabs tabs-lifted">
               {TABS.map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`tab flex-1 gap-1.5 ${activeTab === tab.id ? 'tab-active' : ''}`}
+                  className={`tab gap-2 ${
+                    activeTab === tab.id 
+                      ? 'tab-active [--tab-bg:theme(colors.base-200)] [--tab-border-color:theme(colors.base-300)] bg-base-200' 
+                      : 'hover:bg-base-200/50'
+                  }`}
                 >
-                  <tab.icon size={14}/>
-                  <span className="text-xs font-medium">{tab.shortLabel}</span>
+                  <tab.icon size={16} className="flex-shrink-0"/>
+                  <span className="font-medium">
+                    {isMobile ? tab.shortLabel : tab.label}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
-        </>
+        </div>
+      </div>
+
+      {/* Mobile action buttons - only for normal users on configure tab */}
+      {isMobile && activeTab === 'configure' && !isEmbedUser && (
+        <div className="bg-base-100 border-b border-base-200 p-3">
+          <div className="flex gap-2">
+            {/* Pause/Resume */}
+            {/* <button
+              className={`btn btn-sm flex-1 gap-2 ${
+                bridgeStatus === BRIDGE_STATUS.PAUSED ? 'bg-green-200 hover:bg-green-300' : 'bg-red-200 hover:bg-red-300'
+              } ${isUpdatingBridge ? 'loading' : ''}`}
+              onClick={handlePauseBridge}
+              disabled={isUpdatingBridge}
+            >
+              {!isUpdatingBridge && (bridgeStatus === BRIDGE_STATUS.PAUSED ? <Play size={14}/> : <Pause size={14}/>)}
+              {bridgeStatus === BRIDGE_STATUS.PAUSED ? 'Resume' : 'Pause'}
+            </button> */}
+
+            {/* Discard button */}
+            {isDrafted && (
+              <button
+                className="btn btn-sm btn btn-sm-outline bg-red-200 hover:bg-red-300 flex-1 gap-2"
+                onClick={handleDiscardChanges}
+                disabled={isUpdatingBridge || isPublishing}
+              >
+                <ClipboardX size={14}/>
+                Discard
+              </button>
+            )}
+
+            {/* Publish button */}
+            <button
+              className={`btn btn-sm bg-green-200 hover:bg-green-300 flex-1 gap-2 ${isPublishing ? 'loading' : ''}`}
+              onClick={handlePublish}
+              disabled={!isDrafted || isPublishing}
+            >
+              {!isPublishing && <BookCheck size={14}/>}
+              {isPublishing ? 'Publishing...' : 'Publish'}
+            </button>
+          </div>
+        </div>
       )}
 
-      {/* Sliders */}
-      <OrgSlider/>
-      <BridgeSlider/>
-      <ChatBotSlider/>
-      <ConfigHistorySlider versionId={versionId}/>
+      {/* Sliders - only for non-embed users */}
+      {!isEmbedUser && (
+        <>
+          <OrgSlider/>
+          <BridgeSlider/>
+          <ChatBotSlider/>
+          <ConfigHistorySlider versionId={versionId}/>
+        </>
+      )}
     </div>
   );
 };
 
-export default SimpleNavbar;
+export default Protected(Navbar);

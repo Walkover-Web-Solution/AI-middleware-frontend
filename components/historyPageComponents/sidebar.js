@@ -182,7 +182,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   }
 
   return (
-    <div className="drawer-side justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r relative" id="sidebar">
+    <div className="drawer-side h-full justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
       <div className="p-4 gap-3 flex flex-col">
         <div className="collapse collapse-arrow join-item border border-base-300">

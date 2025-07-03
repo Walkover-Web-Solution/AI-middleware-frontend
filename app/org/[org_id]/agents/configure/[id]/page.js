@@ -78,17 +78,18 @@ const Page = ({ searchParams }) => {
   return (
     <>
       {!bridgeType && <LoadingSpinner />}
-      <div className="flex flex-col md:flex-row w-full">
-        <div className="w-full md:w-1/2 overflow-y-auto overflow-x-hidden p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
+      <div className="flex flex-col md:flex-row w-full h-full max-h-[calc(100vh-4rem)] overflow-hidden">
+        <div className="w-full md:w-1/2 overflow-y-auto overflow-x-hidden p-4 h-full border-r min-w-[350px] configurationPage">
           <ConfigurationPage apiKeySectionRef={apiKeySectionRef} params={params} />
           <div />
         </div>
         <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
-        <div className="w-full md:w-1/2 flex-1 chatPage min-w-[450px] relative">
-          <div className="m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
-            <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} params={params} />
-            {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> :bridgeType==='chatbot'? <Chatbot params={params} key={params} />: <Chat params={params} />}
-
+        <div className="w-full md:w-1/2 flex-1 chatPage min-w-[450px] relative h-full overflow-hidden">
+          <div className="h-full overflow-y-auto" id="parentChatbot">
+            <div className="m-10 md:m-0 h-full min-h-[85vh]">
+              <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} params={params} />
+              {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> :bridgeType==='chatbot'? <Chatbot params={params} key={params} />: <Chat params={params} />}
+            </div>
           </div>
         </div>
       </div>
