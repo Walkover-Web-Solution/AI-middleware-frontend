@@ -167,7 +167,7 @@ function Page({ params }) {
             <div
                 key={org.id || index}
                 onClick={() => handleSelectOrg(org.id, org.name)}
-                className={`bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 p-6 ${formState.selectedOrg?.id === org.id ? 'ring-2 ring-blue-500' : ''}`}
+                className={`bg-base-100 shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 p-6 ${formState.selectedOrg?.id === org.id ? 'ring-2 ring-blue-500' : ''}`}
             >
                 <h3 className="font-medium text-gray-900">{org.name}</h3>
         
@@ -182,7 +182,7 @@ function Page({ params }) {
     return (
         <div className="flex min-h-screen bg-gray-100 p-6 gap-6">
             {/* Organizations List */}
-            <div className="w-96 bg-white rounded-xl shadow-sm p-4 h-[calc(100vh-3rem)]">
+            <div className="w-96 bg-base-100 rounded-xl shadow-sm p-4 h-[calc(100vh-3rem)]">
                 <h2 className="text-lg font-semibold mb-4 text-gray-800">Organizations</h2>
                 <div className="mb-4">
                     <input
@@ -200,7 +200,7 @@ function Page({ params }) {
             </div>
 
             {/* Creation Form */}
-            <div className="flex-1 bg-white rounded-xl shadow-sm p-8">
+            <div className="flex-1 bg-base-100 rounded-xl shadow-sm p-8">
                 <div className="max-w-2xl mx-auto">
                      <div className="bg-blue-50 p-4 rounded-lg">
                         <h2 className="text-xl font-semibold text-blue-800">Create New Agent</h2>

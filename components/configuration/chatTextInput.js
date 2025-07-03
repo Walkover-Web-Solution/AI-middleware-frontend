@@ -220,7 +220,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     return (
         <div className="input-group flex justify-end items-end gap-2 w-full relative">
             {uploadedImages.length > 0 && (
-                <div className="absolute bottom-16 left-0 gap-2 flex w-auto rounded-lg">
+                <div className="absolute bottom-16 left-0 gap-2 flex w-auto rounded-lg bg-base-200 p-2">
                     {uploadedImages.map((url, index) => (
                         <div key={index} className="relative">
                             <Image
@@ -231,7 +231,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                                 className="w-16 h-16 object-cover mb-2 bg-base-300 p-2 rounded-lg"
                             />
                             <button
-                                className="absolute top-[-3px] right-[-3px]  text-white rounded-full p-1"
+                                className="absolute top-[-3px] right-[-3px] text-error rounded-full p-1"
                                 onClick={() => {
                                     const newImages = uploadedImages.filter((_, i) => i !== index);
                                     setUploadedImages(newImages);
@@ -247,7 +247,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 <textarea
                     ref={inputRef}
                     placeholder="Type here"
-                    className="textarea textarea-bordered w-full focus:border-primary max-h-[200px] resize-none overflow-y-auto h-auto"
+                    className="textarea textarea-bordered w-full max-h-[200px] resize-none overflow-y-auto h-auto"
                     onKeyDown={handleKeyDown}
                     rows={1}
                     onInput={(e) => {
@@ -264,19 +264,19 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 className="hidden"
             />
             {configuration && configuration?.vision && configuration['vision'] && <button
-                className="btn"
+                className="btn btn-primary"
                 onClick={() => fileInputRef.current.click()}
                 disabled={loading || uploading}
             >
                 <ImageUploadIcon  />
             </button>}
             <button
-                className="btn"
+                className="btn btn-primary"
                 onClick={handleSendMessage}
                 disabled={loading || uploading || (modelType === 'image')}
             >
                 {(loading || uploading) ? (
-                    <span className="loading loading-dots loading-lg"></span>
+                    <span className="loading loading-dots loading-lg text-primary"></span>
                 ) : (
                     <svg
                         xmlns="http://www.w3.org/2000/svg"

@@ -8,7 +8,7 @@ import Modal from '../UI/Modal';
 // Video Component using iframe
 const TutorialVideo = ({ videoUrl, title }) => {
   return (
-    <div className="relative bg-black rounded-lg overflow-hidden">
+    <div className="relative bg-base-content rounded-lg overflow-hidden">
       <iframe
         src={videoUrl}
         title={title}
@@ -61,7 +61,7 @@ const TutorialModal = () => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.TUTORIAL_MODAL}>
       {/* Main Modal */}
-      <div className="relative z-low w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
+      <div className="relative z-low w-full max-w-5xl bg-base-100 rounded-xl shadow-2xl overflow-hidden border border-gray-200">
         {/* Header */}
         <div className=" px-8 py-6 ">
           <div className="flex items-center justify-between">
@@ -92,7 +92,7 @@ const TutorialModal = () => {
                   key={index}
                   className={`border rounded-xl transition-all duration-200 transform hover:scale-[1.01] ${isActive
                       ? 'border-slate-300 shadow-lg bg-slate-50'
-                      : 'border-slate-200 hover:border-slate-300 hover:shadow-md bg-white hover:bg-slate-50'
+                      : 'border-slate-200 hover:border-slate-300 hover:shadow-md bg-base-100 hover:bg-slate-50'
                     }`}
                 >
                   <div

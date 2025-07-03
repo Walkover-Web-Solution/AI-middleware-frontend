@@ -130,7 +130,7 @@ const Page = ({ params }) => {
             {filteredKnowledgeBase.map((item, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"
+                className="bg-base-100 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"
               >
                 <div className="dropdown dropdown-right absolute top-2 right-2">
                   <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>

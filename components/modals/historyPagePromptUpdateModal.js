@@ -23,7 +23,7 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL}>
-      <div className="modal-box w-11/12 max-w-7xl bg-white">
+      <div className="modal-box w-11/12 max-w-7xl bg-base-100">
         <h3 className="font-bold text-lg mb-4">Update Prompt</h3>
         <div className='flex gap-3 w-full'>
           <div className='w-full'>

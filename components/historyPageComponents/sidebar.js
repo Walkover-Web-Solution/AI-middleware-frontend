@@ -284,7 +284,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                     <div onClick={(e) => e?.stopPropagation()}>
                       <input
                         type="checkbox"
-                        className="checkbox checkbox-lg mr-2 bg-white"
+                        className="checkbox checkbox-lg mr-2 bg-base-100"
                         checked={selectedThreadIds?.includes(item?.thread_id)}
                         onChange={() => handleThreadIds(item?.thread_id)}
                       />

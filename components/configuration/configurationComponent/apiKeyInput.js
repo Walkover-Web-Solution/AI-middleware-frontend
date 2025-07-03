@@ -109,14 +109,14 @@ const ApiKeyInput = ({ params,apiKeySectionRef }) => {
     const maxChar = 20;
 
     return (
-        <div className="relative form-control max-w-xs text-base-content" ref={apiKeySectionRef} >
+        <div className="relative form-control max-w-xs" ref={apiKeySectionRef} >
             <div className="label">
                 <span className="label-text font-medium">Service's API Key</span>
             </div>
             <div className=''>
                 <div className='relative'>
                     <select
-                        className="select select-bordered select-sm w-full"
+                        className="select select-bordered select-sm w-full bg-base-100"
                         onChange={handleDropdownChange}
                         maxLength="10"
                         value={selectedValue}
@@ -146,7 +146,7 @@ const ApiKeyInput = ({ params,apiKeySectionRef }) => {
                         )}
                         <option value="add_new" className="add-new-option">+  Add new API Key </option>
                     </select>
-                    <div className='text-[10px] text-end '>
+                    <div className='text-[10px] text-end text-primary'>
                         <button
                             type="button"
                             onClick={toggleDropdown}
@@ -157,9 +157,9 @@ const ApiKeyInput = ({ params,apiKeySectionRef }) => {
                 </div>
                 <div>
                     {showDropdown && (
-                        <div className="absolute w-full bg-white border border-gray-300 rounded-md shadow-lg z-low max-h-80 overflow-auto">
+                        <div className="absolute w-full bg-base-100 border-base-300 rounded-md shadow-lg z-low max-h-80 overflow-auto">
                             {SERVICES?.filter(service => service?.value !== bridge?.service).map(service => (
-                                <div key={service?.value} className="px-4 py-2 border-b last:border-b-0">
+                                <div key={service?.value} className="px-4 py-2 border-base-300 border-b last:border-b-0">
                                     <div className="font-semibold capitalize mb-1">{service?.displayName}</div>
                                     {filterApiKeysByService(service?.value)?.map(apiKey => (
                                         <label key={apiKey?._id} className="flex items-center mb-1">
@@ -169,7 +169,7 @@ const ApiKeyInput = ({ params,apiKeySectionRef }) => {
                                                 value={apiKey?._id}
                                                 checked={selectedApiKeys[service?.value] === apiKey?._id}
                                                 onChange={() => handleSelectionChange(service?.value, apiKey?._id)}
-                                                className="radio h-4 w-4"
+                                                className="radio h-4 w-4 bg-base-100"
                                             />
                                             <span className="ml-2 text-sm">
                                                 {truncateText(apiKey?.name, maxChar)}
@@ -177,7 +177,7 @@ const ApiKeyInput = ({ params,apiKeySectionRef }) => {
                                         </label>
                                     ))}
                                     {filterApiKeysByService(service?.value)?.length === 0 && (
-                                        <span className="text-sm text-gray-500">No API keys available</span>
+                                        <span className="text-sm text-base-content/50">No API keys available</span>
                                     )}
                                 </div>
                             ))}

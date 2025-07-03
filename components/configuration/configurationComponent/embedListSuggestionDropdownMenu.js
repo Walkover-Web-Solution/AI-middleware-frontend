@@ -152,7 +152,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         ) : (
                             <li className="text-center mt-2">No tools found</li>
                         )}
-                        {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined,
+                        {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-base-100 py-2" onClick={() => openViasocket(undefined,
                             {
                                 embedToken,
                                 meta: {

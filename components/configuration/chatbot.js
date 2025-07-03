@@ -107,7 +107,7 @@ const Chatbot = ({ params }) => {
       {isLoading ? (
         <div
           id="chatbot-loader"
-          className="flex flex-col gap-4 justify-center items-center h-full w-full bg-white text-black"
+          className="flex flex-col gap-4 justify-center items-center h-full w-full bg-base-100 text-black"
         >
           <p className="text-lg font-semibold animate-pulse">Loading chatbot...</p>
         </div>

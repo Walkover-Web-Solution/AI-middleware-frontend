@@ -33,7 +33,7 @@ const BatchResponseFormat = () => {
 const Section = ({ title, caption, children }) => (
     <div className="flex items-start flex-col justify-center">
         <h3 className="text-lg font-semibold">{title}</h3>
-        <p className="text-sm text-gray-600 block">{caption}</p>
+        <p className="text-sm text-base-content block">{caption}</p>
         {children}
     </div>
 );
@@ -41,16 +41,16 @@ const Section = ({ title, caption, children }) => (
 const BatchApiGuide = ({ params }) => {
     return (
         <div className="min-h-screen gap-4 flex flex-col">
-            <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
+            <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-lg p-4">
                 <Section title="Step 1" caption="Create `pauthkey`" />
-                <p className=" text-sm">
+                <p className="text-sm">
                     Follow the on-screen instructions to create a new API key. Ignore if already created
                     <br /> <Link href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create pauthkey</Link>
                 </p>
             </div>
-            <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
+            <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-lg p-4">
                 <Section title="Step 2" caption="Use the Batch API" />
-                <div className="mockup-code relative">
+                <div className="mockup-code relative bg-base-100 p-4 rounded-lg">
                     <CopyButton data={BatchApi(params.id, params.version)} />
                     <pre className="break-words whitespace-pre-wrap ml-4">
                         <code>
@@ -58,12 +58,12 @@ const BatchApiGuide = ({ params }) => {
                         </code>
                     </pre>
                 </div>
-                <p className=" text-sm"><strong>Note:</strong> Ensure that the 'webhook_url' is correctly set to receive batch processing updates.
+                <p className="text-sm"><strong>Note:</strong> Ensure that the 'webhook_url' is correctly set to receive batch processing updates.
                 </p>
             </div>
-            <div className="flex flex-col gap-4 bg-white rounded-lg shadow-lg p-4">
+            <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-xl p-4">
                 <Section title="Response Format" />
-                <div className="mockup-code relative">
+                <div className="mockup-code relative bg-base-100 p-4 rounded-lg">
                     <CopyButton data={BatchResponseFormat()} />
                     <pre className="break-words whitespace-pre-wrap">
                         <code>

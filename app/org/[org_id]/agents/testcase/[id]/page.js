@@ -80,7 +80,7 @@ function TestCases({ params }) {
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm">
+    <div className="p-6 bg-base-100 rounded-lg shadow-sm">
       <div className="">
         <h1 className="text-xl font-semibold text-gray-800 mb-4">Test Case</h1>
         <div className="overflow-x-auto">
@@ -98,7 +98,7 @@ function TestCases({ params }) {
                       <div className="flex items-center gap-2">
                         <div className="tooltip tooltip-left" data-tip="Run Test Case">
                           <button
-                            className="btn btn-xs btn-circle bg-white border border-gray-200 hover:bg-primary hover:border-primary hover:text-white disabled:bg-gray-100 disabled:border-gray-200 disabled:text-gray-400"
+                            className="btn btn-xs btn-circle bg-base-100 border border-gray-200 hover:bg-primary hover:border-primary hover:text-white disabled:bg-gray-100 disabled:border-gray-200 disabled:text-gray-400"
                             onClick={() => handleRunTestCase(version)}
                             disabled={!params?.id || isloading}
                           >
@@ -172,10 +172,10 @@ function TestCases({ params }) {
                                   <textarea
                                     value={editUserInput}
                                     onChange={(e) => setEditUserInput(e.target.value)}
-                                    className="w-full p-3 bg-white min-h-20 rounded-md shadow-sm text-sm text-gray-600"
+                                    className="w-full p-3 bg-base-100 min-h-20 rounded-md shadow-sm text-sm text-gray-600"
                                   />
                                 ) : (
-                                  <div className="p-3 bg-white rounded-md shadow-sm text-sm text-gray-600 overflow-auto max-h-40">
+                                  <div className="p-3 bg-base-100 rounded-md shadow-sm text-sm text-gray-600 overflow-auto max-h-40">
                                     {lastUserMessage}
                                   </div>
                                 )}
@@ -186,17 +186,17 @@ function TestCases({ params }) {
                                   <textarea
                                     value={editExpectedOutput}
                                     onChange={(e) => setEditExpectedOutput(e.target.value)}
-                                    className="w-full p-3 min-h-20 bg-white rounded-md shadow-sm text-sm text-gray-600"
+                                    className="w-full p-3 min-h-20 bg-base-100 rounded-md shadow-sm text-sm text-gray-600"
                                   />
                                 ) : (
-                                  <div className="p-3 bg-white rounded-md shadow-sm text-sm text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
+                                  <div className="p-3 bg-base-100 rounded-md shadow-sm text-sm text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
                                     {expectedOutput}
                                   </div>
                                 )}
                               </div>
                               <div>
                                 <h3 className="text-sm font-medium text-gray-700 mb-1">Model Answer</h3>
-                                <div className="p-3 bg-white rounded-md shadow-sm text-sm text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
+                                <div className="p-3 bg-base-100 rounded-md shadow-sm text-sm text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
                                   {model_output || 'N/A'}
                                 </div>
                               </div>
@@ -255,7 +255,7 @@ function TestCases({ params }) {
                                     return (
                                       <div
                                         key={versionIndex}
-                                        className="flex flex-col gap-2 px-3 py-2 bg-white rounded-lg text-sm text-gray-700 border border-gray-200"
+                                        className="flex flex-col gap-2 px-3 py-2 bg-base-100 rounded-lg text-sm text-gray-700 border border-gray-200"
                                       >
                                         <div className="flex items-center gap-2">
                                           <span>V{versionIndex + 1}:</span>

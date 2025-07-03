@@ -283,7 +283,7 @@ function Home({ params, isEmbedUser }) {
                 {filteredArchivedBridges?.length > 0 && <div className="">
                   <div className="flex justify-center items-center my-4">
                     <p className="border-t border-base-300 w-full"></p>
-                    <p className="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+                    <p className="bg-base-content text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
                       Archived Agents
                     </p>
                     <p className="border-t border-base-300 w-full"></p>

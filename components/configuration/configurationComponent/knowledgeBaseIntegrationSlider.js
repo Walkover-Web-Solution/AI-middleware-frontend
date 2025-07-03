@@ -51,7 +51,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
 }`;
 
         return (
-            <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
+            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
                 <Section title="Step 1: Connect Knowledge Base" caption="Use the following API configuration and access key." />
                 <div className="mockup-code">
                     <CopyButton data={apiConfig} />
@@ -79,7 +79,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
         };
 
         return (
-            <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
+            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
                 <Section title="Step 2" caption="Add below code in your product." />
                 <div className="mockup-code">
                     <CopyButton data={DataObject.script} />
@@ -98,7 +98,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
     }
     const renderStepThree = () => {
         return (
-            <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
+            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
                 <Section title="Step 3" caption="Use this function to show list or add Document modal" />
                 <div className="mockup-code">
                     <pre data-prefix=">" className="text-error" ><code className="text-warning">window.openRag() /* to open add document modal */</code></pre>

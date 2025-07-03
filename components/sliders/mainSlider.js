@@ -85,7 +85,7 @@ function MainSlider({ isEmbedUser }) {
           <div className="drawer-content flex flex-col"></div>
           <div className="drawer-side">
             <label htmlFor="my-drawer-2" className="drawer-overlay"></label>
-            <div className="flex flex-col h-screen w-72 bg-base-100 border-r py-4">
+            <div className="flex flex-col h-screen w-72 bg-base-100 border-r border-base-300 py-4">
               <div className="flex-grow overflow-y-auto px-4">
                 <div className='mb-4 flex-col gap-2'>
                   <h2 className="text-xl font-bold text-start">
@@ -105,7 +105,7 @@ function MainSlider({ isEmbedUser }) {
                   {
                     ['agents', 'pauthkey', 'apikeys', 'alerts', 'knowledge_base', 'integration', 'invite', 'metrics'].map((item) => (
                       <li key={item} onClick={() => router.push(`/org/${path[2]}/${item}`)} className="transition-transform transform hover:scale-105 flex items-center">
-                        <a className={` w-full font-medium ${path[3] === item ? "active text-primary" : "text-gray-700"} `}>
+                        <a className={` w-full font-medium ${path[3] === item ? "active text-primary" : "text-base-content"} `}>
                           {Icons[item]}
                           {item === 'knowledge_base' ? 'Knowledge base' : item.charAt(0).toUpperCase() + item.slice(1)}
                         </a>
@@ -121,18 +121,18 @@ function MainSlider({ isEmbedUser }) {
                     <li>
                       <a
                         onClick={() => openModal(MODAL_TYPE.TUTORIAL_MODAL)}
-                        className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
+                        className="flex items-center gap-3 py-3 px-4  transition-colors cursor-pointer"
                       >
-                        <MonitorPlayIcon size={16} className="text-gray-600" />
+                        <MonitorPlayIcon size={16} className="text-base-content" />
                         <span className="flex-1 text-sm font-medium">Tutorial</span>
                       </a>
                     </li>
                     <li>
                       <a
                         onClick={() => { openModal(MODAL_TYPE.DEMO_MODAL) }}
-                        className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
+                        className="flex items-center gap-3 py-3 px-4  transition-colors cursor-pointer"
                       >
-                        <MessageCircleMoreIcon size={16} className="text-gray-600" />
+                        <MessageCircleMoreIcon size={16} className="text-base-content" />
                         <span className="flex-1 text-sm font-medium">Speak to Us</span>
                       </a>
                     </li>
@@ -141,9 +141,9 @@ function MainSlider({ isEmbedUser }) {
                         href="https://gtwy.featurebase.app/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 py-3 px-4 hover:bg-gray-100 transition-colors"
+                        className="flex items-center gap-3 py-3 px-4  transition-colors"
                       >
-                        <MessageSquareMoreIcon size={16} className="text-gray-600" />
+                        <MessageSquareMoreIcon size={16} className="text-base-content" />
                         <span className="flex-1 text-sm font-medium">Feedback</span>
                       </a>
                     </li>
@@ -153,11 +153,11 @@ function MainSlider({ isEmbedUser }) {
                 {/* Settings Section */}
                 <div className="border-t border-base-300">
                   <details className="overflow-hidden [&_summary::-webkit-details-marker]:hidden">
-                    <summary className="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition hover:bg-gray-100">
-                      <span className="text-sm font-medium flex justify-center items-center gap-3"><SettingsAltIcon size={16} className="text-gray-600" />Settings</span>
-                      <span className="transition group-open:-rotate-180"><ChevronDownIcon strokeWidth={1.25} size={16} className="text-gray-600" /></span>
+                    <summary className="flex cursor-pointer items-center justify-between gap-2 bg-base-100 p-4 text-base-content transition hover:bg-base-100">
+                      <span className="text-sm font-medium flex justify-center items-center gap-3"><SettingsAltIcon size={16} className="text-base-content" />Settings</span>
+                      <span className="transition group-open:-rotate-180"><ChevronDownIcon strokeWidth={1.25} size={16} className="text-base-content" /></span>
                     </summary>
-                    <div className="border-t border-gray-200 bg-white">
+                    <div className="border-t border-base-300 bg-base-100">
                       <ul className="menu w-full text-base-content">
                         <li> <a className='py-2 px-2 rounded-md'> <MailIcon size={16} /> {userdetails.email}</a> </li>
                         <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/userDetails`) }}> <CogIcon size={16} />Update User Details</a> </li>

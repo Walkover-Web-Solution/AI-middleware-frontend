@@ -38,7 +38,7 @@ function BridgeSlider() {
                 <>
                     {title === "Archived Bridges" && <div className="flex justify-center items-center my-4">
                         <p className="border-t border-base-300 w-full"></p>
-                       <p className="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-xs">
+                       <p className="bg-base-content text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-xs">
                             {title}
                         </p>
                         <p className="border-t border-base-300 w-full"></p>
@@ -81,7 +81,7 @@ function BridgeSlider() {
                     onChange={handleBridgeSearchChange}
                     className="border border-gray-300 rounded p-2 w-full"
                 />
-                <button className="bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>
+                <button className="bg-base-100 border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>
                     + Create new agent
                 </button>
                 {filteredBridgesList.length === 0 ? (

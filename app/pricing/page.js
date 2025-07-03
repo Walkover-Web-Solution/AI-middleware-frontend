@@ -37,7 +37,7 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="bg-black flex flex-col w-full min-h-screen text-white relative pt-40">
+    <div className="bg-base-content flex flex-col w-full min-h-screen text-white relative pt-40">
       <Head>
         <link rel="canonical" href="https://gtwy.ai" />
       </Head>
@@ -54,7 +54,7 @@ export default function PricingPage() {
 
           <div className="flex flex-col md:flex-row items-stretch justify-between w-3/4 mx-auto gap-8">
             {PRICINGPLANS?.map((plan) => (
-              <div key={plan.name} className="flex-1 w-full rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:bg-zoom bg-black/20 backdrop-blur-sm">
+              <div key={plan.name} className="flex-1 w-full rounded-md p-10 flex flex-col justify-between border-opacity-40 border-gray-400 border-[0.1px] relative overflow-hidden group hover:bg-zoom bg-base-content/20 backdrop-blur-sm">
                 <div>
                   <h2 className="text-4xl font-bold">{plan.name}</h2>
                   <p className="text-gray-400 mt-2">{plan.description}</p>

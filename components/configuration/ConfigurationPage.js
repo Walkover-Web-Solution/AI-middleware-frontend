@@ -54,7 +54,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
             <div className="mb-4 mt-4">
                 <a
                     href="/faq/how-to-use-gtwy-ai"
-                    className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                    className="text-sm text-primary hover:text-primary-focus hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                 >

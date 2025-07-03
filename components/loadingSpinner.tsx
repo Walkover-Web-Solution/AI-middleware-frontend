@@ -3,7 +3,7 @@ import React from 'react'
 function LoadingSpinner({ height = '100vh', width = '100vw', marginLeft = '0px', marginTop = '0px', margin = 'auto' }) {
     return (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-filter backdrop-blur-lg flex justify-center items-center z-very-high" style={{ height, width, margin, marginLeft, marginTop }}>
-            <div className="p-5 bg-white border border-gray-200 rounded-lg shadow-xl">
+            <div className="p-5 bg-base-100 border border-gray-200 rounded-lg shadow-xl">
                 <div className="flex items-center justify-center space-x-2">
                     <svg className="animate-spin -ml-1 mr-3 h-10 w-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

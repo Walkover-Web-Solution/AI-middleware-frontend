@@ -13,7 +13,7 @@ export const metadata = {
 
 const Privacy = () => {
   return (
-    <div className="bg-black flex flex-col w-full min-h-screen text-white relative">
+    <div className="bg-base-content flex flex-col w-full min-h-screen text-white relative">
       <Head>
         <link rel="canonical" href="https://gtwy.ai" />
       </Head>

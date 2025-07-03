@@ -75,7 +75,7 @@ function OrgSlider() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="border border-gray-300 rounded p-2 w-full"
                 />
-                <button onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="  bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50 ">
+                <button onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="  bg-base-content border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-base-300 hover:text-base-content ">
                     <span className='flex justify-center items-center gap-2 text-gray font-semibold'>+ Create New Org<BuildingIcon size={16} /></span>
                 </button>
                 <ul className="menu p-0 w-full text-base-content">
@@ -102,7 +102,7 @@ function OrgSlider() {
                     className="overflow-hidden rounded border border-gray-300 [&_summary::-webkit-details-marker]:hidden"
                 >
                     <summary
-                        className="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition"
+                        className="flex cursor-pointer items-center justify-between gap-2 bg-base-100 p-4 text-gray-900 transition"
                     >
                         <span className="text-sm font-medium flex justify-center items-center gap-2">
                             <SettingsAltIcon size={16} /> Setting
@@ -113,7 +113,7 @@ function OrgSlider() {
                         </span>
                     </summary>
 
-                    <div className="border-t border-gray-200 bg-white">
+                    <div className="border-t border-gray-200 bg-base-100">
                         <ul className="menu w-full   text-base-content">
                             <li> <a className='py-2 px-2 rounded-md'> <MailIcon className="h-4 w-4" /> {userdetails.email}</a> </li>
                             <li> <a className={`py-2 px-2  ${path[3] === 'Pauthkey' ? "active" : ""}  rounded-md`} onClick={() => { router.push(`/org/${path[2]}/pauthkey`) }}> <KeyRoundIcon className="h-4 w-4" />Pauth key</a> </li>

@@ -131,7 +131,7 @@ function InvitePage({ params }) {
   }, [isModalOpen]);
   return (
     <div className="h-full flex items-start justify-center w-full">
-      <div className="bg-white shadow-lg rounded-lg w-full max-w-4xl p-8">
+      <div className="bg-base-100 shadow-lg rounded-lg w-full max-w-4xl p-8">
         {/* Header Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Invite Team Members</h1>
@@ -177,7 +177,7 @@ function InvitePage({ params }) {
               {filteredMembers.map((member, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+                  className="flex items-center justify-between bg-base-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all"
                 >
                   <div className="flex items-center gap-4">
                     <UserCircleIcon size={16} className="text-blue-500 text-2xl" />
@@ -196,7 +196,7 @@ function InvitePage({ params }) {
         {/* Modal for Confirmation */}
         {isModalOpen && (
           <>
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-low-medium"></div>
+            <div className="fixed inset-0 bg-base-content bg-opacity-50 z-low-medium"></div>
             <dialog className="modal z-low-medium open">
               <div className="modal-box rounded-lg shadow-lg">
                 <h3 className="font-bold text-lg">Invite Member</h3>
@@ -227,7 +227,7 @@ function InvitePage({ params }) {
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-200 flex items-center justify-center">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-2xl bg-white shadow-lg rounded-lg p-8">
+        <div className="w-full max-w-2xl bg-base-100 shadow-lg rounded-lg p-8">
           <button
             onClick={handleInviteClick}
             className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-2 px-4 rounded-full mb-8 hover:from-blue-600 hover:to-purple-600 transition duration-300"
@@ -236,9 +236,9 @@ function InvitePage({ params }) {
           </button>
           {isModalOpen && (
             <>
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-low-medium"></div>
+              <div className="fixed inset-0 bg-base-content bg-opacity-50 z-low-medium"></div>
               <dialog className="modal z-low-medium" open>
-                <div className="modal-box bg-white rounded-lg shadow-lg p-6">
+                <div className="modal-box bg-base-100 rounded-lg shadow-lg p-6">
                   <h3 className="font-bold text-2xl text-gray-800 mb-4">Invite Member</h3>
                   <input
                     type="email"
@@ -273,7 +273,7 @@ function InvitePage({ params }) {
               {invitedMembers.map((member, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-start space-x-4 bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition duration-300"
+                  className="flex items-center justify-start space-x-4 bg-base-100 p-4 rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition duration-300"
                 >
                   <UserCircleIcon size={16} className="text-blue-500" />
                   <span className="text-lg font-medium text-gray-700">{member.name}</span>

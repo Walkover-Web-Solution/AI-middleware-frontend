@@ -39,7 +39,7 @@ const ResponseFormat = () => {
 const Section = ({ title, caption, children }) => (
   <div className="flex items-start flex-col justify-center">
     <h3 className="text-lg font-semibold">{title}</h3>
-    <p className="text-sm text-gray-600 block">{caption}</p>
+    <p className="text-sm text-base-content block">{caption}</p>
     {children}
   </div>
 );
@@ -47,16 +47,16 @@ const Section = ({ title, caption, children }) => (
 const ApiGuide = ({ params, modelType }) => {
   return (
     <div className="min-h-screen gap-4 flex flex-col">
-      <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
+      <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-lg p-4">
         <Section title="Step 1" caption="Create `pauthkey`" />
-        <p className=" text-sm">
+        <p className="text-sm">
           Follow the on-screen instructions to create a new API key. Ignore if already created
           <br /> <Link href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create pauthkey</Link>
         </p>
       </div>
-      <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
+      <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-lg p-4">
         <Section title="Step 2" caption="Use the API" />
-        <div className="mockup-code relative">
+        <div className="mockup-code relative bg-base-100 p-4 rounded-lg">
           <CopyButton data={ComplitionApi(params.id, modelType)} />
           <pre className="break-words whitespace-pre-wrap">
             <code>
@@ -64,12 +64,12 @@ const ApiGuide = ({ params, modelType }) => {
             </code>
           </pre>
         </div>
-        <p className=" text-sm"><strong>Note:</strong> The 'response_type' key determines output format. If the value is <strong>json_object</strong> (or undefined), the output will be in JSON format. If <strong>text</strong>, the output will be in text format.
+        <p className="text-sm"><strong>Note:</strong> The 'response_type' key determines output format. If the value is <strong>json_object</strong> (or undefined), the output will be in JSON format. If <strong>text</strong>, the output will be in text format.
         </p>
       </div>
-      <div className="flex flex-col gap-4 bg-white rounded-lg shadow-lg p-4">
+      <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-xl p-4">
         <Section title="Response Format" />
-        <div className="mockup-code relative">
+        <div className="mockup-code relative bg-base-100 p-4 rounded-lg">
           <CopyButton data={ResponseFormat()} />
           <pre className="break-words whitespace-pre-wrap">
             <code>

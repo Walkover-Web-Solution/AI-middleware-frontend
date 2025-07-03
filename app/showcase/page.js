@@ -34,7 +34,7 @@ function Page() {
   }, [searchQuery, showcaseData]);
 
   return (
-    <div className="bg-black h-100vh w-full text-white">
+    <div className="bg-base-content h-100vh w-full text-white">
       <Head>
         <link rel="canonical" href="https://gtwy.ai" />
       </Head>
@@ -44,7 +44,7 @@ function Page() {
       </div>
       <div className="w-3/4 mx-auto">
         <input
-          className="w-full p-6 rounded-xl border-[0.1px] border-gray-500 bg-black text-white text-xl"
+          className="w-full p-6 rounded-xl border-[0.1px] border-gray-500 bg-base-content text-white text-xl"
           placeholder="search"
           type="text"
           value={searchQuery}

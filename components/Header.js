@@ -32,13 +32,13 @@ const Header = () => {
   const getButtonClass = (path) => {
     const isActive = pathname === path;
     return `relative px-6 py-2 ${isActive
-      ? "text-white after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-white"
+      ? "text-white after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-base-100"
       : "text-white hover:text-white"
       } transition-all duration-300 ease-in-out`;
   };
 
   return (
-    <header className={`fixed w-full top-0 z-low-medium transition-all duration-300 ${isScrolled ? 'backdrop-blur-md bg-black/60' : ''
+    <header className={`fixed w-full top-0 z-low-medium transition-all duration-300 ${isScrolled ? 'backdrop-blur-md bg-base-content/60' : ''
       }`}>
       <div className="max-w-7xl mx-auto flex justify-between items-end px-4 md:px-8 py-4">
         <div className="flex items-center justify-center">
@@ -48,7 +48,7 @@ const Header = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
               </svg>
             </label>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-black/90 backdrop-blur-md rounded-box w-52">
+            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-content/90 backdrop-blur-md rounded-box w-52">
               <li><a onClick={() => router.push("/")} className="text-white">Home</a></li>
               <li>
                 <a onClick={() => router.push("/pricing")} className="text-white">

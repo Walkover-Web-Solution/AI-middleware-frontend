@@ -21,15 +21,15 @@ function Chat({ params }) {
   }
   return (
     <div className="px-4 pt-4">
-      <div className="w-full flex justify-between items-center px-2">
+      <div className="w-full flex justify-between items-center px-2 gap-2">
         <span className="label-text">Playground</span>
         {conversation?.length > 0 && <button className="btn btn-sm" onClick={handleResetChat}>Reset Chat</button>}
       </div>
 
-      <div className="sm:p-2 mt-4 justify-between flex flex-col h-[86vh] border rounded-md w-full z-low">
+      <div className="sm:p-2 mt-4 justify-between flex flex-col h-[86vh] border-base-300 rounded-md w-full z-low">
         <div
           id="messages"
-          className="flex flex-col w-full overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2"
+          className="flex flex-col w-full overflow-y-auto overflow-x-hidden scrollbar scrollbar-thumb-primary scrollbar-thumb-rounded scrollbar-track-base-100 scrollbar-w-1 mb-4 pr-2"
         >
           {messages.map((message, index) => {
             return (
@@ -41,15 +41,15 @@ function Chat({ params }) {
                 <div className="chat-image avatar"></div>
                 <div className="chat-header">
                   {message.sender}
-                  <time className="text-xs opacity-50 pl-2">{message.time}</time>
+                  <time className="text-xs text-neutral-500 pl-2">{message.time}</time>
                   {message?.sender === "Assist" && message?.fallback && (
                     <div className="my-1">
-                      <div className="max-w-[30rem] text-primary rounded-lg text-xs overflow-hidden transition-all duration-200 hover:bg-base-200/90">
+                      <div className="text-xs text-primary rounded-lg overflow-hidden transition-all duration-200 hover:bg-base-200">
                         <input type="checkbox" id={`retry-${message.id}`} className="peer hidden" />
 
                         <label
                           htmlFor={`retry-${message.id}`}
-                          className="px-3 py-1.5 min-h-0 h-7 leading-none cursor-pointer flex items-center justify-between w-full gap-2 transition-all duration-200 hover:bg-base-300/20 peer-checked:bg-base-300/30 flex-row-reverse"
+                          className="px-3 py-1.5 min-h-0 h-7 leading-none cursor-pointer flex items-center justify-between w-full gap-2 transition-all duration-200 hover:bg-base-300 peer-checked:bg-base-300 flex-row-reverse"
                         >
                           {/* Left side - text */}
                           <div className="flex items-center gap-1.5 flex-1 min-w-0">
@@ -59,8 +59,8 @@ function Chat({ params }) {
                           </div>
                         </label>
 
-                        <div className="max-h-0 peer-checked:max-h-96 transition-all duration-300 ease-in-out overflow-hidden bg-base-300/10">
-                          <pre className="text-xs text-error/90 whitespace-pre-wrap px-3 py-2 leading-relaxed">
+                        <div className="max-h-0 peer-checked:max-h-96 transition-all duration-300 ease-in-out overflow-hidden bg-base-300">
+                          <pre className="text-xs text-error whitespace-pre-wrap px-3 py-2 leading-relaxed">
                             {message.firstAttemptError}
                           </pre>
                         </div>

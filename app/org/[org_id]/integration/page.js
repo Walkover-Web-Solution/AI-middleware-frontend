@@ -127,7 +127,7 @@ const Page = ({ params }) => {
             {filteredIntegration.map((item, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative border-2 hover:border-primary"
+                className="bg-base-100 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative border-2 hover:border-primary"
                 onClick={() => {
                   handleClickIntegration(item);
                 }}

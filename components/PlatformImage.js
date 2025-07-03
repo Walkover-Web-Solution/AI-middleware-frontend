@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const PlatformImage = () => {
   return (
-    <div className="w-full flex justify-center bg-black">
+    <div className="w-full flex justify-center bg-base-content">
       <Image
         src="/Group1.svg"
         alt="Background"
