@@ -28,7 +28,7 @@ const PreEmbedList = ({ params }) => {
             modelType: modelTypeName,
             model: modelName,
             service: serviceName,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName].validationConfig?.tools,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
         };
     });

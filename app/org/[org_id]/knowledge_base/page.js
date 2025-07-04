@@ -39,8 +39,8 @@ const Page = ({ params }) => {
 
   const filteredKnowledgeBase = useMemo(() =>
     knowledgeBaseData?.filter(item =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      item?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item?.description?.toLowerCase().includes(searchTerm.toLowerCase())
     ) || []
     , [knowledgeBaseData, searchTerm]);
 
