@@ -15,118 +15,105 @@ const Chatbot = ({ params }) => {
     modelInfo: state?.modelReducer?.serviceModels
   }));
 
-  const bridgeNameRef = useRef(bridgeName);
-  const bridgeSlugNameRef = useRef(bridgeSlugName);
-  const bridgeTypeRef = useRef(bridgeType);
-  const variablesKeyValueRef = useRef(variablesKeyValue);
-  const configurationRef = useRef(configuration);
-  const isVision = modelInfo?.[service]?.[configurationRef?.current?.type]?.[configurationRef?.current?.model]?.validationConfig?.vision;
-
-  useEffect(() => {
-    bridgeNameRef.current = bridgeName;
-    bridgeSlugNameRef.current = bridgeSlugName;
-    bridgeTypeRef.current = bridgeType;
-    variablesKeyValueRef.current = variablesKeyValue;
-    configurationRef.current = configuration;
-  }, [bridgeName, bridgeSlugName, bridgeType, variablesKeyValue, configuration]);
-
+  // Convert variables array to object
   const variables = useMemo(() => {
-    return variablesKeyValueRef.current.reduce((acc, pair) => {
+    return variablesKeyValue.reduce((acc, pair) => {
       if (pair.key && pair.value) {
         acc[pair.key] = pair.value;
       }
       return acc;
     }, {});
-  }, [variablesKeyValueRef.current]);
+  }, [variablesKeyValue]);
 
+  const isVision = useMemo(() => {
+    return modelInfo?.[service]?.[configuration?.type]?.[configuration?.model]?.validationConfig?.vision;
+  }, [modelInfo, service, configuration?.type, configuration?.model]);
+
+  // Send bridge name as threadId when it changes
   useEffect(() => {
-    if (bridgeNameRef.current && window?.SendDataToChatbot) {
-      SendDataToChatbot({ 
-        "threadId": bridgeNameRef.current 
+    if (bridgeName && window?.SendDataToChatbot) {
+      window.SendDataToChatbot({ 
+        "threadId": bridgeName?.replaceAll(" ", "_"), 
       });
     }
-  }, [bridgeNameRef.current]);
+  }, [bridgeName]);
 
+  // Send bridge slug name when it changes
   useEffect(() => {
-    if (bridgeSlugNameRef.current && window?.SendDataToChatbot) {
-      SendDataToChatbot({ bridgeName: bridgeSlugNameRef.current });
+    if (bridgeSlugName && window?.SendDataToChatbot) {
+      window.SendDataToChatbot({ 
+        bridgeName: bridgeSlugName 
+      });
     }
-  }, [bridgeSlugNameRef.current]);
+  }, [bridgeSlugName]);
   
+  // Send vision config when it changes
   useEffect(() => {
-    if (isVision && window?.SendDataToChatbot) {
-      SendDataToChatbot({ vision: { vision: true } });
-    } else if (window?.SendDataToChatbot) {
-      SendDataToChatbot({ vision: { vision: false } });
+    if (window?.SendDataToChatbot) {
+      window.SendDataToChatbot({ 
+        vision: { vision: isVision } 
+      });
     }
-  }, [isVision,configurationRef.current?.model, service]);
+  }, [isVision]);
 
+  // Send variables when they change
   useEffect(() => {
-    if (variables && window?.SendDataToChatbot) {
-      window.SendDataToChatbot({ variables: variables });
+    if (window?.SendDataToChatbot) {
+      window.SendDataToChatbot({ 
+        variables: variables 
+      });
     }
   }, [variables]);
 
+  // Initialize chatbot when all required data is available
   useEffect(() => {
+    if (!bridgeName || !bridgeSlugName || !bridgeType || !params?.version) {
+      return;
+    }
+
     const intervalId = setInterval(() => {
-      if (
-        window?.SendDataToChatbot &&
-        window.openChatbot &&
-        document.getElementById('parentChatbot') &&
-        bridgeNameRef.current &&
-        bridgeSlugNameRef.current &&
-        bridgeTypeRef.current &&
-        params?.version
-      ) {
+      if (window?.SendDataToChatbot && window.openChatbot) {
+        // Send all configuration data
         window.SendDataToChatbot({
-          "bridgeName": bridgeSlugNameRef.current,
-          "threadId": bridgeNameRef.current?.replaceAll(" ", "_"),
+          "bridgeName": bridgeSlugName,
+          "threadId": bridgeName?.replaceAll(" ", "_"),
           "parentId": 'parentChatbot',
           "fullScreen": true,
-         "hideCloseButton": true,
+          "hideCloseButton": true,
           "hideIcon": true,
           "version_id": params?.version,
           "variables": variables || {}
         });
+
         setTimeout(() => {
-          if (bridgeTypeRef.current === 'chatbot') {
-           if( window.openChatbot()){
+          if (bridgeType === 'chatbot') {
+            if (window.openChatbot()) {
               setIsLoading(false);
-           }
+            }
           }
         }, 500);
-     clearInterval(intervalId);
+
+        clearInterval(intervalId);
       }
     }, 300);
 
     return () => {
       clearInterval(intervalId);
-    // if (typeof window.closeChatbot === "function") {
-      //     SendDataToChatbot({
-      //         parentId: '',
-      //         fullScreen: false,
-      //     });
-      //     setTimeout(() => {
-      //         closeChatbot();
-      //     }, 0);
-      // }
-    }
-
+    };
   }, [chatbot_token]);
 
- return (
-  <>
-    {isLoading ? (
-      <div
-        id="chatbot-loader"
-        className="flex flex-col gap-4 justify-center items-center h-full w-full bg-white text-black"
-      >
-        <p className="text-lg font-semibold animate-pulse">Loading chatbot...</p>
-        
-      </div>
-    ) : null}
-  </>
-);
+  return (
+    <>
+      {isLoading ? (
+        <div
+          id="chatbot-loader"
+          className="flex flex-col gap-4 justify-center items-center h-full w-full bg-white text-black"
+        >
+          <p className="text-lg font-semibold animate-pulse">Loading chatbot...</p>
+        </div>
+      ) : null}
+    </>
+  );
 };
 
 export default Chatbot;

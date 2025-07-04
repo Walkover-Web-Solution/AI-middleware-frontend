@@ -333,7 +333,7 @@
                         left: 0 !important;
                         top: 0 !important;
                         width: 700px !important;
-                        height: 98vh !important;
+                        max-height: 98vh !important;
                         z-index: 9999 !important;
                         transform: translateX(-100%) !important;
                         transition: transform 0.3s ease-in-out !important;
@@ -348,7 +348,7 @@
                         right: 0 !important;
                         top: 0 !important;
                         width: 700px !important;
-                        height: 98vh !important;
+                        max-height: 98vh !important;
                         z-index: 9999 !important;
                         transform: translateX(100%) !important;
                         transition: transform 0.3s ease-in-out !important;
@@ -363,7 +363,7 @@
                         top: 0 !important;
                         left: 0 !important;
                         width: 100vw !important;
-                        height: 98vh !important;
+                        max-height: 98vh !important;
                         z-index: 9999 !important;
                         opacity: 0 !important;
                         transition: opacity 0.3s ease-in-out !important;
@@ -493,7 +493,7 @@
                 if (enable) {
                     // Entering fullscreen mode
                     iframeContainer.style.width = '100vw';
-                    iframeContainer.style.height = '98vh';
+                    iframeContainer.style.maxHeight = '98vh';
                     iframeContainer.classList.add('full-screen-without-border');
                     iframeContainer.classList.add('slide-full');
 
@@ -527,7 +527,7 @@
                     const width = this.props?.config?.width || this.config.width;
                     const widthUnit = this.props?.config?.widthUnit || this.config.widthUnit;
 
-                    iframeContainer.style.height = `${height}${heightUnit}`;
+                    iframeContainer.style.maxHeight = `${height}${heightUnit}`;
                     iframeContainer.style.width = `${width}${widthUnit}`;
                 }
             }
@@ -607,7 +607,7 @@
 
             // Only set minimum height if not in parent container
             if (!this.state.hasParentContainer) {
-                iframe.style.minHeight = '98vh';
+                iframe.style.maxHeight = '95vh';
             }
 
             this.parentContainer.appendChild(iframe);
@@ -635,7 +635,7 @@
             } else {
                 // Not in parent container - use default positioning
                 this.parentContainer.style.position = 'fixed';
-                this.parentContainer.style.minHeight = '98vh';
+                this.parentContainer.style.maxHeight = '95vh';
 
                 // Update class to reflect standalone status
                 this.parentContainer.className = 'popup-parent-container with-header';
@@ -733,7 +733,7 @@
 
                 iframeParentContainer.style.height = `${height}${heightUnit}`;
                 iframeParentContainer.style.width = `${width}${widthUnit}`;
-                iframeParentContainer.style.minHeight = '98vh'; // Ensure minimum height
+                iframeParentContainer.style.minHeight = '95vh'; // Ensure minimum height
             }
         }
 

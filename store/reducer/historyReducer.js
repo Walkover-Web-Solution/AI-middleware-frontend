@@ -54,6 +54,25 @@ export const historyReducer = createSlice({
     clearHistoryData: (state) => {
       state.history = [];
     },
+    addThreadUsingRtLayer: (state, action) => {
+      const {Thread} = action.payload;
+      const threadIndex = state.history.findIndex((thread) => thread.thread_id === Thread.thread_id);
+      if (threadIndex !== -1) {
+        state.history.splice(threadIndex, 1);
+        state.history.unshift(Thread);
+      } else {
+        state.history.unshift(Thread);
+      }
+    },
+    addThreadNMessageUsingRtLayer: (state, action) => {
+      const {thread_id,sub_thread_id, Messages} = action.payload;
+      const threadIndex = state.thread.findIndex((thread) => thread.thread_id === thread_id || thread.sub_thread_id === sub_thread_id);
+      if (threadIndex !== -1) {
+        Messages.map((message) => {
+          state.thread.push(message);
+        })
+      } 
+    },
   },
 });
 
@@ -67,6 +86,8 @@ export const {
   fetchSubThreadReducer,
   clearSubThreadData,
   setSelectedVersion,
-  clearHistoryData
+  clearHistoryData,
+  addThreadUsingRtLayer,
+  addThreadNMessageUsingRtLayer
 } = historyReducer.actions;
 export default historyReducer.reducer;
