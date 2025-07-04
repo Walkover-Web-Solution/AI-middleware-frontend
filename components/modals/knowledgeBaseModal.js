@@ -5,8 +5,9 @@ import { KNOWLEDGE_BASE_CUSTOM_SECTION, KNOWLEDGE_BASE_SECTION_TYPES, MODAL_TYPE
 import { closeModal, openModal } from '@/utils/utility';
 import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/store/action/knowledgeBaseAction';
 import Modal from '../UI/Modal';
+import { toast } from 'react-toastify';
 
-const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {} }) => {
+const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {},knowledgeBaseData=[] }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSectionType, setSelectedSectionType] = useState('default');
@@ -27,7 +28,21 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
     event.preventDefault();
     setIsLoading(true);
     const formData = new FormData(event.target);
+    const newName = formData.get("name").trim();
+        if (!newName) {
+      toast.error('Please enter a valid name.');
+      setIsLoading(false)
+      return;
+    }
+    const isDuplicate = knowledgeBaseData.some(kb => 
+      kb.name?.trim().toLowerCase() === newName.toLowerCase()
+    );
 
+    if (isDuplicate) {
+      toast.error('Knowledge Base name already exists. Please choose a different name.');
+      setIsLoading(false)
+      return;
+    }
     // Create payload object
     const payload = {
       orgId: params?.org_id,
