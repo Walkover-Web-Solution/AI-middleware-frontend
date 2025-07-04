@@ -15,7 +15,7 @@
                 slide: 'full' // default slide behavior
             };
             this.urls = {
-                gtwyUrl: 'https://gtwy.ai/embed',
+                gtwyUrl: 'https://app.gtwy.ai/embed',
                 login: 'https://db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {
