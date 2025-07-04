@@ -4,14 +4,15 @@ import ThreadItem from './threadItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { scrollToBottom, scrollToTop } from './assistFile';
 import { useDispatch } from 'react-redux';
-import { getThread } from '@/store/action/historyAction';
+import { getThread, updateContentHistory } from '@/store/action/historyAction';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useRouter } from "next/navigation";
-import { openModal } from '@/utils/utility';
+import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import AddTestCaseModal from '../modals/AddTestCaseModal';
 import LoadingSpinner from '../loadingSpinner';
 import HistoryPagePromptUpdateModal from '../modals/historyPagePromptUpdateModal';
+import EditMessageModal from '../modals/EditMessageModal';
 
 
 const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedVersion, previousPrompt, isErrorTrue}) => {
@@ -29,6 +30,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [testCaseConversation, setTestCaseConversation] = useState([]);
   const [loadingData, setLoadingData] = useState(false); // New state for loading
   const [promotToUpdate, setPromptToUpdate] = useState(null);
+  const [modalInput, setModalInput] = useState(null);
 
   const handleAddTestCase = (item, index, variables = false) => {
     const conversation = [];
@@ -254,8 +256,28 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     return isNaN(date.getTime()) ? "Invalid Date" : date.toLocaleDateString("en-US", options);
   };
 
+  const handleSave = useCallback((item) => {
+      if (modalInput?.content?.trim() === "") {
+        alert("Message cannot be empty.");
+        return;
+      }
+      dispatch(updateContentHistory({
+        id: modalInput?.Id,
+        bridge_id: params.id,
+        message: modalInput.content,
+        index: modalInput.index
+      }));
+      setModalInput("");
+      closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
+    }, [modalInput]);
+
+    const handleClose = useCallback(() => {
+        setModalInput("");
+        closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
+      }, []);
+
   return (
-    <div className="drawer-content flex flex-col items-center overflow-scroll justify-center">
+    <div className="drawer-content flex flex-col items-center overflow-hidden justify-center">
       <div className="w-full min-h-screen">
         <div
           id="scrollableDiv"
@@ -306,6 +328,8 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
                       searchMessageId={searchMessageId}
                       setSearchMessageId={setSearchMessageId}
                       handleAddTestCase={handleAddTestCase}
+                      setModalInput={setModalInput}
+                      modalInput={modalInput}
                     />
                   ))}
               </div>
@@ -316,7 +340,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         {showScrollToBottom && (
           <button
             onClick={() => scrollToBottom(historyRef)}
-            className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-10"
+            className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-low"
           >
             <CircleDownIcon size={24} />
           </button>
@@ -324,6 +348,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       </div>
       <AddTestCaseModal testCaseConversation={testCaseConversation} setTestCaseConversation={setTestCaseConversation} />
       <HistoryPagePromptUpdateModal params={params} promotToUpdate={promotToUpdate} previousPrompt={previousPrompt}/>
+      <EditMessageModal  setModalInput={setModalInput} handleClose={handleClose} handleSave={handleSave} modalInput={modalInput} />
     </div>
   );
 };

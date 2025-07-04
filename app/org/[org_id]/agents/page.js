@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 
 export const runtime = 'edge';
 
-function Home({ params }) {
+function Home({ params, isEmbedUser }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
@@ -147,7 +147,7 @@ function Home({ params }) {
         </div>
         <div className="dropdown bg-transparent absolute right-3 top-2">
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
-          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
             <li><a onClick={(e) => { e.preventDefault(); archiveBridge(item._id, item.status != undefined ? Number(!item?.status) : undefined) }}>{(item?.status === 0) ? 'Un-archive Agent' : 'Archive Agent'}</a></li>
           </ul>
         </div>
@@ -174,7 +174,7 @@ function Home({ params }) {
     return (
       <div className="flex items-center mr-4">
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button
+          {!isEmbedUser && <button
             className="btn btn-outline btn-ghost btn-sm"
             onClick={(e) => {
               e.preventDefault();
@@ -183,11 +183,11 @@ function Home({ params }) {
             }}
           >
             Test Case
-          </button>
+          </button>}
         </div>
         <div className="dropdown dropdown-left bg-transparent">
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
-          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -216,7 +216,7 @@ function Home({ params }) {
 
   return (
     <div className="w-full">
-      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"}/>}
+      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"} />}
       {tutorialState?.showTutorial && (
         <OnBoarding
           setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}

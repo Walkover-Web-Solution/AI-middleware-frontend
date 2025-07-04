@@ -119,17 +119,17 @@ const NewInputConfigComponent = ({ params }) => {
                 <div
                     ref={divRef}
                     className={`relative transition-all duration-300 min-h-[500px] border border-gray-300 rounded-r-lg rounded-l-lg rounded-t-md ${isFullscreen
-                        ? 'fixed inset-0 w-full h-screen z-50'
+                        ? 'fixed inset-0 w-full h-screen z-low'
                         : 'w-full'
                         }`}
                     style={!isFullscreen ? { height: `${height}px` } : {}}
                 >
                     <div
                         id="docStar-embed"
-                        className="w-full z-0 h-full"
+                        className="w-full h-full"
                     />
 
-                    <div className="absolute top-4 right-4 z-[9999] group">
+                    <div className="absolute top-4 right-4 z-low-medium group">
                         <button
                             onClick={toggleFullscreen}
                             className="text-base-content bg-base-300 p-2 rounded-full transition hover:bg-base-200"
@@ -204,7 +204,7 @@ const NewInputConfigComponent = ({ params }) => {
 
                 {/* Overlay to prevent iframe interference during resize */}
                 {isResizing && (
-                    <div className="fixed inset-0 z-[9998] cursor-row-resize" />
+                    <div className="fixed inset-0 z-low-medium cursor-row-resize" />
                 )}
             </div>
             <div className='flex mt-2'>

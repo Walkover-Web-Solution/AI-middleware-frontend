@@ -4,6 +4,7 @@ import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import Modal from '../UI/Modal';
 
 function CreateVariableModal({ keyName, setKeyName, params }) {
     const dispatch = useDispatch();
@@ -46,7 +47,7 @@ function CreateVariableModal({ keyName, setKeyName, params }) {
     }
 
     return (
-        <dialog id={MODAL_TYPE.CREATE_VARIABLE} className="modal">
+        <Modal MODAL_ID={MODAL_TYPE.CREATE_VARIABLE}>
             <div className="modal-box" key={keyName}>
                 <h3 className="font-bold text-lg">Create New Variable</h3>
                 {/* <form> */}
@@ -84,7 +85,7 @@ function CreateVariableModal({ keyName, setKeyName, params }) {
                 </div>
                 {/* </form> */}
             </div>
-        </dialog>
+        </Modal>
     )
 }
 

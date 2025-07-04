@@ -56,7 +56,7 @@ function BridgeVersionDropdown({ params }) {
                         </span>
                     }
                 </div>
-                <ul tabIndex={0} className="dropdown-content menu rounded-box z-[9999999] w-52 p-2 shadow bg-base-100">
+                <ul tabIndex={0} className="dropdown-content menu rounded-box z-high w-52 p-2 shadow bg-base-100">
                     {bridgeVersionsArray?.map((version, index) => (
                         <li key={version} onClick={() => handleVersionChange(version)} >
                             <a className={`flex justify-between ${params.version === version ? 'active' : ''}`}>

@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import Modal from '../UI/Modal';
 
 function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
     const params = useParams();
@@ -107,10 +108,10 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
     };
 
     return (
-        <dialog id={MODAL_TYPE?.ADD_TEST_CASE_MODAL} className="modal">
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-[1000] min-w-[100vw] min-h-[100vh] overflow-auto py-4">
+        <Modal MODAL_ID={MODAL_TYPE.ADD_TEST_CASE_MODAL}>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-low-medium min-w-[100vw] min-h-[100vh] overflow-auto py-4">
                 <form onSubmit={handleSubmit} className="bg-base-200 rounded-lg shadow-2xl max-w-5xl w-[90vw] overflow-auto relative flex flex-col">
-                    <div className="flex justify-between items-center p-6 pb-0 sticky top-0 bg-base-100 z-10">
+                    <div className="flex justify-between items-center p-6 pb-0 sticky top-0 bg-base-100 z-low">
                         <h3 className="text-xl font-semibold">Create Test Case</h3>
                         <button type="button" className="btn btn-circle btn-ghost btn-sm" onClick={handleClose}>✕</button>
                     </div>
@@ -176,7 +177,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                     </div>
                 </form>
             </div>
-        </dialog>
+        </Modal>
     );
 }
 

@@ -15,13 +15,15 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     const inputRef = useRef(null);
     const fileInputRef = useRef(null);
     const versionId = params?.version;
-    const { bridge, modelType, modelName, variablesKeyValue, prompt, configuration } = useCustomSelector((state) => ({
+    const { bridge, modelType, modelName, variablesKeyValue, prompt, configuration, modelInfo, service } = useCustomSelector((state) => ({
         bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version],
         modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model?.toLowerCase(),
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt,
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
         configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
+        modelInfo: state?.modelReducer?.serviceModels,
+        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service?.toLowerCase(),
     }));
     const dataToSend = {
         configuration: {
@@ -36,7 +38,12 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             type: 'default'
         }
     };
+    
     const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
+    
+    const isVision = useMemo(() => {
+        return modelInfo?.[service]?.[configuration?.type]?.[configuration?.model]?.validationConfig?.vision;
+    }, [modelInfo, service, configuration?.type, configuration?.model]);
 
     useEffect(() => {
         setLocalDataToSend(dataToSend);
@@ -263,7 +270,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 onChange={handleFileChange}
                 className="hidden"
             />
-            {configuration && configuration?.vision && configuration['vision'] && <button
+            {isVision && <button
                 className="btn"
                 onClick={() => fileInputRef.current.click()}
                 disabled={loading || uploading}

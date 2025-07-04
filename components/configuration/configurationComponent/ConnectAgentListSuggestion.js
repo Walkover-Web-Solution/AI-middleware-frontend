@@ -5,10 +5,7 @@ import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { InfoIcon } from 'lucide-react';
 
-function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [], shouldToolsShow, modelName }) {
-    const { bridges } = useCustomSelector((state) => ({
-        bridges: state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
-    }));
+function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [], shouldToolsShow, modelName, bridges }) {
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
@@ -83,7 +80,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
                     }
                 </div>
             </div>
-            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                 <div className='flex flex-col gap-2 w-full'>
                     <li className="text-sm font-semibold disabled">Suggested Agents</li>
                     <input

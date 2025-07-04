@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CircleAlertIcon, RocketIcon, SparklesIcon } from '@/components/Icons';
 import { AGENT_SETUP_GUIDE_STEPS } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
-const AgentSetupGuide = ({ params = {} }) => {
+const AgentSetupGuide = ({ params = {},apiKeySectionRef }) => {
 
   // Get API key from Redux store
   const { bridgeApiKey } = useCustomSelector((state) => {
@@ -15,18 +15,49 @@ const AgentSetupGuide = ({ params = {} }) => {
 
   const [isVisible, setIsVisible] = useState(!bridgeApiKey);
   const [showError, setShowError] = useState(false);
+  const selectElement = apiKeySectionRef?.current?.querySelector('select');
+  useEffect(() => {
+    if (bridgeApiKey) {
+      setShowError(false);
+      if (apiKeySectionRef?.current) {
+        const selectElement = apiKeySectionRef.current.querySelector('select');
+        if (selectElement) {
+          selectElement.style.borderColor = "";
+        }
+      }
+      setIsVisible(false);
+    } else {
+      setIsVisible(true);
+    }
+  }, [bridgeApiKey, apiKeySectionRef]);
   const handleStart = () => {
     if (!bridgeApiKey) {
       setShowError(true);
+      if (apiKeySectionRef?.current) {
+        apiKeySectionRef.current.scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => {
+          const selectElement = apiKeySectionRef.current.querySelector('select');
+          if (selectElement) {
+            selectElement.focus();
+            selectElement.style.borderColor = "red";
+          }
+        }, 300);
+      }
       return;
     }
     setIsVisible(false);
   };
 
-  if (!isVisible || bridgeApiKey) return null;
+
+  if (!isVisible || bridgeApiKey) {
+    if (selectElement) {
+      selectElement.style.borderColor = ""
+    }
+    return null;
+  }
 
   return (
-    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-[999999]">
+    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-high" >
       <div className="card bg-base-100 w-full h-full shadow-xl">
         <div className="card-body p-6 h-full flex flex-col">
 

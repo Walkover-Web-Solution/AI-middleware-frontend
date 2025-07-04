@@ -107,16 +107,17 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                        
                         </InfoModel>
 
-                        {/* Plus Icon Button */}
-                       <button
-                        tabIndex={0}
-                        disabled={!shouldToolsShow}
-                        onClick={() => handleTutorial()}
-                    className="btn btn-outline btn-sm"
-                    >
-                        <AddIcon size={16} />
-                        {"Connect Tool"}
-                    </button>
+                        <div className='flex flex-wrap items-center gap-2 w-full lg:mr-0 mr-5'>
+                            <button
+                                tabIndex={0}
+                                disabled={!shouldToolsShow}
+                                onClick={() => handleTutorial()}
+                                className="btn btn-outline btn-sm "
+                            >
+                                <AddIcon size={16} />
+                                <span className="truncate">Connect Tool</span>
+                            </button>
+                        </div>
                     </div>
                 )}
                 {
@@ -136,7 +137,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.FunctionCreation}  flagKey={"FunctionCreation"} />
             )}
             {!tutorialState?.showTutorial && (
-                <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+                <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                     <div className='flex flex-col gap-2 w-full'>
                         <li className="text-sm font-semibold disabled">Suggested Tools</li>
                         <input

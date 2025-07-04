@@ -6,6 +6,7 @@ import { closeModal } from '@/utils/utility';
 import { usePathname } from 'next/navigation';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import Modal from '../UI/Modal';
 
 const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id }) => {
     const pathName = usePathname();
@@ -63,7 +64,7 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
     }, [isEditing, selectedApiKey, service]);
 
     return (
-        <dialog id={MODAL_TYPE?.API_KEY_MODAL} className="modal modal-bottom sm:modal-middle">
+        <Modal MODAL_ID={MODAL_TYPE?.API_KEY_MODAL}>
             <form onSubmit={handleSubmit} className="modal-box flex flex-col gap-4">
                 <h3 className="font-bold text-lg">
                     {isEditing ? 'Update API Key' : 'Add New API Key'}
@@ -75,11 +76,13 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                         </label>
                         <input
                             id={field}
+                            required
                             type={field === 'apikey' && isEditing ? 'password' : 'text'}
                             className="input input-bordered"
                             name={field}
                             placeholder={`Enter ${field}`}
                             defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
+                            readOnly={field === 'apikey' && isEditing}
                         />
                     </div>
                 ))}
@@ -102,11 +105,11 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                     </select>
                 </div>
                 <div className="modal-action">
-                    <button type="button" className="btn" onClick={handleClose}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">{isEditing ? 'Update' : 'Create'}</button>
+                    <button type="reset" className="btn" onClick={handleClose}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">{isEditing ? 'Update' : 'Add'}</button>
                 </div>
             </form>
-        </dialog>
+        </Modal>
     )
 }
 

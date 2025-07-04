@@ -21,8 +21,9 @@ import { openModal } from "@/utils/utility";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
+import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 
-function layoutOrgPage({ children, params }) {
+function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
   const urlParams = useParams();
@@ -33,7 +34,7 @@ function layoutOrgPage({ children, params }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES , doctstar_embed_token } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
@@ -43,30 +44,33 @@ function layoutOrgPage({ children, params }) {
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
- useEffect(() => {
-  const updateUserMeta = async () => {
-    if (currentUser?.meta===null) {
-      const updatedUser = {
-        ...currentUser,
-        meta: {
-          onboarding: {
-            bridgeCreation: true,
-            FunctionCreation: true,
-            knowledgeBase: true,
-            Addvariables: true,
-            AdvanceParameter: true,
-            PauthKey: true,
-            CompleteBridgeSetup: true,
+  useEffect(() => {
+    const updateUserMeta = async () => {
+      if (currentUser?.meta === null) {
+        const updatedUser = {
+          ...currentUser,
+          meta: {
+            onboarding: {
+              bridgeCreation: true,
+              FunctionCreation: true,
+              knowledgeBase: true,
+              Addvariables: true,
+              AdvanceParameter: true,
+              PauthKey: true,
+              CompleteBridgeSetup: true,
+            },
           },
-        },
-      };
-      await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
-    }
-  };
+        };
+        await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+      }
+    };
 
-  updateUserMeta();
-}, []);
-  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
+    updateUserMeta();
+  }, []);
+
+  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+  useRtLayerEventHandler();
+  
   useEffect(() => {
     const validateOrg = async () => {
       try {
@@ -83,7 +87,7 @@ function layoutOrgPage({ children, params }) {
         setIsValidOrg(false);
       }
     };
-    if (params.org_id && organizations) {
+    if (params.org_id && organizations && !isEmbedUser) {
       validateOrg();
     }
   }, [params, organizations]);
@@ -278,10 +282,10 @@ function layoutOrgPage({ children, params }) {
   }
 
   const isHomePage = useMemo(() => path?.length < 5, [path]);
-  if (!isValidOrg) {
+  if (!isValidOrg && !isEmbedUser) {
     return <ErrorPage></ErrorPage>;
   }
-  if (isHomePage) {
+  if (isHomePage && !isEmbedUser) {
     return (
       <div className="flex h-screen">
         <div className=" flex flex-col  h-full">
@@ -298,7 +302,7 @@ function layoutOrgPage({ children, params }) {
     );
   } else {
     return (
-      <div className="h-screen">
+      <div className="h-screen lg:overflow-hidden">
         <Navbar />
         {loading ? <LoadingSpinner /> : children}
         <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />

@@ -6,6 +6,7 @@ import { PencilIcon } from '@/components/Icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import Modal from '../UI/Modal';
 
 const PromptSummaryModal = ({ params }) => {
     const dispatch = useDispatch();
@@ -39,7 +40,11 @@ const PromptSummaryModal = ({ params }) => {
             setIsGeneratingSummary(false);
         }
     }, [dispatch, params, prompt]);
-
+    const handleClose=()=>{
+        closeModal(MODAL_TYPE.PROMPT_SUMMARY); 
+        setErrorMessage("");
+        setSummary(bridge_summary)
+    }
     const handleSaveSummary = useCallback(() => {
         const newValue = textareaRef.current?.value || summary || "";
         const dataToSend = { bridge_summary: newValue };
@@ -72,18 +77,18 @@ const PromptSummaryModal = ({ params }) => {
         <div className="space-y-2">
             <textarea
                 ref={textareaRef}
-                defaultValue={summary}
-                key={summary}
+                value={summary}
+                onChange={(e)=>setSummary(e.target.value)}
                 className="textarea textarea-bordered w-full min-h-96 resize-y focus:border-primary caret-black p-2"
             />
-            <button className="btn btn-ghost btn-sm" onClick={() => { setIsEditing(false); }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => { setIsEditing(false); setSummary(bridge_summary) }}>
                 Cancel
             </button>
         </div>
     );
 
     return (
-        <dialog id={MODAL_TYPE.PROMPT_SUMMARY} className="modal">
+        <Modal MODAL_ID={MODAL_TYPE.PROMPT_SUMMARY}>
             <div className="modal-box w-11/12 max-w-5xl">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-lg">Prompt Summary</h3>
@@ -111,7 +116,7 @@ const PromptSummaryModal = ({ params }) => {
                 </div>
                 <div className="modal-action">
                     <div className="flex gap-2">
-                        <button className="btn" onClick={() => {closeModal(MODAL_TYPE.PROMPT_SUMMARY); setErrorMessage("")}}>Close</button>
+                        <button className="btn" onClick={() => {handleClose()}}>Close</button>
                         <button
                             className="btn btn-primary"
                             disabled={isGeneratingSummary || bridge_summary === summary}
@@ -122,7 +127,7 @@ const PromptSummaryModal = ({ params }) => {
                     </div>
                 </div>
             </div>
-        </dialog>
+        </Modal>
     );
 }
 

@@ -9,8 +9,9 @@ import { closeModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { BotIcon, CircleAlertIcon, ClockTenIcon, WebhookIcon } from "@/components/Icons";
+import Protected from "./protected";
 
-function CreateNewBridge({ orgid }) {
+  function CreateNewBridge({ orgid, isEmbedUser }) {
     const [selectedService, setSelectedService] = useState('openai');
     const [selectedModel, setSelectedModel] = useState("gpt-4o");
     const [selectedType, setSelectedType] = useState("chat");
@@ -61,38 +62,38 @@ function CreateNewBridge({ orgid }) {
     };
 
     const createBridgeHandler = (name, slugname) => {
-        name = 'Untitled';
-        const matches = allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
-        const newCount = matches?.length + 1 || 0;
-        name = `Untitled${newCount}`;
-        const slugNameMatches=allBridgeList?.filter(bridge=>bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
-        const slugNameCount=slugNameMatches?.length+1||0;
-        slugname=`Untitled${slugNameCount}`
-        if (!selectedBridgeTypeCard) {
-            setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
-            return;
-        }
+      name = isEmbedUser ? 'untitled' : 'Untitled';
+      const matches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.name?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
+      const newCount = matches?.length + 1 || 0;
+      name = isEmbedUser ? `untitled${newCount}` : `Untitled${newCount}`;
+      const slugNameMatches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.slugName?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
+      const slugNameCount = slugNameMatches?.length + 1 || 0;
+      slugname = isEmbedUser ? `untitled${slugNameCount}` : `Untitled${slugNameCount}`
+      if (!selectedBridgeTypeCard) {
+        setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
+        return;
+      }
 
-        if (name.length > 0 && selectedModel && selectedBridgeTypeCard) {
-            setIsLoading(true);
-            const dataToSend = {
-                "service": selectedService,
-                "model": selectedModel,
-                "name": name,
-                "slugName": slugname || name,
-                "bridgeType": selectedBridgeTypeCard || bridgeType,
-                "type": selectedType,
-            };
-            dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
-                // setShowFileUploadModal(false);
-                route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
-                closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-                setIsLoading(false);
-                cleanState();
-            })).catch(() => {
-                setIsLoading(false);
-            });
-        }
+      if (name.length > 0 && selectedModel && selectedBridgeTypeCard) {
+        setIsLoading(true);
+        const dataToSend = {
+          "service": selectedService,
+          "model": selectedModel,
+          "name": name,
+          "slugName": slugname || name,
+          "bridgeType": selectedBridgeTypeCard || bridgeType,
+          "type": selectedType,
+        };
+        dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
+          // setShowFileUploadModal(false);
+          route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+          closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
+          setIsLoading(false);
+          cleanState();
+        })).catch(() => {
+          setIsLoading(false);
+        });
+      }
     };
 
     const cleanState = () => {
@@ -182,7 +183,7 @@ function CreateNewBridge({ orgid }) {
                 )}
               </div>
               <div
-                className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 overflow-x-auto p-2 ${
+                className={`flex flex-col md:flex-row gap-2 justify-center mx-auto overflow-x-auto p-2 ${
                   validationErrors.bridgeType
                     ? "border border-red-500 rounded-xl"
                     : ""
@@ -270,7 +271,7 @@ function CreateNewBridge({ orgid }) {
                 </div>
 
                 {/* Triggers Card */}
-                <div
+                {!isEmbedUser && <div
                   className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "triggers"
                       ? "ring-2 ring-amber-500"
@@ -294,7 +295,7 @@ function CreateNewBridge({ orgid }) {
                       Perfect for real-time automation.
                     </p>
                   </div>
-                </div>
+                </div>}
               </div>
             </div>
 
@@ -402,4 +403,4 @@ function CreateNewBridge({ orgid }) {
     );
 }
 
-export default CreateNewBridge;
+export default Protected(CreateNewBridge);
