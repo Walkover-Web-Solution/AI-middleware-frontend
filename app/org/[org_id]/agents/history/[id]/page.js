@@ -112,7 +112,7 @@ function Page({ searchParams }) {
   const threadHandler = useCallback(
     async (thread_id, item, value) => {
       if (item?.role === "assistant") return;
-      if ((item?.role === "user" || item?.role === "tools_call") && !thread_id) {
+      if ((item?.role === "user" || item?.role === "tools_call")) {
         try {
           setSelectedItem({ variables: item.variables, ...item, value});
           if(value === 'system Prompt' || value === 'more' || item?.[value] === null)
