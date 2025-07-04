@@ -197,14 +197,14 @@ const ConnectedAgentList = ({ params }) => {
     return (
         <div>
             <div className="label flex-col items-start mb-2">
-                {shouldToolsShow&&Object.keys(connect_agents).length > 0  &&(
+                {shouldToolsShow && Object.keys(connect_agents).length > 0 && (
                     <>
-                    <InfoModel tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
-                        <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
-                    </InfoModel>
-                    <div className="flex flex-wrap gap-4">
-                        {renderEmbed}
-                    </div>
+                        <InfoModel tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                            <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
+                        </InfoModel>
+                        <div className="flex flex-wrap gap-4">
+                            {renderEmbed}
+                        </div>
                     </>
                 )}
         
