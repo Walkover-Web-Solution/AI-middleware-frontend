@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
 import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction, updateTestCaseAction } from '@/store/action/testCasesAction';
-import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon } from '@/components/Icons';
+import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, ExternalLinkIcon } from '@/components/Icons';
 
 export const runtime = 'edge';
 
@@ -82,8 +82,24 @@ function TestCases({ params }) {
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
       <div className="">
-        <h1 className="text-xl font-semibold text-gray-800 mb-4">Test Case</h1>
-        <div className="overflow-x-auto">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Test Case</h1>
+            <p className="text-gray-700 text-sm leading-relaxed ">
+              Test cases are used to compare outputs from different versions with varying prompts and models. You can create test cases from chat history and choose a comparison type - Exact, AI, or Cosine to measure accuracy.
+            </p>
+            <a href="https://blog.gtwy.ai/features/testcases?source=single"
+              className="inline-flex mb-4 items-center gap-2 text-sm text-primary hover:text-primary-dark transition-colors font-medium group"
+              target="_blank"
+              rel="noopener noreferrer">
+              <span>Learn more about test cases</span>
+               <ExternalLinkIcon size={16}/>
+            </a>
+
+            {/* <a href='https://video-faq.viasocket.com/demo/cmav1ocfu4thnho3rijvpzlrq'
+              target='_blank' className=' inline-flex ml-4 items-center gap-2 text-sm text-primary hover:text-primary-dark transition-colors font-medium group'rel="noopener noreferrer"> 
+                <span>watch video</span>
+                <PlayIcon size={14}/>
+            </a> */}
+          <div className="overflow-x-auto">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead className="bg-gray-50">
