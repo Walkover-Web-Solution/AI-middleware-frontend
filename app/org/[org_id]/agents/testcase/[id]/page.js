@@ -5,6 +5,9 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
 import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction, updateTestCaseAction } from '@/store/action/testCasesAction';
 import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, ExternalLinkIcon } from '@/components/Icons';
+import OnBoarding from '@/components/OnBoarding';
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
+import { ONBOARDING_VIDEOS } from '@/utils/enums';
 
 export const runtime = 'edge';
 
@@ -21,10 +24,14 @@ function TestCases({ params }) {
   const [selectedVersion, setSelectedVersion] = useState(searchParams.get('versionId') || '');
 
   const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
-  const { testCases } = useCustomSelector((state) => ({
+  const { testCases,isFirstTestcase } = useCustomSelector((state) => ({
     testCases: state.testCasesReducer?.testCases?.[params?.id] || {},
+     isFirstTestcase: state.userDetailsReducer.userDetails?.meta?.onboarding?.TestCasesSetup || "",
   }));
-
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: isFirstTestcase
+  });
   const versions = useMemo(() => {
     return allBridges.find((bridge) => bridge?._id === params?.id)?.versions || [];
   }, [allBridges, params?.id]);
@@ -93,12 +100,14 @@ function TestCases({ params }) {
               <span>Learn more about test cases</span>
                <ExternalLinkIcon size={16}/>
             </a>
-
-            {/* <a href='https://video-faq.viasocket.com/demo/cmav1ocfu4thnho3rijvpzlrq'
-              target='_blank' className=' inline-flex ml-4 items-center gap-2 text-sm text-primary hover:text-primary-dark transition-colors font-medium group'rel="noopener noreferrer"> 
-                <span>watch video</span>
-                <PlayIcon size={14}/>
-            </a> */}
+              {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"TestCasesSetup"} TutorialDetails={"TestCases Creation"} />}
+      {tutorialState?.showTutorial && (
+        <OnBoarding
+          setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
+          video={ONBOARDING_VIDEOS.TestCases}
+          flagKey={"TestCasesSetup"}
+        />
+      )}
           <div className="overflow-x-auto">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
