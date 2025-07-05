@@ -289,31 +289,30 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   if (!isEmbedUser) {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
-        <div className="flex flex-1 overflow-hidden z-medium">
+        <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
-          <div className="flex flex-col h-full z-medium">
+          <div className="flex flex-col h-full z-high">
             <MainSlider params={params} />
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 ml-12 lg:ml-12 flex flex-col overflow-hidden z-low">
+          <div className="flex-1 ml-12 lg:ml-12 flex flex-col overflow-hidden z-medium">
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-low bg-white border-b">
+            <div className="sticky top-0 z-medium bg-white border-b ml-2">
               <Navbar params={params} />
             </div>
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
-              {loading ? (
-                <div className="flex items-center justify-center h-full">
-                  <LoadingSpinner />
-                </div>
-              ) : (
-                <main className={`px-2 h-full max-h-[calc(100vh-4rem)] ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
-              )}
+              <main className={`px-2 h-full max-h-[calc(100vh-4rem)] ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
             </div>
           </div>
         </div>
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <LoadingSpinner />
+          </div>
+        ) : null}
 
         {/* Chat Details Sidebar */}
         <ChatDetails

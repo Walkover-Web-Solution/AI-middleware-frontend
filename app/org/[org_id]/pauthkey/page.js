@@ -123,7 +123,7 @@ function Page({ params }) {
   };
 
   return (
-    <div className="h-full">
+    <div className="h-auto">
       {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"PauthKey"} TutorialDetails={"Pauth Key Setup"}/>}
       {tutorialState?.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"} />
