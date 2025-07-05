@@ -58,6 +58,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
               AdvanceParameter: true,
               PauthKey: true,
               CompleteBridgeSetup: true,
+              TestCasesSetup:true
             },
           },
         };

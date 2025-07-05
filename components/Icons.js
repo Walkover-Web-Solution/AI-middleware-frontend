@@ -87,7 +87,8 @@ import {
   MessageCircle,
   Blocks,
   ChevronLast,
-  CheckCircle
+  CheckCircle,
+  ExternalLink
 } from 'lucide-react';
 
 /**
@@ -766,3 +767,4 @@ export const BlocksIcon = (props) => <Blocks {...props} />;
 export const ChevronLastIcon = (props) => <ChevronLast {...props} />;
 
 export const CheckCircleIcon = (props) => <CheckCircle {...props} />;
+export const ExternalLinkIcon=(props)=> <ExternalLink  {...props} />
