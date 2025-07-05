@@ -38,19 +38,19 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
-    versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
+    versionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.org_id]?.[version_id]?.apiCalls || {},
     organizations: state.userDetailsReducer.organizations,
-    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
+    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[params?.org_id]?.[version_id]?.pre_tools || {},
     SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
-   useEffect(()=>{
-    const value=window.location.pathname.split('/').pop();
-    if(value==='agents'){
-    dispatch(userDetails());
+  useEffect(() => {
+    if (pathName.endsWith("agents")) {
+      dispatch(userDetails());
     }
-  },[]);
+  }, [pathName]);
+
   useEffect(() => {
     const updateUserMeta = async () => {
       if (currentUser?.meta === null) {
