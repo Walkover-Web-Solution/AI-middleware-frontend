@@ -94,22 +94,6 @@ function MainSlider({ isEmbedUser }) {
   const [isMobile, setIsMobile] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  /* --------------------------- Responsive logic --------------------------- */
-  useEffect(() => {
-    const checkScreenSize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      // Auto‑collapse on mobile
-      if (mobile && isOpen) {
-        setIsOpen(false);
-      }
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, [isOpen]);
-
   /* ------------------------------------------------------------------------ */
   /*                                 Helpers                                  */
   /* ------------------------------------------------------------------------ */
@@ -205,7 +189,7 @@ function MainSlider({ isEmbedUser }) {
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`fixed left-0 top-0 h-screen bg-base-100 border-r transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col ${barWidth} ${isMobile ? 'z-50' : 'z-30'}`}
+          className={`fixed left-0 top-0 h-screen bg-base-100 border-r transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${isMobile ? 'z-50' : 'z-30'}`}
           style={{ 
             width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '256px' : '50px'),
             transform: isMobile && !isOpen ? 'translateX(-200px)' : 'translateX(0)'
