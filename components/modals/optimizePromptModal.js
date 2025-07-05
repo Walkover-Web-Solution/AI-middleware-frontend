@@ -23,8 +23,32 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
   }, [optimizePromptHistory]);
 
   const handleOptimizeApi = async (instructionText, params) => {
+  
+  const conversations = {
+    user: [],
+    assistant: []
+  };
+  
+  messages.forEach(message => {
+    if (message.sender === "user") {
+      conversations.user.push({
+        content: message.content
+      });
+    } else if (message.sender === "assistant") {
+      const assistantMessage = {
+        content: message.content
+      };
+    if (message.optimized) {
+        assistantMessage.optimized = message.optimized;
+      }
+      
+      conversations.assistant.push(assistantMessage);
+    }
+  });
+   
     const response = await optimizePromptApi({
       query: instructionText,
+      history:conversations,
       bridge_id: params.id,
       version_id: params.version,
     });
@@ -47,7 +71,7 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
   };
 
   const handleRedo = () => {
-    if (currentIndex < promptHistory.length - 1) {
+    if (currentIndex < promptHistory.length) {
       setCurrentIndex(currentIndex + 1);
       return promptHistory[currentIndex + 1];
     }
@@ -66,6 +90,7 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
       setMessages={setMessages}
       showHistory={true}
       history={promptHistory}
+      setCurrentIndex={setCurrentIndex}
       currentIndex={currentIndex}
       onUndo={handleUndo}
       onRedo={handleRedo}

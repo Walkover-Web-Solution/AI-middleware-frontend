@@ -51,7 +51,6 @@ function Home({ params, isEmbedUser }) {
     };
     updateScreenSize();
     window.addEventListener('resize', updateScreenSize);
-
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
