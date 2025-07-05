@@ -92,13 +92,17 @@ const Page = () => {
 
   return (
     <div className="w-full">
-
-        <MainLayout>
-        <PageHeader 
-         title="ApiKeys" 
-         description="Add your model-specific API keys to enable and use different AI models in your chat." 
-        />
-        </MainLayout>
+      <MainLayout>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-2 pt-4">
+          <PageHeader
+            title="ApiKeys"
+            description="Add your model-specific API keys to enable and use different AI models in your chat."
+          />
+          <div className="flex-shrink-0 mt-4 sm:mt-0">
+            <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_API_KEY_MODAL)}>+ create new agent</button>
+          </div>
+        </div>
+      </MainLayout>
       {Object.entries(
         dataWithIcons.reduce((acc, item) => {
           const service = item.service.props.children[1].props.children;

@@ -13,7 +13,7 @@ const MainLayout = ({
   return (
     <div className="h-full flex flex-col">
       {/* Main content area */}
-      <div className={`flex-grow ${withPadding ? 'p-4' : ''}`}>
+      <div className={`flex-grow ${withPadding ? 'pl-4 pt-4' : ''}`}>
         {children}
       </div>
     </div>

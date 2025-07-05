@@ -87,7 +87,10 @@ import {
   MessageCircle,
   Blocks,
   ChevronLast,
-  CheckCircle
+  CheckCircle,
+  MessageSquare,
+  Database,
+  Shield
 } from 'lucide-react';
 
 /**
@@ -766,3 +769,12 @@ export const BlocksIcon = (props) => <Blocks {...props} />;
 export const ChevronLastIcon = (props) => <ChevronLast {...props} />;
 
 export const CheckCircleIcon = (props) => <CheckCircle {...props} />;
+
+export const BookOpenIcon = (props) => <BookOpenIcon {...props} />;
+
+export const MessageSquareIcon = (props) => <MessageSquare {...props} />;
+
+export const DatabaseIcon = (props) => <Database {...props} />;
+
+export const ShieldIcon = (props) => <Shield {...props} />;
+
