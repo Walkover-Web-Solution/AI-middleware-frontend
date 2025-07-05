@@ -9,9 +9,9 @@ import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import GoogleDocIcon from '@/icons/GoogleDocIcon';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
-import InfoModel from '@/components/infoModel';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { InfoIcon } from 'lucide-react';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const KnowledgebaseList = ({ params }) => {
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
@@ -103,9 +103,9 @@ const KnowledgebaseList = ({ params }) => {
             <div className="flex flex-wrap gap-4 mb-4">
                 {shouldToolsShow&&renderKnowledgebase}
             </div>
-            <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
+            <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
                 <p className=" label-text info mb-2">Knowledgebase Configuration</p>
-            </InfoModel>
+            </InfoTooltip>
             <div className="dropdown dropdown-right">
                 <div className='flex items-center gap-2'>
                     <button tabIndex={0} className="btn btn-outline btn-sm mt-0" 

@@ -7,7 +7,7 @@ import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const PreEmbedList = ({ params }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
@@ -85,9 +85,9 @@ const PreEmbedList = ({ params }) => {
             />
             <div className="form-control inline-block">
                 <div className='flex gap-5 items-center ml-2 '>
-                    <InfoModel tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
+                    <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
                         <p className="label-text font-medium whitespace-nowrap info">Pre Tool</p>
-                    </InfoModel>
+                    </InfoTooltip>
                 </div>
                 <div className="label flex-col items-start">
                     

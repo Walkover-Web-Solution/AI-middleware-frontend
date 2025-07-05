@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 import { PencilIcon } from '@/components/Icons';
 
 const GptMemory = ({ params }) => {
@@ -34,10 +34,10 @@ const GptMemory = ({ params }) => {
             <div className='flex flex-col lg:flex-row justify-center items-center w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center justify-center gap-1'>
                     <div className="label">
-                        <InfoModel tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
+                        <InfoTooltip tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
                         <span className="font-medium text-nowrap info ">Enable LLM-memory</span>
                         
-                        </InfoModel>
+                        </InfoTooltip>
                     </div>
                     <input
                         type="checkbox"

@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import InfoModel from '@/components/infoModel';
+
 import { PencilIcon } from '@/components/Icons';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const UserReferenceForRichText = ({ params }) => {
     const dispatch = useDispatch();
@@ -40,9 +41,9 @@ const UserReferenceForRichText = ({ params }) => {
             <div className='flex flex-col lg:flex-row justify-center items-center w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center justify-center gap-1'>
                     <div className="label">
-                        <InfoModel tooltipContent={"Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content."}>
+                        <InfoTooltip tooltipContent={"Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content."}>
                             <span className="font-medium text-nowrap info">Rich Text Supported</span>
-                        </InfoModel>
+                        </InfoTooltip>
                     </div>
                     <input
                         type="checkbox"
