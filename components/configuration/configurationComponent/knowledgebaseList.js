@@ -23,7 +23,7 @@ const KnowledgebaseList = ({ params }) => {
         const modelName = versionData?.configuration?.model;
         return {
             knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
-            knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
+            knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids||[],
             isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName
@@ -97,20 +97,31 @@ const KnowledgebaseList = ({ params }) => {
             ) : null;
         })
     ), [knowbaseVersionData, knowledgeBaseData]);
-
     return (
         <div className="label flex-col items-start p-0">
-            <div className="flex flex-wrap gap-4 mb-4">
-                {shouldToolsShow&&renderKnowledgebase}
+            <div className='label flex-col items-start mb-2'>
+
+                {Array.isArray(knowbaseVersionData) && knowbaseVersionData.length > 0 && shouldToolsShow && (
+                    <>
+                        <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
+                            <p className="label-text font-medium whitespace-nowrap mb-2 info">KnowledgeBase</p>
+                        </InfoModel>
+                        <div className="flex flex-wrap gap-4 mb-2">
+                            {renderKnowledgebase}
+                        </div>
+                    </>
+                )}
             </div>
-            <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
-                <p className=" label-text info mb-2">Knowledgebase Configuration</p>
-            </InfoModel>
+            {Array.isArray(knowbaseVersionData) && knowbaseVersionData.length === 0 && (
+                <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
+                    <p className=" label-text info mb-2">Knowledgebase Configuration</p>
+                </InfoModel>
+            )}
             <div className="dropdown dropdown-right">
                 <div className='flex items-center gap-2'>
-                    <button tabIndex={0} className="btn btn-outline btn-sm mt-0" 
-                    disabled={!shouldToolsShow}
-                    onClick={() => handleTutorial()}>
+                    <button tabIndex={0} className="btn btn-outline btn-sm mt-0"
+                        disabled={!shouldToolsShow}
+                        onClick={() => handleTutorial()}>
                         <AddIcon size={16} />Connect Knowledgebase
                     </button>
                     {

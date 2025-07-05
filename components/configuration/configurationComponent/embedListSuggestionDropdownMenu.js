@@ -101,11 +101,13 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         </button>
                     </div>
                 ) : (
-                     <div className="flex flex-col items-start gap-2">
-                        <InfoModel video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
-                        <p className=" label-text info">Tool Configuration</p>
-                       
-                        </InfoModel>
+                    <div className="flex flex-col items-start gap-2">
+                        {connectedFunctions.length === 0 && (
+                            <InfoModel video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
+                                <p className=" label-text info">Tool Configuration</p>
+
+                            </InfoModel>
+                        )}
 
                         <div className='flex flex-wrap items-center gap-2 w-full lg:mr-0 mr-5'>
                             <button
