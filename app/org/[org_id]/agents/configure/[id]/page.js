@@ -79,7 +79,7 @@ const Page = ({ searchParams }) => {
     <>
       {!bridgeType && <LoadingSpinner />}
       <div className="flex flex-col md:flex-row w-full h-full max-h-[calc(100vh-4rem)] overflow-hidden">
-        <div className="w-full md:w-1/2 overflow-y-auto overflow-x-hidden p-4 h-full border-r min-w-[350px] configurationPage">
+        <div className="w-full md:w-1/2 overflow-y-auto overflow-x-hidden px-4 pb-4 h-full border-r min-w-[350px] configurationPage">
           <ConfigurationPage apiKeySectionRef={apiKeySectionRef} params={params} />
           <div />
         </div>

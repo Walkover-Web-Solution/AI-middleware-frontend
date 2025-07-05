@@ -279,11 +279,11 @@ const Navbar = ({ isEmbedUser }) => {
   if (!shouldShowNavbar()) return null;
 
   return (
-    <div className="bg-base-100 ml-2 z-medium">
+    <div className="bg-base-100 z-medium">
       {/* Main navigation header */}
       <div className={`sticky top-0 z-high transition-all duration-300 ${isScrolled
         ? 'bg-base-100/95 backdrop-blur-sm shadow-md border-b border-base-300'
-        : 'bg-base-100 shadow-sm border-b border-base-200'
+        : 'bg-base-100 shadow-sm border-b border-base-200 '
         }`}>
 
         {/* Top bar with breadcrumb/home and actions */}

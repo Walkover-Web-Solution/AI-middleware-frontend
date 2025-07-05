@@ -1,9 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 import React, {
   useState,
   useEffect,
   useCallback,
-  MouseEvent as ReactMouseEvent,
   useMemo
 } from 'react';
 import {
@@ -15,13 +15,14 @@ import {
   MonitorPlayIcon,
   MessageCircleMoreIcon,
   MessageSquareMoreIcon,
-  Blocks
+  Blocks,
+  User
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { truncate } from '@/components/historyPageComponents/assistFile';
-import { toggleSidebar, getIconOfService, openModal } from '@/utils/utility';
+import { openModal } from '@/utils/utility';
 import OrgSlider from './orgSlider';
 import TutorialModal from '@/components/modals/tutorialModal';
 import DemoModal from '../modals/DemoModal';
@@ -45,7 +46,7 @@ const ITEM_ICONS = {
   knowledge_base: <BookOpen size={16} />,
   feedback: <MessageSquareMore size={16} />,
   integration: <Blocks size={16} />
-}
+};
 
 const NAV_SECTIONS = [
   { items: ['agents'] },
@@ -54,6 +55,15 @@ const NAV_SECTIONS = [
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
   { title: 'TEAM & COLLABORATION', items: ['invite'] }
 ];
+
+/* -------------------------------------------------------------------------- */
+/*                               Helper Components                            */
+/* -------------------------------------------------------------------------- */
+
+/** Small horizontal rule visible only when sidebar is collapsed */
+const HRCollapsed = () => (
+  <hr className="my-2 w-6 border-base-300 mx-auto" />
+);
 
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */
@@ -70,14 +80,10 @@ function MainSlider({ isEmbedUser }) {
   const bridgeId = pathParts[5];
   const versionId = searchParams.get('version');
 
-  const { userdetails, organizations, bridgeData, chatbotData } = useCustomSelector(
-    state => ({
-      userdetails: state.userDetailsReducer.userDetails,
-      organizations: state.userDetailsReducer.organizations,
-      bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
-      chatbotData: state.ChatBot.ChatBotMap[bridgeId]
-    })
-  );
+  const { userdetails, organizations } = useCustomSelector(state => ({
+    userdetails: state.userDetailsReducer.userDetails,
+    organizations: state.userDetailsReducer.organizations
+  }));
 
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Organization', [organizations, orgId]);
 
@@ -93,7 +99,7 @@ function MainSlider({ isEmbedUser }) {
     const checkScreenSize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      // Auto-collapse on mobile
+      // Auto‑collapse on mobile
       if (mobile && isOpen) {
         setIsOpen(false);
       }
@@ -109,19 +115,19 @@ function MainSlider({ isEmbedUser }) {
   /* ------------------------------------------------------------------------ */
 
   /** Nice display names for items */
-  const displayName = (key) => {
+  const displayName = key => {
     const names = {
-      'knowledge_base': 'Knowledge base',
-      'feedback': 'Feedback',
-      'tutorial': 'Tutorial',
+      knowledge_base: 'Knowledge base',
+      feedback: 'Feedback',
+      tutorial: 'Tutorial',
       'speak-to-us': 'Speak to Us',
-      'integration': 'Integration',
-      'settings': 'Settings'
+      integration: 'Integration',
+      settings: 'Settings'
     };
     return names[key] || key.charAt(0).toUpperCase() + key.slice(1);
   };
 
-  /** Logout */
+  /** Logout handler */
   const handleLogout = useCallback(async () => {
     try {
       await logoutUserFromMsg91({
@@ -135,8 +141,8 @@ function MainSlider({ isEmbedUser }) {
     }
   }, [router]);
 
-  /** Single‑click toggles; double‑click always fully opens */
-  const handleToggle = (e) => {
+  /** Single‑click toggles; double‑click forcibly expands (desktop) */
+  const handleToggle = e => {
     if (e.detail === 2 && !isMobile) {
       setIsOpen(true);
       setHovered(null);
@@ -146,34 +152,31 @@ function MainSlider({ isEmbedUser }) {
     }
   };
 
-  /** Hover handlers – active only when collapsed and not on mobile */
+  /** Hover handlers – active only when collapsed (desktop) */
   const onItemEnter = (key, e) => {
     if (isOpen || isMobile) return;
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltipPos({ top: rect.top + rect.height / 2, left: rect.right + 8 });
     setHovered(key);
   };
-
   const onItemLeave = () => !isOpen && !isMobile && setHovered(null);
 
-  /* Hide any tooltip the moment we expand */
-  useEffect(() => { if (isOpen) setHovered(null); }, [isOpen]);
+  // Hide tooltip the moment sidebar expands
+  useEffect(() => {
+    if (isOpen) setHovered(null);
+  }, [isOpen]);
 
-  // Close sidebar when clicking outside on mobile
+  // Close on backdrop click (mobile)
   const handleBackdropClick = () => {
-    if (isMobile && isOpen) {
-      setIsOpen(false);
-    }
+    if (isMobile && isOpen) setIsOpen(false);
   };
 
-  // Handle settings click
+  // Settings toggler
   const handleSettingsClick = () => {
     if (!isOpen) {
-      // If sidebar is collapsed, expand it and open settings
       setIsOpen(true);
       setIsSettingsOpen(true);
     } else {
-      // If sidebar is open, toggle settings accordion
       setIsSettingsOpen(prev => !prev);
     }
   };
@@ -182,8 +185,9 @@ function MainSlider({ isEmbedUser }) {
   /*                                  Render                                  */
   /* ------------------------------------------------------------------------ */
 
-  const barWidth = isOpen ? (isMobile ? 'w-80' : 'w-72') : 'w-16';
-  const spacerW = isMobile ? '0px' : (isOpen ? '288px' : '64px');
+  // Fixed sidebar width - always 64px collapsed, 256px expanded
+  const barWidth = 'w-50';
+  const spacerW = isMobile ? '50px' : isOpen ? '256px' : '50px';
   const activeKey = pathParts[3];
 
   return (
@@ -191,7 +195,7 @@ function MainSlider({ isEmbedUser }) {
       {/* Mobile backdrop */}
       {isMobile && isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 lg:hidden"
+          className="fixed inset-0 bg-black/50 lg:hidden z-40"
           onClick={handleBackdropClick}
         />
       )}
@@ -200,65 +204,76 @@ function MainSlider({ isEmbedUser }) {
         {/* ------------------------------------------------------------------ */}
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
-        <div className={`
-          fixed left-0 top-0 h-screen bg-base-100 border-r transition-all duration-300
-          ${barWidth}
-          ${isMobile ? 'shadow-xl' : ''}
-          flex flex-col
-        `}>
+        <div
+          className={`fixed left-0 top-0 h-screen bg-base-100 border-r transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col ${barWidth} ${isMobile ? 'z-50' : 'z-30'}`}
+          style={{ 
+            width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '256px' : '50px'),
+            transform: isMobile && !isOpen ? 'translateX(-200px)' : 'translateX(0)'
+          }}
+        >
           {/* Toggle button */}
-          <button
-            onClick={handleToggle}
-            className={`
-              absolute -right-3 top-10 w-8 h-8 bg-base-100 border border-base-300
-              rounded-full flex items-center justify-center hover:bg-base-200
-              transition-colors z-low shadow-sm
-              ${isMobile ? 'hidden' : ''}
-            `}
-          >
-            {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-          </button>
+          {!isMobile && (
+            <button
+              onClick={handleToggle}
+              className="absolute -right-3 top-8 w-7 h-7 bg-base-100 border border-base-300 rounded-full flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
+            >
+              {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+            </button>
+          )}
 
-          {/* Mobile close button */}
+          {/* Mobile close */}
           {isMobile && isOpen && (
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute right-4 top-4 w-8 h-8 bg-base-200 rounded-full 
-                         flex items-center justify-center hover:bg-base-300 transition-colors z-low"
+              className="absolute right-4 top-2 w-8 h-8 bg-base-200 rounded-full flex items-center justify-center hover:bg-base-300 transition-colors z-10"
             >
               <ChevronLeft size={16} />
             </button>
           )}
 
+          {/* Mobile hamburger when closed */}
+          {isMobile && !isOpen && (
+            <button
+              onClick={() => setIsOpen(true)}
+              className="absolute right-2 top-2 w-8 h-8 bg-base-200 rounded-full flex items-center justify-center hover:bg-base-300 transition-colors z-10"
+            >
+              <ChevronRight size={16} />
+            </button>
+          )}
+
           {/* -------------------------- NAVIGATION -------------------------- */}
           <div className="flex flex-col h-full">
-            {/* Scrollable content area */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden py-4">
-              <div className="px-2 space-y-4">
-                {/* ---------- Org ---------- */}
-                {pathParts.length >= 4 && (
-                  <div>
-                    <button
-                      onClick={() => { router.push(`/org`); if (isMobile) setIsOpen(false); }}
-                      onMouseEnter={e => onItemEnter('org', e)}
-                      onMouseLeave={onItemLeave}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
-                    >
-                      <Building2 size={16} className="shrink-0" />
-                      {isOpen && (
-                        <span className="truncate">
-                          {truncate(organizations?.[orgId]?.name ?? 'Organization', isMobile ? 20 : 15)}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                )}
+            {/* Header section */}
+            <div className="p-2 border-b border-base-300">
+              {/* Organization */}
+              {pathParts.length >= 4 && (
+                <button
+                  onClick={() => {
+                    router.push('/org');
+                    if (isMobile) setIsOpen(false);
+                  }}
+                  onMouseEnter={e => onItemEnter('org', e)}
+                  onMouseLeave={onItemLeave}
+                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-colors"
+                >
+                  <Building2 size={20} className="shrink-0" />
+                  {(isOpen || isMobile) && (
+                    <div className="flex-1 text-left overflow-hidden">
+                      <div className="font-semibold text-sm truncate">{truncate(orgName, 20)}</div>
+                      <div className="text-xs text-base-content/60">Organization</div>
+                    </div>
+                  )}
+                </button>
+              )}
+            </div>
 
-                {/* ---------- Section loops ---------- */}
+            {/* Main navigation - scrollable */}
+            <div className={`flex-1 ${isOpen ? 'overflow-y-auto' : 'overflow-y-hidden'} overflow-x-hidden p-2`}>
+              <div className="space-y-6">
                 {NAV_SECTIONS.map(({ title, items }, idx) => (
-                  <div key={idx}>
-                    {isOpen && title && (
-                      <h3 className="px-3 mb-2 text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+                  <div key={idx} className="space-y-1">
+                    {(isOpen || isMobile) && title && (
+                      <h3 className="mb-3 text-xs font-semibold text-base-content/50 uppercase tracking-wider px-2">
                         {title}
                       </h3>
                     )}
@@ -272,23 +287,27 @@ function MainSlider({ isEmbedUser }) {
                           }}
                           onMouseEnter={e => onItemEnter(key, e)}
                           onMouseLeave={onItemLeave}
-                          className={`btn btn-ghost btn-sm flex items-center justify-start gap-2 w-full
-                                      ${activeKey === key ? 'bg-primary text-primary-content hover:text-black' : 'hover:bg-base-200 text-black'}`}
+                          className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-all duration-200 ${
+                            activeKey === key 
+                              ? 'bg-primary text-primary-content shadow-sm' 
+                              : 'hover:bg-base-200 text-base-content'
+                          } ${!isOpen && !isMobile ? 'justify-center' : ''}`}
                         >
                           <div className="shrink-0">{ITEM_ICONS[key]}</div>
-                          {isOpen && <span className="font-medium truncate">{displayName(key)}</span>}
+                          {(isOpen || isMobile) && (
+                            <span className="font-medium text-sm truncate">{displayName(key)}</span>
+                          )}
                         </button>
                       ))}
                     </div>
+                    {!isOpen && !isMobile && idx !== NAV_SECTIONS.length - 1 && <HRCollapsed />}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* ------------------------------------------------------------------ */}
-            {/*                    SUPPORT & HELP SECTION                         */}
-            {/* ------------------------------------------------------------------ */}
-            <div className="border-t border-base-300 pt-4 px-2 pb-2">
+            {/* Tutorial & Help Section */}
+            <div className="border-t border-base-300 p-2">
               <div className="space-y-1">
                 <button
                   onClick={() => {
@@ -297,10 +316,10 @@ function MainSlider({ isEmbedUser }) {
                   }}
                   onMouseEnter={e => onItemEnter('tutorial', e)}
                   onMouseLeave={onItemLeave}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!isOpen && !isMobile ? 'justify-center' : ''}`}
                 >
                   <MonitorPlayIcon size={16} className="shrink-0" />
-                  {isOpen && <span className="font-medium truncate">Tutorial</span>}
+                  {(isOpen || isMobile) && <span className="font-medium text-sm truncate">Tutorial</span>}
                 </button>
 
                 <button
@@ -310,10 +329,10 @@ function MainSlider({ isEmbedUser }) {
                   }}
                   onMouseEnter={e => onItemEnter('speak-to-us', e)}
                   onMouseLeave={onItemLeave}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!isOpen && !isMobile ? 'justify-center' : ''}`}
                 >
                   <MessageCircleMoreIcon size={16} className="shrink-0" />
-                  {isOpen && <span className="font-medium truncate">Speak to Us</span>}
+                  {(isOpen || isMobile) && <span className="font-medium text-sm truncate">Speak to Us</span>}
                 </button>
 
                 <a
@@ -322,75 +341,77 @@ function MainSlider({ isEmbedUser }) {
                   rel="noopener noreferrer"
                   onMouseEnter={e => onItemEnter('feedback', e)}
                   onMouseLeave={onItemLeave}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!isOpen && !isMobile ? 'justify-center' : ''}`}
                   onClick={() => isMobile && setIsOpen(false)}
                 >
                   <MessageSquareMoreIcon size={16} className="shrink-0" />
-                  {isOpen && <span className="font-medium truncate">Feedback</span>}
+                  {(isOpen || isMobile) && <span className="font-medium text-sm truncate">Feedback</span>}
                 </a>
               </div>
             </div>
 
-            {/* ------------------------- SETTINGS / BOTTOM ---------------------- */}
-            <div className="border-t border-base-300 pt-4 px-2 pb-4">
-              <div className="w-full">
-                <button
-                  onClick={handleSettingsClick}
-                  onMouseEnter={e => onItemEnter('settings', e)}
-                  onMouseLeave={onItemLeave}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors"
-                >
-                  <Settings2 size={16} className="shrink-0" />
-                  {isOpen && (
-                    <>
-                      <span className="flex-1 truncate">Settings</span>
-                      <ChevronDown
-                        size={16}
-                        className={`shrink-0 transition-transform ${isSettingsOpen ? 'rotate-180' : ''}`}
-                      />
-                    </>
-                  )}
-                </button>
-
-                {isOpen && isSettingsOpen && (
-                  <div className="mt-2 space-y-1 bg-base-200 rounded-lg p-2">
-                    <div className="flex items-center gap-3 p-2 text-sm">
-                      <Mail size={16} className="shrink-0" />
-                      <span className="truncate flex-1">{userdetails?.email ?? 'user@email.com'}</span>
+            {/* User & Settings Section */}
+            <div className="border-t border-base-300 p-2">
+              <button
+                onClick={handleSettingsClick}
+                onMouseEnter={e => onItemEnter('settings', e)}
+                onMouseLeave={onItemLeave}
+                className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!isOpen && !isMobile ? 'justify-center' : ''}`}
+              >
+                <div className="shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                  <User size={16} className="text-primary-content" />
+                </div>
+                {(isOpen || isMobile) && (
+                  <div className="flex-1 text-left overflow-hidden">
+                    <div className="font-medium text-sm truncate">
+                      {userdetails?.email?.split('@')[0] || 'User'}
                     </div>
-
-                    <button
-                      onClick={() => {
-                        router.push(`/org/${orgId}/userDetails`);
-                        if (isMobile) setIsOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
-                    >
-                      <Cog size={16} className="shrink-0" />
-                      <span className="truncate">Update User Details</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        router.push(`/org/${orgId}/workspaceSetting`);
-                        if (isMobile) setIsOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
-                    >
-                      <Cog size={16} className="shrink-0" />
-                      <span className="truncate">Workspace Setting</span>
-                    </button>
-
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
-                    >
-                      <LogOut size={16} className="shrink-0" />
-                      <span className="truncate">Logout</span>
-                    </button>
+                    <div className="text-xs text-base-content/60">Settings</div>
                   </div>
                 )}
-              </div>
+                {(isOpen || isMobile) && (
+                  <ChevronDown size={16} className={`shrink-0 transition-transform ${isSettingsOpen ? 'rotate-180' : ''}`} />
+                )}
+              </button>
+
+              {(isOpen || isMobile) && isSettingsOpen && (
+                <div className="mt-2 space-y-1 bg-base-200 rounded-lg p-2">
+                  <div className="flex items-center gap-3 p-2 text-sm text-base-content/70">
+                    <Mail size={14} className="shrink-0" />
+                    <span className="truncate flex-1 text-xs">{userdetails?.email ?? 'user@email.com'}</span>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      router.push(`/org/${orgId}/userDetails`);
+                      if (isMobile) setIsOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
+                  >
+                    <Cog size={14} className="shrink-0" />
+                    <span className="truncate text-xs">User Details</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      router.push(`/org/${orgId}/workspaceSetting`);
+                      if (isMobile) setIsOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
+                  >
+                    <Settings2 size={14} className="shrink-0" />
+                    <span className="truncate text-xs">Workspace</span>
+                  </button>
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm text-error"
+                  >
+                    <LogOut size={14} className="shrink-0" />
+                    <span className="truncate text-xs">Logout</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -398,22 +419,17 @@ function MainSlider({ isEmbedUser }) {
         {/* ------------------------------------------------------------------ */}
         {/*                         CONTENT SPACER                             */}
         {/* ------------------------------------------------------------------ */}
-        <div
-          className="absolute top-0 left-0 transition-all duration-300 hidden lg:block"
-          style={{ width: spacerW }}
-        />
+        <div className="absolute top-0 left-0 transition-all duration-300 hidden lg:block" style={{ width: spacerW }} />
 
         {/* ------------------------------------------------------------------ */}
         {/*                              TOOL‑TIP                              */}
         {/* ------------------------------------------------------------------ */}
         {hovered && !isOpen && !isMobile && (
           <div
-            className="fixed bg-base-300 text-base-content px-3 py-2 rounded-lg
-                       shadow-lg whitespace-nowrap border pointer-events-none"
+            className="fixed bg-base-300 text-base-content py-2 px-3 rounded-lg shadow-lg whitespace-nowrap border pointer-events-none z-50"
             style={{ top: tooltipPos.top - 20, left: tooltipPos.left }}
           >
-            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border
-                            rotate-45 -left-1 border-r-0 border-b-0"/>
+            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border rotate-45 -left-1 border-r-0 border-b-0" />
             {displayName(hovered)}
           </div>
         )}
@@ -424,7 +440,7 @@ function MainSlider({ isEmbedUser }) {
         <OrgSlider />
         <BridgeSlider />
         <TutorialModal />
-        <DemoModal speakToUs={true} />
+        <DemoModal speakToUs />
       </div>
     </>
   );
