@@ -22,6 +22,7 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
+import { userDetails } from "@/store/action/userDetailsAction";
 
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -44,6 +45,12 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
+   useEffect(()=>{
+    const value=window.location.pathname.split('/').pop();
+    if(value==='agents'){
+    dispatch(userDetails());
+    }
+  },[]);
   useEffect(() => {
     const updateUserMeta = async () => {
       if (currentUser?.meta === null) {
