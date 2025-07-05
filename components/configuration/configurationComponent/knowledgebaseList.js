@@ -23,7 +23,7 @@ const KnowledgebaseList = ({ params }) => {
         const modelName = versionData?.configuration?.model;
         return {
             knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
-            knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
+            knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids||[],
             isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName
@@ -97,11 +97,11 @@ const KnowledgebaseList = ({ params }) => {
             ) : null;
         })
     ), [knowbaseVersionData, knowledgeBaseData]);
-
     return (
         <div className="label flex-col items-start p-0">
             <div className='label flex-col items-start mb-2'>
-                {Array.isArray(knowbaseVersionData) && knowbaseVersionData.length > 1 && shouldToolsShow && (
+
+                {Array.isArray(knowbaseVersionData) && knowbaseVersionData.length > 0 && shouldToolsShow && (
                     <>
                         <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
                             <p className="label-text font-medium whitespace-nowrap mb-2 info">KnowledgeBase</p>
@@ -112,7 +112,7 @@ const KnowledgebaseList = ({ params }) => {
                     </>
                 )}
             </div>
-            {Array.isArray(knowbaseVersionData) && knowbaseVersionData.length === 1 && (
+            {Array.isArray(knowbaseVersionData) && knowbaseVersionData.length === 0 && (
                 <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
                     <p className=" label-text info mb-2">Knowledgebase Configuration</p>
                 </InfoModel>
