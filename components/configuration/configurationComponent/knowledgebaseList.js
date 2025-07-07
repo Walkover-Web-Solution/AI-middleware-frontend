@@ -171,7 +171,7 @@ const KnowledgebaseList = ({ params }) => {
                     </ul>
                 )}
             </div>
-            <KnowledgeBaseModal params={params} knowledgeBaseData={knowledgeBaseData} />
+            <KnowledgeBaseModal params={params} />
         </div>
     );
 };

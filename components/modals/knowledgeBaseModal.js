@@ -7,7 +7,7 @@ import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/sto
 import Modal from '../UI/Modal';
 import { toast } from 'react-toastify';
 
-const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {},knowledgeBaseData=[] }) => {
+const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {}, knowledgeBaseData=[] }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSectionType, setSelectedSectionType] = useState('default');
@@ -22,7 +22,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
     setIsUpload(false);
     setIsLoading(false);
     setSelectedKnowledgeBase(null);
-  }, []);
+  }, [selectedKnowledgeBase]);
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -35,7 +35,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
       return;
     }
     const isDuplicate = knowledgeBaseData.some(kb => 
-      kb.name?.trim().toLowerCase() === newName.toLowerCase()
+      kb.name?.trim().toLowerCase() === newName.toLowerCase()?.trim() && kb._id !== selectedKnowledgeBase?._id
     );
 
     if (isDuplicate) {
@@ -90,7 +90,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
       setChunkingType("");
       setIsLoading(false);
     }
-  }, [dispatch, params.org_id, file, isUpload, selectedKnowledgeBase]);
+  }, [dispatch, params.org_id, file, isUpload, selectedKnowledgeBase, knowledgeBaseData]);
 
   const handleClose = useCallback(() => {
     closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
@@ -137,6 +137,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   placeholder="Enter knowledge base name"
                   required
                   disabled={isLoading}
+                  key={selectedKnowledgeBase?._id}
                   defaultValue={selectedKnowledgeBase?.actual_name || ''}
                 />
               </div>
@@ -151,6 +152,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   placeholder="Describe the purpose and content of this knowledge base..."
                   required
                   disabled={isLoading}
+                  key={selectedKnowledgeBase?._id}
                   defaultValue={selectedKnowledgeBase?.description || ''}
                 />
               </div>
