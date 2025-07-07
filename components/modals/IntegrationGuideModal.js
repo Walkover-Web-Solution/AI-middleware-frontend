@@ -42,7 +42,7 @@ const IntegrationGuideModal = ({ selectedIntegration = {}, params }) => {
         `<script
     id="gtwy-main-script"
     embedToken="Your embed token"
-    src="https://gtwy.ai/gtwy.js"
+    src="https://app.gtwy.ai/gtwy.js"
     slide="left/right/full /* adjust the position of the gtwy */"
     defaultOpen="true /* open by default */"
     parentId="Your_parent_id /* parent id of the element where the gtwy will be embedded */"
