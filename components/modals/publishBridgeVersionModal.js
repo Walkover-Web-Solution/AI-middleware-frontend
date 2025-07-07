@@ -7,9 +7,10 @@ import { closeModal } from "@/utils/utility";
 import React, {  useCallback } from "react";
 import { useDispatch } from "react-redux";
 import Modal from "../UI/Modal";
+import Protected from "../protected";
 ``
 
-function PublishBridgeVersionModal({ params }) {
+function PublishBridgeVersionModal({ params, agent_name, isEmbedUser }) {
   const dispatch = useDispatch();
 
   const handleCloseModal = useCallback((e) => {
@@ -25,6 +26,7 @@ function PublishBridgeVersionModal({ params }) {
         orgId: params?.org_id,
       })
     );
+    isEmbedUser && window.parent.postMessage({type: 'gtwy', data:{ "agent_id":params?.id,"agent_name": agent_name}}, '*');
     dispatch(getAllBridgesAction());
     closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
   }, [dispatch, params]);
@@ -64,4 +66,4 @@ function PublishBridgeVersionModal({ params }) {
   );
 }
 
-export default PublishBridgeVersionModal;
+export default Protected(PublishBridgeVersionModal);

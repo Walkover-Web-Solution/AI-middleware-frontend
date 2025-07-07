@@ -771,7 +771,7 @@
 
     const gtwyEmbedManager = new GtwyEmbedManager();
 
-    window.SendDataToGtwyEmbed = function (dataToSend) {
+    const SendDataToGtwyEmbed = function (dataToSend) {
         const iframeComponent = document.getElementById('iframe-component-gtwyInterfaceEmbed');
 
         // Parse string data if needed
@@ -878,8 +878,8 @@
                 gtwyInterfaceEmbed.style.display = 'none';
             }
         },
-        sendData: (data) => {
-            window.SendDataToGtwyEmbed(data);
+        sendDataToGtwy: (data) => {
+            SendDataToGtwyEmbed(data);
         },
         // New methods for header control
         toggleFullscreen: () => {
@@ -897,7 +897,7 @@
     function sendMessageToGtwy(messageObj) {
         const iframeComponent = document.getElementById('iframe-component-gtwyInterfaceEmbed');
         if (iframeComponent?.contentWindow) {
-            iframeComponent?.contentWindow?.postMessage(messageObj, '*');
+            iframeComponent?.contentWindow?.postMessage({type: 'gtwyMessage', data: messageObj}, '*');
         }
     }
 

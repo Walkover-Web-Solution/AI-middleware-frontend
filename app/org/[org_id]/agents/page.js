@@ -67,8 +67,8 @@ function Home({ params, isEmbedUser }) {
       <div className="flex gap-2 items-center">
         {getIconOfService(item.service, 30, 30)}
       </div>
-      <div className="flex-col" title={item.name}>
-        {item.name.length > 20 ? item.name.slice(0, 17) + '...' : item.name}
+      <div className="flex-col" title={item?.name}>
+        {item?.name?.length > 20 ? item?.name.slice(0, 17) + '...' : item?.name}
         <p className="opacity-60 text-xs" title={item.slugName}>
           {item?.slugName || ""}
         </p>
@@ -93,7 +93,7 @@ function Home({ params, isEmbedUser }) {
         {getIconOfService(item.service, 30, 30)}
       </div>
       <div className="flex-col">
-        {item.name}
+        {item?.name}
         <p className="opacity-60 text-xs">
           {item?.slugName || ""}
         </p>
@@ -121,7 +121,7 @@ function Home({ params, isEmbedUser }) {
           <div className="flex flex-col h-[200px] gap-2 w-full">
             <h1 className="flex items-center overflow-hidden gap-2 text-lg leading-5 font-semibold text-base-content mr-2">
               {getIconOfService(item.service)}
-              {item.name}
+              {item?.name}
             </h1>
             <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
               {item.slugName && <span>SlugName: {item.slugName}</span>}

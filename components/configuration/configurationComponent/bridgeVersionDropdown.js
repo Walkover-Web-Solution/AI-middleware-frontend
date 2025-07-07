@@ -12,9 +12,10 @@ function BridgeVersionDropdown({ params }) {
     const router = useRouter();
     const dispatch = useDispatch();
     const versionDescriptionRef = React?.useRef('');
-    const { bridgeVersionsArray, publishedVersion } = useCustomSelector((state) => ({
+    const { bridgeVersionsArray, publishedVersion, bridgeName } = useCustomSelector((state) => ({
         bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
         publishedVersion: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.published_version_id || [],
+        bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
     }));
 
     useEffect(() => {
@@ -75,7 +76,7 @@ function BridgeVersionDropdown({ params }) {
                     </li>
                 </ul>
             </div>
-            <PublishBridgeVersionModal params={params} />
+            <PublishBridgeVersionModal params={params} agent_name={bridgeName}/>
             <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion}/>
         </div>
     );

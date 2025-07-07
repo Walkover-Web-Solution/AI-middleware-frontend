@@ -1,10 +1,11 @@
+import Protected from '@/components/protected';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-function BridgeNameInput({ params }) {
+function BridgeNameInput({ params, isEmbedUser }) {
   const dispatch = useDispatch();
   const { bridgeName } = useCustomSelector((state) => ({
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
@@ -67,6 +68,8 @@ function BridgeNameInput({ params }) {
       }));
     }
 
+    isEmbedUser && window.parent.postMessage({type: 'gtwy', data:{ "agent_name": trimmed}}, '*');
+
     setDisplayValue(
       trimmed.length > 20 ? trimmed.slice(0, 17) + "..." : trimmed
     );
@@ -106,4 +109,4 @@ function BridgeNameInput({ params }) {
   );
 }
 
-export default React.memo(BridgeNameInput)
+export default Protected(React.memo(BridgeNameInput))
