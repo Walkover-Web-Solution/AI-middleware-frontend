@@ -22,6 +22,7 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
+import { getTutorialDataAction } from "@/store/action/tutotrialAction";
 
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -34,7 +35,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token,tutorialData } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
@@ -43,7 +44,15 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
+    tutorialData: state.tutorialReducer.tutorialData,
   }));
+
+  useEffect(() => {
+      if(!tutorialData.length)
+      dispatch(getTutorialDataAction());
+    
+  }, [tutorialData])
+
   useEffect(() => {
     const updateUserMeta = async () => {
       if (currentUser?.meta === null) {
@@ -70,6 +79,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
+  
   
   useEffect(() => {
     const validateOrg = async () => {
