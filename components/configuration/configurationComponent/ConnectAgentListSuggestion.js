@@ -58,10 +58,11 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
     return (
         <div className="dropdown dropdown-right">
             <div className="flex flex-col  gap-2">
+                {Object.keys(connect_agents).length=== 0 &&(
                 <InfoModel tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
                     <p className=" label-text info">Agents Configuration </p>
-
                 </InfoModel>
+                )}
                 <div className='flex items-center gap-2'>
                     <button tabIndex={0}
                         className="btn btn-outline btn-sm"
