@@ -5,8 +5,9 @@ import { KNOWLEDGE_BASE_CUSTOM_SECTION, KNOWLEDGE_BASE_SECTION_TYPES, MODAL_TYPE
 import { closeModal, openModal } from '@/utils/utility';
 import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/store/action/knowledgeBaseAction';
 import Modal from '../UI/Modal';
+import { toast } from 'react-toastify';
 
-const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {} }) => {
+const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {}, knowledgeBaseData=[] }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSectionType, setSelectedSectionType] = useState('default');
@@ -21,13 +22,27 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
     setIsUpload(false);
     setIsLoading(false);
     setSelectedKnowledgeBase(null);
-  }, []);
+  }, [selectedKnowledgeBase]);
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
     setIsLoading(true);
     const formData = new FormData(event.target);
+    const newName = formData.get("name").trim();
+        if (!newName) {
+      toast.error('Please enter a valid name.');
+      setIsLoading(false)
+      return;
+    }
+    const isDuplicate = knowledgeBaseData.some(kb => 
+      kb.name?.trim().toLowerCase() === newName.toLowerCase()?.trim() && kb._id !== selectedKnowledgeBase?._id
+    );
 
+    if (isDuplicate) {
+      toast.error('Knowledge Base name already exists. Please choose a different name.');
+      setIsLoading(false)
+      return;
+    }
     // Create payload object
     const payload = {
       orgId: params?.org_id,
@@ -75,7 +90,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
       setChunkingType("");
       setIsLoading(false);
     }
-  }, [dispatch, params.org_id, file, isUpload, selectedKnowledgeBase]);
+  }, [dispatch, params.org_id, file, isUpload, selectedKnowledgeBase, knowledgeBaseData]);
 
   const handleClose = useCallback(() => {
     closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
@@ -122,6 +137,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   placeholder="Enter knowledge base name"
                   required
                   disabled={isLoading}
+                  key={selectedKnowledgeBase?._id}
                   defaultValue={selectedKnowledgeBase?.actual_name || ''}
                 />
               </div>
@@ -136,6 +152,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   placeholder="Describe the purpose and content of this knowledge base..."
                   required
                   disabled={isLoading}
+                  key={selectedKnowledgeBase?._id}
                   defaultValue={selectedKnowledgeBase?.description || ''}
                 />
               </div>
