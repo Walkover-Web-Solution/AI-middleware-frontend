@@ -15,6 +15,7 @@ import ConfigHistorySlider from "./sliders/configHistorySlider";
 import { truncate } from "@/components/historyPageComponents/assistFile";
 import Protected from './protected';
 import IntegrationModal from './modals/IntegrationModal';
+import InfoTooltip from './InfoTooltip';
 
 function Navbar({ isEmbedUser }) {
   const router = useRouter();
@@ -136,20 +137,29 @@ function Navbar({ isEmbedUser }) {
           {path.length === 6 && path[3] === 'agents' ? (
             <>
               {/* Add Pause/Resume Button */}
-              {!isEmbedUser && <button
-                className={`btn m-1 tooltip tooltip-left ${bridge?.bridge_status === 0 ? 'bg-green-200 hover:bg-green-300' : 'bg-red-200 hover:bg-red-300'}`}
-                data-tip={bridge?.bridge_status === 0 ? 'Resume Agent' : 'Pause Agent'}
+              {!isEmbedUser &&
+              <InfoTooltip placement='left'className='z-low-medium w-28 h-5 pt-2 pb-5 pl-3 pr-2 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto' tooltipContent={bridge?.bridge_status === 0 ? 'Resume Agent' : 'Pause Agent'}>
+               <button
+                className={`btn m-1  ${bridge?.bridge_status === 0 ? 'bg-green-200 hover:bg-green-300' : 'bg-red-200 hover:bg-red-300'}`}
                 onClick={() => handlePauseBridge(bridge?.bridge_status === 0 ? 'resume' : 'paused')}
               >
                 {bridge?.bridge_status === 0 ? <PlayIcon size={16} /> : <PauseIcon size={16} />}
-              </button>}
-              <button className="btn m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
+              </button>
+              </InfoTooltip>
+              }
+
+              <InfoTooltip tooltipContent='Updates History' placement='left' className='z-low-medium w-28 h-5 pt-2 pb-5 pl-3 pr-2 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto'>
+              <button className="btn m-1" onClick={toggleConfigHistorySidebar}>
                 <HistoryIcon size={16} />
               </button>
+              </InfoTooltip>
               {path[4] === 'configure' && (
                 <div className='flex items-center'>
                   {(isdrafted && publishedVersion === versionId) && (
-                    <div className="tooltip tooltip-left" data-tip="Your changes are discarded & will be synced by publish version.">
+                    <InfoTooltip placement="left" tooltipContent="Your changes are discarded & will be synced by publish version." className='z-low-medium w-60 h-12 pt-2 pb-5 pl-3 pr-2 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto'>
                       <div className='flex items-center gap-2'>
                         <button
                           className="btn bg-red-200 m-1 hover:bg-red-300"
@@ -158,7 +168,7 @@ function Navbar({ isEmbedUser }) {
                           <ClipboardXIcon size={16} /> <span className='text-black'>Discard</span>
                         </button>
                       </div>
-                    </div>
+                    </InfoTooltip>
                   )}
                   <button
                     className="btn bg-green-200 hover:bg-green-300"

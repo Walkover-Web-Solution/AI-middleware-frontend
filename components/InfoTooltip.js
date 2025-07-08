@@ -8,13 +8,13 @@ import {
 } from '@floating-ui/react';
 import Tutorial from './tutorial';
 
-const InfoTooltip = ({ video = "", children, tooltipContent }) => {
+const InfoTooltip = ({ video = "", children, tooltipContent="", className = "", placement = "top" }) => {
   const [open, setOpen] = useState(false); // for hover state
   const [showTutorial, setShowTutorial] = useState(false);
   const delayTimeout = useRef(null);
 
   const { refs, floatingStyles, update } = useFloating({
-    placement: 'top',
+    placement,
     middleware: [offset(8), flip(), shift()],
     whileElementsMounted: autoUpdate,
   });
@@ -43,7 +43,11 @@ const InfoTooltip = ({ video = "", children, tooltipContent }) => {
       return () => cleanup();
     }
   }, [open, update, refs.reference, refs.floating]);
-
+ if (tooltipContent.length === 0) {
+    return <>
+    {children}
+    </>;
+  }
   return (
     <>
       <div
@@ -63,14 +67,12 @@ const InfoTooltip = ({ video = "", children, tooltipContent }) => {
               setOpen(true);
             }}
             onMouseLeave={handleClose}
-            className="
-              z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
-              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
-              border border-gray-700 space-y-2 pointer-events-auto
-            "
+            className={className} 
+                
           >
+          
             <p className="whitespace-pre-line">{tooltipContent}</p>
-
+         
           {video !== "" && (
             <button
               onClick={() => setShowTutorial(true)}

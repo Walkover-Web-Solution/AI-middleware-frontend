@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import IntegrationGuideModal from "@/components/modals/IntegrationGuideModal";
 import { openModal } from "@/utils/utility";
+import InfoTooltip from "@/components/InfoTooltip";
 
 export const runtime = 'edge';
 
@@ -51,9 +52,11 @@ const Page = ({ params }) => {
     id: index,
     name: (
       <div className="flex gap-2">
-        <div className="tooltip" data-tip={item.name}>
+        <InfoTooltip className="z-low-medium h-2 pt-1 pb-5 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto" tooltipContent={item.name}>
           {truncate(item.name, 30)}
-        </div>
+        </InfoTooltip>
       </div>
     ),
     createdAt: item?.created_at,
@@ -66,16 +69,18 @@ const Page = ({ params }) => {
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center">
-        <button
-          className="tooltip tooltip-primary cursor-pointer btn btn-sm"
-          data-tip="Configure Integration"
-          onClick={(e) => {
+        <InfoTooltip
+          className="z-low-medium w-36 h-4 pl-3 pr-3 pt-2 pb-5 bg-primary text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              bordespace-y-2 space-x-2 pointer-events-auto"
+          tooltipContent="Configure Integration"
+          
+        >
+          <ChevronLastIcon strokeWidth={2} size={20} onClick={(e) => {
             e.stopPropagation();
             handleClickIntegration(row.originalItem);
-          }}
-        >
-          <ChevronLastIcon strokeWidth={2} size={20} />
-        </button>
+          }} />
+        </InfoTooltip>
       </div>
     );
   };
@@ -133,16 +138,20 @@ const Page = ({ params }) => {
                 }}
               >
                 <div className="flex flex-col items-center w-full gap-2">
-                  <div className="tooltip" data-tip={item?.name}>
+                  <InfoTooltip className="z-low-medium h-2  pt-1 pb-5 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto" tooltipContent={item?.name}>
                     <h3 className="text-lg font-medium max-w-[90%] w-full text-center">
                       {truncate(String(item?.name), 10)}
                     </h3>
-                  </div>
-                  <div className="tooltip" data-tip={item?.description}>
+                  </InfoTooltip>
+                  <InfoTooltip className="z-low-medium  pt-1 pb-5 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto" tooltipContent={item?.description}>
                     <p className="text-sm text-base-content/70 max-w-[90%] w-full text-center">
                       {truncate(item?.description || 'No description', 20)}
                     </p>
-                  </div>
+                  </InfoTooltip>
                 </div>
               </div>
             ))}

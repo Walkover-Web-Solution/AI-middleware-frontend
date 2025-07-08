@@ -85,7 +85,10 @@ const PreEmbedList = ({ params }) => {
             />
             <div className="form-control inline-block">
                 <div className='flex gap-5 items-center ml-2 '>
-                    <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
+                    <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call." className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            '>
                         <p className="label-text font-medium whitespace-nowrap info">Pre Tool</p>
                     </InfoTooltip>
                 </div>

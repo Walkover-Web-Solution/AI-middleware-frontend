@@ -85,7 +85,10 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             <div className="flex items-end gap-2">
                 {name === "preFunction" ? (
                     <div className=" flex flex-col items-start gap-2">
-                        <InfoTooltip tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
+                        <InfoTooltip tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            "'>
                         <p className="text-base font-semibold info">Pre Tool Configuration</p>
                        
                         </InfoTooltip>
@@ -101,7 +104,10 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     </div>
                 ) : (
                      <div className="flex flex-col items-start gap-2">
-                        <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
+                        <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            '>
                         <p className=" label-text info">Tool Configuration</p>
                        
                         </InfoTooltip>

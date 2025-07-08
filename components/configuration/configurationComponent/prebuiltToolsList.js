@@ -85,7 +85,10 @@ const PrebuiltToolsList = ({ params }) => {
                 <div className="flex flex-wrap gap-4 mb-4">
                     {renderTools}
                 </div>
-                <InfoTooltip tooltipContent={"This tool lets the AI fetch real-time info from the internet. It's useful for current events, fact-checking, and time-sensitive questions."}>
+                <InfoTooltip tooltipContent={"This tool lets the AI fetch real-time info from the internet. It's useful for current events, fact-checking, and time-sensitive questions."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            '>
                         <p className=" mb-2 label-text info">Configure Prebuilt Tool</p>
                        
                  </InfoTooltip>

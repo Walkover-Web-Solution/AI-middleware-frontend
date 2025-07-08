@@ -103,7 +103,10 @@ const KnowledgebaseList = ({ params }) => {
             <div className="flex flex-wrap gap-4 mb-4">
                 {shouldToolsShow&&renderKnowledgebase}
             </div>
-            <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
+            <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            '>
                 <p className=" label-text info mb-2">Knowledgebase Configuration</p>
             </InfoTooltip>
             <div className="dropdown dropdown-right">
@@ -151,9 +154,11 @@ const KnowledgebaseList = ({ params }) => {
                                             <div className="flex items-center gap-2">
                                                 {GetFileTypeIcon(item?.type, 16, 16)}
                                                 {item?.name.length > 20 ? (
-                                                    <div className="tooltip" data-tip={item?.name}>
+                                                    <InfoTooltip className='z-low-medium p-2 w-32 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in border border-gray-700 space-y-2 pointer-events-auto' tooltipContent={item?.name}>
+
                                                         {truncate(item?.name, 20)}
-                                                    </div>
+        
+                                                    </InfoTooltip>
                                                 ) : (
                                                     truncate(item?.name, 20)
                                                 )}

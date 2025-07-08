@@ -25,7 +25,10 @@ function ToolCallCount({ params }) {
     return (
         <div className='form-control'>
             <div className="label items-center flex justify-start">
-                <InfoTooltip tooltipContent={"This feature sets a limit on function calls. By default, functions are called one at a time, but with 'Parallel Tools' enabled, multiple functions can be called simultaneously within a single function call."}>
+                <InfoTooltip tooltipContent={"This feature sets a limit on function calls. By default, functions are called one at a time, but with 'Parallel Tools' enabled, multiple functions can be called simultaneously within a single function call."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            '>
                 <span className="label-text font-medium info">Maximum Function Call Limit</span>
                 </InfoTooltip>
                 

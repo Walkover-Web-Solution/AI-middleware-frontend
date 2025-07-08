@@ -4,6 +4,7 @@ import { RefreshIcon } from "@/components/Icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import InfoTooltip from "../InfoTooltip";
 
 function RadioButton({ name, label, checked, onChange }) {
     return (
@@ -416,9 +417,10 @@ function BridgesToSwitch({ chatBotId, handleSave ,orgId}) {
                             return <tr key={index}>
                                 <th>
                                     <label >
-                                        <div className="tooltip tooltip-right cursor-pointer" data-tip="Publish a version and add a slug name to select.">
+                                        <InfoTooltip placement="right" className="z-low-medium w-36 h-10S pt-2 pb-5 pl-3 pr-2 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" tooltipContent="Publish a version and add a slug name to select.">
                                             <input type="checkbox" className="checkbox" disabled />
-                                        </div>
+                                        </InfoTooltip>
                                     </label>
                                 </th>
                                 <td>

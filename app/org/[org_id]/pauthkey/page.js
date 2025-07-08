@@ -14,6 +14,7 @@ import { CopyIcon, TrashIcon } from '@/components/Icons'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export const runtime = 'edge';
 
@@ -106,18 +107,22 @@ function Page({ params }) {
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center">
-        <div className="tooltip tooltip-primary" data-tip="delete">
+        <InfoTooltip className="z-low-medium  h-3 pl-3 pr-3 pt-2 pb-5 bg-primary text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              bordespace-y-2 space-x-2 pointer-events-auto" tooltipContent="delete">
           <a onClick={() => deleteModel(row["name"], row["id"], row.index)}>
             <TrashIcon size={16} />
           </a>
-        </div>
-        <div
-          className="tooltip tooltip-primary"
-          onClick={() => copyToClipboard(row["authkey"])}
-          data-tip="copy auth key"
+        </InfoTooltip>
+        <InfoTooltip
+          className="z-low-medium  w-28 h-5 pl-3 pr-3 pt-2 pb-5 bg-primary text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              bordespace-y-2 space-x-2 pointer-events-auto"
+         
+          tooltipContent="copy auth key"
         >
-          <CopyIcon size={16} />
-        </div>
+          <CopyIcon size={16}  onClick={() => copyToClipboard(row["authkey"])} />
+        </InfoTooltip>
       </div>
     );
   };

@@ -12,6 +12,7 @@ import { GetFileTypeIcon, openModal } from "@/utils/utility";
 import { BookIcon, EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
+import InfoTooltip from "@/components/InfoTooltip";
 
 export const runtime = 'edge';
 
@@ -39,7 +40,7 @@ const Page = ({ params }) => {
 
   const filteredKnowledgeBase = useMemo(() =>
     knowledgeBaseData?.filter(item =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchTerm.toLowerCase())
     ) || []
     , [knowledgeBaseData, searchTerm]);
@@ -50,9 +51,11 @@ const Page = ({ params }) => {
       <div className="flex items-center gap-2">
         {GetFileTypeIcon(item?.type, 24, 24)}
       </div>
-      <div className="tooltip" data-tip={item.name}>
+      <InfoTooltip className="z-low-medium p-2 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto" tooltipContent={item.name}>
         {truncate(item.name, 30)}
-      </div>
+      </InfoTooltip>
     </div>,
     description: item?.description,
     actual_name: item?.name,
@@ -61,20 +64,24 @@ const Page = ({ params }) => {
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center">
-        <div
-          className="tooltip tooltip-primary"
-          data-tip="delete"
-          onClick={() => handleDelete(row.actual_name, row._id)}
+        <InfoTooltip
+          className="z-low-medium  h-3 pl-3 pr-3 pt-2 pb-5 bg-primary text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              bordespace-y-2 space-x-2 pointer-events-auto"
+          tooltipContent="delete"
+         
         >
-          <TrashIcon strokeWidth={2} size={20} />
-        </div>
-        <div
-          className="tooltip tooltip-primary"
-          data-tip="Update"
-          onClick={() => handleUpdateKnowledgeBase(row)}
+          <TrashIcon strokeWidth={2} size={20}  onClick={() => handleDelete(row.actual_name, row._id)} />
+        </InfoTooltip>
+        <InfoTooltip
+          className="z-low-medium  h-3 pl-3 pr-3 pt-2 pb-5 bg-primary text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              bordespace-y-2 space-x-2 pointer-events-auto"
+          tooltipContent="Update"
+         
         >
-          <SquarePenIcon size={20} />
-        </div>
+          <SquarePenIcon size={20}  onClick={() => handleUpdateKnowledgeBase(row)}/>
+        </InfoTooltip>
       </div>
     );
   };
@@ -143,11 +150,11 @@ const Page = ({ params }) => {
                 </div>
                 <div className="flex flex-col items-center w-full gap-2">
                   {GetFileTypeIcon(item?.type, 26, 26)}
-                  <div className="tooltip" data-tip={item?.name}>
+                  <InfoTooltip className="tooltip" data-tip={item?.name}>
                     <h3 className="text-lg font-medium max-w-[90%] w-full">
                       {truncate(String(item?.name), 10)}
                     </h3>
-                  </div>
+                  </InfoTooltip>
                   <div className="tooltip" data-tip={item?.description}>
                     <p className="text-sm text-base-content/70 max-w-[90%] w-full">
                       {truncate(item?.description, 20)}
