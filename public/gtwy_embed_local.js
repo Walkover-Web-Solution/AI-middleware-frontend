@@ -194,7 +194,6 @@
             });
 
             // Assemble header
-            console.log(this.config)
             if (this?.config?.slide !== 'full'){(this.config.hideFullScreenButton === "false" || this.config.hideFullScreenButton === false) && buttonsContainer.appendChild(fullscreenBtn)}
             (this.config.hideCloseButton === "false" || this.config.hideCloseButton === false) && buttonsContainer.appendChild(closeBtn);
             headerContent.appendChild(poweredBy);
