@@ -68,7 +68,7 @@ function BridgeNameInput({ params, isEmbedUser }) {
       }));
     }
 
-    isEmbedUser && window.parent.postMessage({type: 'gtwy', data:{ "agent_name": trimmed}}, '*');
+    isEmbedUser && window.parent.postMessage({type: 'gtwy',status:"agent_name_update", data:{ "agent_name": trimmed}}, '*');
 
     setDisplayValue(
       trimmed.length > 20 ? trimmed.slice(0, 17) + "..." : trimmed
