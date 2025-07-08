@@ -5,9 +5,7 @@ import { PlayIcon, ChevronDownIcon, ChevronRightIcon, BookIcon, BotIcon, KeyIcon
 import { closeModal } from '@/utils/utility';
 import Modal from '../UI/Modal';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { useDispatch } from 'react-redux';
-import { getTutorialDataAction } from '@/store/action/tutotrialAction';
-// Video Component using iframe
+
 const TutorialVideo = ({ videoUrl, title }) => {
   return (
     <div className="relative bg-black rounded-lg overflow-hidden">
