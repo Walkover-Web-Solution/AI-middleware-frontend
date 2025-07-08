@@ -91,6 +91,7 @@ import {
   MessageSquare,
   Database,
   Shield
+  ExternalLink
 } from 'lucide-react';
 
 /**
@@ -778,3 +779,4 @@ export const DatabaseIcon = (props) => <Database {...props} />;
 
 export const ShieldIcon = (props) => <Shield {...props} />;
 
+export const ExternalLinkIcon=(props)=> <ExternalLink  {...props} />

@@ -22,6 +22,7 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
+import { userDetails } from "@/store/action/userDetailsAction";
 
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -46,6 +47,12 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   }));
 
   useEffect(() => {
+    if (pathName.endsWith("agents")) {
+      dispatch(userDetails());
+    }
+  }, [pathName]);
+
+  useEffect(() => {
     const updateUserMeta = async () => {
       if (currentUser?.meta === null) {
         const updatedUser = {
@@ -59,6 +66,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
               AdvanceParameter: true,
               PauthKey: true,
               CompleteBridgeSetup: true,
+              TestCasesSetup:true
             },
           },
         };
