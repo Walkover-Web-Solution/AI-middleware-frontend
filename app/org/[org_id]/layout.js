@@ -11,7 +11,7 @@ import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
-import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
+import { getAllKnowBaseDataAction, getKnowledgeBaseTokenAction } from "@/store/action/knowledgeBaseAction";
 import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
@@ -34,7 +34,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token, knowledgeBaseToken } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
@@ -43,6 +43,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
+    knowledgeBaseToken: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params.org_id]?.knowledgeBaseToken || "",
   }));
   useEffect(() => {
     const updateUserMeta = async () => {
@@ -122,14 +123,17 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   useEffect(() => {
     if (isValidOrg && params?.org_id) {
       dispatch(getAllApikeyAction(params?.org_id));
-      dispatch(getAllKnowBaseDataAction(params?.org_id))
+      // dispatch(getAllKnowBaseDataAction(params?.org_id))
       dispatch(getPrebuiltToolsAction())
     }
   }, [isValidOrg, dispatch, params?.org_id]);
 
+  useEffect(() => {
+    dispatch(getKnowledgeBaseTokenAction(params.org_id))
+  }, [params.org_id])
+
   const scriptId = "chatbot-main-script";
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
-
   useEffect(() => {
     if (isValidOrg) {
       const updateScript = (token) => {
