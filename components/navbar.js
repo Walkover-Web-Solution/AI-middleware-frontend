@@ -24,13 +24,14 @@ function Navbar({ isEmbedUser }) {
   const pathName = usePathname();
   const path = pathName.split('?')[0].split('/')
   const bridgeId = path[5];
-  const { organizations, bridgeData, chatbotData, bridge, publishedVersion, isdrafted } = useCustomSelector((state) => ({
+  const { organizations, bridgeData, chatbotData, bridge, publishedVersion, isdrafted, hideHomeButton} = useCustomSelector((state) => ({
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
     chatbotData: state.ChatBot.ChatBotMap[bridgeId],
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || [],
     publishedVersion: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.published_version_id || [],
     isdrafted: state?.bridgeReducer?.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted,
+    hideHomeButton:  state.userDetailsReducer.userDetails.hideHomeButton,
   }));
   const handleDeleteBridge = async (item, newStatus = 0) => {
     const orgId = path[2];
@@ -109,9 +110,9 @@ function Navbar({ isEmbedUser }) {
     <div className='z-medium'>
       <div className={` ${pathName === '/' || pathName.endsWith("alerts") ? 'hidden' : (!isEmbedUser ? 'flex items-center justify-between flex-wrap' : ' ')} w-full navbar border md:flex-nowrap z-low-medium max-h-[4rem] bg-base-100 sticky top-0`}>
         <div className={`${(path.length > 5 ? 'flex w-full items-center justify-start gap-2' : 'hidden')}`}>
-          <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/agents`)}>
+          {((isEmbedUser && !hideHomeButton) || !isEmbedUser) && <button className="btn m-1" onClick={() => router.push(`/org/${path[2]}/agents`)}>
             <HomeIcon size={16} />
-          </button>
+          </button>}
           {!isEmbedUser && <>
             <button className="btn m-1" onClick={toggleOrgSidebar}>
               <BuildingIcon size={16} /> {truncate(organizations[path[2]]?.name, 15)}
@@ -143,9 +144,9 @@ function Navbar({ isEmbedUser }) {
               >
                 {bridge?.bridge_status === 0 ? <PlayIcon size={16} /> : <PauseIcon size={16} />}
               </button>}
-              <button className="btn m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
+             {!isEmbedUser &&  <button className="btn m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
                 <HistoryIcon size={16} />
-              </button>
+              </button>}
               {path[4] === 'configure' && (
                 <div className='flex items-center'>
                   {(isdrafted && publishedVersion === versionId) && (
@@ -239,7 +240,7 @@ function Navbar({ isEmbedUser }) {
 
       {/* chatbot slider */}
       <ChatBotSlider />
-      <ConfigHistorySlider versionId={versionId} />
+      {!isEmbedUser && <ConfigHistorySlider versionId={versionId} />}
       <IntegrationModal orgId={path[2]}/>
     </div>
   );

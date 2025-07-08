@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReducer';
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
+import { createBridgeAction } from '@/store/action/bridgeAction'; 
+import { toBoolean } from '@/utils/utility';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -17,26 +19,81 @@ const Layout = ({ children }) => {
   const urlParamsObj = decodedParam ? JSON.parse(decodedParam) : {};
 
   useEffect(() => {
-    window.parent.postMessage({type: 'gtwyLoaded', data: 'gtwyLoaded'}, '*');
+    window.parent.postMessage({ type: 'gtwyLoaded', data: 'gtwyLoaded' }, '*');
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(getServiceAction())
-  },[])
+  }, [])
 
   useEffect(() => {
-    if (urlParamsObj.org_id && urlParamsObj.token && urlParamsObj.folder_id) {
+    if ((urlParamsObj.org_id && urlParamsObj.token && urlParamsObj.folder_id) || urlParamsObj?.hideHomeButton) {
       setIsLoading(true);
 
       if (urlParamsObj.token) {
-        dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true }));
+        dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton, showGuide: false}));
         sessionStorage.setItem('proxy_token', urlParamsObj.token);
+        sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
+        sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
       }
 
       router.push(`org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
     }
   }, [urlParamsObj, router, dispatch]);
 
+  useEffect(() => {
+    const handleMessage = (event) => {
+      const { data } = event?.data;
+      if (data?.type !== "gtwyInterfaceData") return;
+
+      const messageData = data?.data;
+      const orgId = sessionStorage.getItem('gtwy_org_id');
+
+      // Handle agent creation/configuration
+      if (messageData?.agent_nane) {
+        const dataToSend = {
+          service: "openai",
+          model: "gpt-4o", 
+          name: messageData.agent_nane,
+          slugName: messageData.agent_nane,
+          bridgeType: "api",
+          type: "chat"
+        };
+        dispatch(createBridgeAction({ dataToSend, orgid: orgId }, (response) => {
+          router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}`);
+        })).catch(() => setIsLoading(false));
+
+      } else if (messageData?.agent_id) {
+        try {
+          setIsLoading(true);
+          router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+        } catch (error) {
+          setIsLoading(false);
+        }
+      }
+
+      // Handle UI configuration updates
+      const uiUpdates = {
+        hideHomeButton: messageData?.hideHomeButton,
+        showGuide: messageData?.showGuide,
+        showConfigType: messageData?.showConfigType
+      };
+
+      Object.entries(uiUpdates).forEach(([key, value]) => {
+        if (value !== undefined) {
+          dispatch(updateUserDetialsForEmbedUser({
+            [key]: toBoolean(value)
+          }));
+        }
+      });
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      // window.removeEventListener('message', handleMessage);
+    };
+  }, []);
  
 
   if (isLoading) {
