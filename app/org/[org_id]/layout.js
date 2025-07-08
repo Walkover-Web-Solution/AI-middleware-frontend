@@ -44,14 +44,11 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
-    tutorialData: state.tutorialReducer.tutorialData,
   }));
 
   useEffect(() => {
-      if(!tutorialData.length)
-      dispatch(getTutorialDataAction());
-    
-  }, [tutorialData])
+      dispatch(getTutorialDataAction());   
+  }, [])
 
   useEffect(() => {
     const updateUserMeta = async () => {
