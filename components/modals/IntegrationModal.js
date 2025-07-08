@@ -5,13 +5,13 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 import Modal from '@/components/UI/Modal'
 
-const IntegrationModal = ({ orgId }) => {
+const IntegrationModal = ({ params }) => {
   const integrationNameRef = React.useRef('');
   const dispatch = useDispatch();
   const handleCreateNewIntegration = () => {
     dispatch(createIntegrationAction({
       name: integrationNameRef?.current?.value,
-      orgId
+      orgId: params.org_id
     }))
     closeModal(MODAL_TYPE.INTEGRATION_MODAL);
     integrationNameRef.current.value = '';
