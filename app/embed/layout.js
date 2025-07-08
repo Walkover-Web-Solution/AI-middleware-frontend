@@ -43,43 +43,49 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     const handleMessage = (event) => {
-      const { data } = event?.data
-      if (data?.type === "gtwyInterfaceData") {
-        if (data?.data?.agent_nane) {
-          const agent_name = data?.data?.agent_nane
-          const dataToSend = {
-            "service": "openai",
-            "model": "gpt-4o",
-            "name": agent_name,
-            "slugName": agent_name,
-            "bridgeType": "api",
-            "type": "chat"
-          }
-          dispatch(createBridgeAction({ dataToSend: dataToSend, orgid: sessionStorage.getItem('gtwy_org_id') }, (data) => {
-            router.push(`/org/${sessionStorage.getItem('gtwy_org_id')}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
-          })).catch(() => {
-            setIsLoading(false);
-          });
-        }
-        else if (data?.data?.agent_id) {
-          try {
-            setIsLoading(true)
-            router.push(`/org/${sessionStorage.getItem('gtwy_org_id')}/agents/configure/${data?.data?.agent_id}?version=${data?.data?.agent_id}`);
-          } catch (error) {
-            setIsLoading(false)
-          }
-        }
-        if (data?.data?.hideHomeButton) {
-          dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true, hideHomeButton: toBoolean(data?.data?.hideHomeButton)}));
-        }
-        if(data?.data?.showGuide)
-        {
-          dispatch(updateUserDetialsForEmbedUser({showGuide: toBoolean(data?.data?.showGuide)}));
-        }
-        if(data?.data?.showConfigType){
-          dispatch(updateUserDetialsForEmbedUser({showConfigType: toBoolean(data?.data?.showConfigType)}))
+      const { data } = event?.data;
+      if (data?.type !== "gtwyInterfaceData") return;
+
+      const messageData = data?.data;
+      const orgId = sessionStorage.getItem('gtwy_org_id');
+
+      // Handle agent creation/configuration
+      if (messageData?.agent_nane) {
+        const dataToSend = {
+          service: "openai",
+          model: "gpt-4o", 
+          name: messageData.agent_nane,
+          slugName: messageData.agent_nane,
+          bridgeType: "api",
+          type: "chat"
+        };
+        dispatch(createBridgeAction({ dataToSend, orgid: orgId }, (response) => {
+          router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}`);
+        })).catch(() => setIsLoading(false));
+
+      } else if (messageData?.agent_id) {
+        try {
+          setIsLoading(true);
+          router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+        } catch (error) {
+          setIsLoading(false);
         }
       }
+
+      // Handle UI configuration updates
+      const uiUpdates = {
+        hideHomeButton: messageData?.hideHomeButton,
+        showGuide: messageData?.showGuide,
+        showConfigType: messageData?.showConfigType
+      };
+
+      Object.entries(uiUpdates).forEach(([key, value]) => {
+        if (value !== undefined) {
+          dispatch(updateUserDetialsForEmbedUser({
+            [key]: toBoolean(value)
+          }));
+        }
+      });
     };
 
     window.addEventListener('message', handleMessage);

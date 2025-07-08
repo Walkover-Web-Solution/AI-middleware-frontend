@@ -64,7 +64,7 @@
                     props[attr] = value;
                     this.state.tempDataToSend = { ...this.state.tempDataToSend, [attr]: value }
                 }
-                console.log(this.config)
+                // console.log(this.config)
                 return props;
             }, {});
         }
@@ -595,7 +595,6 @@
             if (!this.state.hasParentContainer) {
                 const header = this.createEmbedHeader();
                 if (header && (this.config.hideHeader === "false" || this.config.hideHeader === false)) {
-                    console.log('hello from inside header')
                     this.addHeaderStyles();
                     this.parentContainer.appendChild(header);
                 }
@@ -765,7 +764,7 @@
             if (this.state.tempDataToSend) {
                 sendMessageToGtwy({ type: 'gtwyInterfaceData', data: this.state.tempDataToSend });
                 if (this?.state?.tempDataToSend?.defaultOpen === true || this?.state?.tempDataToSend?.defaultOpen === "true" || this?.state?.config?.defaultOpen === true || this?.state?.config?.defaultOpen === "true") {
-                    this.openGtwy(null);
+                    this.openGtwy();
                 }
                 this.state.tempDataToSend = null;
             }
