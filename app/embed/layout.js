@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReducer';
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
-import { createBridgeAction } from '@/store/action/bridgeAction';
+import { createBridgeAction } from '@/store/action/bridgeAction'; 
+import { toBoolean } from '@/utils/utility';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -18,22 +19,22 @@ const Layout = ({ children }) => {
   const urlParamsObj = decodedParam ? JSON.parse(decodedParam) : {};
 
   useEffect(() => {
-    window.parent.postMessage({type: 'gtwyLoaded', data: 'gtwyLoaded'}, '*');
+    window.parent.postMessage({ type: 'gtwyLoaded', data: 'gtwyLoaded' }, '*');
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(getServiceAction())
-  },[])
+  }, [])
 
   useEffect(() => {
-    if (urlParamsObj.org_id && urlParamsObj.token && urlParamsObj.folder_id) {
+    if ((urlParamsObj.org_id && urlParamsObj.token && urlParamsObj.folder_id) || urlParamsObj?.hideHomeButton) {
       setIsLoading(true);
 
       if (urlParamsObj.token) {
-        dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true }));
+        dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton, showGuide: false}));
         sessionStorage.setItem('proxy_token', urlParamsObj.token);
-        sessionStorage.setItem('gtwy_org_id',urlParamsObj?.org_id)
-        sessionStorage.setItem('gtwy_folder_id',urlParamsObj?.folder_id)
+        sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
+        sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
       }
 
       router.push(`org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
@@ -42,31 +43,43 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     const handleMessage = (event) => {
-      const {data} = event?.data
-     if(data?.type === "gtwyInterfaceData"){
-      if(data?.data?.agent_nane)
-      {
-        const agent_name = data?.data?.agent_nane
-        
-        const dataToSend = {
-          "service": "openai",
-          "model": "gpt-4o",
-          "name": agent_name,
-          "slugName": agent_name,
-          "bridgeType": "api",
-          "type": "chat"
+      const { data } = event?.data
+      if (data?.type === "gtwyInterfaceData") {
+        if (data?.data?.agent_nane) {
+          const agent_name = data?.data?.agent_nane
+          const dataToSend = {
+            "service": "openai",
+            "model": "gpt-4o",
+            "name": agent_name,
+            "slugName": agent_name,
+            "bridgeType": "api",
+            "type": "chat"
+          }
+          dispatch(createBridgeAction({ dataToSend: dataToSend, orgid: sessionStorage.getItem('gtwy_org_id') }, (data) => {
+            router.push(`/org/${sessionStorage.getItem('gtwy_org_id')}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+          })).catch(() => {
+            setIsLoading(false);
+          });
+        }
+        else if (data?.data?.agent_id) {
+          try {
+            setIsLoading(true)
+            router.push(`/org/${sessionStorage.getItem('gtwy_org_id')}/agents/configure/${data?.data?.agent_id}?version=${data?.data?.agent_id}`);
+          } catch (error) {
+            setIsLoading(false)
+          }
+        }
+        if (data?.data?.hideHomeButton) {
+          dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true, hideHomeButton: toBoolean(data?.data?.hideHomeButton)}));
+        }
+        if(data?.data?.showGuide)
+        {
+          dispatch(updateUserDetialsForEmbedUser({showGuide: toBoolean(data?.data?.showGuide)}));
+        }
+        if(data?.data?.showConfigType){
+          dispatch(updateUserDetialsForEmbedUser({showConfigType: toBoolean(data?.data?.showConfigType)}))
+        }
       }
-      dispatch(createBridgeAction({ dataToSend: dataToSend, orgid: sessionStorage.getItem('gtwy_org_id') }, (data) => {
-        router.push(`/org/${sessionStorage.getItem('gtwy_org_id')}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
-      })).catch(() => {
-        setIsLoading(false);
-      });
-      }
-      else if(data?.data?.agent_id)
-      {
-        router.push(`/org/${sessionStorage.getItem('gtwy_org_id')}/agents/configure/${data?.data?.agent_id}?version=${data?.data?.agent_id}`);
-      }
-     }
     };
 
     window.addEventListener('message', handleMessage);

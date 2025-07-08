@@ -10,7 +10,7 @@ import Modal from "../UI/Modal";
 import Protected from "../protected";
 ``
 
-function PublishBridgeVersionModal({ params, agent_name, isEmbedUser }) {
+function PublishBridgeVersionModal({ params, agent_name, agent_description,  isEmbedUser }) {
   const dispatch = useDispatch();
 
   const handleCloseModal = useCallback((e) => {
@@ -26,7 +26,7 @@ function PublishBridgeVersionModal({ params, agent_name, isEmbedUser }) {
         orgId: params?.org_id,
       })
     );
-    isEmbedUser && window.parent.postMessage({type: 'gtwy', data:{ "agent_id":params?.id,"agent_name": agent_name}}, '*');
+    isEmbedUser && window.parent.postMessage({type: 'gtwy', status:"agent_published", data:{ "agent_id":params?.id,"agent_name": agent_name, agent_description: agent_description}}, '*');
     dispatch(getAllBridgesAction());
     closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
   }, [dispatch, params]);
