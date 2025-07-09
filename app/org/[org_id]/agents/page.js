@@ -71,17 +71,17 @@ function Home({ params, isEmbedUser }) {
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
             {item.name.length > 20 ? item.name.slice(0, 17) + '...' : item.name}
-          </div>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="opacity-60 text-xs" title={item.slugName}>
-              {item?.slugName || ""}
-            </p>
             {item.bridge_status === 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
                   <ClockIcon size={12}/>
                 <span className="hidden sm:inline">Paused</span>
               </div>
             )}
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="opacity-60 text-xs" title={item.slugName}>
+              {item?.slugName || ""}
+            </p>
           </div>
         </div>
       </div>
