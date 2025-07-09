@@ -245,7 +245,7 @@ const Navbar = ({ isEmbedUser }) => {
           </div>
           <div className="py-1">
             <button
-              onClick={() => handleArchiveBridge(bridgeId, isArchived ? 1 : 0)}
+              onClick={() => handleArchiveBridge(bridgeId, isArchived ? 0 : 1)}
               disabled={isUpdatingBridge}
               className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2 ${isUpdatingBridge ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
