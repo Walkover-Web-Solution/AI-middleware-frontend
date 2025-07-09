@@ -19,7 +19,7 @@ const Protected = (WrappedComponent) => {
       }
     }, [router]);
 
-    return <WrappedComponent {...props} isEmbedUser={isEmbedUser ?  isEmbedUser&&sessionStorage.getItem("proxy_token") : false} />;
+    return <WrappedComponent {...props} isEmbedUser={!!(isEmbedUser && sessionStorage.getItem("proxy_token"))} />;
   };
 
   return ProtectedComponent;

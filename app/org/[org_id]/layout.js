@@ -47,7 +47,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   }));
 
   useEffect(() => {
-    if (pathName.endsWith("agents")) {
+    if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(userDetails());
     }
   }, [pathName]);
