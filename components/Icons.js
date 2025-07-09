@@ -90,7 +90,7 @@ import {
   CheckCircle,
   MessageSquare,
   Database,
-  Shield
+  Shield,
   ExternalLink
 } from 'lucide-react';
 
