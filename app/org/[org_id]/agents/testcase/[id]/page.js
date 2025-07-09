@@ -97,7 +97,7 @@ function TestCases({ params }) {
               className="inline-flex mb-4 items-center gap-2 text-sm text-primary hover:text-primary-dark transition-colors font-medium group"
               target="_blank"
               rel="noopener noreferrer">
-              <span>Learn more about test cases</span>
+              <span>Learn more</span>
                <ExternalLinkIcon size={16}/>
             </a>
               {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"TestCasesSetup"} TutorialDetails={"TestCases Creation"} />}

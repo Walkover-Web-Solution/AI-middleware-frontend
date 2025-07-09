@@ -2,7 +2,7 @@ import React from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const StarterQuestionToggle = ({ params }) => {
     const dispatch = useDispatch();
@@ -21,9 +21,9 @@ const StarterQuestionToggle = ({ params }) => {
     return (
         <div className="flex items-center gap-2">
             <div className="label cursor-pointer">
-                <InfoModel tooltipContent={"Toggle to enable/disable starter questions"}>
+                <InfoTooltip tooltipContent={"Toggle to enable/disable starter questions"}>
                 <span className="font-medium mr-2 info">Starter Question</span>
-                </InfoModel>
+                </InfoTooltip>
             </div>
             <input
                 type="checkbox"

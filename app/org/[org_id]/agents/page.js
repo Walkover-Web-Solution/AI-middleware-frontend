@@ -247,6 +247,7 @@ function Home({ params, isEmbedUser }) {
                       <PageHeader
                         title="Agents"
                         description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code."
+                        docLink="https://blog.gtwy.ai/features/bridge"
                       />
                       <div className="flex-shrink-0 mt-4 sm:mt-0">
                         <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ create new agent</button>
