@@ -1073,3 +1073,14 @@ export const verifyAuth = async (data)=>{
     return error
   }
 }
+
+export const getClientInfo = async (client_id)=>{
+  try {
+    const respnse = await axios.get(`${URL}/auth/client_info?client_id=${client_id}`)
+    return respnse?.data
+  } catch (error) {
+    console.error(error)
+    return error
+  }
+}
+

@@ -1,38 +1,49 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { filterOrganizations } from '@/utils/utility';
+import { filterOrganizations, renderedOrganizations } from '@/utils/utility';
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import Protected from '@/components/protected';
 import LoadingSpinner from '@/components/loadingSpinner';
-import { Search, Building2, Shield, CheckCircle, AlertCircle, Key, Link, FileText } from 'lucide-react';
+import { Search, Building2, Shield, CheckCircle, Lock, User, Database, Key, Link, AlertCircle, ArrowRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { verifyAuth } from '@/config';
+import { getClientInfo, switchOrg, verifyAuth } from '@/config';
+import { BuildingIcon } from '@/components/Icons';
 
-function Page({ params }) {
+const Page = ({ params }) => {
     const [formState, setFormState] = useState({
         searchQuery: '',
         selectedOrg: null,
         isLoading: false,
         clientId: '',
         redirectionUrl: '',
-        state: ''
+        state: '',
+        client_name: ''
     });
     const [isInitialLoading, setIsInitialLoading] = useState(false);
+    const [isLoading, setisLoading] = useState();
 
     const searchParams = useSearchParams();
 
     useEffect(() => {
-        const clientId = searchParams.get('client_id');
-        const redirectionUrl = searchParams.get('redirection_url');
-        const state = searchParams.get('state');
+        const fetchClientInfo = async () => {
+            const clientId = searchParams.get('client_id');
+            const redirectionUrl = searchParams.get('redirection_url');
+            const state = searchParams.get('state');
 
-        if (clientId || redirectionUrl || state) {
-            updateFormState({
-                clientId: clientId || '',
-                redirectionUrl: redirectionUrl || '',
-                state: state || ''
-            });
-        }
+            if (clientId || redirectionUrl || state) {
+                if (clientId) {
+                    const res = await getClientInfo(clientId);
+                    updateFormState({client_name: res?.result?.name})
+                }
+                updateFormState({
+                    clientId: clientId || '',
+                    redirectionUrl: redirectionUrl || '',
+                    state: state || ''
+                });
+            }
+        };
+
+        fetchClientInfo();
     }, [searchParams]);
     
     const { organizations } = useCustomSelector(state => ({
@@ -47,7 +58,17 @@ function Page({ params }) {
         updateFormState({ [field]: e.target.value });
     }, [updateFormState]);
 
+    const handleSwitchOrg = useCallback(async (id) => {
+        try {
+          const response = await switchOrg(id);
+          console.log(response)
+        } catch (error) {
+          console.error("Error switching organization", error);
+        }
+      }, []);
+
     const handleSelectOrg = useCallback((orgId, orgName) => {
+        handleSwitchOrg(orgId)
         updateFormState({ selectedOrg: { id: orgId, name: orgName } });
     }, [updateFormState]);
 
@@ -61,46 +82,12 @@ function Page({ params }) {
             state: formState?.state
         }
         const res = await verifyAuth(data)
-        console.log(res)
         updateFormState({ isLoading: false });
     }, [formState.selectedOrg, updateFormState]);
 
     const filteredOrganizations = useMemo(() =>
         filterOrganizations(organizations, formState.searchQuery),
         [organizations, formState.searchQuery]);
-
-    const renderedOrganizations = useMemo(() => (
-        filteredOrganizations.slice().reverse().map((org, index) => (
-            <div
-                key={org.id || index}
-                onClick={() => handleSelectOrg(org.id, org.name)}
-                className={`card bg-base-100 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer border-2 ${
-                    formState.selectedOrg?.id === org.id 
-                        ? 'border-primary bg-primary/5' 
-                        : 'border-transparent hover:border-base-300'
-                }`}
-            >
-                <div className="card-body p-4">
-                    <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${
-                            formState.selectedOrg?.id === org.id 
-                                ? 'bg-primary text-primary-content' 
-                                : 'bg-base-200'
-                        }`}>
-                            <Building2 size={20} />
-                        </div>
-                        <div className="flex-1">
-                            <h3 className="font-semibold text-base-content">{org.name}</h3>
-                            <p className="text-sm text-base-content/70">ID: {org.id}</p>
-                        </div>
-                        {formState.selectedOrg?.id === org.id && (
-                            <CheckCircle className="text-primary" size={20} />
-                        )}
-                    </div>
-                </div>
-            </div>
-        ))
-    ), [filteredOrganizations, formState.selectedOrg, handleSelectOrg]);
 
     if (formState.isLoading || isInitialLoading) {
         return <LoadingSpinner />;
@@ -109,7 +96,7 @@ function Page({ params }) {
     return (
         <div className="flex min-h-screen bg-base-200 p-6 gap-6">
             {/* Organizations List */}
-            <div className="w-96 bg-base-100 rounded-xl shadow-sm p-6 h-[calc(100vh-3rem)]">
+            <div className="w-[35rem] bg-base-100 rounded-xl shadow-sm p-6 h-[calc(100vh-3rem)]">
                 <div className="flex items-center gap-2 mb-6">
                     <Building2 className="text-primary" size={24} />
                     <h2 className="text-xl font-bold text-base-content">Organizations</h2>
@@ -130,10 +117,10 @@ function Page({ params }) {
                 
                 <div className="space-y-3 max-h-[calc(100vh-12rem)] overflow-y-auto">
                     {renderedOrganizations.length > 0 ? (
-                        renderedOrganizations
+                        renderedOrganizations(organizations, formState, handleSelectOrg)
                     ) : (
                         <div className="text-center py-8 text-base-content/70">
-                            <Building2 size={48} className="mx-auto mb-2 opacity-50" />
+                            <BuildingIcon size={48} className="mx-auto mb-2 opacity-50" />
                             <p>No organizations found</p>
                         </div>
                     )}
@@ -141,87 +128,103 @@ function Page({ params }) {
             </div>
 
             {/* Authentication Verification Section */}
-            <div className="flex-1 bg-base-100 rounded-xl shadow-sm p-6 h-[calc(100vh-3rem)]">
-                <div className="flex items-center gap-2 mb-6">
-                    <Shield className="text-secondary" size={24} />
-                    <h2 className="text-xl font-bold text-base-content">Authentication Verification</h2>
-                </div>
-
-                {formState.selectedOrg ? (
-                    <div className="space-y-6 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2">
-                        {/* Selected Organization Info */}
-                        <div className="card bg-base-200 shadow-sm">
-                            <div className="card-body">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="p-3 bg-primary rounded-lg">
-                                        <Building2 className="text-primary-content" size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-base-content">
-                                            {formState.selectedOrg.name}
-                                        </h3>
-                                        <p className="text-sm text-base-content/70">
-                                            Organization ID: {formState.selectedOrg.id}
-                                        </p>
-                                    </div>
-                                </div>
-                                
-                                <div className="divider"></div>
-                                
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircle className="text-success" size={16} />
-                                        <span className="text-sm">Organization selected for authentication</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <AlertCircle className={`${formState.clientId && formState.redirectionUrl ? 'text-success' : 'text-warning'}`} size={16} />
-                                        <span className="text-sm">
-                                            {formState.clientId && formState.redirectionUrl 
-                                                ? 'Authentication configuration completed' 
-                                                : 'Please fill in required authentication fields'}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Shield className="text-info" size={16} />
-                                        <span className="text-sm">Security protocols will be validated</span>
-                                    </div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 w-full">
+                <div className="w-full max-w-md">
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                        {/* Header */}
+                        <div className="bg-blue-600 text-white p-6 text-center">
+                            <div className="flex justify-center mb-3">
+                                <div className="p-3 bg-white/20 rounded-full">
+                                    <Shield size={24} />
                                 </div>
                             </div>
+                            <h1 className="text-xl font-bold">Authorization Request</h1>
+                            <p className="text-blue-100 text-sm mt-1">OAuth 2.0 Authorization Flow</p>
                         </div>
 
+                        {/* Content */}
+                        <div className="p-6">
+                            {/* Request Details */}
+                            <div className="mb-6 bg-blue-50 p-4 rounded-lg">
+                                <div className="flex items-center gap-2 text-blue-900 font-medium mb-4">
+                                    <AlertCircle size={20} />
+                                    <span>Authorization Request Details</span>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 text-sm text-blue-800">
+                                        <User size={16} />
+                                        <span><strong>{formState.client_name}</strong> wants to access your Gateway organization</span>
+                                    </div>
+                                    {/* <div className="flex items-center gap-2 text-sm text-blue-800">
+                                        <Key size={16} />
+                                        <span>Client ID: {formState.clientId}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-blue-800">
+                                        <Link size={16} />
+                                        <span>Redirect URL: {formState.redirectionUrl}</span>
+                                    </div> */}
+                                </div>
+                            </div>
 
-                        {/* Verify Button */}
-                        <div className="flex justify-center">
-                            <button
-                                onClick={handleVerify}
-                                disabled={formState.isLoading || !formState.selectedOrg || !formState.clientId || !formState.redirectionUrl}
-                                className={`btn gap-2 ${
-                                    formState.selectedOrg && formState.clientId && formState.redirectionUrl 
-                                        ? 'btn-primary' 
-                                        : 'btn-disabled'
-                                }`}
-                            >
-                                {formState.isLoading ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                        Verifying...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Shield size={16} />
-                                        Verify Auth
-                                    </>
+                            {/* OAuth Info */}
+                            <div className="mb-6 border-l-4 border-blue-600 pl-4">
+                                <h3 className="font-semibold text-gray-900 mb-2">What you're authorizing:</h3>
+                                <ul className="space-y-2 text-sm text-gray-600">
+                                    <li className="flex items-center gap-2">
+                                        <Database size={16} className="text-blue-600" />
+                                        <span>Access to organization data</span>
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <Lock size={16} className="text-blue-600" />
+                                        <span>Secure API access</span>
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <ArrowRight size={16} className="text-blue-600" />
+                                        <span>Integration capabilities</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            {/* Organization Selection */}
+                            <div className="text-center mb-6">
+                                <p className="text-sm text-gray-600">
+                                    Select an organization to grant access to
+                                </p>
+                                {formState.selectedOrg && (
+                                    <div className="mt-2 text-blue-600 font-medium">
+                                        Selected: {formState.selectedOrg.name}
+                                    </div>
                                 )}
-                            </button>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3">
+                                <button
+                                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
+                                >
+                                    Deny Access
+                                </button>
+                                <button
+                                    onClick={handleVerify}
+                                    disabled={!formState.selectedOrg}
+                                    className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            Authorizing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle size={16} />
+                                            Grant Access
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                ) : (
-                    <div className="flex flex-col items-center justify-center h-[calc(100vh-12rem)] text-base-content/70">
-                        <Building2 size={64} className="mb-4 opacity-50" />
-                        <h3 className="text-lg font-semibold mb-2">No Organization Selected</h3>
-                        <p className="text-center">Please select an organization from the list to proceed with authentication verification.</p>
-                    </div>
-                )}
+                </div>
             </div>
         </div>
     );
