@@ -61,7 +61,6 @@ export const userDetailsReducer = createSlice({
         }
         return acc;
       }, {});
-      console.log(validUpdates)
       state.userDetails = {
         ...state.userDetails,
         ...validUpdates
