@@ -31,7 +31,7 @@ const Layout = ({ children }) => {
       setIsLoading(true);
 
       if (urlParamsObj.token) {
-        dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton, showGuide: false}));
+        dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton}));
         sessionStorage.setItem('proxy_token', urlParamsObj.token);
         sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
         sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
@@ -50,12 +50,12 @@ const Layout = ({ children }) => {
       const orgId = sessionStorage.getItem('gtwy_org_id');
 
       // Handle agent creation/configuration
-      if (messageData?.agent_nane) {
+      if (messageData?.agent_name) {
         const dataToSend = {
           service: "openai",
           model: "gpt-4o", 
-          name: messageData.agent_nane,
-          slugName: messageData.agent_nane,
+          name: messageData.agent_name,
+          slugName: messageData.agent_name,
           bridgeType: "api",
           type: "chat"
         };

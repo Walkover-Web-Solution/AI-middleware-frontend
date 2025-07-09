@@ -39,7 +39,7 @@ function BridgeVersionDropdown({ params }) {
 
     useEffect(() => {
         if (!params.version && bridgeVersionsArray.length > 0) {
-            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${publishedVersion ? publishedVersion : bridgeVersionsArray[0]}`);
+            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${publishedVersion?.length > 0 ? publishedVersion : bridgeVersionsArray[0]}`);
         }
     }, [params.version, bridgeVersionsArray]);
 
