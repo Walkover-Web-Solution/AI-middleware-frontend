@@ -22,7 +22,6 @@ const Page = ({params}) => {
   const  {authData}  = useCustomSelector((state) => ({
     authData: state?.authReducer?.authData[params?.org_id] || []
   }))
-  console.log(authData)
 
   const validateUrl = (value) => {
     try {

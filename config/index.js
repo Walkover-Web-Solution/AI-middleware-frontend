@@ -1063,3 +1063,13 @@ export const createNewAuth = async (data) => {
     return error;
   }
 }
+
+export const verifyAuth = async (data)=>{
+  try {
+    const respnse = await axios.post(`${URL}/auth/verify`, data)
+    return respnse
+  } catch (error) {
+    console.error(error)
+    return error
+  }
+}

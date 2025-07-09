@@ -6,7 +6,7 @@ const initialState = {
 };
 
 export const authDataReducer = createSlice({
-  name: "authReducer",
+  name: "authData",
   initialState,
   reducers: {
     fetchAllAuthData: (state, action) => {
@@ -14,6 +14,7 @@ export const authDataReducer = createSlice({
       if (!state.authData[orgId]) {
         state.authData[orgId] = [];
       }
+     if(data)
       state.authData[orgId] = [data];
     },
     addAuth: (state, action) => {
@@ -21,7 +22,7 @@ export const authDataReducer = createSlice({
       if (!state.authData[orgId]) {
         state.authData[orgId] = [];
       }
-      state.authData[orgId] = [data, ...state.authData[orgId]];
+      state.authData[orgId] = [data];
     }
   },
 });
