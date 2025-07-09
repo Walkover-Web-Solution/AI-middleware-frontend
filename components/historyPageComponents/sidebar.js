@@ -182,7 +182,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   }
 
   return (
-    <div className="drawer-side justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r relative" id="sidebar">
+    <div className="drawer-side h-full justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
       <div className="p-4 gap-3 flex flex-col">
         <div className="collapse collapse-arrow join-item border border-base-300">
@@ -435,12 +435,12 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       )}
       <div className="fixed bottom-2 left-12">
         {!isThreadSelectable && historyData?.length > 0 && (
-          <button onClick={() => setIsThreadSelectable(true)} className="btn btn-primary btn-sm">
+          <button onClick={() => setIsThreadSelectable(true)} className="btn btn-primary btn-sm ml-20">
             Generate Fine tuning file
           </button>
         )}
         {isThreadSelectable && (
-          <div className="flex gap-3">
+          <div className="flex gap-3 ml-20">
             <button
               onClick={() => openModal(MODAL_TYPE.FINE_TUNE_MODAL)}
               className="btn btn-primary"

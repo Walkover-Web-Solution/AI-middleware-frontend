@@ -76,7 +76,6 @@ function Home({ params, isEmbedUser }) {
     </div>,
     actualName: item?.name || "",
     slugName: item?.slugName || "",
-    prompt: item.configuration?.prompt || "",
     service: getIconOfService(item.service),
     bridgeType: item.bridgeType,
     status: item.status,
@@ -101,7 +100,6 @@ function Home({ params, isEmbedUser }) {
     </div>,
     actualName: item?.name || "",
     slugName: item?.slugName || "",
-    prompt: item.configuration?.prompt || "",
     service: item.service === 'openai' ? <OpenAiIcon /> : item.service,
     bridgeType: item.bridgeType,
     status: item.status,
@@ -242,65 +240,72 @@ function Home({ params, isEmbedUser }) {
                 </div>
               </div>
             ) : (
-
-              < div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-0' : ''}`}>
-                <div className="px-4 pt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between w-full ">
-                  <div className="sm:max-w-4xl w-full">
-                    <MainLayout>
+              <div className={`flex flex-col ${viewMode !== 'grid' ? 'lg:mx-0' : ''}`}>
+                <div className="px-2 pt-4">
+                  <MainLayout>
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
                       <PageHeader
                         title="Agents"
                         description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code."
                       />
-                    </MainLayout>
+                      <div className="flex-shrink-0 mt-4 sm:mt-0">
+                        <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ create new agent</button>
+                      </div>
+                    </div>
+                  </MainLayout>
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <input
                       ref={inputRef}
                       type="text"
                       placeholder="Search for agents (Ctrl/Cmd + K)"
-                      className="input input-bordered input-md w-80 mb-4"
+                      className="input input-bordered input-md w-full sm:w-80"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                  </div>
-                  <div className="join hidden sm:block">
-                    <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
-                      <LayoutGridIcon className="h-4 w-4" />
-                    </a>
-                    <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
-                      <TableIcon className="h-4 w-4" />
-                    </a>
+                    <div className="join hidden sm:block">
+                      <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
+                        <LayoutGridIcon className="h-4 w-4" />
+                      </a>
+                      <a onClick={() => setViewMode('table')} className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}>
+                        <TableIcon className="h-4 w-4" />
+                      </a>
+                    </div>
                   </div>
                 </div>
+
                 {viewMode === 'grid' ? (
                   <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 p-4">
                     {filteredUnArchivedBridges.slice().sort((a, b) => a.name?.localeCompare(b.name)).map((item) => (
                       renderBridgeCard(item)
                     ))}
                   </div>
-
                 ) : (
-                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'prompt', 'model', 'totalTokens', 'averageResponseTime']} sorting sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
+                  <CustomTable data={UnArchivedBridges} columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} sorting sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'model']} endComponent={EndComponent} />
                 )}
-                {filteredArchivedBridges?.length > 0 && <div className="">
-                  <div className="flex justify-center items-center my-4">
-                    <p className="border-t border-base-300 w-full"></p>
-                    <p className="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
-                      Archived Agents
-                    </p>
-                    <p className="border-t border-base-300 w-full"></p>
+                
+                {filteredArchivedBridges?.length > 0 && (
+                  <div className="">
+                    <div className="flex justify-center items-center my-4">
+                      <p className="border-t border-base-300 w-full"></p>
+                      <p className="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+                        Archived Agents
+                      </p>
+                      <p className="border-t border-base-300 w-full"></p>
+                    </div>
+                    {viewMode === 'grid' ? (
+                      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 opacity-50">
+                        {filteredArchivedBridges.slice().sort((a, b) => a.name?.localeCompare(b.name)).map((item) => (
+                          renderBridgeCard(item)
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="opacity-60">
+                        <CustomTable data={ArchivedBridges} columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} sorting sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
+                      </div>
+                    )}
                   </div>
-                  {viewMode === 'grid' ? (
-                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 opacity-50">
-                      {filteredArchivedBridges.slice().sort((a, b) => a.name?.localeCompare(b.name)).map((item) => (
-                        renderBridgeCard(item)
-                      ))}
-                    </div>
-
-                  ) : (
-                    <div className="opacity-60">
-                      <CustomTable data={ArchivedBridges} columnsToShow={['name', 'prompt', 'model', 'totalTokens', 'averageResponseTime']} sorting sortingColumns={['name', 'model', 'totalTokens', 'averageResponseTime']} handleRowClick={(props) => onClickConfigure(props?._id, props?.versionId)} keysToExtractOnRowClick={['_id', 'versionId']} keysToWrap={['name', 'prompt', 'model']} endComponent={EndComponent} />
-                    </div>
-                  )}
-                </div>}
+                )}
               </div>
             )}
           </div>
