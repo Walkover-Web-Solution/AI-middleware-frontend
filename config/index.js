@@ -1043,3 +1043,23 @@ export const generateGtwyAccessTokenApi = async () => {
     return error;
   }
 }
+
+export const getAuthData = async () => {
+  try {
+    const response = await axios.get(`${URL}/auth/`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const createNewAuth = async (data) => {
+  try {
+    const response = await axios.post(`${URL}/auth/`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
