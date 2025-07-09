@@ -240,9 +240,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                               }`}
                             onClick={() => selectMessageType(0)}
                           >
-                            <div className="tooltip tooltip-left" data-tip="Chatbot Response">
+                            <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" placement="left" tooltipContent="Chatbot Response">
                               <BotIcon className="" size={16} />
-                            </div>
+                            </InfoTooltip>
                           </button>
                         </li>
                       )}
@@ -252,9 +253,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                             }`}
                           onClick={() => selectMessageType(1)}
                         >
-                          <div className="tooltip tooltip-left" data-tip="Normal Response">
+                          <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" placement="right" tooltipContent="Normal Response">
                             <CodeMessageIcon className="" size={16} />
-                          </div>
+                          </InfoTooltip>
                         </button>
                       </li>
                       {item.updated_message && (
@@ -264,9 +266,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                               }`}
                             onClick={() => selectMessageType(2)}
                           >
-                            <div className="tooltip tooltip-left" data-tip="Updated Message">
+                            <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" placement="left" tooltipContent="Updated Message">
                               <PencilIcon className="" size={16} />
-                            </div>
+                            </InfoTooltip>
                           </button>
                         </li>
                       )}

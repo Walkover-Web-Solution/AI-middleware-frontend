@@ -1,4 +1,5 @@
 import { CopyIcon, RedoIcon, UndoIcon } from '@/components/Icons'
+import InfoTooltip from '@/components/InfoTooltip'
 import React from 'react'
 
 const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handleRedo = () => { }, copyToClipboard = () => { }, copyText = "", currentIndex = 0, promptHistory = [], displayPrompt = "", errorMessage = "", key}) => {
@@ -95,25 +96,28 @@ const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handle
                         <span className="inline-block w-4 h-4 bg-yellow-100 rounded mr-2 ml-4"></span>Modified
                     </div>
                     {key === "prompt" && <div className="flex gap-2">
-                        <div className="tooltip cursor-pointer" data-tip="Previous Prompt">
+                        <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto"   tooltipContent="Previous Prompt">
                             <UndoIcon
                                 onClick={handleUndo}
                                 className={`${(!currentIndex || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
                             />
-                        </div>
-                        <div className="tooltip tooltip-left cursor-pointer" data-tip="Next Prompt">
+                        </InfoTooltip>
+                        <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" tooltipContent="Next Prompt">
                             <RedoIcon
                                 onClick={handleRedo}
                                 className={`${((currentIndex >= promptHistory.length - 1) || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
                             />
-                        </div>
-                        <div className="tooltip tooltip-left cursor-pointer" data-tip={copyText}>
+                        </InfoTooltip>
+                        <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" tooltipContent={copyText} placement='left'>
                             <CopyIcon
                                 onClick={copyToClipboard}
                                 size={20}
                                 className={`${(!displayPrompt || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
                             />
-                        </div>
+                        </InfoTooltip>
                     </div>}
                 </div>
             )}
