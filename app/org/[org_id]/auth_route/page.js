@@ -7,10 +7,12 @@ import { useDispatch } from 'react-redux'
 import { createAuth, getAuthDataAction } from '@/store/action/authAction'
 import CustomTable from "@/components/customTable/customTable"
 import { openModal } from '@/utils/utility'
-import { MODAL_TYPE } from '@/utils/enums'
+import { AUTH_COLUMNS, MODAL_TYPE } from '@/utils/enums'
 import AuthDataModal from '@/components/modals/AuthDataModal'
 
-const AUTH_COLUMNS = ['name', 'redirection_url', 'client_id']
+export const runtime = 'edge';
+
+
 
 const Page = ({params}) => {
   const [name, setName] = useState('')
