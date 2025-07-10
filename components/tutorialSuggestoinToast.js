@@ -1,9 +1,9 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { TUTORIALS } from "@/utils/enums";
-import { Play, X, Clock } from "lucide-react";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
+import { ClockIcon, PlayIcon } from "./Icons";
 
 const TIMER_DURATION = 10;
 
@@ -126,7 +126,7 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
               className="btn btn-primary btn-xs flex-1 gap-1" 
               aria-label="Start tutorial"
             >
-              <Play className="h-3 w-3" fill="currentColor" />
+              <PlayIcon className="h-3 w-3" fill="currentColor" />
               Start Tutorial
             </button>
             <button
@@ -140,7 +140,7 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
 
           {/* Timer indicator */}
           <div className="flex items-center justify-center gap-2 text-xs text-base-content/60">
-            <Clock className="h-3 w-3" />
+            <ClockIcon className="h-3 w-3" />
             <span>Auto-skip in {timeLeft}s</span>
             <div className="flex gap-1" role="presentation">
               {[0, 0.2, 0.4].map((delay, index) => (

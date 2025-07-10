@@ -30,7 +30,6 @@ const KnowledgebaseList = ({ params }) => {
         };
     });
 
-
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
     const [tutorialState, setTutorialState] = useState({
@@ -101,20 +100,20 @@ const KnowledgebaseList = ({ params }) => {
         <div className="label flex-col items-start p-0">
             <div className='label flex-col items-start mb-2'>
 
-                {Array.isArray(knowbaseVersionData) && knowbaseVersionData.length > 0 && shouldToolsShow && (
-                    <>
-                        <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
+                {Array.isArray(knowbaseVersionData) && shouldToolsShow && knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
+                    <React.Fragment>
+                        <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."}>
                             <p className="label-text font-medium whitespace-nowrap mb-2 info">KnowledgeBase</p>
                         </InfoModel>
                         <div className="flex flex-wrap gap-4 mb-2">
                             {renderKnowledgebase}
                         </div>
-                    </>
+                    </React.Fragment>
                 )}
             </div>
-            {Array.isArray(knowbaseVersionData) && knowbaseVersionData.length === 0 && (
-                <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
-                    <p className=" label-text info mb-2">Knowledgebase Configuration</p>
+            {!Array.isArray(knowbaseVersionData) || !knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
+                <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."}>
+                    <p className="label-text info mb-2">Knowledgebase Configuration</p>
                 </InfoModel>
             )}
             <div className="dropdown dropdown-right">

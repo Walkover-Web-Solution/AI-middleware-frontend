@@ -483,3 +483,6 @@ export const updateTitle = (newTitle) => {
     return { fields, required_params };
 };
 
+export function toBoolean(str) {
+    return str === "true";
+  }
