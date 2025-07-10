@@ -100,15 +100,27 @@ const KnowledgebaseList = ({ params }) => {
 
     return (
         <div className="label flex-col items-start p-0">
-            <div className="flex flex-wrap gap-4 mb-4">
-                {shouldToolsShow&&renderKnowledgebase}
+            <div className='label flex-col items-start mb-2'>
+
+                {Array.isArray(knowbaseVersionData) && knowbaseVersionData.length > 0 && shouldToolsShow && (
+                    <>
+                        <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
+                            <p className="label-text font-medium whitespace-nowrap mb-2 info">KnowledgeBase</p>
+                        </InfoTooltip>
+                        <div className="flex flex-wrap gap-4 mb-2">
+                            {renderKnowledgebase}
+                        </div>
+                    </>
+                )}
             </div>
-            <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+            {Array.isArray(knowbaseVersionData) && knowbaseVersionData.length === 0 && (
+                <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
               rounded-md shadow-xl text-xs animate-in fade-in zoom-in
               border border-gray-700 space-y-2 pointer-events-auto
             '>
-                <p className=" label-text info mb-2">Knowledgebase Configuration</p>
-            </InfoTooltip>
+                    <p className=" label-text info mb-2">Knowledgebase Configuration</p>
+                </InfoTooltip>
+            )}
             <div className="dropdown dropdown-right">
                 <div className='flex items-center gap-2'>
                     <button tabIndex={0} className="btn btn-outline btn-sm mt-0" 
