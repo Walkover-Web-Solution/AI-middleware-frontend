@@ -209,9 +209,9 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
               </label>
               <div className="relative">
                 <div className="mockup-code">
-                  <pre data-prefix=">"><code className="text-warning">window.openGtwy()</code><code> //To open GTWY</code></pre>
-                  <pre data-prefix=">"><code className="text-warning">window.closeGtwy()</code><code> //To Close GTWY</code></pre>
-                  <pre data-prefix=">"><code className="text-warning">window.openGtwy({`{"agent_id":"your gtwy agentid"}`})</code><code> // Open GTWY with specific agent</code></pre>
+                  <pre data-prefix=">"><code className="text-warning">window.openGtwy()</code><code>{" //To open GTWY"}</code></pre>
+                  <pre data-prefix=">"><code className="text-warning">window.closeGtwy()</code><code>{" //To Close GTWY"}</code></pre>
+                  <pre data-prefix=">"><code className="text-warning">window.openGtwy({`{"agent_id":"your gtwy agentid"}`})</code><code>{" // Open GTWY with specific agent"}</code></pre>
                 </div>
                 <CopyButton
                   data={helperFunctions}
@@ -234,11 +234,11 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
               <div className="relative">
                 <div className="mockup-code">
                   <pre data-prefix=">"><code className="text-error">window.GtwyEmbed.sendDataToGtwy({`{`}</code></pre>
-                  <pre data-prefix=">"><code className="text-error">  hideHomeButton: </code><code className="text-warning">true</code><code>, // Hide home button</code></pre>
-                  <pre data-prefix=">"><code className="text-error">  showGuide: </code><code className="text-warning">false</code><code>, // Hide agent guide</code></pre>
-                  <pre data-prefix=">"><code className="text-error">  showConfigType: </code><code className="text-warning">false</code><code>, // Hide chatbot and config types</code></pre>
-                  <pre data-prefix=">"><code className="text-error">  agent_name: </code><code className="text-warning">"New Agent"</code><code>, // Create bridge with agent name</code></pre>
-                  <pre data-prefix=">"><code className="text-error">  agent_id: </code><code className="text-warning">"your_agent_id"</code><code> // Redirect to specific agent</code></pre>
+                  <pre data-prefix=">"><code className="text-error">  hideHomeButton: </code><code className="text-warning">true</code><code>{", // Hide home button"}</code></pre>
+                  <pre data-prefix=">"><code className="text-error">  showGuide: </code><code className="text-warning">false</code><code>{", // Hide agent guide"}</code></pre>
+                  <pre data-prefix=">"><code className="text-error">  showConfigType: </code><code className="text-warning">false</code><code>{", // Hide chatbot and config types"}</code></pre>
+                  <pre data-prefix=">"><code className="text-error">  agent_name: </code><code className="text-warning">"New Agent"</code><code>{", // Create bridge with agent name"}</code></pre>
+                  <pre data-prefix=">"><code className="text-error">  agent_id: </code><code className="text-warning">"your_agent_id"</code><code>{" // Redirect to specific agent"}</code></pre>
                   <pre data-prefix=">"><code className="text-error">{`});`}</code></pre>
                 </div>
                 <CopyButton

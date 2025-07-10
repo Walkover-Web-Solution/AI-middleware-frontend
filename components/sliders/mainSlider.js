@@ -158,7 +158,7 @@ function MainSlider({ isEmbedUser }) {
   /** Close sidebar on outside click when in sub-routes */
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (pathParts.length > 3 && isOpen) {
+      if (pathParts.length > 4 && isOpen) {
         const sidebar = document.querySelector('.sidebar'); // Assuming sidebar has this class
         if (sidebar && !sidebar.contains(e.target)) {
           setIsOpen(false);
