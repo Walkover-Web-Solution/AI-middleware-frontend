@@ -246,7 +246,7 @@ function Home({ params, isEmbedUser }) {
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
                       <PageHeader
                         title="Agents"
-                        description="A seamless integration layer that lets you connect with AI models effortlessly, without the hassle of complex configuration or boilerplate code."
+                        description="Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."
                         docLink="https://blog.gtwy.ai/features/bridge"
                       />
                       <div className="flex-shrink-0 mt-4 sm:mt-0">

@@ -95,7 +95,7 @@ const Page = ({ params }) => {
           <PageHeader
             title="Integration"
             description="A repository where you can provide integration data that the AI uses to generate accurate and context-aware responses."
-            docLink="https://blog.gtwy.ai/integeration"
+            docLink="https://app.docstar.io/p/features/gtwy-embed--1?collectionId=inYU67SKiHgW"
           />
           <div className="flex-shrink-0 mt-4 sm:mt-0">
             <button 
