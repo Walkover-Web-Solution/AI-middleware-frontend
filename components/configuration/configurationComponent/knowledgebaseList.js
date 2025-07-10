@@ -101,7 +101,7 @@ const KnowledgebaseList = ({ params }) => {
 
                 {Array.isArray(knowbaseVersionData) && shouldToolsShow && knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
                     <React.Fragment>
-                        <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} docLink="https://blog.gtwy.ai/features/knowledgebase">
+                        <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."}>
                             <p className="label-text font-medium whitespace-nowrap mb-2 info">KnowledgeBase</p>
                         </InfoTooltip>
                         <div className="flex flex-wrap gap-4 mb-2">
@@ -111,7 +111,7 @@ const KnowledgebaseList = ({ params }) => {
                 )}
             </div>
             {!Array.isArray(knowbaseVersionData) || !knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
-                <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} docLink="https://blog.gtwy.ai/features/knowledgebase">
+                <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} >
                     <p className="label-text info mb-2">Knowledgebase Configuration</p>
                 </InfoTooltip>
             )}
