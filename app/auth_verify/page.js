@@ -4,7 +4,7 @@ import { filterOrganizations, renderedOrganizations } from '@/utils/utility';
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import Protected from '@/components/protected';
 import LoadingSpinner from '@/components/loadingSpinner';
-import { Search, Building2, Shield, CheckCircle, Lock, User, Database, Key, Link, AlertCircle, ArrowRight } from 'lucide-react';
+import { Search, Building2, Shield, CheckCircle, Lock, User, Database, Key, Link, AlertCircle, ArrowRight, XCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { getClientInfo, switchOrg, verifyAuth } from '@/config';
 import { BuildingIcon } from '@/components/Icons';
@@ -17,10 +17,15 @@ const Page = ({ params }) => {
         clientId: '',
         redirectionUrl: '',
         state: '',
-        client_name: ''
+        client_name: '',
+        isClientVerified: false
     });
     const [isInitialLoading, setIsInitialLoading] = useState(false);
     const [isLoading, setisLoading] = useState();
+    const [missingParams, setMissingParams] = useState({
+        clientId: false,
+        redirectionUrl: false
+    });
 
     const searchParams = useSearchParams();
 
@@ -30,10 +35,24 @@ const Page = ({ params }) => {
             const redirectionUrl = searchParams.get('redirection_url');
             const state = searchParams.get('state');
 
+            setMissingParams({
+                clientId: !clientId,
+                redirectionUrl: !redirectionUrl
+            });
+
             if (clientId || redirectionUrl || state) {
                 if (clientId) {
-                    const res = await getClientInfo(clientId);
-                    updateFormState({client_name: res?.result?.name})
+                    try {
+                        const res = await getClientInfo(clientId);
+                        updateFormState({
+                            client_name: res?.result?.name,
+                            isClientVerified: true
+                        });
+                    } catch (error) {
+                        updateFormState({
+                            isClientVerified: false
+                        });
+                    }
                 }
                 updateFormState({
                     clientId: clientId || '',
@@ -73,7 +92,7 @@ const Page = ({ params }) => {
     }, [updateFormState]);
 
     const handleVerify = useCallback(async() => {
-        if (!formState.selectedOrg) return;
+        if (!formState.selectedOrg || !formState.isClientVerified) return;
         
         updateFormState({ isLoading: true });
         const data = {
@@ -83,11 +102,8 @@ const Page = ({ params }) => {
         }
         const res = await verifyAuth(data)
         updateFormState({ isLoading: false });
-    }, [formState.selectedOrg, updateFormState]);
+    }, [formState.selectedOrg, formState.isClientVerified, updateFormState]);
 
-    const filteredOrganizations = useMemo(() =>
-        filterOrganizations(organizations, formState.searchQuery),
-        [organizations, formState.searchQuery]);
 
     if (formState.isLoading || isInitialLoading) {
         return <LoadingSpinner />;
@@ -150,20 +166,55 @@ const Page = ({ params }) => {
                                     <AlertCircle size={20} />
                                     <span>Authorization Request Details</span>
                                 </div>
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2 text-sm text-blue-800">
+                                
+                                {/* Verification Status Cards */}
+                                <div className="space-y-4 mb-4">
+                                    {/* Client ID Status */}
+                                    <div className={`p-3 rounded-lg flex items-center justify-between ${missingParams.clientId ? 'bg-red-100' : 'bg-green-100'}`}>
+                                        <div className="flex items-center gap-2">
+                                            <Key size={16} className={missingParams.clientId ? 'text-red-600' : 'text-green-600'} />
+                                            <span className="text-sm">Client ID</span>
+                                        </div>
+                                        {missingParams.clientId ? (
+                                            <XCircle className="text-red-600" size={20} />
+                                        ) : (
+                                            <CheckCircle className="text-green-600" size={20} />
+                                        )}
+                                    </div>
+
+                                    {/* Redirection URL Status */}
+                                    <div className={`p-3 rounded-lg flex items-center justify-between ${missingParams.redirectionUrl ? 'bg-red-100' : 'bg-green-100'}`}>
+                                        <div className="flex items-center gap-2">
+                                            <Link size={16} className={missingParams.redirectionUrl ? 'text-red-600' : 'text-green-600'} />
+                                            <span className="text-sm">Redirection URL</span>
+                                        </div>
+                                        {missingParams.redirectionUrl ? (
+                                            <XCircle className="text-red-600" size={20} />
+                                        ) : (
+                                            <CheckCircle className="text-green-600" size={20} />
+                                        )}
+                                    </div>
+
+                                    {/* Client Verification Status */}
+                                    <div className={`p-3 rounded-lg flex items-center justify-between ${!formState.isClientVerified ? 'bg-red-100' : 'bg-green-100'}`}>
+                                        <div className="flex items-center gap-2">
+                                            <User size={16} className={!formState.isClientVerified ? 'text-red-600' : 'text-green-600'} />
+                                            <span className="text-sm">Client Verification</span>
+                                        </div>
+                                        {!formState.isClientVerified ? (
+                                            <XCircle className="text-red-600" size={20} />
+                                        ) : (
+                                            <CheckCircle className="text-green-600" size={20} />
+                                        )}
+                                    </div>
+                                </div>
+
+                                {formState.isClientVerified && (
+                                    <div className="flex items-center gap-2 text-sm text-blue-800 mt-4">
                                         <User size={16} />
                                         <span><strong>{formState.client_name}</strong> wants to access your Gateway organization</span>
                                     </div>
-                                    {/* <div className="flex items-center gap-2 text-sm text-blue-800">
-                                        <Key size={16} />
-                                        <span>Client ID: {formState.clientId}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-blue-800">
-                                        <Link size={16} />
-                                        <span>Redirect URL: {formState.redirectionUrl}</span>
-                                    </div> */}
-                                </div>
+                                )}
                             </div>
 
                             {/* OAuth Info */}
@@ -206,7 +257,7 @@ const Page = ({ params }) => {
                                 </button>
                                 <button
                                     onClick={handleVerify}
-                                    disabled={!formState.selectedOrg}
+                                    disabled={!formState.selectedOrg || !formState.isClientVerified || missingParams.clientId || missingParams.redirectionUrl}
                                     className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {isLoading ? (
