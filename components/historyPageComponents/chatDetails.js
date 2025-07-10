@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
 import { truncate, useCloseSliderOnEsc } from "./assistFile";
+import InfoTooltip from "../InfoTooltip";
 
 const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) => {
   if (selectedItem) {
@@ -141,13 +142,15 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                                 {truncate(JSON.stringify(displayValue, null, 2), 210)}
                               </pre>
                               {key === "variables" && displayValue && (
+                                <InfoTooltip className="z-low-medium w-28 h-5 pt-2 pb-3 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" tooltipContent="Copy variables" placement="left">
                                 <div
-                                  className={`absolute top-2 right-2 tooltip tooltip-primary tooltip-left hover:bg-base-300 p-2 rounded-full cursor-pointer transition-colors duration-200`}
+                                  className={`absolute top-2 right-2  hover:bg-base-300 p-2 rounded-full cursor-pointer transition-colors duration-200`}
                                   onClick={(e) => copyToClipboard(displayValue)}
-                                  data-tip="Copy variables"
                                 >
                                   <CopyIcon size={18} className="text-base-content" />
-                                </div>
+                                </div>|
+                                </InfoTooltip>
                               )}
                             </div>
                           ) : (

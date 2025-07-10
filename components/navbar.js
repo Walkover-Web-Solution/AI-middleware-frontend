@@ -14,6 +14,7 @@ import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import ConfigHistorySlider from './sliders/configHistorySlider';
 import Protected from './protected';
+import InfoTooltip from './InfoTooltip';
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,

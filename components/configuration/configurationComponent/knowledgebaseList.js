@@ -9,9 +9,9 @@ import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import GoogleDocIcon from '@/icons/GoogleDocIcon';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
-import InfoModel from '@/components/infoModel';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { InfoIcon } from 'lucide-react';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const KnowledgebaseList = ({ params }) => {
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
@@ -102,9 +102,9 @@ const KnowledgebaseList = ({ params }) => {
 
                 {Array.isArray(knowbaseVersionData) && shouldToolsShow && knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
                     <React.Fragment>
-                        <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."}>
+                        <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in border border-gray-700 space-y-2 pointer-events-auto'>
                             <p className="label-text font-medium whitespace-nowrap mb-2 info">KnowledgeBase</p>
-                        </InfoModel>
+                        </InfoTooltip>
                         <div className="flex flex-wrap gap-4 mb-2">
                             {renderKnowledgebase}
                         </div>
@@ -112,10 +112,15 @@ const KnowledgebaseList = ({ params }) => {
                 )}
             </div>
             {!Array.isArray(knowbaseVersionData) || !knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
-                <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."}>
-                    <p className="label-text info mb-2">Knowledgebase Configuration</p>
-                </InfoModel>
+                
+                <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            '>
+                        <p className="label-text info mb-2">Knowledgebase Configuration</p>
+                    </InfoTooltip>
             )}
+            
             <div className="dropdown dropdown-right">
                 <div className='flex items-center gap-2'>
                     <button tabIndex={0} className="btn btn-outline btn-sm mt-0"
@@ -161,9 +166,11 @@ const KnowledgebaseList = ({ params }) => {
                                             <div className="flex items-center gap-2">
                                                 {GetFileTypeIcon(item?.type, 16, 16)}
                                                 {item?.name.length > 20 ? (
-                                                    <div className="tooltip" data-tip={item?.name}>
+                                                    <InfoTooltip className='z-low-medium p-2 w-32 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in border border-gray-700 space-y-2 pointer-events-auto' tooltipContent={item?.name}>
+
                                                         {truncate(item?.name, 20)}
-                                                    </div>
+        
+                                                    </InfoTooltip>
                                                 ) : (
                                                     truncate(item?.name, 20)
                                                 )}

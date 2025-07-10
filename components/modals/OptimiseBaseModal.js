@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import ComparisonCheck from '@/utils/comparisonCheck';
 import Canvas from '../Canvas';
 import Modal from '../UI/Modal';
+import InfoTooltip from '../InfoTooltip';
 
 function OptimiseBaseModal({
   modalType,
@@ -177,27 +178,30 @@ function OptimiseBaseModal({
                 <div className="label gap-2">
                   {showHistory && (
                     <>
-                      <div className="tooltip cursor-pointer" data-tip={`Previous ${contentLabel}`}>
+                      <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" placement='left' tooltipContent={`Previous ${contentLabel}`}>
                         <Undo
                           onClick={onUndo}
                           className={`${(!currentIndex || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
                         />
-                      </div>
-                      <div className="tooltip tooltip-left cursor-pointer" data-tip={`Next ${contentLabel}`}>
+                      </InfoTooltip>
+                      <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" placement='top' tooltipContent={`Next ${contentLabel}`}>
                         <Redo
                           onClick={onRedo}
                           className={`${((currentIndex >= history.length - 1) || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
                         />
-                      </div>
+                      </InfoTooltip>
                     </>
                   )}
-                  <div className="tooltip tooltip-left cursor-pointer" data-tip={copyText}>
+                  <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" placement='left' tooltipContent={copyText}>
                     <Copy
                       onClick={copyToClipboard}
                       size={20}
                       className={`${(!displayContent || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
                     />
-                  </div>
+                  </InfoTooltip>
                 </div>
               </div>
               <div className="relative">

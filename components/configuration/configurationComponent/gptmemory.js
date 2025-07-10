@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 import { PencilIcon } from '@/components/Icons';
 
 const GptMemory = ({ params }) => {
@@ -34,10 +34,13 @@ const GptMemory = ({ params }) => {
             <div className='flex  flex-row justify-center items-center w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center justify-center gap-1'>
                     <div className="label">
-                        <InfoModel tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
+                        <InfoTooltip tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            "'>
                         <span className="font-medium text-nowrap info ">Enable LLM-memory</span>
                         
-                        </InfoModel>
+                        </InfoTooltip>
                     </div>
                     <input
                         type="checkbox"
@@ -46,7 +49,9 @@ const GptMemory = ({ params }) => {
                         className="toggle"
                     />
                 </div>
-                <div className='tooltip tooltip-top flex justify-end' data-tip={"Customize the context you’d like the LLM to remember for future conversations; or else, it’ll store only your basic personal information by default."}>
+                <InfoTooltip placement='top' className='z-low-medium w-96 h-16 pt-2 pb-5 pl-3 pr-2 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto' tooltipContent='Customize the context you’d like the LLM to remember for future conversations; or else, it’ll store only your basic personal information by default.'>
+                <div className=' flex justify-end'>
                     {(gpt_memory && gpt_memory_context?.length === 0) && (
                         <button
                             onClick={() => setShowInput(!showInput)}
@@ -57,6 +62,7 @@ const GptMemory = ({ params }) => {
                         </button>
                     )}
                 </div>
+                </InfoTooltip>
             </div>
 
             {showInput && gpt_memory && (

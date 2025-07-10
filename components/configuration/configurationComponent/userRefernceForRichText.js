@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import InfoModel from '@/components/infoModel';
+
 import { PencilIcon } from '@/components/Icons';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const UserReferenceForRichText = ({ params }) => {
     const dispatch = useDispatch();
@@ -40,9 +41,12 @@ const UserReferenceForRichText = ({ params }) => {
             <div className='flex flex-col lg:flex-row justify-center items-center w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center justify-center gap-1'>
                     <div className="label">
-                        <InfoModel tooltipContent={"Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content."}>
+                        <InfoTooltip tooltipContent={"Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            '>
                             <span className="font-medium text-nowrap info">Rich Text Supported</span>
-                        </InfoModel>
+                        </InfoTooltip>
                     </div>
                     <input
                         type="checkbox"
@@ -51,7 +55,8 @@ const UserReferenceForRichText = ({ params }) => {
                         className="toggle"
                     />
                 </div>
-                <div className='tooltip tooltip-top flex justify-end' data-tip={"Customize rich text to enhance responses with UI elements like buttons, tables, and cards. Or else, responses will appear in plain text."}>
+                <InfoTooltip className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in border border-gray-700 space-y-2 pointer-events-auto' tooltipContent='Customize rich text to enhance responses with UI elements like buttons, tables, and cards. Or else, responses will appear in plain text.'>
+                <div className='flex justify-end' >
                     {(isRichText && user_reference?.trim()?.length === 0) && (
                         <button
                             onClick={() => setShowInput(!showInput)}
@@ -62,6 +67,7 @@ const UserReferenceForRichText = ({ params }) => {
                         </button>
                     )}
                 </div>
+                </InfoTooltip>
             </div>
             {showInput && isRichText && (
             <div className="mt-3">

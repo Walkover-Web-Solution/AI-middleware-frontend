@@ -10,7 +10,9 @@ import { useDispatch } from "react-redux";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import { openModal, toggleSidebar } from "@/utils/utility";
 import IntegrationModal from "@/components/modals/IntegrationModal";
+import InfoTooltip from "@/components/InfoTooltip";
 import GtwyIntegrationGuideSlider from "@/components/sliders/gtwyIntegrationGuideSlider";
+
 
 export const runtime = 'edge';
 
@@ -40,9 +42,11 @@ const Page = ({ params }) => {
     id: index,
     name: (
       <div className="flex gap-2">
-        <div className="tooltip" data-tip={item.name}>
+        <InfoTooltip className="z-low-medium h-2 pt-1 pb-5 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto" tooltipContent={item.name}>
           {truncate(item.name, 30)}
-        </div>
+        </InfoTooltip>
       </div>
     ),
     createdAt: new Date(item?.created_at).toLocaleString(),
