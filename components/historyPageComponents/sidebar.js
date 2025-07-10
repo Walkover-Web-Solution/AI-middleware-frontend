@@ -276,7 +276,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
           loader={<h4></h4>}
           scrollableTarget="sidebar"
         >
-          <div className="slider-container min-w-[40%] overflow-x-auto mb-16">
+          <div className="slider-container min-w-[40%] max-h-96 overflow-x-auto pb-10">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData?.map((item) => (
                 <div className={`${isThreadSelectable ? "flex" : "flex-col"}`} key={item?.thread_id}>

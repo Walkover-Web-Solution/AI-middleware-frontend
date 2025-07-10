@@ -135,7 +135,7 @@ function Page({ params }) {
           description="A unique key used to validate API requests for sending and receiving messages securely."
         />
         <div className="flex-shrink-0 mt-4 sm:mt-0">
-          <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new agent</button>
+          <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new Pauth key</button>
         </div>
       </div>
       </MainLayout>
