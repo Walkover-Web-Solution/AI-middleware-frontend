@@ -78,7 +78,7 @@ function OptimiseBaseModal({
   const handleCloseModal = () => {
     setErrorMessage("");
     setNewContent("");
-    setCurrentIndex(history.length)
+    setCurrentIndex(history.length-1)
     setStreamedContent("");
     setIsStreaming(false);
     setDiff(false);
@@ -118,7 +118,7 @@ function OptimiseBaseModal({
   };
 
   const displayContent = isStreaming ? streamedContent : newContent;
-  const textareaContent = (displayContent || isStreaming) ? (currentIndex === history.length ? content : displayContent) : '';
+  const textareaContent = displayContent || (currentIndex === history.length-1 ? content : history[currentIndex]);
 
   return (
     <Modal MODAL_ID={modalType}>

@@ -15,11 +15,11 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
   }));
 
   const [promptHistory, setPromptHistory] = useState(optimizePromptHistory);
-  const [currentIndex, setCurrentIndex] = useState(optimizePromptHistory.length);
+  const [currentIndex, setCurrentIndex] = useState(optimizePromptHistory.length-1);
 
   useEffect(() => {
     setPromptHistory(optimizePromptHistory);
-    setCurrentIndex(optimizePromptHistory.length);
+    setCurrentIndex(optimizePromptHistory.length-1);
   }, [optimizePromptHistory]);
 
   const handleOptimizeApi = async (instructionText, params) => {
