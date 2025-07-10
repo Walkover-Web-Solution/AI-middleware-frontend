@@ -1043,3 +1043,44 @@ export const generateGtwyAccessTokenApi = async () => {
     return error;
   }
 }
+
+export const getAuthData = async () => {
+  try {
+    const response = await axios.get(`${URL}/auth/`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const createNewAuth = async (data) => {
+  try {
+    const response = await axios.post(`${URL}/auth/`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const verifyAuth = async (data)=>{
+  try {
+    const respnse = await axios.post(`${URL}/auth/verify`, data)
+    return respnse
+  } catch (error) {
+    console.error(error)
+    return error
+  }
+}
+
+export const getClientInfo = async (client_id)=>{
+  try {
+    const respnse = await axios.get(`${URL}/auth/client_info?client_id=${client_id}`)
+    return respnse?.data
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
+
