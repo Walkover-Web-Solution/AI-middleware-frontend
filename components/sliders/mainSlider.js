@@ -29,6 +29,7 @@ import DemoModal from '../modals/DemoModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
+import { KeyIcon } from '../Icons';
 
 /* -------------------------------------------------------------------------- */
 /*                                    Consts                                  */
@@ -158,7 +159,7 @@ function MainSlider({ isEmbedUser }) {
   /** Close sidebar on outside click when in sub-routes */
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (pathParts.length > 3 && isOpen) {
+      if (pathParts.length > 4 && isOpen) {
         const sidebar = document.querySelector('.sidebar'); // Assuming sidebar has this class
         if (sidebar && !sidebar.contains(e.target)) {
           setIsOpen(false);
@@ -423,6 +424,16 @@ function MainSlider({ isEmbedUser }) {
                   >
                     <Settings2 size={14} className="shrink-0" />
                     <span className="truncate text-xs">Workspace</span>
+                  </button>
+
+                  <button
+                    onClick={()=>{
+                      router.push(`/org/${orgId}/auth_route`);
+                    }}
+                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
+                  >
+                    <KeyIcon size={14} className="shrink-0" />
+                    <span className="truncate text-xs">Auth 2.0</span>
                   </button>
 
                   <button

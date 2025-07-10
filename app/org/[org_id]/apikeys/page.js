@@ -104,7 +104,7 @@ const Page = () => {
             description="Add your model-specific API keys to enable and use different AI models in your chat."
           />
           <div className="flex-shrink-0 mt-4 sm:mt-0">
-            <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_API_KEY_MODAL)}>+ create new agent</button>
+            <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>+ create new api key</button>
           </div>
         </div>
       </MainLayout>

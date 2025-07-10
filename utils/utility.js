@@ -1,3 +1,4 @@
+import { BuildingIcon, CheckCircleIcon } from "@/components/Icons";
 import AnthropicIcon from "@/icons/AnthropicIcon";
 import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
@@ -486,3 +487,39 @@ export const updateTitle = (newTitle) => {
 export function toBoolean(str) {
     return str === "true";
   }
+
+
+export const renderedOrganizations = (organizations, formState, handleSelectOrg) => {
+    const filteredOrgs = filterOrganizations(organizations, formState.searchQuery);
+    
+    return filteredOrgs?.map((org, index) => (
+        <div
+            key={org.id || index}
+            onClick={() => handleSelectOrg(org.id, org.name)}
+            className={`card bg-base-100 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer border-2 ${
+                formState.selectedOrg?.id === org.id 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-transparent hover:border-base-300'
+            }`}
+        >
+            <div className="card-body p-4">
+                <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                        formState.selectedOrg?.id === org.id 
+                            ? 'bg-primary text-primary-content' 
+                            : 'bg-base-200'
+                    }`}>
+                        <BuildingIcon size={20} />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="font-semibold text-base-content">{org.name}</h3>
+                        <p className="text-sm text-base-content/70">ID: {org.id}</p>
+                    </div>
+                    {formState.selectedOrg?.id === org.id && (
+                        <CheckCircleIcon className="text-primary" size={20} />
+                    )}
+                </div>
+            </div>
+        </div>
+    ));
+};
