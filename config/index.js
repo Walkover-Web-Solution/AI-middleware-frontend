@@ -1080,7 +1080,7 @@ export const getClientInfo = async (client_id)=>{
     return respnse?.data
   } catch (error) {
     console.error(error)
-    return error
+    throw error
   }
 }
 

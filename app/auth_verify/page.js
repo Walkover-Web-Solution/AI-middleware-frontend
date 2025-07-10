@@ -166,48 +166,12 @@ const Page = ({ params }) => {
                                     <AlertCircle size={20} />
                                     <span>Authorization Request Details</span>
                                 </div>
-                                
-                                {/* Verification Status Cards */}
-                                <div className="space-y-4 mb-4">
-                                    {/* Client ID Status */}
-                                    <div className={`p-3 rounded-lg flex items-center justify-between ${missingParams.clientId ? 'bg-red-100' : 'bg-green-100'}`}>
-                                        <div className="flex items-center gap-2">
-                                            <Key size={16} className={missingParams.clientId ? 'text-red-600' : 'text-green-600'} />
-                                            <span className="text-sm">Client ID</span>
-                                        </div>
-                                        {missingParams.clientId ? (
-                                            <XCircle className="text-red-600" size={20} />
-                                        ) : (
-                                            <CheckCircle className="text-green-600" size={20} />
-                                        )}
+                                {!formState.isClientVerified && (
+                                    <div className="ml-2 flex items-center gap-2 text-sm text-red-800 mt-4">
+                                        <AlertCircle size={16} />
+                                        <span>Client verification failed. Please try Again</span>
                                     </div>
-
-                                    {/* Redirection URL Status */}
-                                    <div className={`p-3 rounded-lg flex items-center justify-between ${missingParams.redirectionUrl ? 'bg-red-100' : 'bg-green-100'}`}>
-                                        <div className="flex items-center gap-2">
-                                            <Link size={16} className={missingParams.redirectionUrl ? 'text-red-600' : 'text-green-600'} />
-                                            <span className="text-sm">Redirection URL</span>
-                                        </div>
-                                        {missingParams.redirectionUrl ? (
-                                            <XCircle className="text-red-600" size={20} />
-                                        ) : (
-                                            <CheckCircle className="text-green-600" size={20} />
-                                        )}
-                                    </div>
-
-                                    {/* Client Verification Status */}
-                                    <div className={`p-3 rounded-lg flex items-center justify-between ${!formState.isClientVerified ? 'bg-red-100' : 'bg-green-100'}`}>
-                                        <div className="flex items-center gap-2">
-                                            <User size={16} className={!formState.isClientVerified ? 'text-red-600' : 'text-green-600'} />
-                                            <span className="text-sm">Client Verification</span>
-                                        </div>
-                                        {!formState.isClientVerified ? (
-                                            <XCircle className="text-red-600" size={20} />
-                                        ) : (
-                                            <CheckCircle className="text-green-600" size={20} />
-                                        )}
-                                    </div>
-                                </div>
+                                )}
 
                                 {formState.isClientVerified && (
                                     <div className="flex items-center gap-2 text-sm text-blue-800 mt-4">
@@ -241,9 +205,9 @@ const Page = ({ params }) => {
                                 <p className="text-sm text-gray-600">
                                     Select an organization to grant access to
                                 </p>
-                                {formState.selectedOrg && (
+                                {formState.client_name && (
                                     <div className="mt-2 text-blue-600 font-medium">
-                                        Selected: {formState.selectedOrg.name}
+                                       {formState.client_name}
                                     </div>
                                 )}
                             </div>
