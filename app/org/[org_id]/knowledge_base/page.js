@@ -12,6 +12,7 @@ import { GetFileTypeIcon, openModal } from "@/utils/utility";
 import { BookIcon, EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
+import SearchItems from "@/components/UI/SearchItems";
 
 export const runtime = 'edge';
 
@@ -22,7 +23,7 @@ const Page = ({ params }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider] = useState(false);
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
-
+  const [filterKnowledgeBase,setFilterKnowledgeBase]=useState(knowledgeBaseData)
   useEffect(() => {
     const updateScreenSize = () => {
       if (window.matchMedia('(max-width: 640px)').matches) {
@@ -33,18 +34,13 @@ const Page = ({ params }) => {
     };
     dispatch(getAllKnowBaseDataAction(params?.org_id))
     updateScreenSize();
+    setFilterKnowledgeBase(knowledgeBaseData)
     window.addEventListener('resize', updateScreenSize);
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
-  const filteredKnowledgeBase = useMemo(() =>
-    knowledgeBaseData?.filter(item =>
-      item?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item?.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || []
-    , [knowledgeBaseData, searchTerm]);
 
-  const tableData = filteredKnowledgeBase.map(item => ({
+  const tableData = filterKnowledgeBase.map(item => ({
     ...item,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
@@ -106,13 +102,7 @@ const Page = ({ params }) => {
         </MainLayout>
         
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-          <input
-            type="text"
-            placeholder="Search knowledge base..."
-            className="input input-bordered w-full sm:w-80"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase}/>
           
           <div className="flex flex-wrap justify-end items-center gap-2">
             <button className="btn" onClick={() => setOpenKnowledgeBaseSlider(true)}>
@@ -137,10 +127,10 @@ const Page = ({ params }) => {
       </div>
 
       <div className="px-4">
-        {filteredKnowledgeBase.length > 0 ? (
+        {filterKnowledgeBase.length > 0 ? (
           viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredKnowledgeBase.map((item, index) => (
+              {filterKnowledgeBase.map((item, index) => (
                 <div
                   key={index}
                   className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"

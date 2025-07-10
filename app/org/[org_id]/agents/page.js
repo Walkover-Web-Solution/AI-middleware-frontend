@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import SearchItems from "@/components/UI/SearchItems";
 
 export const runtime = 'edge';
 
@@ -36,6 +37,7 @@ function Home({ params, isEmbedUser }) {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
+  const [filterBridges,setFilterBridges]=useState(allBridges);
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
     showSuggestion: isFirstBridgeCreation
@@ -50,15 +52,15 @@ function Home({ params, isEmbedUser }) {
       }
     };
     updateScreenSize();
+    setFilterBridges(allBridges)
     window.addEventListener('resize', updateScreenSize);
 
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
   
-  const filteredBridges = filterBridges(allBridges, searchTerm);
-  const filteredArchivedBridges = filteredBridges?.filter((item) => item.status === 0);
-  const filteredUnArchivedBridges = filteredBridges?.filter((item) => item.status === 1 || item.status === undefined);
+  const filteredArchivedBridges = filterBridges?.filter((item) => item.status === 0);
+  const filteredUnArchivedBridges = filterBridges?.filter((item) => item.status === 1 || item.status === undefined);
 
   const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
     _id: item._id,
@@ -289,14 +291,7 @@ function Home({ params, isEmbedUser }) {
                   </MainLayout>
                   
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      placeholder="Search for agents (Ctrl/Cmd + K)"
-                      className="input input-bordered input-md w-full sm:w-80"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                   <SearchItems data={allBridges} setFilterItems={setFilterBridges}/>
                     <div className="join hidden sm:block">
                       <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
                         <LayoutGridIcon className="h-4 w-4" />
