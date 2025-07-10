@@ -11,6 +11,7 @@ import { SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import DeleteModal from "@/components/UI/DeleteModal";
 
 export const runtime = 'edge';
 
@@ -43,19 +44,21 @@ const Page = () => {
 
   const deleteApikey = useCallback(
     (item) => {
-      if (window.confirm("Are you sure you want to delete this API key?")) {
-        dispatch(
+
+      dispatch(
           deleteApikeyAction({
             org_id: item.org_id,
             name: item.name,
             id: item._id,
           })
         );
-      }
-    },
+        
+      },
     [dispatch]
   );
-
+  const hanldeDelete=()=>{
+    openModal(MODAL_TYPE.DELETE_MODAL)
+  }
   const columns = API_KEY_COLUMNS || [];
 
   const dataWithIcons = apikeyData.map((item) => ({
@@ -75,7 +78,7 @@ const Page = () => {
         <div
           className="tooltip tooltip-primary"
           data-tip="delete"
-          onClick={() => deleteApikey(row)}
+          onClick={() => hanldeDelete()}
         >
           <TrashIcon size={16} />
         </div>
@@ -86,6 +89,12 @@ const Page = () => {
         >
           <SquarePenIcon size={16} />
         </div>
+        <DeleteModal
+          onConfirm={deleteApikey}
+          item={row}
+          title="Delete API Key"
+          description={`Are you sure you want to delete the API key "${row.name}"? This action cannot be undone.`}
+        />
       </div>
     );
   };
