@@ -78,7 +78,7 @@ const Page = () => {
               rounded-md shadow-xl text-xs animate-in fade-in zoom-in
               bordespace-y-2 space-x-2 pointer-events-auto"
           tooltipContent="delete"
-          
+
         >
           <TrashIcon size={16} onClick={() => deleteApikey(row)} />
         </InfoTooltip>
@@ -87,7 +87,7 @@ const Page = () => {
               rounded-md shadow-xl text-xs animate-in fade-in zoom-in
               bordespace-y-2 space-x-2 pointer-events-auto"
           tooltipContent="Update"
-         
+
         >
           <SquarePenIcon size={16}  onClick={() => handleUpdateClick(row)} />
         </InfoTooltip>

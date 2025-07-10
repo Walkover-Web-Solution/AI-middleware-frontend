@@ -163,16 +163,19 @@ const Page = ({ params }) => {
                   </div>
                   <div className="flex flex-col items-center w-full gap-2">
                     {GetFileTypeIcon(item?.type, 26, 26)}
-                    <InfoTooltip className="tooltip" data-tip={item?.name}>
+                    <InfoTooltip className="z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto" tooltipContent={item?.name}>
                       <h3 className="text-lg font-medium max-w-[90%] w-full">
                         {truncate(String(item?.name), 10)}
                       </h3>
                     </InfoTooltip>
-                    <div className="tooltip" data-tip={item?.description}>
+                    <InfoTooltip className="z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                 border border-gray-700 space-y-2 pointer-events-auto" tooltipContent={item?.description}>
                       <p className="text-sm text-base-content/70 max-w-[90%] w-full">
                         {truncate(item?.description, 20)}
                       </p>
-                    </div>
+                    </InfoTooltip>
                   </div>
                 </div>
               ))}

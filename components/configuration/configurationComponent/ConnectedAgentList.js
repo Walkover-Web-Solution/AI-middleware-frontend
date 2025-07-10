@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
 import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const ConnectedAgentList = ({ params }) => {
     const dispatch = useDispatch();
@@ -168,9 +168,11 @@ const ConnectedAgentList = ({ params }) => {
                         <div>
                             <div className="flex justify-between items-center">
                                 <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content flex items-center gap-2">
-                                    <div className="tooltip" data-tip={name?.length > 10 ? name : ""}>
+                                    <InfoTooltip className="z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto" tooltipContent={name?.length > 10 ? name : ""}>
                                         <span>{name?.length > 10 ? `${name.slice(0, 15)}...` : name}</span>
-                                    </div>
+                                    </InfoTooltip>
                                 </h1>
                                 {item?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
                             </div>
@@ -199,9 +201,9 @@ const ConnectedAgentList = ({ params }) => {
             <div className="label flex-col items-start mb-2">
                 {shouldToolsShow && Object.keys(connect_agents).length > 0 && (
                     <>
-                        <InfoModel tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                        <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents." className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in border border-gray-700 space-y-2 pointer-events-auto'>
                             <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
-                        </InfoModel>
+                        </InfoTooltip>
                         <div className="flex flex-wrap gap-4">
                             {renderEmbed}
                         </div>

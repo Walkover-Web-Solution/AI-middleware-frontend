@@ -305,7 +305,7 @@ const AddVariable = ({ params }) => {
               <div className="flex flex-col gap-4 max-h-56 overflow-y-auto mt-4 w-full items-start">
                 {keyValuePairs.length > 0 && <div className="flex items-center gap-2 w-full">
                   <InfoTooltip className="z-low-medium w-52 p-3 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
-              border border-gray-700 space-y-2 pointer-events-auto" tooltipContent="Mark checkbox if it is required" placement="right" >
+                   border border-gray-700 space-y-2 pointer-events-auto" tooltipContent="Mark checkbox if it is required" placement="right" >
                     <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
                       <InfoIcon className="w-4 h-4 text-base-content/70" />
                     </button>

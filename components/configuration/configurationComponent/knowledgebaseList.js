@@ -102,7 +102,7 @@ const KnowledgebaseList = ({ params }) => {
 
                 {Array.isArray(knowbaseVersionData) && shouldToolsShow && knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
                     <React.Fragment>
-                        <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."}>
+                        <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in border border-gray-700 space-y-2 pointer-events-auto'>
                             <p className="label-text font-medium whitespace-nowrap mb-2 info">KnowledgeBase</p>
                         </InfoTooltip>
                         <div className="flex flex-wrap gap-4 mb-2">
