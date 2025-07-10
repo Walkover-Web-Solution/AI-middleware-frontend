@@ -12,6 +12,8 @@ import { MODAL_TYPE } from '@/utils/enums';
 import AddTestCaseModal from '../modals/AddTestCaseModal';
 import LoadingSpinner from '../loadingSpinner';
 import HistoryPagePromptUpdateModal from '../modals/historyPagePromptUpdateModal';
+import { ChatLoadingSkeleton } from './ChatLayoutLoader';
+import { clearThreadData } from '@/store/reducer/historyReducer';
 import EditMessageModal from '../modals/EditMessageModal';
 
 
@@ -51,11 +53,11 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     }
     openModal(MODAL_TYPE.ADD_TEST_CASE_MODAL);
   };
-  
 
   useEffect(() => {
     let timeoutId;
-
+    dispatch(clearThreadData());
+    setLoadingData(true);
     const fetchData = async () => {
       const thread_id = params?.thread_id;
       const startDate = search.get("start"); 
@@ -282,7 +284,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         <div
           id="scrollableDiv"
           ref={historyRef}
-          className="w-full text-start flex flex-col h-screen overflow-y-auto"
+          className="w-full text-start flex flex-col h-screen overflow-y-auto relative"
           style={{
             height: "90vh",
             overflowY: "auto",
@@ -290,11 +292,13 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
             flexDirection: flexDirection,
           }}
         >
+          {/* Loading skeleton with absolute positioning */}
           {loadingData && (
-            <div>
-              <LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px' />
+            <div className="absolute inset-0 z-10 bg-base-100 backdrop-blur-sm">
+              <ChatLoadingSkeleton />
             </div>
           )}
+          
           {!loadingData && (!thread || thread.length === 0) ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500 text-lg">No history present</p>

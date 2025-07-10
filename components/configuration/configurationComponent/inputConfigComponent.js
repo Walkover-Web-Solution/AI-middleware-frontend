@@ -46,8 +46,8 @@ const InputConfigComponent = ({ params }) => {
         };
     }, [prompt, reduxPrompt]);
 
-    const savePrompt = useCallback((e) => {
-        const newValue = e?.target?.value || e || "";
+    const savePrompt = useCallback((newPrompt) => {
+        const newValue = newPrompt || "";
         setShowSuggestions(false);
         if (newValue !== reduxPrompt) {
             // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { prompt: newValue } } }));
@@ -297,7 +297,7 @@ const InputConfigComponent = ({ params }) => {
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
-            onBlur={savePrompt}
+            onBlur={(e)=>savePrompt(e.target.value)}
           />
           {showSuggestions && renderSuggestions()}
           <div className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 border-t-0 border border-base-300 rounded-t-none">

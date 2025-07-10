@@ -356,7 +356,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 }}>
                   {!item.image_url && getMessageToDisplay()}
                 </ReactMarkdown>
-                {!item.image_url && item?.role === 'assistant' && (
+                {!item.image_url && item?.role === 'assistant' && !item?.fromRTLayer && (
                   <div className="flex gap-2 tooltip absolute top-2 right-2 text-sm cursor-pointer" data-tip="Edit response">
                     <PencilIcon
                       size={16}

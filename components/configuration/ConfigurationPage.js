@@ -38,10 +38,12 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
     const view = searchParams.get('view') || 'config';
     const [currentView, setCurrentView] = useState(view);
 
-    const { bridgeType, modelType, modelName } = useCustomSelector((state) => ({
+    const { bridgeType, modelType, modelName, showGuide, showConfigType } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
         modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
+        showGuide: state.userDetailsReducer.userDetails.showGuide,
+        showConfigType: state.userDetailsReducer.userDetails.showConfigType,
     }));
 
     const handleNavigation = (target) => {
@@ -127,16 +129,16 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
     }, [bridgeType, params, modelType]);
 
     return (
-        <div className="flex flex-col gap-3 relative">
+        <div className="flex flex-col gap-3 relative mt-4">
             <div>
                 <BridgeNameInput params={params} />
                 <VersionDescriptionInput params={params} />
             </div>
-            <BridgeTypeToggle params={params} />
-            <div className="absolute right-0 top-0">
+            {((isEmbedUser && showConfigType) || !isEmbedUser) && <BridgeTypeToggle params={params} />}
+           {<div className="absolute right-0 top-0">
                 <div className="flex items-center">
                     <BridgeVersionDropdown params={params} />
-                    <div className="join group flex">
+                    {((isEmbedUser && showConfigType) || !isEmbedUser ) && <div className="join group flex">
                         <button
                             onClick={() => handleNavigation('config')}
                             className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
@@ -151,17 +153,16 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
                             <BotIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
                         </button>
-                        <button
+                        {((isEmbedUser && showGuide) || !isEmbedUser) && <button
                             onClick={() => handleNavigation('guide')}
                             className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
-                            
                             <FilterSliderIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'guide' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Integration Guide</span>
-                        </button>
-                    </div>
+                        </button>}
+                    </div>}
                 </div>
-            </div>
+            </div>}
             {currentView === 'chatbot-config' ? renderChatbotConfigView() : currentView === 'guide' ? renderGuideView() : renderSetupView()}
             {renderNeedHelp()}
         </div>

@@ -22,6 +22,7 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
+import { userDetails } from "@/store/action/userDetailsAction";
 
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -44,6 +45,13 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
+
+  useEffect(() => {
+    if (pathName.endsWith("agents") && !isEmbedUser) {
+      dispatch(userDetails());
+    }
+  }, [pathName]);
+
   useEffect(() => {
     const updateUserMeta = async () => {
       if (currentUser?.meta === null) {
@@ -58,6 +66,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
               AdvanceParameter: true,
               PauthKey: true,
               CompleteBridgeSetup: true,
+              TestCasesSetup:true
             },
           },
         };
@@ -281,31 +290,68 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     }
   }
 
-  const isHomePage = useMemo(() => path?.length < 5, [path]);
   if (!isValidOrg && !isEmbedUser) {
     return <ErrorPage></ErrorPage>;
   }
-  if (isHomePage && !isEmbedUser) {
+
+  if (!isEmbedUser) {
     return (
-      <div className="flex h-screen">
-        <div className=" flex flex-col  h-full">
-          <MainSlider />
+      <div className="h-screen flex flex-col overflow-hidden">
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <div className="flex flex-col h-full z-high">
+            <MainSlider params={params} />
+          </div>
+
+          {/* Main Content Area */}
+          <div className={`flex-1 ${path.length > 4 ? 'ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
+            {/* Sticky Navbar */}
+            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+              <Navbar params={params} />
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              <main className={`px-2 h-full ${path.length > 4 ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+            </div>
+          </div>
         </div>
-        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto overflow-x-hidden">
-          <Navbar />
-          {loading ? <LoadingSpinner /> :
-            <main className="px-2">{children}</main>
-          }
-        </div>
-        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <LoadingSpinner />
+          </div>
+        ) : null}
+
+        {/* Chat Details Sidebar */}
+        <ChatDetails
+          selectedItem={selectedItem}
+          setIsSliderOpen={setIsSliderOpen}
+          isSliderOpen={isSliderOpen}
+        />
       </div>
     );
-  } else {
+  }
+  else {
     return (
-      <div className="h-screen lg:overflow-hidden">
-        <Navbar />
-        {loading ? <LoadingSpinner /> : children}
-        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
+      <div className="h-screen flex flex-col overflow-hidden">
+          {/* Main Content Area for Embed Users */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Sticky Navbar */}
+            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+              <Navbar params={params} />
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <LoadingSpinner />
+                </div>
+              ) : (
+                <main className={`px-2 h-full ${path.length > 4 ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+              )}
+            </div>
+          </div>
       </div>
     );
   }

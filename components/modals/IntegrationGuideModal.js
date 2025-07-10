@@ -9,7 +9,7 @@ import Modal from '@/components/UI/Modal';
 
 const IntegrationGuideModal = ({ selectedIntegration = {}, params }) => {
     const dispatch = useDispatch();
-    const [copied, setCopied] = useState({ accessKey: false, jwtToken: false, script: false });
+    const [copied, setCopied] = useState({ accessKey: false, jwtToken: false, script: false, functions: false, interfaceData: false, eventListener: false });
     const gtwyAccessToken = useCustomSelector((state) =>
             state?.userDetailsReducer?.organizations?.[params.org_id]?.meta?.gtwyAccessToken || ""
         );
@@ -42,15 +42,38 @@ const IntegrationGuideModal = ({ selectedIntegration = {}, params }) => {
         `<script
     id="gtwy-main-script"
     embedToken="Your embed token"
-    src="https://gtwy.ai/gtwy.js"
+    src="https://app.gtwy.ai/gtwy.js"
     slide="left/right/full /* adjust the position of the gtwy */"
     defaultOpen="true /* open by default */"
     parentId="Your_parent_id /* parent id of the element where the gtwy will be embedded */"
+    hideFullScreenButton: true, /* Hide full-screen button */
+    hideCloseButton: true,    /* Hide close button */
+    hideHeader: true,         /* Hide header */
    ></script>`;
 
     const helperFunctions =
-        ` window.openGtwy();
-   window.closeGtwy();`;
+        `  window.openGtwy() //To open GTWY;
+    window.closeGtwy() //To Close GTWY;
+    window.openGtwy({"agent_id":"your gtwy agentid"}); // Open GTWY with specific agent`;
+
+    const interfaceData = 
+    `// Configure UI elements
+    window.GtwyEmbed.sendDataToGtwy({
+        hideHomeButton: true,      // Hide home button
+        showGuide: false,         // Hide agent guide
+        showConfigType: false,    // Hide chatbot and config types
+        agent_name: "New Agent",  // Create bridge with agent name
+        agent_id: "your_agent_id" // Redirect to specific agent
+    });`;
+
+    const eventListenerScript = 
+    `  <script>
+    window.addEventListener('message', (event) => {
+        if (event.data.type === 'gtwy') {
+            console.log('Received gtwy event:', event.data);
+        }
+    });
+    </script>`;
 
     const CopyButton = ({ data, onCopy, copied: isCopied }) => (
         <button
@@ -177,6 +200,54 @@ const IntegrationGuideModal = ({ selectedIntegration = {}, params }) => {
                                         data={helperFunctions}
                                         onCopy={() => handleCopy(helperFunctions, 'functions')}
                                         copied={copied.functions}
+                                        className="text-base-100"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Step 4: Interface Configuration */}
+                    <div className="card bg-base-100 border">
+                        <div className="card-body">
+                            <h4 className="card-title text-base">Step 4: Configure Interface</h4>
+
+                            <div className="form-control">
+                                <label className="label">
+                                    <span className="label-text">Send Data to GTWY</span>
+                                </label>
+                                <div className="relative">
+                                    <div className="mockup-code">
+                                        <pre><code>{interfaceData}</code></pre>
+                                    </div>
+                                    <CopyButton
+                                        data={interfaceData}
+                                        onCopy={() => handleCopy(interfaceData, 'interfaceData')}
+                                        copied={copied.interfaceData}
+                                        className="text-base-100"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Step 5: Event Listener */}
+                    <div className="card bg-base-100 border">
+                        <div className="card-body">
+                            <h4 className="card-title text-base">Step 5: Add Event Listener</h4>
+
+                            <div className="form-control">
+                                <label className="label">
+                                    <span className="label-text">Add this script to receive GTWY events</span>
+                                </label>
+                                <div className="relative">
+                                    <div className="mockup-code">
+                                        <pre><code>{eventListenerScript}</code></pre>
+                                    </div>
+                                    <CopyButton
+                                        data={eventListenerScript}
+                                        onCopy={() => handleCopy(eventListenerScript, 'eventListener')}
+                                        copied={copied.eventListener}
                                         className="text-base-100"
                                     />
                                 </div>

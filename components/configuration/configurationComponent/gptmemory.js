@@ -31,7 +31,7 @@ const GptMemory = ({ params }) => {
 
     return (
         <div>
-            <div className='flex flex-col lg:flex-row justify-center items-center w-fit gap-4 bg-base-100 text-base-content'>
+            <div className='flex  flex-row justify-center items-center w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center justify-center gap-1'>
                     <div className="label">
                         <InfoTooltip tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground

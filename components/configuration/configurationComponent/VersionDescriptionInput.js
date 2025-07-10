@@ -1,10 +1,11 @@
+import Protected from '@/components/protected';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-function VersionDescriptionInput({ params }) {
+function VersionDescriptionInput({ params, isEmbedUser }) {
     const dispatch = useDispatch();
     const { versionDescription } = useCustomSelector((state) => ({
         versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.version_description || "",
@@ -19,6 +20,7 @@ function VersionDescriptionInput({ params }) {
             return;
         }
         dispatch(updateBridgeVersionAction({ versionId: params?.version, dataToSend: { version_description: newValue } }));
+        isEmbedUser && window.parent.postMessage({type: 'gtwy', status:"agent_description_update", data:{agent_description: newValue}}, '*');
     }, [dispatch, params?.version, versionDescription]);
 
     const handleKeyDown = useCallback((e) => {
@@ -50,4 +52,4 @@ function VersionDescriptionInput({ params }) {
     )
 }
 
-export default React.memo(VersionDescriptionInput)
+export default Protected(React.memo(VersionDescriptionInput))

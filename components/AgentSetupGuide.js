@@ -57,7 +57,7 @@ const AgentSetupGuide = ({ params = {},apiKeySectionRef }) => {
   }
 
   return (
-    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-high" >
+    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-low-medium" >
       <div className="card bg-base-100 w-full h-full shadow-xl">
         <div className="card-body p-6 h-full flex flex-col">
 
