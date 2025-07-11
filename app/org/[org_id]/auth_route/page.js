@@ -20,12 +20,14 @@ const Page = ({params}) => {
   const [urlError, setUrlError] = useState('')
   const dispatch = useDispatch()
   const  {authData}  = useCustomSelector((state) => ({
-    authData: state?.authReducer?.authData[params?.org_id] || []
+    authData: state?.authReducer?.authenticationData?.[params?.org_id] || []
   }))
 
   const validateUrl = (value) => {
     try {
-      new URL(value)
+      const urlRegex = /^https?:\/\/.*\..*/;
+      if (!urlRegex.test(value)) throw new Error('Invalid URL');
+      new URL(value);
       setUrlError('')
       return true
     } catch (err) {
@@ -99,20 +101,20 @@ const Page = ({params}) => {
             <div className="space-y-4">
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Route Name</span>
+                  <span className="label-text">Auth Name</span>
                 </label>
                 <input 
                   type="text"
                   className="input input-bordered w-full"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter route name"
+                  placeholder="Enter Auth name"
                 />
               </div>
 
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">OAuth Redirect URL</span>
+                  <span className="label-text">Auth Redirect URL</span>
                 </label>
                 <input
                   type="url" 
