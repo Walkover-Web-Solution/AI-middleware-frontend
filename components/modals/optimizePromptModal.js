@@ -13,7 +13,6 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
     optimizePromptHistory: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.optimizePromptHistory || [],
   }));
-
   const [promptHistory, setPromptHistory] = useState(optimizePromptHistory);
   const [currentIndex, setCurrentIndex] = useState(optimizePromptHistory.length-1);
 
@@ -54,6 +53,10 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
     }
   };
 
+  const handleClose = () => {
+    setCurrentIndex(optimizePromptHistory.length);
+  };
+
   return (
     <OptimiseBaseModal
       modalType={MODAL_TYPE.OPTIMIZE_PROMPT}
@@ -62,6 +65,7 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
       content={prompt}
       optimizeApi={handleOptimizeApi}
       onApply={handleApply}
+      onClose={handleClose}
       params={params}
       messages={messages}
       setMessages={setMessages}
