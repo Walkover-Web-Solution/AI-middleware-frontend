@@ -1,5 +1,6 @@
 "use client"
 import CreateOrg from '@/components/createNewOrg';
+import LoadingSpinner from '@/components/loadingSpinner';
 import Protected from '@/components/protected';
 import { switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -18,6 +19,7 @@ import { useDispatch } from "react-redux";
  */
 function Page() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch();
   const route = useRouter()
   const organizations = useCustomSelector(state => state.userDetailsReducer.organizations);
@@ -42,7 +44,18 @@ function Page() {
   }, [dispatch, route]);
 
   useEffect(() => {
-    dispatch(userDetails());
+    dispatch(userDetails()).then((data) => {
+      if (data?.data?.data) {
+        const userData = data?.data?.data
+        console.log(userData)
+        if(!userData[0]?.meta?.newUser) {
+          route.push('org/onBoarding')
+        }
+        else{
+          setIsLoading(false);
+        }
+      }
+    });
     dispatch(getServiceAction())
   }, []);
 
@@ -61,6 +74,12 @@ function Page() {
       </div>
     ))
   ), [filteredOrganizations, handleSwitchOrg]);
+
+  if (isLoading) {
+    return (
+     <LoadingSpinner/>
+    );
+  }
 
   return (
     <div className="flex flex-col justify-start items-center min-h-screen bg-gray-100 px-2 md:px-0">
