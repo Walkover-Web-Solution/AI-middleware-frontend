@@ -12,7 +12,7 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import { archiveBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
-import { EllipsisIcon, LayoutGridIcon, TableIcon } from "@/components/Icons";
+import { ClockIcon, EllipsisIcon, LayoutGridIcon, TableIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -68,10 +68,22 @@ function Home({ params, isEmbedUser }) {
         {getIconOfService(item.service, 30, 30)}
       </div>
       <div className="flex-col" title={item.name}>
-        {item.name.length > 20 ? item.name.slice(0, 17) + '...' : item.name}
-        <p className="opacity-60 text-xs" title={item.slugName}>
-          {item?.slugName || ""}
-        </p>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            {item.name.length > 20 ? item.name.slice(0, 17) + '...' : item.name}
+            {item.bridge_status === 0 && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
+                  <ClockIcon size={12}/>
+                <span className="hidden sm:inline">Paused</span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="opacity-60 text-xs" title={item.slugName}>
+              {item?.slugName || ""}
+            </p>
+          </div>
+        </div>
       </div>
     </div>,
     actualName: item?.name || "",
@@ -79,6 +91,7 @@ function Home({ params, isEmbedUser }) {
     service: getIconOfService(item.service),
     bridgeType: item.bridgeType,
     status: item.status,
+    bridge_status: item.bridge_status,
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]}</div>
@@ -92,10 +105,22 @@ function Home({ params, isEmbedUser }) {
         {getIconOfService(item.service, 30, 30)}
       </div>
       <div className="flex-col">
-        {item.name}
-        <p className="opacity-60 text-xs">
-          {item?.slugName || ""}
-        </p>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            {item.name}
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="opacity-60 text-xs">
+              {item?.slugName || ""}
+            </p>
+            {item.bridge_status === 0 && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
+                  <ClockIcon size={12}/>
+                <span className="hidden sm:inline">Paused</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>,
     actualName: item?.name || "",
@@ -103,6 +128,7 @@ function Home({ params, isEmbedUser }) {
     service: item.service === 'openai' ? <OpenAiIcon /> : item.service,
     bridgeType: item.bridgeType,
     status: item.status,
+    bridge_status: item.bridge_status,
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
     averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]}</div>
@@ -116,13 +142,15 @@ function Home({ params, isEmbedUser }) {
     return (
       <div className="flex rounded-md border cursor-pointer hover:shadow-lg bg-base-100 p-4 relative w-full">
         <div key={item._id} className="flex flex-col items-center w-full" onClick={() => onClickConfigure(item._id, item?.published_version_id || item?.versions?.[0])}>
+          
           <div className="flex flex-col h-[200px] gap-2 w-full">
             <h1 className="flex items-center overflow-hidden gap-2 text-lg leading-5 font-semibold text-base-content mr-2">
               {getIconOfService(item.service)}
               {item.name}
             </h1>
             <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
-              {item.slugName && <span>SlugName: {item.slugName}</span>}
+              {item.slugName && <span>SlugName: {item.slugName.length > 20 ? item.slugName.slice(0, 17) + '...' : item.slugName}</span>}
+              
               {item.configuration?.prompt && (
                 Array.isArray(item.configuration.prompt) ? item.configuration.prompt.map((promptItem, index) => (
                   <div key={index}>
@@ -134,6 +162,12 @@ function Home({ params, isEmbedUser }) {
               {item.configuration?.input && <span>Input: {item.configuration.input}</span>}
             </p>
             <div className="mt-auto">
+              {item.bridge_status === 0 && (
+                <div className="flex items-center gap-1.5 mb-2 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
+                  <ClockIcon size={12}/>
+                  <span className="whitespace-nowrap">Paused</span>
+                </div>
+              )}
               <span className="mb-2 mr-2 inline-block rounded-full bg-base-100 px-3 py-1 text-xs font-semibold">
                 {item.service}
               </span>

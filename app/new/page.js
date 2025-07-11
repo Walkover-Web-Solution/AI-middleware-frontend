@@ -1,6 +1,6 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { filterOrganizations } from '@/utils/utility';
+import { filterOrganizations, renderedOrganizations } from '@/utils/utility';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import Protected from '@/components/protected';
@@ -162,19 +162,6 @@ function Page({ params }) {
         filterOrganizations(organizations, formState.searchQuery),
         [organizations, formState.searchQuery]);
 
-    const renderedOrganizations = useMemo(() => (
-        filteredOrganizations.slice().reverse().map((org, index) => (
-            <div
-                key={org.id || index}
-                onClick={() => handleSelectOrg(org.id, org.name)}
-                className={`bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 p-6 ${formState.selectedOrg?.id === org.id ? 'ring-2 ring-blue-500' : ''}`}
-            >
-                <h3 className="font-medium text-gray-900">{org.name}</h3>
-        
-            </div>
-        ))
-    ), [filteredOrganizations, formState.selectedOrg, handleSelectOrg]);
-
     if (formState.isLoading || isInitialLoading) {
         return <LoadingSpinner />;
     }
@@ -194,7 +181,7 @@ function Page({ params }) {
                     />
                 </div>
                 <div className="space-y-2 max-h-[78vh] overflow-x-hidden overflow-y-auto p-2">
-                    {renderedOrganizations}
+                    {renderedOrganizations(organizations, formState, handleSelectOrg)}
                 </div>
 
             </div>

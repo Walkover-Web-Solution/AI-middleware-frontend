@@ -3,8 +3,8 @@ import OptimizePromptModal from '@/components/modals/optimizePromptModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
-import { openModal } from '@/utils/utility';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { generateRandomID, openModal } from '@/utils/utility';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import ToneDropdown from './toneDropdown'; 
@@ -27,6 +27,7 @@ const InputConfigComponent = ({ params }) => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
     const [messages, setMessages] = useState([]);
+    const thread_id = useMemo(() => generateRandomID(), []);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -46,8 +47,8 @@ const InputConfigComponent = ({ params }) => {
         };
     }, [prompt, reduxPrompt]);
 
-    const savePrompt = useCallback((e) => {
-        const newValue = e?.target?.value || e || "";
+    const savePrompt = useCallback((newPrompt) => {
+        const newValue = newPrompt || "";
         setShowSuggestions(false);
         if (newValue !== reduxPrompt) {
             // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { prompt: newValue } } }));
@@ -294,7 +295,7 @@ const InputConfigComponent = ({ params }) => {
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
-            onBlur={savePrompt}
+            onBlur={(e)=>savePrompt(e.target.value)}
           />
           {showSuggestions && renderSuggestions()}
           <div className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 border-t-0 border border-base-300 rounded-t-none">
@@ -348,7 +349,7 @@ const InputConfigComponent = ({ params }) => {
               <ResponseStyleDropdown params={params} />
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
-            <OptimizePromptModal savePrompt={savePrompt}setPrompt={setPrompt} params={params} messages={messages} setMessages={setMessages}/>
+            <OptimizePromptModal savePrompt={savePrompt}setPrompt={setPrompt} params={params} messages={messages} setMessages={setMessages} thread_id={thread_id}/>
             <PromptSummaryModal params={params}/>
         </div>
     );
