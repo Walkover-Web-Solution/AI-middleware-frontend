@@ -1,10 +1,9 @@
-
 // JsonSchemaModal.jsx
 import { optimizeSchemaApi } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import OptimiseBaseModal from "./OptimiseBaseModal";
 import { toast } from "react-toastify";
@@ -16,14 +15,9 @@ function JsonSchemaModal({ params, messages, setMessages, thread_id}) {
     json_schema: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.response_type?.json_schema,
   }));
 
-  const [jsonSchemaRequirements, setJsonSchemaRequirements] = useState(
-    typeof json_schema === "object" ? JSON.stringify(json_schema, null, 4) : json_schema
-  );
-
-  useEffect(() => {
-    setJsonSchemaRequirements(
-      typeof json_schema === "object" ? JSON.stringify(json_schema, null, 4) : json_schema
-    );
+  // Use useMemo to always get the latest formatted JSON schema
+  const jsonSchemaRequirements = useMemo(() => {
+    return typeof json_schema === "object" ? JSON.stringify(json_schema, null, 4) : (json_schema || "");
   }, [json_schema]);
 
   const handleOptimizeApi = async (instructionText) => {
@@ -82,7 +76,7 @@ function JsonSchemaModal({ params, messages, setMessages, thread_id}) {
       }}
       errorMessage={errorMessage}
       setErrorMessage={setErrorMessage}
-      key="json_schema"
+      key={`json_schema_${params?.id}_${params?.version}`}
     />
   );
 }
