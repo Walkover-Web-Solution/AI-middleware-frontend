@@ -134,11 +134,7 @@ function OptimiseBaseModal({
   };
 
   const textareaContent = getTextareaContent();
-  
-  console.log("displayContent",displayContent)
-  console.log("textareaContent",textareaContent)
-  console.log("content",content)
-  console.log("newContent",newContent)
+
 
   return (
     <Modal MODAL_ID={modalType}>
