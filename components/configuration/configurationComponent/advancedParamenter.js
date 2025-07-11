@@ -9,8 +9,8 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
-import InfoModel from '@/components/infoModel';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -205,9 +205,9 @@ const AdvancedParameters = ({ params }) => {
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                  {description ? <InfoModel tooltipContent={description}>
+                  {description ? <InfoTooltip tooltipContent={description}>
                     <span className="label-text capitalize info">{name || key}</span>        
-                    </InfoModel> : <span className="label-text capitalize">{name || key}</span>}
+                    </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
                   </div>
                   <div>
                     <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">

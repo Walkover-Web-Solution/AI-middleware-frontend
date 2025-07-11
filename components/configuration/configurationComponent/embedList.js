@@ -8,7 +8,7 @@ import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import { isEqual } from 'lodash';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -139,9 +139,9 @@ const EmbedList = ({ params }) => {
                 {
                     shouldToolsShow && bridgeFunctions.length > 0 &&
                     <>
-                        <InfoModel tooltipContent="The Tools are set up for the whole organization, so any agent can use them.">
+                        <InfoTooltip tooltipContent="The Tools are set up for the whole organization, so any agent can use them.">
                             <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
-                        </InfoModel>
+                        </InfoTooltip>
                         <div className="flex flex-wrap gap-4">
                             <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" />
                         </div>

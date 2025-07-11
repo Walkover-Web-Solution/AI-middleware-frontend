@@ -3,10 +3,9 @@ import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { GetFileTypeIcon, GetPreBuiltToolTypeIcon, openModal } from '@/utils/utility';
-import { MODAL_TYPE } from '@/utils/enums';
+import { GetPreBuiltToolTypeIcon, openModal } from '@/utils/utility';
 import { truncate } from '@/components/historyPageComponents/assistFile';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const PrebuiltToolsList = ({ params }) => {
     const { prebuiltToolsData, toolsVersionData, service } = useCustomSelector((state) => ({
@@ -85,10 +84,10 @@ const PrebuiltToolsList = ({ params }) => {
                 <div className="flex flex-wrap gap-4 mb-4">
                     {renderTools}
                 </div>
-                <InfoModel tooltipContent={"This tool lets the AI fetch real-time info from the internet. It's useful for current events, fact-checking, and time-sensitive questions."}>
+                <InfoTooltip tooltipContent={"This tool lets the AI fetch real-time info from the internet. It's useful for current events, fact-checking, and time-sensitive questions."}>
                         <p className=" mb-2 label-text info">Configure Prebuilt Tool</p>
                        
-                 </InfoModel>
+                 </InfoTooltip>
                 <div className="dropdown dropdown-right">
                     <button tabIndex={0} className="btn btn-outline btn-sm mt-0">
                         <AddIcon size={16} />Add Prebuilt Tool

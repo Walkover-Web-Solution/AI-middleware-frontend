@@ -1,4 +1,4 @@
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from '@/utils/enums';
@@ -25,9 +25,9 @@ function ToolCallCount({ params }) {
     return (
         <div className='form-control'>
             <div className="label items-center flex justify-start">
-                <InfoModel tooltipContent={"This feature sets a limit on function calls. By default, functions are called one at a time, but with 'Parallel Tools' enabled, multiple functions can be called simultaneously within a single function call."}>
+                <InfoTooltip tooltipContent={"This feature sets a limit on function calls. By default, functions are called one at a time, but with 'Parallel Tools' enabled, multiple functions can be called simultaneously within a single function call."}>
                 <span className="label-text font-medium info">Maximum Function Call Limit</span>
-                </InfoModel>
+                </InfoTooltip>
                 
             </div>
             <input
