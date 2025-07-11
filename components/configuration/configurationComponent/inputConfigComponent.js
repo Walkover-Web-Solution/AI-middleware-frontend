@@ -259,7 +259,7 @@ const InputConfigComponent = ({ params }) => {
                 }}
               >
                 <InfoModel tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
-                <span className='label-text promptSummary-info capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
+                <span className='label-text  capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
                 </InfoModel>
               </button>
              
