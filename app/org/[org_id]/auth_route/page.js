@@ -20,12 +20,14 @@ const Page = ({params}) => {
   const [urlError, setUrlError] = useState('')
   const dispatch = useDispatch()
   const  {authData}  = useCustomSelector((state) => ({
-    authData: state?.authReducer?.authData[params?.org_id] || []
+    authData: state?.authReducer?.authenticationData?.[params?.org_id] || []
   }))
 
   const validateUrl = (value) => {
     try {
-      new URL(value)
+      const urlRegex = /^https?:\/\/.*\..*/;
+      if (!urlRegex.test(value)) throw new Error('Invalid URL');
+      new URL(value);
       setUrlError('')
       return true
     } catch (err) {
