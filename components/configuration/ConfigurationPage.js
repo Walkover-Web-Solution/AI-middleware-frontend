@@ -101,7 +101,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
 
     const renderChatbotConfigView = useMemo(() => () => (
         <>
-            <SlugNameInput params={params} />
+            
             <UserRefernceForRichText params={params} />
             <StarterQuestionToggle params={params} />
             <ActionList params={params} />
@@ -117,6 +117,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
 
         return (
             <div className="flex flex-col w-100 overflow-auto gap-3">
+                <SlugNameInput params={params} />
                 <h1 className="text-xl font-semibold">
                     {bridgeType === 'api' ? 'API Configuration' :
                         bridgeType === 'batch' ? 'Batch API Configuration' : 'Chatbot Configuration'}
