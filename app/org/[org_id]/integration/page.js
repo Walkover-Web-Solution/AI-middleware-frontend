@@ -5,13 +5,12 @@ import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { ChevronLastIcon, LayoutGridIcon, TableIcon } from "@/components/Icons";
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
 import MainLayout from "@/components/layoutComponents/MainLayout";
-import IntegrationGuideModal from "@/components/modals/IntegrationGuideModal";
-import { openModal } from "@/utils/utility";
+import { openModal, toggleSidebar } from "@/utils/utility";
 import IntegrationModal from "@/components/modals/IntegrationModal";
+import GtwyIntegrationGuideSlider from "@/components/sliders/gtwyIntegrationGuideSlider";
 
 export const runtime = 'edge';
 
@@ -22,22 +21,12 @@ const Page = ({ params }) => {
     integrationData: state?.integrationReducer?.integrationData?.[params?.org_id],
   })
   );
-  const [viewMode, setViewMode] = useState('table');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIntegration, setSelectedIntegration] = useState(null);
+  const [isSliderOpen, setIsSliderOpen] = useState(false);
 
   useEffect(() => {
-    const updateScreenSize = () => {
-      if (typeof window !== 'undefined') {
-        setViewMode(window.innerWidth < 640 ? 'grid' : 'table');
-      }
-    };
     dispatch(getAllIntegrationDataAction(params?.org_id));
-    if (typeof window !== 'undefined') {
-      updateScreenSize();
-      window.addEventListener('resize', updateScreenSize);
-      return () => window.removeEventListener('resize', updateScreenSize);
-    }
   }, [dispatch, params?.org_id]);
 
   const filteredIntegration = useMemo(() => {
@@ -56,45 +45,31 @@ const Page = ({ params }) => {
         </div>
       </div>
     ),
-    createdAt: item?.created_at,
-    folder_id: item?._id,
+    createdAt: new Date(item?.created_at).toLocaleString(),
+    folder_id: item?.folder_id,
     originalName: item?.name,
     org_id: item?.org_id,
     originalItem: item
   }));
 
-  const EndComponent = ({ row }) => {
-    return (
-      <div className="flex gap-3 justify-center items-center">
-        <button
-          className="tooltip tooltip-primary cursor-pointer btn btn-sm"
-          data-tip="Configure Integration"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleClickIntegration(row.originalItem);
-          }}
-        >
-          <ChevronLastIcon strokeWidth={2} size={20} />
-        </button>
-      </div>
-    );
-  };
+  const toggleGtwyIntegraionSlider = useCallback(() => {
+    setIsSliderOpen(!isSliderOpen);
+    toggleSidebar("gtwy-integration-slider", "right");
+  }, [isSliderOpen]);
 
   const handleClickIntegration = (item) => {
     setSelectedIntegration(item);
-    openModal(MODAL_TYPE.INTEGRATION_GUIDE_MODAL);
+    toggleGtwyIntegraionSlider();
   };
 
   return (
     <MainLayout>
       <div className="w-full">
-        <IntegrationGuideModal params={params} selectedIntegration={selectedIntegration} />
-        
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-6 px-4 pt-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-4 pt-4">
           <PageHeader
             title="Integration"
-            description="A repository where you can provide integration data that the AI uses to generate accurate and context-aware responses."
+            description="Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."
           />
           <div className="flex-shrink-0 mt-4 sm:mt-0">
             <button 
@@ -117,61 +92,22 @@ const Page = ({ params }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
-          <div className="join">
-            <button
-              className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
-              onClick={() => setViewMode('grid')}
-            >
-              <LayoutGridIcon size={16} />
-            </button>
-            <button
-              className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
-              onClick={() => setViewMode('table')}
-            >
-              <TableIcon size={16} />
-            </button>
-          </div>
         </div>
 
         {/* Content Section */}
         <div className="w-full">
           {filteredIntegration.length > 0 ? (
-            viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {filteredIntegration.map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer border-2 hover:border-primary"
-                    onClick={() => handleClickIntegration(item)}
-                  >
-                    <div className="flex flex-col items-center w-full gap-2">
-                      <div className="tooltip" data-tip={item?.name}>
-                        <h3 className="text-lg font-medium text-center truncate w-full">
-                          {truncate(String(item?.name), 15)}
-                        </h3>
-                      </div>
-                      <div className="tooltip" data-tip={item?.description}>
-                        <p className="text-sm text-base-content/70 text-center">
-                          {truncate(item?.description || 'No description', 25)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
               <div className="w-full">
                 <CustomTable
                   data={tableData}
-                  columnsToShow={['name', 'createdAt']}
+                  columnsToShow={['name', 'folder_id', 'createdAt']}
                   sorting
                   sortingColumns={['name']}
                   keysToWrap={['name', 'description']}
-                  endComponent={EndComponent}
+                  handleRowClick={(data)=>handleClickIntegration(data)}
+                  keysToExtractOnRowClick = {['org_id', 'folder_id']}
                 />
               </div>
-            )
           ) : (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">No integration entries found</p>
@@ -180,6 +116,7 @@ const Page = ({ params }) => {
         </div>
       </div>
       <IntegrationModal params={params}/>
+      <GtwyIntegrationGuideSlider data={selectedIntegration} handleCloseSlider={toggleGtwyIntegraionSlider}/>
     </MainLayout>
   );
 };

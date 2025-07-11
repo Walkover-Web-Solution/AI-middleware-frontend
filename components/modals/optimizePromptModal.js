@@ -7,24 +7,24 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import OptimiseBaseModal from './OptimiseBaseModal';
 
-function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessages }) {
+function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessages, thread_id}) { 
   const dispatch = useDispatch();
   const { prompt, optimizePromptHistory } = useCustomSelector((state) => ({
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
     optimizePromptHistory: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.optimizePromptHistory || [],
   }));
-
   const [promptHistory, setPromptHistory] = useState(optimizePromptHistory);
-  const [currentIndex, setCurrentIndex] = useState(optimizePromptHistory.length);
+  const [currentIndex, setCurrentIndex] = useState(optimizePromptHistory.length-1);
 
   useEffect(() => {
     setPromptHistory(optimizePromptHistory);
-    setCurrentIndex(optimizePromptHistory.length);
+    setCurrentIndex(optimizePromptHistory.length-1);
   }, [optimizePromptHistory]);
 
   const handleOptimizeApi = async (instructionText, params) => {
     const response = await optimizePromptApi({
       query: instructionText,
+      thread_id,
       bridge_id: params.id,
       version_id: params.version,
     });
@@ -47,10 +47,14 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
   };
 
   const handleRedo = () => {
-    if (currentIndex < promptHistory.length - 1) {
+    if (currentIndex < promptHistory.length) {
       setCurrentIndex(currentIndex + 1);
       return promptHistory[currentIndex + 1];
     }
+  };
+
+  const handleClose = () => {
+    setCurrentIndex(optimizePromptHistory.length);
   };
 
   return (
@@ -61,11 +65,13 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
       content={prompt}
       optimizeApi={handleOptimizeApi}
       onApply={handleApply}
+      onClose={handleClose}
       params={params}
       messages={messages}
       setMessages={setMessages}
       showHistory={true}
       history={promptHistory}
+      setCurrentIndex={setCurrentIndex}
       currentIndex={currentIndex}
       onUndo={handleUndo}
       onRedo={handleRedo}

@@ -182,7 +182,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   }
 
   return (
-    <div className="drawer-side h-full justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r relative" id="sidebar">
+    <div className="drawer-side justify-items-stretch bg-base-200 min-w-[350px] max-w-[380px] border-r relative" id="sidebar">
       <CreateFineTuneModal params={params} selectedThreadIds={selectedThreadIds} />
       <div className="p-4 gap-3 flex flex-col">
         <div className="collapse collapse-arrow join-item border border-base-300">
@@ -276,7 +276,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
           loader={<h4></h4>}
           scrollableTarget="sidebar"
         >
-          <div className="slider-container min-w-[40%] overflow-x-auto mb-16">
+          <div className="slider-container min-w-[40%] overflow-x-auto pb-40">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData?.map((item) => (
                 <div className={`${isThreadSelectable ? "flex" : "flex-col"}`} key={item?.thread_id}>
