@@ -62,7 +62,7 @@ const Page = ({ searchParams }) => {
     dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
     return () => {
       try {
-        if (typeof window !== 'undefined' && window.handleclose) {
+        if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
           window.handleclose();
         }
       } catch (error) {
@@ -73,8 +73,8 @@ const Page = ({ searchParams }) => {
 
   useEffect(() => {
     if (bridgeType !== "trigger") {
-      if (typeof window !== 'undefined' && window.handleclose) {
-        window.handleclose();
+      if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
+        window?.handleclose();
       }
     }
   }, [bridgeType]);
@@ -82,7 +82,7 @@ const Page = ({ searchParams }) => {
   useEffect(() => {
     if (mountRef.current) {
       if (bridgeType === 'chatbot') {
-        if (typeof openChatbot !== 'undefined' && document.getElementById('parentChatbot')) {
+        if (typeof openChatbot !== 'undefined') {
           openChatbot();
         }
       } else {
