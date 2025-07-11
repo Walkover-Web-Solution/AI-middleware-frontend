@@ -19,7 +19,7 @@ const Page = ({ params }) => {
   const dispatch = useDispatch();
   const { integrationData } = useCustomSelector((state) =>
   ({
-    integrationData: state?.integrationReducer?.integrationData?.[params?.org_id],
+    integrationData: state?.integrationReducer?.integrationData?.[params?.org_id] || [],
   })
   );
   const [selectedIntegration, setSelectedIntegration] = useState(null);
@@ -34,7 +34,7 @@ const Page = ({ params }) => {
     setFilterIntegration(integrationData);
   }, [integrationData]);
 
-  const tableData = filterIntegration.map((item, index) => ({
+  const tableData = (filterIntegration || [])?.map((item, index) => ({
     id: index,
     name: (
       <div className="flex gap-2">

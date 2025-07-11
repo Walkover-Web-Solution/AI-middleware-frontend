@@ -9,7 +9,7 @@ import { useDispatch } from "react-redux";
 import OptimiseBaseModal from "./OptimiseBaseModal";
 import { toast } from "react-toastify";
 
-function JsonSchemaModal({ params, messages, setMessages }) {
+function JsonSchemaModal({ params, messages, setMessages, thread_id}) {
   const dispatch = useDispatch();
   const [errorMessage, setErrorMessage] = useState("");
   const { json_schema } = useCustomSelector((state) => ({
@@ -29,6 +29,7 @@ function JsonSchemaModal({ params, messages, setMessages }) {
   const handleOptimizeApi = async (instructionText) => {
     const result = await optimizeSchemaApi({
       data: {
+        thread_id,
         query: instructionText,
         json_schema: jsonSchemaRequirements,
       },

@@ -346,7 +346,8 @@ export const MODAL_TYPE = {
   TUTORIAL_MODAL: "TUTORIAL_MODAL",
   EDIT_MESSAGE_MODAL:"EDIT_MESSAGE_MODAL",
   INTEGRATION_MODAL: "INTEGRATION_MODAL",
-  INTEGRATION_GUIDE_MODAL: "INTEGRATION_GUIDE_MODAL"
+  INTEGRATION_GUIDE_MODAL: "INTEGRATION_GUIDE_MODAL",
+  AUTH_DATA_MODAL: "AUTH_DATA_MODAL"
 }
 
 export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
@@ -367,6 +368,8 @@ export const KNOWLEDGE_BASE_CUSTOM_SECTION = [
   { value: 'recursive', label: 'Recursive Chunking' }
 ];
 export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini', 'o4-mini'];
+
+export const AUTH_COLUMNS = ['name', 'redirection_url', 'client_id']
 
 export const FAQSIDEBARLINKS = [
   {
