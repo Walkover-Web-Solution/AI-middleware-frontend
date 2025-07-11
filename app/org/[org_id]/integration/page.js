@@ -68,7 +68,7 @@ const Page = ({ params }) => {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-4 pt-4">
           <PageHeader
-            title="Integration
+            title="Integration"
             docLink="https://app.docstar.io/p/features/gtwy-embed--1?collectionId=inYU67SKiHgW"
             description="Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."
           />
