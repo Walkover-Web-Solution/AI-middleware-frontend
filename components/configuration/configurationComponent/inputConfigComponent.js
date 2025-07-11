@@ -301,9 +301,9 @@ const InputConfigComponent = ({ params }) => {
           <div className="collapse bg-gradient-to-r bg-gray-100 border-t-0 border border-base-300 rounded-t-none">
             <input type="checkbox" className="min-h-[0.75rem]" />
             <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 ">
                 <span className="text-nowrap">Default Variables</span>
-                <p role="alert" className="label-text-alt alert p-2">
+                <p role="alert" className="label-text-alt alert p-2 bg-gray-200">
                   <InfoIcon size={16} className="" />
                   Use these variables in prompt to get their functionality
                 </p>
