@@ -72,7 +72,7 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                 {API_KEY_MODAL_INPUT.map((field) => (
                     <div key={field} className="flex flex-col gap-2">
                         <label htmlFor={field} className="label-text">
-                            {field.charAt(0).toUpperCase() + field.slice(1)}:
+                            {field.charAt(0).toUpperCase() + field.slice(1)}: *
                         </label>
                         <input
                             id={field}
@@ -88,7 +88,7 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                 ))}
                 <div className="flex flex-col gap-2">
                     <label htmlFor="service" className="label-text">
-                        Service:
+                        Service: *
                     </label>
                     <select
                         id="service"
