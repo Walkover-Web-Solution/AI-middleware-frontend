@@ -82,7 +82,7 @@ const Page = ({ searchParams }) => {
   useEffect(() => {
     if (mountRef.current) {
       if (bridgeType === 'chatbot') {
-        if (typeof openChatbot !== 'undefined') {
+        if (typeof openChatbot !== 'undefined' && document.getElementById('parentChatbot')) {
           openChatbot();
         }
       } else {
