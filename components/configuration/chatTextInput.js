@@ -6,7 +6,7 @@ import Image from 'next/image';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { CloseCircleIcon, ImageUploadIcon } from '@/components/Icons';
+import { CloseCircleIcon, ImageUploadIcon, SendHorizontalIcon } from '@/components/Icons';
 
 function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation }) {
     const [loading, setLoading] = useState(false);
@@ -68,7 +68,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         }
         const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n'); 
         if (modelType !== 'completion' && modelType !== 'embedding') {
-            if (newMessage?.trim() === "") {
+            if (newMessage?.trim() === "" && uploadedImages?.length === 0) {
                 setErrorMessage("Message cannot be empty");
                 return;
             }
@@ -285,14 +285,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 {(loading || uploading) ? (
                     <span className="loading loading-dots loading-lg"></span>
                 ) : (
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        className="h-6 w-6 ml-2 transform rotate-90"
-                    >
-                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
-                    </svg>
+                    <SendHorizontalIcon/>
                 )}
             </button>
         </div>

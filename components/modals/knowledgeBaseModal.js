@@ -195,9 +195,10 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                     name="url"
                     className="input input-bordered input-md focus:ring-1 ring-primary/40"
                     placeholder="https://example.com/documentation"
+                    key={selectedKnowledgeBase?._id}
                     required={!selectedKnowledgeBase}
                     disabled={isLoading || selectedKnowledgeBase}
-                    defaultValue={selectedKnowledgeBase?.url || ''}
+                    defaultValue={selectedKnowledgeBase?.source?.data?.url || ''}
                   />
                 </div>
               ) : (
