@@ -283,9 +283,14 @@ export const inviteUser = async (email) => {
   }
 }
 
-export const getInvitedUsers = async () => {
+export const getInvitedUsers = async ({page, limit}) => {
   try {
-    const data = await axios.get(`${PROXY_URL}/api/c/getUsers`);
+    const data = await axios.get(`${PROXY_URL}/api/c/getUsers`, {
+      params: {
+        pageNo:page,
+        itemsPerPage:limit
+      }
+    });
     return data;
   } catch (error) {
     console.error(error);
