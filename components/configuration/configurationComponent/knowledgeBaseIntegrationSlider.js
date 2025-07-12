@@ -58,17 +58,27 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
                         <pre data-prefix=">" className="text-error"><code>org_id=</code><code className="text-warning">{orgId}</code></pre>
                         <pre data-prefix=">" className="text-error"><code>user_id=</code><code className="text-warning">"unique_user_id"</code></pre>
                 </div>
+                <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">JWT Access Token</span>
+                </label>
                 {access_key ? (
                     <div className="mockup-code">
                         <CopyButton data={access_key} />
                         <pre data-prefix=">" className="text-error">
                             <code>Access Key: </code>
                             <code className="text-warning">{access_key}</code>
-                        </pre>
+                        </pre> 
                     </div>
                 ) : (
-                    <button className='btn mt-4 text-base-content' onClick={handleGenerateAccessKey}>Generate Access key</button>
-                )}
+                  <button
+                    onClick={handleGenerateAccessKey}
+                    className="btn btn-primary btn-sm w-56"
+                  >
+                    Generate JWT Access Token
+                  </button>     
+                       )}
+                </div>
             </div>
         );
     }

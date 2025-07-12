@@ -157,7 +157,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
                 ) : (
                   <button
                     onClick={handleGenerateAccessKey}
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-primary btn-sm w-56"
                   >
                     Generate JWT Access Token
                   </button>
