@@ -12,6 +12,7 @@ import { GetFileTypeIcon, openModal } from "@/utils/utility";
 import { BookIcon, EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
+import DeleteModal from "@/components/UI/DeleteModal";
 
 export const runtime = 'edge';
 
@@ -57,14 +58,25 @@ const Page = ({ params }) => {
     description: item?.description,
     actual_name: item?.name,
   }));
-
+const handleUpdateKnowledgeBase = (item) => {
+    setSelectedKnowledgeBase(item);
+    openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)
+  };
+  
+  const handleDelete=()=>{
+    openModal(MODAL_TYPE.DELETE_MODAL)
+  }
+  const handleDeleteKnowledgebase = (item) => {
+      dispatch(deleteKnowBaseDataAction({ data: {id:item?._id, orgId: params?.org_id } }));
+  
+  };
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center">
         <div
           className="tooltip tooltip-primary"
           data-tip="delete"
-          onClick={() => handleDelete(row.actual_name, row._id)}
+          onClick={() => handleDelete()}
         >
           <TrashIcon strokeWidth={2} size={20} />
         </div>
@@ -75,20 +87,12 @@ const Page = ({ params }) => {
         >
           <SquarePenIcon size={20} />
         </div>
+        <DeleteModal onConfirm={handleDeleteKnowledgebase} item={row} title="Delete KnowledgeBase "  description={`Are you sure you want to delete the KnowledgeBase "${row.actual_name}"? This action cannot be undone.`}/>
       </div>
     );
   };
   
-  const handleUpdateKnowledgeBase = (item) => {
-    setSelectedKnowledgeBase(item);
-    openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)
-  };
-
-  const handleDelete = (name, id) => {
-    if (window.confirm(`Do you want to delete document with name: ${name}?`)) {
-      dispatch(deleteKnowBaseDataAction({ data: { id, orgId: params?.org_id } }));
-    }
-  };
+  
 
   return (
     <div className="w-full">
@@ -150,7 +154,7 @@ const Page = ({ params }) => {
                       <EllipsisVerticalIcon size={16} />
                     </div>
                     <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32">
-                      <li><a onClick={() => handleDelete(item.name, item?._id)} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
+                      <li><a onClick={() => handleDelete()} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
                       <li><a onClick={() => handleUpdateKnowledgeBase(item)} className="hover:bg-base-200">Update</a></li>
                     </ul>
                   </div>
@@ -167,6 +171,7 @@ const Page = ({ params }) => {
                       </p>
                     </div>
                   </div>
+                  <DeleteModal onConfirm={handleDeleteKnowledgebase} item={item} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${item.actual_name}"? This action cannot be undone.`}/>
                 </div>
               ))}
             </div>

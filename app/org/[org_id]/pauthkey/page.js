@@ -14,6 +14,7 @@ import { CopyIcon, TrashIcon } from '@/components/Icons'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
+import DeleteModal from '@/components/UI/DeleteModal'
 
 export const runtime = 'edge';
 
@@ -27,7 +28,6 @@ function Page({ params }) {
   };
 });
 
-  const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
@@ -37,8 +37,6 @@ function Page({ params }) {
   useEffect(() => {
     dispatch(getAllAuthData())
   }, []); // Removed authData from dependencies to avoid infinite loop
-
-
   /**
    * Copies given content to clipboard
    * @param {string} content Content to be copied
@@ -89,25 +87,22 @@ function Page({ params }) {
     document.getElementById('authNameInput').value = ''
   };
 
-  const deleteModel = (authname, authid, index) => {
-    setSingleAuthData({ name: authname, id: authid, index })
-    openModal(MODAL_TYPE.PAUTH_KEY_DELETE_MODAL)
-    document.getElementById('authNameInput').value = ''
-  }
+  const hanldeDelete=()=>{
+      openModal(MODAL_TYPE.DELETE_MODAL)
+    }
 
-  const DeleteAuth = () => {
-    dispatch(deleteAuthData(singleAuthData)).then(() => {
+  const DeleteAuth = (item) => {
+    dispatch(deleteAuthData(item)).then(() => {
       toast.success("Auth Key Deleted Successfully")
       // Optionally, you can show a success message to the user
     });
-    closeModal(MODAL_TYPE.PAUTH_KEY_DELETE_MODAL);
   };
 
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center">
         <div className="tooltip tooltip-primary" data-tip="delete">
-          <a onClick={() => deleteModel(row["name"], row["id"], row.index)}>
+          <a onClick={() => hanldeDelete()}>
             <TrashIcon size={16} />
           </a>
         </div>
@@ -118,6 +113,7 @@ function Page({ params }) {
         >
           <CopyIcon size={16} />
         </div>
+        <DeleteModal onConfirm={DeleteAuth} item={row} description={`Are you sure you want to delete the Pauth key "${row.name}"? This action cannot be undone.`} title='Delete API Key'/>
       </div>
     );
   };
@@ -190,20 +186,7 @@ function Page({ params }) {
         </div>
       </dialog>
 
-      <dialog id={MODAL_TYPE.PAUTH_KEY_DELETE_MODAL} className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Do you want to delete {singleAuthData.name} ?</h3>
-          {/* <p className="py-4">Do you want to delete {singleAuthData.name } ?</p> */}
-          <div className="modal-action">
-            <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
-              <button className="btn">Cancel</button>
-            </form>
-            <button className="btn" onClick={DeleteAuth}>Delete</button>
-
-          </div>
-        </div>
-      </dialog>
+      
     </div>
   )
 }
