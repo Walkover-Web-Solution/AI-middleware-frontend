@@ -1,4 +1,5 @@
 import CopyButton from '@/components/copyButton/copyButton';
+import GenericTable from '@/components/table/table';
 import Link from 'next/link';
 import React from 'react';
 
@@ -22,6 +23,17 @@ const BatchApi = (bridgeId, versionId) => {
         `}'`
     );
 }
+const headers = ['Parameter', 'Type', 'Description', 'Required'];
+
+const data = [
+  ['pauthkey', 'string', 'The key used to authenticate the request.', 'true'],
+  ['webhook', 'object', 'An object containing the webhook URL and headers to receive responses.', 'true'],
+  ['webhook.url', 'string', 'The URL where the response will be sent.', 'true'],
+  ['webhook.header', 'object', 'headers to include in the webhook request.', 'true'],
+  ['batch', 'array of strings', 'A list of user questions to process in batch.', 'true'],
+  ['agent_id', 'string', 'The unique ID of the agent to process the request.', 'true'],
+  ['version_id', 'string', 'The specific version  of the agent.', 'true'],
+];
 
 const BatchResponseFormat = () => {
     return `{
@@ -58,6 +70,7 @@ const BatchApiGuide = ({ params }) => {
                         </code>
                     </pre>
                 </div>
+              <GenericTable headers={headers} data={data} />
                 <p className=" text-sm"><strong>Note:</strong> Ensure that the 'webhook_url' is correctly set to receive batch processing updates.
                 </p>
             </div>

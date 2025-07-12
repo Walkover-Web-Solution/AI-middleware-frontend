@@ -1,5 +1,6 @@
 import CopyButton from '@/components/copyButton/copyButton';
 import Protected from '@/components/protected';
+import GenericTable from '@/components/table/table';
 import Link from 'next/link';
 import React from 'react';
 
@@ -23,7 +24,14 @@ const ComplitionApi = (bridgeId, modelType, isEmbedUser) => {
 
   return `curl --location '${url}' \\\n  ${headers} \\\n  --data '${body}'`;
 };
-
+const headers = ['Parameter', 'Type', 'Description', 'Required'];
+const data = [
+  ['user', 'string', 'The user\'s question ( the query asked by the user)', 'true'],
+  ['agent_id', 'string', 'The unique ID of the agent to process the request.', 'true'],
+  ['thread_id', 'string', 'The ID to maintain conversation context across messages.', 'true'],
+  ['response_type', 'string', 'Specifies the format of the response: "text", "json".', 'false'],
+  ['variables', 'object', 'A key-value map of dynamic variables used in the agent\'s prompt.', 'false'],
+];
 
 const ResponseFormat = () => {
   return `{
@@ -72,7 +80,8 @@ const ApiGuide = ({ params, modelType, isEmbedUser }) => {
             </code>
           </pre>
         </div>
-        <p className=" text-sm"><strong>Note:</strong> The 'response_type' key determines output format. If the value is <strong>json_object</strong> (or undefined), the output will be in JSON format. If <strong>text</strong>, the output will be in text format.
+        <GenericTable headers={headers} data={data} />
+        <p className=" text-sm"><strong>Note:</strong> If the value of response_type is undefined, the output will be in JSON format by default.
         </p>
       </div>
       <div className="flex flex-col gap-4 bg-white rounded-lg shadow-lg p-4">
