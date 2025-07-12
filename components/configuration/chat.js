@@ -85,7 +85,7 @@ function Chat({ params }) {
                     </div>
                   )}
                 </div>
-                <div className="chat-bubble inline-block break-all">
+                {message?.content && <div className="chat-bubble inline-block break-all">
                   <ReactMarkdown components={{
                     code: ({ node, inline, className, children, ...props }) => (
                       <CodeBlock
@@ -98,7 +98,7 @@ function Chat({ params }) {
                       </CodeBlock>
                     )
                   }}>{message.content}</ReactMarkdown>
-                </div>
+                </div>}
               </div>
             )
           })}
