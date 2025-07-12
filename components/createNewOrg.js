@@ -75,7 +75,7 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                             maxLength={40}
                             required
                         />
-                        <label className='label-text mb-1'>Description *</label>
+                        <label className='label-text mb-1'>Description</label>
                         <textarea
                             id="message"
                             name="about"
@@ -86,7 +86,6 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                             className="p-2.5 w-full text-sm textarea textarea-bordered"
                             minLength={10}
                             maxLength={400}
-                            required
                         />
                         <label className='label-text mb-1'>Timezone *</label>
                         <select
