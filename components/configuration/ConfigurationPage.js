@@ -98,7 +98,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
             {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
         </>
     ), [bridgeType, modelType, params, modelName]);
-
     const renderChatbotConfigView = useMemo(() => () => (
         <>
             
@@ -147,6 +146,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
                             <SettingsIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
                         </button>
+                        {bridgeType==='chatbot'&&
                         <button
                             onClick={() => handleNavigation('chatbot-config')}
                             className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
@@ -154,7 +154,8 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
                             <BotIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
                         </button>
-                        {((isEmbedUser && showGuide) || !isEmbedUser) && <button
+                        } 
+                        {((isEmbedUser && showGuide) ||( !isEmbedUser && bridgeType!=='trigger')) && <button
                             onClick={() => handleNavigation('guide')}
                             className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
