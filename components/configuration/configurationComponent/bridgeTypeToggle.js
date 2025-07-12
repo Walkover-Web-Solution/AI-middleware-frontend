@@ -31,15 +31,16 @@ const BridgeTypeToggle = ({ params, isEmbedUser }) => {
             dataToSend: { ...updatedDataToSend }
         }));
     };
-
-    useEffect(() => {
-        if (service !== 'openai' && bridgeType === 'batch') {
-            dispatch(updateBridgeAction({
-                bridgeId: params.id,
-                dataToSend: { bridgeType: 'api' }
-            }));
-        }
-    }, [params.version]);
+    
+   useEffect(() => {
+    if (!service || !bridgeType) return; 
+    if (service !== 'openai' && bridgeType === 'batch') {
+        dispatch(updateBridgeAction({
+            bridgeId: params.id,
+            dataToSend: { bridgeType: 'api' }
+        }));
+    }
+}, [params.version, service, bridgeType]);
 
     return (
         <div className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content'>

@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import OnBoarding from "./OnBoarding";
 import { ONBOARDING_VIDEOS } from "@/utils/enums";
 import TutorialSuggestionToast from "./tutorialSuggestoinToast";
+
 const AddVariable = ({ params }) => {
   const versionId = params.version;
   const { variablesKeyValue, prompt, isFirstVariable,  } = useCustomSelector((state) => ({
@@ -240,7 +241,7 @@ const AddVariable = ({ params }) => {
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
       >
-        <span className="mr-2 text-nowrap font-medium">Add Variables</span>
+        <span className="mr-2 text-nowrap font-medium " >Add Variables</span>  
         {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </button>
       {tutorialState?.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"} TutorialDetails={"Variable Management"}/>)}

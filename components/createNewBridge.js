@@ -18,7 +18,7 @@ import Protected from "./protected";
     const [bridgeType, setBridgeType] = useState("api");
     const [isManualMode, setIsManualMode] = useState(false);
     const textAreaPurposeRef = useRef();
-    const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState();
+    const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState("api");
     const [validationErrors, setValidationErrors] = useState({
         bridgeType: "",
         purpose: ""
@@ -191,7 +191,7 @@ import Protected from "./protected";
               >
                 {/* API Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "api"
                       ? "ring-2 ring-blue-500"
                       : ""
@@ -202,6 +202,13 @@ import Protected from "./protected";
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-blue-50">
                         <WebhookIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+                      {selectedBridgeTypeCard === "api" && (
+                      <div className="absolute top-3 right-3 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         API
@@ -218,7 +225,7 @@ import Protected from "./protected";
 
                 {/* Chatbot Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "chatbot"
                       ? "ring-2 ring-green-500"
                       : ""
@@ -229,6 +236,13 @@ import Protected from "./protected";
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-green-50">
                         <BotIcon className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
+                        {selectedBridgeTypeCard === "chatbot" && (
+                      <div className="absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         Chatbot
@@ -245,7 +259,7 @@ import Protected from "./protected";
 
                 {/* Batch API Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "batch"
                       ? "ring-2 ring-purple-500"
                       : ""
@@ -256,6 +270,13 @@ import Protected from "./protected";
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-purple-50">
                         <ClockTenIcon className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
+                        {selectedBridgeTypeCard === "batch" && (
+                      <div className="absolute top-3 right-3 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         Batch API
@@ -272,17 +293,24 @@ import Protected from "./protected";
 
                 {/* Triggers Card */}
                 {!isEmbedUser && <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
-                    selectedBridgeTypeCard === "triggers"
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
+                    selectedBridgeTypeCard === "trigger"
                       ? "ring-2 ring-amber-500"
                       : ""
                   }`}
-                  onClick={() => handleBridgeTypeSelection("triggers")}
+                  onClick={() => handleBridgeTypeSelection("trigger")}
                 >
                   <div className="card-body p-4 md:p-6">
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-amber-50">
                         <CircleAlertIcon className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
+                        {selectedBridgeTypeCard === "trigger" && (
+                      <div className="absolute top-3 right-3 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         Triggers

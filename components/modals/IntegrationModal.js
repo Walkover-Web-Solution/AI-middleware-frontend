@@ -17,7 +17,6 @@ const IntegrationModal = ({ params }) => {
     integrationNameRef.current.value = '';
   }
   return (
-
     <Modal MODAL_ID={MODAL_TYPE.INTEGRATION_MODAL}>
       <div className='modal-box'>
         <h3 className="font-bold text-lg mb-4">Enter Integration Name</h3>
@@ -26,6 +25,12 @@ const IntegrationModal = ({ params }) => {
           placeholder="Enter integration name"
           className="input input-bordered input-md w-full mb-2 placeholder-opacity-50"
           ref={integrationNameRef}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleCreateNewIntegration();
+            }
+          }}
         />
         <div className="modal-action">
           <form method="dialog">

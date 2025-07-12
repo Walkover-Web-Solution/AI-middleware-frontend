@@ -128,7 +128,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
             <div className="space-y-2">
               <div className="form-control">
                 <div className="label">
-                  <span className="label-text font-medium text-md">Knowledge Base Name</span>
+                  <span className="label-text font-medium text-md">Knowledge Base Name *</span>
                 </div>
                 <input
                   type="text"
@@ -144,7 +144,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
               <div className="form-control">
                 <label className="label !px-0">
-                  <span className="label-text text-sm font-medium">Description</span>
+                  <span className="label-text text-sm font-medium">Description *</span>
                 </label>
                 <textarea
                   name="description"
@@ -159,7 +159,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
               <div className="form-control">
                 <label className="label !px-0">
-                  <span className="label-text text-sm font-medium">Choose Upload Method</span>
+                  <span className="label-text text-sm font-medium">Choose Upload Method </span>
                 </label>
                 <div className="flex items-center">
                   <input
@@ -188,7 +188,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
               {!isUpload ? (
                 <div className="form-control">
                   <label className="label !px-0">
-                    <span className="label-text text-sm font-medium">Google Documentation URL</span>
+                    <span className="label-text text-sm font-medium">Google Documentation URL *</span>
                   </label>
                   <input
                     type="url"
@@ -223,7 +223,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label !px-0">
-                    <span className="label-text text-sm font-medium">Processing Method</span>
+                    <span className="label-text text-sm font-medium">Processing Method </span>
                   </label>
                   <select
                     name="sectionType"
@@ -265,7 +265,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="form-control">
                     <label className="label !px-0">
-                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Size</span>
+                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Size *</span>
                     </label>
                     <input
                       type="number"
@@ -280,7 +280,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
                   <div className="form-control">
                     <label className="label !px-0">
-                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Overlap</span>
+                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Overlap *</span>
                     </label>
                     <input
                       type="number"
