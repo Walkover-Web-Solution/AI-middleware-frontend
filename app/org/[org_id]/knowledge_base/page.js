@@ -20,7 +20,6 @@ const Page = ({ params }) => {
   const dispatch = useDispatch();
   const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id]);
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
-  const [searchTerm, setSearchTerm] = useState('');
   const [openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider] = useState(false);
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase,setFilterKnowledgeBase]=useState(knowledgeBaseData)
@@ -101,9 +100,9 @@ const Page = ({ params }) => {
           </div>
         </MainLayout>
         
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase}/>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
           
+          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase}/>
           <div className="flex flex-wrap justify-end items-center gap-2">
             <button className="btn" onClick={() => setOpenKnowledgeBaseSlider(true)}>
               <BookIcon /> Integration Guide

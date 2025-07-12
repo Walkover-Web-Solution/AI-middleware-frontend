@@ -35,7 +35,6 @@ function Home({ params, isEmbedUser }) {
       isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
     };
   });
-  const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [filterBridges,setFilterBridges]=useState(allBridges);
   const [tutorialState, setTutorialState] = useState({
@@ -290,8 +289,10 @@ function Home({ params, isEmbedUser }) {
                     </div>
                   </MainLayout>
                   
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
+                
                    <SearchItems data={allBridges} setFilterItems={setFilterBridges}/>
+                  
                     <div className="join hidden sm:block">
                       <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>
                         <LayoutGridIcon className="h-4 w-4" />
