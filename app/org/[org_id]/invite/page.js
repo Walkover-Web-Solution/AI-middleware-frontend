@@ -17,7 +17,7 @@ function InvitePage({ params }) {
   const [page, setPage] = useState(1);
   const [isInviting, setIsInviting] = useState(false);
 
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     fetchInvitedMembers(1, true);
