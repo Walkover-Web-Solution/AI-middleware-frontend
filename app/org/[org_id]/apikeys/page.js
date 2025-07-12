@@ -11,6 +11,7 @@ import { SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import SearchItems from "@/components/UI/SearchItems";
 
 export const runtime = 'edge';
 
@@ -19,20 +20,23 @@ const Page = () => {
   const dispatch = useDispatch();
   const path = pathName?.split('?')[0].split('/');
   const orgId = path[2] || '';
-
   const { apikeyData } = useCustomSelector((state) => ({
     apikeyData: state?.bridgeReducer?.apikeys[orgId] || []
   }));
+  const [filterApiKeys, setFilterApiKeys] = useState(apikeyData);
 
   useEffect(() => {
     if (orgId) {
       dispatch(getAllApikeyAction(orgId));
     }
-  }, []);
+  }, [dispatch, orgId]);
+
+  useEffect(() => {
+    setFilterApiKeys(apikeyData);
+  }, [apikeyData]);
 
   const [selectedApiKey, setSelectedApiKey] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-
   const handleUpdateClick = useCallback((item) => {
     setSelectedApiKey(item);
     setIsEditing(true);
@@ -58,7 +62,7 @@ const Page = () => {
 
   const columns = API_KEY_COLUMNS || [];
 
-  const dataWithIcons = apikeyData.map((item) => ({
+  const dataWithIcons = filterApiKeys.map((item) => ({
     ...item,
     actualName: item.name,
     service: (
@@ -103,6 +107,7 @@ const Page = () => {
           </div>
         </div>
       </MainLayout>
+      <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} />
       {Object.entries(
         dataWithIcons.reduce((acc, item) => {
           const service = item.service.props.children[1].props.children;
