@@ -48,7 +48,7 @@ const BridgeTypeToggle = ({ params, isEmbedUser }) => {
                 <div className="flex flex-row items-center gap-4 mb-4">
                     <>
                         <div className="flex items-center gap-2">
-                            <InfoModel tooltipContent="API  lets you create custom AI endpoints that integrate with your apps, giving you direct, programmatic access to AI models for tasks like response generation, data processing, and more.">
+                            <InfoModel tooltipContent="API lets you create custom AI endpoints that integrate with your apps, giving you direct, programmatic access to AI models for tasks like response generation, data processing, and more.">
                                 <label className="flex items-center cursor-pointer">
                                     <input
                                         type="radio"
