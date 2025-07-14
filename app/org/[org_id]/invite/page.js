@@ -16,7 +16,7 @@ function InvitePage({ params }) {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [isInviting, setIsInviting] = useState(false);
-
+  const [totalMembers, setTotalMembers] = useState(0);
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -39,6 +39,7 @@ function InvitePage({ params }) {
         const newMembers = response.data.data.data;
         if (reset) {
           setInvitedMembers(newMembers);
+          setTotalMembers(response?.data?.data?.totalEntityCount)
           setPage(1);
         } else {
           setInvitedMembers(prev => {
@@ -157,8 +158,8 @@ function InvitePage({ params }) {
       {/* Team Members */}
       <div className="bg-base-100 rounded-box shadow-sm border border-base-200 p-4 max-h-[75vh]">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-semibold">
-            Team Members ({invitedMembers.length})
+          <h2 className="text-md font-semibold">
+            Team Members ({totalMembers})
           </h2>
           <input
             type="text"
