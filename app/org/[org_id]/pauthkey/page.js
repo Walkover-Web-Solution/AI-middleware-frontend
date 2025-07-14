@@ -14,6 +14,7 @@ import { CopyIcon, TrashIcon } from '@/components/Icons'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
+import SearchItems from '@/components/UI/SearchItems'
 
 export const runtime = 'edge';
 
@@ -26,7 +27,7 @@ function Page({ params }) {
     isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
   };
 });
-
+  const [filterPauthKeys, setFilterPauthKeys] = useState(authData);
   const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
   const [tutorialState, setTutorialState] = useState({
@@ -36,6 +37,7 @@ function Page({ params }) {
 
   useEffect(() => {
     dispatch(getAllAuthData())
+    setFilterPauthKeys(authData)
   }, []); // Removed authData from dependencies to avoid infinite loop
 
 
@@ -124,34 +126,57 @@ function Page({ params }) {
 
   return (
     <div className="h-auto">
-      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"PauthKey"} TutorialDetails={"Pauth Key Setup"}/>}
-      {tutorialState?.showTutorial && (
-        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.PauthKey} params={params} flagKey={"PauthKey"} />
-      )}
-      <MainLayout>
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-2 pt-4">
-        <PageHeader
-          title="PauthKey"
-          description="A unique key used to validate API requests for sending and receiving messages securely."
-          docLink="https://blog.gtwy.ai/features/pauthkey"
+      <div className="w-full">
+        {tutorialState?.showSuggestion && (
+          <TutorialSuggestionToast 
+            setTutorialState={setTutorialState} 
+            flagKey="PauthKey" 
+            TutorialDetails="Pauth Key Setup"
+          />
+        )}
+        {tutorialState?.showTutorial && (
+          <OnBoarding 
+            setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} 
+            video={ONBOARDING_VIDEOS.PauthKey} 
+            params={params} 
+            flagKey="PauthKey" 
+          />
+        )}
+        <MainLayout>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-2 pt-4">
+            <PageHeader
+              title="PauthKey"
+              description="A unique key used to validate API requests for sending and receiving messages securely."
+              docLink="https://blog.gtwy.ai/features/pauthkey"
         />
-        <div className="flex-shrink-0 mt-4 sm:mt-0">
-          <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new Pauth key</button>
-        </div>
+            <div className="flex-shrink-0 mt-4 sm:mt-0">
+              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new Pauth key</button>
+            </div>
+          </div>
+        </MainLayout>
+        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} />
+
+        {isCreating ? (
+          <div className="flex justify-center items-center h-64">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <div>
+            <CustomTable
+              data={filterPauthKeys.map(item => ({
+                ...item,
+                actualName: item.name || 'Unnamed Key',
+              }))}
+              columnsToShow={PAUTH_KEY_COLUMNS}
+              sorting
+              sortingColumns={["name"]}
+              keysToWrap={["authkey"]}
+              endComponent={EndComponent}
+            />
+            {isCreating && <LoadingSpinner />}
+          </div>
+        )}
       </div>
-      </MainLayout>
-      {isCreating && <LoadingSpinner />}
-      <CustomTable
-        data={authData.map(item => ({
-          ...item,
-          actualName: item.name
-        }))}
-        columnsToShow={PAUTH_KEY_COLUMNS}
-        sorting
-        sortingColumns={["name"]}
-        keysToWrap={["authkey"]}
-        endComponent={EndComponent}
-      />
       <dialog
         id={MODAL_TYPE.PAUTH_KEY_MODAL}
         className="modal modal-bottom sm:modal-middle"
@@ -180,8 +205,6 @@ function Page({ params }) {
           </label>
           <div className="modal-action">
             <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
-
               <div className='flex gap-2'>
                 <button className="btn">Cancel</button>
               </div>
@@ -194,19 +217,16 @@ function Page({ params }) {
       <dialog id={MODAL_TYPE.PAUTH_KEY_DELETE_MODAL} className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Do you want to delete {singleAuthData.name} ?</h3>
-          {/* <p className="py-4">Do you want to delete {singleAuthData.name } ?</p> */}
           <div className="modal-action">
             <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
               <button className="btn">Cancel</button>
             </form>
             <button className="btn" onClick={DeleteAuth}>Delete</button>
-
           </div>
         </div>
       </dialog>
     </div>
-  )
+  );
 }
 
 export default Protected(Page)

@@ -291,7 +291,7 @@ function MainSlider({ isEmbedUser }) {
             </div>
 
             {/* Main navigation - scrollable */}
-            <div className={`flex-1 ${isOpen ? 'overflow-y-auto' : 'overflow-y-hidden'} overflow-x-hidden p-2`}>
+            <div className={`flex-1  scrollbar-hide overflow-x-hidden scroll-smooth p-2`}>
               <div className="space-y-6">
                 {NAV_SECTIONS.map(({ title, items }, idx) => (
                   <div key={idx} className="space-y-1">
