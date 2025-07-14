@@ -1,7 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { BotIcon, SettingsIcon, FilterSliderIcon } from "@/components/Icons";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
@@ -45,7 +45,14 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
         showGuide: state.userDetailsReducer.userDetails.showGuide,
         showConfigType: state.userDetailsReducer.userDetails.showConfigType,
     }));
-
+   useEffect(()=>{
+      if(bridgeType==='trigger'||bridgeType=='api'||bridgeType==='batch'){
+        if(currentView==='chatbot-config'||bridgeType==='trigger'){
+        setCurrentView('config');  
+        router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=config`);
+        }
+      } 
+   },[bridgeType])
     const handleNavigation = (target) => {
         setCurrentView(target);
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=${target}`);
@@ -165,7 +172,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
                     </div>}
                 </div>
             </div>}
-            {currentView === 'chatbot-config' ? renderChatbotConfigView() : currentView === 'guide' ? renderGuideView() : renderSetupView()}
+            {currentView === 'chatbot-config' && bridgeType==='chatbot' ? renderChatbotConfigView() : currentView === 'guide' &&currentView!=='trigger' ? renderGuideView() : renderSetupView()}
             {renderNeedHelp()}
         </div>
     );

@@ -28,7 +28,7 @@ const headers = ['Parameter', 'Type', 'Description', 'Required'];
 const data = [
   ['user', 'string', 'The user\'s question ( the query asked by the user)', 'true'],
   ['agent_id', 'string', 'The unique ID of the agent to process the request.', 'true'],
-  ['thread_id', 'string', 'The ID to maintain conversation context across messages.', 'true'],
+  ['thread_id', 'string', 'The ID to maintain conversation context across messages.', 'false'],
   ['response_type', 'string', 'Specifies the format of the response: "text", "json".', 'false'],
   ['variables', 'object', 'A key-value map of dynamic variables used in the agent\'s prompt.', 'false'],
 ];
