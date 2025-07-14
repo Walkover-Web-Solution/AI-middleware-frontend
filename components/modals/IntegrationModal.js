@@ -1,6 +1,6 @@
 import { createIntegrationAction } from '@/store/action/integrationAction'
 import { MODAL_TYPE } from '@/utils/enums'
-import { closeModal } from '@/utils/utility'
+import { closeModal, RequiredItem } from '@/utils/utility'
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import Modal from '@/components/UI/Modal'
@@ -19,7 +19,7 @@ const IntegrationModal = ({ params }) => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.INTEGRATION_MODAL}>
       <div className='modal-box'>
-        <h3 className="font-bold text-lg mb-4">Enter Integration Name</h3>
+        <h3 className="font-bold text-lg mb-4">Enter Integration Name{RequiredItem()}</h3>
         <input
           type="text"
           placeholder="Enter integration name"

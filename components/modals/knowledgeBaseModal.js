@@ -2,7 +2,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { KNOWLEDGE_BASE_CUSTOM_SECTION, KNOWLEDGE_BASE_SECTION_TYPES, MODAL_TYPE } from '@/utils/enums';
-import { closeModal, openModal } from '@/utils/utility';
+import { closeModal, openModal, RequiredItem } from '@/utils/utility';
 import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/store/action/knowledgeBaseAction';
 import Modal from '../UI/Modal';
 import { toast } from 'react-toastify';
@@ -128,7 +128,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
             <div className="space-y-2">
               <div className="form-control">
                 <div className="label">
-                  <span className="label-text font-medium text-md">Knowledge Base Name *</span>
+                  <span className="label-text font-medium text-md">Knowledge Base Name{RequiredItem()}</span>
                 </div>
                 <input
                   type="text"
@@ -144,7 +144,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
               <div className="form-control">
                 <label className="label !px-0">
-                  <span className="label-text text-sm font-medium">Description *</span>
+                  <span className="label-text text-sm font-medium">Description{RequiredItem()}</span>
                 </label>
                 <textarea
                   name="description"
@@ -188,7 +188,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
               {!isUpload ? (
                 <div className="form-control">
                   <label className="label !px-0">
-                    <span className="label-text text-sm font-medium">Google Documentation URL *</span>
+                    <span className="label-text text-sm font-medium">Google Documentation URL{RequiredItem()}</span>
                   </label>
                   <input
                     type="url"
@@ -265,7 +265,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="form-control">
                     <label className="label !px-0">
-                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Size *</span>
+                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Size{RequiredItem()}</span>
                     </label>
                     <input
                       type="number"
@@ -280,7 +280,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
                   <div className="form-control">
                     <label className="label !px-0">
-                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Overlap *</span>
+                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Overlap{RequiredItem()}</span>
                     </label>
                     <input
                       type="number"
