@@ -8,8 +8,9 @@ import LoadingSpinner from "./loadingSpinner";
 import { closeModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
 import { getServiceAction } from "@/store/action/serviceAction";
-import { BotIcon, CircleAlertIcon, ClockTenIcon, WebhookIcon } from "@/components/Icons";
+import { BotIcon, CheckIcon, CircleAlertIcon, ClockTenIcon, WebhookIcon } from "@/components/Icons";
 import Protected from "./protected";
+import { Check, CircleCheckBig } from "lucide-react";
 
   function CreateNewBridge({ orgid, isEmbedUser }) {
     const [selectedService, setSelectedService] = useState('openai');
@@ -204,9 +205,7 @@ import Protected from "./protected";
                         <WebhookIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
                       {selectedBridgeTypeCard === "api" && (
                       <div className="absolute top-3 right-3 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                        <CheckIcon className="text-base-100 h-4 w-4"/>
                       </div>
                     )}
                       </div>
@@ -238,9 +237,7 @@ import Protected from "./protected";
                         <BotIcon className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
                         {selectedBridgeTypeCard === "chatbot" && (
                       <div className="absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                         <CheckIcon className="text-base-100 h-4 w-4"/>
                       </div>
                     )}
                       </div>
@@ -272,10 +269,8 @@ import Protected from "./protected";
                         <ClockTenIcon className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
                         {selectedBridgeTypeCard === "batch" && (
                       <div className="absolute top-3 right-3 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
+                       <CheckIcon className="text-base-100 h-4 w-4"/>
+                       </div>
                     )}
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
@@ -306,9 +301,7 @@ import Protected from "./protected";
                         <CircleAlertIcon className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
                         {selectedBridgeTypeCard === "trigger" && (
                       <div className="absolute top-3 right-3 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                         <CheckIcon className="text-base-100 h-4 w-4"/>
                       </div>
                     )}
                       </div>
