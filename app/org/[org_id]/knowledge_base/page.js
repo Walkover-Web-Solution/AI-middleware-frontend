@@ -39,7 +39,7 @@ const Page = ({ params }) => {
   }, []);
 
 
-  const tableData = filterKnowledgeBase.map(item => ({
+  const tableData = filterKnowledgeBase?.map(item => ({
     ...item,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
@@ -126,10 +126,10 @@ const Page = ({ params }) => {
       </div>
 
       <div className="px-4">
-        {filterKnowledgeBase.length > 0 ? (
+        {filterKnowledgeBase?.length > 0 ? (
           viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filterKnowledgeBase.map((item, index) => (
+              {filterKnowledgeBase?.map((item, index) => (
                 <div
                   key={index}
                   className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"
