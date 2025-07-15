@@ -4,7 +4,7 @@ import { InfoIcon } from '@/components/Icons';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Protected from '@/components/protected';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const BridgeTypeToggle = ({ params, isEmbedUser }) => {
     const dispatch = useDispatch();
@@ -48,7 +48,7 @@ const BridgeTypeToggle = ({ params, isEmbedUser }) => {
                 <div className="flex flex-row items-center gap-4 mb-4">
                     <>
                         <div className="flex items-center gap-2">
-                            <InfoModel tooltipContent="The API allows users to connect with AI models to perform tasks like generating responses or processing information.">
+                            <InfoTooltip tooltipContent="The API allows users to connect with AI models to perform tasks like generating responses or processing information.">
                                 <label className="flex items-center cursor-pointer">
                                     <input
                                         type="radio"
@@ -62,10 +62,10 @@ const BridgeTypeToggle = ({ params, isEmbedUser }) => {
                                         <span className="label-text ml-2 cursor-pointer">API</span>
                                     </div>
                                 </label>
-                            </InfoModel>
+                            </InfoTooltip>
                         </div>
                         <div className="flex items-center gap-2">
-                            <InfoModel tooltipContent="ChatBot enables you to create conversational AI agents that can interact with users in natural language.">
+                            <InfoTooltip tooltipContent="ChatBot enables you to create conversational AI agents that can interact with users in natural language.">
                                 <label className="flex items-center cursor-pointer">
                                     <input
                                         type="radio"
@@ -80,10 +80,10 @@ const BridgeTypeToggle = ({ params, isEmbedUser }) => {
                                         <span className="label-text ml-2 cursor-pointer">ChatBot</span>
                                     </div>
                                 </label>
-                            </InfoModel>
+                            </InfoTooltip>
                         </div>
                         <div className="flex items-center gap-2">
-                            <InfoModel tooltipContent="Batch api automates and executes multiple tasks simultaneously for greater efficiency.">
+                            <InfoTooltip tooltipContent="Batch api automates and executes multiple tasks simultaneously for greater efficiency.">
                                 <label className="flex items-center cursor-pointer">
                                     <input
                                         type="radio"
@@ -98,11 +98,11 @@ const BridgeTypeToggle = ({ params, isEmbedUser }) => {
                                         <span className="label-text ml-2 cursor-pointer">Batch API</span>
                                     </div>
                                 </label>
-                            </InfoModel>
+                            </InfoTooltip>
                         </div>
                         {!isEmbedUser && (
                             <div className="flex items-center gap-2">
-                                <InfoModel tooltipContent="Triggers allows you to create automated workflows that respond to specific events or conditions. Ideal for creating event-driven applications.">
+                                <InfoTooltip tooltipContent="Triggers allows you to create automated workflows that respond to specific events or conditions. Ideal for creating event-driven applications.">
                                     <label className="flex items-center cursor-pointer">
                                         <input
                                             type="radio"
@@ -117,7 +117,7 @@ const BridgeTypeToggle = ({ params, isEmbedUser }) => {
                                             <span className="label-text ml-2 cursor-pointer">Triggers</span>
                                         </div>
                                     </label>
-                                </InfoModel>
+                                </InfoTooltip>
                             </div>
                         )}
                     </>
