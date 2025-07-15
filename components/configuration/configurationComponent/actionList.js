@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import ActionModel from './actionModel';
 import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
 function ActionList({ params }) {
     const { action, bridgeType } = useCustomSelector((state) => ({
@@ -40,9 +40,9 @@ function ActionList({ params }) {
     return (
         <div className="form-control">
             <div className='flex items-start'>
-                    <InfoModel tooltipContent="Action is a task or operation executed in response to a trigger or event, often used to perform a defined outcome such as sending or processing data.">
+                    <InfoTooltip tooltipContent="Action is a task or operation executed in response to a trigger or event, often used to perform a defined outcome such as sending or processing data.">
                         <label className="label font-medium whitespace-nowrap info">Action</label>
-                    </InfoModel>
+                    </InfoTooltip>
             </div>
             <div className='flex flex-wrap gap-4'>
                 {action && Object.entries(action).sort().map(([key, value]) => (

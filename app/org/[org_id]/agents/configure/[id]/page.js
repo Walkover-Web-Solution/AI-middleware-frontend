@@ -54,7 +54,7 @@ const Page = ({ searchParams }) => {
 
   useEffect(() => {
     if (bridgeName) {
-      updateTitle(`GSTWY Ai | ${bridgeName}`);
+      updateTitle(`GTWY Ai | ${bridgeName}`);
     }
   }, [bridgeName]);
 

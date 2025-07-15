@@ -532,3 +532,6 @@ export  function generateRandomID(length = 10) {
     }
     return result;
   }
+
+export const RequiredItem = () => <span className="text-error text-lg">*</span>;
+  

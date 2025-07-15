@@ -1,5 +1,4 @@
 import OnBoarding from '@/components/OnBoarding';
-import InfoModel from '@/components/infoModel';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ONBOARDING_VIDEOS } from '@/utils/enums';
@@ -7,6 +6,7 @@ import { getStatusClass } from '@/utils/utility';
 import { current } from '@reduxjs/toolkit';
 import { InfoIcon, AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
+import InfoTooltip from '@/components/InfoTooltip';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
      const [tutorialState, setTutorialState] = useState({
@@ -86,10 +86,10 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             <div className="flex items-end gap-2">
                 {name === "preFunction" ? (
                     <div className=" flex flex-col items-start gap-2">
-                        <InfoModel tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
+                        <InfoTooltip tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
                         <p className="text-base font-semibold info">Pre Tool Configuration</p>
                        
-                        </InfoModel>
+                        </InfoTooltip>
 
                         {/* Plus Icon Button */}
                         <button
@@ -103,10 +103,10 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 ) : (
                     <div className="flex flex-col items-start gap-2">
                         {connectedFunctions.length === 0 && (
-                            <InfoModel video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
+                            <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."} >
                                 <p className=" label-text info">Tool Configuration</p>
 
-                            </InfoModel>
+                            </InfoTooltip>
                         )}
 
                         <div className='flex flex-wrap items-center gap-2 w-full lg:mr-0 mr-5'>

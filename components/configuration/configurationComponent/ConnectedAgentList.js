@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
 import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const ConnectedAgentList = ({ params }) => {
     const dispatch = useDispatch();
@@ -199,9 +199,9 @@ const ConnectedAgentList = ({ params }) => {
             <div className="label flex-col items-start mb-2">
                 {shouldToolsShow && Object.keys(connect_agents).length > 0 && (
                     <>
-                        <InfoModel tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                        <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
                             <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
-                        </InfoModel>
+                        </InfoTooltip>
                         <div className="flex flex-wrap gap-4">
                             {renderEmbed}
                         </div>
