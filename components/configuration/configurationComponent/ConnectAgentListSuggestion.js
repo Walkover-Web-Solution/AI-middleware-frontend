@@ -1,9 +1,8 @@
-import InfoTooltip from '@/components/InfoTooltip';
-import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
 import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { InfoIcon } from 'lucide-react';
+import InfoTooltip from '@/components/InfoTooltip';
 
 function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [], shouldToolsShow, modelName, bridges }) {
     const [searchQuery, setSearchQuery] = useState('');

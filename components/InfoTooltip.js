@@ -7,8 +7,9 @@ import {
   autoUpdate,
 } from '@floating-ui/react';
 import Tutorial from './tutorial';
+import { ExternalLinkIcon } from './Icons';
 
-const InfoTooltip = ({ video = "", children, tooltipContent="", className = "", placement = "top" }) => {
+const InfoTooltip = ({ video = "", children, tooltipContent="", className = "", placement = "top", docLink }) => {
   const [open, setOpen] = useState(false); // for hover state
   const [showTutorial, setShowTutorial] = useState(false);
   const delayTimeout = useRef(null);
@@ -67,16 +68,27 @@ const InfoTooltip = ({ video = "", children, tooltipContent="", className = "", 
               setOpen(true);
             }}
             onMouseLeave={handleClose}
-            className={className} 
-                
+            className={`${className ? className : `
+              z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            `}`}
           >
-          
-            <p className="whitespace-pre-line">{tooltipContent}</p>
-         
-          {video !== "" && (
-            <button
+            <p className="whitespace-pre-line">{tooltipContent}
+            {docLink&&
+            <a href={docLink}
+              className="inline-flex ml-2 items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300  font-medium group"
+              target="_blank"
+              rel="noopener noreferrer">
+              <span>Learn more</span>
+              <ExternalLinkIcon size={12} />
+            </a>
+            }   
+           </p>
+            {video !== "" && (
+              <button
               onClick={() => setShowTutorial(true)}
-              className="mt-1 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 pointer-events-auto"
+              className="mt-1 ml-2 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 pointer-events-auto"
             >
               Watch Video <span aria-hidden>↗</span>
             </button>

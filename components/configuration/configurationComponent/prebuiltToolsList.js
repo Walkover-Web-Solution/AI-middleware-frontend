@@ -3,8 +3,7 @@ import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { GetFileTypeIcon, GetPreBuiltToolTypeIcon, openModal } from '@/utils/utility';
-import { MODAL_TYPE } from '@/utils/enums';
+import { GetPreBuiltToolTypeIcon, openModal } from '@/utils/utility';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import InfoTooltip from '@/components/InfoTooltip';
 

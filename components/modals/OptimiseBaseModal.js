@@ -1,5 +1,5 @@
 import { closeModal, createDiff, simulateStreaming } from '@/utils/utility';
-import { Copy, Redo, Undo } from 'lucide-react';
+import { CopyIcon, RedoIcon, UndoIcon } from '@/components/Icons';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import ComparisonCheck from '@/utils/comparisonCheck';
@@ -20,6 +20,7 @@ function OptimiseBaseModal({
   setMessages,
   showHistory = false,
   history = [],
+  setCurrentIndex=()=>{},
   currentIndex = 0,
   onUndo,
   onRedo,
@@ -31,16 +32,22 @@ function OptimiseBaseModal({
   
   const [diff, setDiff] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [newContent, setNewContent] = useState("");
+  const [newContent, setNewContent] = useState(content);
   const [copyText, setCopyText] = useState(`Copy ${contentLabel}`);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedContent, setStreamedContent] = useState("");
 
   useEffect(() => {
-    setNewContent("");
     setStreamedContent("");
     setIsStreaming(false);
+    setNewContent(content);
   }, [content]);
+
+  useEffect(() => {
+    if (history?.length > 0 && history[currentIndex]) {
+      setNewContent(history[currentIndex]);
+    }
+  }, [currentIndex, history]);
 
   const diffData = useMemo(() => {
     const displayContent = isStreaming ? streamedContent : newContent;
@@ -60,6 +67,7 @@ function OptimiseBaseModal({
       simulateStreaming(updatedContent, setStreamedContent, setIsStreaming, () => {
         setNewContent(updatedContent);
       });
+      setCurrentIndex(history.length);
 
       return result;
     } catch (error) {
@@ -103,7 +111,7 @@ function OptimiseBaseModal({
 
   const handleContentChange = (value) => {
     if (!isStreaming) {
-       setNewContent(value);
+      setNewContent(value);
       if (additionalValidation) {
         additionalValidation(value, setErrorMessage);
       }
@@ -111,7 +119,23 @@ function OptimiseBaseModal({
   };
 
   const displayContent = isStreaming ? streamedContent : newContent;
-  const hasContent = displayContent || isStreaming;
+  
+  // Fixed: Use consistent logic for textarea content
+  const getTextareaContent = () => {
+    if (isStreaming) {
+      return streamedContent;
+    }
+    if (newContent) {
+      return newContent;
+    }
+    if (showHistory && history.length > 0 && currentIndex < history.length) {
+      return history[currentIndex];
+    }
+    return content;
+  };
+
+  const textareaContent = getTextareaContent();
+
 
   return (
     <Modal MODAL_ID={modalType}>
@@ -162,7 +186,7 @@ function OptimiseBaseModal({
             )}
           </div>
 
-          {!diff && hasContent ? (
+          {!diff && (
             <div className='w-full h-full pt-3 overflow-auto'>
               <div className='flex justify-between'>
                 <div className="label">
@@ -180,26 +204,26 @@ function OptimiseBaseModal({
                     <>
                       <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
                                   border border-gray-700 space-y-2 pointer-events-auto" placement='left' tooltipContent={`Previous ${contentLabel}`}>
-                        <Undo
+                        <UndoIcon
                           onClick={onUndo}
-                          className={`${(!currentIndex || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
+                          className={`${(!currentIndex || isStreaming) ? "opacity-50 pointer-events-none" : "hover:text-blue-600"}`}
                         />
                       </InfoTooltip>
                       <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
                                   border border-gray-700 space-y-2 pointer-events-auto" placement='top' tooltipContent={`Next ${contentLabel}`}>
-                        <Redo
+                        <RedoIcon
                           onClick={onRedo}
-                          className={`${((currentIndex >= history.length - 1) || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
+                          className={`${((currentIndex >= history.length) || isStreaming) ? "opacity-50 pointer-events-none" : "hover:text-blue-600"}`}
                         />
                       </InfoTooltip>
                     </>
                   )}
                   <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
                                   border border-gray-700 space-y-2 pointer-events-auto" placement='left' tooltipContent={copyText}>
-                    <Copy
+                    <CopyIcon
                       onClick={copyToClipboard}
                       size={20}
-                      className={`${(!displayContent || isStreaming) ? "opacity-50 pointer-events-none" : ""}`}
+                      className={`${(!displayContent || isStreaming) ? "opacity-50 pointer-events-none" : "hover:text-blue-600"}`}
                     />
                   </InfoTooltip>
                 </div>
@@ -207,7 +231,7 @@ function OptimiseBaseModal({
               <div className="relative">
                 <textarea
                   className="textarea textarea-bordered border focus:border-primary caret-black p-2 w-full resize-none flex-grow min-h-[60vh]"
-                  value={displayContent}
+                  value={textareaContent}
                   onChange={(e) => handleContentChange(e.target.value)}
                   readOnly={isStreaming}
                   {...textareaProps}
@@ -223,15 +247,6 @@ function OptimiseBaseModal({
                   </div>
                 )}
               </div>
-            </div>
-          ) : !diff && (
-            <div className="w-full h-full pt-16 overflow-auto flex flex-col">
-              <textarea
-                className="textarea textarea-bordered border focus:border-primary caret-black p-2 w-full resize-none flex-grow min-h-[60vh]"
-                value={content}
-                onChange={(e) => handleContentChange(e.target.value)}
-                {...textareaProps}
-              />
             </div>
           )}
         </div>

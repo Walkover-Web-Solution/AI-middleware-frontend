@@ -6,7 +6,6 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { GetFileTypeIcon, openModal } from '@/utils/utility';
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
-import GoogleDocIcon from '@/icons/GoogleDocIcon';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
