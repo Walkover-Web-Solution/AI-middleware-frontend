@@ -8,7 +8,7 @@ import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
-import { GetFileTypeIcon, openModal } from "@/utils/utility";
+import { closeModal, GetFileTypeIcon, openModal } from "@/utils/utility";
 import { BookIcon, EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
@@ -24,6 +24,7 @@ const Page = ({ params }) => {
   const [openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider] = useState(false);
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData)
+  const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
   useEffect(() => {
     const updateScreenSize = () => {
       if (window.matchMedia('(max-width: 640px)').matches) {
@@ -59,8 +60,8 @@ const Page = ({ params }) => {
   };
 
   const handleDeleteKnowledgebase = (item) => {
-    dispatch(deleteKnowBaseDataAction({ data: { id: item?._id, orgId: params?.org_id } }));
-
+    closeModal(MODAL_TYPE.DELETE_MODAL);
+    dispatch(deleteKnowBaseDataAction({ data: { id: item?._id, orgId: params?.org_id } }))
   };
   const EndComponent = ({ row }) => {
     return (
@@ -68,7 +69,7 @@ const Page = ({ params }) => {
         <div
           className="tooltip tooltip-primary"
           data-tip="delete"
-          onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
+          onClick={() => { setselectedDataToDelete(row); openModal(MODAL_TYPE.DELETE_MODAL) }}
         >
           <TrashIcon strokeWidth={2} size={20} />
         </div>
@@ -79,7 +80,6 @@ const Page = ({ params }) => {
         >
           <SquarePenIcon size={20} />
         </div>
-        <DeleteModal onConfirm={handleDeleteKnowledgebase} item={row} title="Delete KnowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${row.actual_name}"? This action cannot be undone.`} />
       </div>
     );
   };
@@ -156,7 +156,6 @@ const Page = ({ params }) => {
                       </p>
                     </div>
                   </div>
-                  <DeleteModal onConfirm={handleDeleteKnowledgebase} item={item} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${item.actual_name}"? This action cannot be undone.`} />
                 </div>
               ))}
             </div>
@@ -179,6 +178,7 @@ const Page = ({ params }) => {
 
       <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} knowledgeBaseData={knowledgeBaseData} />
       <KnowledgeBaseIntegrationSlider params={params} setOpenKnowledgeBaseSlider={setOpenKnowledgeBaseSlider} openKnowledgeBaseSlider={openKnowledgeBaseSlider} />
+      <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedDataToDelete} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${selectedDataToDelete?.actual_name}"? This action cannot be undone.`} />
     </div>
   );
 };

@@ -29,7 +29,7 @@ function Page({ params }) {
     };
   });
   const [filterPauthKeys, setFilterPauthKeys] = useState(authData);
-  const [singleAuthData, setSingleAuthData] = useState({});
+  const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
@@ -89,11 +89,11 @@ function Page({ params }) {
     closeModal(MODAL_TYPE.PAUTH_KEY_MODAL)
     document.getElementById('authNameInput').value = ''
   };
-  
+
   const DeleteAuth = (item) => {
+    closeModal(MODAL_TYPE?.DELETE_MODAL);
     dispatch(deleteAuthData(item)).then(() => {
       toast.success("Auth Key Deleted Successfully")
-      // Optionally, you can show a success message to the user
     });
   };
 
@@ -101,7 +101,7 @@ function Page({ params }) {
     return (
       <div className="flex gap-3 justify-center items-center">
         <div className="tooltip tooltip-primary" data-tip="delete">
-          <a onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}>
+          <a onClick={() => { setselectedDataToDelete(row); openModal(MODAL_TYPE.DELETE_MODAL) }}>
             <TrashIcon size={16} />
           </a>
         </div>
@@ -112,7 +112,6 @@ function Page({ params }) {
         >
           <CopyIcon size={16} />
         </div>
-        <DeleteModal onConfirm={DeleteAuth} item={row} description={`Are you sure you want to delete the Pauth key "${row.name}"? This action cannot be undone.`} title='Delete API Key' />
       </div>
     );
   };
@@ -207,7 +206,7 @@ function Page({ params }) {
         </div>
       </dialog>
 
-
+      <DeleteModal onConfirm={DeleteAuth} item={selectedDataToDelete} description={`Are you sure you want to delete the Pauth key "${selectedDataToDelete?.name}"? This action cannot be undone.`} title='Delete API Key' />
     </div>
   );
 }

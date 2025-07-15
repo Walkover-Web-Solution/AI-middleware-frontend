@@ -10,7 +10,6 @@ const DeleteModal = ({
   title = "Are you sure?",
   description = "This action cannot be undone. This will permanently delete selected file."
 }) => {
- 
 const handleClose=()=>{
     closeModal(MODAL_TYPE.DELETE_MODAL);
 }

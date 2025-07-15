@@ -6,7 +6,7 @@ import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, getAllApikeyAction } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
-import { getIconOfService, openModal } from '@/utils/utility';
+import { closeModal, getIconOfService, openModal } from '@/utils/utility';
 import { SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -38,6 +38,7 @@ const Page = () => {
 
   const [selectedApiKey, setSelectedApiKey] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
   const handleUpdateClick = useCallback((item) => {
     setSelectedApiKey(item);
     setIsEditing(true);
@@ -48,15 +49,14 @@ const Page = () => {
 
   const deleteApikey = useCallback(
     (item) => {
-
+      closeModal(MODAL_TYPE?.DELETE_MODAL)
       dispatch(
         deleteApikeyAction({
           org_id: item.org_id,
           name: item.name,
           id: item._id,
         })
-      );
-
+      )
     },
     [dispatch]
   );
@@ -78,7 +78,7 @@ const Page = () => {
         <div
           className="tooltip tooltip-primary"
           data-tip="delete"
-          onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
+          onClick={() => { setselectedDataToDelete(row); openModal(MODAL_TYPE.DELETE_MODAL) }}
         >
           <TrashIcon size={16} />
         </div>
@@ -89,12 +89,6 @@ const Page = () => {
         >
           <SquarePenIcon size={16} />
         </div>
-        <DeleteModal
-          onConfirm={deleteApikey}
-          item={row}
-          title="Delete API Key"
-          description={`Are you sure you want to delete the API key "${row.name}"? This action cannot be undone.`}
-        />
       </div>
     );
   };
@@ -140,6 +134,8 @@ const Page = () => {
         </div>
       ))}
       <ApiKeyModal orgId={orgId} isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} />
+      <DeleteModal onConfirm={deleteApikey} item={selectedDataToDelete} title="Delete API Key" description={`Are you sure you want to delete the API key "${selectedDataToDelete?.name}"? This action cannot be undone.`}
+      />
     </div>
   );
 };
