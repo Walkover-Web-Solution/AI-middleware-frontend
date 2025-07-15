@@ -92,7 +92,8 @@ const Page = ({ params }) => {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
             <PageHeader
               title="Knowledge Base"
-              description="A repository where you can provide reference data that the AI uses to generate accurate and context-aware responses."
+              description="A knowledge base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."
+              docLink="https://blog.gtwy.ai/features/knowledgebase"
             />
             <div className="flex-shrink-0 mt-4 sm:mt-0">
               <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>+ create knowledge base</button>
