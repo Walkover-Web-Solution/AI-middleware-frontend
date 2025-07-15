@@ -23,7 +23,7 @@ const Page = ({ params }) => {
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider] = useState(false);
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
-  const [filterKnowledgeBase,setFilterKnowledgeBase]=useState(knowledgeBaseData)
+  const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData)
   useEffect(() => {
     const updateScreenSize = () => {
       if (window.matchMedia('(max-width: 640px)').matches) {
@@ -53,17 +53,14 @@ const Page = ({ params }) => {
     description: item?.description,
     actual_name: item?.name,
   }));
-const handleUpdateKnowledgeBase = (item) => {
+  const handleUpdateKnowledgeBase = (item) => {
     setSelectedKnowledgeBase(item);
     openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)
   };
-  
-  const handleDelete=()=>{
-    openModal(MODAL_TYPE.DELETE_MODAL)
-  }
+
   const handleDeleteKnowledgebase = (item) => {
-      dispatch(deleteKnowBaseDataAction({ data: {id:item?._id, orgId: params?.org_id } }));
-  
+    dispatch(deleteKnowBaseDataAction({ data: { id: item?._id, orgId: params?.org_id } }));
+
   };
   const EndComponent = ({ row }) => {
     return (
@@ -71,7 +68,7 @@ const handleUpdateKnowledgeBase = (item) => {
         <div
           className="tooltip tooltip-primary"
           data-tip="delete"
-          onClick={() => handleDelete()}
+          onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
         >
           <TrashIcon strokeWidth={2} size={20} />
         </div>
@@ -82,12 +79,10 @@ const handleUpdateKnowledgeBase = (item) => {
         >
           <SquarePenIcon size={20} />
         </div>
-        <DeleteModal onConfirm={handleDeleteKnowledgebase} item={row} title="Delete KnowledgeBase "  description={`Are you sure you want to delete the KnowledgeBase "${row.actual_name}"? This action cannot be undone.`}/>
+        <DeleteModal onConfirm={handleDeleteKnowledgebase} item={row} title="Delete KnowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${row.actual_name}"? This action cannot be undone.`} />
       </div>
     );
   };
-  
-  
 
   return (
     <div className="w-full">
@@ -104,10 +99,10 @@ const handleUpdateKnowledgeBase = (item) => {
             </div>
           </div>
         </MainLayout>
-        
+
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
-          
-          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase}/>
+
+          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} />
           <div className="flex flex-wrap justify-end items-center gap-2">
             <button className="btn" onClick={() => setOpenKnowledgeBaseSlider(true)}>
               <BookIcon /> Integration Guide
@@ -161,7 +156,7 @@ const handleUpdateKnowledgeBase = (item) => {
                       </p>
                     </div>
                   </div>
-                  <DeleteModal onConfirm={handleDeleteKnowledgebase} item={item} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${item.actual_name}"? This action cannot be undone.`}/>
+                  <DeleteModal onConfirm={handleDeleteKnowledgebase} item={item} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${item.actual_name}"? This action cannot be undone.`} />
                 </div>
               ))}
             </div>
@@ -181,8 +176,8 @@ const handleUpdateKnowledgeBase = (item) => {
           </div>
         )}
       </div>
-      
-      <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} knowledgeBaseData={knowledgeBaseData}/>
+
+      <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} knowledgeBaseData={knowledgeBaseData} />
       <KnowledgeBaseIntegrationSlider params={params} setOpenKnowledgeBaseSlider={setOpenKnowledgeBaseSlider} openKnowledgeBaseSlider={openKnowledgeBaseSlider} />
     </div>
   );

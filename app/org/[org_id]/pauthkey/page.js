@@ -21,13 +21,13 @@ export const runtime = 'edge';
 
 function Page({ params }) {
   const dispatch = useDispatch();
- const { authData, isFirstPauthCreation, } = useCustomSelector((state) => {
-  const user = state.userDetailsReducer.userDetails || [];
-  return {
-    authData: state?.authDataReducer?.authData || [],
-    isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
-  };
-});
+  const { authData, isFirstPauthCreation, } = useCustomSelector((state) => {
+    const user = state.userDetailsReducer.userDetails || [];
+    return {
+      authData: state?.authDataReducer?.authData || [],
+      isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
+    };
+  });
   const [filterPauthKeys, setFilterPauthKeys] = useState(authData);
   const [singleAuthData, setSingleAuthData] = useState({});
   const [isCreating, setIsCreating] = useState(false);
@@ -61,12 +61,12 @@ function Page({ params }) {
    * @param {Event} e Event object
    * @param {string} name Name of the new auth key
    */
-  const createAuthKeyHandler = async (e, name) => { 
+  const createAuthKeyHandler = async (e, name) => {
     const isDuplicate = authData.some(item => item.name === name);
     if (isDuplicate) {
       toast.error("The name has already been taken")
     }
-    else  if (name.length > 2) {
+    else if (name.length > 2) {
       setIsCreating(true); // Start loading
       try {
         await dispatch(createNewAuthData({
@@ -89,11 +89,7 @@ function Page({ params }) {
     closeModal(MODAL_TYPE.PAUTH_KEY_MODAL)
     document.getElementById('authNameInput').value = ''
   };
-
-  const hanldeDelete=()=>{
-      openModal(MODAL_TYPE.DELETE_MODAL)
-    }
-
+  
   const DeleteAuth = (item) => {
     dispatch(deleteAuthData(item)).then(() => {
       toast.success("Auth Key Deleted Successfully")
@@ -105,7 +101,7 @@ function Page({ params }) {
     return (
       <div className="flex gap-3 justify-center items-center">
         <div className="tooltip tooltip-primary" data-tip="delete">
-          <a onClick={() => hanldeDelete()}>
+          <a onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}>
             <TrashIcon size={16} />
           </a>
         </div>
@@ -116,7 +112,7 @@ function Page({ params }) {
         >
           <CopyIcon size={16} />
         </div>
-        <DeleteModal onConfirm={DeleteAuth} item={row} description={`Are you sure you want to delete the Pauth key "${row.name}"? This action cannot be undone.`} title='Delete API Key'/>
+        <DeleteModal onConfirm={DeleteAuth} item={row} description={`Are you sure you want to delete the Pauth key "${row.name}"? This action cannot be undone.`} title='Delete API Key' />
       </div>
     );
   };
@@ -125,18 +121,18 @@ function Page({ params }) {
     <div className="h-auto">
       <div className="w-full">
         {tutorialState?.showSuggestion && (
-          <TutorialSuggestionToast 
-            setTutorialState={setTutorialState} 
-            flagKey="PauthKey" 
+          <TutorialSuggestionToast
+            setTutorialState={setTutorialState}
+            flagKey="PauthKey"
             TutorialDetails="Pauth Key Setup"
           />
         )}
         {tutorialState?.showTutorial && (
-          <OnBoarding 
-            setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} 
-            video={ONBOARDING_VIDEOS.PauthKey} 
-            params={params} 
-            flagKey="PauthKey" 
+          <OnBoarding
+            setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
+            video={ONBOARDING_VIDEOS.PauthKey}
+            params={params}
+            flagKey="PauthKey"
           />
         )}
         <MainLayout>
@@ -145,7 +141,7 @@ function Page({ params }) {
               title="PauthKey"
               description="A unique key used to validate API requests for sending and receiving messages securely."
               docLink="https://blog.gtwy.ai/features/pauthkey"
-        />
+            />
             <div className="flex-shrink-0 mt-4 sm:mt-0">
               <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new Pauth key</button>
             </div>
@@ -211,7 +207,7 @@ function Page({ params }) {
         </div>
       </dialog>
 
-      
+
     </div>
   );
 }

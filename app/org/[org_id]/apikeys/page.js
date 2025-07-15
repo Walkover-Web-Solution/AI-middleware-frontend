@@ -50,20 +50,16 @@ const Page = () => {
     (item) => {
 
       dispatch(
-          deleteApikeyAction({
-            org_id: item.org_id,
-            name: item.name,
-            id: item._id,
-          })
-        );
-        
-      },
+        deleteApikeyAction({
+          org_id: item.org_id,
+          name: item.name,
+          id: item._id,
+        })
+      );
+
+    },
     [dispatch]
   );
-  const hanldeDelete=()=>{
-    openModal(MODAL_TYPE.DELETE_MODAL)
-  }
-  const columns = API_KEY_COLUMNS || [];
 
   const dataWithIcons = filterApiKeys.map((item) => ({
     ...item,
@@ -82,7 +78,7 @@ const Page = () => {
         <div
           className="tooltip tooltip-primary"
           data-tip="delete"
-          onClick={() => hanldeDelete()}
+          onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
         >
           <TrashIcon size={16} />
         </div>
