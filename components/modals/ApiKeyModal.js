@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { saveApiKeysAction, updateApikeyAction } from '@/store/action/apiKeyAction';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { API_KEY_MODAL_INPUT, MODAL_TYPE } from '@/utils/enums';
-import { closeModal } from '@/utils/utility';
+import { closeModal, RequiredItem } from '@/utils/utility';
 import { usePathname } from 'next/navigation';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
@@ -72,11 +72,11 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                 {API_KEY_MODAL_INPUT.map((field) => (
                     <div key={field} className="flex flex-col gap-2">
                         <label htmlFor={field} className="label-text">
-                            {field.charAt(0).toUpperCase() + field.slice(1)}: *
+                            {field.charAt(0).toUpperCase() + field.slice(1)}{field !=="comment" && RequiredItem()}
                         </label>
                         <input
                             id={field}
-                            required
+                            required = {field !== "comment"}
                             type={field === 'apikey' && isEditing ? 'password' : 'text'}
                             className="input input-bordered"
                             name={field}
@@ -88,7 +88,7 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                 ))}
                 <div className="flex flex-col gap-2">
                     <label htmlFor="service" className="label-text">
-                        Service: *
+                        Service{RequiredItem()}
                     </label>
                     <select
                         id="service"
