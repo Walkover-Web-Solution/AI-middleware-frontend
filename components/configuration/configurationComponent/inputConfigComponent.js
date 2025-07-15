@@ -3,14 +3,14 @@ import OptimizePromptModal from '@/components/modals/optimizePromptModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
-import { openModal } from '@/utils/utility';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { generateRandomID, openModal } from '@/utils/utility';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import ToneDropdown from './toneDropdown'; 
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const InputConfigComponent = ({ params }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -27,6 +27,7 @@ const InputConfigComponent = ({ params }) => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
     const [messages, setMessages] = useState([]);
+    const thread_id = useMemo(() => generateRandomID(), []);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -257,9 +258,9 @@ const InputConfigComponent = ({ params }) => {
                   openModal(MODAL_TYPE?.PROMPT_SUMMARY);
                 }}
               >
-                <InfoModel tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
-                <span className='label-text promptSummary-info capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
-                </InfoModel>
+                <InfoTooltip tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
+                <span className='label-text  capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
+                </InfoTooltip>
               </button>
              
             </div>
@@ -348,7 +349,7 @@ const InputConfigComponent = ({ params }) => {
               <ResponseStyleDropdown params={params} />
             </div>
             <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
-            <OptimizePromptModal savePrompt={savePrompt}setPrompt={setPrompt} params={params} messages={messages} setMessages={setMessages}/>
+            <OptimizePromptModal savePrompt={savePrompt}setPrompt={setPrompt} params={params} messages={messages} setMessages={setMessages} thread_id={thread_id}/>
             <PromptSummaryModal params={params}/>
         </div>
     );

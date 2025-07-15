@@ -1,5 +1,6 @@
 // PageHeader.js
 import React from 'react';
+import { ExternalLinkIcon } from './Icons';
 
 /**
  * Reusable page header component
@@ -7,13 +8,20 @@ import React from 'react';
  * @param {string} description - The page description
  * @returns {JSX.Element}
  */
-const PageHeader = ({ title, description }) => {
+const PageHeader = ({ title, description,docLink }) => {
   return (
     <div className="mb-6">
       <h1 className="text-2xl font-bold mb-1">{title}</h1>
       {description && (
         <p className="text-base text-gray-700">
           {description}
+          <a href={docLink}
+            className="inline-flex mb-4 ml-2 items-center gap-2 text-sm text-primary hover:text-primary-dark transition-colors font-medium group"
+            target="_blank"
+            rel="noopener noreferrer">
+            <span>Learn more</span>
+            <ExternalLinkIcon size={16} />
+          </a>
         </p>
       )}
     </div>

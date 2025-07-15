@@ -12,6 +12,7 @@ import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import DeleteModal from "@/components/UI/DeleteModal";
+import SearchItems from "@/components/UI/SearchItems";
 
 export const runtime = 'edge';
 
@@ -20,20 +21,23 @@ const Page = () => {
   const dispatch = useDispatch();
   const path = pathName?.split('?')[0].split('/');
   const orgId = path[2] || '';
-
   const { apikeyData } = useCustomSelector((state) => ({
     apikeyData: state?.bridgeReducer?.apikeys[orgId] || []
   }));
+  const [filterApiKeys, setFilterApiKeys] = useState(apikeyData);
 
   useEffect(() => {
     if (orgId) {
       dispatch(getAllApikeyAction(orgId));
     }
-  }, []);
+  }, [dispatch, orgId]);
+
+  useEffect(() => {
+    setFilterApiKeys(apikeyData);
+  }, [apikeyData]);
 
   const [selectedApiKey, setSelectedApiKey] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-
   const handleUpdateClick = useCallback((item) => {
     setSelectedApiKey(item);
     setIsEditing(true);
@@ -61,7 +65,7 @@ const Page = () => {
   }
   const columns = API_KEY_COLUMNS || [];
 
-  const dataWithIcons = apikeyData.map((item) => ({
+  const dataWithIcons = filterApiKeys.map((item) => ({
     ...item,
     actualName: item.name,
     service: (
@@ -106,12 +110,14 @@ const Page = () => {
           <PageHeader
             title="ApiKeys"
             description="Add your model-specific API keys to enable and use different AI models in your chat."
+            docLink="https://app.docstar.io/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
           />
           <div className="flex-shrink-0 mt-4 sm:mt-0">
             <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>+ create new api key</button>
           </div>
         </div>
       </MainLayout>
+      <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} />
       {Object.entries(
         dataWithIcons.reduce((acc, item) => {
           const service = item.service.props.children[1].props.children;

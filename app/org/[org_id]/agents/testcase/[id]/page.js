@@ -89,7 +89,7 @@ function TestCases({ params }) {
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
       <div className="">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Test Case</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Test Cases</h1>
             <p className="text-gray-700 text-sm leading-relaxed ">
               Test cases are used to compare outputs from different versions with varying prompts and models. You can create test cases from chat history and choose a comparison type - Exact, AI, or Cosine to measure accuracy.
             </p>
@@ -97,7 +97,7 @@ function TestCases({ params }) {
               className="inline-flex mb-4 items-center gap-2 text-sm text-primary hover:text-primary-dark transition-colors font-medium group"
               target="_blank"
               rel="noopener noreferrer">
-              <span>Learn more about test cases</span>
+              <span>Learn more</span>
                <ExternalLinkIcon size={16}/>
             </a>
               {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"TestCasesSetup"} TutorialDetails={"TestCases Creation"} />}

@@ -13,6 +13,7 @@ import { BookIcon, EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIco
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
 import DeleteModal from "@/components/UI/DeleteModal";
+import SearchItems from "@/components/UI/SearchItems";
 
 export const runtime = 'edge';
 
@@ -20,10 +21,9 @@ const Page = ({ params }) => {
   const dispatch = useDispatch();
   const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id]);
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
-  const [searchTerm, setSearchTerm] = useState('');
   const [openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider] = useState(false);
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
-
+  const [filterKnowledgeBase,setFilterKnowledgeBase]=useState(knowledgeBaseData)
   useEffect(() => {
     const updateScreenSize = () => {
       if (window.matchMedia('(max-width: 640px)').matches) {
@@ -34,18 +34,13 @@ const Page = ({ params }) => {
     };
     dispatch(getAllKnowBaseDataAction(params?.org_id))
     updateScreenSize();
+    setFilterKnowledgeBase(knowledgeBaseData)
     window.addEventListener('resize', updateScreenSize);
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
-  const filteredKnowledgeBase = useMemo(() =>
-    knowledgeBaseData?.filter(item =>
-      item?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item?.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || []
-    , [knowledgeBaseData, searchTerm]);
 
-  const tableData = filteredKnowledgeBase.map(item => ({
+  const tableData = filterKnowledgeBase.map(item => ({
     ...item,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
@@ -101,7 +96,8 @@ const handleUpdateKnowledgeBase = (item) => {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
             <PageHeader
               title="Knowledge Base"
-              description="A repository where you can provide reference data that the AI uses to generate accurate and context-aware responses."
+              description="A knowledge base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."
+              docLink="https://blog.gtwy.ai/features/knowledgebase"
             />
             <div className="flex-shrink-0 mt-4 sm:mt-0">
               <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>+ create knowledge base</button>
@@ -109,15 +105,9 @@ const handleUpdateKnowledgeBase = (item) => {
           </div>
         </MainLayout>
         
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-          <input
-            type="text"
-            placeholder="Search knowledge base..."
-            className="input input-bordered w-full sm:w-80"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
           
+          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase}/>
           <div className="flex flex-wrap justify-end items-center gap-2">
             <button className="btn" onClick={() => setOpenKnowledgeBaseSlider(true)}>
               <BookIcon /> Integration Guide
@@ -141,10 +131,10 @@ const handleUpdateKnowledgeBase = (item) => {
       </div>
 
       <div className="px-4">
-        {filteredKnowledgeBase.length > 0 ? (
+        {filterKnowledgeBase.length > 0 ? (
           viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredKnowledgeBase.map((item, index) => (
+              {filterKnowledgeBase.map((item, index) => (
                 <div
                   key={index}
                   className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"

@@ -11,6 +11,7 @@ import MainLayout from "@/components/layoutComponents/MainLayout";
 import { openModal, toggleSidebar } from "@/utils/utility";
 import IntegrationModal from "@/components/modals/IntegrationModal";
 import GtwyIntegrationGuideSlider from "@/components/sliders/gtwyIntegrationGuideSlider";
+import SearchItems from "@/components/UI/SearchItems";
 
 export const runtime = 'edge';
 
@@ -18,25 +19,22 @@ const Page = ({ params }) => {
   const dispatch = useDispatch();
   const { integrationData } = useCustomSelector((state) =>
   ({
-    integrationData: state?.integrationReducer?.integrationData?.[params?.org_id],
+    integrationData: state?.integrationReducer?.integrationData?.[params?.org_id] || [],
   })
   );
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedIntegration, setSelectedIntegration] = useState(null);
+  const [filterIntegration, setFilterIntegration] = useState(integrationData);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
 
   useEffect(() => {
     dispatch(getAllIntegrationDataAction(params?.org_id));
   }, [dispatch, params?.org_id]);
 
-  const filteredIntegration = useMemo(() => {
-    const filtered = integrationData?.filter(item =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || [];
-    return filtered;
-  }, [integrationData, searchTerm]);
+  useEffect(() => {
+    setFilterIntegration(integrationData);
+  }, [integrationData]);
 
-  const tableData = filteredIntegration.map((item, index) => ({
+  const tableData = (filterIntegration || [])?.map((item, index) => ({
     id: index,
     name: (
       <div className="flex gap-2">
@@ -69,6 +67,7 @@ const Page = ({ params }) => {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-4 pt-4">
           <PageHeader
             title="Integration"
+            docLink="https://app.docstar.io/p/features/gtwy-embed--1?collectionId=inYU67SKiHgW"
             description="Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."
           />
           <div className="flex-shrink-0 mt-4 sm:mt-0">
@@ -82,21 +81,11 @@ const Page = ({ params }) => {
         </div>
 
         {/* Controls Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 px-4 pt-4">
-          <div className="flex-1 max-w-md">
-            <input
-              type="text"
-              placeholder="Search integration..."
-              className="input input-bordered w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-
+        
         {/* Content Section */}
         <div className="w-full">
-          {filteredIntegration.length > 0 ? (
+          <SearchItems data={integrationData} setFilterItems={setFilterIntegration} />
+          {filterIntegration.length > 0 ? (
               <div className="w-full">
                 <CustomTable
                   data={tableData}

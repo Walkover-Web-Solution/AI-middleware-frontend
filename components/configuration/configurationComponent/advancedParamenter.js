@@ -2,15 +2,15 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
-import { openModal } from '@/utils/utility';
+import { generateRandomID, openModal } from '@/utils/utility';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
-import InfoModel from '@/components/infoModel';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -23,6 +23,7 @@ const AdvancedParameters = ({ params }) => {
     showSuggestion: false
   });
   const [messages, setMessages] = useState([]);
+  const thread_id = useMemo(() => generateRandomID(), []);
   const dispatch = useDispatch();
 
   const { service, version_function_data, configuration, integrationData, isFirstParameter } = useCustomSelector((state) => {
@@ -204,9 +205,9 @@ const AdvancedParameters = ({ params }) => {
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                  {description ? <InfoModel tooltipContent={description}>
+                  {description ? <InfoTooltip tooltipContent={description}>
                     <span className="label-text capitalize info">{name || key}</span>        
-                    </InfoModel> : <span className="label-text capitalize">{name || key}</span>}
+                    </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
                   </div>
                   <div>
                     <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
@@ -421,7 +422,7 @@ const AdvancedParameters = ({ params }) => {
                         placeholder="Enter valid JSON object here..."
                       />
 
-                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages}/>
+                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages} thread_id={thread_id}/>
                     </>
                   )}
 
