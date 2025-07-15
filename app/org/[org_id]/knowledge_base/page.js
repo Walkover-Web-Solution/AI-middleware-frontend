@@ -8,10 +8,11 @@ import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
-import { GetFileTypeIcon, openModal } from "@/utils/utility";
+import { closeModal, GetFileTypeIcon, openModal } from "@/utils/utility";
 import { BookIcon, EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
+import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
 
 export const runtime = 'edge';
@@ -22,7 +23,8 @@ const Page = ({ params }) => {
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider] = useState(false);
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
-  const [filterKnowledgeBase,setFilterKnowledgeBase]=useState(knowledgeBaseData)
+  const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData)
+  const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
   useEffect(() => {
     const updateScreenSize = () => {
       if (window.matchMedia('(max-width: 640px)').matches) {
@@ -52,14 +54,22 @@ const Page = ({ params }) => {
     description: item?.description,
     actual_name: item?.name,
   }));
+  const handleUpdateKnowledgeBase = (item) => {
+    setSelectedKnowledgeBase(item);
+    openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)
+  };
 
+  const handleDeleteKnowledgebase = (item) => {
+    closeModal(MODAL_TYPE.DELETE_MODAL);
+    dispatch(deleteKnowBaseDataAction({ data: { id: item?._id, orgId: params?.org_id } }))
+  };
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center">
         <div
           className="tooltip tooltip-primary"
           data-tip="delete"
-          onClick={() => handleDelete(row.actual_name, row._id)}
+          onClick={() => { setselectedDataToDelete(row); openModal(MODAL_TYPE.DELETE_MODAL) }}
         >
           <TrashIcon strokeWidth={2} size={20} />
         </div>
@@ -72,17 +82,6 @@ const Page = ({ params }) => {
         </div>
       </div>
     );
-  };
-  
-  const handleUpdateKnowledgeBase = (item) => {
-    setSelectedKnowledgeBase(item);
-    openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)
-  };
-
-  const handleDelete = (name, id) => {
-    if (window.confirm(`Do you want to delete document with name: ${name}?`)) {
-      dispatch(deleteKnowBaseDataAction({ data: { id, orgId: params?.org_id } }));
-    }
   };
 
   return (
@@ -100,10 +99,10 @@ const Page = ({ params }) => {
             </div>
           </div>
         </MainLayout>
-        
+
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
-          
-          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase}/>
+
+          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} />
           <div className="flex flex-wrap justify-end items-center gap-2">
             <button className="btn" onClick={() => setOpenKnowledgeBaseSlider(true)}>
               <BookIcon /> Integration Guide
@@ -140,7 +139,7 @@ const Page = ({ params }) => {
                       <EllipsisVerticalIcon size={16} />
                     </div>
                     <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32">
-                      <li><a onClick={() => handleDelete(item.name, item?._id)} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
+                      <li><a onClick={() => handleDelete()} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
                       <li><a onClick={() => handleUpdateKnowledgeBase(item)} className="hover:bg-base-200">Update</a></li>
                     </ul>
                   </div>
@@ -176,9 +175,10 @@ const Page = ({ params }) => {
           </div>
         )}
       </div>
-      
-      <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} knowledgeBaseData={knowledgeBaseData}/>
+
+      <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} knowledgeBaseData={knowledgeBaseData} />
       <KnowledgeBaseIntegrationSlider params={params} setOpenKnowledgeBaseSlider={setOpenKnowledgeBaseSlider} openKnowledgeBaseSlider={openKnowledgeBaseSlider} />
+      <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedDataToDelete} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${selectedDataToDelete?.actual_name}"? This action cannot be undone.`} />
     </div>
   );
 };
