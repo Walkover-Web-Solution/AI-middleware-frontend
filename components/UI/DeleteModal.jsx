@@ -37,7 +37,7 @@ const handleClose=()=>{
           <button
             type="button"
             onClick={handleClose}
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-white shadow-sm hover:bg-gray-50 hover:text-gray-900 h-9 px-4 py-2 mt-2 sm:mt-0"
+            className="btn"
           >
             Cancel
           </button>
@@ -46,9 +46,9 @@ const handleClose=()=>{
             onClick={()=>{
                 onConfirm(item)
             }}
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-400 disabled:pointer-events-none disabled:opacity-50 bg-red-600 text-white shadow-sm hover:bg-red-700 h-9 px-4 py-2"
+            className="btn btn-error text-base-100"
           >
-            <Trash2 className="mr-1 h-4 w-4" />
+            <Trash2 className="mr-1 h-4 w-4 text-base-100" />
             Delete
           </button>
         </div>
