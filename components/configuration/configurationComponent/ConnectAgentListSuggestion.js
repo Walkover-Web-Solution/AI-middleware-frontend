@@ -1,9 +1,8 @@
-import InfoModel from '@/components/infoModel';
-import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
 import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { InfoIcon } from 'lucide-react';
+import InfoTooltip from '@/components/InfoTooltip';
 
 function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [], shouldToolsShow, modelName, bridges }) {
     const [searchQuery, setSearchQuery] = useState('');
@@ -59,9 +58,9 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
         <div className="dropdown dropdown-right">
             <div className="flex flex-col  gap-2">
                 {Object.keys(connect_agents).length=== 0 &&(
-                <InfoModel tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
+                <InfoTooltip tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
                     <p className=" label-text info">Agents Configuration </p>
-                </InfoModel>
+                </InfoTooltip>
                 )}
                 <div className='flex items-center gap-2'>
                     <button tabIndex={0}

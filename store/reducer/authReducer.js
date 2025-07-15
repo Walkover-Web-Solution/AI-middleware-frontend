@@ -1,35 +1,32 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  authData: [],
+  authenticationData: {},
   loading: false
 };
 
 export const authDataReducer = createSlice({
-  name: "authData",
+  name: "authenticationData",
   initialState,
   reducers: {
-    fetchAllAuthData: (state, action) => {
+    fetchAllAuthenticationData: (state, action) => {
       const { orgId, data } = action.payload;
-      if (!state.authData[orgId]) {
-        state.authData[orgId] = [];
-      }
      if(data)
-      state.authData[orgId] = [data];
+      state.authenticationData[orgId] = [data];
     },
-    addAuth: (state, action) => {
+    addAuthenticationData: (state, action) => {
       const { orgId, data } = action.payload;
-      if (!state.authData[orgId]) {
-        state.authData[orgId] = [];
+      if (!state.authenticationData[orgId]) {
+        state.authenticationData[orgId] = [];
       }
-      state.authData[orgId] = [data];
+      state.authenticationData[orgId] = [data];
     }
   },
 });
 
 export const {
-  fetchAllAuthData,
-  addAuth
+  fetchAllAuthenticationData,
+  addAuthenticationData
 } = authDataReducer.actions;
 
 export default authDataReducer.reducer;

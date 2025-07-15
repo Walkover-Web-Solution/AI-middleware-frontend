@@ -1,13 +1,12 @@
 import { createNewAuth, getAuthData } from "@/config";
-import { fetchAllAuthData } from "../reducer/authkeyReducer";
 import { toast } from "react-toastify";
-import { addAuth } from "../reducer/authReducer";
+import { addAuthenticationData, fetchAllAuthenticationData } from "../reducer/authReducer";
 
 export const getAuthDataAction = (orgId) => async (dispatch) => {
   try {
     const response = await getAuthData();
     if (response.data) {
-      dispatch(fetchAllAuthData({ 
+      dispatch(fetchAllAuthenticationData({ 
         orgId,
         data : response?.data?.result,
       }))
@@ -20,7 +19,7 @@ export const createAuth = (data, orgId) => async (dispatch) => {
   try {
     const response = await createNewAuth(data);
     if (response.data) {
-      dispatch(addAuth({ 
+      dispatch(addAuthenticationData({ 
         orgId,
         data : response?.data?.result,
       }))

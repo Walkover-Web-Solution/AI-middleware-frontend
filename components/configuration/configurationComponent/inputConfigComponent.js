@@ -10,7 +10,7 @@ import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import ToneDropdown from './toneDropdown'; 
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const InputConfigComponent = ({ params }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -258,9 +258,9 @@ const InputConfigComponent = ({ params }) => {
                   openModal(MODAL_TYPE?.PROMPT_SUMMARY);
                 }}
               >
-                <InfoModel tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
-                <span className='label-text promptSummary-info capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
-                </InfoModel>
+                <InfoTooltip tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
+                <span className='label-text  capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
+                </InfoTooltip>
               </button>
              
             </div>

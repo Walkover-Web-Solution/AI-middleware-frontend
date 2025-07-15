@@ -39,6 +39,7 @@ function OptimiseBaseModal({
   useEffect(() => {
     setStreamedContent("");
     setIsStreaming(false);
+    setNewContent(content);
   }, [content]);
 
   useEffect(() => {
@@ -78,7 +79,6 @@ function OptimiseBaseModal({
   const handleCloseModal = () => {
     setErrorMessage("");
     setNewContent("");
-    setCurrentIndex(history.length-1)
     setStreamedContent("");
     setIsStreaming(false);
     setDiff(false);
@@ -118,7 +118,23 @@ function OptimiseBaseModal({
   };
 
   const displayContent = isStreaming ? streamedContent : newContent;
-  const textareaContent = displayContent || (currentIndex === history.length-1 ? content : history[currentIndex]);
+  
+  // Fixed: Use consistent logic for textarea content
+  const getTextareaContent = () => {
+    if (isStreaming) {
+      return streamedContent;
+    }
+    if (newContent) {
+      return newContent;
+    }
+    if (showHistory && history.length > 0 && currentIndex < history.length) {
+      return history[currentIndex];
+    }
+    return content;
+  };
+
+  const textareaContent = getTextareaContent();
+
 
   return (
     <Modal MODAL_ID={modalType}>
@@ -211,7 +227,7 @@ function OptimiseBaseModal({
               <div className="relative">
                 <textarea
                   className="textarea textarea-bordered border focus:border-primary caret-black p-2 w-full resize-none flex-grow min-h-[60vh]"
-                  value={contentLabel === "Schema" ? displayContent : textareaContent}
+                  value={textareaContent}
                   onChange={(e) => handleContentChange(e.target.value)}
                   readOnly={isStreaming}
                   {...textareaProps}
