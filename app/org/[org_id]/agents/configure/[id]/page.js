@@ -1,30 +1,38 @@
 "use client";
 
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useDispatch } from "react-redux";
+
+// Import your components
 import ConfigurationPage from "@/components/configuration/ConfigurationPage";
 import Chat from "@/components/configuration/chat";
 import Chatbot from "@/components/configuration/chatbot";
+import WebhookForm from "@/components/BatchApi";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
+import AgentSetupGuide from "@/components/AgentSetupGuide";
+
+// Import your actions and utils
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getSingleBridgesAction } from "@/store/action/bridgeAction";
-import { useEffect, useRef, useState } from "react";
-import WebhookForm from "@/components/BatchApi";
-import { useDispatch } from "react-redux";
 import { updateTitle } from "@/utils/utility";
-import AgentSetupGuide from "@/components/AgentSetupGuide";
 
 export const runtime = 'edge';
 
 const Page = ({ searchParams }) => {
+  // --- Refs ---
   const apiKeySectionRef = useRef(null);
-  const resizerRef = useRef(null);
-  const params = searchParams;
-  const mountRef = useRef(false);
-  const dispatch = useDispatch();
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [leftWidth, setLeftWidth] = useState(50);
+  const leftPanelRef = useRef(null); // Ref for the left panel to get its width
+  const rightPanelRef = useRef(null); // Ref for the right panel to find the iframe
+
+  // --- State ---
+  const [isDesktop, setIsDesktop] = useState(true);
+  const [leftWidth, setLeftWidth] = useState(50); // Left panel width in percentage
   const [isResizing, setIsResizing] = useState(false);
 
+  // --- Redux & Hooks ---
+  const params = searchParams;
+  const dispatch = useDispatch();
   const { bridgeType, versionService, bridgeName } = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
@@ -35,188 +43,134 @@ const Page = ({ searchParams }) => {
     };
   });
 
-  // Enhanced responsive detection
-  useEffect(() => {
-    const handleResize = () => {
-      const desktop = window.innerWidth >= 1024;
-      setIsDesktop(desktop);
-      
-      // Reset layout for mobile
-      if (!desktop) {
-        setLeftWidth(50);
-      }
-    };
+  // --- Effects ---
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+  // Effect to detect screen size for responsive layout
+  useEffect(() => {
+    const checkScreenSize = () => setIsDesktop(window.innerWidth >= 1024);
+    checkScreenSize(); // Initial check
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  // Effect to update document title
   useEffect(() => {
     if (bridgeName) {
       updateTitle(`GTWY Ai | ${bridgeName}`);
     }
   }, [bridgeName]);
 
+  // Effect for data fetching and initial setup
   useEffect(() => {
     dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
-    return () => {
-      try {
-        if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
-          window.handleclose();
-        }
-      } catch (error) {
-        console.error("Error in handleclose:", error);
-      }
-    };
-  }, []);
+  }, [dispatch, params.id, params.version]);
 
-  useEffect(() => {
-    if (bridgeType !== "trigger") {
-      if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
-        window?.handleclose();
-      }
-    }
-  }, [bridgeType]);
+  // --- Resizing Logic ---
 
-  useEffect(() => {
-    if (mountRef.current) {
-      if (bridgeType === 'chatbot') {
-        if (typeof openChatbot !== 'undefined' && document.getElementById('parentChatbot')) {
-          openChatbot();
-        }
-      } else {
-        if (typeof closeChatbot !== 'undefined') {
-          closeChatbot();
-        }
-      }
-    }
-    mountRef.current = true;
-  }, [bridgeType]);
-
-  // Initialize resizer only for desktop
-  useEffect(() => {
-    if (isDesktop) {
-      const cleanup = initializeResizer();
-      return cleanup;
-    }
+  const handleMouseDown = useCallback((e) => {
+    // Only allow resizing on desktop
+    if (!isDesktop) return;
+    e.preventDefault();
+    setIsResizing(true);
   }, [isDesktop]);
 
-  const initializeResizer = () => {
-    if (typeof window === 'undefined') return;
+  useEffect(() => {
+    if (!isResizing) return;
 
-    const resizer = document.querySelector(".resizer");
-    if (!resizer) return;
+    const leftPanel = leftPanelRef.current;
+    const rightPanel = rightPanelRef.current;
+    if (!leftPanel || !rightPanel) return;
 
-    const leftSide = resizer.previousElementSibling;
-    const rightSide = resizer.nextElementSibling;
-    const container = resizer.parentElement;
+    // Find iframe once resizing starts
+    const iframe = rightPanel.querySelector('iframe');
+    if (iframe) {
+      iframe.style.pointerEvents = 'none';
+    }
+    document.body.style.cursor = 'col-resize';
+    
+    const handleMouseMove = (e) => {
+      const totalWidth = window.innerWidth;
+      let newLeftWidthPx = e.clientX;
 
-    let startX = 0;
-    let startLeftWidth = 0;
-
-    const onMouseDown = (e) => {
-      e.preventDefault();
-      setIsResizing(true);
+      // Apply constraints
+      const minLeftWidth = 350;
+      const minRightWidth = 450;
+      newLeftWidthPx = Math.max(minLeftWidth, newLeftWidthPx);
+      newLeftWidthPx = Math.min(newLeftWidthPx, totalWidth - minRightWidth);
       
-      startX = e.clientX;
-      startLeftWidth = leftWidth;
-      
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-      
-      // Prevent text selection
-      document.body.style.userSelect = 'none';
-      document.body.style.cursor = 'col-resize';
+      const newLeftWidthPercent = (newLeftWidthPx / totalWidth) * 100;
+      setLeftWidth(newLeftWidthPercent);
     };
 
-    const onMouseMove = (e) => {
-      if (!container) return;
-      
-      const containerWidth = container.offsetWidth;
-      const deltaX = e.clientX - startX;
-      const deltaPercentage = (deltaX / containerWidth) * 100;
-      
-      const newLeftWidth = Math.max(20, Math.min(80, startLeftWidth + deltaPercentage));
-      
-      setLeftWidth(newLeftWidth);
-    };
-
-    const onMouseUp = () => {
+    const handleMouseUp = () => {
       setIsResizing(false);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      
-      document.body.style.userSelect = '';
-      document.body.style.cursor = '';
     };
 
-    resizer.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
 
+    // Cleanup function
     return () => {
-      resizer.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      
+      // Reset styles
+      if (iframe) {
+        iframe.style.pointerEvents = 'auto';
+      }
+      document.body.style.cursor = 'auto';
     };
-  };
+  }, [isResizing]);
 
+
+  // Initial loading state
   if (!bridgeType) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-screen">
         <LoadingSpinner />
       </div>
     );
   }
 
+  // --- Render ---
   return (
     <div className={`w-full h-full max-h-[calc(100vh-4rem)] ${isDesktop ? 'flex flex-row overflow-hidden' : 'overflow-y-auto'}`}>
-      {/* Configuration Panel */}
-      <div 
-        className={`
-          w-full
-          ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen'} 
-          bg-white
-          ${isDesktop ? 'border-r border-gray-200' : 'border-b border-gray-200'}
-          ${isResizing ? 'transition-none' : 'transition-all duration-200'}
-        `}
-        style={isDesktop ? { width: `${leftWidth}%` } : {}}
+      
+      {/* Left Panel */}
+      <div
+        ref={leftPanelRef}
+        className={`bg-white ${isDesktop ? 'h-full overflow-y-auto' : 'border-b'}`}
+        style={{ width: isDesktop ? `${leftWidth}%` : '100%' }}
       >
-        <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} px-4 py-4`}>
+        <div className="p-4">
           <ConfigurationPage apiKeySectionRef={apiKeySectionRef} params={params} />
         </div>
       </div>
 
-      {/* Desktop Resizer */}
+      {/* Resizer */}
       {isDesktop && (
-        <div 
-          className="w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors duration-200 flex-shrink-0 resizer"
+        <div
+          onMouseDown={handleMouseDown}
+          className="flex-shrink-0 w-1 bg-gray-200 cursor-col-resize hover:bg-blue-400 transition-colors"
           style={{ backgroundColor: isResizing ? '#3B82F6' : '' }}
         />
       )}
 
-      {/* Chat Panel */}
-      <div 
-        className={`
-          w-full
-          ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen'} 
-          relative
-          ${isResizing ? 'transition-none' : 'transition-all duration-200'}
-        `}
-        style={isDesktop ? { width: `${100 - leftWidth}%` } : {}}
+      {/* Right Panel */}
+      <div
+        ref={rightPanelRef}
         id="parentChatbot"
+        className={`relative ${isDesktop ? 'h-full overflow-y-auto' : ''}`}
+        style={{ width: isDesktop ? `${100 - leftWidth}%` : '100%' }}
       >
-        <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} pb-4`}>
-          <div className={`${isDesktop ? 'h-full flex flex-col' : ''}`}>
-            <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} params={params} />
-            <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
-              {bridgeType === 'batch' && versionService === 'openai' ? (
-                <WebhookForm params={params} />
-              ) : bridgeType === 'chatbot' ? (
-                <Chatbot params={params} key={JSON.stringify(params)} />
-              ) : (
-                <Chat params={params} />
-              )}
-            </div>
-          </div>
-        </div>
+          <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} params={params} />
+          {bridgeType === 'batch' && versionService === 'openai' ? (
+            <WebhookForm params={params} />
+          ) : bridgeType === 'chatbot' ? (
+            <Chatbot params={params} key={JSON.stringify(params)} />
+          ) : (
+            <Chat params={params} />
+          )}
       </div>
     </div>
   );
