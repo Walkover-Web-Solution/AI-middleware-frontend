@@ -1,7 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { BotIcon, SettingsIcon, FilterSliderIcon } from "@/components/Icons";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
@@ -45,7 +45,14 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
         showGuide: state.userDetailsReducer.userDetails.showGuide,
         showConfigType: state.userDetailsReducer.userDetails.showConfigType,
     }));
-
+   useEffect(()=>{
+      if(bridgeType==='trigger'||bridgeType=='api'||bridgeType==='batch'){
+        if(currentView==='chatbot-config'||bridgeType==='trigger'){
+        setCurrentView('config');  
+        router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=config`);
+        }
+      } 
+   },[bridgeType])
     const handleNavigation = (target) => {
         setCurrentView(target);
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=${target}`);
@@ -98,7 +105,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
             {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
         </>
     ), [bridgeType, modelType, params, modelName]);
-
     const renderChatbotConfigView = useMemo(() => () => (
         <>
             
@@ -147,6 +153,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
                             <SettingsIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
                         </button>
+                        {bridgeType==='chatbot'&&
                         <button
                             onClick={() => handleNavigation('chatbot-config')}
                             className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
@@ -154,7 +161,8 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
                             <BotIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
                         </button>
-                        {((isEmbedUser && showGuide) || !isEmbedUser) && <button
+                        } 
+                        {((isEmbedUser && showGuide) ||( !isEmbedUser && bridgeType!=='trigger')) && <button
                             onClick={() => handleNavigation('guide')}
                             className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
@@ -164,7 +172,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
                     </div>}
                 </div>
             </div>}
-            {currentView === 'chatbot-config' ? renderChatbotConfigView() : currentView === 'guide' ? renderGuideView() : renderSetupView()}
+            {currentView === 'chatbot-config' && bridgeType==='chatbot' ? renderChatbotConfigView() : currentView === 'guide' &&currentView!=='trigger' ? renderGuideView() : renderSetupView()}
             {renderNeedHelp()}
         </div>
     );

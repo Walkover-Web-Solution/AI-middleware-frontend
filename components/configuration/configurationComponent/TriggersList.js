@@ -41,7 +41,7 @@ export default function TriggersList({ params, isEmbedUser }) {
         if (triggerData) {
             const filteredTriggers = triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
             setTriggers(filteredTriggers);
-            if (!filteredTriggers?.length && openViasocket && authkey) openTrigger()
+            if (!filteredTriggers?.length && window?.openViasocket && authkey) openTrigger()
         }
         if (!isEmbedUser) getAndSetAuthKey()
     }, [params?.org_id, authkey]);

@@ -9,7 +9,7 @@ import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast'
 import { useCustomSelector } from '@/customHooks/customSelector'
 import { createNewAuthData, deleteAuthData, getAllAuthData } from '@/store/action/authkeyAction'
 import { MODAL_TYPE, ONBOARDING_VIDEOS, PAUTH_KEY_COLUMNS } from '@/utils/enums'
-import { closeModal, openModal } from '@/utils/utility'
+import { closeModal, openModal, RequiredItem } from '@/utils/utility'
 import { CopyIcon, TrashIcon } from '@/components/Icons'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
@@ -181,7 +181,7 @@ function Page({ params }) {
         <div className="modal-box">
           <h3 className="font-bold text-lg mb-2">Create New Auth</h3>
           <label className="input input-bordered flex items-center gap-2">
-            Name :
+            Name{RequiredItem()} :
             <input
               type="text"
               className="grow"

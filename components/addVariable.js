@@ -241,7 +241,7 @@ const AddVariable = ({ params }) => {
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
       >
-        <span className="mr-2 text-nowrap font-medium">Add Variables</span>
+        <span className="mr-2 text-nowrap font-medium " >Add Variables</span>  
         {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </button>
       {tutorialState?.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"} TutorialDetails={"Variable Management"}/>)}

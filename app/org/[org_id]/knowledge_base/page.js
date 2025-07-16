@@ -8,9 +8,9 @@ import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
-import { closeModal, GetFileTypeIcon, openModal } from "@/utils/utility";
+import { closeModal, GetFileTypeIcon, openModal, toggleSidebar } from "@/utils/utility";
 import { BookIcon, EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from "react-redux";
 import InfoTooltip from "@/components/InfoTooltip";
 import DeleteModal from "@/components/UI/DeleteModal";
@@ -22,7 +22,6 @@ const Page = ({ params }) => {
   const dispatch = useDispatch();
   const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id]);
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
-  const [openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider] = useState(false);
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData)
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
@@ -112,7 +111,7 @@ const Page = ({ params }) => {
 
           <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} />
           <div className="flex flex-wrap justify-end items-center gap-2">
-            <button className="btn" onClick={() => setOpenKnowledgeBaseSlider(true)}>
+            <button className="btn" onClick={() => toggleSidebar("knowledgeBase-integration-slider","right")}>
               <BookIcon /> Integration Guide
             </button>
             <div className="join">
@@ -188,7 +187,7 @@ const Page = ({ params }) => {
       </div>
 
       <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} knowledgeBaseData={knowledgeBaseData} />
-      <KnowledgeBaseIntegrationSlider params={params} setOpenKnowledgeBaseSlider={setOpenKnowledgeBaseSlider} openKnowledgeBaseSlider={openKnowledgeBaseSlider} />
+      <KnowledgeBaseIntegrationSlider params={params}  />
       <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedDataToDelete} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${selectedDataToDelete?.actual_name}"? This action cannot be undone.`} />
     </div>
   );
