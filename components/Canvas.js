@@ -1,8 +1,10 @@
 import { SendHorizontalIcon } from "@/components/Icons";
 import { useEffect, useRef, useState } from "react";
+import Markdown from "react-markdown";
 
 function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, setMessages }) {
   const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [instruction, setInstruction] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,6 +14,9 @@ function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, set
   const handleResetChat = () => {
     setMessages([]);
     setInstruction("");
+     if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
   };
 
   const handleSend = async () => {
@@ -29,6 +34,9 @@ function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, set
 
     setMessages(prev => [...prev, userMessage]);
     setInstruction("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
     setErrorMessage("");
     setLoading(true);
 
@@ -39,6 +47,7 @@ function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, set
         id: Date.now() + 1,
         sender: "assistant",
         content: result.description,
+        optimized:result.updated,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages(prev => [...prev, assistantMessage]);
@@ -77,7 +86,9 @@ function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, set
                 {message.sender}
                 <time className="text-xs opacity-50 pl-2">{message.time}</time>
               </div>
-              <div className="chat-bubble mt-1">{message.content}</div>
+              <div className="chat-bubble mt-1 whitespace-pre-wrap">
+                <Markdown>{message.content}</Markdown>
+              </div>
             </div>
           ))}
           {loading && (
@@ -99,18 +110,41 @@ function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, set
           )}
         </div>
 
-        <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-low">
-          <div className="flex flex-row gap-2">
-            <input
-              type="text"
-              className="input input-bordered w-full"
-              placeholder="Type your instruction..."
-              value={instruction}
-              onChange={(e) => setInstruction(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
-            />
-            <button className="btn btn-primary" disabled={loading} onClick={handleSend}>
-              {loading && <span className="loading loading-spinner"></span>} <SendHorizontalIcon/>
+        <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-10">
+          <div className="flex flex-row gap-2 items-end">
+            <div className="flex-1">
+              <textarea
+                ref={textareaRef}
+                className="textarea textarea-bordered w-full focus:border-primary max-h-[100px] resize-none overflow-y-auto"
+                placeholder="Type your instruction..."
+                value={instruction}
+                rows={1}
+                onChange={(e) => {
+                  setInstruction(e.target.value);
+                  if (textareaRef.current) {
+                    textareaRef.current.style.height = 'auto';
+                    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+                  }
+                }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !loading) {
+                    if (e.shiftKey) {
+                      return;
+                    } else {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }
+                }}
+              />
+            </div>
+            <button 
+              className="btn btn-primary mb-2" 
+              disabled={loading || !instruction.trim()} 
+              onClick={handleSend}
+            >
+              {loading && <span className="loading loading-spinner"></span>} 
+              <SendHorizontalIcon />
             </button>
           </div>
           {errorMessage && (
