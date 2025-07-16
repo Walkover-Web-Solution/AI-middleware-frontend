@@ -12,7 +12,7 @@ import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new c
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const InputConfigComponent = ({ params }) => {
+const InputConfigComponent = ({ params , promptTextAreaRef }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type || "",
@@ -247,7 +247,7 @@ const InputConfigComponent = ({ params }) => {
     if (service === "google" && serviceType === "chat") return null;
 
     return (
-      <div>
+      <div ref={promptTextAreaRef}>
         <div className="flex justify-between items-center mb-2">
           <div className="label flex items-center gap-2">
             <span className="label-text capitalize font-medium">Prompt</span>
