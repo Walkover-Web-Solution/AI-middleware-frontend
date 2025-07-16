@@ -9,7 +9,7 @@ import {
 import Tutorial from './tutorial';
 import { ExternalLinkIcon } from './Icons';
 
-const InfoTooltip = ({ video = "", children, tooltipContent="", className = "", placement = "top", docLink }) => {
+const InfoTooltip = ({ video = "", children, tooltipContent="", className = "ml-2 rounded-md shadow-xl text-xs animate-in fade-in zoom-in border border-gray-700 space-y-2 pointer-events-automl-4  z-low-medium w-64 p-3 bg-gray-900 text-base-100 text-primary-foreground", placement = "top", docLink }) => {
   const [open, setOpen] = useState(false); // for hover state
   const [showTutorial, setShowTutorial] = useState(false);
   const delayTimeout = useRef(null);
@@ -68,10 +68,7 @@ const InfoTooltip = ({ video = "", children, tooltipContent="", className = "", 
               setOpen(true);
             }}
             onMouseLeave={handleClose}
-            className={`${className} "rounded-md shadow-xl text-xs animate-in fade-in zoom-in
-              border border-gray-700 space-y-2 pointer-events-automl-4
-              z-low-medium w-64 p-3 bg-gray-900 text-base-100 text-primary-foreground
-            "}`}
+            className={`${className}`}
           >
             <p className="whitespace-pre-line">{tooltipContent}
             {docLink&&

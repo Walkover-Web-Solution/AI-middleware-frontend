@@ -139,7 +139,7 @@ const EmbedList = ({ params }) => {
                 {
                     shouldToolsShow && bridgeFunctions.length > 0 &&
                     <>
-                        <InfoTooltip tooltipContent="The Tools are set up for the whole organization, so any agent can use them." className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground  rounded-md shadow-xl text-xs animate-in fade-in zoom-in border border-gray-700 space-y-2 pointer-events-auto'>
+                        <InfoTooltip tooltipContent="The Tools are set up for the whole organization, so any agent can use them.">
                             <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
                         </InfoTooltip>
                         <div className="flex flex-wrap gap-4">

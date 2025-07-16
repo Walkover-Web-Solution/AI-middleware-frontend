@@ -112,10 +112,7 @@ const KnowledgebaseList = ({ params }) => {
             </div>
             {!Array.isArray(knowbaseVersionData) || !knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
                 
-                <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
-              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
-              border border-gray-700 space-y-2 pointer-events-auto
-            '>
+                <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."}>
                         <p className="label-text info mb-2">Knowledgebase Configuration</p>
                     </InfoTooltip>
             )}
