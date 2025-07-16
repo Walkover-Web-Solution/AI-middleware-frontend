@@ -57,8 +57,15 @@ function ServiceDropdown({ params }) {
                     }
                 });
             } else {
-                setModelRecommendations({ error: 'Failed to get model recommendations' });
+            const errorDetail = response?.response?.data?.detail?.error;
+            if (errorDetail === "'apikey_object_id'") {
+                setModelRecommendations({ error: 'API key is missing. Please add an API key' });
+            } else if (errorDetail === "'prompt'") {
+                setModelRecommendations({ error: 'Prompt is missing. Please enter a prompt ' });
+            } else {
+                setModelRecommendations({ error: 'Failed to get model recommendations.' });
             }
+        }
         } catch (error) {
             console.error('Error fetching recommended model:', error);
             setModelRecommendations({ error: 'Error fetching recommended model' });
