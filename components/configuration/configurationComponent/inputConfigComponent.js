@@ -291,7 +291,7 @@ const InputConfigComponent = ({ params }) => {
         <div className="form-control h-full">
           <textarea
             ref={textareaRef}
-            className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-low caret-black p-2 rounded-b-none"
+            className="textarea pro textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-low caret-black p-2 rounded-b-none"
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}

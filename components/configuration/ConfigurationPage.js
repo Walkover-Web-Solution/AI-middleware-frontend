@@ -1,7 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { BotIcon, SettingsIcon, FilterSliderIcon } from "@/components/Icons";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
@@ -29,10 +29,10 @@ import AddVariable from "../addVariable";
 import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
-import NewInputConfigComponent from "./configurationComponent/newInputConfigComponent";
 import Protected from "../protected";
 
 const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
+    const preEmbedRef = useRef()
     const router = useRouter();
     const searchParams = useSearchParams();
     const view = searchParams.get('view') || 'config';
@@ -45,7 +45,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
         showGuide: state.userDetailsReducer.userDetails.showGuide,
         showConfigType: state.userDetailsReducer.userDetails.showConfigType,
     }));
-   useEffect(()=>{
+    useEffect(()=>{
       if(bridgeType==='trigger'||bridgeType=='api'||bridgeType==='batch'){
         if(currentView==='chatbot-config'||bridgeType==='trigger'){
         setCurrentView('config');  
@@ -53,6 +53,14 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
         }
       } 
    },[bridgeType])
+
+   useEffect(() => {
+    if ((bridgeType === 'api' || bridgeType === 'chatbot') && preEmbedRef.current) {
+      setTimeout(() => {
+        preEmbedRef.current.scrollIntoView({ behavior: 'smooth' });
+      }, 200); 
+    }
+}, [bridgeType, searchParams, router])
     const handleNavigation = (target) => {
         setCurrentView(target);
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=${target}`);
@@ -78,7 +86,9 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
             {bridgeType === 'trigger' && !isEmbedUser && <TriggersList params={params} />}
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
                 <>
-                    <PreEmbedList params={params} />
+                    <div ref={preEmbedRef}>
+                        <PreEmbedList params={params} />
+                    </div>
                     <InputConfigComponent params={params} />
                     {/* <NewInputConfigComponent params={params} /> */}
                     <EmbedList params={params} />
