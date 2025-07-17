@@ -6,18 +6,64 @@ import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
 
-function ServiceDropdown({ params }) {
-    const { bridgeType, service, SERVICES, DEFAULT_MODEL } = useCustomSelector((state) => ({
-        SERVICES: state?.serviceReducer?.services,
-        DEFAULT_MODEL: state?.serviceReducer?.default_model,
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
-    }));
+function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
+    const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey } = useCustomSelector((state) => {
+        const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
+        return {
+            SERVICES: state?.serviceReducer?.services,
+            DEFAULT_MODEL: state?.serviceReducer?.default_model,
+            bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+            service: service,
+            prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+            bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[
+                service === 'openai_response' ? 'openai' : service
+            ]
+        };
+    });
+
     const [selectedService, setSelectedService] = useState(service);
     const [modelRecommendations, setModelRecommendations] = useState(null);
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
     const dispatch = useDispatch();
 
+  const resetBorder = (ref, selector) => {
+    if (ref?.current) {
+      const element = ref.current.querySelector(selector);
+      if (element) {
+        element.style.borderColor = "";
+        setModelRecommendations(null)
+      }
+    }
+  };
+
+  const setErrorBorder = (ref, selector, scrollToView = false) => {
+    if (ref?.current) {
+      if (scrollToView) {
+        ref.current.scrollIntoView({ behavior: 'smooth'  });
+      }
+      setTimeout(() => {
+        const element = ref.current.querySelector(selector);
+        if (element) {
+          element.focus();
+          element.style.borderColor = "red";
+        }
+      }, 300);
+    }
+  };
+
+  useEffect(() => {
+    const hasPrompt = prompt !== ""||promptTextAreaRef.current.querySelector('textarea').value!=="";
+    const hasApiKey = !!bridgeApiKey;
+    
+    if (hasPrompt) {
+      resetBorder(promptTextAreaRef, 'textarea');
+    }
+    
+    if (hasApiKey) {
+      resetBorder(apiKeySectionRef, 'select');
+    }
+    
+  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef]);
     useEffect(() => {
         if (service) {
             setSelectedService(service);
@@ -44,6 +90,7 @@ function ServiceDropdown({ params }) {
     const handleGetRecommendations = async () => {
         setIsLoadingRecommendations(true);
         try {
+        if(bridgeApiKey&&(prompt!==""||promptTextAreaRef.current.querySelector('textarea').value!=="")){
             const response = await modelSuggestionApi({ versionId: params?.version });
             if (response?.success) {
                 setModelRecommendations({
@@ -57,13 +104,20 @@ function ServiceDropdown({ params }) {
                     }
                 });
             } else {
-            const errorDetail = response?.response?.data?.detail?.error;
-            if (errorDetail === "'apikey_object_id'") {
-                setModelRecommendations({ error: 'API key is missing. Please add an API key' });
-            } else if (errorDetail === "'prompt'") {
-                setModelRecommendations({ error: 'Prompt is missing. Please enter a prompt ' });
-            } else {
+            
                 setModelRecommendations({ error: 'Failed to get model recommendations.' });
+        }
+       }
+        else{
+            if (prompt === "" && promptTextAreaRef.current.querySelector('textarea').value === "") {
+                setModelRecommendations({error:'Prompt is missing. Please enter a prompt'});
+                setErrorBorder(promptTextAreaRef, 'textarea', true);
+                return;
+            }
+           else {
+                setModelRecommendations({error:'API key is missing. Please add an API key'});
+                setErrorBorder(apiKeySectionRef, 'select', true);
+
             }
         }
         } catch (error) {
