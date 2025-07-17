@@ -1,6 +1,6 @@
 import axios from "axios";
-import { fetchModelReducer } from "../reducer/modelReducer";
-import { getAllModels } from "@/config";
+import { addNewModelReducer, fetchModelReducer } from "../reducer/modelReducer";
+import { addNewModel, getAllModels } from "@/config";
 
 
 export const getModelAction = ({ service }) => async (dispatch) => {
@@ -11,3 +11,13 @@ export const getModelAction = ({ service }) => async (dispatch) => {
     console.error(error);
   }
 };
+
+export const addNewModelAction = ({service, type, newModelObject}) => async(dispatch) =>{
+  try {
+    const data = await addNewModel(newModelObject);
+    dispatch(addNewModelReducer({service, type, modelData: data?.data?.result}))
+    return data;
+  } catch (error) {
+    console.error(error)
+  }
+}

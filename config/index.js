@@ -1101,3 +1101,12 @@ export const getClientInfo = async (client_id)=>{
   }
 }
 
+export const addNewModel = async(newModelObj) =>{
+  try {
+    const response = await axios.post(`${URL}/modelConfiguration/user`, newModelObj)
+    return response;
+  } catch (error) {
+    console.log(error)
+    toast.error(error?.response?.data?.error)
+  }
+}
