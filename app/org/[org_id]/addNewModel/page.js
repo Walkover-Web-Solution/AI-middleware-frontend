@@ -8,6 +8,8 @@ import MainLayout from '@/components/layoutComponents/MainLayout';
 import CustomTable from '@/components/customTable/customTable';
 import PageHeader from '@/components/Pageheader';
 
+export const runtime = 'edge';
+
 const Page = () => {
     const { modelInfo} = useCustomSelector((state) => ({
         modelInfo: state?.modelReducer?.serviceModels
