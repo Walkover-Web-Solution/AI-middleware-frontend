@@ -46,17 +46,15 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
     
     if (hasPrompt) {
       resetBorder(promptTextAreaRef, 'textarea');
-       setShowError(false);
     }
     
     if (hasApiKey) {
       resetBorder(apiKeySectionRef, 'select');
-       setShowError(false);
     }
     
     if (hasPrompt && hasApiKey) {
       setIsVisible(false);
-     
+      setShowError(false);
       setErrorType('');
     } else {
       setIsVisible(true);
@@ -64,17 +62,17 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
   }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef]);
 
   const handleStart = () => {
-    if (!bridgeApiKey) {
-      setShowError(true);
-      setErrorType('apikey');
-      setErrorBorder(apiKeySectionRef, 'select', true);
-      return;
-    }
-
+    
     if (prompt === ""&&promptTextAreaRef.current.querySelector('textarea').value==="") {
       setShowError(true);
       setErrorType('prompt');
       setErrorBorder(promptTextAreaRef, 'textarea', true);
+      return;
+    }
+    if (!bridgeApiKey) {
+      setShowError(true);
+      setErrorType('apikey');
+      setErrorBorder(apiKeySectionRef, 'select', true);
       return;
     }
     
