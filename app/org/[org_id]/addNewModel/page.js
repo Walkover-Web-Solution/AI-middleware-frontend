@@ -6,6 +6,7 @@ import AddNewModelModal from '@/components/modals/AddNewModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import MainLayout from '@/components/layoutComponents/MainLayout';
 import CustomTable from '@/components/customTable/customTable';
+import PageHeader from '@/components/Pageheader';
 
 const Page = () => {
     const { modelInfo} = useCustomSelector((state) => ({
@@ -61,14 +62,19 @@ const Page = () => {
     return (
         <MainLayout>
             <div className="p-8">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-2xl font-bold">Model Management</h1>
-                    <button
-                        onClick={() => openModal(MODAL_TYPE.ADD_NEW_MODEL_MODAL)}
-                        className="btn btn-primary"
-                    >
-                        Add New Model
-                    </button>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-2 pt-4">
+                    <PageHeader
+                        title="Model Management"
+                        description="Add and configure AI models for different services and use cases."
+                    />
+                    <div className="flex-shrink-0 mt-4 sm:mt-0">
+                        <button 
+                            onClick={() => openModal(MODAL_TYPE.ADD_NEW_MODEL_MODAL)}
+                            className="btn btn-primary"
+                        >
+                            + Add New Model
+                        </button>
+                    </div>
                 </div>
 
                 <CustomTable
