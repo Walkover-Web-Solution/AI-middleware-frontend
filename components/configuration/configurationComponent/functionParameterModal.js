@@ -1,6 +1,7 @@
 import { optimizeJsonApi, updateFlowDescription } from "@/config";
 import { parameterTypes } from "@/jsonFiles/bridgeParameter";
 import {
+  updateApiAction,
   updateBridgeVersionAction,
   updateFuntionApiAction,
 } from "@/store/action/bridgeAction";
@@ -635,7 +636,7 @@ function FunctionParameterModal({
                           }
                         />
                       </td>
-                      <td>
+                     <td>
                         <input
                           type="checkbox"
                           className="checkbox"

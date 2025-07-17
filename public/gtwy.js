@@ -12,10 +12,13 @@
                 width: '100',
                 widthUnit: 'vw', // Changed from % to vw for full width
                 buttonName: '',
-                slide: 'full' // default slide behavior
+                slide: 'full', // default slide behavior
+                hideCloseButton: 'false',
+                hideFullScreenButton: 'false',
+                hideHeader: 'false'
             };
             this.urls = {
-                gtwyUrl: 'https://gtwy.ai/embed',
+                gtwyUrl: 'https://app.gtwy.ai/embed',
                 login: 'https://db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {
@@ -36,7 +39,7 @@
                 return {};
             }
 
-            const attributes = ['embedToken', 'onOpen', 'onClose', 'fullScreen', 'hideCloseButton', 'parentId', 'config', 'hideFullScreenButton', 'defaultOpen', 'slide'];
+            const attributes = ['embedToken', 'hideCloseButton', 'parentId', 'hideFullScreenButton', 'hideHeader', 'defaultOpen', 'slide'];
 
             return attributes.reduce((props, attr) => {
                 if (interfaceScript.hasAttribute(attr)) {
@@ -52,14 +55,16 @@
                     if (attr === 'defaultOpen') {
                         this.config.defaultOpen = value || false;
                     }
-
                     if (attr === 'slide' && (value === 'full' || value === 'left' || value === 'right')) {
                         this.config.slide = value || 'full';
                     }
-
+                    if(attr === 'hideHeader' || attr === 'hideCloseButton' || attr === 'hideFullScreenButton'){
+                        this.config[attr] = value;
+                    }
                     props[attr] = value;
                     this.state.tempDataToSend = { ...this.state.tempDataToSend, [attr]: value }
                 }
+                // console.log(this.config)
                 return props;
             }, {});
         }
@@ -148,7 +153,7 @@
             poweredBy.style.textDecoration = 'none';
             poweredBy.innerHTML = `
                 <span class="gtwy-powered-text" style="color: #ccc; font-size: 12px; margin-right: 6px; font-weight: 300;">Powered by</span>
-                <span class="gtwy-brand" style="color: #fff; font-weight: 500; font-size: 12px;">GTWY</span>
+                <span class="gtwy-brand" style="color: #fff; font-weight: 500; font-size: 12px;">GTWY AI</span>
             `;
 
             // Create buttons container
@@ -189,8 +194,9 @@
             });
 
             // Assemble header
-            if (this?.config?.slide !== 'full') buttonsContainer.appendChild(fullscreenBtn);
-            buttonsContainer.appendChild(closeBtn);
+            // console.log(this.config)
+            if (this?.config?.slide !== 'full'){(this.config.hideFullScreenButton === "false" || this.config.hideFullScreenButton === false) && buttonsContainer.appendChild(fullscreenBtn)}
+            (this.config.hideCloseButton === "false" || this.config.hideCloseButton === false) && buttonsContainer.appendChild(closeBtn);
             headerContent.appendChild(poweredBy);
             headerContent.appendChild(buttonsContainer);
             header.appendChild(headerContent);
@@ -376,16 +382,19 @@
             }
         }
 
-        openGtwy() {
+        openGtwy(agent_id = null) {
             //console.log('Opening GTWY Embed...'); // Debug log
-
             // Check if initialized
             if (!this.state.isInitialized) {
                 //console.log('GTWY Embed not initialized yet, initializing...');
                 this.initializeGtwyEmbed().then(() => {
-                    this.openGtwy(); // Retry after initialization
+                    this.openGtwy(agent_id); // Retry after initialization
                 });
                 return;
+            }
+            if(agent_id)
+            {
+                SendDataToGtwyEmbed(agent_id)
             }
 
             const gtwyInterfaceEmbed = document.getElementById('gtwyInterfaceEmbed');
@@ -417,11 +426,9 @@
                 console.error('gtwy-iframe-parent-container not found');
             }
 
+
             if (window.parent) {
                 window.parent.postMessage?.({ type: 'open', data: {} }, '*');
-            }
-            if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage?.(JSON.stringify({ type: 'open', data: {} }));
             }
 
             const iframeComponent = document.getElementById('iframe-component-gtwyInterfaceEmbed');
@@ -587,7 +594,7 @@
             // Only create and add header if not in parent container
             if (!this.state.hasParentContainer) {
                 const header = this.createEmbedHeader();
-                if (header) {
+                if (header && (this.config.hideHeader === "false" || this.config.hideHeader === false)) {
                     this.addHeaderStyles();
                     this.parentContainer.appendChild(header);
                 }
@@ -747,11 +754,6 @@
                 this.state.tempDataToSend = { ...this.state.tempDataToSend, hideFullScreenButton: true }
                 sendMessageToGtwy({ type: 'gtwyInterfaceData', data: { hideFullScreenButton: true } });
             }
-            if (newprops.fullScreen === false || newprops.fullScreen === 'false') {
-                document.getElementById('gtwy-iframe-parent-container')?.classList.remove('full-screen-gtwyInterfaceEmbed')
-                this.state.tempDataToSend = { ...this.state.tempDataToSend, hideFullScreenButton: false }
-                sendMessageToGtwy({ type: 'gtwyInterfaceData', data: { hideFullScreenButton: false } });
-            }
             // Handle slide property
             if ('slide' in newprops) {
                 this.props.slide = newprops.slide;
@@ -771,7 +773,7 @@
 
     const gtwyEmbedManager = new GtwyEmbedManager();
 
-    window.SendDataToGtwyEmbed = function (dataToSend) {
+    const SendDataToGtwyEmbed = function (dataToSend) {
         const iframeComponent = document.getElementById('iframe-component-gtwyInterfaceEmbed');
 
         // Parse string data if needed
@@ -853,15 +855,15 @@
     }
 
     // New GTWY specific functions - FIXED WITH PROPER INITIALIZATION
-    window.openGtwy = () => {
+    window.openGtwy = (agent_id = null) => {
         //console.log('window.openGtwy called');
-        gtwyEmbedManager.openGtwy();
+        gtwyEmbedManager.openGtwy(agent_id);
     };
     window.closeGtwy = () => gtwyEmbedManager.closeGtwy();
 
     window.GtwyEmbed = {
         open: () => {
-            gtwyEmbedManager.openGtwy();
+            gtwyEmbedManager.openGtwy(agent_id = null);
         },
         close: () => {
             gtwyEmbedManager.closeGtwy();
@@ -878,8 +880,8 @@
                 gtwyInterfaceEmbed.style.display = 'none';
             }
         },
-        sendData: (data) => {
-            window.SendDataToGtwyEmbed(data);
+        sendDataToGtwy: (data) => {
+            SendDataToGtwyEmbed(data);
         },
         // New methods for header control
         toggleFullscreen: () => {
@@ -897,7 +899,7 @@
     function sendMessageToGtwy(messageObj) {
         const iframeComponent = document.getElementById('iframe-component-gtwyInterfaceEmbed');
         if (iframeComponent?.contentWindow) {
-            iframeComponent?.contentWindow?.postMessage(messageObj, '*');
+            iframeComponent?.contentWindow?.postMessage({type: 'gtwyMessage', data: messageObj}, '*');
         }
     }
 

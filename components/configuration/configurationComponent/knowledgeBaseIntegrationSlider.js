@@ -1,11 +1,11 @@
-import CodeBlock from '@/components/codeBlock/codeBlock';
 import CopyButton from '@/components/copyButton/copyButton';
 import { useCloseSliderOnEsc } from '@/components/historyPageComponents/assistFile';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { generateAccessKeyAction } from '@/store/action/orgAction';
-import {  CloseCircleIcon } from '@/components/Icons';
-import React, { useRef, useState } from 'react';
+import {CloseIcon } from '@/components/Icons';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { toggleSidebar } from '@/utils/utility';
 
 function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider }) {
     const dispatch = useDispatch();
@@ -16,8 +16,6 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
     const [copied, setCopied] = useState({
         accessKey: false,
     });
-    const sidebarRef = useRef();
-
     useCloseSliderOnEsc(setOpenKnowledgeBaseSlider);
 
     const handleCopy = async (text, key) => {
@@ -110,16 +108,21 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
     }
 
     return (
+         <aside
+            id="knowledgeBase-integration-slider"
+            className="fixed inset-y-0 right-0 border-l-2 bg-base-100 shadow-2xl rounded-md w-full md:w-1/2 lg:w-1/2 
+                     overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-medium
+                     translate-x-full"
+            aria-label="Api Keys guide slider"
+        >
         <div
-            ref={sidebarRef}
-            className={`fixed inset-y-0 right-0 border-l-2 bg-base-100 shadow-2xl rounded-md ${openKnowledgeBaseSlider ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
-                } overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-medium`}
+           
         >
             <button
-                onClick={() => setOpenKnowledgeBaseSlider(false)}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-base-300 transition-colors"
+                onClick={() => toggleSidebar("knowledgeBase-integration-slider","right")}
+                className="absolute top-4 right-4 p-2 rounded-full hover:text-error transition-colors z-10"
             >
-                <CloseCircleIcon />
+                <CloseIcon/>
             </button>
 
             {/* Step 1 */}
@@ -131,6 +134,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
             {/* Step 3 */}
             {renderStepThree()}
         </div>
+        </aside>
     );
 }
 

@@ -1,21 +1,37 @@
 import CopyButton from '@/components/copyButton/copyButton';
+import Protected from '@/components/protected';
+import GenericTable from '@/components/table/table';
 import Link from 'next/link';
 import React from 'react';
 
-const ComplitionApi = (bridgeId, modelType) => {
-  return `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\
-  --header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
-  --header 'Content-Type: application/json' \\
-  --data '{
-    ${modelType === 'embedding' ? '"text": "YOUR_TEXT_HERE",' : '"user": "YOUR_USER_QUESTION",'}
-    "agent_id": "${bridgeId}",
-    "thread_id": "YOUR_THREAD_ID",
-    "response_type": "text", // optional
-    "variables": {
-      // ...VARIABLES_USED_IN_BRIDGE
-    }
-  }'`
-}
+const ComplitionApi = (bridgeId, modelType, isEmbedUser) => {
+  const url = `${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion`;
+
+  const headers = isEmbedUser
+    ? `--header 'Content-Type: application/json'`
+    : `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\
+  --header 'Content-Type: application/json'`;
+
+  const body = `{
+  ${modelType === 'embedding' ? '"text": "YOUR_TEXT_HERE",' : '"user": "YOUR_USER_QUESTION",'}
+  "agent_id": "${bridgeId}",
+  "thread_id": "YOUR_THREAD_ID",
+  "response_type": "text", // optional
+  "variables": {
+    // ...VARIABLES_USED_IN_BRIDGE
+  }
+}`;
+
+  return `curl --location '${url}' \\\n  ${headers} \\\n  --data '${body}'`;
+};
+const headers = ['Parameter', 'Type', 'Description', 'Required'];
+const data = [
+  ['user', 'string', 'The user\'s question ( the query asked by the user)', 'true'],
+  ['agent_id', 'string', 'The unique ID of the agent to process the request.', 'true'],
+  ['thread_id', 'string', 'The ID to maintain conversation context across messages.', 'false'],
+  ['response_type', 'string', 'Specifies the format of the response: "text", "json".', 'false'],
+  ['variables', 'object', 'A key-value map of dynamic variables used in the agent\'s prompt.', 'false'],
+];
 
 const ResponseFormat = () => {
   return `{
@@ -44,27 +60,28 @@ const Section = ({ title, caption, children }) => (
   </div>
 );
 
-const ApiGuide = ({ params, modelType }) => {
+const ApiGuide = ({ params, modelType, isEmbedUser }) => {
   return (
     <div className="min-h-screen gap-4 flex flex-col">
-      <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
+      {!isEmbedUser && <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
         <Section title="Step 1" caption="Create `pauthkey`" />
         <p className=" text-sm">
           Follow the on-screen instructions to create a new API key. Ignore if already created
           <br /> <Link href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create pauthkey</Link>
         </p>
-      </div>
+      </div>}
       <div className="flex flex-col gap-4 bg-white rounded-lg shadow-md p-4">
-        <Section title="Step 2" caption="Use the API" />
+        <Section title={`${isEmbedUser ? 'Step 1' : 'Step 2'}`} caption="Use the API" />
         <div className="mockup-code relative">
-          <CopyButton data={ComplitionApi(params.id, modelType)} />
+          <CopyButton data={ComplitionApi(params.id, modelType, isEmbedUser)} />
           <pre className="break-words whitespace-pre-wrap">
             <code>
-              {ComplitionApi(params.id, modelType)}
+              {ComplitionApi(params.id, modelType, isEmbedUser)}
             </code>
           </pre>
         </div>
-        <p className=" text-sm"><strong>Note:</strong> The 'response_type' key determines output format. If the value is <strong>json_object</strong> (or undefined), the output will be in JSON format. If <strong>text</strong>, the output will be in text format.
+        <GenericTable headers={headers} data={data} />
+        <p className=" text-sm"><strong>Note:</strong> If the value of response_type is undefined, the output will be in JSON format by default.
         </p>
       </div>
       <div className="flex flex-col gap-4 bg-white rounded-lg shadow-lg p-4">
@@ -82,4 +99,4 @@ const ApiGuide = ({ params, modelType }) => {
   );
 };
 
-export default ApiGuide;
+export default Protected(ApiGuide);

@@ -54,6 +54,8 @@ export const updateUserMetaOnboarding = (userId, user) => async (dispatch) => {
 export const generateAccessKeyAction = (orgId) => async (dispatch) => {
   try {
     const response = await generateAccessKey();
+
+
     dispatch(updateToken({ orgId, auth_token: response?.data?.auth_token }));
   } catch (error) {
     console.error('Error updating organization timezone:', error);

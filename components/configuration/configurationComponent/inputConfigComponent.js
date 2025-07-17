@@ -3,16 +3,16 @@ import OptimizePromptModal from '@/components/modals/optimizePromptModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
-import { openModal } from '@/utils/utility';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { generateRandomID, openModal } from '@/utils/utility';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import ToneDropdown from './toneDropdown'; 
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
-import InfoModel from '@/components/infoModel';
+import InfoTooltip from '@/components/InfoTooltip';
 
-const InputConfigComponent = ({ params }) => {
+const InputConfigComponent = ({ params , promptTextAreaRef }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type || "",
@@ -27,6 +27,7 @@ const InputConfigComponent = ({ params }) => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
     const [messages, setMessages] = useState([]);
+    const thread_id = useMemo(() => generateRandomID(), []);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -46,8 +47,8 @@ const InputConfigComponent = ({ params }) => {
         };
     }, [prompt, reduxPrompt]);
 
-    const savePrompt = useCallback((e) => {
-        const newValue = e?.target?.value || e || "";
+    const savePrompt = useCallback((newPrompt) => {
+        const newValue = newPrompt || "";
         setShowSuggestions(false);
         if (newValue !== reduxPrompt) {
             // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { prompt: newValue } } }));
@@ -246,7 +247,7 @@ const InputConfigComponent = ({ params }) => {
     if (service === "google" && serviceType === "chat") return null;
 
     return (
-      <div>
+      <div ref={promptTextAreaRef}>
         <div className="flex justify-between items-center mb-2">
           <div className="label flex items-center gap-2">
             <span className="label-text capitalize font-medium">Prompt</span>
@@ -257,9 +258,9 @@ const InputConfigComponent = ({ params }) => {
                   openModal(MODAL_TYPE?.PROMPT_SUMMARY);
                 }}
               >
-                <InfoModel tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
-                <span className='label-text promptSummary-info capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
-                </InfoModel>
+                <InfoTooltip tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
+                <span className='label-text  capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
+                </InfoTooltip>
               </button>
              
             </div>
@@ -294,15 +295,15 @@ const InputConfigComponent = ({ params }) => {
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
-            onBlur={savePrompt}
+            onBlur={(e)=>savePrompt(e.target.value)}
           />
           {showSuggestions && renderSuggestions()}
-          <div className="collapse bg-gradient-to-r from-yellow-50 to-orange-50 border-t-0 border border-base-300 rounded-t-none">
+          <div className="collapse bg-gradient-to-r bg-base-200 border-t-0 border border-base-300 rounded-t-none">
             <input type="checkbox" className="min-h-[0.75rem]" />
             <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 ">
                 <span className="text-nowrap">Default Variables</span>
-                <p role="alert" className="label-text-alt alert p-2">
+                <p role="alert" className="label-text-alt alert p-2 bg-base-300">
                   <InfoIcon size={16} className="" />
                   Use these variables in prompt to get their functionality
                 </p>
@@ -315,43 +316,52 @@ const InputConfigComponent = ({ params }) => {
               <div className="text-xs">
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-1">
-                    <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
-                    <span className="">
-                      &#123;&#123;current_time_and_date&#125;&#125;
-                    </span>
-                    <span className=" ml-2">
-                      - To access the current date and time
-                    </span>
-                  </div>
-                  {/* <div className="flex items-center gap-1">
-                                    <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
-                                    <span className="">&#123;&#123;memory&#125;&#125;</span>
-                                    <span className="">- Access GPT memory context when enabled</span>
-                                </div> */}
-                                <div className="flex items-center gap-1">
-                                    <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
-                                    <span className="">&#123;&#123;pre_function&#125;&#125;</span>
-                                    <span className="">- Use this variable if you are using the pre_function</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
-                                    <span className="">&#123;&#123;timezone&#125;&#125;</span>
-                                    <span className="">- Access the timezone using a timezone identifier</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <span className="inline-block w-1 h-1 bg-black rounded-full"></span>
+                  <span>&#123;&#123;current_time_and_date&#125;&#125;</span>
+                  <span className="ml-2">- To access the current date and time</span>
                 </div>
+
+                {/* Uncomment if needed later
+                      <div className="flex items-center gap-1">
+                        <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
+                          <span>&#123;&#123;memory&#125;&#125;</span>
+                           <span>- Access GPT memory context when enabled</span>
+                     </div> 
+                 */}
+
+                <div className="flex items-center gap-1">
+                  <span className="inline-block w-1 h-1 bg-black rounded-full"></span>
+                  <span>&#123;&#123;pre_function&#125;&#125;</span>
+                  <span>- Use this variable if you are using the pre_function</span>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <span className="inline-block w-1 h-1 bg-black  rounded-full"></span>
+                  <span>&#123;&#123;timezone&#125;&#125;</span>
+                  <span>- Access the timezone using a timezone identifier</span>
+                </div>
+
+                  <div className="flex items-center gap-1">
+
+                    <span>
+                      Use custom variables like <code>&#123;&#123;your_custom_variable&#125;&#125;</code>, created from the <strong>Add Variable</strong> section, to insert dynamic values.
+                    </span>
+
+                  </div>
+              </div>
             </div>
-            <div className='flex mt-2'>
-              <ToneDropdown params={params} />
-              <ResponseStyleDropdown params={params} />
-            </div>
-            <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
-            <OptimizePromptModal savePrompt={savePrompt}setPrompt={setPrompt} params={params} messages={messages} setMessages={setMessages}/>
-            <PromptSummaryModal params={params}/>
+          </div>
         </div>
-    );
+      </div>
+      <div className='flex mt-2'>
+        <ToneDropdown params={params} />
+        <ResponseStyleDropdown params={params} />
+      </div>
+      <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
+      <OptimizePromptModal savePrompt={savePrompt} setPrompt={setPrompt} params={params} messages={messages} setMessages={setMessages} thread_id={thread_id} />
+      <PromptSummaryModal params={params} />
+    </div>
+  );
 };
 
 export default InputConfigComponent;

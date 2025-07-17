@@ -1,6 +1,7 @@
 "use client";
 import { ChevronDownIcon } from '@/components/Icons';
 import Protected from '@/components/protected';
+import SearchItems from '@/components/UI/SearchItems';
 import { getMetricsDataApi } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { METRICS_FACTOR_OPTIONS, TIME_RANGE_OPTIONS } from '@/utils/enums';
@@ -59,18 +60,13 @@ function Page({ params }) {
     return bridgeId && bridgeName ? { bridge_id: bridgeId, bridge_name: bridgeName } : null;
   });
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const [metricsBarChartData, setMetricsBarChartData] = useState({ series: [], categories: [] });
   
   const { allBridges, apikeyData } = useCustomSelector((state) => ({
     allBridges: state.bridgeReducer.org[params.org_id]?.orgs || [],
     apikeyData: state?.bridgeReducer?.apikeys[org_id] || []
-  }));
-
-  const filteredBridges = allBridges.filter(bridge => 
-    bridge.name?.toLowerCase().includes(searchTerm?.toLowerCase())
-  );
-
+  })); 
+  const [filterBridges, setFilterBridges] = useState(allBridges);
   const updateURLParams = (newParams) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
     
@@ -146,7 +142,7 @@ function Page({ params }) {
   const handleBridgeChange = (bridge_id, bridge_name) => {
     const newBridge = { bridge_id, bridge_name };
     setBridge(newBridge);
-    setSearchTerm('');
+   
     updateURLParams({ 
       bridge_id: bridge_id, 
       bridge_name: bridge_name 
@@ -183,16 +179,16 @@ function Page({ params }) {
             {bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Agent'}
             <ChevronDownIcon className="w-4 h-4" />
           </label>
-            <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-row overflow-y-auto max-h-[70vh]">
-            <input
-                  type="text"
-                  placeholder="Search Agent..."
-                  className="input input-bordered mb-4 w-full"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              {filteredBridges.map((item, index) => (
-                <li key={index}><a onClick={() => handleBridgeChange(item?._id, item?.name)} className={`w-56 ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}>{item.name}</a></li>
+            <ul tabIndex="0" className="dropdown-content menu p-2 pr-6 shadow bg-base-100 rounded-box flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
+              <SearchItems setFilterItems={setFilterBridges} data={allBridges} />
+              {filterBridges.map((item, index) => (
+                <li key={index}><a
+                  onClick={() => handleBridgeChange(item?._id, item?.name)}
+                  className={`w-72 ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}
+                >
+                  {item.name}
+                </a>
+                </li>
               ))}
             </ul>
           </div>
@@ -202,7 +198,7 @@ function Page({ params }) {
       <div className="flex justify-end items-center mb-6 gap-3">
         <span className={`${loading ? 'loading loading-ring loading-lg' : ""}`}></span>
         {loading && <span className="text-gray-600">Loading...</span>}
-        <div className="dropdown border rounded-lg z-medium">
+        <div className="dropdown border rounded-lg z-low">
           <label tabIndex="0" role="button" className="flex items-center gap-2 btn">
             {TIME_RANGE_OPTIONS?.[range]}
             <ChevronDownIcon className="w-4 h-4" />

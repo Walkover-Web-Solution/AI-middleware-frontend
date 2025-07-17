@@ -1,31 +1,36 @@
 import { createIntegrationAction } from '@/store/action/integrationAction'
 import { MODAL_TYPE } from '@/utils/enums'
-import { closeModal } from '@/utils/utility'
+import { closeModal, RequiredItem } from '@/utils/utility'
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import Modal from '@/components/UI/Modal'
 
-const IntegrationModal = ({ orgId }) => {
+const IntegrationModal = ({ params }) => {
   const integrationNameRef = React.useRef('');
   const dispatch = useDispatch();
   const handleCreateNewIntegration = () => {
     dispatch(createIntegrationAction({
       name: integrationNameRef?.current?.value,
-      orgId
+      orgId: params.org_id
     }))
     closeModal(MODAL_TYPE.INTEGRATION_MODAL);
     integrationNameRef.current.value = '';
   }
   return (
-
     <Modal MODAL_ID={MODAL_TYPE.INTEGRATION_MODAL}>
       <div className='modal-box'>
-        <h3 className="font-bold text-lg mb-4">Enter Integration Name</h3>
+        <h3 className="font-bold text-lg mb-4">Enter Integration Name{RequiredItem()}</h3>
         <input
           type="text"
           placeholder="Enter integration name"
           className="input input-bordered input-md w-full mb-2 placeholder-opacity-50"
           ref={integrationNameRef}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleCreateNewIntegration();
+            }
+          }}
         />
         <div className="modal-action">
           <form method="dialog">
