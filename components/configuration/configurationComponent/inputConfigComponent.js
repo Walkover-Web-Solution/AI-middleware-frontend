@@ -12,7 +12,7 @@ import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new c
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const InputConfigComponent = ({ params ,promptTextAreaRef }) => {
+const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type || "",

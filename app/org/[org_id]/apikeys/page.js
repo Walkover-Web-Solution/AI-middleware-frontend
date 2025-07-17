@@ -6,13 +6,14 @@ import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, getAllApikeyAction } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
-import { closeModal, getIconOfService, openModal } from '@/utils/utility';
-import { SquarePenIcon, TrashIcon } from '@/components/Icons';
+import { closeModal, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
+import { BookIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
+import ApiKeyGuideSlider from "@/components/configuration/configurationComponent/ApiKeyGuide";
 
 export const runtime = 'edge';
 
@@ -102,8 +103,16 @@ const Page = () => {
             description="Add your model-specific API keys to enable and use different AI models in your chat."
             docLink="https://app.docstar.io/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
           />
-          <div className="flex-shrink-0 mt-4 sm:mt-0">
-            <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>+ create new api key</button>
+          <div className="flex-shrink-0 mt-4 sm:mt-0 flex gap-2">
+            <button 
+              className="btn" 
+              onClick={() => toggleSidebar("Api-Keys-guide-slider","right")}
+            >
+             <BookIcon />  API Key Guide
+            </button>
+            <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>
+              + create new api key
+            </button>
           </div>
         </div>
       </MainLayout>
@@ -134,6 +143,8 @@ const Page = () => {
         </div>
       ))}
       <ApiKeyModal orgId={orgId} isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} />
+      
+      <ApiKeyGuideSlider/>
       <DeleteModal onConfirm={deleteApikey} item={selectedDataToDelete} title="Delete API Key" description={`Are you sure you want to delete the API key "${selectedDataToDelete?.name}"? This action cannot be undone.`}
       />
     </div>
