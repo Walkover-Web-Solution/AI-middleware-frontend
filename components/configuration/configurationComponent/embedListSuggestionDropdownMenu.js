@@ -103,7 +103,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 ) : (
                     <div className="flex flex-col items-start gap-2">
                         {connectedFunctions.length === 0 && (
-                            <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."} >
+                            <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"Tools let LLMs access real-time data, perform calculations, and interact with external services."} >
                                 <p className=" label-text info">Tool Configuration</p>
 
                             </InfoTooltip>

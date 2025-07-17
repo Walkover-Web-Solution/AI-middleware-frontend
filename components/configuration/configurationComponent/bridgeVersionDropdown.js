@@ -48,7 +48,12 @@ function BridgeVersionDropdown({ params }) {
         dispatch(createBridgeVersionAction({ parentVersionId: params?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value }, (data) => {
             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${data.version_id}`);
         }))
-        versionDescriptionRef.current.value = ''
+        setTimeout(() => {
+            closeModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL);
+            versionDescriptionRef.current.value = ''
+            
+        }, 1000);
+        
     }
     return (
         <div className='flex items-center gap-2'>

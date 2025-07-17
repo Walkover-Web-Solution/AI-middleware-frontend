@@ -13,6 +13,12 @@ const VersionDescriptionModal = ({ versionDescriptionRef, handleCreateNewVersion
           placeholder="Enter version description"
           className="input input-bordered input-md w-full mb-2 placeholder-opacity-50"
           ref={versionDescriptionRef}
+            onKeyDown={(e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault(); // prevent default Enter behavior
+          handleCreateNewVersion();
+        }
+      }}
         />
         <div className="modal-action">
           <form method="dialog">
