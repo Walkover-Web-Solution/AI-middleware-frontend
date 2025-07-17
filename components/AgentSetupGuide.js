@@ -28,7 +28,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
   const setErrorBorder = (ref, selector, scrollToView = false) => {
     if (ref?.current) {
       if (scrollToView) {
-        ref.current.scrollIntoView({ behavior: 'smooth' });
+        ref.current.scrollIntoView({ behavior: 'smooth'  });
       }
       setTimeout(() => {
         const element = ref.current.querySelector(selector);
@@ -41,7 +41,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
   };
 
   useEffect(() => {
-    const hasPrompt = prompt !== "";
+    const hasPrompt = prompt !== ""||promptTextAreaRef.current.querySelector('textarea').value!=="";
     const hasApiKey = !!bridgeApiKey;
     
     if (hasPrompt) {
@@ -64,19 +64,20 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
   }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef]);
 
   const handleStart = () => {
-    if (prompt === "") {
-      setShowError(true);
-      setErrorType('prompt');
-      setErrorBorder(promptTextAreaRef, 'textarea', true);
-      return;
-    }
-    
     if (!bridgeApiKey) {
       setShowError(true);
       setErrorType('apikey');
       setErrorBorder(apiKeySectionRef, 'select', true);
       return;
     }
+
+    if (prompt === ""&&promptTextAreaRef.current.querySelector('textarea').value==="") {
+      setShowError(true);
+      setErrorType('prompt');
+      setErrorBorder(promptTextAreaRef, 'textarea', true);
+      return;
+    }
+    
     
     setIsVisible(false);
   };
