@@ -31,7 +31,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
       const element = ref.current.querySelector(selector);
       if (element) {
         element.style.borderColor = "";
-        setModelRecommendations(null)
+        
       }
     }
   };
@@ -90,7 +90,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
     const handleGetRecommendations = async () => {
         setIsLoadingRecommendations(true);
         try {
-        if(bridgeApiKey&&(prompt!==""||promptTextAreaRef.current.querySelector('textarea').value!=="")){
+        if(bridgeApiKey && promptTextAreaRef.current.querySelector('textarea').value!==""){
             const response = await modelSuggestionApi({ versionId: params?.version });
             if (response?.success) {
                 setModelRecommendations({
@@ -109,15 +109,14 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
         }
        }
         else{
-            if (prompt === "" && promptTextAreaRef.current.querySelector('textarea').value === "") {
+            if ( promptTextAreaRef.current.querySelector('textarea').value === "") {
                 setModelRecommendations({error:'Prompt is missing. Please enter a prompt'});
                 setErrorBorder(promptTextAreaRef, 'textarea', true);
-                return;
+                
             }
            else {
                 setModelRecommendations({error:'API key is missing. Please add an API key'});
                 setErrorBorder(apiKeySectionRef, 'select', true);
-
             }
         }
         } catch (error) {
