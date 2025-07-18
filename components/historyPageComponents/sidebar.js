@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
-import { usePathname, useRouter, useSearchParams } from "next/navigation.js";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation.js";
 import { setSelectedVersion } from '@/store/reducer/historyReducer';
 
 const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion, setIsErrorTrue, isErrorTrue }) => {
@@ -23,6 +23,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedThreads, setExpandedThreads] = useState([]);
   const [loadingSubThreads, setLoadingSubThreads] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const dispatch = useDispatch();
   const pathName = usePathname();
   const router = useRouter();
@@ -88,24 +89,50 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   }, 500), [setSearchQuery]);
 
   const handleSearch = async (e) => {
+    if(e.target.value==='') router.push(`${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${params.sub_thread_id}&start=''&end=''`, undefined, { shallow: true })
     e?.preventDefault();
+    setSearchLoading(true);
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
+    // router.push(`${pathName}?version=${params.version}&thread_id=''&subThread_id=''&start=''&end=''`, undefined, { shallow: true });
+    dispatch(clearThreadData());
     dispatch(clearSubThreadData());
-    const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
-    if (result?.length < 40) setHasMore(false);
+    try {
+      const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || "")).then((data) => {
+        console.log(Object.entries(data).length, data)
+        data.length && router.push(
+          `${pathName}?version=${params.version}&thread_id=${data[0]?.thread_id}` +
+          `&subThread_id=${data[0]?.sub_thread?.[0]?.sub_thread_id || data[0]?.thread_id}` +
+          `&start=&end=`,
+          undefined,
+          { shallow: true }
+        );
+      });
+      if (result?.length < 40) setHasMore(false);
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setSearchLoading(false);
+    }
   };
 
   const clearInput = async () => {
     setSearchQuery("");
     if (searchRef?.current) searchRef.current.value = "";
+    setSearchLoading(true);
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
-    const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
-    await dispatch(getThread(params.thread_id, params?.id, params.subThread_id || params.thread_id, 1, "all"));
-    if (result?.length < 40) setHasMore(false);
+    try {
+      const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
+      await dispatch(getThread(params.thread_id, params?.id, params.subThread_id || params.thread_id, 1, "all"));
+      if (result?.length < 40) setHasMore(false);
+    } catch (error) {
+      console.error("Clear search error:", error);
+    } finally {
+      setSearchLoading(false);
+    }
   };
 
   const handleThreadIds = (id) => {
@@ -147,13 +174,29 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     dispatch(userFeedbackCountAction({ bridge_id: params?.id, user_feedback }));
   };
 
-  const SubThreadSkeleton = () => (
-    <div className="pl-10 p-2">
-      {[1, 2, 3].map((i) => (
+  const Skeleton = ({ count = 3 }) => (
+    <div className="pl-4 p-2">
+      {[...Array(count)].map((_, i) => (
         <div key={i} className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded-md mb-2"></div>
         </div>
       ))}
+    </div>
+  );
+
+  const NoDataFound = () => (
+    <div className="flex flex-col items-center justify-center py-8 text-center">
+      <div className="text-gray-400 mb-2">
+        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <p className="text-gray-500 text-sm">No data available</p>
+      {searchQuery && (
+        <p className="text-gray-400 text-xs mt-1">
+          No results found for "{searchQuery}"
+        </p>
+      )}
     </div>
   );
 
@@ -266,8 +309,16 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
         </form>
       </div>
       <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
-      {loading ? (
-        <div className="flex justify-center items-center bg-base-200 h-full">{/* Loading... */}</div>
+
+      {/* Fixed: Render search loader at the top level, not inside InfiniteScroll */}
+      <div className="flex-1 overflow-hidden">
+        {searchLoading ? (
+          <Skeleton count={8} />
+        ) : loading ? (
+          <div className="flex justify-center items-center bg-base-200 h-full">
+          </div>
+        ) : historyData?.length === 0 ? (
+          <NoDataFound />
       ) : (
         <InfiniteScroll
           dataLength={historyData?.length}
@@ -305,7 +356,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                           {item?.thread_id}
                         </div>
                       )}
-                      {/* Show chevron button only when no search query */}
                       {!searchQuery && params.thread_id === item?.thread_id && (
                         <div
                           onClick={(e) => {
@@ -324,66 +374,62 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                     </a>
                   </li>
                   {params.thread_id === item?.thread_id && expandedThreads?.includes(item?.thread_id) && (
-                    <>
-                      {loadingSubThreads ? (
-                        <SubThreadSkeleton />
-                      ) : (
-                        <div className="pl-10 p-2 text-gray-600 text-sm rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
-                          <ul>
-                            {subThreads?.length === 0 ? (
-                              <li>No sub thread available</li>
-                            ) : (
-                              subThreads?.map((subThreadId, index) => (
-                                <li
-                                  key={index}
-                                  className={`cursor-pointer ${params.subThread_id === subThreadId?.sub_thread_id
-                                    ? "hover:bg-base-primary hover:text-base-100"
-                                    : "hover:bg-base-300 hover:text-gray-800"
-                                    } p-2 rounded-md transition-all duration-200 ${params.subThread_id === subThreadId?.sub_thread_id
-                                      ? "bg-primary text-base-100"
-                                      : ""
-                                    }`}
-                                  onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, params.thread_id)}
-                                >
-                                  {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 35)}
-                                </li>
-                              ))
-                            )}
-                          </ul>
-                        </div>
+                        <>
+                          {loadingSubThreads ? (
+                            <Skeleton />
+                          ) : (
+                            <div className="pl-10 p-2 text-gray-600 text-sm rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
+                              <ul>
+                                {subThreads?.length === 0 ? (
+                                  <li>No sub thread available</li>
+                                ) : (
+                                  subThreads?.map((subThreadId, index) => (
+                                    <li
+                                      key={index}
+                                      className={`cursor-pointer ${params.subThread_id === subThreadId?.sub_thread_id
+                                        ? "hover:bg-base-primary hover:text-base-100"
+                                        : "hover:bg-base-300 hover:text-gray-800"
+                                        } p-2 rounded-md transition-all duration-200 ${params.subThread_id === subThreadId?.sub_thread_id
+                                          ? "bg-primary text-base-100"
+                                          : ""
+                                        }`}
+                                      onClick={() => handleSelectSubThread(subThreadId?.sub_thread_id, params.thread_id)}
+                                    >
+                                      {truncate(subThreadId?.display_name || subThreadId?.sub_thread_id, 35)}
+                                    </li>
+                                  ))
+                                )}
+                              </ul>
+                            </div>
+                          )}
+                        </>
                       )}
-                    </>
-                  )}
-                  {params.thread_id === item?.thread_id && <div className="space-y-6">
-                    <div key={item.id} className="rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
-                      {item?.sub_thread && item.sub_thread?.length > 0 && (
-                        <div className="bg-base-100">
-                          <div className="p-4">
-                            <div className="space-y-2">
-                              {item?.sub_thread?.map((subThread, index) => (
-                                <div key={index} className="ml-4">
-                                  {/* Sub Thread Header */}
-                                  <div
-                                    onClick={() => handleSelectSubThread(subThread?.sub_thread_id)}
-                                    className={`cursor-pointer p-3 rounded-lg transition-all duration-200 border-2 ${params?.subThread_id === subThread?.sub_thread_id
-                                      ? 'bg-base-200 border-primary text-primary'
-                                      : 'bg-base-100 border-gray-200 hover:bg-base-200 hover:border-gray-300 text-gray-700'
-                                      }`}
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <MessageCircleIcon className={`w-4 h-4 ${params?.subThread_id === subThread?.sub_thread_id ? 'text-primary' : 'text-gray-500'
-                                        }`} />
-                                      <span 
-                                        className="font-medium text-sm"
+                      {params.thread_id === item?.thread_id && <div className="space-y-6">
+                        <div key={item.id} className="rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
+                          {item?.sub_thread && item.sub_thread?.length > 0 && (
+                            <div className="bg-base-100">
+                              <div className="p-4">
+                                <div className="space-y-2">
+                                  {item?.sub_thread?.map((subThread, index) => (
+                                    <div key={index} className="ml-4">
+                                      <div
+                                        onClick={() => handleSelectSubThread(subThread?.sub_thread_id)}
+                                        className={`cursor-pointer p-3 rounded-lg transition-all duration-200 border-2 ${params?.subThread_id === subThread?.sub_thread_id
+                                          ? 'bg-base-200 border-primary text-primary'
+                                          : 'bg-base-100 border-gray-200 hover:bg-base-200 hover:border-gray-300 text-gray-700'
+                                          }`}
                                       >
-                                        {truncate(subThread?.display_name || subThread?.sub_thread_id, 35)}
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  {/* Sub Thread Messages */}
-                                  {subThread?.messages?.length > 0 && (
-                                    <div className="mt-2 ml-6 space-y-1">
+                                        <div className="flex items-center gap-2">
+                                          <MessageCircleIcon className={`w-4 h-4 ${params?.subThread_id === subThread?.sub_thread_id ? 'text-primary' : 'text-gray-500'
+                                            }`} />
+                                          <span
+                                            className="font-medium text-sm"
+                                          >
+                                            {truncate(subThread?.display_name || subThread?.sub_thread_id, 35)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                 {subThread?.messages?.length > 0 && (                                    <div className="mt-2 ml-6 space-y-1">
                                       {subThread?.messages?.map((msg, msgIndex) => (
                                         <div
                                           key={msgIndex}
@@ -403,24 +449,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                             </div>
                           </div>
                         </div>
-                      )}
-
-                      {/* Main Messages */}
-                      {item?.message && item?.message?.length > 0 && (
-                        <div className="p-4">
-                          <div className="space-y-2 ml-4">
-                            {item?.message?.map((msg, index) => (
-                              <div
-                                key={index}
-                                onClick={() => handleSetMessageId(msg?.message_id)}
-                                className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
-                              >
-                                <div className="flex items-start gap-2">
-                                  <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />
-                                  <span>{truncate(msg?.message, 45)}</span>
-                                </div>
-                              </div>
-                            ))}
+                      )}                      {item?.message && item?.message?.length > 0 && (                        <div className="p-4">                          <div className="space-y-2 ml-4">                            {item?.message?.map((msg, index) => (                              <div                                key={index}                                onClick={() => handleSetMessageId(msg?.message_id)}                                className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}                              >                                <div className="flex items-start gap-2">                                  <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />                                  <span>{truncate(msg?.message, 45)}</span>                                </div>                              </div>                            ))}
                             </div>
                           </div>
                         )}
@@ -433,6 +462,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
           </div>
         </InfiniteScroll>
       )}
+      </div>
       <div className="fixed bottom-2 left-12">
         {!isThreadSelectable && historyData?.length > 0 && (
           <button onClick={() => setIsThreadSelectable(true)} className="btn btn-primary btn-sm ml-20">
