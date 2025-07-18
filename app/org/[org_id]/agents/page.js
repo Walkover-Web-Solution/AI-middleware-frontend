@@ -292,7 +292,7 @@ function Home({ params, isEmbedUser }) {
                   
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
                 
-                   <SearchItems data={allBridges} setFilterItems={setFilterBridges}/>
+                   <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
                   
                     <div className="join hidden sm:block">
                       <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>

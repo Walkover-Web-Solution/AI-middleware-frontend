@@ -101,7 +101,7 @@ const Page = ({ params }) => {
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
 
-          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} />
+          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} item="KnowledgeBase" />
           <div className="flex flex-wrap justify-end items-center gap-2">
             <button className="btn" onClick={() => toggleSidebar("knowledgeBase-integration-slider","right")}>
               <BookIcon /> Integration Guide
