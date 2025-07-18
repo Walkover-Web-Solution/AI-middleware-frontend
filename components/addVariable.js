@@ -3,20 +3,24 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
 import { updateOnBoardingDetails } from "@/utils/utility";
-import { ChevronDown, ChevronUp, Info, Trash2 } from "lucide-react";
+import { ChevronUpIcon, ChevronDownIcon, InfoIcon, TrashIcon } from "@/components/Icons";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import OnBoarding from "./OnBoarding";
 import { ONBOARDING_VIDEOS } from "@/utils/enums";
+import TutorialSuggestionToast from "./tutorialSuggestoinToast";
+
 const AddVariable = ({ params }) => {
   const versionId = params.version;
-  const { variablesKeyValue, prompt, isFirstVariable, currentOrg } = useCustomSelector((state) => ({
+  const { variablesKeyValue, prompt, isFirstVariable,  } = useCustomSelector((state) => ({
     variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-    isFirstVariable: state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(params.org_id))?.meta?.onboarding?.Addvariables || "",
-    currentOrg: state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(params.org_id)),
+    isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
   }));
-  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: false
+  });
   const [keyValuePairs, setKeyValuePairs] = useState([]);
   const [isFormData, setIsFormData] = useState(true);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
@@ -26,7 +30,10 @@ const AddVariable = ({ params }) => {
   const accordionContentRef = useRef(null); // Ref for the accordion content
   const isOpeningRef = useRef(false); // To track if the accordion is opening
   const handleTutorial = () => {
-    setShowTutorial(isFirstVariable);
+     setTutorialState(prev => ({
+        ...prev,
+        showSuggestion: isFirstVariable
+      }));
   };
 
 
@@ -225,7 +232,6 @@ const AddVariable = ({ params }) => {
 
   return (
     <div className="collapse text-base-content" tabIndex={0}>
-      {/* Accordion Toggle Button */}
       <button
         className="flex items-center cursor-pointer focus:outline-none"
         onClick={() => {
@@ -235,45 +241,12 @@ const AddVariable = ({ params }) => {
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
       >
-        {showTutorial && (
-         <div className="fixed inset-0 z-[99999] bg-black bg-opacity-70 flex items-center justify-center">
-          <button
-            onClick={() => handleVideoEnd()}
-            className="absolute top-4 right-4 text-white text-4xl hover:text-red-500 z-50"
-            aria-label="Close Tutorial"
-          >
-            &times;
-          </button>
-
-          <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
-             <iframe
-                src="https://video-faq.viasocket.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2"
-                loading="lazy"
-                title="AI-middleware"
-                allow="clipboard-write"
-                frameBorder="0"
-                webkitallowfullscreen="true"
-                mozallowfullscreen="true"
-                allowFullScreen
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                }}
-                className="rounded-xl"
-              />
-          </div>
-        </div>
-  )
-}
-        
-        <span className="mr-2 text-nowrap font-medium">Add Variables</span>
-        {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
+        <span className="mr-2 text-nowrap font-medium " >Add Variables</span>  
+        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </button>
-      {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.Addvariables} params={params} flagKey={"Addvariables"} currentOrg={currentOrg} />
+      {tutorialState?.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"} TutorialDetails={"Variable Management"}/>)}
+      {tutorialState?.showTutorial && (
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
       )}
 
       {/* Accordion Content */}
@@ -333,7 +306,7 @@ const AddVariable = ({ params }) => {
                 {keyValuePairs.length > 0 && <div className="flex items-center gap-2 w-full">
                   <div className="tooltip tooltip-right" data-tip="Mark checkbox if it is required">
                     <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
-                      <Info className="w-4 h-4 text-base-content/70" />
+                      <InfoIcon className="w-4 h-4 text-base-content/70" />
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
@@ -373,7 +346,7 @@ const AddVariable = ({ params }) => {
                       onClick={() => handleRemoveKeyValuePair(index)}
                       aria-label="Remove Variable"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <TrashIcon className="w-4 h-4" />
                     </button>
                   </div>
                 ))}

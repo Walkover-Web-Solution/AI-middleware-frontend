@@ -50,6 +50,7 @@ export const getBridgeVersionApi = async ({ bridgeVersionId = null }) => {
   }
 }
 
+
 export const deleteBridge = async (bridgeId) => {
   try {
     const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`);
@@ -282,9 +283,14 @@ export const inviteUser = async (email) => {
   }
 }
 
-export const getInvitedUsers = async () => {
+export const getInvitedUsers = async ({page, limit}) => {
   try {
-    const data = await axios.get(`${PROXY_URL}/api/c/getUsers`);
+    const data = await axios.get(`${PROXY_URL}/api/c/getUsers`, {
+      params: {
+        pageNo:page,
+        itemsPerPage:limit
+      }
+    });
     return data;
   } catch (error) {
     console.error(error);
@@ -306,7 +312,27 @@ export const getMetricsData = async (org_id, startDate, endDate) => {
     return error;
   }
 }
+export const updateFlowDescription = async (embed_token, functionId, description) => {
+  try {
+    const response = await fetch(`https://flow-api.viasocket.com/projects/updateflowembed/${functionId}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": embed_token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "description": description
+      })
+    });
+    
+    const data = await response.json();
+    return data.data;
 
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 export const integration = async (embed_token) => {
 
   try {
@@ -625,7 +651,7 @@ export const archiveBridgeApi = async (bridge_id, newStatus) => {
   }
 };
 
-export const optimizePromptApi = async ({ bridge_id, version_id, data = { version_id } }) => {
+export const optimizePromptApi = async ({ bridge_id, version_id, query, thread_id, data = { query, thread_id, version_id} }) => {
   try {
     const response = await axios.post(`${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`, data);
     return response.data.result;
@@ -659,11 +685,12 @@ export const userFeedbackCount = async ({ bridge_id, user_feedback }) => {
   }
 }
 
-export const getSubThreadIds = async ({ thread_id, error }) => {
+export const getSubThreadIds = async ({ thread_id, error, bridge_id }) => {
   try {
     const response = await axios.get(`${URL}/api/v1/config/history/sub-thread/${thread_id}`, {
       params: {
-        error
+        error,
+        bridge_id
       }
     });
     return response.data;
@@ -710,6 +737,17 @@ export const optimizeSchemaApi = async ({ data }) => {
   } catch (error) {
     console.error(error);
     return error;
+  }
+};
+
+export const updateUser = async ({ user_id, user }) => {
+  const updateObject = { user_id, user: {"meta": user?.meta} };
+  try {
+    const response = await axios.put(`${URL}/user/updateDetails`, updateObject);
+    return response?.data;
+  } catch (error) {
+    console.error('Error updating details:', error.response?.data?.message || error.message);
+    throw new Error(error.response?.data?.message || 'Something went wrong');
   }
 };
 
@@ -983,32 +1021,83 @@ export const getPrebuiltToolsApi = async () => {
   }
 }
 
-export const getAllAgentsApi = async () => {
+export const getTutorial =async ()=>{
   try {
-    const response = await axios.get(`${PYTHON_URL}/publicAgent/all`);
+    const response=await axios.get("https://flow.sokt.io/func/scri33jNs1M1");
     return response;
-  } catch (error) {
-    console.error(error);
+  }
+  catch(error){
     throw new Error(error);
   }
 }
 
-export const publicAgentLoginApi = async () =>{
+export const createIntegrationApi = async (name) => {
   try {
-    const repsonse = await axios.post(`${PYTHON_URL}/publicAgent/public/login`)
-    return repsonse;
+    const response = await axios.post(`${URL}/gtwyEmbed/`, {name});
+    return response?.data;
   } catch (error) {
-    console.error(error)
-    throw new Error(error);
+    console.error(error);
+    return error;
+  }
+}
+export const getAllIntegrationApi = async () => {
+  try {
+    const response = await axios.get(`${URL}/gtwyEmbed/`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
   }
 }
   
-export const privateAgentLoginApi = async () => {
+export const generateGtwyAccessTokenApi = async () => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/publicAgent/login`)
+    const response = await axios.get(`${URL}/gtwyEmbed/token`);
     return response;
   } catch (error) {
-    console.error(error)
-    throw new Error(error);
+    console.error(error);
+    return error;
+
   }
-}  
+}
+
+export const getAuthData = async () => {
+  try {
+    const response = await axios.get(`${URL}/auth/`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const createNewAuth = async (data) => {
+  try {
+    const response = await axios.post(`${URL}/auth/`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const verifyAuth = async (data)=>{
+  try {
+    const respnse = await axios.post(`${URL}/auth/verify`, data)
+    return respnse
+  } catch (error) {
+    console.error(error)
+    return error
+  }
+}
+
+export const getClientInfo = async (client_id)=>{
+  try {
+    const respnse = await axios.get(`${URL}/auth/client_info?client_id=${client_id}`)
+    return respnse?.data
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
+

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createOrgToken } from "@/config";
-import { Copy } from "lucide-react";
+import { CopyIcon } from "@/components/Icons";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import CopyButton from "../copyButton/copyButton";
 
@@ -14,7 +14,7 @@ function InputWithCopyButton({ label, placeholder, value, disabled }) {
             </div>
             <div className="flex items-center justify-start">
                 <input className="input input-bordered join-item input-sm w-[25rem]" placeholder={placeholder} value={value} disabled={disabled} />
-                <button className="btn join-item btn-sm" onClick={copyToClipboard}><Copy size={16} /></button>
+                <button className="btn join-item btn-sm" onClick={copyToClipboard}><CopyIcon size={16} /></button>
             </div>
         </div>
     );
@@ -107,7 +107,7 @@ function ChatbotDropdown({ params, setChatBotId }) {
     };
     return (<div className="dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn m-1">{selectedChatbot ? selectedChatbot.title : 'Select a chatbot'}</div>
-        <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+        <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
             {chatbots.map((chatbot, index) => (
                 <li key={index} onClick={() => handleSelectChatbot(chatbot)}><a>{chatbot.title}</a></li>
             ))}

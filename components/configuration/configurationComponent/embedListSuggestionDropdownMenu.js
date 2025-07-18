@@ -1,29 +1,36 @@
 import OnBoarding from '@/components/OnBoarding';
-import InfoModel from '@/components/infoModel';
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ONBOARDING_VIDEOS } from '@/utils/enums';
 import { getStatusClass } from '@/utils/utility';
-import { Info, Plus } from 'lucide-react';
+import { current } from '@reduxjs/toolkit';
+import { InfoIcon, AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
+import InfoTooltip from '@/components/InfoTooltip';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
-    const [showTutorial, setShowTutorial] = useState(false);
-    const { integrationData, function_data, embedToken, isFirstFunction, currentOrg } = useCustomSelector((state) => {
+     const [tutorialState, setTutorialState] = useState({
+        showTutorial: false,
+        showSuggestion: false
+      });
+    const { integrationData, function_data, embedToken, isFirstFunction } = useCustomSelector((state) => {
         const orgId = Number(params?.org_id);
         const orgData = state?.bridgeReducer?.org?.[orgId] || {};
-        const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
-        const currentOrg = userCompanies.find((c) => c.id === orgId);
+        const currentUser = state.userDetailsReducer.userDetails
 
         return {
             integrationData: orgData.integrationData,
             function_data: orgData.functionData,
             embedToken: orgData.embed_token,
-            isFirstFunction: currentOrg?.meta?.onboarding?.FunctionCreation,
-            currentOrg: currentOrg
+            isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
+            
         };
     });
     const handleTutorial = () => {
-        setShowTutorial(isFirstFunction);
+        setTutorialState(prev=>({
+            ...prev,
+            showSuggestion:isFirstFunction
+        }));
     };
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -76,58 +83,63 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
     ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, params.version]);
     return (
         <div className="dropdown dropdown-right">
-            <div className="flex items-center gap-2">
+            <div className="flex items-end gap-2">
                 {name === "preFunction" ? (
-                    <div className=" flex flex-col  gap-2">
-                        <InfoModel tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
-                        <p className="text-base font-semibold info">Configure Pre Tool</p>
+                    <div className=" flex flex-col items-start gap-2">
+                        <InfoTooltip tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
+                        <p className="text-base font-semibold info">Pre Tool Configuration</p>
                        
-                        </InfoModel>
+                        </InfoTooltip>
 
                         {/* Plus Icon Button */}
                         <button
                            tabIndex={0}
-                           disabled={!shouldToolsShow}  
                            className="btn btn-outline btn-sm"                  
                         >
-                                <Plus size={16} />
-                               {"Connect Pre Tools"}
+                                <AddIcon size={16} />
+                               {"Connect Pre Tool"}
                         </button>
                     </div>
                 ) : (
-                     <div className="flex flex-col  gap-2">
-                        <InfoModel tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
-                        <p className=" label-text info">Configure Tool</p>
-                       
-                        </InfoModel>
+                    <div className="flex flex-col items-start gap-2">
+                        {connectedFunctions.length === 0 && (
+                            <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."} >
+                                <p className=" label-text info">Tool Configuration</p>
 
-                        {/* Plus Icon Button */}
-                       <button
-                        tabIndex={0}
-                        disabled={!shouldToolsShow}
-                        onClick={() => handleTutorial()}
-                    className="btn btn-outline btn-sm"
-                    >
-                        <Plus size={16} />
-                        {"Connect Tool"}
-                    </button>
+                            </InfoTooltip>
+                        )}
+
+                        <div className='flex flex-wrap items-center gap-2 w-full lg:mr-0 mr-5'>
+                            <button
+                                tabIndex={0}
+                                disabled={!shouldToolsShow}
+                                onClick={() => handleTutorial()}
+                                className="btn btn-outline btn-sm "
+                            >
+                                <AddIcon size={16} />
+                                <span className="truncate">Connect Tool</span>
+                            </button>
+                        </div>
                     </div>
                 )}
                 {
-                    !shouldToolsShow &&
+                    !shouldToolsShow && name !== "preFunction"&&
                     <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                        <Info size={16} className="flex-shrink-0 mt-0.5" />
+                        <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                         <span className='label-text-alt text-xs leading-tight'>
                             {`The ${modelName} does not support ${name?.toLowerCase()?.includes('pre function') ? 'pre functions' : 'functions'} calling`}
                         </span>
                     </div>
                 }
             </div>
-            {showTutorial && (
-                <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.FunctionCreation} params={params} flagKey={"FunctionCreation"} currentOrg={currentOrg} />
+            {tutorialState?.showSuggestion && (
+                <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"FunctionCreation"} TutorialDetails={"Tool Configuration"}/>
             )}
-            {!showTutorial && (
-                <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+            {tutorialState?.showTutorial && (
+                <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.FunctionCreation}  flagKey={"FunctionCreation"} />
+            )}
+            {!tutorialState?.showTutorial && (
+                <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                     <div className='flex flex-col gap-2 w-full'>
                         <li className="text-sm font-semibold disabled">Suggested Tools</li>
                         <input
@@ -153,7 +165,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                             }
                         )}>
                             <div>
-                                <Plus size={16} /><p className='font-semibold'>Add new Tools</p>
+                                <AddIcon size={16} /><p className='font-semibold'>Add new Tools</p>
                             </div>
                         </li>}
                     </div>

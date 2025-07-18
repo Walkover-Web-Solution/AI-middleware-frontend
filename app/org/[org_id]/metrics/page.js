@@ -1,5 +1,6 @@
 "use client";
 import Protected from '@/components/protected';
+import SearchItems from '@/components/UI/SearchItems';
 import { getMetricsDataApi } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { METRICS_FACTOR_OPTIONS, TIME_RANGE_OPTIONS } from '@/utils/enums';
@@ -51,17 +52,12 @@ function Page({ params }) {
   const [level, setLevel] = useState('Organization');
   const [bridge, setBridge] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const [metricsBarChartData, setMetricsBarChartData] = useState({ series: [], categories: [] });
   const { allBridges, apikeyData } = useCustomSelector((state) => ({
     allBridges: state.bridgeReducer.org[params.org_id]?.orgs || [],
     apikeyData: state?.bridgeReducer?.apikeys[org_id] || []
-  }));
-
-  const filteredBridges = allBridges.filter(bridge => 
-    bridge.name?.toLowerCase().includes(searchTerm?.toLowerCase())
-  );
-
+  })); 
+  const [filterBridges, setFilterBridges] = useState(allBridges);
 
   const handleFactorChange = (index, changeIn = "factor") => {
     if (changeIn === 'time') {
@@ -108,7 +104,7 @@ function Page({ params }) {
 
   const handleBridgeChange = (bridge_id, bridge_name) => {
     setBridge({ bridge_id, bridge_name });
-    setSearchTerm('');
+   
   }
 
   return (
@@ -122,7 +118,7 @@ function Page({ params }) {
       <div className='flex gap-8 justify-center'>
         <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Level:</label>
-          <div className="dropdown dropdown-end z-[999] border rounded-lg">
+          <div className="dropdown dropdown-end z-medium border rounded-lg">
             <label tabIndex="0" role="button" className="btn capitalize">{level} level</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
               {['Organization', 'Agent'].map((item, index) => (
@@ -133,18 +129,18 @@ function Page({ params }) {
         </div>
         <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Select Agent:</label>
-          <div className={`dropdown dropdown-end z-[999] border rounded-lg ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`dropdown dropdown-end z-medium border rounded-lg ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}>
           <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Agent'}</label>
-            <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-row overflow-y-auto max-h-[70vh]">
-            <input
-                  type="text"
-                  placeholder="Search Agent..."
-                  className="input input-bordered mb-4 w-full"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              {filteredBridges.map((item, index) => (
-                <li key={index}><a onClick={() => handleBridgeChange(item?._id, item?.name)} className={`w-56 ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}>{item.name}</a></li>
+            <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
+              <SearchItems setFilterItems={setFilterBridges} data={allBridges} item="Agents" />
+              {filterBridges.map((item, index) => (
+                <li key={index}><a
+                  onClick={() => handleBridgeChange(item?._id, item?.name)}
+                  className={`w-72 ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}
+                >
+                  {item.name}
+                </a>
+                </li>
               ))}
             </ul>
           </div>
@@ -154,7 +150,7 @@ function Page({ params }) {
       <div className="flex justify-end items-center mb-6 gap-3">
         <span className={`${loading ? 'loading loading-ring loading-lg' : ""}`}></span>
         {loading && <span className="text-gray-600">Loading...</span>}
-        <div className="dropdown border rounded-lg z-[99]">
+        <div className="dropdown border rounded-lg z-low">
           <label tabIndex="0" role="button" className="btn">{TIME_RANGE_OPTIONS?.[range]}</label>
           <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
             {TIME_RANGE_OPTIONS.map((item, index) => (

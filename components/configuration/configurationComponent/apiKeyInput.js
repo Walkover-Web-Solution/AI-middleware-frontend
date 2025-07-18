@@ -6,11 +6,11 @@ import { openModal } from '@/utils/utility';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const ApiKeyInput = ({ params }) => {
+const ApiKeyInput = ({ params,apiKeySectionRef }) => {
     const dispatch = useDispatch();
     const [showDropdown, setShowDropdown] = useState(false);
     const [selectedApiKeys, setSelectedApiKeys] = useState({});
-    const dropdownRef = useRef(null);
+
 
     const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id, currentService, SERVICES } = useCustomSelector((state) => {
         const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version] || {};
@@ -68,7 +68,7 @@ const ApiKeyInput = ({ params }) => {
     };
 
     const handleClickOutside = useCallback((event) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        if (apiKeySectionRef.current && !apiKeySectionRef.current.contains(event.target)) {
             setShowDropdown(false);
         }
     }, []);
@@ -109,7 +109,7 @@ const ApiKeyInput = ({ params }) => {
     const maxChar = 20;
 
     return (
-        <div className="relative form-control max-w-xs text-base-content" ref={dropdownRef}>
+        <div className="relative form-control max-w-xs text-base-content" ref={apiKeySectionRef} >
             <div className="label">
                 <span className="label-text font-medium">Service's API Key</span>
             </div>
@@ -157,7 +157,7 @@ const ApiKeyInput = ({ params }) => {
                 </div>
                 <div>
                     {showDropdown && (
-                        <div className="absolute w-full bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-80 overflow-auto">
+                        <div className="absolute w-full bg-white border border-gray-300 rounded-md shadow-lg z-low max-h-80 overflow-auto">
                             {SERVICES?.filter(service => service?.value !== bridge?.service).map(service => (
                                 <div key={service?.value} className="px-4 py-2 border-b last:border-b-0">
                                     <div className="font-semibold capitalize mb-1">{service?.displayName}</div>

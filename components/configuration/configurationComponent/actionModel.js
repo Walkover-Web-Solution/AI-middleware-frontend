@@ -2,7 +2,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { createOrRemoveActionBridge } from "@/store/action/chatBotAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { closeModal } from "@/utils/utility";
-import { Plus } from "lucide-react";
+import { AddIcon } from "@/components/Icons";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
 
@@ -85,11 +85,11 @@ const ActionModel = ({ params, actionId, setActionId }) => {
 
     return (
         <div className="cursor-pointer">
-            <button className="btn btn-outline btn-sm mt-4 w-fit" onClick={() => {
+            <button className="btn btn-outline btn-sm w-fit" onClick={() => {
                 document.getElementById('actionModel').showModal();
                 clearInputFields();
             }}>
-                <Plus size={16} /> Add a new action
+                <AddIcon size={16} /> Add a new action
             </button>
 
             <dialog id={MODAL_TYPE.ACTION_MODAL} className="modal">

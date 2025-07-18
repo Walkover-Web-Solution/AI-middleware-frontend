@@ -2,22 +2,29 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { createTestCaseAction } from '@/store/action/testCasesAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { Bot, User, X } from 'lucide-react';
+import { CloseIcon } from '@/components/Icons';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import Modal from '../UI/Modal';
 
 function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
     const params = useParams();
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
-    const { mongoIdsOfTools } = useCustomSelector((state) => ({
-        mongoIdsOfTools: Object.values(state.bridgeReducer.org?.[params.org_id]?.functionData)?.reduce((acc, item) => {
-            acc[item?.function_name] = item?._id;
-            return acc;
-        }, {})
-    }));
+    const { mongoIdsOfTools } = useCustomSelector((state) => {
+        const functionData = state.bridgeReducer.org?.[params.org_id]?.functionData;
+        const mongoIds = functionData ? Object.values(functionData).reduce((acc, item) => {
+                if (item?.function_name && item?._id) {
+                    acc[item.function_name] = item._id;
+                }
+                return acc;
+            }, {})
+            : {};
+
+        return { mongoIdsOfTools: mongoIds };
+    });
     // Ensure testCaseConversation is not undefined or null
     const initialTestCases = testCaseConversation && testCaseConversation.length > 0 ? testCaseConversation.map((message) => {
         if (message.role === "user") {
@@ -101,10 +108,10 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
     };
 
     return (
-        <dialog id={MODAL_TYPE?.ADD_TEST_CASE_MODAL} className="modal">
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-[1000] min-w-[100vw] min-h-[100vh] overflow-auto py-4">
+        <Modal MODAL_ID={MODAL_TYPE.ADD_TEST_CASE_MODAL}>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-low-medium min-w-[100vw] min-h-[100vh] overflow-auto py-4">
                 <form onSubmit={handleSubmit} className="bg-base-200 rounded-lg shadow-2xl max-w-5xl w-[90vw] overflow-auto relative flex flex-col">
-                    <div className="flex justify-between items-center p-6 pb-0 sticky top-0 bg-base-100 z-10">
+                    <div className="flex justify-between items-center p-6 pb-0 sticky top-0 bg-base-100 z-low">
                         <h3 className="text-xl font-semibold">Create Test Case</h3>
                         <button type="button" className="btn btn-circle btn-ghost btn-sm" onClick={handleClose}>✕</button>
                     </div>
@@ -119,7 +126,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                                     <div className="space-y-3">
                                         {message.tools?.map((item, idx) => (
                                             <div key={idx} className="flex gap-3 items-start group relative bg-base-100 rounded-lg p-3 shadow-sm">
-                                                <textarea 
+                                                <textarea
                                                     defaultValue={JSON.stringify(item, null, 2)}
                                                     className="textarea w-full font-mono text-sm p-2 bg-transparent focus:outline-none min-h-20 h-auto max-h-72 overflow-y-auto"
                                                     onBlur={(e) => handleChange(e.target.value, index, idx)}
@@ -130,7 +137,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                                                         className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
                                                         onClick={() => removeTool(index, idx)}
                                                     >
-                                                        <X size={16} />
+                                                        <CloseIcon size={16} />
                                                     </button>
                                                 )}
                                             </div>
@@ -170,7 +177,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                     </div>
                 </form>
             </div>
-        </dialog>
+        </Modal>
     );
 }
 

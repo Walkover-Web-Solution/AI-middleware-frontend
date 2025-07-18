@@ -1,13 +1,14 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { CircleAlert, Settings } from 'lucide-react';
+import { updateBridgeVersionAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
-import { openModal } from '@/utils/utility';
-import { MODAL_TYPE, PROMPT_SUPPORTED_REASIONING_MODELS } from '@/utils/enums';
+import { closeModal, openModal } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
+import { isEqual } from 'lodash';
+import InfoTooltip from '@/components/InfoTooltip';
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -28,8 +29,12 @@ function getStatusClass(status) {
 
 const EmbedList = ({ params }) => {
     const [functionId, setFunctionId] = useState(null);
+    const [functionData, setfunctionData] = useState({});
+    const [toolData, setToolData] = useState({});
+    const [function_name, setFunctionName] = useState("");
+    const [variablesPath, setVariablesPath] = useState({});
     const dispatch = useDispatch();
-    const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken } = useCustomSelector((state) => {
+    const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -42,27 +47,24 @@ const EmbedList = ({ params }) => {
             bridge_functions: versionData?.function_ids || [],
             modelType: modelTypeName,
             model: modelName,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.configuration?.additional_parameters?.tools,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
+            variables_path: versionData?.variables_path || {},
         };
     });
+
     const handleOpenModal = (functionId) => {
         setFunctionId(functionId);
+        setfunctionData(function_data?.[functionId]);
+        setFunctionName(function_data?.[functionId]?.function_name || function_data?.[functionId]?.endpoint);
+        setVariablesPath(variables_path[function_name] || {});
         openModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL)
+
     }
 
     const bridgeFunctions = useMemo(() => bridge_functions.map((id) => function_data?.[id]), [bridge_functions, function_data]);
     const handleSelectFunction = (functionId) => {
         if (functionId) {
-            // dispatch(updateBridgeAction({
-            //     bridgeId: params.id,
-            //     dataToSend: {
-            //         functionData: {
-            //             function_id: functionId,
-            //             function_operation: "1"
-            //         }
-            //     }
-            // }))
             dispatch(updateBridgeVersionAction({
                 bridgeId: params.id,
                 versionId: params.version,
@@ -76,19 +78,74 @@ const EmbedList = ({ params }) => {
         }
     };
 
-    if (modelType === 'reasoning' && !PROMPT_SUPPORTED_REASIONING_MODELS.includes(model)) {
-        return <></>;
-    }
+    const handleRemoveFunctionFromBridge = () => {
+        dispatch(
+            updateBridgeVersionAction({
+                bridgeId: params.id,
+                versionId: params.version,
+                dataToSend: {
+                    functionData: {
+                        function_id: functionId,
+                        function_name: function_name,
+                    },
+                },
+            })
+        ).then(() => {
+            closeModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL);
+        });
+    };
+
+    const handleSaveFunctionData = () => {
+        if (!isEqual(toolData, functionData)) {
+            const { _id, ...dataToSend } = toolData;
+            dispatch(
+                updateFuntionApiAction({
+                    function_id: functionId,
+                    dataToSend: dataToSend,
+                })
+            );
+            setToolData("");
+        }
+        if (!isEqual(variablesPath, variables_path[function_name])) {
+            dispatch(
+                updateBridgeVersionAction({
+                    bridgeId: params.id,
+                    versionId: params.version,
+                    dataToSend: { variables_path: { [function_name]: variablesPath } },
+                })
+            );
+        }
+    };
 
     return (bridge_functions &&
         <div>
-            <FunctionParameterModal preFunction={false} functionId={functionId} params={params} Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL} />
+            <FunctionParameterModal
+                name="Tool"
+                functionId={functionId}
+                params={params}
+                Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL}
+                embedToken={embedToken}
+                handleRemove={handleRemoveFunctionFromBridge}
+                handleSave={handleSaveFunctionData}
+                toolData={toolData}
+                setToolData={setToolData}
+                function_details={functionData}
+                variables_path={variables_path}
+                functionName={function_name} 
+                setVariablesPath={setVariablesPath}
+                variablesPath={variablesPath}
+            />
             <div className="label flex-col items-start mb-2">
                 {
-                    shouldToolsShow &&
-                    <div className="flex flex-wrap gap-4">
-                        <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" />
-                    </div>
+                    shouldToolsShow && bridgeFunctions.length > 0 &&
+                    <>
+                        <InfoTooltip tooltipContent="The Tools are set up for the whole organization, so any agent can use them.">
+                            <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
+                        </InfoTooltip>
+                        <div className="flex flex-wrap gap-4">
+                            <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" />
+                        </div>
+                    </>
                 }
             </div>
             <EmbedListSuggestionDropdownMenu name={"Function"} params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />

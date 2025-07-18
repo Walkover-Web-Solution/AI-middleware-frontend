@@ -1,17 +1,20 @@
-import { CircleChevronDown } from 'lucide-react';
+import { CircleDownIcon } from '@/components/Icons';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ThreadItem from './threadItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { scrollToBottom, scrollToTop } from './assistFile';
 import { useDispatch } from 'react-redux';
-import { getThread } from '@/store/action/historyAction';
+import { getThread, updateContentHistory } from '@/store/action/historyAction';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useRouter } from "next/navigation";
-import { openModal } from '@/utils/utility';
+import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import AddTestCaseModal from '../modals/AddTestCaseModal';
 import LoadingSpinner from '../loadingSpinner';
 import HistoryPagePromptUpdateModal from '../modals/historyPagePromptUpdateModal';
+import { ChatLoadingSkeleton } from './ChatLayoutLoader';
+import { clearThreadData } from '@/store/reducer/historyReducer';
+import EditMessageModal from '../modals/EditMessageModal';
 
 
 const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedVersion, previousPrompt, isErrorTrue}) => {
@@ -29,6 +32,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [testCaseConversation, setTestCaseConversation] = useState([]);
   const [loadingData, setLoadingData] = useState(false); // New state for loading
   const [promotToUpdate, setPromptToUpdate] = useState(null);
+  const [modalInput, setModalInput] = useState(null);
 
   const handleAddTestCase = (item, index, variables = false) => {
     const conversation = [];
@@ -49,11 +53,11 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     }
     openModal(MODAL_TYPE.ADD_TEST_CASE_MODAL);
   };
-  
 
   useEffect(() => {
     let timeoutId;
-
+    dispatch(clearThreadData());
+    setLoadingData(true);
     const fetchData = async () => {
       const thread_id = params?.thread_id;
       const startDate = search.get("start"); 
@@ -254,13 +258,33 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     return isNaN(date.getTime()) ? "Invalid Date" : date.toLocaleDateString("en-US", options);
   };
 
+  const handleSave = useCallback((item) => {
+      if (modalInput?.content?.trim() === "") {
+        alert("Message cannot be empty.");
+        return;
+      }
+      dispatch(updateContentHistory({
+        id: modalInput?.Id,
+        bridge_id: params.id,
+        message: modalInput.content,
+        index: modalInput.index
+      }));
+      setModalInput("");
+      closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
+    }, [modalInput]);
+
+    const handleClose = useCallback(() => {
+        setModalInput("");
+        closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
+      }, []);
+
   return (
-    <div className="drawer-content flex flex-col items-center overflow-scroll justify-center">
+    <div className="drawer-content flex flex-col items-center overflow-hidden justify-center">
       <div className="w-full min-h-screen">
         <div
           id="scrollableDiv"
           ref={historyRef}
-          className="w-full text-start flex flex-col h-screen overflow-y-auto"
+          className="w-full text-start flex flex-col h-screen overflow-y-auto relative"
           style={{
             height: "90vh",
             overflowY: "auto",
@@ -268,11 +292,13 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
             flexDirection: flexDirection,
           }}
         >
+          {/* Loading skeleton with absolute positioning */}
           {loadingData && (
-            <div>
-              <LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px' />
+            <div className="absolute inset-0 z-10 bg-base-100 backdrop-blur-sm">
+              <ChatLoadingSkeleton />
             </div>
           )}
+          
           {!loadingData && (!thread || thread.length === 0) ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500 text-lg">No history present</p>
@@ -306,6 +332,8 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
                       searchMessageId={searchMessageId}
                       setSearchMessageId={setSearchMessageId}
                       handleAddTestCase={handleAddTestCase}
+                      setModalInput={setModalInput}
+                      modalInput={modalInput}
                     />
                   ))}
               </div>
@@ -316,14 +344,15 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         {showScrollToBottom && (
           <button
             onClick={() => scrollToBottom(historyRef)}
-            className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-10"
+            className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-low"
           >
-            <CircleChevronDown size={24} />
+            <CircleDownIcon size={24} />
           </button>
         )}
       </div>
       <AddTestCaseModal testCaseConversation={testCaseConversation} setTestCaseConversation={setTestCaseConversation} />
       <HistoryPagePromptUpdateModal params={params} promotToUpdate={promotToUpdate} previousPrompt={previousPrompt}/>
+      <EditMessageModal  setModalInput={setModalInput} handleClose={handleClose} handleSave={handleSave} modalInput={modalInput} />
     </div>
   );
 };

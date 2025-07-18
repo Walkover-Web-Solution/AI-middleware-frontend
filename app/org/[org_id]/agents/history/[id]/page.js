@@ -6,10 +6,10 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getHistoryAction, userFeedbackCountAction } from "@/store/action/historyAction";
 import { clearThreadData, clearHistoryData, setSelectedVersion } from "@/store/reducer/historyReducer";
-import LoadingSpinner from '@/components/loadingSpinner';
 import Protected from "@/components/protected";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import { getSingleMessage } from "@/config";
+import { ChatLoadingSkeleton } from "@/components/historyPageComponents/ChatLayoutLoader";
 
 // Lazy load the components to reduce initial render time
 const ThreadContainer = React.lazy(() => import('@/components/historyPageComponents/threadContainer'));
@@ -112,10 +112,9 @@ function Page({ searchParams }) {
   const threadHandler = useCallback(
     async (thread_id, item, value) => {
       if (item?.role === "assistant") return;
-      if ((item?.role === "user" || item?.role === "tools_call") && !thread_id) {
+      if ((item?.role === "user" || item?.role === "tools_call")) {
         try {
-          const systemPromptResponse = await getSingleMessage({ bridge_id: params.id, message_id: item.createdAt });
-          setSelectedItem({ variables: item.variables, "System Prompt": systemPromptResponse, ...item, value});
+          setSelectedItem({ variables: item.variables, ...item, value});
           if(value === 'system Prompt' || value === 'more' || item?.[value] === null)
             setIsSliderOpen(true);
         } catch (error) {
@@ -141,16 +140,16 @@ function Page({ searchParams }) {
 
   if (loading || !historyData) return (
     <div>
-      <LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px'/>
+      <ChatLoadingSkeleton />
     </div>
   );
 
   return (
-    <div className="bg-base-100 relative scrollbar-hide text-base-content h-screen">
-      <div className="drawer drawer-open">
+    <div className="bg-base-100 relative scrollbar-hide text-base-content max-h-[calc(100vh-9rem)]">
+    <div className="drawer drawer-open overflow-hidden">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex flex-col">
-          <React.Suspense fallback={<LoadingSpinner width="auto" height="999px" marginLeft='350px' marginTop='65px'/>}>
+        {loading ? <ChatLoadingSkeleton /> : <div className="drawer-content flex flex-col">
+          <React.Suspense>
             <ThreadContainer
               key={`thread-container-${params.id}-${params.version}`}
               thread={thread}
@@ -176,8 +175,8 @@ function Page({ searchParams }) {
               previousPrompt ={previousPrompt}
             />
           </React.Suspense>
-        </div>
-        <React.Suspense fallback={<LoadingSpinner/>}>
+        </div>}
+        <React.Suspense>
           <Sidebar
             historyData={historyData}
             threadHandler={threadHandler}

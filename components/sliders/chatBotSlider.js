@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import { X } from 'lucide-react';
+import { CloseIcon } from '@/components/Icons';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 
@@ -31,13 +31,13 @@ function ChatBotSlider() {
     return (
         <aside
             id="default-chatbot-sidebar"
-            className="sidebar-container fixed flex flex-col top-0 left-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen -translate-x-full py-4 overflow-y-auto bg-base-200 transition-all duration-300 z-50 border-r"
+            className="sidebar-container fixed flex flex-col top-0 left-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen -translate-x-full py-4 overflow-y-auto bg-base-200 transition-all duration-300 z-low-medium border-r"
             aria-label="Sidebar"
         >
             <div className="flex flex-col overflow-hidden gap-4 w-full">
                 <div className='flex flex-row justify-between'>
                     <p className='text-xl font-semibold'>Chatbots</p>
-                    <X className="block md:hidden" onClick={handleCloseChatbotSlider} />
+                    <CloseIcon className="block md:hidden" onClick={handleCloseChatbotSlider} />
                 </div>
                 {/* Input field for chatbot search */}
                 <input

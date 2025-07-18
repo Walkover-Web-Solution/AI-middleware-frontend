@@ -1,3 +1,4 @@
+import { BuildingIcon, CheckCircleIcon } from "@/components/Icons";
 import AnthropicIcon from "@/icons/AnthropicIcon";
 import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
@@ -7,7 +8,6 @@ import OpenAiIcon from "@/icons/OpenAiIcon";
 import OpenRouter from "@/icons/OpenRouter";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { WebSearchIcon } from "@/icons/webSearchIcon";
-import { updateOrgDetails } from "@/store/action/orgAction";
 import { cloneDeep } from "lodash";
 
 export const updatedData = (obj1, obj2 = {}, type) => {
@@ -319,21 +319,219 @@ export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
 
 export const updateTitle = (newTitle) => {
     if (typeof document !== 'undefined' && newTitle) {
-      document.title = newTitle;
+        document.title = newTitle;
+        document.title = newTitle;
     }
   };
-  
-export const  updateOnBoardingDetails = async (dispatch, orgId, currentOrg, flagKey) => {
-  if (!flagKey) throw new Error("flagKey is required");
-  const updatedOrgDetails = {
-    ...currentOrg,
-    meta: {
-      ...currentOrg?.meta,
-      onboarding: {
-        ...currentOrg?.meta?.onboarding,
-        [flagKey]: false,
-      },
-    },
+
+ export const simulateStreaming = (text, setStreamed, setIsStreaming, callback) => {
+    setIsStreaming(true);
+    setStreamed("");
+    
+    let currentIndex = 0;
+    const streamInterval = setInterval(() => {
+      if (currentIndex < text?.length) {
+        // Process multiple characters at once
+        const chunk = text?.slice(currentIndex, currentIndex + 5); // Process 5 chars at a time
+        setStreamed(prev => prev + chunk);
+        currentIndex += 5;
+      } else {
+        clearInterval(streamInterval);
+        setIsStreaming(false);
+        // Set final text to ensure we didn't miss any characters
+        setStreamed(text);
+        callback();
+      }
+    }, 5); // Reduced interval to 5ms
   };
-  await dispatch(updateOrgDetails(orgId, updatedOrgDetails));
+  
+
+  export const createDiff = (oldText, newText) => {
+    const oldLines = oldText?.split('\n');
+    const newLines = newText?.split('\n');
+    const maxLines = Math.max(oldLines?.length, newLines?.length);
+    
+    const diffLines = [];
+    
+    for (let i = 0; i < maxLines; i++) {
+      const oldLine = oldLines[i] || '';
+      const newLine = newLines[i] || '';
+      
+      if (oldLine === newLine) {
+        diffLines?.push({
+          type: 'equal',
+          oldLine,
+          newLine,
+          lineNumber: i + 1
+        });
+      } else if (!oldLine) {
+        diffLines?.push({
+          type: 'added',
+          oldLine: '',
+          newLine,
+          lineNumber: i + 1
+        });
+      } else if (!newLine) {
+        diffLines?.push({
+          type: 'deleted',
+          oldLine,
+          newLine: '',
+          lineNumber: i + 1
+        });
+      } else {
+        diffLines?.push({
+          type: 'modified',
+          oldLine,
+          newLine,
+          lineNumber: i + 1
+        });
+      }
+    }
+    
+    return diffLines;
+  };
+
+  export const transformAgentVariableToToolCallFormat = (inputData) => {
+    const fields = {};
+    const required_params = [];
+
+    function setNestedValue(obj, path, value, isRequired) {
+        const parts = path.split('.');
+        let current = obj;
+
+        for (let i = 0; i < parts.length - 1; i++) {
+            const part = parts[i];
+
+            if (!current[part]) {
+                current[part] = {
+                    type: "object",
+                    description: "",
+                    enum: [],
+                    required_params: [],
+                    parameter: {}
+                };
+            } else if (!current[part].parameter) {
+                current[part].parameter = {};
+            }
+
+            current = current[part].parameter;
+        }
+
+        const finalKey = parts[parts.length - 1];
+
+        let paramType = "string";
+        if (finalKey.toLowerCase().includes('number') || finalKey.toLowerCase().includes('num')) {
+            paramType = "number";
+        } else if (finalKey.toLowerCase().includes('bool') || finalKey.toLowerCase().includes('flag')) {
+            paramType = "boolean";
+        }
+
+        current[finalKey] = {
+            type: paramType,
+            description: "",
+            enum: [],
+            required_params: []
+        };
+
+        if (isRequired) {
+            for (let i = 0; i < parts.length - 1; i++) {
+                let currentLevel = obj;
+                for (let j = 0; j < i; j++) {
+                    currentLevel = currentLevel[parts[j]].parameter;
+                }
+
+                const parentKey = parts[i];
+                const childKey = parts[i + 1];
+
+                if (!currentLevel[parentKey].required_params.includes(childKey)) {
+                    currentLevel[parentKey].required_params.push(childKey);
+                }
+            }
+
+            // Add top-level key to required_params
+            if (!required_params.includes(parts[0])) {
+                required_params.push(parts[0]);
+            }
+        }
+    }
+
+    for (const [key, value] of Object.entries(inputData)) {
+        const isRequired = value === "required";
+
+        if (key.includes('.')) {
+            setNestedValue(fields, key, value, isRequired);
+        } else {
+            let paramType = "string";
+            if (key.toLowerCase().includes('number') || key.toLowerCase().includes('num')) {
+                paramType = "number";
+            } else if (key.toLowerCase().includes('bool') || key.toLowerCase().includes('flag')) {
+                paramType = "boolean";
+            }
+
+            fields[key] = {
+                type: paramType,
+                description: "",
+                enum: [],
+                required_params: []
+            };
+
+            if (isRequired && !required_params.includes(key)) {
+                required_params.push(key);
+            }
+        }
+    }
+
+    return { fields, required_params };
 };
+
+export function toBoolean(str) {
+    return str === "true";
+  }
+
+
+export const renderedOrganizations = (organizations, formState, handleSelectOrg) => {
+    const filteredOrgs = filterOrganizations(organizations, formState.searchQuery);
+    
+    return filteredOrgs?.map((org, index) => (
+        <div
+            key={org.id || index}
+            onClick={() => handleSelectOrg(org.id, org.name)}
+            className={`card bg-base-100 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer border-2 ${
+                formState.selectedOrg?.id === org.id 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-transparent hover:border-base-300'
+            }`}
+        >
+            <div className="card-body p-4">
+                <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                        formState.selectedOrg?.id === org.id 
+                            ? 'bg-primary text-primary-content' 
+                            : 'bg-base-200'
+                    }`}>
+                        <BuildingIcon size={20} />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="font-semibold text-base-content">{org.name}</h3>
+                        <p className="text-sm text-base-content/70">ID: {org.id}</p>
+                    </div>
+                    {formState.selectedOrg?.id === org.id && (
+                        <CheckCircleIcon className="text-primary" size={20} />
+                    )}
+                </div>
+            </div>
+        </div>
+    ));
+};
+
+export  function generateRandomID(length = 10) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+export const RequiredItem = () => <span className="text-error text-lg">*</span>;
+  

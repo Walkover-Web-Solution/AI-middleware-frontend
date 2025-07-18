@@ -10,7 +10,7 @@ import { closeModal } from '@/utils/utility';
 import timezoneData from '@/utils/timezoneData';
 
 const CreateOrg = ({ handleSwitchOrg }) => {
-    const [orgDetails, setOrgDetails] = useState({ name: '', about: '', timezone: '' });
+    const [orgDetails, setOrgDetails] = useState({ name: '', about: '', timezone: 'Asia/Kolkata' });
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
     const route = useRouter();
@@ -36,15 +36,6 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                         about,
                         identifier: selectedTimezone?.identifier,
                         offSet: selectedTimezone?.offSet,
-                        onboarding: {
-                            bridgeCreation: true,
-                            FunctionCreation: true,
-                            knowledgeBase: true,
-                            Addvariables: true,
-                            AdvanceParameter: true,
-                            PauthKey: true,
-                            CompleteBridgeSetup: true
-                        }
                     },
                     timezone: selectedTimezone?.offSet
                 },
@@ -72,7 +63,7 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                 <div className="flex items-center justify-center min-h-screen">
                     <form className="modal-box relative p-5 bg-white rounded-lg shadow-xl mx-4" onSubmit={createOrgHandler}>
                         <h3 className="font-bold text-lg mb-2">Create Organization</h3>
-                        <label className='label-text mb-1'>Name</label>
+                        <label className='label-text mb-1'>Name *</label>
                         <input
                             type="text"
                             name="name"
@@ -95,9 +86,8 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                             className="p-2.5 w-full text-sm textarea textarea-bordered"
                             minLength={10}
                             maxLength={400}
-                            required
                         />
-                        <label className='label-text mb-1'>Timezone</label>
+                        <label className='label-text mb-1'>Timezone *</label>
                         <select
                             className="select select-bordered w-full mb-4"
                             value={orgDetails.timezone}

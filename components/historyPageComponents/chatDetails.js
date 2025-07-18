@@ -1,7 +1,7 @@
 'use client';
 import { MODAL_TYPE } from "@/utils/enums";
 import { allowedAttributes, openModal } from "@/utils/utility";
-import { CircleX, Copy } from "lucide-react";
+import { CloseCircleIcon, CopyIcon } from "@/components/Icons";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import ChatAiConfigDeatilViewModal from "../modals/ChatAiConfigDeatilViewModal";
@@ -13,7 +13,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
       selectedItem['AiConfig']?.messages?.[0]?.role === 'developer' || 
       selectedItem['AiConfig']?.messages?.[0]?.role === 'system' 
         ? selectedItem['AiConfig']?.messages?.[0]?.content 
-        : selectedItem['AiConfig']?.system || selectedItem['System Prompt'];
+          : selectedItem['AiConfig']?.system 
   }
   const variablesKeyValue = selectedItem && selectedItem['variables'] ? selectedItem['variables'] : {};
   const [modalContent, setModalContent] = useState(null);
@@ -86,7 +86,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
       ref={sidebarRef}
       className={`fixed inset-y-0 right-0 border-l-2 bg-base-100 shadow-2xl rounded-md ${
         isSliderOpen ? "w-full md:w-1/2 lg:w-1/2 opacity-100" : "w-0"
-      } overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-[9999999]`}
+      } overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-very-high`}
     >
       {selectedItem && (
         <aside className="flex flex-col h-screen overflow-y-auto">
@@ -99,7 +99,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                 onClick={() => setIsSliderOpen(false)} 
                 className="btn btn-ghost btn-circle hover:bg-base-100 transition-colors duration-200"
               >
-                <CircleX size={20} className="bg-base-100" />
+                <CloseCircleIcon size={20} className="bg-base-100" />
               </button>
             </div>
             <div className="bg-base-100 rounded-md shadow-sm">
@@ -114,45 +114,6 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
 
                     let displayValue = value;
                     
-                    if (displayKey === "Latency" && typeof value === "object") {
-                      let callCounter = 1; // To track the call number
-                      let isGptCall = true; // Toggle between gpt and function call
-                    
-                      const formattedSteps = Object.entries(value.execution_time_logs).reduce((acc, [step, time]) => {
-                        const suffix = 
-                          callCounter === 1 ? '1st' :
-                          callCounter === 2 ? '2nd' :
-                          callCounter === 3 ? '3rd' :
-                          `${callCounter}th`;
-                    
-                        const callType = isGptCall ? 'gpt call' : 'function call';
-                    
-                        acc[`${suffix} ${callType}`] = {
-                          time_taken: Number(time.toFixed(2)),
-                          description: `Time taken during ${suffix} ${callType}.`
-                        };
-                    
-                        callCounter++;
-                        isGptCall = !isGptCall; // Toggle gpt <-> function
-                        return acc;
-                      }, {});
-                    
-                      displayValue = {
-                        over_all_time: {
-                          total_time_taken_in_seconds: Number(value.over_all_time.toFixed(2)),
-                          description: "Total time including all steps and overhead."
-                        },
-                        execution_details: {
-                          individual_step_times_in_seconds: formattedSteps,
-                          overall_model_execution_time: {
-                            time_taken: Number(value.model_execution_time.toFixed(2)),
-                            description: "Time taken by the model to generate output."
-                          }
-                        }
-                      };
-                    }
-                    
-
                     if (key === "system Prompt" && typeof value === "string") {
                       displayValue = replaceVariablesInPrompt(value);
                       displayValue = displayValue.replace(/\n/g, '<br />');
@@ -185,7 +146,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                                   onClick={(e) => copyToClipboard(displayValue)}
                                   data-tip="Copy variables"
                                 >
-                                  <Copy size={18} className="text-base-content" />
+                                  <CopyIcon size={18} className="text-base-content" />
                                 </div>
                               )}
                             </div>

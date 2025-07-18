@@ -1,13 +1,10 @@
-import InfoModel from '@/components/infoModel';
-import { useCustomSelector } from '@/customHooks/customSelector';
 import { getStatusClass } from '@/utils/utility';
-import { Plus } from 'lucide-react';
+import { AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
+import { InfoIcon } from 'lucide-react';
+import InfoTooltip from '@/components/InfoTooltip';
 
-function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [] }) {
-    const { bridges } = useCustomSelector((state) => ({
-        bridges: state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
-    }));
+function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [], shouldToolsShow, modelName, bridges }) {
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
@@ -60,15 +57,30 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
     return (
         <div className="dropdown dropdown-right">
             <div className="flex flex-col  gap-2">
-                 <InfoModel tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
-                        <p className=" label-text info">Configure Agents </p>
-                       
-                 </InfoModel>
-                <button tabIndex={0}
-                    className="btn btn-outline btn-sm"><Plus size={16} />{name || "Connect Agent"}
-                </button>
+                {Object.keys(connect_agents).length=== 0 &&(
+                <InfoTooltip tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
+                    <p className=" label-text info">Agents Configuration </p>
+                </InfoTooltip>
+                )}
+                <div className='flex items-center gap-2'>
+                    <button tabIndex={0}
+                        className="btn btn-outline btn-sm"
+                        disabled={!shouldToolsShow}
+                    >
+                        <AddIcon size={16} />{name || "Connect Agent"}
+                    </button>
+                    {
+                        !shouldToolsShow && name !== "preFunction" &&
+                        <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
+                            <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
+                            <span className='label-text-alt text-xs leading-tight'>
+                                {`The ${modelName} does not support agents calling`}
+                            </span>
+                        </div>
+                    }
+                </div>
             </div>
-            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+            <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                 <div className='flex flex-col gap-2 w-full'>
                     <li className="text-sm font-semibold disabled">Suggested Agents</li>
                     <input

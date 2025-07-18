@@ -2,7 +2,7 @@ import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { filterOrganizations, openModal, toggleSidebar } from '@/utils/utility';
-import { Building2, ChevronDown, Cog, KeyRound, LogOut, Mail, Settings2, X } from 'lucide-react';
+import { KeyRoundIcon, LogoutIcon, MailIcon, CloseIcon, SettingsIcon, SettingsAltIcon, BuildingIcon, ChevronDownIcon } from '@/components/Icons';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateOrg from '../createNewOrg';
@@ -60,13 +60,13 @@ function OrgSlider() {
     return (
         <aside
             id="default-org-sidebar"
-            className="sidebar-container fixed flex flex-col top-0 left-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen -translate-x-full py-4 overflow-y-auto bg-base-200 transition-all duration-300 z-[103] border-r"
+            className="sidebar-container fixed flex flex-col top-0 left-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen -translate-x-full py-4 overflow-y-auto bg-base-200 transition-all duration-300 z-high border-r"
             aria-label="Sidebar"
         >
             <div className="flex flex-col gap-4 w-full">
                 <div className='flex flex-row justify-between'>
                     <p className='text-xl font-semibold'>Organizations</p>
-                    <X className="block md:hidden" onClick={handleCloseOrgSlider} />
+                    <CloseIcon className="block md:hidden" onClick={handleCloseOrgSlider} />
                 </div>
                 <input
                     type="text"
@@ -75,7 +75,9 @@ function OrgSlider() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="border border-gray-300 rounded p-2 w-full"
                 />
-                <button onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="  bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50 "><span className='flex justify-center items-center gap-2 text-gray font-semibold'>+ Create New Org<Building2 size={16} /></span></button>
+                <button onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="  bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50 ">
+                    <span className='flex justify-center items-center gap-2 text-gray font-semibold'>+ Create New Org<BuildingIcon size={16} /></span>
+                </button>
                 <ul className="menu p-0 w-full text-base-content">
                     {filteredOrganizations.length === 0 ? (
                         <div className='max-w-full'>
@@ -88,7 +90,7 @@ function OrgSlider() {
                                 <li key={item.id}>
                                     <a className={`${item.id == path[2] ? "active" : `${item.id}`} py-2 px-2 rounded-md`}
                                         onClick={() => { handleSwitchOrg(item.id, item.name) }}>
-                                        <Building2 size={16} /> {item.name}
+                                        <BuildingIcon size={16} /> {item.name}
                                     </a>
                                 </li>
                             ))
@@ -102,19 +104,21 @@ function OrgSlider() {
                     <summary
                         className="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition"
                     >
-                        <span className="text-sm font-medium flex justify-center items-center gap-2"> <Settings2 size={16} /> Setting </span>
+                        <span className="text-sm font-medium flex justify-center items-center gap-2">
+                            <SettingsAltIcon size={16} /> Setting
+                        </span>
 
                         <span className="transition group-open:-rotate-180">
-                            <ChevronDown strokeWidth={1.25} />
+                            <ChevronDownIcon strokeWidth={1.25} />
                         </span>
                     </summary>
 
                     <div className="border-t border-gray-200 bg-white">
                         <ul className="menu w-full   text-base-content">
-                            <li> <a className='py-2 px-2 rounded-md'> <Mail size={16} /> {userdetails.email}</a> </li>
-                            <li> <a className={`py-2 px-2  ${path[3] === 'Pauthkey' ? "active" : ""}  rounded-md`} onClick={() => { router.push(`/org/${path[2]}/pauthkey`) }}> <KeyRound size={16} />Pauth key</a> </li>
-                            <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <Cog size={16} /> Workspace Setting</a> </li>
-                            <li onClick={logoutHandler}><a className='py-2 px-2 rounded-md'> <LogOut size={16} />  logout</a></li>
+                            <li> <a className='py-2 px-2 rounded-md'> <MailIcon className="h-4 w-4" /> {userdetails.email}</a> </li>
+                            <li> <a className={`py-2 px-2  ${path[3] === 'Pauthkey' ? "active" : ""}  rounded-md`} onClick={() => { router.push(`/org/${path[2]}/pauthkey`) }}> <KeyRoundIcon className="h-4 w-4" />Pauth key</a> </li>
+                            <li> <a className={`py-2 px-2 rounded-md`} onClick={() => { router.push(`/org/${path[2]}/workspaceSetting`) }}> <SettingsIcon className="h-4 w-4" /> Workspace Setting</a> </li>
+                            <li onClick={logoutHandler}><a className='py-2 px-2 rounded-md'> <LogoutIcon className="h-4 w-4" />  logout</a></li>
                         </ul>
                     </div>
 

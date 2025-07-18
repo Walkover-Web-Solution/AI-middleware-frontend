@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -9,7 +9,7 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs }) => {
     if (!hoveredModel || !modelSpecs) return null;
 
     return (
-        <div className="max-w-[500px] bg-white border border-gray-200 rounded-lg shadow-lg p-6 mt-8 top-0 absolute left-[320px] transition-transform duration-300 ease-in-out z-[99] transform hover:scale-105">
+        <div className="max-w-[500px] bg-white border border-gray-200 rounded-lg shadow-lg p-6 mt-8 top-0 absolute left-[320px] transition-transform duration-300 ease-in-out z-low-medium transform hover:scale-105">
             <div className="space-y-4">
                 <div className="border-b pb-3">
                     <h3 className="text-xl font-bold text-gray-800">{hoveredModel}</h3>
@@ -130,7 +130,7 @@ const ModelDropdown = ({ params }) => {
         Object.entries(modelsList || {}).forEach(([group, options]) => {
             Object.entries(options || {}).forEach(([option, config]) => {
                 if (config?.configuration?.model?.default === modelName) {
-                    modelSpec = config?.configuration?.additional_parameters?.specification;
+                    modelSpec = config?.validationConfig?.specification;
                 }
             });
         });
@@ -169,7 +169,7 @@ const ModelDropdown = ({ params }) => {
 
     return (
         <div className="flex items-start gap-4 relative">
-            <div className="w-full max-w-xs z-[9]">
+            <div className="w-full max-w-xs z-low">
                 <div className="label">
                     <span className="label-text text-gray-700">LLM Model</span>
                 </div>
@@ -180,13 +180,13 @@ const ModelDropdown = ({ params }) => {
                         className="btn btn-sm w-full justify-between border border-gray-300 bg-white hover:bg-gray-50 font-normal"
                         onClick={toggleDropdown}
                     >
-                        {model || "Select a Model"}
-                        {isDropdownOpen ? <ChevronUp className="h-4 w-4 text-gray-500" /> : <ChevronDown className="h-4 w-4 text-gray-500" />}
+                        {model?.length > 30 ? `${model.substring(0, 30)}...` : model|| "Select a Model"}
+                        {isDropdownOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                     </div>
                     {isDropdownOpen && (
                         <ul
                             tabIndex={0}
-                            className="dropdown-content dropdown-left z-[1] p-2 shadow bg-white rounded-lg w-full mt-1 max-h-[500px] overflow-y-auto border border-gray-100"
+                            className="dropdown-content dropdown-left z-low p-2 shadow bg-white rounded-lg w-full mt-1 max-h-[500px] overflow-y-auto border border-gray-100"
                             onMouseLeave={() => setHoveredModel(null)}
                         >
                             {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
@@ -198,7 +198,7 @@ const ModelDropdown = ({ params }) => {
                                 if (!isInvalidGroup) {
                                     return (
                                         <li key={`group_${groupIndex}`} className="px-2 py-1 cursor-pointer">
-                                            <span className="text-sm text-gray-500">{group}</span>
+                                            <span className="text-sm  text-gray-500">{group}</span>
                                             <ul className="">
                                                 {Object.keys(options || {}).map((option, optionIndex) => {
                                                     const modelName = options?.[option]?.configuration?.model?.default;
@@ -210,9 +210,12 @@ const ModelDropdown = ({ params }) => {
                                                             onClick={() => {
                                                                 handleModelClick(group, modelName);
                                                             }}
-                                                            className="hover:bg-gray-50 rounded-md py-1"
+                                                            className={`hover:bg-base-200 rounded-md py-1 ${modelName === model && 'bg-base-200'}`}
                                                         >
-                                                            <a className="text-gray-700 hover:text-gray-900 px-2 py-3">{modelName}</a>
+                                                            {modelName === model && <span className="flex-shrink-0 ml-2">✓</span>}
+                                                            <span className={`truncate flex-1 pl-2 ${modelName !== model && 'ml-4'}`}>
+                                                                {modelName?.length > 30 ? `${modelName.substring(0, 30)}...` : modelName}
+                                                            </span>
                                                         </li>
                                                     );
                                                 })}

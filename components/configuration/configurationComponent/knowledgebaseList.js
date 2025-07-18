@@ -1,33 +1,40 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlert, Plus, Trash2 } from 'lucide-react';
+import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { GetFileTypeIcon, openModal } from '@/utils/utility';
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
-import GoogleDocIcon from '@/icons/GoogleDocIcon';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import OnBoarding from '@/components/OnBoarding';
-import InfoModel from '@/components/infoModel';
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
+import { InfoIcon } from 'lucide-react';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const KnowledgebaseList = ({ params }) => {
-    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, currentOrg } = useCustomSelector((state) => {
-        const userCompanies = state.userDetailsReducer.userDetails?.c_companies || [];
-        const org = userCompanies.find((c) => c.id === Number(params?.org_id));
-
+    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
+        const user = state.userDetailsReducer.userDetails || []
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
         return {
             knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
-            knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids,
-            isFirstKnowledgeBase: org?.meta?.onboarding?.knowledgeBase,
-            currentOrg: org
+            knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids||[],
+            isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
+            model: modelName
         };
     });
 
-
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
-    const [showTutorial, setShowTutorial] = useState(false);
+    const [tutorialState, setTutorialState] = useState({
+        showTutorial: false,
+        showSuggestion: false
+    });
     const handleInputChange = (e) => {
         setSearchQuery(e.target?.value || "");
     };
@@ -46,7 +53,10 @@ const KnowledgebaseList = ({ params }) => {
     };
 
     const handleTutorial = () => {
-        setShowTutorial(isFirstKnowledgeBase);
+        setTutorialState(prev => ({
+            ...prev,
+            showSuggestion: isFirstKnowledgeBase
+        }))
     };
 
     const renderKnowledgebase = useMemo(() => (
@@ -71,9 +81,9 @@ const KnowledgebaseList = ({ params }) => {
                                         }}
                                         className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-red-600"
                                     >
-                                        <Trash2 size={16} />
+                                        <TrashIcon size={16} />
                                     </button>
-                                    {!item?.description && <CircleAlert color='red' size={16} />}
+                                    {!item?.description && <CircleAlertIcon color='red' size={16} />}
                                 </div>
                             </div>
                             <p className="mt-3 text-xs sm:text-sm line-clamp-3">
@@ -85,26 +95,51 @@ const KnowledgebaseList = ({ params }) => {
             ) : null;
         })
     ), [knowbaseVersionData, knowledgeBaseData]);
-
     return (
         <div className="label flex-col items-start p-0">
-            <div className="flex flex-wrap gap-4 mb-4">
-                {renderKnowledgebase}
-            </div>
-                 <InfoModel tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it’s easy to update."}>
-                        <p className=" label-text info mb-2">Configure Knowledgebase</p>
-                 </InfoModel>
-            <div className="dropdown dropdown-right">
-                
-                       
-                <button tabIndex={0} className="btn btn-outline btn-sm mt-0" onClick={() => handleTutorial()}>
-                    <Plus size={16} />Add Knowledgebase
-                </button>
-                {showTutorial && (
-                    <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.knowledgeBase} params={params} flagKey={"knowledgeBase"} currentOrg={currentOrg} />
+            <div className='label flex-col items-start mb-2'>
+
+                {Array.isArray(knowbaseVersionData) && shouldToolsShow && knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
+                    <React.Fragment>
+                        <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."}>
+                            <p className="label-text font-medium whitespace-nowrap mb-2 info">KnowledgeBase</p>
+                        </InfoTooltip>
+                        <div className="flex flex-wrap gap-4 mb-2">
+                            {renderKnowledgebase}
+                        </div>
+                    </React.Fragment>
                 )}
-                {!showTutorial && (
-                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-[9999999] px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+            </div>
+            {!Array.isArray(knowbaseVersionData) || !knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
+                <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} >
+                    <p className="label-text info mb-2">Knowledgebase Configuration</p>
+                </InfoTooltip>
+            )}
+            <div className="dropdown dropdown-right">
+                <div className='flex items-center gap-2'>
+                    <button tabIndex={0} className="btn btn-outline btn-sm mt-0"
+                        disabled={!shouldToolsShow}
+                        onClick={() => handleTutorial()}>
+                        <AddIcon size={16} />Connect Knowledgebase
+                    </button>
+                    {
+                        !shouldToolsShow && name !== "preFunction" &&
+                        <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
+                            <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
+                            <span className='label-text-alt text-xs leading-tight'>
+                                {`The ${model} does not support knowledgebase`}
+                            </span>
+                        </div>
+                    }
+                </div>
+                {tutorialState?.showSuggestion && (
+                    <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"knowledgeBase"} TutorialDetails={"KnowledgeBase Configuration"} />
+                )}
+                {tutorialState?.showTutorial && (
+                    <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
+                )}
+                {!tutorialState?.showTutorial && (
+                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto overflow-x-hidden pb-1">
                         <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
                             <input
@@ -138,7 +173,7 @@ const KnowledgebaseList = ({ params }) => {
                             }
                             <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => { openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL) }}>
                                 <div>
-                                    <Plus size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
+                                    <AddIcon size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
                                 </div>
                             </li>
                         </div>

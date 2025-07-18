@@ -12,7 +12,7 @@ import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
-import { updateOrgDetails } from "@/store/action/orgAction";
+import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
@@ -21,8 +21,11 @@ import { openModal } from "@/utils/utility";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
+import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
+import { getTutorialDataAction } from "@/store/action/tutotrialAction";
+import { userDetails } from "@/store/action/userDetailsAction";
 
-function layoutOrgPage({ children, params }) {
+function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
   const urlParams = useParams();
@@ -33,22 +36,29 @@ function layoutOrgPage({ children, params }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentOrg, SERVICES } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token,tutorialData } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
     organizations: state.userDetailsReducer.organizations,
     preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
     SERVICES: state?.serviceReducer?.services,
-    currentOrg: state.userDetailsReducer.userDetails?.c_companies?.find(c => c.id === Number(params?.org_id)) || {}
-
+    currentUser: state.userDetailsReducer.userDetails,
+    doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
+  
+  useEffect(() => {
+    if (pathName.endsWith("agents") && !isEmbedUser) {
+      dispatch(getTutorialDataAction()); 
+      dispatch(userDetails());
+    }
+  }, [pathName]);
 
   useEffect(() => {
-    const updateOrgIfMetaNull = async () => {
-      if (currentOrg.meta === null) {
-        const updatedOrg = {
-          ...currentOrg,
+    const updateUserMeta = async () => {
+      if (currentUser?.meta === null) {
+        const updatedUser = {
+          ...currentUser,
           meta: {
             onboarding: {
               bridgeCreation: true,
@@ -58,17 +68,21 @@ function layoutOrgPage({ children, params }) {
               AdvanceParameter: true,
               PauthKey: true,
               CompleteBridgeSetup: true,
+              TestCasesSetup:true
             },
           },
         };
-        await dispatch(updateOrgDetails(currentOrg.id, updatedOrg));
+        await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
       }
     };
 
-    updateOrgIfMetaNull();
+    updateUserMeta();
   }, []);
 
-  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') ? alertingEmbedToken : '');
+  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+  useRtLayerEventHandler();
+  
+  
   useEffect(() => {
     const validateOrg = async () => {
       try {
@@ -85,7 +99,7 @@ function layoutOrgPage({ children, params }) {
         setIsValidOrg(false);
       }
     };
-    if (params.org_id && organizations) {
+    if (params.org_id && organizations && !isEmbedUser) {
       validateOrg();
     }
   }, [params, organizations]);
@@ -99,14 +113,14 @@ function layoutOrgPage({ children, params }) {
   useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
-        if (data === 0 && !currentOrg?.meta?.onboarding?.bridgeCreation) {
+        if (data === 0 && !currentUser?.meta?.onboarding?.bridgeCreation) {
           openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
         }
         setLoading(false);
       }))
       dispatch(getAllFunctions())
     }
-  }, [isValidOrg, currentOrg?.meta?.onboarding?.bridgeCreation]);
+  }, [isValidOrg, currentUser?.meta?.onboarding?.bridgeCreation]);
 
   useEffect(() => {
     if (isValidOrg) {
@@ -176,6 +190,23 @@ function layoutOrgPage({ children, params }) {
       window.removeEventListener('focus', onFocus);
     }
   }, [isValidOrg, params])
+
+  // const docstarScriptId = "docstar-main-script";
+  // const docstarScriptSrc = "https://app.docstar.io/scriptProd.js";
+
+  // useEffect(() => {
+  //   const existingScript = document.getElementById(docstarScriptId);
+  //   if (existingScript) {
+  //     document.head.removeChild(existingScript);
+  //   }
+  //   if (doctstar_embed_token) {
+  //     const script = document.createElement("script");
+  //     script.setAttribute("embedToken", doctstar_embed_token);
+  //     script.id = docstarScriptId;
+  //     script.src = docstarScriptSrc;
+  //     document.head.appendChild(script);
+  //   }
+  // }, [doctstar_embed_token]);
 
   useEffect(() => {
     if (isValidOrg) {
@@ -262,31 +293,68 @@ function layoutOrgPage({ children, params }) {
     }
   }
 
-  const isHomePage = useMemo(() => path?.length < 5, [path]);
-  if (!isValidOrg) {
+  if (!isValidOrg && !isEmbedUser) {
     return <ErrorPage></ErrorPage>;
   }
-  if (isHomePage) {
+
+  if (!isEmbedUser) {
     return (
-      <div className="flex h-screen">
-        <div className=" flex flex-col  h-full">
-          <MainSlider />
+      <div className="h-screen flex flex-col overflow-hidden">
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <div className="flex flex-col h-full z-high">
+            <MainSlider params={params} />
+          </div>
+
+          {/* Main Content Area */}
+          <div className={`flex-1 ${path.length > 4 ? 'ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
+            {/* Sticky Navbar */}
+            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+              <Navbar params={params} />
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              <main className={`px-2 h-full ${path.length > 4 ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+            </div>
+          </div>
         </div>
-        <div className="flex-1 ml-8 lg:ml-0 overflow-y-auto overflow-x-hidden">
-          <Navbar />
-          {loading ? <LoadingSpinner /> :
-            <main className="px-2">{children}</main>
-          }
-        </div>
-        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <LoadingSpinner />
+          </div>
+        ) : null}
+
+        {/* Chat Details Sidebar */}
+        <ChatDetails
+          selectedItem={selectedItem}
+          setIsSliderOpen={setIsSliderOpen}
+          isSliderOpen={isSliderOpen}
+        />
       </div>
     );
-  } else {
+  }
+  else {
     return (
-      <div className="h-screen">
-        <Navbar />
-        {loading ? <LoadingSpinner /> : children}
-        <ChatDetails selectedItem={selectedItem} setIsSliderOpen={setIsSliderOpen} isSliderOpen={isSliderOpen} />
+      <div className="h-screen flex flex-col overflow-hidden">
+          {/* Main Content Area for Embed Users */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Sticky Navbar */}
+            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+              <Navbar params={params} />
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <LoadingSpinner />
+                </div>
+              ) : (
+                <main className={`px-2 h-full ${path.length > 4 ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+              )}
+            </div>
+          </div>
       </div>
     );
   }

@@ -8,16 +8,17 @@ import LoadingSpinner from "./loadingSpinner";
 import { closeModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
 import { getServiceAction } from "@/store/action/serviceAction";
-import { Bot, CircleAlert, Clock10, Webhook } from "lucide-react";
+import { BotIcon, CheckIcon, CircleAlertIcon, ClockTenIcon, WebhookIcon } from "@/components/Icons";
+import Protected from "./protected";
 
-function CreateNewBridge({ orgid }) {
+  function CreateNewBridge({ orgid, isEmbedUser }) {
     const [selectedService, setSelectedService] = useState('openai');
     const [selectedModel, setSelectedModel] = useState("gpt-4o");
     const [selectedType, setSelectedType] = useState("chat");
     const [bridgeType, setBridgeType] = useState("api");
     const [isManualMode, setIsManualMode] = useState(false);
     const textAreaPurposeRef = useRef();
-    const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState();
+    const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState("api");
     const [validationErrors, setValidationErrors] = useState({
         bridgeType: "",
         purpose: ""
@@ -61,38 +62,38 @@ function CreateNewBridge({ orgid }) {
     };
 
     const createBridgeHandler = (name, slugname) => {
-        name = 'Untitled';
-        const matches = allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
-        const newCount = matches?.length + 1 || 0;
-        name = `Untitled${newCount}`;
-        const slugNameMatches=allBridgeList?.filter(bridge=>bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
-        const slugNameCount=slugNameMatches?.length+1||0;
-        slugname=`Untitled${slugNameCount}`
-        if (!selectedBridgeTypeCard) {
-            setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
-            return;
-        }
+      name = isEmbedUser ? 'untitled' : 'Untitled';
+      const matches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.name?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
+      const newCount = matches?.length + 1 || 0;
+      name = isEmbedUser ? `untitled${newCount}` : `Untitled${newCount}`;
+      const slugNameMatches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.slugName?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
+      const slugNameCount = slugNameMatches?.length + 1 || 0;
+      slugname = isEmbedUser ? `untitled${slugNameCount}` : `Untitled${slugNameCount}`
+      if (!selectedBridgeTypeCard) {
+        setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
+        return;
+      }
 
-        if (name.length > 0 && selectedModel && selectedBridgeTypeCard) {
-            setIsLoading(true);
-            const dataToSend = {
-                "service": selectedService,
-                "model": selectedModel,
-                "name": name,
-                "slugName": slugname || name,
-                "bridgeType": selectedBridgeTypeCard || bridgeType,
-                "type": selectedType,
-            };
-            dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
-                // setShowFileUploadModal(false);
-                route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
-                closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-                setIsLoading(false);
-                cleanState();
-            })).catch(() => {
-                setIsLoading(false);
-            });
-        }
+      if (name.length > 0 && selectedModel && selectedBridgeTypeCard) {
+        setIsLoading(true);
+        const dataToSend = {
+          "service": selectedService,
+          "model": selectedModel,
+          "name": name,
+          "slugName": slugname || name,
+          "bridgeType": selectedBridgeTypeCard || bridgeType,
+          "type": selectedType,
+        };
+        dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
+          // setShowFileUploadModal(false);
+          route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+          closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
+          setIsLoading(false);
+          cleanState();
+        })).catch(() => {
+          setIsLoading(false);
+        });
+      }
     };
 
     const cleanState = () => {
@@ -182,7 +183,7 @@ function CreateNewBridge({ orgid }) {
                 )}
               </div>
               <div
-                className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 overflow-x-auto p-2 ${
+                className={`flex flex-col md:flex-row gap-2 justify-center mx-auto overflow-x-auto p-2 ${
                   validationErrors.bridgeType
                     ? "border border-red-500 rounded-xl"
                     : ""
@@ -190,7 +191,7 @@ function CreateNewBridge({ orgid }) {
               >
                 {/* API Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "api"
                       ? "ring-2 ring-blue-500"
                       : ""
@@ -200,7 +201,12 @@ function CreateNewBridge({ orgid }) {
                   <div className="card-body p-4 md:p-6">
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-blue-50">
-                        <Webhook className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+                        <WebhookIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+                      {selectedBridgeTypeCard === "api" && (
+                      <div className="absolute top-3 right-3 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                        <CheckIcon className="text-base-100 h-4 w-4"/>
+                      </div>
+                    )}
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         API
@@ -217,7 +223,7 @@ function CreateNewBridge({ orgid }) {
 
                 {/* Chatbot Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "chatbot"
                       ? "ring-2 ring-green-500"
                       : ""
@@ -227,7 +233,12 @@ function CreateNewBridge({ orgid }) {
                   <div className="card-body p-4 md:p-6">
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-green-50">
-                        <Bot className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
+                        <BotIcon className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
+                        {selectedBridgeTypeCard === "chatbot" && (
+                      <div className="absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                         <CheckIcon className="text-base-100 h-4 w-4"/>
+                      </div>
+                    )}
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         Chatbot
@@ -244,7 +255,7 @@ function CreateNewBridge({ orgid }) {
 
                 {/* Batch API Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "batch"
                       ? "ring-2 ring-purple-500"
                       : ""
@@ -254,7 +265,12 @@ function CreateNewBridge({ orgid }) {
                   <div className="card-body p-4 md:p-6">
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-purple-50">
-                        <Clock10 className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
+                        <ClockTenIcon className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
+                        {selectedBridgeTypeCard === "batch" && (
+                      <div className="absolute top-3 right-3 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                       <CheckIcon className="text-base-100 h-4 w-4"/>
+                       </div>
+                    )}
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         Batch API
@@ -270,18 +286,23 @@ function CreateNewBridge({ orgid }) {
                 </div>
 
                 {/* Triggers Card */}
-                <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 rounded-xl min-w-[280px] md:min-w-0 ${
-                    selectedBridgeTypeCard === "triggers"
+                {!isEmbedUser && <div
+                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
+                    selectedBridgeTypeCard === "trigger"
                       ? "ring-2 ring-amber-500"
                       : ""
                   }`}
-                  onClick={() => handleBridgeTypeSelection("triggers")}
+                  onClick={() => handleBridgeTypeSelection("trigger")}
                 >
                   <div className="card-body p-4 md:p-6">
                     <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                       <div className="p-2 md:p-3 rounded-lg bg-amber-50">
-                        <CircleAlert className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
+                        <CircleAlertIcon className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
+                        {selectedBridgeTypeCard === "trigger" && (
+                      <div className="absolute top-3 right-3 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
+                         <CheckIcon className="text-base-100 h-4 w-4"/>
+                      </div>
+                    )}
                       </div>
                       <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
                         Triggers
@@ -294,7 +315,7 @@ function CreateNewBridge({ orgid }) {
                       Perfect for real-time automation.
                     </p>
                   </div>
-                </div>
+                </div>}
               </div>
             </div>
 
@@ -402,4 +423,4 @@ function CreateNewBridge({ orgid }) {
     );
 }
 
-export default CreateNewBridge;
+export default Protected(CreateNewBridge);

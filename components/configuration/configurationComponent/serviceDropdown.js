@@ -1,23 +1,70 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { DEFAULT_MODEL } from "@/jsonFiles/bridgeParameter";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { Info } from "lucide-react";
+import { InfoIcon } from "@/components/Icons";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
 
-function ServiceDropdown({ params }) {
-    const { bridgeType, service, SERVICES } = useCustomSelector((state) => ({
-        SERVICES: state?.serviceReducer?.services,
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
-    }));
+function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
+    const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey } = useCustomSelector((state) => {
+        const bridgeData=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id];
+        const service = bridgeData?.[params?.version]?.service;
+        return {
+            SERVICES: state?.serviceReducer?.services,
+            DEFAULT_MODEL: state?.serviceReducer?.default_model,
+            bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
+            service: service,
+            prompt: bridgeData?.[params?.version]?.configuration?.prompt || "",
+            bridgeApiKey: bridgeData?.[params?.version]?.apikey_object_id?.[
+                service === 'openai_response' ? 'openai' : service
+            ]
+        };
+    });
+
     const [selectedService, setSelectedService] = useState(service);
     const [modelRecommendations, setModelRecommendations] = useState(null);
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
     const dispatch = useDispatch();
 
+  const resetBorder = (ref, selector) => {
+    if (ref?.current) {
+      const element = ref.current.querySelector(selector);
+      if (element) {
+        element.style.borderColor = "";
+        
+      }
+    }
+  };
+
+  const setErrorBorder = (ref, selector, scrollToView = false) => {
+    if (ref?.current) {
+      if (scrollToView) {
+        ref.current.scrollIntoView({ behavior: 'smooth'  });
+      }
+      setTimeout(() => {
+        const element = ref.current.querySelector(selector);
+        if (element) {
+          element.focus();
+          element.style.borderColor = "red";
+        }
+      }, 300);
+    }
+  };
+
+  useEffect(() => {
+    const hasPrompt = prompt !== ""||promptTextAreaRef.current.querySelector('textarea').value.trim()!=="";
+    const hasApiKey = !!bridgeApiKey;
+    
+    if (hasPrompt) {
+      resetBorder(promptTextAreaRef, 'textarea');
+    }
+    
+    if (hasApiKey) {
+      resetBorder(apiKeySectionRef, 'select');
+    }
+    
+  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef]);
     useEffect(() => {
         if (service) {
             setSelectedService(service);
@@ -32,7 +79,7 @@ function ServiceDropdown({ params }) {
 
     const handleServiceChange = useCallback((e) => {
         const newService = e.target.value;
-        const defaultModel = DEFAULT_MODEL?.[newService];
+        const defaultModel = DEFAULT_MODEL?.[newService]?.model;
         setSelectedService(newService);
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
@@ -44,6 +91,7 @@ function ServiceDropdown({ params }) {
     const handleGetRecommendations = async () => {
         setIsLoadingRecommendations(true);
         try {
+        if(bridgeApiKey && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""){
             const response = await modelSuggestionApi({ versionId: params?.version });
             if (response?.success) {
                 setModelRecommendations({
@@ -57,8 +105,20 @@ function ServiceDropdown({ params }) {
                     }
                 });
             } else {
-                setModelRecommendations({ error: 'Failed to get model recommendations' });
+            
+                setModelRecommendations({ error: 'Failed to get model recommendations.' });
+        }
+       }
+        else{
+            if ( promptTextAreaRef.current.querySelector('textarea').value.trim() === "") {
+                setModelRecommendations({error:'Prompt is missing. Please enter a prompt'});
+                setErrorBorder(promptTextAreaRef, 'textarea', true);        
             }
+           else {
+                setModelRecommendations({error:'API key is missing. Please add an API key'});
+                setErrorBorder(apiKeySectionRef, 'select', true);
+            }
+        }
         } catch (error) {
             console.error('Error fetching recommended model:', error);
             setModelRecommendations({ error: 'Error fetching recommended model' });
@@ -114,7 +174,7 @@ function ServiceDropdown({ params }) {
                     </select>
                     {isDisabled && (
                         <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                            <Info size={16} className="flex-shrink-0 mt-0.5" />
+                            <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                             <span className='label-text-alt text-xs leading-tight'>
                                 Batch API is only applicable for OpenAI services.
                             </span>

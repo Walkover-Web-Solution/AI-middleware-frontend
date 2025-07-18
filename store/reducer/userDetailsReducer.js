@@ -34,22 +34,39 @@ export const userDetailsReducer = createSlice({
         }
       }
     },
-
-    updateOnBoarding: (state, action) => {
-      const { updatedOnboarding, orgId } = action.payload;
-      if (state.userDetails?.c_companies) {
-        const index = state.userDetails.c_companies.findIndex(
-          (c) => c.id === Number(orgId)
-        );
-        if (index !== -1) {
-          const company = state.userDetails.c_companies[index];
-          if (!company.meta) {
-            company.meta = {};
-          }
-          company.meta.onboarding = updatedOnboarding;
+    updateGtwyAccessToken: (state, action) => {
+      const { gtwyAccessToken, orgId } = action.payload;
+      state.organizations[orgId] = {
+        ...state.organizations[orgId],
+        meta: {
+          ...state.organizations[orgId]?.meta,
+          gtwyAccessToken: gtwyAccessToken
         }
       }
-    }
+    },
+    updateUserMeta: (state, action) => {
+      const { user_id, user } = action.payload;
+      state.userDetails = {
+        ...state.userDetails,
+        meta: {
+          ...state.userDetails.meta,
+          onboarding: user?.meta?.onboarding
+        }
+      }
+    },
+    updateUserDetialsForEmbedUser: (state, action) => {
+      const validUpdates = Object.entries(action.payload).reduce((acc, [key, value]) => {
+        if (value !== null && value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
+      state.userDetails = {
+        ...state.userDetails,
+        ...validUpdates
+      };
+    },
+
   }
 }
 );
@@ -58,6 +75,8 @@ export const {
   fetchUserDetails,
   updateUserDetails,
   updateToken,
-  updateOnBoarding
+  updateGtwyAccessToken,
+  updateUserMeta,
+  updateUserDetialsForEmbedUser
 } = userDetailsReducer.actions;
 export default userDetailsReducer.reducer;

@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { filterBridges, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { X } from 'lucide-react';
+import { CloseIcon } from '@/components/Icons';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateNewBridge from '../createNewBridge';
@@ -66,13 +66,13 @@ function BridgeSlider() {
     return (
         <aside
             id="default-agent-sidebar"
-            className="sidebar-container fixed flex flex-col top-0 left-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen -translate-x-full py-4 overflow-y-auto bg-base-200 transition-all duration-300 z-50 border-r"
+            className="sidebar-container fixed flex flex-col top-0 left-0 p-4 w-full md:w-1/3 lg:w-1/6 opacity-100 h-screen -translate-x-full py-4 overflow-y-auto bg-base-200 transition-all duration-300 z-high border-r"
             aria-label="Sidebar"
         >
             <div className="flex w-full flex-col gap-4">
                 <div className='flex flex-row justify-between'>
-                    <p className='text-xl font-semibold'> Bridges </p>
-                    <X className="block md:hidden" onClick={handlCloseBridgeSlider} />
+                    <p className='text-xl font-semibold'> Agents </p>
+                    <CloseIcon className="block md:hidden" onClick={handlCloseBridgeSlider} />
                 </div>
                 <input
                     type="text"
@@ -81,7 +81,7 @@ function BridgeSlider() {
                     onChange={handleBridgeSearchChange}
                     className="border border-gray-300 rounded p-2 w-full"
                 />
-                <button className="bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>
+                <button className="bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
                     + Create new agent
                 </button>
                 {filteredBridgesList.length === 0 ? (

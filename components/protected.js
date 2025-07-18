@@ -1,20 +1,28 @@
 // Protected.js
-"use-client"
+"use client"
 
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from 'react';
 
 const Protected = (WrappedComponent) => {
-  return (props) => {
+  const ProtectedComponent = (props) => {
     const router = useRouter();
-    if (typeof window !== 'undefined' && !localStorage.getItem("proxy_token")) {
-      if(window.location.href!='/login')localStorage.setItem("previous_url", window.location.href);           
-      router.replace('/login');
-      return null;
-    }
-    return <WrappedComponent {...props} />;
-    
+    const isEmbedUser = useCustomSelector((state) => state.userDetailsReducer.userDetails.isEmbedUser);
+
+    useEffect(() => {
+      if ((typeof window !== 'undefined' && !localStorage.getItem("proxy_token")) && (!sessionStorage.getItem("proxy_token")) && !isEmbedUser) {
+        if (window.location.href !== '/login') {
+          localStorage.setItem("previous_url", window.location.href);
+        }
+        router.replace('/login');
+      }
+    }, [router]);
+
+    return <WrappedComponent {...props} isEmbedUser={!!(isEmbedUser && sessionStorage.getItem("proxy_token"))} />;
   };
+
+  return ProtectedComponent;
 };
 
 export default Protected;

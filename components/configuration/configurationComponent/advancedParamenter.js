@@ -2,14 +2,15 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bridgeParameter';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
-import { openModal } from '@/utils/utility';
-import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { generateRandomID, openModal } from '@/utils/utility';
+import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
-import InfoModel from '@/components/infoModel';
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const AdvancedParameters = ({ params }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -17,20 +18,24 @@ const AdvancedParameters = ({ params }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState([]);
-  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: false
+  });
+  const [messages, setMessages] = useState([]);
+  const thread_id = useMemo(() => generateRandomID(), []);
   const dispatch = useDispatch();
 
-  const { service, version_function_data, configuration, integrationData, isFirstParameter, currentOrg } = useCustomSelector((state) => {
+  const { service, version_function_data, configuration, integrationData, isFirstParameter } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
-    const currentOrg = state.userDetailsReducer.userDetails?.c_companies?.find((c) => c.id === Number(params.org_id))
+    const user = state.userDetailsReducer.userDetails
     return {
       version_function_data: versionData?.apiCalls,
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
-      currentOrg: currentOrg,
-      isFirstParameter: currentOrg?.meta?.onboarding?.AdvanceParameter
+      isFirstParameter:user?.meta?.onboarding?.AdvanceParameter
     };
   });
   const { tool_choice: tool_choice_data, type, model } = configuration || {};
@@ -39,7 +44,11 @@ const AdvancedParameters = ({ params }) => {
   }));
 
   const handleTutorial = () => {
-    setShowTutorial(isFirstParameter);
+    setTutorialState(prev=>({
+      ...prev,
+      showSuggestion:isFirstParameter
+
+    }))
   };
 
   useEffect(() => {
@@ -161,7 +170,7 @@ const AdvancedParameters = ({ params }) => {
   }, [dispatch, params?.id, params?.version]);
 
   return (
-    <div className="collapse text-base-content" tabIndex={0}>
+    <div className="collapse z-very-low  text-base-content" tabIndex={0}>
       <input type="radio" name="my-accordion-1" onClick={() => {
         handleTutorial()
         toggleAccordion()
@@ -172,10 +181,11 @@ const AdvancedParameters = ({ params }) => {
           Advanced Parameters
         </span>
 
-        {isAccordionOpen ? <ChevronUp /> : <ChevronDown />}
+        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </div>
-      {showTutorial && (
-        <OnBoarding setShowTutorial={setShowTutorial} video={ONBOARDING_VIDEOS.AdvanceParameter} params={params} flagKey={"AdvanceParameter"} currentOrg={currentOrg} />
+      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"}/>)}
+      {tutorialState.showTutorial && (
+        <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
       {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
 
@@ -195,9 +205,9 @@ const AdvancedParameters = ({ params }) => {
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                  <InfoModel tooltipContent={description}>
+                  {description ? <InfoTooltip tooltipContent={description}>
                     <span className="label-text capitalize info">{name || key}</span>        
-                    </InfoModel>
+                    </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
                   </div>
                   <div>
                     <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
@@ -224,12 +234,12 @@ const AdvancedParameters = ({ params }) => {
                           : 'Select an tool choice option...'}
                       </span>
                       <div className="ml-auto">
-                        {showDropdown ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        {showDropdown ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                       </div>
                     </div>
 
                     {showDropdown && (
-                      <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-10 max-h-[200px] overflow-y-auto mt-1 p-2">
+                      <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-low max-h-[200px] overflow-y-auto mt-1 p-2">
 
                         <div className="p-2 top-0 bg-base-100">
                           <input
@@ -379,8 +389,21 @@ const AdvancedParameters = ({ params }) => {
                       <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
                     ))}
                   </select>
+
                   {configuration?.[key]?.type === "json_schema" && (
                     <>
+                      <div className="flex justify-end mb-2 mt-5">
+                        <span
+                          className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => {
+                            openModal(MODAL_TYPE.JSON_SCHEMA);
+                          }}
+                        >
+                          Response Builder
+                        </span>
+                      </div>
+
+                      {/* Textarea */}
                       <textarea
                         key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
                         type="input"
@@ -392,23 +415,17 @@ const AdvancedParameters = ({ params }) => {
                             4
                           )
                         }
-                        className="mt-5 textarea textarea-bordered border w-full min-h-96 resize-y z-[1]"
+                        className="textarea textarea-bordered border w-[450px] min-h-96 resize-y"
                         onBlur={(e) =>
                           handleSelectChange(e, "json_schema")
                         }
                         placeholder="Enter valid JSON object here..."
                       />
-                      <span
-                        className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
-                        onClick={() => {
-                          openModal(MODAL_TYPE.JSON_SCHEMA);
-                        }}
-                      >
-                        Optimize Schema
-                      </span>
-                      <JsonSchemaModal params={params} />
+
+                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages} thread_id={thread_id}/>
                     </>
                   )}
+
                 </label>
               )}
             </div>

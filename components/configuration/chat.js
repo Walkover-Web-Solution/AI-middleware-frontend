@@ -26,7 +26,7 @@ function Chat({ params }) {
         {conversation?.length > 0 && <button className="btn btn-sm" onClick={handleResetChat}>Reset Chat</button>}
       </div>
 
-      <div className="sm:p-2 mt-4 justify-between flex flex-col h-[86vh] border rounded-md w-full z-10">
+      <div className="sm:p-2 mt-4 justify-between flex flex-col h-[83vh] border rounded-md w-full z-low">
         <div
           id="messages"
           className="flex flex-col w-full overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2"
@@ -85,7 +85,7 @@ function Chat({ params }) {
                     </div>
                   )}
                 </div>
-                <div className="chat-bubble break-keep inline-block">
+                {message?.content && <div className="chat-bubble inline-block break-all">
                   <ReactMarkdown components={{
                     code: ({ node, inline, className, children, ...props }) => (
                       <CodeBlock
@@ -98,14 +98,14 @@ function Chat({ params }) {
                       </CodeBlock>
                     )
                   }}>{message.content}</ReactMarkdown>
-                </div>
+                </div>}
               </div>
             )
           })}
         </div>
 
 
-        <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-10">
+        <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-low">
           <div className="relative flex flex-col gap-4 w-full">
             <div className="flex flex-row gap-2">
               <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} message={messages} params={params} uploadedImages={uploadedImages} setUploadedImages={setUploadedImages} conversation={conversation} setConversation={setConversation} />

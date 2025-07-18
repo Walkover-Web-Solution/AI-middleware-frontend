@@ -1,9 +1,10 @@
 import { getOrCreateNotificationAuthKey } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateTriggerDataReducer } from "@/store/reducer/bridgeReducer";
-import { Plus } from "lucide-react";
+import { AddIcon } from "@/components/Icons";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import InfoTooltip from "@/components/InfoTooltip";
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -23,7 +24,7 @@ function getStatusClass(status) {
     }
 };
 
-export default function TriggersList({ params }) {
+export default function TriggersList({ params, isEmbedUser }) {
     const dispatch = useDispatch();
     const { triggerEmbedToken, triggerData } = useCustomSelector((state) => ({
         triggerEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.triggerEmbedToken,
@@ -38,11 +39,11 @@ export default function TriggersList({ params }) {
     }
     useEffect(() => {
         if (triggerData) {
-            const filteredTriggers=triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
+            const filteredTriggers = triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
             setTriggers(filteredTriggers);
-            if(!filteredTriggers?.length && openViasocket && authkey) openTrigger()
+            if (!filteredTriggers?.length && window?.openViasocket && authkey) openTrigger()
         }
-        getAndSetAuthKey()
+        if (!isEmbedUser) getAndSetAuthKey()
     }, [params?.org_id, authkey]);
 
     function openTrigger(triggerId) {
@@ -58,8 +59,8 @@ export default function TriggersList({ params }) {
                     "inputValues": {
                         "bridge": params?.id,
                         "_bridge": params?.id,
-                        "message":`\${JSON.stringify(context.req.body)}`,
-                        "_message":`\${JSON.stringify(context.req.body)}`,
+                        "message": `\${JSON.stringify(context.req.body)}`,
+                        "_message": `\${JSON.stringify(context.req.body)}`,
                     },
                     "authValues": {
                         "pauth_key": authkey
@@ -98,7 +99,16 @@ export default function TriggersList({ params }) {
 
     return (
         <div className="w-full">
-            <button tabIndex={0} className="btn btn-outline btn-sm mb-2" onClick={() => { openTrigger() }}><Plus size={16} />Connect Trigger</button>
+            <div className="flex items-start flex-col gap-2">
+                <div className='flex gap-5  items-start just'>
+                    <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
+                        <p className="label-text font-medium whitespace-nowrap info">Trigger Configuration</p>
+                    </InfoTooltip>
+                </div>
+                <button tabIndex={0} className="btn btn-outline btn-sm mb-2" onClick={() => { openTrigger() }}>
+                <AddIcon size={16} />Connect Trigger
+                </button>
+                </div>
             <div className="flex flex-wrap gap-4">
                 {triggers?.length ? (triggers?.map(trigger => {
                     return (
