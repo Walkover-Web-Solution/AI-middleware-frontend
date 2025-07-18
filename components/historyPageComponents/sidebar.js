@@ -95,7 +95,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
-    // router.push(`${pathName}?version=${params.version}&thread_id=''&subThread_id=''&start=''&end=''`, undefined, { shallow: true });
     dispatch(clearThreadData());
     dispatch(clearSubThreadData());
     try {
