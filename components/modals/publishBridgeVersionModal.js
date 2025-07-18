@@ -1,10 +1,12 @@
+import React, { useCallback, useState } from "react";
+import { X, AlertTriangle, Settings, Upload } from "lucide-react";
+import PublicAgentForm from "../chatbotConfiguration/PublicAgentForm";
 import {
   getAllBridgesAction,
   publishBridgeVersionAction,
 } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { closeModal } from "@/utils/utility";
-import React, {  useCallback } from "react";
 import { useDispatch } from "react-redux";
 import Modal from "../UI/Modal";
 import Protected from "../protected";
@@ -12,6 +14,7 @@ import Protected from "../protected";
 
 function PublishBridgeVersionModal({ params, agent_name, agent_description,  isEmbedUser }) {
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCloseModal = useCallback((e) => {
     e?.preventDefault();
@@ -19,6 +22,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description,  isE
   }, []);
 
   const handlePublishBridge = useCallback(async () => {
+    setIsLoading(true);
     await dispatch(
       publishBridgeVersionAction({
         bridgeId: params?.id,
@@ -29,6 +33,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description,  isE
     isEmbedUser && window.parent.postMessage({type: 'gtwy', status:"agent_published", data:{ "agent_id":params?.id,"agent_name": agent_name, agent_description: agent_description}}, '*');
     dispatch(getAllBridgesAction());
     closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
+    setIsLoading(false);
   }, [dispatch, params]);
 
   return (
