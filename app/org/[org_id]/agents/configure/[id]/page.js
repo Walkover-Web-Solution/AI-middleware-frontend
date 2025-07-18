@@ -17,7 +17,7 @@ export const runtime = 'edge';
 
 const Page = ({ searchParams }) => {
   const apiKeySectionRef = useRef(null);
-  const promptTextAreaRef=useRef(null);
+  const promptTextAreaRef=useRef(null)
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
@@ -180,7 +180,7 @@ const Page = ({ searchParams }) => {
         style={isDesktop ? { width: `${leftWidth}%` } : {}}
       >
         <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} px-4 py-4`}>
-          <ConfigurationPage apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} params={params} />
+          <ConfigurationPage apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef}  params={params} />
         </div>
       </div>
 
