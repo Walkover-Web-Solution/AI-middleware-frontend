@@ -47,15 +47,21 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
         };
     }, [prompt, reduxPrompt]);
 
-    const savePrompt = useCallback((newPrompt) => {
-        const newValue = newPrompt || "";
-        setShowSuggestions(false);
-        if (newValue !== reduxPrompt) {
-            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { prompt: newValue } } }));
-            dispatch(updateBridgeVersionAction({ versionId: params.version, dataToSend: { configuration: { prompt: newValue } } }));
-        }
-    }, [dispatch, params.version, reduxPrompt]);
+  const savePrompt = useCallback((newPrompt) => {
+    const newValue = (newPrompt || "").trim();
+    setShowSuggestions(false);
 
+    if (newValue && newValue !== reduxPrompt.trim()) {
+      dispatch(updateBridgeVersionAction({
+        versionId: params.version,
+        dataToSend: {
+          configuration: {
+            prompt: newValue
+          }
+        }
+      }));
+    }
+  }, [dispatch, params.version, reduxPrompt]);
     const getCaretCoordinatesAdjusted = () => {
         if (textareaRef.current) {
             const textarea = textareaRef.current;
