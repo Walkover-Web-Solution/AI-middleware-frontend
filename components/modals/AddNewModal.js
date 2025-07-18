@@ -89,6 +89,10 @@ const DEFAULT_PARAMETER = {
         "label": "Top-P (Nucleus Sampling)",
         "description": "Controls diversity by limiting tokens to a cumulative probability threshold. Lower values result in more focused output."
     },
+    "top_p": { // Added for completeness based on example JSON
+        "label": "Top-P",
+        "description": "Controls diversity via nucleus sampling. A value of 0.9 means only tokens comprising the top 90% probability mass are considered."
+    },
     "log_probability": {
         "label": "Show Token Probabilities",
         "description": "When enabled, returns log probabilities for each token generated. Useful for debugging or analysis."
@@ -174,16 +178,24 @@ export default function AddNewModelModal() {
         setExpandedKeys(new Set());
     };
 
+    /**
+     * CORRECTED: This function now prepares the API payload with a flat
+     * configuration structure, as requested.
+     */
     const getCleanedConfigForApi = () => {
+        // Destructure to separate the base configuration from the dynamic parameters
+        const { additional_parameters, ...baseConfiguration } = config.configuration;
+
+        // Gather only the parameters that are selected (checked) by the user
         const selectedParams = selectedKeys.reduce((acc, key) => {
-            if (config.configuration.additional_parameters[key]) {
-                acc[key] = config.configuration.additional_parameters[key];
+            if (additional_parameters && additional_parameters[key]) {
+                acc[key] = additional_parameters[key];
             }
             return acc;
         }, {});
 
+        // Handle output configuration and costs
         const spec = config.validationConfig?.specification || {};
-
         let newOutPutConfig = {
             ...config.outputConfig,
             input_cost: spec.input_cost || "",
@@ -196,21 +208,27 @@ export default function AddNewModelModal() {
                     ...config?.outputConfig?.usage?.[0],
                     total_cost: {
                         input_cost: spec.input_cost || config?.outputConfig?.usage?.[0]?.total_cost?.input_cost,
-                        output_cost: spec.output_cost || config?.outputConfig?.usage?.[0]?.total_cost?.output_cost
+                        output_cost: spec.output_cost || config?.outputConfig?.usage?.[0]?.total_cost?.output_cost,
+                        // Ensure other cost fields from the base config are preserved if they exist
+                        ...config?.outputConfig?.usage?.[0]?.total_cost
                     }
                 }]
             }
         }
 
-        return {
+        // Construct the final object with the flattened configuration
+        const finalConfig = {
             ...config,
             configuration: {
-                ...config.configuration,
-                additional_parameters: selectedParams
+                ...baseConfiguration, // Spread base properties like 'model'
+                ...selectedParams      // Spread the selected parameters directly into configuration
             },
             outputConfig: { ...newOutPutConfig }
         };
+
+        return finalConfig;
     };
+
 
     const handleTopLevelChange = (key, value) => {
         if (key === 'service') {
@@ -440,6 +458,7 @@ export default function AddNewModelModal() {
                 if (data?.data?.success) {
                     closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL);
                     resetFormToDefault();
+                    toast.success("Model added successfully!");
                 }
             });
     }
