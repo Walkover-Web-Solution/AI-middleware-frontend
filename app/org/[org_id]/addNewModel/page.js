@@ -1,16 +1,24 @@
 'use client'
-import React from 'react';
+import React, { useState } from 'react';
 import { MODAL_TYPE } from '@/utils/enums';
-import { openModal } from '@/utils/utility';
+import { closeModal, openModal } from '@/utils/utility';
 import AddNewModelModal from '@/components/modals/AddNewModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import MainLayout from '@/components/layoutComponents/MainLayout';
 import CustomTable from '@/components/customTable/customTable';
 import PageHeader from '@/components/Pageheader';
+import { TrashIcon } from '@/components/Icons';
+import { deleteModelAction } from '@/store/action/modelAction';
+import { useDispatch } from 'react-redux';
+import ModelUsageDetailsModal from '@/components/modals/ModelUsageDetailsModal';
+import DeleteModal from '@/components/UI/DeleteModal';
 
 export const runtime = 'edge';
 
 const Page = () => {
+    const dispatch = useDispatch()
+    const [usageDetailsData, setUsageDetailsData] = useState();
+    const [selectedDataToDelete, setselectedDataToDelete] = useState();
     const { modelInfo} = useCustomSelector((state) => ({
         modelInfo: state?.modelReducer?.serviceModels
     }));
@@ -61,9 +69,44 @@ const Page = () => {
         { key: 'output_cost', label: 'Output Cost' }
     ];
 
+    const handleDeleteModel = () =>{
+        const dataToSend = {
+            model_name: selectedDataToDelete.model,
+            service:selectedDataToDelete.service,
+            type:selectedDataToDelete.type 
+        }
+        closeModal(MODAL_TYPE?.DELETE_MODAL)
+        dispatch(deleteModelAction(dataToSend))
+          .then(result => {
+            console.log('Delete model success:', result);
+          })
+          .catch(error => {
+            if(error.response?.data?.usageDetails)
+            {
+                setUsageDetailsData(error.response?.data?.usageDetails)
+                openModal(MODAL_TYPE.USAGE_DETAILS_MODAL)
+                console.log(error.response?.data?.usageDetails)
+            }
+          });
+    }
+
+    const EndComponent = ({ row }) => {
+        return (
+            <div className="flex gap-3 justify-center items-center">
+                <div
+                    className="tooltip tooltip-primary"
+                    data-tip="Delete"
+                    onClick={()=>{setselectedDataToDelete(row); openModal(MODAL_TYPE?.DELETE_MODAL)}}
+                >
+                    <TrashIcon strokeWidth={2} size={20} />
+                </div>
+            </div>
+        );
+    };
+
     return (
         <MainLayout>
-            <div className="p-8">
+            <div className="px-8">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-2 pt-4">
                     <PageHeader
                         title="Model Management"
@@ -82,8 +125,11 @@ const Page = () => {
                 <CustomTable
                     data={tableData}
                     columns={columns}
+                    endComponent={EndComponent}
                 />
                 <AddNewModelModal />
+                <ModelUsageDetailsModal usageDetailsData={usageDetailsData}/>
+                <DeleteModal onConfirm={handleDeleteModel} item={selectedDataToDelete} description={`Are you sure you want to delete the Model "${selectedDataToDelete?.model}"? This action cannot be undone.`} title='Delete Model' />
             </div>
         </MainLayout>
     );

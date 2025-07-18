@@ -13,8 +13,8 @@ export const modelReducer = createSlice({
       const { data, service } = action.payload;
       state.serviceModels[service] = data;
     },
-    addNewModelReducer:(state, action)=>{
-      const {service, type, modelData} = action.payload;
+    addNewModelReducer: (state, action) => {
+      const { service, type, modelData } = action.payload;
       if (!state.serviceModels[service]) {
         state.serviceModels[service] = {};
       }
@@ -22,12 +22,19 @@ export const modelReducer = createSlice({
         state.serviceModels[service][type] = {};
       }
       state.serviceModels[service][type][modelData.model_name] = modelData;
+    },
+    deleteModelReducer: (state, action) => {
+      const { service, type, model_name } = action.payload;
+      if (state.serviceModels[service]?.[type]?.[model_name]) {
+        delete state.serviceModels[service][type][model_name];
+      }
     }
-  },
+  }
 });
 
 export const {
   fetchModelReducer,
-  addNewModelReducer
+  addNewModelReducer,
+  deleteModelReducer
 } = modelReducer.actions;
 export default modelReducer.reducer;

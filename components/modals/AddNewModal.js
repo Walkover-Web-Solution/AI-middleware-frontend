@@ -460,26 +460,26 @@ export default function AddNewModelModal() {
 
         <Modal MODAL_ID={MODAL_TYPE.ADD_NEW_MODEL_MODAL}>
             <div className='modal-box min-w-[70rem]'>
-                <div className="min-h-screen bg-base-100 pt-8">
+                <div className="min-h-screen bg-base-100 pt-4">
                     <div className="w-full mx-auto">
-                        <div className="relative text-center mb-8">
+                        <div className="relative text-center">
                             <button
                                 onClick={resetFormToDefault}
-                                className="btn btn-ghost absolute right-0 top-1/2 tooltip tooltip-left"
+                                className="btn btn-ghost absolute right-0 top-1/3 tooltip tooltip-left"
                                 data-tip="Reset form to default values"
                             >
                                 <RefreshCw size={20} />
                             </button>
                             <div>
                                 <h1 className="text-2xl font-bold">Add a New Model</h1>
-                                <p className="mt-2 text-base-content/70">Create and configure a new model for your agent in just a few steps.</p>
+                                <p className="mt-2 text-base-content/70">Add and configure a new model for your agent in just a few steps.</p>
                             </div>
                         </div>
                         <div className="card w-full">
 
                             <div className="card-body p-6 md:p-8">
                                 <div className="space-y-8">
-                                    <h2 className="card-title mb-6">Model Details</h2>
+                                    <h2 className="card-title">Model Details</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div className="form-control">
                                             <label className="label"><span className="label-text">Service</span></label>

@@ -1110,3 +1110,14 @@ export const addNewModel = async(newModelObj) =>{
     toast.error(error?.response?.data?.error)
   }
 }
+export const deleteModel = async(dataToSend) =>{
+  try {
+    const response = await axios.delete(`${URL}/modelConfiguration/user?${new URLSearchParams(dataToSend).toString()}`)
+    toast.success(response?.data?.message)
+    return response;
+  } catch (error) {
+    console.log(error)
+    toast.error(error?.response?.data?.error || error?.response?.data?.message )
+    throw error
+  }
+}
