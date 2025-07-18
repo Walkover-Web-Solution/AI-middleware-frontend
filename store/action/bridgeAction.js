@@ -168,16 +168,25 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
   }
 };
 
-export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (dispatch) => {
+export const updateBridgeVersionAction = ({ versionId, dataToSend, signal }) => async (dispatch) => {
   try {
     dispatch(isPending());
-    const data = await updateBridgeVersionApi({ versionId, dataToSend });
+
+    const data = await updateBridgeVersionApi({ versionId, dataToSend, signal });
+
     if (data?.success) {
-      dispatch(updateBridgeVersionReducer({ bridges: data.bridge, functionData: dataToSend?.functionData || null }));
+      dispatch(updateBridgeVersionReducer({
+        bridges: data.bridge,
+        functionData: dataToSend?.functionData || null,
+      }));
     }
   } catch (error) {
-    console.error(error);
-    dispatch(isError());
+    if (error.name === 'CanceledError' || error.name === 'AbortError') {
+      console.error('Request aborted');
+    } else {
+      console.error(error);
+      dispatch(isError());
+    }
   }
 };
 

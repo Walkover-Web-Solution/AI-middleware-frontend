@@ -121,31 +121,44 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
   }
 }
 
-export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
+export const updateBridgeVersionApi = async ({ versionId, dataToSend, signal }) => {
   try {
-    const response = await axios.put(`${PYTHON_URL}/bridge/versions/update/${versionId}`, dataToSend);
-    return response?.data
+    const response = await axios.put(`${PYTHON_URL}/bridge/versions/update/${versionId}`, dataToSend,{ signal } 
+    );
+    return response?.data;
   } catch (error) {
-    console.error(error)
-    toast.error(error?.response?.data?.error);
+    if (axios.isCancel?.(error) || error.name === 'CanceledError' || error.name === 'AbortError') {
+      console.error('API request canceled');
+    } else {
+      console.error(error);
+      toast.error(error?.response?.data?.error || 'Something went wrong');
+    }
   }
-}
+};
 
-export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, error, pagelimit = 40) => {
+
+export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextPage, user_feedback, versionId, error, pagelimit = 40,signal) => {
   try {
     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/threads/${threadId}/${bridgeId}?sub_thread_id=${subThreadId || threadId}&pageNo=${nextPage}&limit=${pagelimit}&version_id=${versionId === 'undefined' ? undefined : versionId}`, {
       params: {
         user_feedback,
         error
-      }
+      },
+      signal
     })
     return getSingleThreadData
   } catch (error) {
-    console.error(error)
+    if (axios.isCancel(error)) {
+      console.error("Request cancelled:", error.message);
+    } else if (error.name === "CanceledError") {
+      console.error("Request was aborted by signal");
+    } else {
+      console.error("Axios error:", error);
+    }
   }
 }
 
-export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback, isErrorTrue) => {
+export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback, isErrorTrue,signal) => {
   try {
 
     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`, {
@@ -157,11 +170,18 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
         keyword_search: keyword,
         user_feedback: user_feedback,
         error: isErrorTrue
-      }
+      },
+       signal
     });
     return getSingleThreadData.data;
   } catch (error) {
-    console.error(error);
+    if (axios.isCancel(error)) {
+      console.error("Request cancelled:", error.message);
+    } else if (error.name === "CanceledError") {
+      console.error("Request was aborted by signal");
+    } else {
+      console.error("Axios error:", error);
+    }
   }
 };
 
