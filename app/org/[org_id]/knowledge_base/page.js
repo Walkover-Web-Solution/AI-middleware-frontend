@@ -101,7 +101,7 @@ const Page = ({ params }) => {
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
 
-          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} />
+          <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} item="KnowledgeBase" />
           <div className="flex flex-wrap justify-end items-center gap-2">
             <button className="btn" onClick={() => toggleSidebar("knowledgeBase-integration-slider","right")}>
               <BookIcon /> Integration Guide
@@ -137,7 +137,7 @@ const Page = ({ params }) => {
                     <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>
                       <EllipsisVerticalIcon size={16} />
                     </div>
-                    <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32">
+                    <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box z-high w-32">
                       <li><a onClick={() => handleDelete()} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
                       <li><a onClick={() => handleUpdateKnowledgeBase(item)} className="hover:bg-base-200">Update</a></li>
                     </ul>
