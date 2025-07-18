@@ -2,11 +2,12 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { KNOWLEDGE_BASE_CUSTOM_SECTION, KNOWLEDGE_BASE_SECTION_TYPES, MODAL_TYPE } from '@/utils/enums';
-import { closeModal, openModal } from '@/utils/utility';
+import { closeModal, openModal, RequiredItem } from '@/utils/utility';
 import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/store/action/knowledgeBaseAction';
 import Modal from '../UI/Modal';
+import { toast } from 'react-toastify';
 
-const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {} }) => {
+const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {}, knowledgeBaseData=[] }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSectionType, setSelectedSectionType] = useState('default');
@@ -21,13 +22,27 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
     setIsUpload(false);
     setIsLoading(false);
     setSelectedKnowledgeBase(null);
-  }, []);
+  }, [selectedKnowledgeBase]);
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
     setIsLoading(true);
     const formData = new FormData(event.target);
+    const newName = formData.get("name").trim();
+        if (!newName) {
+      toast.error('Please enter a valid name.');
+      setIsLoading(false)
+      return;
+    }
+    const isDuplicate = knowledgeBaseData.some(kb => 
+      kb.name?.trim().toLowerCase() === newName.toLowerCase()?.trim() && kb._id !== selectedKnowledgeBase?._id
+    );
 
+    if (isDuplicate) {
+      toast.error('Knowledge Base name already exists. Please choose a different name.');
+      setIsLoading(false)
+      return;
+    }
     // Create payload object
     const payload = {
       orgId: params?.org_id,
@@ -75,7 +90,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
       setChunkingType("");
       setIsLoading(false);
     }
-  }, [dispatch, params.org_id, file, isUpload, selectedKnowledgeBase]);
+  }, [dispatch, params.org_id, file, isUpload, selectedKnowledgeBase, knowledgeBaseData]);
 
   const handleClose = useCallback(() => {
     closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
@@ -113,7 +128,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
             <div className="space-y-2">
               <div className="form-control">
                 <div className="label">
-                  <span className="label-text font-medium text-md">Knowledge Base Name</span>
+                  <span className="label-text font-medium text-md">Knowledge Base Name{RequiredItem()}</span>
                 </div>
                 <input
                   type="text"
@@ -122,13 +137,14 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   placeholder="Enter knowledge base name"
                   required
                   disabled={isLoading}
+                  key={selectedKnowledgeBase?._id}
                   defaultValue={selectedKnowledgeBase?.actual_name || ''}
                 />
               </div>
 
               <div className="form-control">
                 <label className="label !px-0">
-                  <span className="label-text text-sm font-medium">Description</span>
+                  <span className="label-text text-sm font-medium">Description{RequiredItem()}</span>
                 </label>
                 <textarea
                   name="description"
@@ -136,13 +152,14 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   placeholder="Describe the purpose and content of this knowledge base..."
                   required
                   disabled={isLoading}
+                  key={selectedKnowledgeBase?._id}
                   defaultValue={selectedKnowledgeBase?.description || ''}
                 />
               </div>
 
               <div className="form-control">
                 <label className="label !px-0">
-                  <span className="label-text text-sm font-medium">Choose Upload Method</span>
+                  <span className="label-text text-sm font-medium">Choose Upload Method </span>
                 </label>
                 <div className="flex items-center">
                   <input
@@ -171,16 +188,17 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
               {!isUpload ? (
                 <div className="form-control">
                   <label className="label !px-0">
-                    <span className="label-text text-sm font-medium">Google Documentation URL</span>
+                    <span className="label-text text-sm font-medium">Google Documentation URL{RequiredItem()}</span>
                   </label>
                   <input
                     type="url"
                     name="url"
                     className="input input-bordered input-md focus:ring-1 ring-primary/40"
                     placeholder="https://example.com/documentation"
+                    key={selectedKnowledgeBase?._id}
                     required={!selectedKnowledgeBase}
                     disabled={isLoading || selectedKnowledgeBase}
-                    defaultValue={selectedKnowledgeBase?.url || ''}
+                    defaultValue={selectedKnowledgeBase?.source?.data?.url || ''}
                   />
                 </div>
               ) : (
@@ -206,7 +224,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label !px-0">
-                    <span className="label-text text-sm font-medium">Processing Method</span>
+                    <span className="label-text text-sm font-medium">Processing Method </span>
                   </label>
                   <select
                     name="sectionType"
@@ -248,7 +266,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="form-control">
                     <label className="label !px-0">
-                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Size</span>
+                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Size{RequiredItem()}</span>
                     </label>
                     <input
                       type="number"
@@ -263,7 +281,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
                   <div className="form-control">
                     <label className="label !px-0">
-                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Overlap</span>
+                      <span className="label-text text-sm font-medium text-base-content/70">Chunk Overlap{RequiredItem()}</span>
                     </label>
                     <input
                       type="number"

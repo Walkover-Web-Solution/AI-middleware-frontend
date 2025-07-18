@@ -276,7 +276,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
           loader={<h4></h4>}
           scrollableTarget="sidebar"
         >
-          <div className="slider-container min-w-[40%] overflow-x-auto mb-16">
+          <div className="slider-container min-w-[40%] overflow-x-auto pb-40">
             <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
               {historyData?.map((item) => (
                 <div className={`${isThreadSelectable ? "flex" : "flex-col"}`} key={item?.thread_id}>
@@ -435,12 +435,12 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       )}
       <div className="fixed bottom-2 left-12">
         {!isThreadSelectable && historyData?.length > 0 && (
-          <button onClick={() => setIsThreadSelectable(true)} className="btn btn-primary btn-sm">
+          <button onClick={() => setIsThreadSelectable(true)} className="btn btn-primary btn-sm ml-20">
             Generate Fine tuning file
           </button>
         )}
         {isThreadSelectable && (
-          <div className="flex gap-3">
+          <div className="flex gap-3 ml-20">
             <button
               onClick={() => openModal(MODAL_TYPE.FINE_TUNE_MODAL)}
               className="btn btn-primary"

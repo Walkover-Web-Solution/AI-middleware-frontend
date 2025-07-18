@@ -1,4 +1,4 @@
-import { BookIcon, BotIcon, KeyIcon, SettingsIcon, WrenchIcon } from "@/components/Icons";
+import { BookIcon, BotIcon, KeyIcon, SettingsIcon, TestTubeDiagonalIcon, WrenchIcon } from "@/components/Icons";
 export const PAUTH_KEY_COLUMNS = ["name", "authkey", "created_at"];
 export const API_KEY_COLUMNS = ["name", "apikey", "comment", "service"];
 export const WEBHOOKALERT_COLUMNS = ['name', 'url', 'headers', 'alertType', 'bridges'];
@@ -331,7 +331,6 @@ export const MODAL_TYPE = {
   ACTION_MODAL: "actionModel",
   CHATBOT_MODAL: "chatBot_model",
   CREATE_ORG_MODAL: "create-org-modal",
-  PAUTH_KEY_DELETE_MODAL: "PAUTH_KEY_DELETE_MODAL",
   WEBHOOK_MODAL: "WEBHOOK_MODAL",
   CHAT_DETAILS_VIEW_MODAL: "chat_details_view",
   JSON_SCHEMA: "JSON_SCHEMA",
@@ -346,7 +345,9 @@ export const MODAL_TYPE = {
   TUTORIAL_MODAL: "TUTORIAL_MODAL",
   EDIT_MESSAGE_MODAL:"EDIT_MESSAGE_MODAL",
   INTEGRATION_MODAL: "INTEGRATION_MODAL",
-  INTEGRATION_GUIDE_MODAL: "INTEGRATION_GUIDE_MODAL"
+  INTEGRATION_GUIDE_MODAL: "INTEGRATION_GUIDE_MODAL",
+  AUTH_DATA_MODAL: "AUTH_DATA_MODAL",
+  DELETE_MODAL:"DELETE_MODAL"
 }
 
 export const API_KEY_MODAL_INPUT = ['name', 'apikey', 'comment'];
@@ -367,6 +368,8 @@ export const KNOWLEDGE_BASE_CUSTOM_SECTION = [
   { value: 'recursive', label: 'Recursive Chunking' }
 ];
 export const PROMPT_SUPPORTED_REASIONING_MODELS = ['o1', 'o3-mini', 'o4-mini'];
+
+export const AUTH_COLUMNS = ['name', 'redirection_url', 'client_id']
 
 export const FAQSIDEBARLINKS = [
   {
@@ -471,7 +474,8 @@ export const ONBOARDING_VIDEOS = {
   knowledgeBase: "https://app.supademo.com/embed/cm9tl9dpo0oeh11m7dz1bipq5?embed_v=2",
   Addvariables: "https://app.supademo.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2",
   AdvanceParameter: "https://app.supademo.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2",
-  PauthKey: "https://app.supademo.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2"
+  PauthKey: "https://app.supademo.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2",
+  TestCases:"https://app.supademo.com/embed/cmav1ocfu4thnho3rijvpzlrq?embed_v=2"
 }
 
 export const AGENT_SETUP_GUIDE_STEPS = [
@@ -553,4 +557,10 @@ export const TUTORIALS = [
     videoUrl: ONBOARDING_VIDEOS?.AdvanceParameter,
     icon: BookIcon
   },
+  {
+   title:'TestCases Creation',
+   description:'Set up TestCase',
+   videoUrl:"https://app.supademo.com/embed/cmav1ocfu4thnho3rijvpzlrq?embed_v=2",
+   icon: TestTubeDiagonalIcon
+  }
 ];

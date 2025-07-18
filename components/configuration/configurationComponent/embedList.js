@@ -8,6 +8,7 @@ import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import { isEqual } from 'lodash';
+import InfoTooltip from '@/components/InfoTooltip';
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -133,13 +134,18 @@ const EmbedList = ({ params }) => {
                 functionName={function_name} 
                 setVariablesPath={setVariablesPath}
                 variablesPath={variablesPath}
-                />
+            />
             <div className="label flex-col items-start mb-2">
                 {
-                    shouldToolsShow &&
-                    <div className="flex flex-wrap gap-4">
-                        <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" />
-                    </div>
+                    shouldToolsShow && bridgeFunctions.length > 0 &&
+                    <>
+                        <InfoTooltip tooltipContent="The Tools are set up for the whole organization, so any agent can use them.">
+                            <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
+                        </InfoTooltip>
+                        <div className="flex flex-wrap gap-4">
+                            <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" />
+                        </div>
+                    </>
                 }
             </div>
             <EmbedListSuggestionDropdownMenu name={"Function"} params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />

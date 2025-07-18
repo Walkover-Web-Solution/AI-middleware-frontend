@@ -4,7 +4,7 @@ import { updateTriggerDataReducer } from "@/store/reducer/bridgeReducer";
 import { AddIcon } from "@/components/Icons";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import InfoModel from "@/components/infoModel";
+import InfoTooltip from "@/components/InfoTooltip";
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -41,7 +41,7 @@ export default function TriggersList({ params, isEmbedUser }) {
         if (triggerData) {
             const filteredTriggers = triggerData.filter(flow => flow?.metadata?.bridge_id === params?.id) || []
             setTriggers(filteredTriggers);
-            if (!filteredTriggers?.length && openViasocket && authkey) openTrigger()
+            if (!filteredTriggers?.length && window?.openViasocket && authkey) openTrigger()
         }
         if (!isEmbedUser) getAndSetAuthKey()
     }, [params?.org_id, authkey]);
@@ -101,9 +101,9 @@ export default function TriggersList({ params, isEmbedUser }) {
         <div className="w-full">
             <div className="flex items-start flex-col gap-2">
                 <div className='flex gap-5  items-start just'>
-                    <InfoModel tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
+                    <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
                         <p className="label-text font-medium whitespace-nowrap info">Trigger Configuration</p>
-                    </InfoModel>
+                    </InfoTooltip>
                 </div>
                 <button tabIndex={0} className="btn btn-outline btn-sm mb-2" onClick={() => { openTrigger() }}>
                 <AddIcon size={16} />Connect Trigger

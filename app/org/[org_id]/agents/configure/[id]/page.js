@@ -7,19 +7,28 @@ import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getSingleBridgesAction } from "@/store/action/bridgeAction";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
 import { updateTitle } from "@/utils/utility";
 import AgentSetupGuide from "@/components/AgentSetupGuide";
 
 export const runtime = 'edge';
+
 const Page = ({ searchParams }) => {
-  const apiKeySectionRef= useRef(null)
+  const apiKeySectionRef = useRef(null);
+  const promptTextAreaRef = useRef(null);
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const { bridgeType,versionService, bridgeName } = useCustomSelector((state) => {
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [leftWidth, setLeftWidth] = useState(50); // Width of the left panel in percentage
+  const [isResizing, setIsResizing] = useState(false);
+
+  // Ref for the main container to calculate percentage-based width
+  const containerRef = useRef(null); 
+
+  const { bridgeType, versionService, bridgeName } = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
@@ -29,29 +38,45 @@ const Page = ({ searchParams }) => {
     };
   });
 
+  // Enhanced responsive detection
+  useEffect(() => {
+    const handleResize = () => {
+      const desktop = window.innerWidth >= 1024;
+      setIsDesktop(desktop);
+      if (!desktop) {
+        setLeftWidth(50); // Reset on mobile
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     if (bridgeName) {
       updateTitle(`GTWY Ai | ${bridgeName}`);
     }
   }, [bridgeName]);
-
+  
+  // Data fetching and other effects...
   useEffect(() => {
     dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
     return () => {
       try {
-        if (handleclose) {
-          handleclose();
+        if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
+          window.handleclose();
         }
       } catch (error) {
         console.error("Error in handleclose:", error);
       }
-    }
+    };
   }, []);
 
   useEffect(() => {
     if (bridgeType !== "trigger") {
-      if (window?.handleclose) {
-        window.handleclose();
+      if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
+        window?.handleclose();
       }
     }
   }, [bridgeType]);
@@ -60,118 +85,142 @@ const Page = ({ searchParams }) => {
     if (mountRef.current) {
       if (bridgeType === 'chatbot') {
         if (typeof openChatbot !== 'undefined' && document.getElementById('parentChatbot')) {
-          openChatbot()
+          openChatbot();
         }
       } else {
         if (typeof closeChatbot !== 'undefined') {
-          closeChatbot()
+          closeChatbot();
         }
       }
     }
     mountRef.current = true;
-  }, [bridgeType])
+  }, [bridgeType]);
 
+  // --- REFACTORED RESIZER LOGIC ---
   useEffect(() => {
-    // Call handleResizer and capture its cleanup function
-    const cleanup = handleResizer();
-    // Return the cleanup function to be executed on component unmount
-    return () => {
-      if (cleanup) {
-        cleanup();
-      }
+    if (!isDesktop) return;
+
+    const resizer = document.querySelector(".resizer");
+    const container = containerRef.current;
+    if (!resizer || !container) return;
+
+    let x = 0;
+    let initialLeftWidth = 0;
+    let overlay = null;
+
+    const mouseDownHandler = (e) => {
+      e.preventDefault(); // Prevent text selection
+      setIsResizing(true);
+      x = e.clientX;
+
+      const leftSide = resizer.previousElementSibling;
+      initialLeftWidth = leftSide.getBoundingClientRect().width;
+      
+      // Create and append the overlay to fix the iframe mouse capture issue
+      overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.inset = '0';
+      overlay.style.cursor = 'col-resize';
+      overlay.style.zIndex = '9999';
+      document.body.appendChild(overlay);
+
+      document.addEventListener("mousemove", mouseMoveHandler);
+      document.addEventListener("mouseup", mouseUpHandler);
     };
-  }, []);
+
+    const mouseMoveHandler = (e) => {
+      const dx = e.clientX - x;
+      const containerWidth = container.getBoundingClientRect().width;
+      const newPixelWidth = initialLeftWidth + dx;
+      
+      // Calculate new width as a percentage of the container
+      const newPercentageWidth = (newPixelWidth / containerWidth) * 100;
+      
+      // Constrain the width and update the React state
+      const constrainedWidth = Math.max(25, Math.min(newPercentageWidth, 75));
+      setLeftWidth(constrainedWidth);
+    };
+
+    const mouseUpHandler = () => {
+      setIsResizing(false);
+      
+      // Clean up the overlay and event listeners
+      if (overlay) {
+        overlay.remove();
+        overlay = null;
+      }
+      
+      document.removeEventListener("mousemove", mouseMoveHandler);
+      document.removeEventListener("mouseup", mouseUpHandler);
+    };
+
+    resizer.addEventListener("mousedown", mouseDownHandler);
+
+    return () => {
+      resizer.removeEventListener("mousedown", mouseDownHandler);
+    };
+  }, [isDesktop]); // Rerun when switching between desktop/mobile
+
+  if (!bridgeType) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
 
   return (
-    <>
-      {!bridgeType && <LoadingSpinner />}
-      <div className="flex flex-col md:flex-row w-full">
-        <div className="w-full md:w-1/2 overflow-y-auto overflow-x-hidden p-4 lg:h-[93vh] border-r min-w-[350px] configurationPage">
-          <ConfigurationPage apiKeySectionRef={apiKeySectionRef} params={params} />
-          <div />
+    <div 
+      ref={containerRef} // Add ref to the main container
+      className={`w-full h-full max-h-[calc(100vh-4rem)] ${isDesktop ? 'flex flex-row overflow-hidden' : 'overflow-y-auto'}`}
+    >
+      {/* Configuration Panel */}
+      <div 
+        className={`
+          ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen border-b border-gray-200'} 
+          bg-white
+        `}
+        style={isDesktop ? { width: `${leftWidth}%` } : {}}
+      >
+        <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} px-4 py-4`}>
+          <ConfigurationPage apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef}  params={params} />
         </div>
-        <div className="resizer w-full md:w-1 bg-base-500 cursor-col-resize hover:bg-primary"></div>
-        <div className="w-full md:w-1/2 flex-1 chatPage min-w-[450px] relative">
-          <div className="m-10 md:m-0 h-auto lg:h-full" id="parentChatbot" style={{ minHeight: "85vh" }}>
-            <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} params={params} />
-            {bridgeType === 'batch' && versionService === 'openai' ? <WebhookForm params={params} /> :bridgeType==='chatbot'? <Chatbot params={params} key={params} />: <Chat params={params} />}
+      </div>
 
+      {/* Desktop Resizer */}
+      {isDesktop && (
+        <div 
+          className={`w-1 hover:bg-blue-400 cursor-col-resize transition-colors duration-200 flex-shrink-0 resizer ${isResizing ? 'bg-blue-500' : 'bg-gray-200'}`}
+        />
+      )}
+
+      {/* Chat Panel (Right Side) */}
+      <div 
+        className={`
+          ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen'} 
+          relative
+        `}
+        style={isDesktop ? { width: `${100 - leftWidth}%` } : {}}
+        id="parentChatbot"
+      >
+        <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} pb-4`}>
+          <div className={`${isDesktop ? 'h-full flex flex-col' : ''}`}>
+            <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} params={params} />
+            <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
+              {bridgeType === 'batch' && versionService === 'openai' ? (
+                <WebhookForm params={params} />
+              ) : bridgeType === 'chatbot' ? (
+                <Chatbot params={params} key={JSON.stringify(params)} />
+              ) : (
+                <Chat params={params} />
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
-
-// Extracted functions for better readability
-function handleResizer() {
-  const resizer = document.querySelector(".resizer");
-  if (!resizer) return;
-
-  const leftSide = resizer.previousElementSibling;
-  const rightSide = resizer.nextElementSibling;
-  let x = 0;
-  let w = 0;
-  // A variable to hold the iframe element
-  let iframe = null;
-
-  const mouseDownHandler = function (e) {
-    // Get the iframe from the right-side panel
-    iframe = rightSide.querySelector('iframe');
-    
-    // **KEY FIX**: Disable mouse events on the iframe
-    if (iframe) {
-      iframe.style.pointerEvents = 'none';
-    }
-
-    // Add bg-primary class and ensure cursor-col-resize during resizing
-    resizer.classList.add('bg-primary');
-    document.body.style.cursor = 'col-resize';
-
-    x = e.clientX;
-    w = leftSide.getBoundingClientRect().width;
-    document.addEventListener("mousemove", mouseMoveHandler);
-    document.addEventListener("mouseup", mouseUpHandler);
-  };
-
-  const mouseMoveHandler = function (e) {
-    const dx = e.clientX - x;
-    const minLeftWidth = 350; // Minimum width for the left panel
-    const minRightWidth = 450; // Minimum width for the right panel
-
-    let newLeftWidth = w + dx;
-    newLeftWidth = Math.max(minLeftWidth, newLeftWidth);
-    newLeftWidth = Math.min(newLeftWidth, window.innerWidth - minRightWidth);
-
-    leftSide.style.width = `${newLeftWidth}px`;
-  };
-
-  const mouseUpHandler = function () {
-    // **KEY FIX**: Re-enable mouse events on the iframe
-    if (iframe) {
-      iframe.style.pointerEvents = 'auto';
-    }
-    
-    // Remove bg-primary class and reset cursor when done resizing
-    resizer.classList.remove('bg-primary');
-    document.body.style.cursor = '';
-
-    document.removeEventListener("mousemove", mouseMoveHandler);
-    document.removeEventListener("mouseup", mouseUpHandler);
-  };
-
-  resizer.addEventListener("mousedown", mouseDownHandler);
-
-  // Return the cleanup function to be called when the component unmounts
-  return () => {
-    // Ensure styles and events are cleaned up on unmount
-    if (iframe) {
-       iframe.style.pointerEvents = 'auto';
-    }
-    resizer.removeEventListener("mousedown", mouseDownHandler);
-    document.removeEventListener("mousemove", mouseMoveHandler);
-    document.removeEventListener("mouseup", mouseUpHandler);
-  };
-}
 
 export default Protected(Page);

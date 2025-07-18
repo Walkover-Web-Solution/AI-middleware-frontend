@@ -50,6 +50,7 @@ export const getBridgeVersionApi = async ({ bridgeVersionId = null }) => {
   }
 }
 
+
 export const deleteBridge = async (bridgeId) => {
   try {
     const response = await axios.delete(`${URL}/api/v1/config/deletebridges/${bridgeId}`);
@@ -282,9 +283,14 @@ export const inviteUser = async (email) => {
   }
 }
 
-export const getInvitedUsers = async () => {
+export const getInvitedUsers = async ({page, limit}) => {
   try {
-    const data = await axios.get(`${PROXY_URL}/api/c/getUsers`);
+    const data = await axios.get(`${PROXY_URL}/api/c/getUsers`, {
+      params: {
+        pageNo:page,
+        itemsPerPage:limit
+      }
+    });
     return data;
   } catch (error) {
     console.error(error);
@@ -645,7 +651,7 @@ export const archiveBridgeApi = async (bridge_id, newStatus) => {
   }
 };
 
-export const optimizePromptApi = async ({ bridge_id, version_id,query, data = { query ,version_id} }) => {
+export const optimizePromptApi = async ({ bridge_id, version_id, query, thread_id, data = { query, thread_id, version_id} }) => {
   try {
     const response = await axios.post(`${PYTHON_URL}/bridge/${bridge_id}/optimize/prompt`, data);
     return response.data.result;
@@ -1015,6 +1021,16 @@ export const getPrebuiltToolsApi = async () => {
   }
 }
 
+export const getTutorial =async ()=>{
+  try {
+    const response=await axios.get("https://flow.sokt.io/func/scri33jNs1M1");
+    return response;
+  }
+  catch(error){
+    throw new Error(error);
+  }
+}
+
 export const createIntegrationApi = async (name) => {
   try {
     const response = await axios.post(`${URL}/gtwyEmbed/`, {name});
@@ -1041,5 +1057,47 @@ export const generateGtwyAccessTokenApi = async () => {
   } catch (error) {
     console.error(error);
     return error;
+
   }
 }
+
+export const getAuthData = async () => {
+  try {
+    const response = await axios.get(`${URL}/auth/`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const createNewAuth = async (data) => {
+  try {
+    const response = await axios.post(`${URL}/auth/`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const verifyAuth = async (data)=>{
+  try {
+    const respnse = await axios.post(`${URL}/auth/verify`, data)
+    return respnse
+  } catch (error) {
+    console.error(error)
+    return error
+  }
+}
+
+export const getClientInfo = async (client_id)=>{
+  try {
+    const respnse = await axios.get(`${URL}/auth/client_info?client_id=${client_id}`)
+    return respnse?.data
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
+
