@@ -51,7 +51,7 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
     const newValue = (newPrompt || "").trim();
     setShowSuggestions(false);
 
-    if (newValue && newValue !== reduxPrompt.trim()) {
+    if (newValue !== reduxPrompt.trim()) {
       dispatch(updateBridgeVersionAction({
         versionId: params.version,
         dataToSend: {

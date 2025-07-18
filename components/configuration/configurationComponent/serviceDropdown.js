@@ -8,14 +8,15 @@ import { getServiceAction } from "@/store/action/serviceAction";
 
 function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
     const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey } = useCustomSelector((state) => {
-        const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
+        const bridgeData=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id];
+        const service = bridgeData?.[params?.version]?.service;
         return {
             SERVICES: state?.serviceReducer?.services,
             DEFAULT_MODEL: state?.serviceReducer?.default_model,
             bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
             service: service,
-            prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-            bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[
+            prompt: bridgeData?.[params?.version]?.configuration?.prompt || "",
+            bridgeApiKey: bridgeData?.[params?.version]?.apikey_object_id?.[
                 service === 'openai_response' ? 'openai' : service
             ]
         };
@@ -52,7 +53,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
   };
 
   useEffect(() => {
-    const hasPrompt = prompt !== ""||promptTextAreaRef.current.querySelector('textarea').value!=="";
+    const hasPrompt = prompt !== ""||promptTextAreaRef.current.querySelector('textarea').value.trim()!=="";
     const hasApiKey = !!bridgeApiKey;
     
     if (hasPrompt) {
@@ -90,7 +91,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
     const handleGetRecommendations = async () => {
         setIsLoadingRecommendations(true);
         try {
-        if(bridgeApiKey && promptTextAreaRef.current.querySelector('textarea').value!==""){
+        if(bridgeApiKey && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""){
             const response = await modelSuggestionApi({ versionId: params?.version });
             if (response?.success) {
                 setModelRecommendations({
@@ -109,10 +110,9 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
         }
        }
         else{
-            if ( promptTextAreaRef.current.querySelector('textarea').value === "") {
+            if ( promptTextAreaRef.current.querySelector('textarea').value.trim() === "") {
                 setModelRecommendations({error:'Prompt is missing. Please enter a prompt'});
-                setErrorBorder(promptTextAreaRef, 'textarea', true);
-                
+                setErrorBorder(promptTextAreaRef, 'textarea', true);        
             }
            else {
                 setModelRecommendations({error:'API key is missing. Please add an API key'});
