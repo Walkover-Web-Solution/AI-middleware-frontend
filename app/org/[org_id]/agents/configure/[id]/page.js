@@ -169,6 +169,7 @@ const Page = ({ searchParams }) => {
     );
   }
 
+
   return (
     <div 
       ref={containerRef} // Add ref to the main container
