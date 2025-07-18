@@ -41,7 +41,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
   };
 
   useEffect(() => {
-    const hasPrompt = prompt !== ""||promptTextAreaRef.current.querySelector('textarea').value!=="";
+    const hasPrompt = prompt !== ""||promptTextAreaRef.current.querySelector('textarea').value.trim()!=="";
     const hasApiKey = !!bridgeApiKey;
     
     if (hasPrompt) {
@@ -63,7 +63,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
 
   const handleStart = () => {
     
-    if (prompt === ""&&promptTextAreaRef.current.querySelector('textarea').value==="") {
+    if (prompt === ""&&promptTextAreaRef.current.querySelector('textarea').value.trim()==="") {
       setShowError(true);
       setErrorType('prompt');
       setErrorBorder(promptTextAreaRef, 'textarea', true);
