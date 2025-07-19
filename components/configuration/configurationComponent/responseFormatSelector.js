@@ -76,7 +76,7 @@ const ResponseFormatSelector = ({ params }) => {
                         <input
                             type="radio"
                             name="radio-10"
-                            className="radio checked:bg-blue-500"
+                            className="radio"
                             checked={selectedOption === value}
                             onChange={() => { setSelectedOption(value); handleResponseChange(value); }}
                         />

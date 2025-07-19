@@ -14,7 +14,6 @@ import EmbedList from "./configurationComponent/embedList";
 import InputConfigComponent from "./configurationComponent/inputConfigComponent";
 import ModelDropdown from "./configurationComponent/modelDropdown";
 import PreEmbedList from "./configurationComponent/preEmbedList";
-import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
@@ -94,7 +93,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             <ServiceDropdown params={params} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} />
             <ModelDropdown params={params} />
             <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
-            <AdvancedParameters params={params} />
+            <AdvancedParameters params={params} modelType={modelType} bridgeType={bridgeType} />
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
                     <AddVariable params={params} />
@@ -102,7 +101,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     <ToolCallCount params={params} />
                 </>
             )}
-            {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
         </>
     ), [bridgeType, modelType, params, modelName]);
     const renderChatbotConfigView = useMemo(() => () => (
