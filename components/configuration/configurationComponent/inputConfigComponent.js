@@ -263,9 +263,10 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
                 onClick={() => {
                   openModal(MODAL_TYPE?.PROMPT_SUMMARY);
                 }}
+                className='cursor-pointer'
               >
-                <InfoTooltip tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
-                <span className='label-text  capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
+                <InfoTooltip tooltipContent={"Prompt Summary is a brief description of the agent’s prompt and applies to all versions of the agent, not just one."}>
+                <span className='label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
                 </InfoTooltip>
               </button>
              

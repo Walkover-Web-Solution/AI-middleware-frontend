@@ -101,7 +101,10 @@ export default function TriggersList({ params, isEmbedUser }) {
         <div className="w-full">
             <div className="flex items-start flex-col gap-2">
                 <div className='flex gap-5  items-start just'>
-                    <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
+                    <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow." className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              border border-gray-700 space-y-2 pointer-events-auto
+            '>
                         <p className="label-text font-medium whitespace-nowrap info">Trigger Configuration</p>
                     </InfoTooltip>
                 </div>

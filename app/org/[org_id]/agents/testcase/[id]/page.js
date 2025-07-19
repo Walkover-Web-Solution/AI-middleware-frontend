@@ -8,6 +8,7 @@ import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, Ext
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { ONBOARDING_VIDEOS } from '@/utils/enums';
+import InfoTooltip from '@/components/InfoTooltip';
 
 export const runtime = 'edge';
 
@@ -121,7 +122,7 @@ function TestCases({ params }) {
                   {versions.map((version, index) => (
                     <th key={index} className={`p-3 text-left text-sm font-medium text-gray-700 border-b ${version === selectedVersion ? 'relative after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:bg-green-500 after:rounded-full' : ''}`}>
                       <div className="flex items-center gap-2">
-                        <div className="tooltip tooltip-left" data-tip="Run Test Case">
+                        <InfoTooltip  tooltipContent="Run Test Case" placement="left" className='z-low-medium w-28 p-3 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in border border-gray-700  pointer-events-auto'>
                           <button
                             className="btn btn-xs btn-circle bg-white border border-gray-200 hover:bg-primary hover:border-primary hover:text-white disabled:bg-gray-100 disabled:border-gray-200 disabled:text-gray-400"
                             onClick={() => handleRunTestCase(version)}
@@ -129,7 +130,7 @@ function TestCases({ params }) {
                           >
                             <PlayIcon size={12} />
                           </button>
-                        </div>
+                        </InfoTooltip>
                         <span className={`font-medium text-gray-800 `}>
                           {`V${index + 1}`}
                         </span>

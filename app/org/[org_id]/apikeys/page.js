@@ -11,6 +11,7 @@ import { BookIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import InfoTooltip from "@/components/InfoTooltip";
 import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
 import ApiKeyGuideSlider from "@/components/configuration/configurationComponent/ApiKeyGuide";
@@ -76,20 +77,24 @@ const Page = () => {
   const EndComponent = ({ row }) => {
     return (
       <div className="flex gap-3 justify-center items-center">
-        <div
-          className="tooltip tooltip-primary"
-          data-tip="delete"
+        <InfoTooltip
+          className="z-low-medium h-3 pl-3 pr-3 pt-2 pb-5 bg-primary text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              bordespace-y-2 space-x-2 pointer-events-auto"
+          tooltipContent="delete"
           onClick={() => { setselectedDataToDelete(row); openModal(MODAL_TYPE.DELETE_MODAL) }}
         >
-          <TrashIcon size={16} />
-        </div>
-        <div
-          className="tooltip tooltip-primary"
-          data-tip="Update"
-          onClick={() => handleUpdateClick(row)}
+          <TrashIcon size={16} onClick={() => deleteApikey(row)} />
+        </InfoTooltip>
+        <InfoTooltip
+          className="z-low-medium h-3 pl-3 pr-3 pt-2 pb-5 bg-primary text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              bordespace-y-2 space-x-2 pointer-events-auto"
+          tooltipContent="Update"
+
         >
-          <SquarePenIcon size={16} />
-        </div>
+          <SquarePenIcon size={16}  onClick={() => handleUpdateClick(row)} />
+        </InfoTooltip>
       </div>
     );
   };
