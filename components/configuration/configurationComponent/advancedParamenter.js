@@ -11,8 +11,9 @@ import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
+import ResponseFormatSelector from './responseFormatSelector';
 
-const AdvancedParameters = ({ params }) => {
+const AdvancedParameters = ({ params ,modelType,bridgeType }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState();
   const [searchQuery, setSearchQuery] = useState('');
@@ -431,6 +432,9 @@ const AdvancedParameters = ({ params }) => {
             </div>
           );
         })}
+          {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
+
+        
       </div>}
     </div>
   );
