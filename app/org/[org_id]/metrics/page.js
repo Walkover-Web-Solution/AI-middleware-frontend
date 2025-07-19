@@ -132,7 +132,7 @@ function Page({ params }) {
           <div className={`dropdown dropdown-end z-medium border rounded-lg ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}>
           <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Agent'}</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
-              <SearchItems setFilterItems={setFilterBridges} data={allBridges} />
+              <SearchItems setFilterItems={setFilterBridges} data={allBridges} item="Agents" />
               {filterBridges.map((item, index) => (
                 <li key={index}><a
                   onClick={() => handleBridgeChange(item?._id, item?.name)}

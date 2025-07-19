@@ -121,7 +121,7 @@ const Page = () => {
           </div>
         </div>
       </MainLayout>
-      <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} />
+      <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="Api keys"/>
       {Object.entries(
         dataWithIcons.reduce((acc, item) => {
           const service = item.service.props.children[1].props.children;

@@ -88,7 +88,7 @@ const Page = ({ params }) => {
         
         {/* Content Section */}
         <div className="w-full">
-          <SearchItems data={integrationData} setFilterItems={setFilterIntegration} />
+          <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="integration" />
           {filterIntegration.length > 0 ? (
               <div className="w-full">
                 <CustomTable

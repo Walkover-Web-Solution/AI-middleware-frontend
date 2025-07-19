@@ -151,7 +151,7 @@ function Page({ params }) {
             </div>
           </div>
         </MainLayout>
-        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} />
+        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="Pauth keys"/>
 
         {isCreating ? (
           <div className="flex justify-center items-center h-64">
