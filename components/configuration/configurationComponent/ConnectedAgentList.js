@@ -30,7 +30,7 @@ const ConnectedAgentList = ({ params }) => {
         return {
             bridgeData: bridges,
             connect_agents: versionData?.connected_agents || {},
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName,
             variables_path: versionData?.variables_path || {},
         };
