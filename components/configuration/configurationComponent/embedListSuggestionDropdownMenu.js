@@ -86,7 +86,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             <div className="flex items-end gap-2">
                 {name === "preFunction" ? (
                     <div className=" flex flex-col items-start gap-2">
-                        <InfoTooltip tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
+                        <InfoTooltip  tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
                         <p className="text-base font-semibold info">Pre Tool Configuration</p>
                        
                         </InfoTooltip>
