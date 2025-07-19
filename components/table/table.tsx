@@ -2,7 +2,7 @@ import React from 'react';
 
 const GenericTable = ({ headers, data }) => {
   return (
-    <div className="relative overflow-x-auto">
+    <div className="relative rounded-xl overflow-x-auto">
       <table className="w-full text-sm text-left rtl:text-right text-gray-100 dark:text-gray-100">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>

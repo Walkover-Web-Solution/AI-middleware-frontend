@@ -5,9 +5,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
+import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
 
 function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
-    const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey } = useCustomSelector((state) => {
+    const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey,modelType } = useCustomSelector((state) => {
         const bridgeData=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id];
         const service = bridgeData?.[params?.version]?.service;
         return {
@@ -18,7 +19,8 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
             prompt: bridgeData?.[params?.version]?.configuration?.prompt || "",
             bridgeApiKey: bridgeData?.[params?.version]?.apikey_object_id?.[
                 service === 'openai_response' ? 'openai' : service
-            ]
+            ],
+            modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
         };
     });
 
@@ -53,7 +55,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
   };
 
   useEffect(() => {
-    const hasPrompt = prompt !== ""||promptTextAreaRef.current.querySelector('textarea').value.trim()!=="";
+    const hasPrompt = prompt !== ""||(promptTextAreaRef.current&&promptTextAreaRef.current.querySelector('textarea').value.trim()!=="");
     const hasApiKey = !!bridgeApiKey;
     
     if (hasPrompt) {
@@ -91,7 +93,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
     const handleGetRecommendations = async () => {
         setIsLoadingRecommendations(true);
         try {
-        if(bridgeApiKey && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""){
+        if(bridgeApiKey && prompt.promptTextAreaRef && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""){
             const response = await modelSuggestionApi({ versionId: params?.version });
             if (response?.success) {
                 setModelRecommendations({
@@ -110,7 +112,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
         }
        }
         else{
-            if ( promptTextAreaRef.current.querySelector('textarea').value.trim() === "") {
+            if ( promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim() === "") {
                 setModelRecommendations({error:'Prompt is missing. Please enter a prompt'});
                 setErrorBorder(promptTextAreaRef, 'textarea', true);        
             }
@@ -135,13 +137,14 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
                 <div className="gap-2 max-w-xl">
                     <div className="label max-w-xs flex justify-between items-center gap-10">
                         <span className="label-text font-medium items-end">LLM Provider</span>
-                        <button
+                     {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (  <button
                             className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text hover:opacity-80 transition-opacity"
                             onClick={handleGetRecommendations}
                             disabled={isLoadingRecommendations}
                         >
                             {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
                         </button>
+                       )}                      
                     </div>
                 </div>
                 {modelRecommendations && (

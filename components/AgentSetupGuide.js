@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { CircleAlertIcon, RocketIcon, SparklesIcon } from '@/components/Icons';
-import { AGENT_SETUP_GUIDE_STEPS } from '@/utils/enums';
+import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
 const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) => {
-  const { bridgeApiKey, prompt } = useCustomSelector((state) => {
+  const { bridgeApiKey, prompt,modelType } = useCustomSelector((state) => {
     const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
     return {
       bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
       prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+      modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
     };
   });
 
-  const [isVisible, setIsVisible] = useState(!bridgeApiKey || prompt === "");
+  const [isVisible, setIsVisible] = useState(!bridgeApiKey || (prompt === ""&&(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) ))
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
-
   const resetBorder = (ref, selector) => {
     if (ref?.current) {
       const element = ref.current.querySelector(selector);
@@ -41,9 +41,11 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
   };
 
   useEffect(() => {
-    const hasPrompt = prompt !== ""||promptTextAreaRef.current.querySelector('textarea').value.trim()!=="";
+    const hasPrompt =( prompt !== ""||(modelType === AVAILABLE_MODEL_TYPES.IMAGE || modelType === AVAILABLE_MODEL_TYPES.EMBEDDING)||(promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""));
     const hasApiKey = !!bridgeApiKey;
-    
+     if(modelType===AVAILABLE_MODEL_TYPES.IMAGE||modelType===AVAILABLE_MODEL_TYPES.EMBEDDING){
+      setShowError(false)
+      }
     if (hasPrompt) {
       resetBorder(promptTextAreaRef, 'textarea');
     }
@@ -59,11 +61,11 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
     } else {
       setIsVisible(true);
     }
-  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef]);
+  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef,modelType]);
 
   const handleStart = () => {
     
-    if (prompt === ""&&promptTextAreaRef.current.querySelector('textarea').value.trim()==="") {
+    if ((modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING)&&(promptTextAreaRef.current &&prompt === ""&&promptTextAreaRef.current.querySelector('textarea').value.trim()==="") ){
       setShowError(true);
       setErrorType('prompt');
       setErrorBorder(promptTextAreaRef, 'textarea', true);
@@ -79,7 +81,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
     
     setIsVisible(false);
   };
-
+ 
   if (!isVisible || (bridgeApiKey && prompt !== "")) {
     resetBorder(promptTextAreaRef, 'textarea');
     resetBorder(apiKeySectionRef, 'select');
