@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-const SearchItems = ({ data, setFilterItems }) => {
+const SearchItems = ({ data, setFilterItems ,item }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const SearchItems = ({ data, setFilterItems }) => {
     <div className="flex-1 max-w-md">
       <input
         type="text"
-        placeholder="Search API keys..."
+        placeholder={`Search ${item}...`}
         className="input input-bordered w-full ml-3 mb-3"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}

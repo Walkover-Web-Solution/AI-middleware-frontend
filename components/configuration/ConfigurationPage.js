@@ -32,7 +32,7 @@ import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import NewInputConfigComponent from "./configurationComponent/newInputConfigComponent";
 import Protected from "../protected";
 
-const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
+const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const view = searchParams.get('view') || 'config';
@@ -79,7 +79,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
                 <>
                     <PreEmbedList params={params} />
-                    <InputConfigComponent params={params} />
+                    <InputConfigComponent params={params} promptTextAreaRef={promptTextAreaRef} />
                     {/* <NewInputConfigComponent params={params} /> */}
                     <EmbedList params={params} />
                     <hr className="my-0 p-0" />
@@ -91,7 +91,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef }) => {
                 </>
             )}
 
-            <ServiceDropdown params={params} />
+            <ServiceDropdown params={params} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} />
             <ModelDropdown params={params} />
             <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
             <AdvancedParameters params={params} />

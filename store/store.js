@@ -16,9 +16,11 @@ import userDetailsReducer from "./reducer/userDetailsReducer";
 import webhookAlertReducer from "./reducer/webhookAlertReducer";
 import testCasesReducer from "./reducer/testCasesReducer";
 import serviceReducer from "./reducer/serviceReducer";
+
 import tutorialReducer from "./reducer/tutorialReducer";
 import integrationReducer from "./reducer/integrationReducer";
 import authReducer from "./reducer/authReducer";
+import gtwyAgentReducer from "./reducer/gwtyAgentReducer";
 
 const createNoopStorage = () => {
     return {
@@ -52,6 +54,7 @@ const rootReducer = combineReducers({
     knowledgeBaseReducer,
     testCasesReducer,
     serviceReducer,
+    gtwyAgentReducer,
     tutorialReducer,
     integrationReducer,
     authReducer

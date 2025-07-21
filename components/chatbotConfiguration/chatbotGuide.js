@@ -7,10 +7,13 @@ function ChatbotGuide({ params }) {
     const [chatbotId, setChatBotId] = useState("");
     return (
         <>
-            <PrivateFormSection params={params} ChooseChatbot={true} setChatBotIdFucntion={setChatBotId}/>
-            <FormSection params={params} chatbotId={chatbotId}/>
-            <SecondStep />
+                <div className="">
+                    <PrivateFormSection params={params} ChooseChatbot={true} setChatBotIdFucntion={setChatBotId}/>
+                    <FormSection params={params} chatbotId={chatbotId}/>
+                    <SecondStep />
+                </div>
         </>
+
     )
 }
 
