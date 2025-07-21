@@ -1,13 +1,14 @@
 
 import { getAllAgentsApi, privateAgentLoginApi, publicAgentLoginApi } from "@/config";
 import { toast } from "react-toastify";
-import { getAllAgent, getPrivateAgentData, getPublicAgentData } from "../reducer/gwtyAgentReducer";
+import { getAllAgentReducer, getPrivateAgentDataReducer, getPublicAgentDataReducer } from "../reducer/gwtyAgentReducer";
 
 export const getAllAgentAction = () => async (dispatch) => {
   try {
     const response = await getAllAgentsApi();
     if (response) {
-      dispatch(getAllAgent({ data: response?.data}))
+      debugger
+      dispatch(getAllAgentReducer({ data: response?.data}))
     }
   } catch (error) {
     toast.error('something went wrong')
@@ -21,7 +22,7 @@ export const publicAgentLoginAction = () => async (dispatch) => {
     localStorage.setItem('AgentToken', response?.data?.token)
     localStorage.setItem('AgentUserId',response?.data?.userid)
     if (response) {
-        dispatch(getPublicAgentData({ data: response?.data}))
+        dispatch(getPublicAgentDataReducer({ data: response?.data}))
     }
   } catch (error) {
     toast.error('something went wrong')
@@ -35,7 +36,7 @@ export const privateAgentLoginAction = () => async (dispatch) => {
     localStorage.setItem('AgentToken', response?.data?.token)
     localStorage.setItem('AgentUserId',response?.data?.userid)
     if (response) {
-        dispatch(getPrivateAgentData({ data: response?.data}))
+        dispatch(getPrivateAgentDataReducer({ data: response?.data}))
     }
   } catch (error) {
     toast.error('Something went wrong');

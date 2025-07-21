@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import PrivateFormSection from './firstStep'
 import FormSection from './formSection'
 import SecondStep from './secondStep'
-import PublicAgentForm from './PublicAgentForm';
 
 function ChatbotGuide({ params }) {
     const [chatbotId, setChatBotId] = useState("");

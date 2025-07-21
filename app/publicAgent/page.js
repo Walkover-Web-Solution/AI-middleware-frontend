@@ -18,7 +18,6 @@ const Page = () => {
       setProxyToken(localStorage.getItem('publicAgentProxyToken'));
     }
   }, [])
-
   useEffect(() => {
     if(!localStorage.getItem('publicAgentProxyToken')){
       dispatch(publicAgentLoginAction())

@@ -27,7 +27,7 @@ axios.interceptors.response.use(
         return response;
     },
     async function (error) {
-        if (error?.response?.status === 401 && !error?.config?.url?.includes("publicAgent") && !sessionStorage.getItem("proxy_token")) {
+        if ((error?.response?.status === 401 && !error?.config?.url?.includes("publicAgent")) && (error?.response?.status === 401  && !sessionStorage.getItem("proxy_token"))) {
             localStorage.clear();
             if (window.location.href != '/login') localStorage.setItem("previous_url", window.location.href);
             window.location.href = "/login";
