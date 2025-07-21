@@ -4,6 +4,8 @@ import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge } from '@xyflow/
 import '@xyflow/react/dist/style.css';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
+export const runtime = 'edge';
+
 export default function App() {
   const { allBridgesMap } = useCustomSelector(state => ({
     allBridgesMap: state.bridgeReducer.allBridgesMap
