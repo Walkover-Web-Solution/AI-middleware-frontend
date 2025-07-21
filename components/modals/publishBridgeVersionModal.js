@@ -8,7 +8,6 @@ import React, {  useCallback } from "react";
 import { useDispatch } from "react-redux";
 import Modal from "../UI/Modal";
 import Protected from "../protected";
-``
 
 function PublishBridgeVersionModal({ params, agent_name, agent_description,  isEmbedUser }) {
   const dispatch = useDispatch();
