@@ -3,6 +3,7 @@ import { Bot, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import LoginButton from '@/components/common/LoginButton';
+import Image from 'next/image';
 
 const PublicAgent = ({ token, agents }) => {
     const router = useRouter();
@@ -42,7 +43,7 @@ const PublicAgent = ({ token, agents }) => {
                                     <div className="avatar">
                                         <div className="w-12 h-12 rounded-full">
                                             {agent.avatar ? (
-                                                <img
+                                                <Image
                                                     src={agent.avatar}
                                                     alt={`${agent.name} avatar`}
                                                     className="object-cover"

@@ -5,6 +5,8 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import React, { useEffect } from 'react'
 import { AgentChatBot } from '@/components/configuration/Agent/AgentChatbot';
 
+export const runtime = 'edge';
+
 const page = ({ params }) => {
   const router = useRouter();
   const gtwyAgent = useCustomSelector((state) => state?.gtwyAgentReducer?.gwtyAgent);

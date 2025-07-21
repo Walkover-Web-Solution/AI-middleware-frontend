@@ -7,6 +7,8 @@ import { Loader2, Sparkles, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 
+export const runtime = 'edge';
+
 const Page = () => {
   const dispatch = useDispatch();
   const [proxyToken, setProxyToken] = useState(null);
