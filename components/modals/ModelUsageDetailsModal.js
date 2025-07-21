@@ -4,9 +4,9 @@ import Modal from '../UI/Modal';
 import { closeModal } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
-const ModelUsageDetailsModal = ({usageDetailsData}) => {
+const ModelUsageDetailsModal = ({usageDetailsData, params}) => {
   const { allBridgesMap } = useCustomSelector((state) => ({
-    allBridgesMap: state?.bridgeReducer?.allBridgesMap
+    allBridgesMap: state.bridgeReducer.org?.[params.org_id]?.orgs || {}
   }));
   
   const handleClose = () => {

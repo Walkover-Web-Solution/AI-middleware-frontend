@@ -15,7 +15,7 @@ import DeleteModal from '@/components/UI/DeleteModal';
 
 export const runtime = 'edge';
 
-const Page = () => {
+const Page = ({params}) => {
     const dispatch = useDispatch()
     const [usageDetailsData, setUsageDetailsData] = useState();
     const [selectedDataToDelete, setselectedDataToDelete] = useState();
@@ -59,15 +59,7 @@ const Page = () => {
         service: model?.service,
     }));
 
-    const columns = [
-        { key: 'model', label: 'Model' },
-        { key: 'service', label: 'Service' },
-        { key: 'type', label: 'Type' },
-        { key: 'description', label: 'Description' },
-        { key: 'knowledge_cutoff', label: 'Knowledge Cutoff' },
-        { key: 'input_cost', label: 'Input Cost' },
-        { key: 'output_cost', label: 'Output Cost' }
-    ];
+    const columnsToShow = ['model', 'service', 'type', 'description', 'knowledge_cutoff', 'input_cost', 'output_cost'];
 
     const handleDeleteModel = () =>{
         const dataToSend = {
@@ -124,11 +116,11 @@ const Page = () => {
 
                 <CustomTable
                     data={tableData}
-                    columns={columns}
+                    columnsToShow={columnsToShow}
                     endComponent={EndComponent}
                 />
                 <AddNewModelModal />
-                <ModelUsageDetailsModal usageDetailsData={usageDetailsData}/>
+                <ModelUsageDetailsModal usageDetailsData={usageDetailsData} params={params}/>
                 <DeleteModal onConfirm={handleDeleteModel} item={selectedDataToDelete} description={`Are you sure you want to delete the Model "${selectedDataToDelete?.model}"? This action cannot be undone.`} title='Delete Model' />
             </div>
         </MainLayout>
