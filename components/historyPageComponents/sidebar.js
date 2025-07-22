@@ -12,6 +12,7 @@ import CreateFineTuneModal from "../modals/CreateFineTuneModal.js";
 import DateRangePicker from "./dateRangePicker.js";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation.js";
 import { setSelectedVersion } from '@/store/reducer/historyReducer';
+import { FileTextIcon } from "lucide-react";
 
 const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, loading, params, setSearchMessageId, setPage, setHasMore, filterOption, setFilterOption, searchRef, setThreadPage, setHasMoreThreadData, selectedVersion, setIsErrorTrue, isErrorTrue }) => {
   const { subThreads } = useCustomSelector(state => ({
@@ -89,40 +90,50 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   }, 500), [setSearchQuery]);
 
   const handleSearch = async (e) => {
-    if (e.target.value === '') router.push(`${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${params.sub_thread_id}&start=''&end=''`, undefined, { shallow: true })
     e?.preventDefault();
+    if (e.target.value === '') {
+      router.push(`${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${params.subThread_id}&start=&end=`,undefined,{ shallow: true });
+      return;
+    }
+
     setSearchLoading(true);
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
     dispatch(clearThreadData());
     dispatch(clearSubThreadData());
+
     try {
-      const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || "")).then((data) => {
-        data.length && router.push(
-          `${pathName}?version=${params.version}&thread_id=${data[0]?.thread_id}` +
-          `&subThread_id=${data[0]?.sub_thread?.[0]?.sub_thread_id || data[0]?.thread_id}` +
-          `&start=&end=`,
+      const searchValue = searchRef?.current?.value || "";
+      const result = await dispatch(
+        getHistoryAction(params?.id, null, null, 1, searchValue)
+      );
+
+      if (result?.length) {
+        const firstResult = result[0];
+        const threadId = firstResult.thread_id;
+        const subThreadId = firstResult.sub_thread?.[0]?.sub_thread_id || threadId;
+        
+        router.push(
+          `${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=`,
           undefined,
           { shallow: true }
         );
-      });
-      await dispatch(getThread({
-                  threadId:params?.thread_id, 
-                  bridgeId: params?.id,
-                  nextPage: 1,
-                  user_feedback: filterOption,
-                  subThreadId: params?.subThread_id || params?.thread_id,
-                  versionId: selectedVersion === "all" ? "" : selectedVersion,
-                  error: params?.error || isErrorTrue
-                }));
-      if (result?.length < 40) setHasMore(false);
+      }
+      else{
+        dispatch(clearThreadData())
+      }
+
+     
+
+      if (result?.length < 40) {
+        setHasMore(false);
+      }
     } catch (error) {
       console.error("Search error:", error);
     } finally {
       setSearchLoading(false);
     }
-   
   };
 
   const clearInput = async () => {
@@ -134,7 +145,17 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setFilterOption("all");
     try {
       const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
-      await dispatch(getThread(params.thread_id, params?.id, params.subThread_id || params.thread_id, 1, "all"));
+      await dispatch(
+        getThread({
+          threadId: params?.thread_id,
+          bridgeId: params?.id,
+          nextPage: 1,
+          user_feedback: filterOption,
+          subThreadId: params?.subThread_id || params?.thread_id,
+          versionId: selectedVersion === "all" ? "" : selectedVersion,
+          error: params?.error || isErrorTrue
+        })
+      );
       if (result?.length < 40) setHasMore(false);
     } catch (error) {
       console.error("Clear search error:", error);
@@ -194,14 +215,12 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
 
   const NoDataFound = () => (
     <div className="flex flex-col items-center justify-center py-8 text-center">
-      <div className="text-gray-400 mb-2">
-        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
+      <div className="text-base-content mb-2">
+       <FileTextIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
       </div>
-      <p className="text-gray-500 text-sm">No data available</p>
+      <p className="text-base-content text-sm">No data available</p>
       {searchQuery && (
-        <p className="text-gray-400 text-xs mt-1">
+        <p className="text-base-content text-xs mt-1 opacity-50">
           No results found for "{searchQuery}"
         </p>
       )}
@@ -458,23 +477,23 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                 </div>
                               </div>
                             </div>
-                          )}          
-                            {item?.message && item?.message?.length > 0 && (
-                            <div className="p-4">                         
-                             <div className="space-y-2 ml-4">         
-                             {item?.message?.map((msg, index) => (
-                             <div 
-                             key={index} 
-                             onClick={() => handleSetMessageId(msg?.message_id)} 
-                             className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}                             
-                              >
-                               <div className="flex items-start gap-2">  
-                                <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />
-                                  <span>{truncate(msg?.message, 45)}</span>
-                          </div>
-                         </div>))}
-                          </div>
-                          </div>
+                          )}
+                          {item?.message && item?.message?.length > 0 && (
+                            <div className="p-4">
+                              <div className="space-y-2 ml-4">
+                                {item?.message?.map((msg, index) => (
+                                  <div
+                                    key={index}
+                                    onClick={() => handleSetMessageId(msg?.message_id)}
+                                    className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
+                                  >
+                                    <div className="flex items-start gap-2">
+                                      <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />
+                                      <span>{truncate(msg?.message, 45)}</span>
+                                    </div>
+                                  </div>))}
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>}
