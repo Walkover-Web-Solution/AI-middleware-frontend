@@ -169,39 +169,55 @@ function Page({ params }) {
 
             <ChevronDownIcon className="w-4 h-4" />
           </summary>
-          <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+          <ul tabIndex="0" className="dropdown-content z-very-high  menu p-2 shadow bg-base-100 rounded-box w-52">
             {['Organization', 'Agent'].map((item, index) => (
-              <li key={index}><a onClick={() => handleLevelChange(index)} className={level === item ? 'active mb-1' : 'mb-1'}>{item} Level</a></li>
+              <li key={index}><a onClick={(e) =>{ handleLevelChange(index);
+                const details = e.currentTarget.closest('details');
+                if (details) details.removeAttribute('open');
+              }} className={level === item ? 'active mb-1' : 'mb-1'}>{item} Level</a></li>
             ))}
           </ul>
         </details>
         <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Select Agent:</label>
-          <details className={`dropdown dropdown-end z-high ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`} tabIndex={0} onBlur={(e) => {
-  // Check if the blur is happening because focus moved outside the dropdown
-  if (!e.currentTarget.contains(e.relatedTarget)) {
-    e.currentTarget.removeAttribute('open');
-  }
-}}>
-            <summary className="btn m-1">  {bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Agent'}
-            <ChevronDownIcon className="w-4 h-4" /></summary>
-            <ul className="menu dropdown-content bg-base-100  pr-6  rounded-box z-high w-52 p-2 shadow-sm flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
-             <SearchItems setFilterItems={setFilterBridges} data={allBridges} />
-              {filterBridges.map((item, index) => (
-                <li key={index}><a
-                  onClick={() => handleBridgeChange(item?._id, item?.name)}
-                  className={`w-72 mb-1 ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}
-                >
-                  {item.name}
-                </a>
-                </li>
-              ))}
-            </ul>
-          </details>
+         <details
+  className={`dropdown dropdown-end z-high ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}
+>
+  <summary className="btn m-1">
+    {bridge?.['bridge_name']
+      ? bridge?.['bridge_name'].length > 15
+        ? bridge?.['bridge_name'].substring(0, 15) + '...'
+        : bridge?.['bridge_name']
+      : 'Select Agent'}
+    <ChevronDownIcon className="w-4 h-4 ml-2" />
+  </summary>
+
+  <ul
+    className="menu dropdown-content bg-base-100 pr-6 rounded-box z-high w-52 p-2 shadow-sm flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
+    <SearchItems setFilterItems={setFilterBridges} data={allBridges} />
+
+    {filterBridges.map((item, index) => (
+      <li key={index}>
+        <a
+          onClick={(e) => {
+            handleBridgeChange(item?._id, item?.name);
+            // Close the dropdown manually
+            const details = e.currentTarget.closest('details');
+            if (details) details.removeAttribute('open');
+          }}
+          className={`w-72 mb-1 ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}
+        >
+          {item.name}
+        </a>
+      </li>
+    ))}
+  </ul>
+</details>
+
         </div>
       </div>
       {/* Top Controls */}
-      <div className="flex justify-end items-center mb-6 gap-3">
+      <div className="flex justify-end items-center mb-6 gap-1">
         <span className={`${loading ? 'loading loading-ring loading-lg' : ""}`}></span>
         {loading && <span className="text-gray-600">Loading...</span>}
         <details className="dropdown" tabIndex={0} onBlur={(e) => {
@@ -213,9 +229,13 @@ function Page({ params }) {
           <summary className="btn m-1">{TIME_RANGE_OPTIONS?.[range]}
             <ChevronDownIcon className="w-4 h-4" />
           </summary>
-          <ul tabIndex="0" className=" z-high dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+          <ul tabIndex="0" className=" z-high dropdown-content menu p-1 shadow bg-base-100 rounded-box w-52 ">
             {TIME_RANGE_OPTIONS.map((item, index) => (
-              <li key={index}><a className={`${index === range ? 'active' : ''}`} onClick={() => handleFactorChange(index, 'time')}>{item}</a></li>
+              <li key={index}><a className={`${index === range ? 'active' : ''}`} onClick={(e) => {
+                handleFactorChange(index, 'time');
+                const details = e.currentTarget.closest('details');
+                if (details) details.removeAttribute('open');
+              }}>{item}</a></li>
             ))}
           </ul>
         </details>
