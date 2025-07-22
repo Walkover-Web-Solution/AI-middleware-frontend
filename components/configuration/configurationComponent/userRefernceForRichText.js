@@ -40,10 +40,7 @@ const UserReferenceForRichText = ({ params }) => {
             <div className='flex flex-col lg:flex-row justify-center items-center w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center justify-center gap-1'>
                     <div className="label">
-                        <InfoTooltip tooltipContent={"Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
-              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
-              border border-gray-700 space-y-2 pointer-events-auto
-            '>
+                        <InfoTooltip tooltipContent={"Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content."}>
                             <span className="font-medium text-nowrap info">Rich Text Supported</span>
                         </InfoTooltip>
                     </div>

@@ -34,10 +34,7 @@ const GptMemory = ({ params }) => {
             <div className='flex  flex-row justify-center items-center w-fit gap-4 bg-base-100 text-base-content'>
                 <div className='flex flex-row items-center justify-center gap-1'>
                     <div className="label">
-                        <InfoTooltip tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."} className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
-              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
-              border border-gray-700 space-y-2 pointer-events-auto
-            "'>
+                        <InfoTooltip tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
                         <span className="font-medium text-nowrap info ">Enable LLM-memory</span>
                         
                         </InfoTooltip>
