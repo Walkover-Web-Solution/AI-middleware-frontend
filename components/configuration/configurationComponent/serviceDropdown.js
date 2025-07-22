@@ -8,9 +8,14 @@ import { getServiceAction } from "@/store/action/serviceAction";
 import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
 
 function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
-    const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey,modelType } = useCustomSelector((state) => {
+    const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey,shouldPromptShow } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const bridgeData=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id];
         const service = bridgeData?.[params?.version]?.service;
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
         return {
             SERVICES: state?.serviceReducer?.services,
             DEFAULT_MODEL: state?.serviceReducer?.default_model,
@@ -20,7 +25,8 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
             bridgeApiKey: bridgeData?.[params?.version]?.apikey_object_id?.[
                 service === 'openai_response' ? 'openai' : service
             ],
-            modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
+            shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt   
+
         };
     });
 
@@ -55,7 +61,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
   };
 
   useEffect(() => {
-    const hasPrompt = prompt !== ""||(promptTextAreaRef.current&&promptTextAreaRef.current.querySelector('textarea').value.trim()!=="");
+    const hasPrompt =!shouldPromptShow|| prompt !== ""||(promptTextAreaRef.current&&promptTextAreaRef.current.querySelector('textarea').value.trim()!=="");
     const hasApiKey = !!bridgeApiKey;
     
     if (hasPrompt) {
@@ -137,7 +143,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
                 <div className="gap-2 max-w-xl">
                     <div className="label max-w-xs flex justify-between items-center gap-10">
                         <span className="label-text font-medium items-end">LLM Provider</span>
-                     {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (  <button
+                     {(shouldPromptShow) && (  <button
                             className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text hover:opacity-80 transition-opacity"
                             onClick={handleGetRecommendations}
                             disabled={isLoadingRecommendations}
