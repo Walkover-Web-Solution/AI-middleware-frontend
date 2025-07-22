@@ -4,6 +4,7 @@ import { CloseIcon, CopyIcon, CheckCircleIcon } from "@/components/Icons";
 import { generateGtwyAccessTokenAction } from '@/store/action/orgAction';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import CopyButton from "../copyButton/copyButton";
 
 
 function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
@@ -46,15 +47,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     dispatch(generateGtwyAccessTokenAction(data?.org_id))
   };
 
-  const CopyButton = ({ data, onCopy, copied: isCopied }) => (
-    <button
-      onClick={onCopy}
-      className={`btn btn-sm btn-ghost absolute top-2 right-2 text-base-100 ${isCopied ? 'btn-success' : ''}`}
-    >
-      {isCopied ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
-      {isCopied ? 'Copied!' : 'Copy'}
-    </button>
-  );
+ 
 
   const jwtPayload = `{
   "org_id": "${data?.org_id}",
@@ -127,11 +120,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
                     <pre data-prefix=">"><code className="text-error">folder_id=</code><code className="text-warning">{data?.folder_id}</code></pre>
                     <pre data-prefix=">"><code className="text-error">user_id=</code><code className="text-warning">"Your_user_id"</code></pre>
                   </div>
-                  <CopyButton
-                    data={jwtPayload}
-                    onCopy={() => handleCopy(jwtPayload, 'jwtToken')}
-                    copied={copied.jwtToken}
-                  />
+                  <CopyButton  data={jwtPayload} />
                 </div>
               </div>
 
