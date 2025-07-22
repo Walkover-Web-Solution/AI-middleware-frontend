@@ -89,7 +89,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   }, 500), [setSearchQuery]);
 
   const handleSearch = async (e) => {
-    if(e.target.value==='') router.push(`${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${params.sub_thread_id}&start=''&end=''`, undefined, { shallow: true })
+    if (e.target.value === '') router.push(`${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${params.sub_thread_id}&start=''&end=''`, undefined, { shallow: true })
     e?.preventDefault();
     setSearchLoading(true);
     setPage(1);
@@ -99,7 +99,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     dispatch(clearSubThreadData());
     try {
       const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || "")).then((data) => {
-        console.log(Object.entries(data).length, data)
         data.length && router.push(
           `${pathName}?version=${params.version}&thread_id=${data[0]?.thread_id}` +
           `&subThread_id=${data[0]?.sub_thread?.[0]?.sub_thread_id || data[0]?.thread_id}` +
@@ -108,12 +107,22 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
           { shallow: true }
         );
       });
+      await dispatch(getThread({
+                  threadId:params?.thread_id, 
+                  bridgeId: params?.id,
+                  nextPage: 1,
+                  user_feedback: filterOption,
+                  subThreadId: params?.subThread_id || params?.thread_id,
+                  versionId: selectedVersion === "all" ? "" : selectedVersion,
+                  error: params?.error || isErrorTrue
+                }));
       if (result?.length < 40) setHasMore(false);
     } catch (error) {
       console.error("Search error:", error);
     } finally {
       setSearchLoading(false);
     }
+   
   };
 
   const clearInput = async () => {
@@ -318,61 +327,62 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
           </div>
         ) : historyData?.length === 0 ? (
           <NoDataFound />
-      ) : (
-        <InfiniteScroll
-          dataLength={historyData?.length}
-          next={fetchMoreData}
-          hasMore={!searchQuery && hasMore}
-          loader={<h4></h4>}
-          scrollableTarget="sidebar"
-        >
-          <div className="slider-container min-w-[40%] overflow-x-auto pb-40">
-            <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
-              {historyData?.map((item) => (
-                <div className={`${isThreadSelectable ? "flex" : "flex-col"}`} key={item?.thread_id}>
-                  {isThreadSelectable && (
-                    <div onClick={(e) => e?.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-lg mr-2 bg-white"
-                        checked={selectedThreadIds?.includes(item?.thread_id)}
-                        onChange={() => handleThreadIds(item?.thread_id)}
-                      />
-                    </div>
-                  )}
-                  <div className="flex flex-col">
-                  <li
-                    className={`${params.thread_id === item?.thread_id
-                      ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
-                      : ""
-                      } flex-grow cursor-pointer`}
-                    onClick={() => threadHandler(item?.thread_id)}
-                  >
-                    <a className="w-full h-full flex items-center justify-between relative group">
-                      <span className="truncate flex-1 mr-3 w-[160px] pr-2">{truncate(item?.thread_id, 35)}</span>
-                      {item?.thread_id?.length > 35 && (
-                        <div className="absolute left-0 top-full mt-1 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-low max-w-[300px] break-words shadow-lg pointer-events-none">
-                          {item?.thread_id}
-                        </div>
-                      )}
-                      {!searchQuery && params.thread_id === item?.thread_id && (
-                        <div
-                          onClick={(e) => {
-                            e?.stopPropagation();
-                            handleToggleThread(item?.thread_id);
-                          }}
-                          className="absolute right-4 cursor-pointer"
-                        >
-                          {expandedThreads?.includes(item?.thread_id) ? (
-                            <ChevronUpIcon size={16} />
-                          ) : (
-                            <ChevronDownIcon size={16} />
+        ) : (
+          <InfiniteScroll
+            dataLength={historyData?.length}
+            next={fetchMoreData}
+            hasMore={!searchQuery && hasMore}
+            loader={<h4></h4>}
+            scrollableTarget="sidebar"
+          >
+            <div className="slider-container min-w-[40%] overflow-x-auto pb-40">
+              <ul className="menu min-h-full text-base-content flex flex-col space-y-2">
+                {historyData?.map((item) => (
+                  <div className={`${isThreadSelectable ? "flex" : "flex-col"}`} key={item?.thread_id}>
+                    {isThreadSelectable && (
+                      <div onClick={(e) => e?.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-lg mr-2 bg-white"
+                          checked={selectedThreadIds?.includes(item?.thread_id)}
+                          onChange={() => handleThreadIds(item?.thread_id)}
+                        />
+                      </div>
+                    )}
+                    <div className="flex flex-col">
+                      <li
+                        className={`${params.thread_id === item?.thread_id
+                          ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
+                          : ""
+                          } flex-grow cursor-pointer`}
+                        onClick={() => threadHandler(item?.thread_id)}
+                      >
+                        <a className="w-full h-full flex items-center justify-between relative group">
+                          <span className="truncate flex-1 mr-3 w-[160px] pr-2">{truncate(item?.thread_id, 35)}</span>
+                          {item?.thread_id?.length > 35 && (
+                            <div className="absolute left-0 top-full mt-1 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-low max-w-[300px] break-words shadow-lg pointer-events-none">
+                              {item?.thread_id}
+                            </div>
                           )}
-                        </div>
-                      )}
-                    </a>
-                  </li>
-                  {params.thread_id === item?.thread_id && expandedThreads?.includes(item?.thread_id) && (
+                          {/* Show chevron button only when no search query */}
+                          {!searchQuery && params.thread_id === item?.thread_id && (
+                            <div
+                              onClick={(e) => {
+                                e?.stopPropagation();
+                                handleToggleThread(item?.thread_id);
+                              }}
+                              className="absolute right-4 cursor-pointer"
+                            >
+                              {expandedThreads?.includes(item?.thread_id) ? (
+                                <ChevronUpIcon size={16} />
+                              ) : (
+                                <ChevronDownIcon size={16} />
+                              )}
+                            </div>
+                          )}
+                        </a>
+                      </li>
+                      {params.thread_id === item?.thread_id && expandedThreads?.includes(item?.thread_id) && (
                         <>
                           {loadingSubThreads ? (
                             <Skeleton />
@@ -428,39 +438,53 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                           </span>
                                         </div>
                                       </div>
-                                 {subThread?.messages?.length > 0 && (                                    <div className="mt-2 ml-6 space-y-1">
-                                      {subThread?.messages?.map((msg, msgIndex) => (
-                                        <div
-                                          key={msgIndex}
-                                          onClick={() => handleSetMessageId(msg?.message_id)}
-                                          className={`cursor-pointer p-2 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
-                                        >
-                                          <div className="flex items-start gap-2">
-                                            <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />
-                                            <span>{truncate(msg?.message, 45)}</span>
+                                      {subThread?.messages?.length > 0 && (<div className="mt-2 ml-6 space-y-1">
+                                        {subThread?.messages?.map((msg, msgIndex) => (
+                                          <div
+                                            key={msgIndex}
+                                            onClick={() => handleSetMessageId(msg?.message_id)}
+                                            className={`cursor-pointer p-2 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}
+                                          >
+                                            <div className="flex items-start gap-2">
+                                              <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />
+                                              <span>{truncate(msg?.message, 45)}</span>
+                                            </div>
                                           </div>
-                                        </div>
-                                      ))}
+                                        ))}
+                                      </div>
+                                      )}
                                     </div>
-                                  )}
+                                  ))}
                                 </div>
-                              ))}
+                              </div>
                             </div>
+                          )}          
+                            {item?.message && item?.message?.length > 0 && (
+                            <div className="p-4">                         
+                             <div className="space-y-2 ml-4">         
+                             {item?.message?.map((msg, index) => (
+                             <div 
+                             key={index} 
+                             onClick={() => handleSetMessageId(msg?.message_id)} 
+                             className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}                             
+                              >
+                               <div className="flex items-start gap-2">  
+                                <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />
+                                  <span>{truncate(msg?.message, 45)}</span>
                           </div>
+                         </div>))}
+                          </div>
+                          </div>
+                          )}
                         </div>
-                      )}                      {item?.message && item?.message?.length > 0 && (                        <div className="p-4">                          <div className="space-y-2 ml-4">                            {item?.message?.map((msg, index) => (                              <div                                key={index}                                onClick={() => handleSetMessageId(msg?.message_id)}                                className={`cursor-pointer p-3 rounded-md transition-all duration-200 text-sm bg-base-100 hover:bg-base-200 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-gray-300`}                              >                                <div className="flex items-start gap-2">                                  <UserIcon className="w-3 h-3 mt-0.5 text-gray-400" />                                  <span>{truncate(msg?.message, 45)}</span>                                </div>                              </div>                            ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>}
+                      </div>}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </ul>
-          </div>
-        </InfiniteScroll>
-      )}
+                ))}
+              </ul>
+            </div>
+          </InfiniteScroll>
+        )}
       </div>
       <div className="fixed bottom-2 left-12">
         {!isThreadSelectable && historyData?.length > 0 && (
