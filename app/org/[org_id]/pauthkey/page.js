@@ -42,7 +42,11 @@ function Page({ params }) {
   }, []); // Removed authData from dependencies to avoid infinite loop
 
   const maskAuthKey = (authkey) => {
+<<<<<<< Updated upstream
     return authkey.substring(0, 3) + '*'.repeat(9) + authkey.substring(authkey.length - 3);
+=======
+    return authkey?.substring(0, 3) + '*'.repeat(9) + authkey?.substring(authkey?.length - 3);
+>>>>>>> Stashed changes
   };
 
   /**
@@ -162,9 +166,15 @@ function Page({ params }) {
             <CustomTable
               data={filterPauthKeys.map(item => ({
                 ...item,
+<<<<<<< Updated upstream
                 actualName: item.name || 'Unnamed Key',
                 originalAuthkey: item.authkey,
                 authkey: maskAuthKey(item.authkey), 
+=======
+                actualName: item?.name || 'Unnamed Key',
+                originalAuthkey: item?.authkey,
+                authkey: maskAuthKey(item?.authkey), 
+>>>>>>> Stashed changes
               }))}
               columnsToShow={PAUTH_KEY_COLUMNS}
               sorting
