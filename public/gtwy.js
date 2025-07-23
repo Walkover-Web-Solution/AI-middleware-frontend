@@ -18,8 +18,8 @@
                 hideHeader: 'false'
             };
             this.urls = {
-                gtwyUrl: 'http://localhost:3000/embed',
-                login: 'http://localhost:7072/gtwyEmbed/login'
+gtwyUrl: 'https://app.gtwy.ai/embed',
+login: 'https://db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {
                 bodyLoaded: false,
