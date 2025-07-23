@@ -29,7 +29,6 @@ import AddVariable from "../addVariable";
 import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
-import NewInputConfigComponent from "./configurationComponent/newInputConfigComponent";
 import Protected from "../protected";
 
 const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef }) => {
@@ -53,6 +52,24 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
         }
       } 
    },[bridgeType])
+
+   useEffect(() => {
+    if ((bridgeType === 'api' || bridgeType === 'chatbot'||bridgeType==='batch') && 
+        promptTextAreaRef?.current?.querySelector('textarea')?.value?.trim()==="" ) {
+     setTimeout(() => {
+        if (promptTextAreaRef?.current) {
+          promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500); 
+      
+     setTimeout(() => {
+        const element = promptTextAreaRef?.current?.querySelector('textarea');
+        if (element) {
+          element.focus();
+        }
+      }, 200); 
+    }
+}, [bridgeType, searchParams, router])
     const handleNavigation = (target) => {
         setCurrentView(target);
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=${target}`);

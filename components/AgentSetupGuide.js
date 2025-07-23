@@ -87,7 +87,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
   }
 
   return (
-    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-low-medium">
+    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-very-high">
       <div className="card bg-base-100 w-full h-full shadow-xl">
         <div className="card-body p-6 h-full flex flex-col">
           <div className="text-center mb-4 flex-shrink-0">
