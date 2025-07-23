@@ -169,7 +169,7 @@ function Page({ params }) {
     return (
         <div className="flex min-h-screen bg-gray-100 p-6 gap-6">
             {/* Organizations List */}
-            <div className="w-96 bg-white rounded-xl shadow-sm p-4 h-[calc(100vh-3rem)]">
+            <div className="w-96 bg-base-100 rounded-xl shadow-sm p-4 h-[calc(100vh-3rem)]">
                 <h2 className="text-lg font-semibold mb-4 text-gray-800">Organizations</h2>
                 <div className="mb-4">
                     <input
@@ -187,7 +187,7 @@ function Page({ params }) {
             </div>
 
             {/* Creation Form */}
-            <div className="flex-1 bg-white rounded-xl shadow-sm p-8">
+            <div className="flex-1 bg-base-100 rounded-xl shadow-sm p-8">
                 <div className="max-w-2xl mx-auto">
                      <div className="bg-blue-50 p-4 rounded-lg">
                         <h2 className="text-xl font-semibold text-blue-800">Create New Agent</h2>

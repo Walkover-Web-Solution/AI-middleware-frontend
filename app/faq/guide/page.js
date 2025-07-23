@@ -39,7 +39,7 @@ const ModelDocs = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Search Header */}
-      <div className="bg-white shadow-sm">
+      <div className="bg-base-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="relative w-full max-w-2xl mx-auto">
             <input
@@ -50,7 +50,7 @@ const ModelDocs = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm bg-white px-2">
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm bg-base-100 px-2">
               ⌘K / Ctrl+K
             </span>
           </div>
@@ -60,7 +60,7 @@ const ModelDocs = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Table of Contents */}
-        <div className="lg:col-span-1 bg-white rounded-xl shadow-sm p-6 sticky top-6 h-fit">
+        <div className="lg:col-span-1 bg-base-100 rounded-xl shadow-sm p-6 sticky top-6 h-fit">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Table of Contents</h2>
           <nav className="space-y-2">
             {filteredSections.map((section) => (
@@ -82,7 +82,7 @@ const ModelDocs = () => {
         </div>
 
         {/* Documentation Content */}
-        <div className="lg:col-span-3 bg-white rounded-xl shadow-sm p-8">
+        <div className="lg:col-span-3 bg-base-100 rounded-xl shadow-sm p-8">
           {filteredSections.map((section) => (
             <section
               key={section.id}

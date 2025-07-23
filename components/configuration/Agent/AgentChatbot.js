@@ -22,7 +22,7 @@ export const AgentChatBot = ({ agent, onBack, agentData }) => {
     },[agent, agentData])
 
     return (    
-        <div className="flex flex-col h-full p-6 bg-white rounded-lg shadow-lg border border-gray-200">
+        <div className="flex flex-col h-full p-6 bg-base-100 rounded-lg shadow-lg border border-gray-200">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold">{agent?.page_config?.url_slugname}</h2>
                 <button

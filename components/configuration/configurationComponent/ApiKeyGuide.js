@@ -255,7 +255,7 @@ function ApiKeyGuideSlider() {
     if (!provider) return null;
 
     return (
-      <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
+      <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
         <Section title={provider.title} caption={provider.caption}>
           {provider.steps.map((step, index) => (
             <StepCard key={index} stepNumber={index + 1} title={step.title}>

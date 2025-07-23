@@ -191,7 +191,7 @@ import Protected from "./protected";
               >
                 {/* API Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "api"
                       ? "ring-2 ring-blue-500"
                       : ""
@@ -223,7 +223,7 @@ import Protected from "./protected";
 
                 {/* Chatbot Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "chatbot"
                       ? "ring-2 ring-green-500"
                       : ""
@@ -255,7 +255,7 @@ import Protected from "./protected";
 
                 {/* Batch API Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "batch"
                       ? "ring-2 ring-purple-500"
                       : ""
@@ -287,7 +287,7 @@ import Protected from "./protected";
 
                 {/* Triggers Card */}
                 {!isEmbedUser && <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "trigger"
                       ? "ring-2 ring-amber-500"
                       : ""
@@ -338,7 +338,7 @@ import Protected from "./protected";
                     placeholder="Describe the purpose of this agent..."
                     ref={textAreaPurposeRef}
                     onChange={handlePurposeInput}
-                    className={`textarea textarea-bordered w-full min-h-[50px] md:min-h-[50px] bg-white transition-all duration-300 placeholder-gray-400 text-sm md:text-base ${
+                    className={`textarea textarea-bordered w-full min-h-[50px] md:min-h-[50px] bg-base-100 transition-all duration-300 placeholder-gray-400 text-sm md:text-base ${
                       validationErrors.purpose
                         ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
                         : "border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"

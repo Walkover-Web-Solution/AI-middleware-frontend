@@ -179,7 +179,7 @@ const Page = ({ searchParams }) => {
       <div 
         className={`
           ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen border-b border-gray-200'} 
-          bg-white
+          bg-base-100
         `}
         style={isDesktop ? { width: `${leftWidth}%` } : {}}
       >

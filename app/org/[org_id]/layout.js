@@ -309,7 +309,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           {/* Main Content Area */}
           <div className={`flex-1 ${path.length > 4 ? 'ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+            <div className="sticky top-0 z-medium bg-base-100 border-b ml-2">
               <Navbar params={params} />
             </div>
 
@@ -340,7 +340,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           {/* Main Content Area for Embed Users */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+            <div className="sticky top-0 z-medium bg-base-100 border-b ml-2">
               <Navbar params={params} />
             </div>
 

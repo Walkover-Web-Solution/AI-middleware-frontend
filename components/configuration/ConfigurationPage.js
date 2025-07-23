@@ -136,7 +136,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     }, [bridgeType, params, modelType]);
 
     return (
-        <div className="flex flex-col gap-3 relative mt-4">
+        <div className="flex flex-col gap-3 relative mt-4 bg-base-100">
             <div>
                 <BridgeNameInput params={params} />
                 <VersionDescriptionInput params={params} />

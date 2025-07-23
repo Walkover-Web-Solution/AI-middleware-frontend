@@ -53,7 +53,7 @@ function Page() {
       <div
         key={index}
         onClick={() => handleSwitchOrg(org.id, org.name)}
-        className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+        className="bg-base-100 shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
       >
         <div className="px-6 py-4">
           <div className="font-bold text-xl mb-2">{org.name}</div>

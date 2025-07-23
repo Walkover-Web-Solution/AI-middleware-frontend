@@ -84,7 +84,7 @@ const CustomTable = ({
 
     return (
         <div className="overflow-x-auto m-2">
-            <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+            <table className="min-w-full bg-base-100 shadow-md rounded-lg overflow-hidden">
                 <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                     <tr className="hover">
                         {showRowSelection &&

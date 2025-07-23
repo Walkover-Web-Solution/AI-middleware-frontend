@@ -5,7 +5,7 @@ import Modal from '../UI/Modal'
 const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput}) => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.EDIT_MESSAGE_MODAL}>
-    <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6">
+    <div className="bg-base-100 rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6">
       <h2 className="text-xl font-semibold mb-4">Edit Message</h2>
       <div className="form-control mb-4">
         <label className="label">

@@ -17,7 +17,7 @@ const ModelUsageDetailsModal = ({usageDetailsData, params}) => {
     <Modal MODAL_ID={MODAL_TYPE.USAGE_DETAILS_MODAL}>
       <div className="flex items-center justify-center">
         <div 
-          className="w-full max-w-[50rem] bg-white border border-gray-200 rounded-lg p-6 mx-4"
+          className="w-full max-w-[50rem] bg-base-100 border border-gray-200 rounded-lg p-6 mx-4"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex flex-col space-y-4">

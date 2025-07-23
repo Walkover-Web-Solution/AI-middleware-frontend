@@ -190,7 +190,7 @@ export default function FormSection({ params, chatbotId = null }) {
     }
 
     return (
-        <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
+        <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow p-4">
             <h3 className="text-lg font-semibold">Display</h3>
             <label className="form-control w-full max-w-xs">
                 <div className="label">

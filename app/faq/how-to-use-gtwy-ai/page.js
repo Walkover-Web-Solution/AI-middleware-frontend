@@ -28,7 +28,7 @@ const Page = () => {
           <div className="mb-20">
             <h2 className="text-3xl font-bold mb-8 text-center">Quick Start Guide</h2>
             <div className="space-y-8">
-              <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <div className="bg-base-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <h3 className="text-2xl font-semibold mb-4 text-blue-600">1. How to Use GTWY AI</h3>
                 <p className="text-gray-700 mb-6 text-lg">Master your agent settings and optimize performance with our comprehensive guide.</p>
                 <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.935483870967742', padding: '40px 0' }}>
@@ -47,7 +47,7 @@ const Page = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <div className="bg-base-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <h3 className="text-2xl font-semibold mb-4 text-purple-600">2. How to Call a Function</h3>
                 <p className="text-gray-700 mb-6 text-lg">Learn to create bridges and harness the power of AI models seamlessly.</p>
                 <div className="rounded-xl overflow-hidden" style={{ position: 'relative', boxSizing: 'content-box', maxHeight: '80vh', width: '100%', aspectRatio: '1.7733990147783252', padding: '40px 0' }}>
@@ -70,7 +70,7 @@ const Page = () => {
 
           {/* Detailed Guides */}
           <div className="space-y-12">
-            <div className="bg-white rounded-2xl p-10 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="bg-base-100 rounded-2xl p-10 shadow-lg hover:shadow-xl transition-all duration-300">
               <h2 className="text-3xl font-bold mb-8 text-blue-600">Detailed Configuration Guide</h2>
               <div className="prose max-w-none">
                 <h3 className="text-2xl mb-4 text-gray-800">API Configuration</h3>
@@ -96,7 +96,7 @@ const Page = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-10 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="bg-base-100 rounded-2xl p-10 shadow-lg hover:shadow-xl transition-all duration-300">
               <h2 className="text-3xl font-bold mb-8 text-purple-600">Chatbot Implementation</h2>
               <div className="prose max-w-none">
                 <p className="text-lg text-gray-700 mb-6">Follow our step-by-step guide to implement a powerful chatbot using GTWY AI:</p>
@@ -116,7 +116,7 @@ const Page = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-10 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="bg-base-100 rounded-2xl p-10 shadow-lg hover:shadow-xl transition-all duration-300">
               <h2 className="text-3xl font-bold mb-8 text-gray-800">Best Practices</h2>
               <div className="grid md:grid-cols-2 gap-10">
                 <div className="bg-blue-50 p-8 rounded-xl">
@@ -153,7 +153,7 @@ const Page = () => {
             </p>
             <a 
               href="mailto:support@gtwy.ai"
-              className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-opacity-90 transition-all duration-300 transform hover:-translate-y-1"
+              className="inline-block bg-base-100 text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-opacity-90 transition-all duration-300 transform hover:-translate-y-1"
             >
               Contact Support
             </a>

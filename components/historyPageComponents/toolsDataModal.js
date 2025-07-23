@@ -15,7 +15,7 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
 
   return (
     <dialog className="modal modal-middle mx-auto outline-none" ref={toolsDataModalRef}>
-      <div className="relative bg-white rounded-lg shadow-lg p-6 w-[80%] max-w-[80vw] overscroll-none">
+      <div className="relative bg-base-100 rounded-lg shadow-lg p-6 w-[80%] max-w-[80vw] overscroll-none">
         <h2 className="font-bold mb-1">Function Data:</h2>
         <div className="overflow-y-scroll max-h-[70vh] max-w-auto overflow-x-hidden">
           {toolsData ? (

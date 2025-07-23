@@ -55,7 +55,7 @@ export default function SettingsPage({ params }) {
 
   return (
     <main className="max-w-4xl mx-auto p-4 my-20">
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-base-100 rounded-lg shadow p-6">
         <div className="flex items-center gap-3 mb-6">
           <BuildingIcon className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-semibold">Workspace Settings</h1>
