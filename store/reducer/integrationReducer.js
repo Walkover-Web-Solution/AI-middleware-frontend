@@ -22,10 +22,15 @@ export const integrationReducer = createSlice({
         state.integrationData[orgId] = [{ ...data, _id }];
       }
     },
-    deleteIntegrationReducer: (state, action) => {
-      const { orgId, id } = action.payload;
+    updateIntegrationDataReducer: (state, action) => {
+      const { orgId, data } = action.payload;
       if (state.integrationData[orgId]) {
-        state.integrationData[orgId] = state.integrationData[orgId].filter(entry => entry._id !== id);
+        state.integrationData[orgId] = state.integrationData[orgId].map(entry => {
+          if (entry._id === data._id) {
+            return { ...entry, ...data };
+          }
+          return entry;
+        });
       }
     }
   }
@@ -34,7 +39,7 @@ export const integrationReducer = createSlice({
 export const {
   fetchAllIntegrationData,
   addIntegrationDataReducer,
-  deleteIntegrationReducer,
+  updateIntegrationDataReducer,
 } = integrationReducer.actions;
 
 export default integrationReducer.reducer;
