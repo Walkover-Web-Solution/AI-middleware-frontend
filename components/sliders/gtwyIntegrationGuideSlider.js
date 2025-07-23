@@ -322,7 +322,7 @@ window.addEventListener('message', (event) => {
   return (
     <aside
       id="gtwy-integration-slider"
-      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 opacity-100 h-screen bg-base-200 transition-all lgoverflow-hidden overflow-auto duration-300 border-l ${isOpen ? '' : 'translate-x-full'}`}
+      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 opacity-100 h-screen bg-base-200 transition-all lg:overflow-hidden overflow-auto duration-300 border-l ${isOpen ? '' : 'translate-x-full'}`}
       aria-label="Integration Guide Slider"
     >
       <div className="flex flex-col w-full gap-4">
