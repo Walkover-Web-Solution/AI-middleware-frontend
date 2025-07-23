@@ -336,7 +336,7 @@ window.addEventListener('message', (event) => {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* Left Column - Configuration Form */}
-          <div className="space-y-2 overflow-y-auto h-[calc(100vh-50px)] scrollbar-hide">
+          <div className="space-y-2 overflow-y-auto h-[calc(100vh-100px)] scrollbar-hide mb-4">
             <div className="card bg-base-100 shadow-sm">
               <div className="card-body p-3">
                 <h4 className="card-title text-primary text-base mb-0">Configuration Settings</h4>
@@ -374,7 +374,7 @@ window.addEventListener('message', (event) => {
           </div>
 
           {/* Right Column - Generated Scripts */}
-          <div className="space-y-6 overflow-y-auto h-[calc(100vh-50px)] scrollbar-hide">
+          <div className="space-y-6 overflow-y-auto h-[calc(100vh-100px)] scrollbar-hide mb-4">
             {/* Script Integration */}
             <div className="card bg-base-100 border">
               <div className="card-body">
