@@ -196,18 +196,12 @@
             });
 
             // Assemble header
-                if (this.config.hideFullScreenButton === "false" || this.config.hideFullScreenButton === false) {
-                    buttonsContainer.appendChild(fullscreenBtn);
-                } else {
-                    buttonsContainer.appendChild(fullscreenBtn);
-                    // fullscreenBtn.style.display = 'none';
-                }
-            if (this.config.hideCloseButton === "false" || this.config.hideCloseButton === false) {
-                buttonsContainer.appendChild(closeBtn);
-            } else {
-                buttonsContainer.appendChild(closeBtn);
-                // closeBtn.style.display = 'none';
-            }
+if (this.config.hideFullScreenButton === "false" || this.config.hideFullScreenButton === false) {
+    buttonsContainer.appendChild(fullscreenBtn);
+}
+if (this.config.hideCloseButton === "false" || this.config.hideCloseButton === false) {
+    buttonsContainer.appendChild(closeBtn);
+}
             headerContent.appendChild(poweredBy);
             headerContent.appendChild(buttonsContainer);
             header.appendChild(headerContent);
