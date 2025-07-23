@@ -42,8 +42,7 @@ export const {
   fetchAllKnowlegdeBaseData,
   addKnowbaseDataReducer,
   deleteKnowledgeBaseReducer,
-  updateKnowledgeBaseReducer,
-  fetchKnowlegdeBaseToken
+  updateKnowledgeBaseReducer
 } = knowledgeBaseReducer.actions;
 
 export default knowledgeBaseReducer.reducer;
