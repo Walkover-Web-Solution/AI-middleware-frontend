@@ -14,7 +14,6 @@ import EmbedList from "./configurationComponent/embedList";
 import InputConfigComponent from "./configurationComponent/inputConfigComponent";
 import ModelDropdown from "./configurationComponent/modelDropdown";
 import PreEmbedList from "./configurationComponent/preEmbedList";
-import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
@@ -29,8 +28,8 @@ import AddVariable from "../addVariable";
 import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
-import NewInputConfigComponent from "./configurationComponent/newInputConfigComponent";
 import Protected from "../protected";
+import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
 
 const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef }) => {
     const router = useRouter();
@@ -95,6 +94,9 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             <ModelDropdown params={params} />
             <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
             <AdvancedParameters params={params} />
+            {modelType !== "image" && modelType !== 'embedding' && bridgeType=='api'&& (
+                    <AdvancedConfiguration params={params} bridgeType={bridgeType} modelType={modelType} />
+            )}
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
                     <AddVariable params={params} />
@@ -102,7 +104,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     <ToolCallCount params={params} />
                 </>
             )}
-            {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
         </>
     ), [bridgeType, modelType, params, modelName]);
     const renderChatbotConfigView = useMemo(() => () => (
