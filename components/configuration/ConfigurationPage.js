@@ -38,13 +38,23 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const view = searchParams.get('view') || 'config';
     const [currentView, setCurrentView] = useState(view);
 
-    const { bridgeType, modelType, modelName, showGuide, showConfigType } = useCustomSelector((state) => ({
+    const { bridgeType, modelType, modelName, showGuide, showConfigType,shouldPromptShow } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
+  return {
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
-        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
+        modelType: modelTypeName,
+        modelName: modelName,
         showGuide: state.userDetailsReducer.userDetails.showGuide,
         showConfigType: state.userDetailsReducer.userDetails.showConfigType,
-    }));
+        shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt   
+
+};
+});
+     
    useEffect(()=>{
       if(bridgeType==='trigger'||bridgeType=='api'||bridgeType==='batch'){
         if(currentView==='chatbot-config'||bridgeType==='trigger'){
@@ -95,16 +105,16 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             <ModelDropdown params={params} />
             <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
             <AdvancedParameters params={params} />
-            {modelType !== "image" && modelType !== 'embedding' && (
+            {shouldPromptShow && modelType !== 'embedding' && (
                 <>
                     <AddVariable params={params} />
                     <GptMemory params={params} />
                     <ToolCallCount params={params} />
                 </>
             )}
-            {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
+            {bridgeType === 'api' && shouldPromptShow && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
         </>
-    ), [bridgeType, modelType, params, modelName]);
+    ), [bridgeType, modelType,shouldPromptShow, params, modelName]);
     const renderChatbotConfigView = useMemo(() => () => (
         <>
             
@@ -112,7 +122,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             <StarterQuestionToggle params={params} />
             <ActionList params={params} />
         </>
-    ), [bridgeType, modelType, params, modelName]);
+    ), [bridgeType, modelType,shouldPromptShow, params, modelName]);
 
     const renderGuideView = useMemo(() => () => {
         const guideComponents = {
