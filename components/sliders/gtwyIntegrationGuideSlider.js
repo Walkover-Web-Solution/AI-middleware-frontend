@@ -402,7 +402,7 @@ window.addEventListener('message', (event) => {
                   {/* Access Token */}
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-medium">JWT Access Token</span>
+                      <span className="label-text font-medium">JWT Access key</span>
                     </label>
                     {gtwyAccessToken ? (
                       <div className="relative">
@@ -421,9 +421,9 @@ window.addEventListener('message', (event) => {
                     ) : (
                       <button
                         onClick={handleGenerateAccessKey}
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-primary btn-sm w-56"
                       >
-                        Generate JWT Access Token
+                        Show Access Key
                       </button>
                     )}
                   </div>
