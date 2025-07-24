@@ -1103,7 +1103,7 @@ export const getClientInfo = async (client_id)=>{
 
 export const addNewModel = async(newModelObj) =>{
   try {
-    const response = await axios.post(`${URL}/modelConfiguration/user`, newModelObj)
+    const response = await axios.post(`${URL}/modelConfiguration/`, newModelObj)
     return response;
   } catch (error) {
     console.log(error)
@@ -1112,7 +1112,7 @@ export const addNewModel = async(newModelObj) =>{
 }
 export const deleteModel = async(dataToSend) =>{
   try {
-    const response = await axios.delete(`${URL}/modelConfiguration/user?${new URLSearchParams(dataToSend).toString()}`)
+    const response = await axios.delete(`${URL}/modelConfiguration/?${new URLSearchParams(dataToSend).toString()}`)
     toast.success(response?.data?.message)
     return response;
   } catch (error) {
