@@ -171,13 +171,11 @@ const AdvancedParameters = ({ params }) => {
 
   return (
     <div className="z-very-low ml-1 mt-2 text-base-content" tabIndex={0}>
-      <button className=" mb-5 info p-0 flex items-center justify-start font-medium " onClick={() => {
-        handleTutorial()
+      <button className="mb-5 info p-0 flex items-center justify-start font-medium" onClick={() => {        handleTutorial()
         toggleAccordion()
       }}>
         <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type.">
-        <span className=" mr-2  ">
-          Advanced Parameters
+        <span className="mr-2">          Advanced Parameters
         </span>
         </InfoTooltip>
 
