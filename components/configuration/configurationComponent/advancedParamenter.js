@@ -3,7 +3,7 @@ import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bri
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import { generateRandomID, openModal } from '@/utils/utility';
-import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -170,24 +170,24 @@ const AdvancedParameters = ({ params }) => {
   }, [dispatch, params?.id, params?.version]);
 
   return (
-    <div className="collapse z-very-low  text-base-content" tabIndex={0}>
-      <input type="radio" name="my-accordion-1" onClick={() => {
+    <div className="z-very-low ml-1 mt-2 text-base-content" tabIndex={0}>
+      <button className=" mb-5 info p-0 flex items-center justify-start font-medium " onClick={() => {
         handleTutorial()
         toggleAccordion()
-      }}
-        className='cursor-pointer' />
-      <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
-        <span className="mr-2 cursor-pointer">
+      }}>
+        <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type.">
+        <span className=" mr-2  ">
           Advanced Parameters
         </span>
+        </InfoTooltip>
 
         {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-      </div>
+      </button>
       {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"}/>)}
       {tutorialState.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
-      {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
+      {isAccordionOpen && <div className=" gap-3 flex flex-col p-3 border rounded-md">
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
           const rowDefaultValue =

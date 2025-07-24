@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import OnBoarding from "./OnBoarding";
 import { ONBOARDING_VIDEOS } from "@/utils/enums";
 import TutorialSuggestionToast from "./tutorialSuggestoinToast";
+import InfoTooltip from "./InfoTooltip";
 
 const AddVariable = ({ params }) => {
   const versionId = params.version;
@@ -231,9 +232,9 @@ const AddVariable = ({ params }) => {
   }, [isAccordionOpen, keyValuePairs, isFormData]);
 
   return (
-    <div className="collapse text-base-content" tabIndex={0}>
+    <div className="ml-1 text-base-content" tabIndex={0}>
       <button
-        className="flex items-center cursor-pointer focus:outline-none"
+        className="flex info items-center cursor-pointer focus:outline-none"
         onClick={() => {
           handleTutorial()
           toggleAccordion()
@@ -241,7 +242,13 @@ const AddVariable = ({ params }) => {
         aria-expanded={isAccordionOpen}
         aria-controls="accordion-content"
       >
-        <span className="mr-2 text-nowrap font-medium " >Add Variables</span>  
+      
+          <InfoTooltip 
+            tooltipContent={"Variables let you dynamically insert data into a prompt using this format: {{variable_name}}."}
+          >
+            <span className="mr-2  text-nowrap font-medium">Add Variables</span>
+          </InfoTooltip>
+      
         {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </button>
       {tutorialState?.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"} TutorialDetails={"Variable Management"}/>)}
