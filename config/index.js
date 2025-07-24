@@ -1101,3 +1101,53 @@ export const getClientInfo = async (client_id)=>{
   }
 }
 
+export const addNewModel = async(newModelObj) =>{
+  try {
+    const response = await axios.post(`${URL}/modelConfiguration/user`, newModelObj)
+    return response;
+  } catch (error) {
+    console.log(error)
+    toast.error(error?.response?.data?.error)
+  }
+}
+export const deleteModel = async(dataToSend) =>{
+  try {
+    const response = await axios.delete(`${URL}/modelConfiguration/user?${new URLSearchParams(dataToSend).toString()}`)
+    toast.success(response?.data?.message)
+    return response;
+  } catch (error) {
+    console.log(error)
+    toast.error(error?.response?.data?.error || error?.response?.data?.message )
+    throw error
+  }
+}
+
+export const getAllAgentsApi = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/publicAgent/all`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
+
+export const publicAgentLoginApi = async () =>{
+  try {
+    const repsonse = await axios.post(`${PYTHON_URL}/publicAgent/public/login`)
+    return repsonse;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error);
+  }
+}
+  
+export const privateAgentLoginApi = async () => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/publicAgent/login`)
+    return response;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error);
+  }
+} 

@@ -279,7 +279,7 @@ const Navbar = ({ isEmbedUser }) => {
         }`}>
 
         {/* Top bar with breadcrumb/home and actions */}
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-3 h-14">
           {/* Left: Breadcrumb or Home */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {(isEmbedUser && !hideHomeButton) && 
@@ -393,7 +393,7 @@ const Navbar = ({ isEmbedUser }) => {
 
         {/* Tabs section */}
         <div className="border-t border-base-200">
-          <div className="px-4 h-10">
+          <div className="px-1 h-10">
             <div className="tabs tabs-lifted h-10">
               {TABS.map(tab => (
                 <button

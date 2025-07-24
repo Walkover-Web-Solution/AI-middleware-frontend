@@ -1,6 +1,8 @@
 'use client'
 import LoginPage from "@/components/LoginPage";
-import WithAuth from "@/components/withauth";
+import WithPublicAgentAuth from "@/components/withPublicAgentAuth";
+
+export const runtime = 'edge';
 
 const page = ({ loading }) => {
   return (
@@ -8,4 +10,4 @@ const page = ({ loading }) => {
   );
 };
 
-export default WithAuth(page);
+export default WithPublicAgentAuth(page);

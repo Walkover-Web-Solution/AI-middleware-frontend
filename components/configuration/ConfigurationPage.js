@@ -32,7 +32,7 @@ import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import NewInputConfigComponent from "./configurationComponent/newInputConfigComponent";
 import Protected from "../protected";
 
-const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef,promptTextAreaRef }) => {
+const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const view = searchParams.get('view') || 'config';
@@ -91,7 +91,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef,promptTextAre
                 </>
             )}
 
-            <ServiceDropdown params={params} />
+            <ServiceDropdown params={params} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} />
             <ModelDropdown params={params} />
             <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
             <AdvancedParameters params={params} />

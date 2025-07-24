@@ -9,6 +9,7 @@ export default function layoutHistoryPage({ children, params }) {
       }));
       
   const scriptId = "chatbot-main-script";
+  const scriptSrcProd = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC_PROD;
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
 
   useEffect(() => {
@@ -21,7 +22,7 @@ export default function layoutHistoryPage({ children, params }) {
     script.setAttribute("embedToken", history_page_chatbot_token);
     script.setAttribute("hideIcon", "true");
     script.id = scriptId;
-    script.src = scriptSrc;
+    script.src = scriptSrcProd;
     document.head.appendChild(script);
 
     return () => {
