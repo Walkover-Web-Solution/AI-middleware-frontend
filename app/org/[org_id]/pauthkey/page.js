@@ -41,9 +41,10 @@ function Page({ params }) {
     setFilterPauthKeys(authData)
   }, []); // Removed authData from dependencies to avoid infinite loop
 
-  const maskAuthKey = (authkey) => {
-    return authkey?.substring(0, 3) + '*'.repeat(9) + authkey?.substring(authkey?.length - 3);
-  };
+const maskAuthKey = (authkey) => {
+  if (!authkey) return '';
+  return authkey.substring(0, 3) + '*'.repeat(9) + authkey.substring(authkey.length - 3);
+};
 
   /**
    * Copies given content to clipboard
