@@ -198,13 +198,11 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
         document.head.removeChild(existingScript);
       }
       if (!token) return;
-      setTimeout(() => {
-        const script = document.createElement("script");
-        script.id = "rag-main-script";
-        script.src = process.env.NEXT_PUBLIC_RAG_EMBED_URL;
-        script.setAttribute("embedToken", token);
-        document.head.appendChild(script);
-      }, 3000); // 3 second delay
+      const script = document.createElement("script");
+      script.id = "rag-main-script";
+      script.src = process.env.NEXT_PUBLIC_RAG_EMBED_URL;
+      script.setAttribute("embedToken", token);
+      document.head.appendChild(script);
     };
 
     dispatch(getKnowledgeBaseTokenAction(params.org_id)).then((data) => {
