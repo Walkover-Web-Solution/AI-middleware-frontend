@@ -19,7 +19,7 @@ export const runtime = 'edge';
 
 const Page = ({ params }) => {
   const dispatch = useDispatch();
-  const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id]);
+  const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id])||[];
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData)
@@ -40,7 +40,7 @@ const Page = ({ params }) => {
   }, []);
 
 
-  const tableData = filterKnowledgeBase?.map(item => ({
+  const tableData = filterKnowledgeBase.map(item => ({
     ...item,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
@@ -125,10 +125,10 @@ const Page = ({ params }) => {
       </div>
 
       <div className="px-4">
-        {filterKnowledgeBase?.length > 0 ? (
+        {filterKnowledgeBase.length > 0 ? (
           viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filterKnowledgeBase?.map((item, index) => (
+              {filterKnowledgeBase.map((item, index) => (
                 <div
                   key={index}
                   className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"
