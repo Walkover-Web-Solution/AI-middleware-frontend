@@ -74,14 +74,14 @@ export default function PrivateFormSection({ params, ChooseChatbot, setChatBotId
                     <InputWithCopyButton label="Access Key" placeholder="Access Key" value={accessKey} />
                 ) : (
                     <button className="btn btn-primary w-fit btn-sm" onClick={handleGetAccessKey}>
-                        Your AccessKey
+                        Show Access Key
                     </button>
                 )}
             </div>
             <p className="text-sm">
                 Generate a JWT token using org_id, chatbot_id, and user_id variables, then sign it with the access key.
             </p>
-            <a className="link link-hover text-sm" target="_blank" href="/faq/create-jwt-for-chatbot">
+            <a className="link link-hover text-sm text-primary" target="_blank" href="/faq/create-jwt-for-chatbot">
                 Learn, How to create JWT token?
             </a>
         </div>

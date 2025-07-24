@@ -138,7 +138,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
               {/* Access Token */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-medium">JWT Access Token</span>
+                  <span className="label-text font-medium">JWT Access Key</span>
                 </label>
                 {gtwyAccessToken ? (
                   <div className="relative">
@@ -157,9 +157,9 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
                 ) : (
                   <button
                     onClick={handleGenerateAccessKey}
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-primary btn-sm w-56"
                   >
-                    Generate JWT Access Token
+                    Show Access Key
                   </button>
                 )}
               </div>
