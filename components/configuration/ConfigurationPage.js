@@ -44,32 +44,32 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
         showGuide: state.userDetailsReducer.userDetails.showGuide,
         showConfigType: state.userDetailsReducer.userDetails.showConfigType,
     }));
-   useEffect(()=>{
-      if(bridgeType==='trigger'||bridgeType=='api'||bridgeType==='batch'){
-        if(currentView==='chatbot-config'||bridgeType==='trigger'){
-        setCurrentView('config');  
-        router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=config`);
+    useEffect(() => {
+        if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
+            if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
+                setCurrentView('config');
+                router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=config`);
+            }
         }
-      } 
-   },[bridgeType])
+    }, [bridgeType])
 
-   useEffect(() => {
-    if ((bridgeType === 'api' || bridgeType === 'chatbot' || bridgeType === 'batch') && 
-        promptTextAreaRef?.current?.querySelector('textarea')?.value?.trim()==="" ) {
-     setTimeout(() => {
-        if (promptTextAreaRef?.current) {
-          promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
+    useEffect(() => {
+        if ((bridgeType === 'api' || bridgeType === 'chatbot' || bridgeType === 'batch') &&
+            promptTextAreaRef?.current?.querySelector('textarea')?.value?.trim() === "") {
+            setTimeout(() => {
+                if (promptTextAreaRef?.current) {
+                    promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 500);
+
+            setTimeout(() => {
+                const element = promptTextAreaRef?.current?.querySelector('textarea');
+                if (element) {
+                    element.focus();
+                }
+            }, 200);
         }
-      }, 500); 
-      
-     setTimeout(() => {
-        const element = promptTextAreaRef?.current?.querySelector('textarea');
-        if (element) {
-          element.focus();
-        }
-      }, 200); 
-    }
-}, [bridgeType, searchParams, router])
+    }, [bridgeType])
     const handleNavigation = (target) => {
         setCurrentView(target);
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=${target}`);
@@ -124,7 +124,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     ), [bridgeType, modelType, params, modelName]);
     const renderChatbotConfigView = useMemo(() => () => (
         <>
-            
+
             <UserRefernceForRichText params={params} />
             <StarterQuestionToggle params={params} />
             <ActionList params={params} />
@@ -159,10 +159,10 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 <VersionDescriptionInput params={params} />
             </div>
             {((isEmbedUser && showConfigType) || !isEmbedUser) && <BridgeTypeToggle params={params} />}
-           {<div className="absolute right-0 top-0">
+            {<div className="absolute right-0 top-0">
                 <div className="flex items-center">
                     <BridgeVersionDropdown params={params} />
-                    {((isEmbedUser && showConfigType) || !isEmbedUser ) && <div className="join group flex">
+                    {((isEmbedUser && showConfigType) || !isEmbedUser) && <div className="join group flex">
                         <button
                             onClick={() => handleNavigation('config')}
                             className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
@@ -170,16 +170,16 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                             <SettingsIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
                         </button>
-                        {bridgeType==='chatbot'&&
-                        <button
-                            onClick={() => handleNavigation('chatbot-config')}
-                            className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
-                        >
-                            <BotIcon size={16} className="shrink-0" />
-                            <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
-                        </button>
-                        } 
-                        {((isEmbedUser && showGuide) ||( !isEmbedUser && bridgeType!=='trigger')) && <button
+                        {bridgeType === 'chatbot' &&
+                            <button
+                                onClick={() => handleNavigation('chatbot-config')}
+                                className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
+                            >
+                                <BotIcon size={16} className="shrink-0" />
+                                <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
+                            </button>
+                        }
+                        {((isEmbedUser && showGuide) || (!isEmbedUser && bridgeType !== 'trigger')) && <button
                             onClick={() => handleNavigation('guide')}
                             className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
@@ -189,7 +189,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     </div>}
                 </div>
             </div>}
-            {currentView === 'chatbot-config' && bridgeType==='chatbot' ? renderChatbotConfigView() : currentView === 'guide' &&currentView!=='trigger' ? renderGuideView() : renderSetupView()}
+            {currentView === 'chatbot-config' && bridgeType === 'chatbot' ? renderChatbotConfigView() : currentView === 'guide' && currentView !== 'trigger' ? renderGuideView() : renderSetupView()}
             {renderNeedHelp()}
         </div>
     );
