@@ -54,7 +54,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
    },[bridgeType])
 
    useEffect(() => {
-    if ((bridgeType === 'api' || bridgeType === 'chatbot'||bridgeType==='batch') && 
+    if ((bridgeType === 'api' || bridgeType === 'chatbot' || bridgeType === 'batch') && 
         promptTextAreaRef?.current?.querySelector('textarea')?.value?.trim()==="" ) {
      setTimeout(() => {
         if (promptTextAreaRef?.current) {
