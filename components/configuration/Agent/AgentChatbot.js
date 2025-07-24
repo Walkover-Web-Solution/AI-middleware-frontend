@@ -22,7 +22,7 @@ export const AgentChatBot = ({ agent, onBack, agentData }) => {
     },[agent, agentData])
 
     return (    
-        <div className="flex flex-col h-full p-6 bg-base-100 rounded-lg shadow-lg border border-gray-200">
+        <div className="flex flex-col h-full p-6 bg-base-100 rounded-lg shadow-lg border border-base-300">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold">{agent?.page_config?.url_slugname}</h2>
                 <button
@@ -32,9 +32,9 @@ export const AgentChatBot = ({ agent, onBack, agentData }) => {
                     Back to Agents
                 </button>
             </div>
-            <div className="flex-1 border-t border-gray-200 pt-4">
+            <div className="flex-1 border-t border-base-300 pt-4">
                 {/* Chat interface would go here */}
-                <div className="text-center text-gray-500 py-8 min-h-[100%]" id='parentChatbot'>
+                <div className="text-center text-base-content py-8 min-h-[100%]" id='parentChatbot'>
                     Chat interface coming soon
                 </div>
             </div>

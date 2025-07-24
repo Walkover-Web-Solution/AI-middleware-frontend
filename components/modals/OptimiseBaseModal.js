@@ -192,7 +192,7 @@ function OptimiseBaseModal({
                   <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                     AI generated {contentLabel.toLowerCase()}
                     {isStreaming && (
-                      <span className="ml-2 text-sm text-gray-500 animate-pulse">
+                      <span className="ml-2 text-sm text-base-content animate-pulse">
                         ✨ Generating...
                       </span>
                     )}
@@ -233,7 +233,7 @@ function OptimiseBaseModal({
                   {...textareaProps}
                 />
                 {isStreaming && (
-                  <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-base-100 px-2 py-1 rounded-md shadow-sm border">
+                  <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-base-100 px-2 py-1 rounded-md shadow-sm border border-base-300">
                     <div className="flex space-x-1">
                       <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce"></div>
                       <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>

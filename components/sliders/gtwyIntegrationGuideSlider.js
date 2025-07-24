@@ -102,7 +102,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     aria-label="Integration Guide Slider"
   >
     <div className="flex flex-col w-full gap-4">
-      <div className="flex justify-between items-center border-b pb-4">
+      <div className="flex justify-between items-center border-b border-base-300 pb-4">
         <h3 className="font-bold text-lg">Integration Setup</h3>
         <CloseIcon
           className="cursor-pointer hover:text-error transition-colors"
@@ -112,7 +112,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
 
       <div className="space-y-6">
         {/* Step 1: JWT Configuration */}
-        <div className="card bg-base-100 border">
+        <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <h4 className="card-title text-base">Step 1: Connect Integration</h4>
             <div className="space-y-4">
@@ -168,7 +168,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
         </div>
 
         {/* Step 2: Script Integration */}
-        <div className="card bg-base-100 border">
+        <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <h4 className="card-title text-base">Step 2: Add Script</h4>
             <div className="form-control">
@@ -200,7 +200,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
         </div>
 
         {/* Step 3: Helper Functions */}
-        <div className="card bg-base-100 border">
+        <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <h4 className="card-title text-base">Step 3: Integration Functions</h4>
             <div className="form-control">
@@ -224,7 +224,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
         </div>
 
         {/* Step 4: Interface Configuration */}
-        <div className="card bg-base-100 border">
+        <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <h4 className="card-title text-base">Configure Interface</h4>
             <div className="form-control">
@@ -252,7 +252,7 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
         </div>
 
         {/* Step 5: Event Listener */}
-        <div className="card bg-base-100 border">
+        <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <h4 className="card-title text-base">Add Event Listener</h4>
             <div className="form-control">

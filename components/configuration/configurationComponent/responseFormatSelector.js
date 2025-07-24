@@ -84,8 +84,8 @@ const ResponseFormatSelector = ({ params }) => {
                     </label>
                 </div>
             ))}
-            <div className={`${selectedOption === 'custom' ? "border rounded" : ""}`}>
-                <div className={`border-t pt-4 px-4 ${selectedOption === 'custom' ? "" : "hidden"}`}>
+            <div className={`${selectedOption === 'custom' ? "border border-base-300 rounded" : ""}`}>
+                <div className={`border-t border-base-300 pt-4 px-4 ${selectedOption === 'custom' ? "" : "hidden"}`}>
                     <label className="form-control w-full mb-4">
                         <span className="label-text block mb-2">Webhook URL</span>
                         <input

@@ -312,7 +312,7 @@ export default function FormSection({ params, chatbotId = null }) {
                     <span className="label-text">ChatBot Preview </span>
                     <span className="flex flex-row items-center gap-3 cursor-pointer" onClick={handleRefreshConfiguration}>Refresh <RefreshIcon className={isRefreshing ? 'animate-spin' : ''} size={16} /></span>
                 </div>
-                <div className="shadow-sm border">
+                <div className="shadow-sm border border-base-300">
                     <iframe
                         ref={iframeRef}
                         src={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/chatbotPreview`}
@@ -374,7 +374,7 @@ function BridgesToSwitch({ chatBotId, handleSave ,orgId}) {
         router.push(`/org/${path[2]}/agents/configure/${id}?version=${versionId}`);
     }
 
-    return <div className="border p-2 flex flex-col gap-2">
+    return <div className="border border-base-300 p-2 flex flex-col gap-2">
         <div className="overflow-x-auto min-h-20 h-auto max-h-72 overflow-y-auto">
             <table className="table">
                 {/* head */}

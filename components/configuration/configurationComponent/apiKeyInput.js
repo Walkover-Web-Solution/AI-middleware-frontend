@@ -157,7 +157,7 @@ const ApiKeyInput = ({ params,apiKeySectionRef }) => {
                 </div>
                 <div>
                     {showDropdown && (
-                        <div className="absolute w-full bg-base-100 border border-gray-300 rounded-md shadow-lg z-low max-h-80 overflow-auto">
+                        <div className="absolute w-full bg-base-100 border border-base-300 rounded-md shadow-lg z-low max-h-80 overflow-auto">
                             {SERVICES?.filter(service => service?.value !== bridge?.service).map(service => (
                                 <div key={service?.value} className="px-4 py-2 border-b last:border-b-0">
                                     <div className="font-semibold capitalize mb-1">{service?.displayName}</div>
@@ -177,7 +177,7 @@ const ApiKeyInput = ({ params,apiKeySectionRef }) => {
                                         </label>
                                     ))}
                                     {filterApiKeysByService(service?.value)?.length === 0 && (
-                                        <span className="text-sm text-gray-500">No API keys available</span>
+                                        <span className="text-sm text-base-content">No API keys available</span>
                                     )}
                                 </div>
                             ))}

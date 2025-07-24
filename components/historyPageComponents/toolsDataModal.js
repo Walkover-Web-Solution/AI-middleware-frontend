@@ -42,7 +42,7 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
               </div>
             </>
           ) : (
-            <p className="text-center text-gray-500">No tools call data available</p>
+            <p className="text-center text-base-content">No tools call data available</p>
           )}
         </div>
         <div className="absolute top-4 right-5">

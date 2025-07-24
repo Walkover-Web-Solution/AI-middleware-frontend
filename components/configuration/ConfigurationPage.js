@@ -82,11 +82,11 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     <InputConfigComponent params={params} promptTextAreaRef={promptTextAreaRef} />
                     {/* <NewInputConfigComponent params={params} /> */}
                     <EmbedList params={params} />
-                    <hr className="my-0 p-0" />
+                    <hr className="my-0 p-0 bg-white border-t border-b border-base-300" />
                     <ConnectedAgentList params={params} />
-                    <hr className="my-0 p-0" />
+                    <hr className="my-0 p-0 bg-white border-t border-b border-base-300" />
                     <KnowledgebaseList params={params} />
-                    <hr className="my-0 p-0" />
+                    <hr className="my-0 p-0 bg-white border-t border-b border-base-300" />
                     <PrebuiltToolsList params={params} />
                 </>
             )}

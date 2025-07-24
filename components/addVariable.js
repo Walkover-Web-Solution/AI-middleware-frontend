@@ -258,7 +258,7 @@ const AddVariable = ({ params }) => {
           height: `${height}px`,
         }}
       >
-        <div className="min-h-[300px] w-full border rounded-md p-4">
+        <div className="min-h-[300px] w-full border border-base-300 rounded-md p-4">
           <div className="w-full flex flex-col gap-2">
             {/* Radio Buttons for Form Data and Raw Data */}
             <div className="flex flex-row gap-4">
@@ -295,7 +295,7 @@ const AddVariable = ({ params }) => {
             {/* Conditional Rendering based on isFormData */}
             {!isFormData ? (
               <textarea
-                className="border-2 border-gray-200 rounded-md p-4 w-full max-h-[400px] focus:outline-none resize-none"
+                className="border-2 border-base-300 rounded-md p-4 w-full max-h-[400px] focus:outline-none resize-none"
                 placeholder={`key: value\nkey: value\nkey: value`}
                 rows="8"
                 onBlur={(e) => onBlurHandler(e.target.value)}
@@ -324,7 +324,7 @@ const AddVariable = ({ params }) => {
                     />
                     <input
                       type="text"
-                      className="input input-bordered input-sm w-full"
+                      className="input input-bordered border-base-300 input-sm w-full"
                       placeholder="Enter key"
                       value={pair?.key || ""}
                       onChange={(e) =>
@@ -333,7 +333,7 @@ const AddVariable = ({ params }) => {
                     />
                     <input
                       type="text"
-                      className="input input-bordered input-sm w-full"
+                      className="input input-bordered border-base-300 input-sm w-full"
                       placeholder="Enter value"
                       value={pair?.value || ""}
                       onChange={(e) =>

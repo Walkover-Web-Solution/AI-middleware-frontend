@@ -212,7 +212,7 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
                     ref={suggestionListRef}
                     tabIndex={0}
                     role="listbox"
-                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-high w-60 p-2 shadow-xl border overflow-scroll overflow-y-auto"
+                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-high w-60 p-2 shadow-xl border border-base-300 overflow-scroll overflow-y-auto"
                 >
                     <div className="flex flex-col w-full">
                         <label className="label label-text-alt">Available variables</label>

@@ -110,7 +110,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
     return (
          <aside
             id="knowledgeBase-integration-slider"
-            className="fixed inset-y-0 right-0 border-l-2 bg-base-100 shadow-2xl rounded-md w-full md:w-1/2 lg:w-1/2 
+            className="fixed inset-y-0 right-0 border-l-2 border-base-300 bg-base-100 shadow-2xl rounded-md w-full md:w-1/2 lg:w-1/2 
                      overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-medium
                      translate-x-full"
             aria-label="Api Keys guide slider"

@@ -24,7 +24,7 @@ const RenderEmbed = ({
         const status = integrationData?.[functionName]?.status;
 
         return (
-          <div key={value?._id} id={value?._id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
+          <div key={value?._id} id={value?._id} className={`flex w-[250px] flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
             <div
               className="p-4 w-full h-full flex flex-col justify-between"
               onClick={() => openViasocket(functionName, {

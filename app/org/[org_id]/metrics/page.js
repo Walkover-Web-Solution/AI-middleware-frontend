@@ -111,14 +111,14 @@ function Page({ params }) {
     <div className="p-10 min-h-screen">
       {/* Page Header */}
       <header className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Metrics Dashboard</h1>
-        <p className="text-gray-600">Monitor your application's key metrics at a glance.</p>
+        <h1 className="text-3xl font-bold text-base-content">Metrics Dashboard</h1>
+        <p className="text-base-content">Monitor your application's key metrics at a glance.</p>
       </header>
 
       <div className='flex gap-8 justify-center'>
         <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Level:</label>
-          <div className="dropdown dropdown-end z-medium border rounded-lg">
+          <div className="dropdown dropdown-end z-medium border border-base-300 rounded-lg">
             <label tabIndex="0" role="button" className="btn capitalize">{level} level</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
               {['Organization', 'Agent'].map((item, index) => (
@@ -129,7 +129,7 @@ function Page({ params }) {
         </div>
         <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Select Agent:</label>
-          <div className={`dropdown dropdown-end z-medium border rounded-lg ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`dropdown dropdown-end z-medium border border-base-300 rounded-lg ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}>
           <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Agent'}</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
               <SearchItems setFilterItems={setFilterBridges} data={allBridges} item="Agents" />
@@ -150,7 +150,7 @@ function Page({ params }) {
       <div className="flex justify-end items-center mb-6 gap-3">
         <span className={`${loading ? 'loading loading-ring loading-lg' : ""}`}></span>
         {loading && <span className="text-gray-600">Loading...</span>}
-        <div className="dropdown border rounded-lg z-low">
+        <div className="dropdown border border-base-300 rounded-lg z-low">
           <label tabIndex="0" role="button" className="btn">{TIME_RANGE_OPTIONS?.[range]}</label>
           <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
             {TIME_RANGE_OPTIONS.map((item, index) => (
@@ -159,7 +159,7 @@ function Page({ params }) {
           </ul>
         </div>
 
-        <div className="join border">
+        <div className="join border border-base-300">
           {['Bridges', 'API Keys', 'Models'].map((item, index) => (
             <button key={index} className={`btn join-item ${factor === index ? 'btn-primary' : ''}`} onClick={() => handleFactorChange(index)}>{item}</button>
           ))}

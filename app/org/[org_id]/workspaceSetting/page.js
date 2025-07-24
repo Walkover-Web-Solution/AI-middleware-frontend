@@ -100,15 +100,15 @@ export default function SettingsPage({ params }) {
           </div>
 
           {isContentOpen && (
-            <div className="mt-4 border rounded-lg p-4">
+            <div className="mt-4 border border-base-300 rounded-lg p-4">
               <input
                 type="text"
                 placeholder="Search timezone..."
-                className="w-full p-2 border rounded mb-3 text-sm"
+                className="w-full p-2 border border-base-300 rounded mb-3 text-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <div className="h-48 overflow-y-auto border rounded">
+              <div className="h-48 overflow-y-auto border border-base-300 rounded">
                 {filteredTimezones.map((timezone) => (
                   <div
                     key={timezone.identifier}
@@ -124,13 +124,13 @@ export default function SettingsPage({ params }) {
               </div>
               <div className="flex justify-end gap-2 mt-3">
                 <button
-                  className="px-3 py-1.5 text-sm rounded bg-gray-100 hover:bg-gray-200"
+                  className="px-3 py-1.5 text-sm rounded bg-base-100 hover:bg-base-200"
                   onClick={handleCancel}
                 >
                   Cancel
                 </button>
                 <button
-                  className="px-3 py-1.5 text-sm rounded bg-primary text-white hover:bg-primary-dark"
+                  className="px-3 py-1.5 text-sm rounded bg-primary text-base-content hover:bg-primary-dark"
                   onClick={handleSave}
                 >
                   Save
