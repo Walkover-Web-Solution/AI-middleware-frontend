@@ -65,7 +65,7 @@ const InfoTooltip = ({ video = "", children, tooltipContent,docLink }) => {
             }}
             onMouseLeave={handleClose}
             className="
-              z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground
+              z-low-medium w-64 p-3 ml-3 bg-gray-900 text-white text-primary-foreground
               rounded-md shadow-xl text-xs animate-in fade-in zoom-in
               border border-gray-700 space-y-2 pointer-events-auto
             "
