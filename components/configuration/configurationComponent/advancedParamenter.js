@@ -171,7 +171,7 @@ const AdvancedParameters = ({ params }) => {
 
   return (
     <div className="z-very-low mt-2 text-base-content w-full cursor-pointer" tabIndex={0}>
-      <div className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full cursor-pointer`} onClick={() => {
+      <div className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
         handleTutorial()
         toggleAccordion()
       }}>
