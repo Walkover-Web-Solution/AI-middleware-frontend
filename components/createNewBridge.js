@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import LoadingSpinner from "./loadingSpinner";
-import { closeModal } from "@/utils/utility";
+import { closeModal, sendDataToParent } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { BotIcon, CheckIcon, CircleAlertIcon, ClockTenIcon, WebhookIcon } from "@/components/Icons";
@@ -86,6 +86,7 @@ import Protected from "./protected";
         };
         dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
           // setShowFileUploadModal(false);
+          isEmbedUser && sendDataToParent("drafted", {name: data?.bridge?.name, agent_id: data?.bridge?._id}, "Agent created Successfully")
           route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
           closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
           setIsLoading(false);
@@ -142,6 +143,7 @@ import Protected from "./protected";
         dispatch(createBridgeWithAiAction({ dataToSend, orgId: orgid }))
             .then((response) => {
                 const data = response.data;
+                isEmbedUser && sendDataToParent("drafted", {name: data?.name, agent_id: data?.bridge?._id}, "Agent created Successfully")
                 route.push(`/org/${orgid}/agents/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
                 closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
                 setIsAiLoading(false);

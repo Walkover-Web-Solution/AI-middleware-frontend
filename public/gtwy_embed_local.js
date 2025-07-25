@@ -115,7 +115,6 @@
 
         handleIncomingMessages(event) {
             const { type, data } = event.data || {};
-            //console.log(type)
             //console.log(data)   
             switch (type) {
                 case 'CLOSE_GTWY_EMBED':
@@ -123,6 +122,9 @@
                     this.closeGtwy();
                     break;
                 case 'gtwyLoaded':
+                    this.sendInitialData();
+                    break;
+                case 'configLoaded':
                     this.sendInitialData();
                     break;
             }
@@ -194,8 +196,18 @@
             });
 
             // Assemble header
-            if (this?.config?.slide !== 'full'){(this.config.hideFullScreenButton === "false" || this.config.hideFullScreenButton === false) && buttonsContainer.appendChild(fullscreenBtn)}
-            (this.config.hideCloseButton === "false" || this.config.hideCloseButton === false) && buttonsContainer.appendChild(closeBtn);
+                if (this.config.hideFullScreenButton === "false" || this.config.hideFullScreenButton === false) {
+                    buttonsContainer.appendChild(fullscreenBtn);
+                } else {
+                    buttonsContainer.appendChild(fullscreenBtn);
+                    // fullscreenBtn.style.display = 'none';
+                }
+            if (this.config.hideCloseButton === "false" || this.config.hideCloseButton === false) {
+                buttonsContainer.appendChild(closeBtn);
+            } else {
+                buttonsContainer.appendChild(closeBtn);
+                // closeBtn.style.display = 'none';
+            }
             headerContent.appendChild(poweredBy);
             headerContent.appendChild(buttonsContainer);
             header.appendChild(headerContent);
@@ -382,10 +394,7 @@
         }
 
         openGtwy(agent_id = null) {
-            //console.log('Opening GTWY Embed...'); // Debug log
-            // Check if initialized
             if (!this.state.isInitialized) {
-                //console.log('GTWY Embed not initialized yet, initializing...');
                 this.initializeGtwyEmbed().then(() => {
                     this.openGtwy(agent_id); // Retry after initialization
                 });
@@ -451,19 +460,7 @@
                     if (window.parent) {
                         window.parent.postMessage?.({ type: 'close', data: {} }, '*');
                     }
-                    if (window.ReactNativeWebView) {
-                        window.ReactNativeWebView.postMessage?.(JSON.stringify({ type: 'close', data: {} }));
-                    }
-
                     iframeContainer.style.display = 'none';
-
-                    const gtwyInterfaceEmbed = document.getElementById('gtwyInterfaceEmbed');
-                    if (gtwyInterfaceEmbed) {
-                        gtwyInterfaceEmbed.style.display =
-                            (this.props.hideIcon === true || this.props.hideIcon === 'true')
-                                ? 'none'
-                                : 'unset';
-                    }
                 }, animationDelay); // Wait for animation to complete
             }
         }
@@ -593,10 +590,17 @@
             // Only create and add header if not in parent container
             if (!this.state.hasParentContainer) {
                 const header = this.createEmbedHeader();
-                if (header && (this.config.hideHeader === "false" || this.config.hideHeader === false)) {
+                if (header) {
                     this.addHeaderStyles();
                     this.parentContainer.appendChild(header);
+                    if (this.config.hideHeader === "true" || this.config.hideHeader === true) {
+                        header.style.display = 'none';
+                    } else {
+                        header.style.display = 'block';
+                    }
                 }
+            } else {
+                // No header when in parent container
             }
 
             const iframe = document.createElement('iframe');
@@ -612,7 +616,13 @@
 
             // Only set minimum height if not in parent container
             if (!this.state.hasParentContainer) {
-                iframe.style.maxHeight = '95vh';
+                if (this.config.hideHeader === "true" || this.config.hideHeader === true) {
+                    iframe.style.marginTop = '0vh';
+                    iframe.style.maxHeight = '100vh';
+                } else {
+                    iframe.style.marginTop = '5vh';
+                    iframe.style.maxHeight = '95vh';
+                }
             }
 
             this.parentContainer.appendChild(iframe);
@@ -640,7 +650,7 @@
             } else {
                 // Not in parent container - use default positioning
                 this.parentContainer.style.position = 'fixed';
-                this.parentContainer.style.maxHeight = '95vh';
+                this.parentContainer.style.maxHeight = '100vh';
 
                 // Update class to reflect standalone status
                 this.parentContainer.className = 'popup-parent-container with-header';
@@ -696,31 +706,57 @@
             //console.log(modifiedUrl);
             iframeComponent.src = modifiedUrl;
 
-            this.props.config = { ...this.config, ...(data?.data?.config || {}) };
-            this.applyConfig(this.props?.config);
+            this.config = { ...this.config, ...(data?.data?.config || {}) };
+            this.applyConfig(this?.config);
+        if (this.state.isInitialized) {
+            window.postMessage({
+                type: 'configLoaded',
+                data: this.props.config
+            }, '*');
+        }
         }
 
         applyConfig(config = {}) {
-            const gtwyInterfaceEmbedElement = document.getElementById('gtwyInterfaceEmbed');
             const iframeParentContainer = document.getElementById('gtwy-iframe-parent-container');
             if (!iframeParentContainer) return;
 
             if (config && Object.keys(config).length > 0) {
-                if (config.type && iframeParentContainer) {
-                    iframeParentContainer?.classList.forEach((cls) => {
-                        if (cls.endsWith('-parent-container')) {
-                            iframeParentContainer.classList.remove(cls);
+                // Handle header configurations
+                if ('hideHeader' in config) {
+                    this.config.hideHeader = config.hideHeader;
+                    iframeParentContainer.classList.toggle('with-header', !config.hideHeader);
+                }
+                if ('hideCloseButton' in config) {
+                    this.config.hideCloseButton = config.hideCloseButton;
+                    const closeBtn = document.getElementById('gtwy-close-btn');
+                    if (closeBtn) {
+                        closeBtn.style.display = (config.hideCloseButton === true || config.hideCloseButton === 'true') ? 'none' : 'flex';
+                    }
+                }
+                if ('hideFullScreenButton' in config) {
+                    this.config.hideFullScreenButton = config.hideFullScreenButton;
+                    const fullscreenBtn = document.getElementById('gtwy-fullscreen-btn');
+                    if (fullscreenBtn) {
+                        fullscreenBtn.style.display = (config.hideFullScreenButton === true || config.hideFullScreenButton === 'true') ? 'none' : 'flex';
+                    }
+                }
+                if ('hideHeader' in config) {
+                    this.config.hideHeader = config.hideHeader;
+                    const header = document.getElementById('gtwy-embed-header');
+                    const iframe = document.getElementById('iframe-component-gtwyInterfaceEmbed');
+                    if (header) {
+                        if (config.hideHeader === true || config.hideHeader === 'true'){
+                            header.style.display = 'none';
+                            if (iframe) {
+                                iframe.style.marginTop = '0px';
+                                iframe.style.maxHeight = '100vh';
+                            }
+                        } else {
+                            iframe.style.marginTop = '5vh';
+                            iframe.style.maxHeight = '95vh';
+                            header.style.display = 'flex';
                         }
-                    });
-                    gtwyInterfaceEmbedElement?.classList.forEach((cls) => {
-                        if (cls.endsWith('-gtwyInterfaceEmbed')) {
-                            gtwyInterfaceEmbedElement.classList.remove(cls);
-                        }
-                    });
-
-                    iframeParentContainer?.classList.add(`${config.type}-parent-container`);
-                    gtwyInterfaceEmbedElement?.classList.add(`${config.type}-gtwyInterfaceEmbed`);
-                    this.className = config.type;
+                    }
                 }
 
                 // Handle slide configuration
@@ -738,19 +774,19 @@
 
                 iframeParentContainer.style.height = `${height}${heightUnit}`;
                 iframeParentContainer.style.width = `${width}${widthUnit}`;
-                iframeParentContainer.style.minHeight = '95vh'; // Ensure minimum height
+                iframeParentContainer.style.minHeight = '100vh'; // Ensure minimum height
             }
         }
 
         updateProps(newProps) {
-            this.props = { ...this.props, ...newProps }
+            this.props = { ...this.props, ...newProps };
             this.setPropValues(newProps);
         }
 
         setPropValues(newprops) {
             if (newprops.fullScreen === true || newprops.fullScreen === 'true') {
-                document.getElementById('gtwy-iframe-parent-container')?.classList.add('full-screen-gtwyInterfaceEmbed')
-                this.state.tempDataToSend = { ...this.state.tempDataToSend, hideFullScreenButton: true }
+                document.getElementById('gtwy-iframe-parent-container')?.classList.add('full-screen-gtwyInterfaceEmbed');
+                this.state.tempDataToSend = { ...this.state.tempDataToSend, hideFullScreenButton: true };
                 sendMessageToGtwy({ type: 'gtwyInterfaceData', data: { hideFullScreenButton: true } });
             }
             // Handle slide property
@@ -762,7 +798,7 @@
         sendInitialData() {
             if (this.state.tempDataToSend) {
                 sendMessageToGtwy({ type: 'gtwyInterfaceData', data: this.state.tempDataToSend });
-                if (this?.state?.tempDataToSend?.defaultOpen === true || this?.state?.tempDataToSend?.defaultOpen === "true" || this?.state?.config?.defaultOpen === true || this?.state?.config?.defaultOpen === "true") {
+                if (this?.state?.tempDataToSend?.defaultOpen === true || this?.state?.tempDataToSend?.defaultOpen === "true" || this?.state?.config?.defaultOpen === true || this?.state?.config?.defaultOpen === "true" || this.config.defaultOpen === true || this.config.defaultOpen === "true") {
                     this.openGtwy();
                 }
                 this.state.tempDataToSend = null;
@@ -868,13 +904,13 @@
             gtwyEmbedManager.closeGtwy();
         },
         show: () => {
-            const gtwyInterfaceEmbed = document.getElementById('gtwyInterfaceEmbed');
+            const gtwyInterfaceEmbed = document.getElementById('iframe-component-gtwyInterfaceEmbed');
             if (gtwyInterfaceEmbed) {
                 gtwyInterfaceEmbed.style.display = 'unset';
             }
         },
         hide: () => {
-            const gtwyInterfaceEmbed = document.getElementById('gtwyInterfaceEmbed');
+            const gtwyInterfaceEmbed = document.getElementById('iframe-component-gtwyInterfaceEmbed');
             if (gtwyInterfaceEmbed) {
                 gtwyInterfaceEmbed.style.display = 'none';
             }

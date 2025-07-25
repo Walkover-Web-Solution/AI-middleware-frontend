@@ -6,7 +6,7 @@ import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReduce
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction } from '@/store/action/bridgeAction'; 
-import { toBoolean } from '@/utils/utility';
+import { sendDataToParent, toBoolean } from '@/utils/utility';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -36,6 +36,16 @@ const Layout = ({ children }) => {
         sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
         sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
       }
+      if(urlParamsObj.config)
+      {
+        Object.entries(urlParamsObj.config).forEach(([key, value]) => {
+          if (value !== undefined) {
+            dispatch(updateUserDetialsForEmbedUser({
+              [key]: toBoolean(value)
+            }));
+          }
+        });
+      }
 
       router.push(`org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
     }
@@ -60,7 +70,8 @@ const Layout = ({ children }) => {
           type: "chat"
         };
         dispatch(createBridgeAction({ dataToSend, orgid: orgId }, (response) => {
-          router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}`);
+        sendDataToParent("drafted", {name: response?.data?.bridge?.name, agent_id: response?.data?.bridge?._id}, "Agent created Successfully")
+        router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}`);
         })).catch(() => setIsLoading(false));
 
       } else if (messageData?.agent_id) {
@@ -73,11 +84,10 @@ const Layout = ({ children }) => {
       }
 
       // Handle UI configuration updates
-      const uiUpdates = {
-        hideHomeButton: messageData?.hideHomeButton,
-        showGuide: messageData?.showGuide,
-        showConfigType: messageData?.showConfigType
-      };
+      const uiUpdates = {};
+      if (messageData?.hideHomeButton !== undefined) uiUpdates.hideHomeButton = messageData.hideHomeButton;
+      if (messageData?.showGuide !== undefined) uiUpdates.showGuide = messageData.showGuide;
+      if (messageData?.showConfigType !== undefined) uiUpdates.showConfigType = messageData.showConfigType;
 
       Object.entries(uiUpdates).forEach(([key, value]) => {
         if (value !== undefined) {
