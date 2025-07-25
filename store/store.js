@@ -16,8 +16,7 @@ import userDetailsReducer from "./reducer/userDetailsReducer";
 import webhookAlertReducer from "./reducer/webhookAlertReducer";
 import testCasesReducer from "./reducer/testCasesReducer";
 import serviceReducer from "./reducer/serviceReducer";
-
-import tutorialReducer from "./reducer/tutorialReducer";
+import flowDataReducer from "./reducer/flowDataReducer";
 import integrationReducer from "./reducer/integrationReducer";
 import authReducer from "./reducer/authReducer";
 import gtwyAgentReducer from "./reducer/gwtyAgentReducer";
@@ -55,7 +54,7 @@ const rootReducer = combineReducers({
     testCasesReducer,
     serviceReducer,
     gtwyAgentReducer,
-    tutorialReducer,
+    flowDataReducer,
     integrationReducer,
     authReducer
 });
