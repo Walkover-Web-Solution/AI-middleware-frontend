@@ -61,10 +61,10 @@ const AgentSidebar = ({
   };
 
   return (
-    <div className={`${sidebarCollapsed ? 'w-16' : 'w-72'} bg-white border-r border-gray-200 p-4 transition-all duration-300 relative h-full`}>
+    <div className={`${sidebarCollapsed ? 'w-16' : 'w-72'} bg-base-100 border-r border-gray-200 p-4 transition-all duration-300 relative h-full`}>
       <button
         onClick={toggleSidebar}
-        className="absolute -right-3 top-4 bg-white rounded-full p-1 border border-gray-200 shadow-sm hover:bg-gray-50 z-10"
+        className="absolute -right-3 top-4 bg-base-100 rounded-full p-1 border border-gray-200 shadow-sm hover:bg-gray-50 z-10"
       >
         {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
       </button>

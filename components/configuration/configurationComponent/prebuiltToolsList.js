@@ -40,7 +40,7 @@ const PrebuiltToolsList = ({ params }) => {
         (Array.isArray(toolsVersionData) ? toolsVersionData : [])?.map((toolId) => {
             const item = prebuiltToolsData?.find(tool => tool.value === toolId);
             return item ? (
-                <div key={toolId} className="flex w-[250px] flex-col items-start rounded-md border cursor-pointer bg-base-100 hover:bg-base-200 relative">
+                <div key={toolId} className="flex w-[250px] flex-col items-start rounded-md border border-base-300 cursor-pointer bg-base-100 hover:bg-base-200 relative">
                     <div className="p-4 w-full h-full flex flex-col justify-between">
                         <div>
                             <div className="flex justify-between items-center">

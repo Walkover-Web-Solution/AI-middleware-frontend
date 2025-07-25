@@ -95,7 +95,7 @@ const Page = ({params}) => {
 
       {(!authData || authData?.length === 0) && (
         <div className="p-6">
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6">
+          <div className="max-w-md mx-auto bg-base-100 rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Add Authentication Route</h2>
             
             <div className="space-y-4">

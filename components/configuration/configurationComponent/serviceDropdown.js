@@ -154,7 +154,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
                     </div>
                 </div>
                 {modelRecommendations && (
-                    <div className="mb-2 p-4 bg-gray-50 rounded-lg border border-gray-200 max-w-xs">
+                    <div className="mb-2 p-4 bg-base-100 rounded-lg border border-base-100 max-w-xs">
                         {modelRecommendations.error ? (
                             <p className="text-red-500 text-sm">{modelRecommendations.error}</p>
                         ) : (

@@ -187,7 +187,7 @@ const AdvancedParameters = ({ params }) => {
       {tutorialState.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
-      {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
+      {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border border-base-300 rounded-md">
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
           const rowDefaultValue =
@@ -415,7 +415,7 @@ const AdvancedParameters = ({ params }) => {
                             4
                           )
                         }
-                        className="textarea textarea-bordered border w-[450px] min-h-96 resize-y"
+                        className="textarea textarea-bordered border border-base-300 w-[450px] min-h-96 resize-y"
                         onBlur={(e) =>
                           handleSelectChange(e, "json_schema")
                         }

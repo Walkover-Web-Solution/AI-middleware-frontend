@@ -61,7 +61,7 @@ const CreateOrg = ({ handleSwitchOrg }) => {
             <div className=""></div>
             <dialog id={MODAL_TYPE.CREATE_ORG_MODAL} className="modal">
                 <div className="flex items-center justify-center min-h-screen">
-                    <form className="modal-box relative p-5 bg-white rounded-lg shadow-xl mx-4" onSubmit={createOrgHandler}>
+                    <form className="modal-box relative p-5 bg-base-100 rounded-lg shadow-xl mx-4" onSubmit={createOrgHandler}>
                         <h3 className="font-bold text-lg mb-2">Create Organization</h3>
                         <label className='label-text mb-1'>Name *</label>
                         <input

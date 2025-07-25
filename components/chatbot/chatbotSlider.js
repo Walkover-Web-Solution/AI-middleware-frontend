@@ -22,7 +22,7 @@ export default function ChatbotSlider({ params }) {
     return (
         <div>
             {/* <button className="btn btn-outline btn-sm w-fit" onClick={SliderClickHandler} ><AddIcon size={16} />Add Bridge</button> */}
-            {/* {isSliderOpen && <aside className="absolute  right-0 top-0 flex h-full w-1/3 flex-col overflow-y-auto bg-white px-5 py-8 shadow-lg z-10">
+            {/* {isSliderOpen && <aside className="absolute  right-0 top-0 flex h-full w-1/3 flex-col overflow-y-auto bg-base-100 px-5 py-8 shadow-lg z-10">
 
                 <div className="flex items-center justify-between ">
                     <h1 className='text-xl font-medium flex items-center gap-2'><BotIcon /> Bridge list</h1>

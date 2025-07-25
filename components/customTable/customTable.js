@@ -84,7 +84,7 @@ const CustomTable = ({
 
     return (
         <div className="overflow-x-auto m-2">
-            <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+            <table className="min-w-full bg-base-100 shadow-md rounded-lg overflow-hidden">
                 <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                     <tr className="hover">
                         {showRowSelection &&
@@ -127,7 +127,7 @@ const CustomTable = ({
                 <tbody className="">
                     {sortedData?.length > 0 ? (
                         sortedData?.map((row, index) => (
-                            <tr key={row.id || row?._id || index} className="border-b hover:bg-gray-100 transition-colors cursor-pointer relative group" onClick={() =>
+                            <tr key={row.id || row?._id || index} className="border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer relative group" onClick={() =>
                                 handleRowClick(
                                     keysToExtractOnRowClick.reduce((acc, key) => {
                                         acc[key] = row[key];

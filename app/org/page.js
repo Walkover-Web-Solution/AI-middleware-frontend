@@ -53,7 +53,7 @@ function Page() {
       <div
         key={index}
         onClick={() => handleSwitchOrg(org.id, org.name)}
-        className="bg-white shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+        className="bg-base-300 shadow-lg rounded-lg overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
       >
         <div className="px-6 py-4">
           <div className="font-bold text-xl mb-2">{org.name}</div>
@@ -63,13 +63,13 @@ function Page() {
   ), [filteredOrganizations, handleSwitchOrg]);
 
   return (
-    <div className="flex flex-col justify-start items-center min-h-screen bg-gray-100 px-2 md:px-0">
+    <div className="flex flex-col justify-start items-center min-h-screen bg-base-100 px-2 md:px-0">
       <div className="w-full max-w-4xl mt-4 flex flex-col gap-3">
         <div className='flex flex-row justify-between items-center'>
-          <h2 className="text-2xl font-semibold text-gray-800">Existing Organizations</h2>
+          <h2 className="text-2xl font-semibold text-base-content">Existing Organizations</h2>
           <button
             onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)}
-            className="px-6 py-3 my-5 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+            className="btn btn-primary"
           >
             + Create New Organization
           </button>
@@ -79,7 +79,7 @@ function Page() {
           placeholder="Search organizations"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border border-gray-300 input input-bordered outline-none p-4 rounded-md  w-full mb-4"
+          className="border border-base-300 input input-bordered outline-none p-4 rounded-md  w-full mb-4"
         />
         <div className="grid grid-rows-1 md:grid-rows-2 lg:grid-rows-3 gap-4 mb-8 cursor-pointer">
           {renderedOrganizations}

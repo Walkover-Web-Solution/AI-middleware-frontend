@@ -10,7 +10,7 @@ export const metadata = {
 
 const CreateJwtToken = () => {
   return (
-    <div className="w-full p-8 bg-white rounded-xl shadow-lg">
+    <div className="w-full p-8 bg-base-100 rounded-xl shadow-lg">
       <div className="space-y-8">
         {/* Header Section */}
         <div className="text-center">
@@ -29,7 +29,7 @@ const CreateJwtToken = () => {
           </h2>
           <p className="text-gray-600 mb-4">To create the JWT token, you will need the following information:</p>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
+            <li className="bg-base-100 p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
               <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
                 <BuildingIcon className="w-6 h-6 text-blue-600" />
               </div>
@@ -37,7 +37,7 @@ const CreateJwtToken = () => {
                 <strong className="text-blue-600">org_id</strong>: Your organization's unique identifier.
               </div>
             </li>
-            <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
+            <li className="bg-base-100 p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
               <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
                 <BotIcon className="w-6 h-6 text-blue-600" />
               </div>
@@ -45,7 +45,7 @@ const CreateJwtToken = () => {
                 <strong className="text-blue-600">chatbot_id</strong>: The ID of the ChatBot you are integrating.
               </div>
             </li>
-            <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
+            <li className="bg-base-100 p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
               <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
                 <UserIcon className="w-6 h-6 text-blue-600" />
               </div>
@@ -53,7 +53,7 @@ const CreateJwtToken = () => {
                 <strong className="text-blue-600">user_id</strong>: The User ID that will be associated with the token.
               </div>
             </li>
-            <li className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
+            <li className="bg-base-100 p-4 rounded-lg shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
               <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
                 <KeyIcon className="w-6 h-6 text-blue-600" />
               </div>
