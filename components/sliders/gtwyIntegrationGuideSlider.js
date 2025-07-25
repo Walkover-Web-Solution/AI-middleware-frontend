@@ -303,7 +303,9 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
 
   const helperFunctions = `window.openGtwy() //To open GTWY;
 window.closeGtwy() //To Close GTWY;
-window.openGtwy({"agent_id":"your gtwy agentid"}); // Open GTWY with specific agent`;
+window.openGtwy({"agent_id":"your gtwy agentid"}); // Open GTWY with specific agent
+window.openGtwy({"agent_name":"your gtwy agent name"}); // Create agent with specific name`;
+
 
   const interfaceData = `// Configure UI elements
 window.GtwyEmbed.sendDataToGtwy({
