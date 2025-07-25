@@ -40,7 +40,7 @@ function ActionList({ params }) {
     return (
         <div className="form-control">
             <div className='flex items-start'>
-                    <InfoTooltip tooltipContent="Action is a task or operation executed in response to a trigger or event, often used to perform a defined outcome such as sending or processing data.">
+                    <InfoTooltip tooltipContent="Action is a task or operation executed in response to a trigger or event, often used to perform a defined outcome such as sending or processing data." >
                         <label className="label font-medium whitespace-nowrap info">Action</label>
                     </InfoTooltip>
             </div>

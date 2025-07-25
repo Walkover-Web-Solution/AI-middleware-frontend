@@ -51,7 +51,8 @@ const UserReferenceForRichText = ({ params }) => {
                         className="toggle"
                     />
                 </div>
-                <div className='tooltip tooltip-top flex justify-end' data-tip={"Customize rich text to enhance responses with UI elements like buttons, tables, and cards. Or else, responses will appear in plain text."}>
+                <InfoTooltip className='z-low-medium w-64 p-3 bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in border border-gray-700 space-y-2 pointer-events-auto' tooltipContent='Customize rich text to enhance responses with UI elements like buttons, tables, and cards. Or else, responses will appear in plain text.'>
+                <div className='flex justify-end' >
                     {(isRichText && user_reference?.trim()?.length === 0) && (
                         <button
                             onClick={() => setShowInput(!showInput)}
@@ -62,6 +63,7 @@ const UserReferenceForRichText = ({ params }) => {
                         </button>
                     )}
                 </div>
+                </InfoTooltip>
             </div>
             {showInput && isRichText && (
             <div className="mt-3">

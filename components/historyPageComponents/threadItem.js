@@ -9,6 +9,8 @@ import ToolsDataModal from "./toolsDataModal";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { openModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
+import InfoTooltip from "../InfoTooltip";
+
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase, setModalInput }) => {
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
@@ -103,7 +105,9 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           </div>
         </div>
         <div className="flex gap-3">
-          <div className="tooltip tooltip-top relative" data-tip="function logs">
+          <InfoTooltip className="z-low-medium h-3 pl-3 pr-3 pt-2 pb-5 bg-primary text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              bordespace-y-2 space-x-2 pointer-events-auto" tooltipContent="function logs">
             <SquareFunctionIcon size={22}
               onClick={() => openViasocket(tool.id, {
                 flowHitId: tool?.metadata?.flowHitId, embedToken, meta: {
@@ -112,8 +116,11 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 }
               })}
               className="opacity-80 cursor-pointer" />
-          </div>
-          <div className="tooltip tooltip-top pr-2 relative" data-tip="function data">
+          </InfoTooltip>
+           <InfoTooltip className="z-low-medium h-3 pl-3 pr-3 pt-2 pb-5 bg-primary text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              bordespace-y-2 space-x-2 pointer-events-auto" tooltipContent="function data">
+          <div className="pr-2 relative" >
             <FileClockIcon
               size={22}
               onClick={() => {
@@ -123,6 +130,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               className="opacity-80 bg-inherit cursor-pointer"
             />
           </div>
+          </InfoTooltip>
         </div>
       </div>
     ))
@@ -141,7 +149,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           {truncate(integrationData?.[funcName]?.title || funcName, 20)}
         </div>
       </div>
-      <div className="tooltip tooltip-top pr-2" data-tip="function logs">
+      <InfoTooltip className="z-low-medium h-3 pl-3 pr-3 pt-2 pb-5 bg-primary text-white text-primary-foreground
+              rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+              bordespace-y-2 space-x-2 pointer-events-auto" tooltipContent="function logs">
+      <div className=" pr-2" >
         <SquareFunctionIcon size={22}
           onClick={() => openViasocket(funcName, {
             flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken, meta: {
@@ -151,6 +162,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           })}
           className="opacity-80 cursor-pointer" />
       </div>
+      </InfoTooltip>
     </div>
   );
 
@@ -228,9 +240,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                               }`}
                             onClick={() => selectMessageType(0)}
                           >
-                            <div className="tooltip tooltip-left" data-tip="Chatbot Response">
+                            <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" placement="left" tooltipContent="Chatbot Response">
                               <BotIcon className="" size={16} />
-                            </div>
+                            </InfoTooltip>
                           </button>
                         </li>
                       )}
@@ -240,9 +253,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                             }`}
                           onClick={() => selectMessageType(1)}
                         >
-                          <div className="tooltip tooltip-left" data-tip="Normal Response">
+                          <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" placement="right" tooltipContent="Normal Response">
                             <CodeMessageIcon className="" size={16} />
-                          </div>
+                          </InfoTooltip>
                         </button>
                       </li>
                       {item.updated_message && (
@@ -252,9 +266,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                               }`}
                             onClick={() => selectMessageType(2)}
                           >
-                            <div className="tooltip tooltip-left" data-tip="Updated Message">
+                            <InfoTooltip className="z-low-medium w-32 h-5 pt-2 pb-5 pl-3 pr-3  bg-gray-900 text-white text-primary-foreground rounded-md shadow-xl text-xs animate-in fade-in zoom-in
+                                  border border-gray-700 space-y-2 pointer-events-auto" placement="left" tooltipContent="Updated Message">
                               <PencilIcon className="" size={16} />
-                            </div>
+                            </InfoTooltip>
                           </button>
                         </li>
                       )}

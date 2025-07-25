@@ -3,7 +3,6 @@ import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ONBOARDING_VIDEOS } from '@/utils/enums';
 import { getStatusClass } from '@/utils/utility';
-import { current } from '@reduxjs/toolkit';
 import { InfoIcon, AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import InfoTooltip from '@/components/InfoTooltip';
@@ -103,7 +102,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 ) : (
                     <div className="flex flex-col items-start gap-2">
                         {connectedFunctions.length === 0 && (
-                            <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."} >
+                            <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."}>
                                 <p className=" label-text info">Tool Configuration</p>
 
                             </InfoTooltip>

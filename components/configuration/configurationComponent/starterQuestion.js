@@ -21,7 +21,7 @@ const StarterQuestionToggle = ({ params }) => {
     return (
         <div className="flex items-center gap-2">
             <div className="label cursor-pointer">
-                <InfoTooltip tooltipContent={"Toggle to enable/disable starter questions"}>
+                <InfoTooltip tooltipContent={"Toggle to enable/disable starter questions"} >
                 <span className="font-medium mr-2 info">Starter Question</span>
                 </InfoTooltip>
             </div>
