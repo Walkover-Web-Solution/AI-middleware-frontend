@@ -518,6 +518,7 @@ window.addEventListener('message', (event) => {
                       <pre data-prefix=">"><code className="text-warning">  window.openGtwy()</code><code>{" //To open GTWY"}</code></pre>
                       <pre data-prefix=">"><code className="text-warning">  window.closeGtwy()</code><code>{" //To Close GTWY"}</code></pre>
                       <pre data-prefix=">"><code className="text-warning">  window.openGtwy({`{"agent_id":"your gtwy agentid"}`})</code><code>{" // Open GTWY with specific agent"}</code></pre>
+                      <pre data-prefix=">"><code className="text-warning">  window.openGtwy({`{"agent_name":"your agent name"}`})</code><code>{" // Create agent with specific name"}</code></pre>
                     </div>
                     <CopyButton
                       data={helperFunctions}
