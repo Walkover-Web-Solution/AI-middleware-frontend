@@ -1048,9 +1048,9 @@ export const getApiKeyGuide =async ()=>{
     throw new Error(error);
   }
 }
-export const createIntegrationApi = async (name) => {
+export const createIntegrationApi = async (data) => {
   try {
-    const response = await axios.post(`${URL}/gtwyEmbed/`, {name});
+    const response = await axios.post(`${URL}/gtwyEmbed/`, data);
     return response?.data;
   } catch (error) {
     console.error(error);

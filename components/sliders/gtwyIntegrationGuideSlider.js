@@ -90,7 +90,7 @@ const CONFIG_SCHEMA = [
 
 // Generic Input Component
 const ConfigInput = ({ config, value, onChange }) => {
-  const { key, type, label, description, options, min, max, placeholder } = config;
+  const { key, type, label, description, options } = config;
 
   const renderInput = () => {
     switch (type) {
