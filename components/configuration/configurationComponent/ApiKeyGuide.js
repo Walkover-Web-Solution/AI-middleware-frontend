@@ -59,7 +59,13 @@ const modelTabs = useMemo(() =>
     color: 'bg-primary'
     })), [API_PROVIDERS]
   );
-  const [selectedModel, setSelectedModel] = useState(modelTabs[0]?.id);
+const [selectedModel, setSelectedModel] = useState();
+
+React.useEffect(() => {
+  if (modelTabs.length > 0 && !selectedModel) {
+    setSelectedModel(modelTabs[0].id);
+  }
+}, [modelTabs, selectedModel]);
 
   // Memoize the guide content to prevent unnecessary re-renders
   const guideContent = useMemo(() => {
