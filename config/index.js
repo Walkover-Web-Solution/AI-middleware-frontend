@@ -1030,7 +1030,15 @@ export const getTutorial =async ()=>{
     throw new Error(error);
   }
 }
-
+export const getApiKeyGuide =async ()=>{
+  try {
+    const response=await axios.get("https://flow.sokt.io/func/scriDewB9Jk2");
+    return response;
+  }
+  catch(error){
+    throw new Error(error);
+  }
+}
 export const createIntegrationApi = async (name) => {
   try {
     const response = await axios.post(`${URL}/gtwyEmbed/`, {name});

@@ -22,7 +22,7 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { getTutorialDataAction } from "@/store/action/tutotrialAction";
+import { getApiKeyGuideAction, getTutorialDataAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
 
 function layoutOrgPage({ children, params, isEmbedUser }) {
@@ -36,7 +36,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token,tutorialData } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
@@ -51,6 +51,9 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(getTutorialDataAction()); 
       dispatch(userDetails());
+    }
+    if (pathName.endsWith("apikeys")&& !isEmbedUser) {
+      dispatch(getApiKeyGuideAction()); 
     }
   }, [pathName]);
 
