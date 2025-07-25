@@ -1,7 +1,7 @@
 import { CloseIcon } from '@/components/Icons';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { toggleSidebar } from '@/utils/utility';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 // Configuration object for better maintainability
 
@@ -61,7 +61,7 @@ const modelTabs = useMemo(() =>
   );
 const [selectedModel, setSelectedModel] = useState();
 
-React.useEffect(() => {
+useEffect(() => {
   if (modelTabs.length > 0 && !selectedModel) {
     setSelectedModel(modelTabs[0].id);
   }
