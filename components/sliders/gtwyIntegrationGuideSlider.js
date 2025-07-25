@@ -22,7 +22,7 @@ const CONFIG_SCHEMA = [
     type: 'toggle',
     label: 'Show Guide',
     description: 'Display helpful user guides',
-    defaultValue: true,
+    defaultValue: false,
     section: 'Interface Options'
   },
   {
@@ -59,7 +59,7 @@ const CONFIG_SCHEMA = [
     type: 'toggle',
     label: 'Default Open',
     description: 'Open GTWY automatically on page load',
-    defaultValue: true,
+    defaultValue: false,
     section: 'Display Settings'
   },
   {
