@@ -54,20 +54,19 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     }, [bridgeType])
 
     useEffect(() => {
-        if ((bridgeType === 'api' || bridgeType === 'chatbot' || bridgeType === 'batch') &&
-            promptTextAreaRef?.current?.querySelector('textarea')?.value?.trim() === "") {
+        if ((bridgeType === 'api' || bridgeType === 'chatbot' || bridgeType === 'batch') &&             promptTextAreaRef?.current?.querySelector('textarea')?.value?.trim() === "") {
             setTimeout(() => {
                 if (promptTextAreaRef?.current) {
-                    promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
+                  promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
                 }
-            }, 500);
-
-            setTimeout(() => {
+              }, 500); 
+        
+             setTimeout(() => {
                 const element = promptTextAreaRef?.current?.querySelector('textarea');
                 if (element) {
-                    element.focus();
+                  element.focus();
                 }
-            }, 200);
+              }, 200); 
         }
     }, [bridgeType])
     const handleNavigation = (target) => {
