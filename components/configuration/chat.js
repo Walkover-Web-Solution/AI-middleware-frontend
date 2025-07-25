@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import CodeBlock from "../codeBlock/codeBlock";
 import ChatTextInput from "./chatTextInput";
+import { PdfIcon } from "@/icons/pdfIcon";
+import { truncate } from "../historyPageComponents/assistFile";
 
 function Chat({ params }) {
   const messagesEndRef = useRef(null);
@@ -10,6 +12,7 @@ function Chat({ params }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadedImages, setUploadedImages] = useState([]);
   const [conversation, setConversation] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -84,6 +87,16 @@ function Chat({ params }) {
                       ))}
                     </div>
                   )}
+                  {message?.files && message?.files?.length > 0 && (
+                    <div className="flex flex-wrap mt-2 items-end justify-end space-x-2 bg-base-200 p-2 rounded-md mb-1">
+                      {message?.files.map((url, fileIndex) => (
+                        <a key={fileIndex} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 hover:underline">
+                          <PdfIcon height={20} width={20} />
+                          <span className="text-sm overflow-hidden truncate max-w-[10rem]">{truncate(url.split('/').pop(), 20)}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {message?.content && <div className="chat-bubble inline-block break-all">
                   <ReactMarkdown components={{
@@ -108,7 +121,7 @@ function Chat({ params }) {
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-low">
           <div className="relative flex flex-col gap-4 w-full">
             <div className="flex flex-row gap-2">
-              <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} message={messages} params={params} uploadedImages={uploadedImages} setUploadedImages={setUploadedImages} conversation={conversation} setConversation={setConversation} />
+              <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} message={messages} params={params} uploadedImages={uploadedImages} setUploadedImages={setUploadedImages} conversation={conversation} setConversation={setConversation} uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}/>
             </div>
           </div>
           {errorMessage && (

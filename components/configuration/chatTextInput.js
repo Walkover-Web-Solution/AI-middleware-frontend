@@ -6,9 +6,10 @@ import Image from 'next/image';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { CloseCircleIcon, ImageUploadIcon, SendHorizontalIcon } from '@/components/Icons';
+import { CloseCircleIcon, SendHorizontalIcon, UploadIcon } from '@/components/Icons';
+import { PdfIcon } from '@/icons/pdfIcon';
 
-function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation }) {
+function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles }) {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const dispatch = useDispatch();
@@ -41,10 +42,14 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     
     const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
     
-    const isVision = useMemo(() => {
-        return modelInfo?.[service]?.[configuration?.type]?.[configuration?.model]?.validationConfig?.vision;
-    }, [modelInfo, service, configuration?.type, configuration?.model]);
-
+    const { isVision, isFileSupported } = useMemo(() => {
+        const validationConfig = modelInfo?.[service]?.[configuration?.type]?.[configuration?.model]?.validationConfig || {};
+        
+        return {
+          isVision: validationConfig.vision,
+          isFileSupported: validationConfig.files,
+        };
+      }, [modelInfo, service, configuration?.type, configuration?.model]);
     useEffect(() => {
         setLocalDataToSend(dataToSend);
     }, [bridge]);
@@ -68,7 +73,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         }
         const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n'); 
         if (modelType !== 'completion' && modelType !== 'embedding') {
-            if (newMessage?.trim() === "" && uploadedImages?.length === 0) {
+            if (newMessage?.trim() === "" && uploadedImages?.length === 0 && uploadedFiles?.length === 0) {
                 setErrorMessage("Message cannot be empty");
                 return;
             }
@@ -85,16 +90,19 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     minute: "2-digit",
                 }),
                 content: newMessage.replace(/\n/g, "  \n"), // Markdown line break
-                image_urls: uploadedImages // Store images in the user role
+                image_urls: uploadedImages, // Store images in the user role
+                files: uploadedFiles,
             };         
             setUploadedImages([]);
+            setUploadedFiles([]);
             let response, responseData;
             let data;
             if (modelType !== 'completion' && modelType !== 'embedding') {
                 data = {
                     role: "user",
                     content: newMessage,
-                    image_urls: uploadedImages // Include images in the data
+                    image_urls: uploadedImages, // Include images in the data
+                    files: uploadedFiles,
                 };
                 setMessages(prevMessages => [...prevMessages, newChat]);
                 responseData = await dryRun({
@@ -106,6 +114,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                         },
                         user: data.content,
                         images: uploadedImages,
+                        files: uploadedFiles,
                         variables
                     },
                     bridge_id: params?.id,
@@ -185,6 +194,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         } finally {
             setLoading(false);
             setUploadedImages([]);
+            setUploadedFiles([]);
         }
     };
 
@@ -206,7 +216,12 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     );
     const handleFileChange = async (e) => {
         const files = fileInputRef.current.files;
-        if (files.length > 4 || uploadedImages.length > 4) {
+        const isPdf = files[0].type === 'application/pdf';
+        if (isPdf && uploadedFiles.length + files.length > 2) {
+            toast.error('Only two pdfs are allowed.');
+            return;
+        }
+        if (!isPdf && uploadedImages.length + files.length > 4) {
             toast.error('Only four images are allowed.');
             return;
         }
@@ -217,7 +232,11 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 formData.append('image', files[i]);
                 const result = await dispatch(uploadImageAction(formData));
                 if (result.success) {
-                    setUploadedImages(prevImages => [...prevImages, result.image_url]);
+                    if (isPdf) {
+                        setUploadedFiles(prevFiles => [...prevFiles, result.image_url]);
+                    } else {
+                        setUploadedImages(prevImages => [...prevImages, result.image_url]);
+                    }
                 }
             }
             setUploading(false);
@@ -250,6 +269,29 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     ))}
                 </div>
             )}
+            {uploadedFiles?.length > 0 && (
+                <div className="absolute bottom-16 left-0 gap-2 flex w-auto rounded-lg overflow-x-auto">
+                    {uploadedFiles.map((url, index) => (
+                        <div key={index} className="relative">
+                            <div className="flex items-start gap-2 bg-base-300 p-2 rounded-lg ">
+                                <PdfIcon height={20} width={20} />
+                                <p className='text-sm' title={url}>{url.length > 20 ? `${url.slice(0, 20)}...` : url}</p>
+                            </div>
+                            <button
+                                className="absolute top-[-3px] right-[-3px]  text-white rounded-full p-1"
+                                onClick={() => {
+                                    const newFiles = uploadedFiles.filter((_, i) => i !== index);
+                                    setUploadedFiles(newFiles);
+                                }}
+                            >
+                                <CloseCircleIcon className='text-base-content bg-base-200 rounded-full' size={20} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+            
+
             {(modelType !== "completion") && (modelType !== 'image') && (
                 <textarea
                     ref={inputRef}
@@ -265,17 +307,18 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
-                multiple
+                accept={isVision && isFileSupported ? 'image/*,.pdf' : isVision ? 'image/*' : isFileSupported ? '.pdf' : 'image/*,.pdf'}
+                multiple={isVision || isFileSupported}
                 onChange={handleFileChange}
                 className="hidden"
+                data-max-size="35MB"
             />
-            {isVision && <button
+            {(isVision || isFileSupported) && <button
                 className="btn"
                 onClick={() => fileInputRef.current.click()}
                 disabled={loading || uploading}
             >
-                <ImageUploadIcon  />
+                <UploadIcon />
             </button>}
             <button
                 className="btn"
