@@ -232,25 +232,22 @@ const AddVariable = ({ params }) => {
   }, [isAccordionOpen, keyValuePairs, isFormData]);
 
   return (
-    <div className="ml-1 text-base-content" tabIndex={0}>
-      <button
-        className="flex info items-center cursor-pointer focus:outline-none"
+    <div className="text-base-content" tabIndex={0}>
+      <div
+        className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full cursor-pointer`}
         onClick={() => {
-          handleTutorial()
-          toggleAccordion()
+          handleTutorial();
+          toggleAccordion();
         }}
-        aria-expanded={isAccordionOpen}
-        aria-controls="accordion-content"
       >
-      
-          <InfoTooltip 
-            tooltipContent={"Variables let you dynamically insert data into a prompt using this format: {{variable_name}}."}
-          >
-            <span className="mr-2  text-nowrap font-medium">Add Variables</span>
-          </InfoTooltip>
-      
-        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-      </button>
+        <InfoTooltip
+          tooltipContent="Variables let you dynamically insert data into a prompt using this format: {{variable_name}}."
+          className="cursor-pointer mr-2"
+        >
+          <div className="cursor-pointer label-text inline-block ml-1">Add Variables</div>
+        </InfoTooltip>
+        <span className="cursor-pointer">{isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
+      </div>
       {tutorialState?.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"} TutorialDetails={"Variable Management"}/>)}
       {tutorialState?.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
@@ -260,12 +257,12 @@ const AddVariable = ({ params }) => {
       <div
         id="accordion-content"
         ref={accordionContentRef}
-        className="overflow-hidden transition-all duration-200 ease-in-out mt-2"
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : ''}`}
         style={{
           height: `${height}px`,
         }}
       >
-        <div className="min-h-[300px] w-full border rounded-md p-4">
+        <div className="min-h-[300px] w-full p-4">
           <div className="w-full flex flex-col gap-2">
             {/* Radio Buttons for Form Data and Raw Data */}
             <div className="flex flex-row gap-4">

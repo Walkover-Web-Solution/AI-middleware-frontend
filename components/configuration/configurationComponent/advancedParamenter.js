@@ -170,22 +170,24 @@ const AdvancedParameters = ({ params }) => {
   }, [dispatch, params?.id, params?.version]);
 
   return (
-    <div className="z-very-low ml-1 mt-2 text-base-content" tabIndex={0}>
-      <button className="mb-5 info p-0 flex items-center justify-start font-medium" onClick={() => {        handleTutorial()
+    <div className="z-very-low mt-2 text-base-content w-full cursor-pointer" tabIndex={0}>
+      <div className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full cursor-pointer`} onClick={() => {
+        handleTutorial()
         toggleAccordion()
       }}>
-        <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type.">
-        <span className="mr-2">          Advanced Parameters
-        </span>
+        <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type." className="cursor-pointer mr-2">
+          <div className="cursor-pointer label-text inline-block ml-1">   
+            Advanced Parameters
+          </div>
         </InfoTooltip>
 
-        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-      </button>
-      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"}/>)}
+       <span className="cursor-pointer"> {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
+      </div>
+      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"} />)}
       {tutorialState.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
-      {isAccordionOpen && <div className=" gap-3 flex flex-col p-3 border rounded-md">
+      <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
           const rowDefaultValue =
@@ -199,12 +201,12 @@ const AdvancedParameters = ({ params }) => {
           const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
           let error = false;
           return (
-            <div key={key} className="form-control">
+            <div key={key} className="form-control w-full">
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                  {description ? <InfoTooltip tooltipContent={description}>
-                    <span className="label-text capitalize info">{name || key}</span>        
+                    {description ? <InfoTooltip tooltipContent={description}>
+                      <span className="label-text capitalize info">{name || key}</span>
                     </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
                   </div>
                   <div>
@@ -413,14 +415,14 @@ const AdvancedParameters = ({ params }) => {
                             4
                           )
                         }
-                        className="textarea textarea-bordered border w-[450px] min-h-96 resize-y"
+                        className="textarea textarea-bordered border w-full min-h-96 resize-y"
                         onBlur={(e) =>
                           handleSelectChange(e, "json_schema")
                         }
                         placeholder="Enter valid JSON object here..."
                       />
 
-                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages} thread_id={thread_id}/>
+                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages} thread_id={thread_id} />
                     </>
                   )}
 
@@ -429,7 +431,7 @@ const AdvancedParameters = ({ params }) => {
             </div>
           );
         })}
-      </div>}
+      </div>
     </div>
   );
 };
