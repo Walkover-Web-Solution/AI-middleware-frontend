@@ -69,25 +69,25 @@ const ResponseFormatSelector = ({ params }) => {
 
     return (
         <div>
-            <p className='font-medium'>Select Response Format</p>
+            <p className='text-sm'>Select Response Format</p>
             {responseOptions.map(({ value, label }) => (
                 <div className="form-control w-fit" key={value}>
-                    <label className="label cursor-pointer mx-w-sm flex items-center gap-5">
+                    <label className="label  cursor-pointer mx-w-sm flex items-center gap-5">
                         <input
                             type="radio"
                             name="radio-10"
-                            className="radio checked:bg-blue-500"
+                            className="radio"
                             checked={selectedOption === value}
                             onChange={() => { setSelectedOption(value); handleResponseChange(value); }}
                         />
-                        <span className="label-text">{label}</span>
+                        <span className="text-sm">{label}</span>
                     </label>
                 </div>
             ))}
             <div className={`${selectedOption === 'custom' ? "border rounded" : ""}`}>
-                <div className={`border-t pt-4 px-4 ${selectedOption === 'custom' ? "" : "hidden"}`}>
+                <div className={`border-t  pt-4 px-4 ${selectedOption === 'custom' ? "" : "hidden"}`}>
                     <label className="form-control w-full mb-4">
-                        <span className="label-text block mb-2">Webhook URL</span>
+                        <span className="text-sm block mb-2">Webhook URL</span>
                         <input
                             type="text"
                             placeholder="https://example.com/webhook"
@@ -99,7 +99,7 @@ const ResponseFormatSelector = ({ params }) => {
                         {errors.webhook && <p className="text-red-500 text-xs mt-2">{errors.webhook}</p>}
                     </label>
                     <label className="form-control mb-4">
-                        <span className="label-text block mb-2">Headers (JSON format)</span>
+                        <span className="text-sm block mb-2">Headers (JSON format)</span>
                         <textarea
                             className="textarea textarea-bordered h-24 w-full"
                             id="headers"
