@@ -72,9 +72,9 @@ function Chat({ params }) {
                   )}
                 </div>
                 <div>
-                  {message?.image_urls && message?.image_urls?.length > 0 && (
+                  {message?.images && message?.images?.length > 0 && (
                     <div className="flex flex-wrap mt-2 items-end justify-end">
-                      {message?.image_urls.map((url, imgIndex) => (
+                      {message?.images.map((url, imgIndex) => (
                         <Image
                           key={imgIndex}
                           src={url}
