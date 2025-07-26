@@ -428,7 +428,7 @@ window.addEventListener('message', (event) => {
                       </a>
                     </div>
 
-                    {gtwyAccessToken && gtwyAccessToken?.length >= 32 ? (
+                    {gtwyAccessToken ? (
                       <div className="relative mt-3">
                         <div className="mockup-code">
                           <pre data-prefix=">">
