@@ -14,7 +14,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     const [uploading, setUploading] = useState(false);
     const dispatch = useDispatch();
     const inputRef = useRef(null);
-    const fileInputRef = useRef(null);
+    const [fileInput, setFileInput] = useState(null); // Use state for the file input element
     const versionId = params?.version;
     const { bridge, modelType, modelName, variablesKeyValue, prompt, configuration, modelInfo, service } = useCustomSelector((state) => ({
         bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version],
@@ -90,7 +90,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     minute: "2-digit",
                 }),
                 content: newMessage.replace(/\n/g, "  \n"), // Markdown line break
-                image_urls: uploadedImages, // Store images in the user role
+                images: uploadedImages, // Store images in the user role
                 files: uploadedFiles,
             };         
             setUploadedImages([]);
@@ -101,7 +101,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 data = {
                     role: "user",
                     content: newMessage,
-                    image_urls: uploadedImages, // Include images in the data
+                    images: uploadedImages, // Include images in the data
                     files: uploadedFiles,
                 };
                 setMessages(prevMessages => [...prevMessages, newChat]);
@@ -215,15 +215,13 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         [loading, uploading, conversation, prompt]
     );
     const handleFileChange = async (e) => {
-        let files = Array.from(fileInputRef.current.files);
+        const files = Array.from(e.target.files);
         const largeFiles = files.filter(file => file.size > 35 * 1024 * 1024);
         if (largeFiles.length > 0) {
             toast.error('Each file should be less than 35MB.');
             return;
         }
-        
 
-        files = Array.from(fileInputRef.current.files);
         const newPdfs = files.filter(file => file.type === 'application/pdf');
         const newImages = files.filter(file => file.type !== 'application/pdf');
     
@@ -258,6 +256,10 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             }
     
             setUploading(false);
+        }
+        // Clear the file input value to allow re-uploading the same file
+        if (fileInput) {
+            fileInput.value = "";
         }
     };
     
@@ -323,7 +325,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 />
             )}
             <input
-                ref={fileInputRef}
+                ref={(el) => setFileInput(el)} // Use callback ref to set the state
                 type="file"
                 accept={isVision && isFileSupported ? 'image/*,.pdf' : isVision ? 'image/*' : isFileSupported ? '.pdf' : 'image/*,.pdf'}
                 multiple={isVision || isFileSupported}
@@ -333,7 +335,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             />
             {(isVision || isFileSupported) && <button
                 className="btn btn-ghost btn-circle"
-                onClick={() => fileInputRef.current.click()}
+                onClick={() => fileInput && fileInput.click()} // Use state variable to trigger click
                 disabled={loading || uploading}
             >
                 <UploadIcon />
