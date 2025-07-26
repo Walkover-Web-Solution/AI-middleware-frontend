@@ -1,7 +1,6 @@
 'use client';
 
 import { CloseIcon } from '@/components/Icons';
-import { addNewModel } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { ChevronDown, ChevronRight, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
@@ -11,8 +10,6 @@ import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import { addNewModelAction } from '@/store/action/modelAction';
 import { useDispatch } from 'react-redux';
-
-const SERVICE_OPTIONS = ['openai', 'anthropic', 'groq', 'open_router', 'mistral', 'openai_response'];
 
 // --- Placeholder Examples for UI ---
 const PLACEHOLDERS = {
@@ -152,8 +149,10 @@ export default function AddNewModelModal() {
             newConfig.display_name = '';
             newConfig.model_name = '';
             newConfig.service = service.value;
+            if (newConfig.org_id === null || newConfig.org_id === undefined || newConfig.org_id) {
+                delete newConfig.org_id;
+            }
             newConfig.status = "1";
-
             acc[service.value] = newConfig;
         }
         return acc;
@@ -225,7 +224,6 @@ export default function AddNewModelModal() {
             },
             outputConfig: { ...newOutPutConfig }
         };
-
         return finalConfig;
     };
 
@@ -504,7 +502,9 @@ export default function AddNewModelModal() {
                                             <label className="label"><span className="label-text">Service</span></label>
                                             <select value={config.service} onChange={e => handleTopLevelChange('service', e.target.value)}
                                                 className="select select-bordered w-full">
-                                                {SERVICE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                                {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
+                                                    <option key={value} value={value}>{displayName}</option>
+                                                )) : null}
                                             </select>
                                         </div>
                                         <div className="form-control">
@@ -556,7 +556,7 @@ export default function AddNewModelModal() {
                                             <div className="form-control p-4 rounded-lg border border-base-300">
                                                 <label className="label cursor-pointer justify-start gap-4">
                                                     <input type="checkbox" checked={!!config.validationConfig?.system_prompt} onChange={e => handleValidationChange('system_prompt', e.target.checked)} className="checkbox checkbox-primary" />
-                                                    <span className="label-text font-medium">Has System Prompt</span>
+                                                    <span className="label-text font-medium">Support System Prompt</span>
                                                 </label>
                                             </div>
                                             <div className="form-control p-4 rounded-lg border border-base-300">
@@ -584,12 +584,21 @@ export default function AddNewModelModal() {
                                                         <input type="number" value={config.validationConfig.specification.input_cost}
                                                             onChange={e => handleSpecificationChange('input_cost', e.target.value === '' ? '' : parseFloat(e.target.value))}
                                                             className="input input-bordered w-full" step="0.001"
-                                                            placeholder={PLACEHOLDERS[config.service]?.input_cost} />
+                                                            placeholder={PLACEHOLDERS[config.service]?.input_cost}
+                                                            min={0} />
                                                     </div>
                                                     <div className="form-control">
                                                         <label className="label"><span className="label-text">Output Cost / Mtok<span className="text-error">*</span></span></label>
                                                         <input type="number" value={config.validationConfig.specification.output_cost}
-                                                            onChange={e => handleSpecificationChange('output_cost', e.target.value === '' ? '' : parseFloat(e.target.value))}
+                                                            onChange={e => {
+                                                                const value = parseFloat(e.target.value);
+                                                                if (value < 0) {
+                                                                    e.target.value = '';
+                                                                } else {
+                                                                    handleSpecificationChange('output_cost', value);
+                                                                }
+                                                            }}
+                                                            min={0}
                                                             className="input input-bordered w-full" step="0.001"
                                                             placeholder={PLACEHOLDERS[config.service]?.output_cost} />
                                                     </div>
