@@ -22,7 +22,7 @@ const CONFIG_SCHEMA = [
     type: 'toggle',
     label: 'Show Guide',
     description: 'Display helpful user guides',
-    defaultValue: true,
+    defaultValue: false,
     section: 'Interface Options'
   },
   {
@@ -59,7 +59,7 @@ const CONFIG_SCHEMA = [
     type: 'toggle',
     label: 'Default Open',
     description: 'Open GTWY automatically on page load',
-    defaultValue: true,
+    defaultValue: false,
     section: 'Display Settings'
   },
   {
@@ -90,7 +90,7 @@ const CONFIG_SCHEMA = [
 
 // Generic Input Component
 const ConfigInput = ({ config, value, onChange }) => {
-  const { key, type, label, description, options, min, max, placeholder } = config;
+  const { key, type, label, description, options } = config;
 
   const renderInput = () => {
     switch (type) {
@@ -303,7 +303,9 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
 
   const helperFunctions = `window.openGtwy() //To open GTWY;
 window.closeGtwy() //To Close GTWY;
-window.openGtwy({"agent_id":"your gtwy agentid"}); // Open GTWY with specific agent`;
+window.openGtwy({"agent_id":"your gtwy agentid"}); // Open GTWY with specific agent
+window.openGtwy({"agent_name":"your gtwy agent name"}); // Create agent with specific name`;
+
 
   const interfaceData = `// Configure UI elements
 window.GtwyEmbed.sendDataToGtwy({
@@ -322,7 +324,7 @@ window.addEventListener('message', (event) => {
   return (
     <aside
       id="gtwy-integration-slider"
-      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-3/4 lg:w-4/5 xl:w-5/6 opacity-100 h-screen bg-base-200 transition-all lg:overflow-hidden overflow-auto duration-300 border-l ${isOpen ? '' : 'translate-x-full'}`}
+      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-[60%] lg:w-[70%] xl:w-[80%] 2xl:w-[70%] opacity-100 h-screen bg-base-200 transition-all overflow-auto duration-300 border-l ${isOpen ? '' : 'translate-x-full'}`}
       aria-label="Integration Guide Slider"
     >
       <div className="flex flex-col w-full gap-4">
@@ -379,7 +381,7 @@ window.addEventListener('message', (event) => {
             <div className="card bg-base-100 border">
               <div className="card-body">
                 <h4 className="card-title text-base">Step 1: Connect Integration</h4>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {/* JWT Payload */}
                   <div className="form-control">
                     <label className="label">
@@ -387,9 +389,18 @@ window.addEventListener('message', (event) => {
                     </label>
                     <div className="relative">
                       <div className="mockup-code">
-                        <pre data-prefix=">"><code className="text-error">org_id=</code><code className="text-warning">{data?.org_id}</code></pre>
-                        <pre data-prefix=">"><code className="text-error">folder_id=</code><code className="text-warning">{data?.folder_id}</code></pre>
-                        <pre data-prefix=">"><code className="text-error">user_id=</code><code className="text-warning">"Your_user_id"</code></pre>
+                        <pre data-prefix=">">
+                          <code className="text-error">org_id=</code>
+                          <code className="text-warning">{data?.org_id}</code>
+                        </pre>
+                        <pre data-prefix=">">
+                          <code className="text-error">folder_id=</code>
+                          <code className="text-warning">{data?.folder_id}</code>
+                        </pre>
+                        <pre data-prefix=">">
+                          <code className="text-error">user_id=</code>
+                          <code className="text-warning">"Your_user_id"</code>
+                        </pre>
                       </div>
                       <CopyButton
                         data={jwtPayload}
@@ -401,11 +412,24 @@ window.addEventListener('message', (event) => {
 
                   {/* Access Token */}
                   <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-medium">JWT Access key</span>
+                    <label className="label flex flex-col items-start space-y-1">
+                      <span className="label-text font-medium">Access Token (Signed with RS256)</span>
                     </label>
+
+                    <div className="text-sm text-base-content/70 leading-relaxed ml-1">
+                      RS256 is an asymmetric signing algorithm defined in
+                      <a
+                        href="https://datatracker.ietf.org/doc/html/rfc7518#section-3.1"
+                        className="text-blue-600 underline ml-1"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        RFC 7518
+                      </a>
+                    </div>
+
                     {gtwyAccessToken ? (
-                      <div className="relative">
+                      <div className="relative mt-3">
                         <div className="mockup-code">
                           <pre data-prefix=">">
                             <code className="text-error">Access Token: </code>
@@ -421,7 +445,7 @@ window.addEventListener('message', (event) => {
                     ) : (
                       <button
                         onClick={handleGenerateAccessKey}
-                        className="btn btn-primary btn-sm w-56"
+                        className="btn btn-primary btn-sm w-56 mt-3"
                       >
                         Show Access Key
                       </button>
@@ -430,6 +454,7 @@ window.addEventListener('message', (event) => {
                 </div>
               </div>
             </div>
+
 
             <div className="card bg-base-100 border">
               <div className="card-body">
@@ -495,6 +520,7 @@ window.addEventListener('message', (event) => {
                       <pre data-prefix=">"><code className="text-warning">  window.openGtwy()</code><code>{" //To open GTWY"}</code></pre>
                       <pre data-prefix=">"><code className="text-warning">  window.closeGtwy()</code><code>{" //To Close GTWY"}</code></pre>
                       <pre data-prefix=">"><code className="text-warning">  window.openGtwy({`{"agent_id":"your gtwy agentid"}`})</code><code>{" // Open GTWY with specific agent"}</code></pre>
+                      <pre data-prefix=">"><code className="text-warning">  window.openGtwy({`{"agent_name":"your agent name"}`})</code><code>{" // Create agent with specific name"}</code></pre>
                     </div>
                     <CopyButton
                       data={helperFunctions}

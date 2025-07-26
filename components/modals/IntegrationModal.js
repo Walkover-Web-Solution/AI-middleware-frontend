@@ -16,7 +16,18 @@ const IntegrationModal = ({ params }) => {
     }
     dispatch(createIntegrationAction({
       name: integrationNameRef?.current?.value,
-      orgId: params.org_id
+      orgId: params.org_id,
+      config:{
+            "hideHomeButton": false,
+            "showGuide": true,
+            "showHistory": false,
+            "showConfigType": false,
+            "slide": "right",
+            "defaultOpen": true,
+            "hideFullScreenButton": false,
+            "hideCloseButton": false,
+            "hideHeader": false
+        }
     }))
     closeModal(MODAL_TYPE.INTEGRATION_MODAL);
     integrationNameRef.current.value = '';

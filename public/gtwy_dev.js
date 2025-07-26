@@ -348,7 +348,7 @@
                         position: fixed !important;
                         left: 0 !important;
                         top: 0 !important;
-                        width: 700px !important;
+                        width: 999px !important;
                         max-height: 98vh !important;
                         z-index: 9999 !important;
                         transform: translateX(-100%) !important;
@@ -363,7 +363,7 @@
                         position: fixed !important;
                         right: 0 !important;
                         top: 0 !important;
-                        width: 700px !important;
+                        width: 999px !important;
                         max-height: 98vh !important;
                         z-index: 9999 !important;
                         transform: translateX(100%) !important;

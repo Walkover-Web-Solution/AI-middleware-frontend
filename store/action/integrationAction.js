@@ -5,7 +5,7 @@ import { addIntegrationDataReducer, fetchAllIntegrationData, updateIntegrationDa
 
 export const createIntegrationAction = (data) => async (dispatch) => {
   try {
-    const response = await createIntegrationApi(data?.name);
+    const response = await createIntegrationApi(data);
     if (response.data) {
       dispatch(addIntegrationDataReducer({
         orgId: data?.orgId,

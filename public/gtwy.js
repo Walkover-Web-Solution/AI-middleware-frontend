@@ -18,8 +18,8 @@
                 hideHeader: 'false'
             };
             this.urls = {
-gtwyUrl: 'https://app.gtwy.ai/embed',
-login: 'https://db.gtwy.ai/gtwyEmbed/login'
+                gtwyUrl: 'https://app.gtwy.ai/embed',
+                login: 'https://db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {
                 bodyLoaded: false,
@@ -196,12 +196,18 @@ login: 'https://db.gtwy.ai/gtwyEmbed/login'
             });
 
             // Assemble header
-if (this.config.hideFullScreenButton === "false" || this.config.hideFullScreenButton === false) {
-    buttonsContainer.appendChild(fullscreenBtn);
-}
-if (this.config.hideCloseButton === "false" || this.config.hideCloseButton === false) {
-    buttonsContainer.appendChild(closeBtn);
-}
+                if (this.config.hideFullScreenButton === "false" || this.config.hideFullScreenButton === false) {
+                    buttonsContainer.appendChild(fullscreenBtn);
+                } else {
+                    buttonsContainer.appendChild(fullscreenBtn);
+                    // fullscreenBtn.style.display = 'none';
+                }
+            if (this.config.hideCloseButton === "false" || this.config.hideCloseButton === false) {
+                buttonsContainer.appendChild(closeBtn);
+            } else {
+                buttonsContainer.appendChild(closeBtn);
+                // closeBtn.style.display = 'none';
+            }
             headerContent.appendChild(poweredBy);
             headerContent.appendChild(buttonsContainer);
             header.appendChild(headerContent);
@@ -342,7 +348,7 @@ if (this.config.hideCloseButton === "false" || this.config.hideCloseButton === f
                         position: fixed !important;
                         left: 0 !important;
                         top: 0 !important;
-                        width: 700px !important;
+                        width: 999px !important;
                         max-height: 98vh !important;
                         z-index: 9999 !important;
                         transform: translateX(-100%) !important;
@@ -357,7 +363,7 @@ if (this.config.hideCloseButton === "false" || this.config.hideCloseButton === f
                         position: fixed !important;
                         right: 0 !important;
                         top: 0 !important;
-                        width: 700px !important;
+                        width: 999px !important;
                         max-height: 98vh !important;
                         z-index: 9999 !important;
                         transform: translateX(100%) !important;
