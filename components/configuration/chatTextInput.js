@@ -215,49 +215,70 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         [loading, uploading, conversation, prompt]
     );
     const handleFileChange = async (e) => {
-        const files = fileInputRef.current.files;
-        const isPdf = files[0].type === 'application/pdf';
-        if (isPdf && uploadedFiles.length + files.length > 2) {
-            toast.error('Only two pdfs are allowed.');
+        let files = Array.from(fileInputRef.current.files);
+        const largeFiles = files.filter(file => file.size > 35 * 1024 * 1024);
+        if (largeFiles.length > 0) {
+            toast.error('Each file should be less than 35MB.');
             return;
         }
-        if (!isPdf && uploadedImages.length + files.length > 4) {
+        
+
+        files = Array.from(fileInputRef.current.files);
+        const newPdfs = files.filter(file => file.type === 'application/pdf');
+        const newImages = files.filter(file => file.type !== 'application/pdf');
+    
+        const totalPdfs = uploadedFiles.length + newPdfs.length;
+        const totalImages = uploadedImages.length + newImages.length;
+    
+        if (totalPdfs > 2) {
+            toast.error('Only two PDFs are allowed.');
+            return;
+        }
+    
+        if (totalImages > 4) {
             toast.error('Only four images are allowed.');
             return;
         }
+    
         if (files.length > 0) {
             setUploading(true);
-            for (let i = 0; i < files.length; i++) {
+    
+            for (let file of files) {
                 const formData = new FormData();
-                formData.append('image', files[i]);
+                formData.append('image', file);
                 const result = await dispatch(uploadImageAction(formData));
+    
                 if (result.success) {
-                    if (isPdf) {
-                        setUploadedFiles(prevFiles => [...prevFiles, result.image_url]);
+                    if (file.type === 'application/pdf') {
+                        setUploadedFiles(prev => [...prev, result.image_url]);
                     } else {
-                        setUploadedImages(prevImages => [...prevImages, result.image_url]);
+                        setUploadedImages(prev => [...prev, result.image_url]);
                     }
                 }
             }
+    
             setUploading(false);
         }
     };
+    
 
     return (
         <div className="input-group flex justify-end items-end gap-2 w-full relative">
-            {uploadedImages.length > 0 && (
-                <div className="absolute bottom-16 left-0 gap-2 flex w-auto rounded-lg">
+            {/* --- CORRECTED PREVIEW CONTAINER --- */}
+            {(uploadedImages.length > 0 || uploadedFiles.length > 0) && (
+                <div className="absolute bottom-16 left-0 w-full flex flex-nowrap overflow-x-auto items-end gap-2 p-2 bg-base-100 border-t rounded-t-lg">
+                    {/* Image Previews */}
                     {uploadedImages.map((url, index) => (
-                        <div key={index} className="relative">
+                        <div key={index} className="relative flex-shrink-0">
                             <Image
                                 src={url}
                                 alt={`Uploaded Preview ${index + 1}`}
-                                width={64} // Adjust width as needed
-                                height={64} // Adjust height as needed
-                                className="w-16 h-16 object-cover mb-2 bg-base-300 p-2 rounded-lg"
+                                width={64}
+                                height={64}
+                                className="w-16 h-16 object-cover bg-base-300 p-1 rounded-lg"
                             />
                             <button
-                                className="absolute top-[-3px] right-[-3px]  text-white rounded-full p-1"
+                                className="absolute -top-2 -right-2 text-white rounded-full"
                                 onClick={() => {
                                     const newImages = uploadedImages.filter((_, i) => i !== index);
                                     setUploadedImages(newImages);
@@ -267,18 +288,15 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                             </button>
                         </div>
                     ))}
-                </div>
-            )}
-            {uploadedFiles?.length > 0 && (
-                <div className="absolute bottom-16 left-0 gap-2 flex w-auto rounded-lg overflow-x-auto">
+                    {/* File Previews */}
                     {uploadedFiles.map((url, index) => (
-                        <div key={index} className="relative">
-                            <div className="flex items-start gap-2 bg-base-300 p-2 rounded-lg ">
-                                <PdfIcon height={20} width={20} />
-                                <p className='text-sm' title={url}>{url.length > 20 ? `${url.slice(0, 20)}...` : url}</p>
+                        <div key={index} className="relative flex-shrink-0">
+                            <div className="flex items-center h-16 gap-2 bg-base-300 p-2 rounded-lg">
+                                <PdfIcon height={24} width={24} />
+                                <p className='text-sm max-w-[120px] truncate' title={url}>{url.split('/').pop()}</p>
                             </div>
                             <button
-                                className="absolute top-[-3px] right-[-3px]  text-white rounded-full p-1"
+                                className="absolute -top-2 -right-2 text-white rounded-full"
                                 onClick={() => {
                                     const newFiles = uploadedFiles.filter((_, i) => i !== index);
                                     setUploadedFiles(newFiles);
@@ -291,7 +309,6 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 </div>
             )}
             
-
             {(modelType !== "completion") && (modelType !== 'image') && (
                 <textarea
                     ref={inputRef}
@@ -300,7 +317,8 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     onKeyDown={handleKeyDown}
                     rows={1}
                     onInput={(e) => {
-                        e.target.style.height = `${e.target.scrollHeight}px`;
+                        e.target.style.height = 'auto'; // Reset height
+                        e.target.style.height = `${e.target.scrollHeight}px`; // Set to scroll height
                     }}
                 />
             )}
@@ -314,19 +332,19 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 data-max-size="35MB"
             />
             {(isVision || isFileSupported) && <button
-                className="btn"
+                className="btn btn-ghost btn-circle"
                 onClick={() => fileInputRef.current.click()}
                 disabled={loading || uploading}
             >
                 <UploadIcon />
             </button>}
             <button
-                className="btn"
+                className="btn btn-primary btn-circle"
                 onClick={handleSendMessage}
                 disabled={loading || uploading || (modelType === 'image')}
             >
                 {(loading || uploading) ? (
-                    <span className="loading loading-dots loading-lg"></span>
+                    <span className="loading loading-dots loading-md"></span>
                 ) : (
                     <SendHorizontalIcon/>
                 )}
@@ -335,4 +353,4 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     )
 }
 
-export default ChatTextInput
+export default ChatTextInput;
