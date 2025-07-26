@@ -71,7 +71,13 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             setErrorMessage("Prompt is required");
             return;
         }
-        const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n'); 
+        const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n');
+
+        if (uploadedFiles?.length > 0 && newMessage?.trim() === "") {
+            setErrorMessage("A message is required when uploading a PDF.");
+            return;
+        }
+
         if (modelType !== 'completion' && modelType !== 'embedding') {
             if (newMessage?.trim() === "" && uploadedImages?.length === 0 && uploadedFiles?.length === 0) {
                 setErrorMessage("Message cannot be empty");
@@ -92,7 +98,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 content: newMessage.replace(/\n/g, "  \n"), // Markdown line break
                 images: uploadedImages, // Store images in the user role
                 files: uploadedFiles,
-            };         
+            };           
             setUploadedImages([]);
             setUploadedFiles([]);
             let response, responseData;
@@ -169,7 +175,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             };
 
             if (modelType !== 'completion' && modelType !== 'embedding') {
-                setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
+                setConversation(prevConversation => [...prevConversation, _.cloneDeep(_.omit(data, 'files')), assistConversation].slice(-6));
             } else if (modelType === 'embedding') {
                 setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
             }
