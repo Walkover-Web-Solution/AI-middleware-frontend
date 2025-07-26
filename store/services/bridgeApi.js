@@ -31,10 +31,10 @@ export const bridgeApi = createApi({
       query: (orgid) => ({
         url: '/api/v1/config/getbridges/all',
         method: 'GET',
-        params: orgid,
+        params: { orgid },
       }),
       providesTags: ['Bridge'],
-      refetchOnMountOrArgChange: true,
+
     }),
     createBridge: builder.mutation({
       query: (dataToSend) => ({
@@ -42,9 +42,39 @@ export const bridgeApi = createApi({
         method: 'POST',
         body: dataToSend,
       }),
-      invalidatesTags: (result, error, arg) => (result ? [{ type: 'Bridge', id: arg.orgid }] : []),
+      invalidatesTags: ['Bridge'],
+    }),
+    getSingleBridge: builder.query({
+      query: (bridgeId) => ({
+        url: `/api/v1/config/getbridges/${bridgeId}`,
+        method: 'GET',
+      }),
+      providesTags: ['singleBridge'],
+    }),
+    createBridgeVersion: builder.mutation({
+      query: (dataToSend) => ({
+        url: '/bridge/versions/create',
+        method: 'POST',
+        body: dataToSend,
+      }),
+      invalidatesTags: ['Bridge'],
+    }),
+    getBridgeVersion: builder.query({
+      query: (bridgeVersionId) => ({
+        url: `/bridge/versions/get/${bridgeVersionId}`,
+        method: 'GET',
+      }),
+      providesTags: ['Bridge'],
+    }),
+    updateBridge: builder.mutation({
+      query: ({bridgeId,dataToSend}) => ({
+        url: `/api/v1/config/update_bridge/${bridgeId}`,
+        method: 'POST',
+        body: dataToSend,
+      }),
+      invalidatesTags: ['singleBridge','Bridge'],
     }),
   }),
-});
+  });
 
-export const { useGetAllBridgesQuery, useCreateBridgeMutation } = bridgeApi;
+export const { useGetAllBridgesQuery, useCreateBridgeMutation ,useGetSingleBridgeQuery,useCreateBridgeVersionMutation,useGetBridgeVersionQuery,useUpdateBridgeMutation} = bridgeApi;

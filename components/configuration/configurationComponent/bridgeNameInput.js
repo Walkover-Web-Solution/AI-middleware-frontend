@@ -4,14 +4,14 @@ import { updateBridgeAction } from '@/store/action/bridgeAction';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import { useGetSingleBridgeQuery, useUpdateBridgeMutation } from '@/store/services/bridgeApi';
 
 function BridgeNameInput({ params, isEmbedUser }) {
   const dispatch = useDispatch();
-  const { bridgeName } = useCustomSelector((state) => ({
-    bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
-  }));
+  const {data:bridgeData}=useGetSingleBridgeQuery(params?.id)
+  const [updateBridge]=useUpdateBridgeMutation()
   const textareaRef = useRef(null);
-  const [originalValue, setOriginalValue] = useState(bridgeName);
+  const [originalValue, setOriginalValue] = useState(bridgeData?.bridge?.name);
   const [displayValue, setDisplayValue] = useState("");
   const resizeTextarea = () => {
     const textarea = textareaRef.current;
@@ -26,11 +26,11 @@ function BridgeNameInput({ params, isEmbedUser }) {
   }, [displayValue]);
 
   useEffect(() => {
-    setOriginalValue(bridgeName);
+    setOriginalValue(bridgeData?.bridge?.name);
     setDisplayValue(
-      bridgeName.length > 20 ? bridgeName.slice(0, 17) + "..." : bridgeName
+      bridgeData?.bridge?.name.length > 20 ? bridgeData?.bridge?.name.slice(0, 17) + "..." : bridgeData?.bridge?.name
     );
-  }, [bridgeName]);
+  }, [bridgeData?.bridge?.name]);
 
   const handleChange = (e) => {
     const input = e.target.value.slice(0, 30);
@@ -56,16 +56,13 @@ function BridgeNameInput({ params, isEmbedUser }) {
     if (trimmed === "") {
       toast.error("Agent name cannot be empty");
       setDisplayValue(
-        bridgeName.length > 20 ? bridgeName.slice(0, 17) + "..." : bridgeName
+        bridgeData?.bridge?.name.length > 20 ? bridgeData?.bridge?.name.slice(0, 17) + "..." : bridgeData?.bridge?.name
       );
       return;
     }
 
-    if (trimmed !== bridgeName) {
-      dispatch(updateBridgeAction({
-        bridgeId: params.id,
-        dataToSend: { name: trimmed },
-      }));
+    if (trimmed !== bridgeData?.bridge?.name) {
+     updateBridge({bridgeId:params.id,dataToSend:{name:trimmed}})
     }
 
     isEmbedUser && window.parent.postMessage({type: 'gtwy',status:"agent_name_update", data:{ "agent_name": trimmed}}, '*');
@@ -73,7 +70,7 @@ function BridgeNameInput({ params, isEmbedUser }) {
     setDisplayValue(
       trimmed.length > 20 ? trimmed.slice(0, 17) + "..." : trimmed
     );
-  }, [originalValue, bridgeName, dispatch, params.id]);
+  }, [originalValue, bridgeData?.bridge?.name, dispatch, params.id]);
 
     const handleKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {

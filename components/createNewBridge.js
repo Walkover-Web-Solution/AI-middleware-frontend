@@ -10,6 +10,7 @@ import { MODAL_TYPE } from "@/utils/enums";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { BotIcon, CheckIcon, CircleAlertIcon, ClockTenIcon, WebhookIcon } from "@/components/Icons";
 import Protected from "./protected";
+import { useCreateBridgeMutation, useGetAllBridgesQuery } from "@/store/services/bridgeApi";
 
   function CreateNewBridge({ orgid, isEmbedUser }) {
     const [selectedService, setSelectedService] = useState('openai');
@@ -25,9 +26,10 @@ import Protected from "./protected";
     });
     const [globalError, setGlobalError] = useState(""); // New state for global error messages
 
-    const { allBridgeList, modelsList, SERVICES } = useCustomSelector((state) => ({
+    const {data:bridgesData}=useGetAllBridgesQuery(orgid)
+    const [createBridgeMutation,{isLoading}] = useCreateBridgeMutation();    
+    const {  modelsList, SERVICES } = useCustomSelector((state) => ({
         SERVICES: state?.serviceReducer?.services,
-        allBridgeList: (state.bridgeReducer.org[orgid]?.orgs) || [],
         modelsList: state?.modelReducer?.serviceModels[selectedService],
     }));
 
@@ -37,8 +39,6 @@ import Protected from "./protected";
         }
     }, [SERVICES]);
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [isAiLoading, setIsAiLoading] = useState(false);
     const dispatch = useDispatch();
     const route = useRouter();
 
@@ -61,12 +61,12 @@ import Protected from "./protected";
         setGlobalError(""); // Clear global error when typing
     };
 
-    const createBridgeHandler = (name, slugname) => {
+    const createBridgeHandler =async (name, slugname) => {
       name = isEmbedUser ? 'untitled' : 'Untitled';
-      const matches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.name?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
+      const matches = isEmbedUser ? bridgesData?.bridge?.filter(bridge => bridge?.name?.match(/^untitled(?:(\d+))?$/)) : bridgesData?.bridge?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
       const newCount = matches?.length + 1 || 0;
       name = isEmbedUser ? `untitled${newCount}` : `Untitled${newCount}`;
-      const slugNameMatches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.slugName?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
+      const slugNameMatches = isEmbedUser ? bridgesData?.bridge?.filter(bridge => bridge?.slugName?.match(/^untitled(?:(\d+))?$/)) : bridgesData?.bridge?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
       const slugNameCount = slugNameMatches?.length + 1 || 0;
       slugname = isEmbedUser ? `untitled${slugNameCount}` : `Untitled${slugNameCount}`
       if (!selectedBridgeTypeCard) {
@@ -75,7 +75,6 @@ import Protected from "./protected";
       }
 
       if (name.length > 0 && selectedModel && selectedBridgeTypeCard) {
-        setIsLoading(true);
         const dataToSend = {
           "service": selectedService,
           "model": selectedModel,
@@ -84,15 +83,11 @@ import Protected from "./protected";
           "bridgeType": selectedBridgeTypeCard || bridgeType,
           "type": selectedType,
         };
-        dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
-          // setShowFileUploadModal(false);
-          route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
+        const { data } = await createBridgeMutation(dataToSend)
+        route.push(`/org/${orgid}/agents/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
           closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-          setIsLoading(false);
           cleanState();
-        })).catch(() => {
-          setIsLoading(false);
-        });
+       
       }
     };
 
@@ -110,7 +105,7 @@ import Protected from "./protected";
         closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
     };
 
-    const handleCreateBridgeUsingAI = () => {
+    const handleCreateBridgeUsingAI = async() => {
         const purpose = textAreaPurposeRef?.current?.value;
         let hasErrors = false;
 
@@ -137,21 +132,13 @@ import Protected from "./protected";
             return;
         }
 
-        setIsAiLoading(true);
+       
         const dataToSend = { purpose, bridgeType: selectedBridgeTypeCard }
-        dispatch(createBridgeWithAiAction({ dataToSend, orgId: orgid }))
-            .then((response) => {
-                const data = response.data;
-                route.push(`/org/${orgid}/agents/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
-                closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
-                setIsAiLoading(false);
-                cleanState();
-            })
-            .catch((error) => {
-                setIsAiLoading(false);
-                // Instead of toast.error, set the global error state
-                setGlobalError(error?.response?.data?.message || "Error while creating agent");
-            });
+       const {data}=await createBridgeMutation(dataToSend)
+       console.log(data,"created")
+       route.push(`/org/${orgid}/agents/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
+       closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
+       cleanState();
     }
 
 
@@ -404,9 +391,9 @@ import Protected from "./protected";
                   <button
                     className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
                     onClick={handleCreateBridgeUsingAI}
-                    disabled={isAiLoading || isLoading}
+                    disabled={isLoading}
                   >
-                    {isAiLoading ? (
+                    {isLoading ? (
                       <>
                         <span className="loading loading-spinner loading-sm"></span>
                       </>

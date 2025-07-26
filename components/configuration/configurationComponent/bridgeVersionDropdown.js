@@ -2,6 +2,7 @@ import PublishBridgeVersionModal from '@/components/modals/publishBridgeVersionM
 import VersionDescriptionModal from '@/components/modals/versionDescriptionModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { createBridgeVersionAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
+import { useCreateBridgeVersionMutation } from '@/store/services/bridgeApi';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal, openModal } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
@@ -18,7 +19,7 @@ function BridgeVersionDropdown({ params }) {
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
         versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.version_description || "",
     }));
-
+   const [createBridgeVersionMutation] = useCreateBridgeVersionMutation();
     useEffect(() => {
         const timer = setInterval(() => {
             if (typeof SendDataToChatbot !== 'undefined' && params.version) {
@@ -43,11 +44,14 @@ function BridgeVersionDropdown({ params }) {
         }
     }, [params.version, bridgeVersionsArray]);
 
-    const handleCreateNewVersion = () => {
+    const handleCreateNewVersion = async () => {
         // create new version
-        dispatch(createBridgeVersionAction({ parentVersionId: params?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value }, (data) => {
-            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${data.version_id}`);
-        }))
+        const dataToSend = {
+            version_id: params?.version,
+            version_description: versionDescriptionRef?.current?.value
+          }
+      const res= await createBridgeVersionMutation(dataToSend)
+       router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${res?.data?.version_id}`);
         versionDescriptionRef.current.value = ''
     }
     return (

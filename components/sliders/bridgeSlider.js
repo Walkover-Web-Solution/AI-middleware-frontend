@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateNewBridge from '../createNewBridge';
 import { MODAL_TYPE } from '@/utils/enums';
+import { useGetAllBridgesQuery } from '@/store/services/bridgeApi';
 
 function BridgeSlider() {
     const router = useRouter();
@@ -12,8 +13,8 @@ function BridgeSlider() {
     const path = pathName.split('?')[0].split('/')
     const [bridgeSearchQuery, setBridgeSearchQuery] = useState('');
 
-    const bridgesList = useCustomSelector((state) => state.bridgeReducer.org[path[2]]?.orgs) || [];
-
+    const {data:bridgesData}=useGetAllBridgesQuery(path[2])
+    const bridgesList = bridgesData?.bridge||[]
     const handleBridgeSearchChange = (e) => {
         setBridgeSearchQuery(e.target.value);
     };

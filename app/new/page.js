@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import LoadingSpinner from '@/components/loadingSpinner';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { switchUser } from '@/config';
+import { useCreateBridgeMutation } from '@/store/services/bridgeApi';
 
 const URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const INITIAL_FORM_STATE = {
@@ -41,7 +42,7 @@ function Page({ params }) {
         SERVICES: state?.serviceReducer?.services,
         DEFAULT_MODEL: state?.serviceReducer?.default_model
     }));
-
+   const [createBridgeMutation] = useCreateBridgeMutation();
     const templateId = searchParams.get('template_id');
 
      useEffect(() => {
@@ -120,13 +121,9 @@ function Page({ params }) {
                 ...(formState.template_Id && { templateId: formState.template_Id }),
             };
 
-            dispatch(createBridgeAction({
-                dataToSend: bridgeData,
-                orgid: selectedOrg.id
-            }, (data) => {
-                route.push(`/org/${selectedOrg.id}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
-            }));
-
+            createBridgeMutation(bridgeData).then((data) => {
+                route.push(`/org/${selectedOrg.id}/agents/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
+            });
         } catch (error) {
             console.error("Error:", error.message || error);
             toast.error(error.message || "An error occurred");

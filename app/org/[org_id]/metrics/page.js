@@ -3,6 +3,7 @@ import Protected from '@/components/protected';
 import SearchItems from '@/components/UI/SearchItems';
 import { getMetricsDataApi } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import { useGetAllBridgesQuery } from '@/store/services/bridgeApi';
 import { METRICS_FACTOR_OPTIONS, TIME_RANGE_OPTIONS } from '@/utils/enums';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
@@ -53,11 +54,11 @@ function Page({ params }) {
   const [bridge, setBridge] = useState(null);
   const [loading, setLoading] = useState(false);
   const [metricsBarChartData, setMetricsBarChartData] = useState({ series: [], categories: [] });
-  const { allBridges, apikeyData } = useCustomSelector((state) => ({
-    allBridges: state.bridgeReducer.org[params.org_id]?.orgs || [],
+  const {  apikeyData } = useCustomSelector((state) => ({
     apikeyData: state?.bridgeReducer?.apikeys[org_id] || []
   })); 
-  const [filterBridges, setFilterBridges] = useState(allBridges);
+  const {data:bridgesData}=useGetAllBridgesQuery(org_id)
+  const [filterBridges, setFilterBridges] = useState(bridgesData?.bridge||[]);
 
   const handleFactorChange = (index, changeIn = "factor") => {
     if (changeIn === 'time') {
@@ -70,7 +71,7 @@ function Page({ params }) {
   function structureCategory(categories = [], factor) {
     if (METRICS_FACTOR_OPTIONS[factor] === 'bridge_id') {
       return categories.map((item) => {
-        const bridge = allBridges.find(bridge => bridge._id === item);
+        const bridge = bridgesData?.bridge.find(bridge => bridge._id === item);
         return bridge ? bridge.name : item;
       });
     } else if (METRICS_FACTOR_OPTIONS[factor] === 'apikey_id') {
@@ -132,7 +133,7 @@ function Page({ params }) {
           <div className={`dropdown dropdown-end z-medium border rounded-lg ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}>
           <label tabIndex="0" role="button" className="btn capitalize">{bridge?.['bridge_name'] ? (bridge?.['bridge_name'].length > 15 ? bridge?.['bridge_name'].substring(0, 15) + '...' : bridge?.['bridge_name']) : 'Select Agent'}</label>
             <ul tabIndex="0" className="dropdown-content menu p-2 shadow bg-base-100 rounded-box flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
-              <SearchItems setFilterItems={setFilterBridges} data={allBridges} item="Agents" />
+              <SearchItems setFilterItems={setFilterBridges} data={bridgesData?.bridge||[]} item="Agents" />
               {filterBridges.map((item, index) => (
                 <li key={index}><a
                   onClick={() => handleBridgeChange(item?._id, item?.name)}

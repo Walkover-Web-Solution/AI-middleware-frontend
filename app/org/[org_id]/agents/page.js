@@ -36,8 +36,7 @@ function Home({ params, isEmbedUser }) {
       isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
     };
   });
-  const { data: bridgesData, isLoading } = useGetAllBridgesQuery(params.org_id);
-  console.log(bridgesData?.bridge,"bridgesData",isLoading)
+  const { data: bridgesData, isLoading } = useGetAllBridgesQuery(params?.org_id);
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [filterBridges,setFilterBridges]=useState(bridgesData?.bridge||[]);
   const [tutorialState, setTutorialState] = useState({

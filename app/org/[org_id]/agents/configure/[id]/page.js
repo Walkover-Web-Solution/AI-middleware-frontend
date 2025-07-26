@@ -12,6 +12,7 @@ import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
 import { updateTitle } from "@/utils/utility";
 import AgentSetupGuide from "@/components/AgentSetupGuide";
+import { useGetSingleBridgeQuery } from "@/store/services/bridgeApi";
 
 export const runtime = 'edge';
 
@@ -21,6 +22,8 @@ const Page = ({ searchParams }) => {
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
+  const {data:bridgeData}=useGetSingleBridgeQuery(params.id)
+  console.log(bridgeData,'bridgeDatasdfds')
   const [isDesktop, setIsDesktop] = useState(false);
   const [leftWidth, setLeftWidth] = useState(50); // Width of the left panel in percentage
   const [isResizing, setIsResizing] = useState(false);
@@ -28,16 +31,19 @@ const Page = ({ searchParams }) => {
   // Ref for the main container to calculate percentage-based width
   const containerRef = useRef(null); 
 
-  const { bridgeType, versionService, bridgeName } = useCustomSelector((state) => {
-    const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
-    return {
-      bridgeType: bridgeData?.bridgeType,
-      versionService: versionData?.service,
-      bridgeName: bridgeData?.name,
-    };
-  });
-
+  // const { bridgeType, versionService, bridgeName } = useCustomSelector((state) => {
+  //   const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+  //   const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+  //   return {
+  //     bridgeType: bridgeData?.bridgeType,
+  //     versionService: versionData?.service,
+  //     bridgeName: bridgeData?.name,
+  //   };
+  // });
+ const bridgeType=bridgeData?.bridge?.bridgeType
+ const versionService=bridgeData?.bridge?.versions[0]
+ const bridgeName=bridgeData?.bridge?.name
+ console.log(versionService,"versionService")
   // Enhanced responsive detection
   useEffect(() => {
     const handleResize = () => {
@@ -61,7 +67,7 @@ const Page = ({ searchParams }) => {
   
   // Data fetching and other effects...
   useEffect(() => {
-    dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
+    // dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
     return () => {
       try {
         if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
