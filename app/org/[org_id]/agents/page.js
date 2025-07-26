@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import SearchItems from "@/components/UI/SearchItems";
+import { useGetAllBridgesQuery } from "@/store/services/bridgeApi";
 
 export const runtime = 'edge';
 
@@ -25,18 +26,20 @@ function Home({ params, isEmbedUser }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation } = useCustomSelector((state) => {
+  
+  const {  averageResponseTime, isFirstBridgeCreation } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[params.org_id] || {};
     const user = state.userDetailsReducer.userDetails
     return {
-      allBridges: (orgData.orgs || []).slice().reverse(),
       averageResponseTime: orgData.average_response_time || [],
-      isLoading: state.bridgeReducer.loading,
+      // isLoading: state.bridgeReducer.loading,
       isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
     };
   });
+  const { data: bridgesData, isLoading } = useGetAllBridgesQuery(params.org_id);
+  console.log(bridgesData?.bridge,"bridgesData",isLoading)
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
-  const [filterBridges,setFilterBridges]=useState(allBridges);
+  const [filterBridges,setFilterBridges]=useState(bridgesData?.bridge||[]);
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
     showSuggestion: isFirstBridgeCreation
@@ -51,7 +54,7 @@ function Home({ params, isEmbedUser }) {
       }
     };
     updateScreenSize();
-    setFilterBridges(allBridges)
+    setFilterBridges(bridgesData?.bridge || [])
     window.addEventListener('resize', updateScreenSize);
 
     return () => window.removeEventListener('resize', updateScreenSize);
@@ -259,12 +262,12 @@ function Home({ params, isEmbedUser }) {
         />
       )}
       <CreateNewBridge />
-      {!allBridges.length && isLoading && <LoadingSpinner />}
+      {!bridgesData?.bridge.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col items-start justify-start">
         <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
           <div className="w-full">
-            {allBridges.length === 0 ? (
+            {bridgesData?.bridge.length === 0 ? (
               <div className="text-center w-full h-screen flex justify-center items-center py-10">
                 <div className="flex flex-col items-center justify-center space-y-4">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="w-16 h-16 text-primary">
@@ -292,7 +295,7 @@ function Home({ params, isEmbedUser }) {
                   
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
                 
-                   <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
+                   <SearchItems data={bridgesData?.bridge} setFilterItems={setFilterBridges} item="Agents"/>
                   
                     <div className="join hidden sm:block">
                       <a onClick={() => setViewMode('grid')} className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}>

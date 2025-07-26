@@ -3,6 +3,8 @@ import { combineReducers } from 'redux';
 import persistReducer from "redux-persist/es/persistReducer";
 import persistStore from "redux-persist/es/persistStore";
 import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
+import { setupListeners } from '@reduxjs/toolkit/query';
+import { bridgeApi } from './services/bridgeApi';
 import authDataReducer from "./reducer/authkeyReducer";
 import bridgeReducer from "./reducer/bridgeReducer";
 import ChatBot from "./reducer/ChatBotReducer";
@@ -40,6 +42,8 @@ const storage = typeof window !== "undefined" ? createWebStorage("local") : crea
 const persistConfig = { key: 'root', storage, version: 1 };
 
 const rootReducer = combineReducers({
+    // Add the RTK Query API reducer
+    [bridgeApi.reducerPath]: bridgeApi.reducer,
     bridgeReducer,
     modelReducer,
     historyReducer,
@@ -66,10 +70,14 @@ export const store = configureStore({
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
             serializableCheck: {
-                ignoredActions: ['persist/PERSIST'],
+                // Add RTK Query actions to ignored actions
+                ignoredActions: ['persist/PERSIST', ...bridgeApi.reducerPath],
                 ignoredPaths: ['register'], // Adjust the paths as necessary
             },
-        }),
+        }).concat(bridgeApi.middleware),
 });
 
 export const persistor = persistStore(store);
+
+// Setup listeners for RTK Query - enables refetchOnFocus/refetchOnReconnect behaviors
+setupListeners(store.dispatch);

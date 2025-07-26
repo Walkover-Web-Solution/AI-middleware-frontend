@@ -24,6 +24,7 @@ import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 import { getApiKeyGuideAction, getTutorialDataAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
+import { useGetAllBridgesQuery } from "@/store/services/bridgeApi";
 
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -35,7 +36,6 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
-  const [loading, setLoading] = useState(true);
   const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
@@ -46,7 +46,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
-  
+  const { data: bridgesData, isLoading: loading } = useGetAllBridgesQuery(params.org_id);
   useEffect(() => {
     if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(getTutorialDataAction()); 
@@ -115,12 +115,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
 
   useEffect(() => {
     if (isValidOrg) {
-      dispatch(getAllBridgesAction((data) => {
-        if (data === 0 && !currentUser?.meta?.onboarding?.bridgeCreation) {
-          openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-        }
-        setLoading(false);
-      }))
+      bridgesData?.bridge?.length === 0 && !currentUser?.meta?.onboarding?.bridgeCreation && openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
       dispatch(getAllFunctions())
     }
   }, [isValidOrg, currentUser?.meta?.onboarding?.bridgeCreation]);

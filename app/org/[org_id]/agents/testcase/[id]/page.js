@@ -8,6 +8,7 @@ import { PencilIcon, PlayIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, Ext
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { ONBOARDING_VIDEOS } from '@/utils/enums';
+import { useGetAllBridgesQuery } from '@/store/services/bridgeApi';
 
 export const runtime = 'edge';
 
@@ -23,7 +24,8 @@ function TestCases({ params }) {
   const bridgeVersion = searchParams.get('version');
   const [selectedVersion, setSelectedVersion] = useState(searchParams.get('versionId') || '');
 
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
+
+  const { data: bridgesData } = useGetAllBridgesQuery(params.org_id);
   const { testCases,isFirstTestcase } = useCustomSelector((state) => ({
     testCases: state.testCasesReducer?.testCases?.[params?.id] || {},
      isFirstTestcase: state.userDetailsReducer.userDetails?.meta?.onboarding?.TestCasesSetup || "",
@@ -33,8 +35,8 @@ function TestCases({ params }) {
     showSuggestion: isFirstTestcase
   });
   const versions = useMemo(() => {
-    return allBridges.find((bridge) => bridge?._id === params?.id)?.versions || [];
-  }, [allBridges, params?.id]);
+    return bridgesData?.bridge.find((bridge) => bridge?._id === params?.id)?.versions || [];
+  }, [bridgesData, params?.id]);
 
   useEffect(() => {
     dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
