@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { CircleAlertIcon, RocketIcon, SparklesIcon } from '@/components/Icons';
-import { AGENT_SETUP_GUIDE_STEPS } from '@/utils/enums';
+import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
 const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) => {
-  const { bridgeApiKey, prompt } = useCustomSelector((state) => {
+  const { bridgeApiKey, prompt,shouldPromptShow } = useCustomSelector((state) => {
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
+    const modelReducer = state?.modelReducer?.serviceModels;
+    const serviceName = versionData?.service;
+    const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+    const modelName = versionData?.configuration?.model;
     return {
       bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
       prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-    };
+      shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt   
+   };
   });
 
-  const [isVisible, setIsVisible] = useState(!bridgeApiKey || prompt === "");
+  const [isVisible, setIsVisible] = useState(!bridgeApiKey || (prompt === ""&&(shouldPromptShow) ))
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
-
   const resetBorder = (ref, selector) => {
     if (ref?.current) {
       const element = ref.current.querySelector(selector);
@@ -41,9 +46,11 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
   };
 
   useEffect(() => {
-    const hasPrompt = prompt !== ""||promptTextAreaRef.current.querySelector('textarea').value.trim()!=="";
+    const hasPrompt =( prompt !== ""||(!shouldPromptShow)||(promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""));
     const hasApiKey = !!bridgeApiKey;
-    
+     if(!shouldPromptShow){
+      setShowError(false)
+      }
     if (hasPrompt) {
       resetBorder(promptTextAreaRef, 'textarea');
     }
@@ -59,11 +66,11 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
     } else {
       setIsVisible(true);
     }
-  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef]);
+  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef,shouldPromptShow]);
 
   const handleStart = () => {
     
-    if (prompt === ""&&promptTextAreaRef.current.querySelector('textarea').value.trim()==="") {
+    if ((shouldPromptShow)&&(promptTextAreaRef.current &&prompt === ""&&promptTextAreaRef.current.querySelector('textarea').value.trim()==="") ){
       setShowError(true);
       setErrorType('prompt');
       setErrorBorder(promptTextAreaRef, 'textarea', true);
@@ -79,15 +86,15 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
     
     setIsVisible(false);
   };
-
-  if (!isVisible || (bridgeApiKey && prompt !== "")) {
+ 
+  if (!isVisible || ((bridgeApiKey && prompt !== ""))) {
     resetBorder(promptTextAreaRef, 'textarea');
     resetBorder(apiKeySectionRef, 'select');
     return null;
   }
 
   return (
-    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-low-medium">
+    <div className="absolute inset-0 w-full h-full bg-white overflow-hidden z-very-high">
       <div className="card bg-base-100 w-full h-full shadow-xl">
         <div className="card-body p-6 h-full flex flex-col">
           <div className="text-center mb-4 flex-shrink-0">
@@ -104,35 +111,41 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
 
           <div className="flex-1 overflow-y-auto px-4 pt2">
             <div className="space-y-3">
-              {AGENT_SETUP_GUIDE_STEPS?.map(({ step, title, detail, optional, icon }, index) => (
-                <div
-                  key={step}
-                  className={`card bg-base-200 shadow-sm transition-all duration-300 hover:shadow-md`}
-                >
-                  <div className="card-body p-2">
-                    <div className="flex items-start gap-3">
-                      <div className={`btn btn-sm btn-circle transition-all duration-300 btn-ghost`}>
-                        <span className="text-sm">{icon}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-base-content text-sm mt-1">
-                            {title}
-                          </h3>
-                          {optional && (
-                            <div className="badge badge-primary badge-sm">
-                              Optional
-                            </div>
-                          )}
+              {AGENT_SETUP_GUIDE_STEPS?.map(({ step, title, detail, optional, icon }, index) => {
+                if ((step === '1'||step==='2') && !shouldPromptShow) {
+                  return null;
+                }
+
+                return (
+                  <div
+                    key={step}
+                    className={`card bg-base-200 shadow-sm transition-all duration-300 hover:shadow-md`}
+                  >
+                    <div className="card-body p-2">
+                      <div className="flex items-start gap-3">
+                        <div className={`btn btn-sm btn-circle transition-all duration-300 btn-ghost`}>
+                          <span className="text-sm">{icon}</span>
                         </div>
-                        <p className="text-base-content/70 text-sm mb-2">
-                          {detail}
-                        </p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-base-content text-sm mt-1">
+                              {title}
+                            </h3>
+                            {optional && (
+                              <div className="badge badge-primary badge-sm">
+                                Optional
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-base-content/70 text-sm mb-2">
+                            {detail}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>      
           

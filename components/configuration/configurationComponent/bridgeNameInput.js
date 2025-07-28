@@ -1,6 +1,7 @@
 import Protected from '@/components/protected';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction } from '@/store/action/bridgeAction';
+import { sendDataToParent } from '@/utils/utility';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -67,9 +68,7 @@ function BridgeNameInput({ params, isEmbedUser }) {
         dataToSend: { name: trimmed },
       }));
     }
-
-    isEmbedUser && window.parent.postMessage({type: 'gtwy',status:"agent_name_update", data:{ "agent_name": trimmed}}, '*');
-
+    isEmbedUser && sendDataToParent("updated", {name:trimmed , agent_id: params?.id}, "Agent Name Updated")
     setDisplayValue(
       trimmed.length > 20 ? trimmed.slice(0, 17) + "..." : trimmed
     );

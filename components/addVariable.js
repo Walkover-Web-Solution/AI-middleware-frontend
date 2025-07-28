@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import OnBoarding from "./OnBoarding";
 import { ONBOARDING_VIDEOS } from "@/utils/enums";
 import TutorialSuggestionToast from "./tutorialSuggestoinToast";
+import InfoTooltip from "./InfoTooltip";
 
 const AddVariable = ({ params }) => {
   const versionId = params.version;
@@ -231,19 +232,21 @@ const AddVariable = ({ params }) => {
   }, [isAccordionOpen, keyValuePairs, isFormData]);
 
   return (
-    <div className="collapse text-base-content" tabIndex={0}>
-      <button
-        className="flex items-center cursor-pointer focus:outline-none"
+    <div className="text-base-content" tabIndex={0}>
+      <div
+        className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
         onClick={() => {
-          handleTutorial()
-          toggleAccordion()
+          handleTutorial();
+          toggleAccordion();
         }}
-        aria-expanded={isAccordionOpen}
-        aria-controls="accordion-content"
       >
-        <span className="mr-2 text-nowrap font-medium " >Add Variables</span>  
-        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-      </button>
+        <InfoTooltip
+          tooltipContent="Variables let you dynamically insert data into a prompt using this format: {{variable_name}}."
+        >
+          <span className="cursor-pointer label-text inline-block ml-1">Add Variables</span>
+        </InfoTooltip>
+        <span className="cursor-pointer">{isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
+      </div>
       {tutorialState?.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"Addvariables"} TutorialDetails={"Variable Management"}/>)}
       {tutorialState?.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.Addvariables} flagKey={"Addvariables"} />
@@ -253,12 +256,12 @@ const AddVariable = ({ params }) => {
       <div
         id="accordion-content"
         ref={accordionContentRef}
-        className="overflow-hidden transition-all duration-200 ease-in-out mt-2"
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : ''}`}
         style={{
           height: `${height}px`,
         }}
       >
-        <div className="min-h-[300px] w-full border rounded-md p-4">
+        <div className="min-h-[300px] w-full p-4">
           <div className="w-full flex flex-col gap-2">
             {/* Radio Buttons for Form Data and Raw Data */}
             <div className="flex flex-row gap-4">
@@ -304,11 +307,14 @@ const AddVariable = ({ params }) => {
             ) : (
               <div className="flex flex-col gap-4 max-h-56 overflow-y-auto mt-4 w-full items-start">
                 {keyValuePairs.length > 0 && <div className="flex items-center gap-2 w-full">
-                  <div className="tooltip tooltip-right" data-tip="Mark checkbox if it is required">
+                  <InfoTooltip
+                    tooltipContent="Mark checkbox if it is required"
+                    className="cursor-pointer"
+                  >
                     <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
                       <InfoIcon className="w-4 h-4 text-base-content/70" />
                     </button>
-                  </div>
+                  </InfoTooltip>
                   <div className="grid grid-cols-2 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
                     <span className="text-sm font-medium text-base-content/80">Key</span>
                     <span className="text-sm font-medium text-base-content/80">Value</span>

@@ -485,7 +485,7 @@ export const updateTitle = (newTitle) => {
 };
 
 export function toBoolean(str) {
-    return str === "true";
+    return str === "true" || str === true;
   }
 
 
@@ -534,4 +534,17 @@ export  function generateRandomID(length = 10) {
   }
 
 export const RequiredItem = () => <span className="text-error text-lg">*</span>;
+
+
+export const sendDataToParent = (status, data, message) => {
+  if (window.parent) {
+    window.parent.postMessage({
+      type: "gtwy",
+      status: status,
+      data: data,
+      message: message
+    }, '*');
+  }
+};
+
   

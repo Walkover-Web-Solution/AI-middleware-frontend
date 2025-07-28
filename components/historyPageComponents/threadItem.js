@@ -9,6 +9,7 @@ import ToolsDataModal from "./toolsDataModal";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { openModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
+import { PdfIcon } from "@/icons/pdfIcon";
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase, setModalInput }) => {
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
@@ -286,20 +287,31 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 )}
                 {item?.role === "user" && (
                   <div className="flex flex-wrap">
-                    {item?.urls?.map((url, index) => (
-                      <div key={index} className="chat chat-end flex-grow-1">
-                        <div className="">
-                          <Image
-                            src={url}
-                            alt="Attached"
-                            width={64} // Adjust width as needed
-                            height={64} // Adjust height as needed
-                            className="max-w-full max-h-16 w-auto h-auto rounded-md"
-                            loading="lazy"
-                          />
+                    {item?.urls?.map((url, index) => {
+                      const isPdf = url.endsWith(".pdf");
+                      return (
+                        <div key={index} className="chat chat-end flex-grow-1">
+                          <div className="">
+                            {isPdf ? (
+                              <a key={index} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 hover:underline">
+                                <PdfIcon height={20} width={20} />
+                                <span className="text-sm overflow-hidden truncate max-w-[10rem]">{truncate(url.split('/').pop(), 20)}</span>
+                              </a>
+                            ) : (
+                              <Image
+                                key={index}
+                                src={url}
+                                alt="Attached"
+                                width={64} // Adjust width as needed
+                                height={64} // Adjust height as needed
+                                className="max-w-full max-h-16 w-auto h-auto rounded-md"
+                                loading="lazy"
+                              />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
                 {item?.firstAttemptError && item?.role === "assistant" && (

@@ -29,7 +29,7 @@ import DemoModal from '../modals/DemoModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
-import { KeyIcon } from '../Icons';
+import { AddIcon, KeyIcon } from '../Icons';
 
 /* -------------------------------------------------------------------------- */
 /*                                    Consts                                  */
@@ -435,6 +435,16 @@ function MainSlider({ isEmbedUser }) {
                     <KeyIcon size={14} className="shrink-0" />
                     <span className="truncate text-xs">Auth 2.0</span>
                   </button>
+
+                  {/* <button
+                    onClick={()=>{
+                      router.push(`/org/${orgId}/addNewModel`);
+                    }}
+                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
+                  >
+                    <AddIcon size={14} className="shrink-0" />
+                    <span className="truncate text-xs">Add new Model</span>
+                  </button> */}
 
                   <button
                     onClick={handleLogout}

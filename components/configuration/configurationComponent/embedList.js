@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
 import FunctionParameterModal from './functionParameterModal';
 import { closeModal, openModal } from '@/utils/utility';
-import { MODAL_TYPE } from '@/utils/enums';
+import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import { isEqual } from 'lodash';
 import InfoTooltip from '@/components/InfoTooltip';
@@ -139,7 +139,7 @@ const EmbedList = ({ params }) => {
                 {
                     shouldToolsShow && bridgeFunctions.length > 0 &&
                     <>
-                        <InfoTooltip tooltipContent="The Tools are set up for the whole organization, so any agent can use them.">
+                        <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation}  tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
                             <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
                         </InfoTooltip>
                         <div className="flex flex-wrap gap-4">
