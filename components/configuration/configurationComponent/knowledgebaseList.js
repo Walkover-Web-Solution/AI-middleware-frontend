@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { GetFileTypeIcon, openModal } from '@/utils/utility';
@@ -11,6 +11,7 @@ import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
+import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
 
 const KnowledgebaseList = ({ params }) => {
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
@@ -58,6 +59,21 @@ const KnowledgebaseList = ({ params }) => {
             showSuggestion: isFirstKnowledgeBase
         }))
     };
+
+    useEffect(() => {
+        const handleMessage = (e) => {
+            if (e.data?.type === 'rag') {
+                if (e.data?.status == "create") {
+                    dispatch(getAllKnowBaseDataAction(params.org_id));
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => {
+            window.removeEventListener('message', handleMessage);
+        };
+    }, [params.org_id]);
 
     const renderKnowledgebase = useMemo(() => (
         (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
@@ -171,7 +187,7 @@ const KnowledgebaseList = ({ params }) => {
                                     </li>
                                 ))
                             }
-                            <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => { openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL) }}>
+                            <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => {if(window?.openRag) window.openRag()}}>
                                 <div>
                                     <AddIcon size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
                                 </div>

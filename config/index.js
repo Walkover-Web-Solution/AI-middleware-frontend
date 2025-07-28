@@ -807,6 +807,15 @@ export const getAllKnowBaseData = async () => {
     return error;
   }
 };
+export const getKnowledgeBaseToken = async () => {
+  try {
+    const response = await axios.get(`${URL}/rag/docs/token`);
+    return response?.data?.result;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
 
 export const deleteKnowBaseData = async (data) => {
   try {
@@ -1030,10 +1039,18 @@ export const getTutorial =async ()=>{
     throw new Error(error);
   }
 }
-
-export const createIntegrationApi = async (name) => {
+export const getApiKeyGuide =async ()=>{
   try {
-    const response = await axios.post(`${URL}/gtwyEmbed/`, {name});
+    const response=await axios.get("https://flow.sokt.io/func/scriDewB9Jk2");
+    return response;
+  }
+  catch(error){
+    throw new Error(error);
+  }
+}
+export const createIntegrationApi = async (data) => {
+  try {
+    const response = await axios.post(`${URL}/gtwyEmbed/`, data);
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -1047,6 +1064,16 @@ export const getAllIntegrationApi = async () => {
   } catch (error) {
     console.error(error);
     return error;
+  }
+}
+
+export const updateIntegrationData = async (dataToSend) => {
+  try {
+    const response = await axios.put(`${URL}/gtwyEmbed/`, {folder_id : dataToSend?.folder_id,  config: dataToSend?.config})
+    return response
+  } catch (error) {
+    console.error(error)
+    throw error
   }
 }
   

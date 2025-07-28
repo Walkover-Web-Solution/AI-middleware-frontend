@@ -6,11 +6,12 @@ import {
   updateBridgeAction,
 } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { closeModal } from "@/utils/utility";
+import { closeModal, sendDataToParent } from "@/utils/utility";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 import Modal from "../UI/Modal";
 import { useCustomSelector } from '@/customHooks/customSelector';
+import Protected from "../protected";
 
 function PublishBridgeVersionModal({ params, agent_name, agent_description, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -109,17 +110,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
         })
       );
 
-      if (isEmbedUser) {
-        window.parent.postMessage({
-          type: 'gtwy',
-          status: "agent_published",
-          data: {
-            "agent_id": params?.id,
-            "agent_name": agent_name,
-            "agent_description": agent_description
-          }
-        }, '*');
-      }
+      isEmbedUser && sendDataToParent("published", { name: agent_name, agent_description: agent_description, agent_id: params?.id, agent_version_id: params?.version }, "Agent Published Successfully")
 
       dispatch(getAllBridgesAction());
       closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
@@ -348,4 +339,4 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
   );
 }
 
-export default PublishBridgeVersionModal;
+export default Protected(PublishBridgeVersionModal);
