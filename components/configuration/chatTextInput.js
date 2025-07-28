@@ -168,7 +168,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             const assistConversation = {
                 role: response?.role || "assistant",
                 content: content,
-                fallback : response?.fallback,
+                fallback : response?.fallback ? response?.fallback : response?.fall_back,
                 firstAttemptError: response?.firstAttemptError,
                 image_urls: response?.image_urls || [],
                 model: response?.model
