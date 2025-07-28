@@ -92,24 +92,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const handleSearch = async (e) => {
     e?.preventDefault();
     if (e.target.value === '') {
-
-      dispatch(clearThreadData())
-      dispatch(clearSubThreadData())
-      const result = await dispatch(
-        getHistoryAction(params?.id, null, null, 1, null)
-      );
-
-      if (result?.length) {
-        const firstResult = result[0];
-        const threadId = firstResult.thread_id;
-        const subThreadId = firstResult.sub_thread?.[0]?.sub_thread_id || threadId;
-
-        router.push(
-          `${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=`,
-          undefined,
-          { shallow: true }
-        );
-      }
+      clearInput();
       return;
     }
 
@@ -117,7 +100,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setPage(1);
     setHasMore(true);
     setFilterOption("all");
-    dispatch(clearThreadData());
     dispatch(clearSubThreadData());
 
     try {
@@ -125,23 +107,27 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       const result = await dispatch(
         getHistoryAction(params?.id, null, null, 1, searchValue)
       );
-
+      router.push(
+        `${pathName}?version=${params.version}`,
+        undefined,
+        { shallow: true }
+      );
       if (result?.length) {
         const firstResult = result[0];
         const threadId = firstResult.thread_id;
         const subThreadId = firstResult.sub_thread?.[0]?.sub_thread_id || threadId;
-        
+
         router.push(
           `${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=`,
           undefined,
           { shallow: true }
         );
       }
-      else{
+      else {
         dispatch(clearThreadData())
       }
 
-     
+
 
       if (result?.length < 40) {
         setHasMore(false);
@@ -162,17 +148,17 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setFilterOption("all");
     try {
       const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
-      await dispatch(
-        getThread({
-          threadId: params?.thread_id,
-          bridgeId: params?.id,
-          nextPage: 1,
-          user_feedback: filterOption,
-          subThreadId: params?.subThread_id || params?.thread_id,
-          versionId: selectedVersion === "all" ? "" : selectedVersion,
-          error: params?.error || isErrorTrue
-        })
-      );
+      if (result?.length) {
+        const firstResult = result[0];
+        const threadId = firstResult.thread_id;
+        const subThreadId = firstResult.sub_thread?.[0]?.sub_thread_id || threadId;
+
+        router.push(
+          `${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=`,
+          undefined,
+          { shallow: true }
+        );
+      }
       if (result?.length < 40) setHasMore(false);
     } catch (error) {
       console.error("Clear search error:", error);
@@ -233,7 +219,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const NoDataFound = () => (
     <div className="flex flex-col items-center justify-center py-8 text-center">
       <div className="text-base-content mb-2">
-       <FileTextIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+        <FileTextIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
       </div>
       <p className="text-base-content text-sm">No data available</p>
       {searchQuery && (
