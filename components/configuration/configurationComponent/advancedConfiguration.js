@@ -3,23 +3,34 @@ import { useDispatch } from 'react-redux';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { ONBOARDING_VIDEOS } from '@/utils/enums';
+import { generateRandomID } from '@/utils/utility';
 import ResponseFormatSelector from './responseFormatSelector';
+import OnBoarding from '@/components/OnBoarding';
+import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [showApiKeysToggle, setShowApiKeysToggle] = useState(false);
   const [selectedApiKeys, setSelectedApiKeys] = useState({});
+  const [tutorialState, setTutorialState] = useState({
+    showTutorial: false,
+    showSuggestion: false
+  });
   const dispatch = useDispatch();
 
-  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES } = useCustomSelector((state) => {
+  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration } = useCustomSelector((state) => {
     const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version] || {};
     const apikeys = state?.bridgeReducer?.apikeys || {};
+    const user = state.userDetailsReducer.userDetails;
 
     return {
       bridge: bridgeMap,
       apikeydata: apikeys[params?.org_id] || [],
       bridgeApikey_object_id: bridgeMap?.apikey_object_id,
-      SERVICES: state?.serviceReducer?.services
+      SERVICES: state?.serviceReducer?.services,
+      isFirstConfiguration: user?.meta?.onboarding?.AdvancedConfiguration
     };
   });
 
@@ -28,6 +39,13 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
       setSelectedApiKeys(bridgeApikey_object_id);
     }
   }, [bridgeApikey_object_id]);
+
+  const handleTutorial = () => {
+    setTutorialState(prev => ({
+      ...prev,
+      showSuggestion: isFirstConfiguration
+    }));
+  };
 
   const filterApiKeysByService = (service) => {
     return apikeydata.filter(apiKey => apiKey?.service === service);
@@ -58,65 +76,103 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
   };
 
   return (
-    <div className="collapse z-very-low text-base-content -mt-4" tabIndex={0}>
-      <input type="radio" name="agent-accordion" onClick={toggleAccordion} className='cursor-pointer' />
-      <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
-        <span className="mr-2 cursor-pointer">
-          Advanced Configuration
+    <div className="z-very-low text-base-content w-full cursor-pointer" tabIndex={0}>
+      <div 
+        className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} 
+        onClick={() => {
+          toggleAccordion();
+        }}
+      >
+        <InfoTooltip 
+          tooltipContent="Advanced configuration options for customizing your bridge setup, including response formats and API key management." 
+          className="cursor-pointer mr-2"
+        >
+          <div className="cursor-pointer label-text inline-block ml-1">   
+            Advanced Configuration
+          </div>
+        </InfoTooltip>
+
+        <span className="cursor-pointer">
+          {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
         </span>
-        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </div>
-      
-      {isAccordionOpen && (
-        <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
-          {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && (
-            <>
-              <ResponseFormatSelector params={params} /> 
+
+
+      <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'} transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+        
+        {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && (
+          <>
+            <div className="form-control w-full mt-2">
+              <ResponseFormatSelector params={params} />
+            </div>
+
+            {/* Multiple API Keys Section */}
+            <div className="form-control w-full">
+              <label className="label">
+                <InfoTooltip tooltipContent="Add multiple API keys from different services to use with your bridge">
+                  <span className="label-text info">Multiple API Keys</span>
+                </InfoTooltip>
+              </label>
               
-              {/* Multiple API Keys Section with Toggle */}
-              <div className="collapse z-very-low text-base-content" tabIndex={0}>
-                <input type="radio" name="api-keys-accordion" onClick={toggleApiKeys} className='cursor-pointer' />
-                <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer gap-2" onClick={toggleApiKeys}>
-                  <span className="text-sm cursor-pointer ">
-                    Add Multiple API Keys
-                  </span>
-                  {showApiKeysToggle ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                </div>
-                
-                {showApiKeysToggle && (
-                  <div className="collapse-content p-0 mt-2">
-                    <div className="bg-base-100 border border-base-200 rounded-md shadow-lg max-h-80 overflow-auto p-4">
+              <div className="w-full">
+                <div className="relative">
+                  <div
+                    className="flex items-center gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer"
+                    onClick={toggleApiKeys}
+                  >
+                    <span className="text-base-content">
+                     Configure API keys...
+                    </span>
+                    <div className="ml-auto">
+                      {showApiKeysToggle ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
+                    </div>
+                  </div>
+
+                  {showApiKeysToggle && (
+                    <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-low max-h-80 overflow-y-auto mt-1 p-2">
                       {SERVICES?.filter(service => service?.value !== bridge?.service).map(service => (
-                        <div key={service?.value} className="px-4 py-2 border-b last:border-b-0">
-                          <div className="font-semibold capitalize mb-1">{service?.displayName}</div>
-                          {filterApiKeysByService(service?.value)?.map(apiKey => (
-                            <label key={apiKey?._id} className="flex items-center mb-1">
-                              <input
-                                type="radio"
-                                name={`apiKey-${service?.value}`}
+                        <div key={service?.value} className="p-2 border-b last:border-b-0">
+                          <div className="font-semibold capitalize mb-2 text-sm">
+                            {service?.displayName}
+                          </div>
+                          
+                          {filterApiKeysByService(service?.value)?.length > 0 ? (
+                            filterApiKeysByService(service?.value).map(apiKey => (
+                              <div
+                                key={apiKey?._id}
+                                className="p-2 hover:bg-base-200 cursor-pointer rounded"
+                                onClick={() => handleSelectionChange(service?.value, apiKey?._id)}
+                              >
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`apiKey-${service?.value}`}
                                 value={apiKey?._id}
                                 checked={selectedApiKeys[service?.value] === apiKey?._id}
                                 onChange={() => handleSelectionChange(service?.value, apiKey?._id)}
                                 className="radio radio-sm h-4 w-4"
-                              />
-                              <span className="ml-2 text-sm">
-                                {truncateText(apiKey?.name, 20)}
-                              </span>
-                            </label>
-                          ))}
-                          {filterApiKeysByService(service?.value)?.length === 0 && (
-                            <span className="text-sm text-gray-500">No API keys available for {service?.displayName}</span>
+                                  />
+                                  <span className="text-sm">
+                                    {truncateText(apiKey?.name, 25)}
+                                  </span>
+                                </label>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="p-2 text-sm text-gray-500">
+                              No API keys available for {service?.displayName}
+                            </div>
                           )}
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </>
-          )}
-        </div>
-      )}
+            </div>
+          </>
+        )}
+              </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import InfoTooltip from '@/components/InfoTooltip';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { isValidJson, validateUrl } from '@/utils/utility';
@@ -69,7 +70,11 @@ const ResponseFormatSelector = ({ params }) => {
 
     return (
         <div>
-            <p className='text-sm'>Select Response Format</p>
+            <label className="label">
+                <InfoTooltip tooltipContent="Configure the response format for your API calls">
+                  <span className="info label-text">Select Response Format</span>
+                </InfoTooltip>
+              </label>
             {responseOptions.map(({ value, label }) => (
                 <div className="form-control w-fit" key={value}>
                     <label className="label  cursor-pointer mx-w-sm flex items-center gap-5">
