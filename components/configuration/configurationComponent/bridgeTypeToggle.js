@@ -5,16 +5,13 @@ import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Protected from '@/components/protected';
 import InfoTooltip from '@/components/InfoTooltip';
+import { useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
 
 const BridgeTypeToggle = ({ params, isEmbedUser }) => {
     const dispatch = useDispatch();
-    const { bridgeType, modelType, service } = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
-    }));
+    
 
-
+    const { data: { bridge: { bridgeType,service,configuration:{type:modelType} } = {} } = {} } = useGetSingleBridgeQuery(params?.id);
     const handleInputChange = (e) => {
         let newCheckedValue;
         if (e.target.type === 'checkbox') {

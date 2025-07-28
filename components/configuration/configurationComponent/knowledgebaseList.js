@@ -11,24 +11,27 @@ import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
+import { useGetAllModelsQuery } from '@/store/services/modelApi';
+import { useGetAllBridgesQuery, useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
 
 const KnowledgebaseList = ({ params }) => {
-    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
+    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase } = useCustomSelector((state) => {
         const user = state.userDetailsReducer.userDetails || []
-        const modelReducer = state?.modelReducer?.serviceModels;
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
         return {
             knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
             knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids||[],
             isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
-            model: modelName
         };
     });
-
+    const { data: { bridge:{service, configuration:{model,type:modelType}} } } = useGetSingleBridgeQuery(params?.id)
+        const { data: modelsList } = useGetAllModelsQuery(service);
+        const {data: {bridge:bridgeData}} = useGetAllBridgesQuery(params?.orgId);
+        console.log(bridgeData,"bridges")
+        const shouldToolsShow = useMemo(() => {
+            if (!modelsList || !model || !service) return false;
+            return modelsList?.[modelType]?.[model]?.validationConfig?.tools
+        }, [modelsList, model, service, modelType]);
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
     const [tutorialState, setTutorialState] = useState({

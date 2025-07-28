@@ -9,6 +9,8 @@ import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import { isEqual } from 'lodash';
 import InfoTooltip from '@/components/InfoTooltip';
+import { useGetAllBridgesQuery, useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
+import { useGetAllModelsQuery } from '@/store/services/modelApi';
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -34,25 +36,25 @@ const EmbedList = ({ params }) => {
     const [function_name, setFunctionName] = useState("");
     const [variablesPath, setVariablesPath] = useState({});
     const dispatch = useDispatch();
-    const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path } = useCustomSelector((state) => {
+    const { integrationData, bridge_functions, function_data,  embedToken, variables_path } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
-        const modelReducer = state?.modelReducer?.serviceModels;
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
         return {
             integrationData: orgData?.integrationData || {},
             function_data: orgData?.functionData || {},
             bridge_functions: versionData?.function_ids || [],
-            modelType: modelTypeName,
-            model: modelName,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
             variables_path: versionData?.variables_path || {},
         };
     });
-
+    const { data: { bridge:{service, configuration:{model,type:modelType}} } } = useGetSingleBridgeQuery(params?.id)
+        const { data: modelsList } = useGetAllModelsQuery(service);
+        const {data: {bridge:bridgeData}} = useGetAllBridgesQuery(params?.orgId);
+        console.log(bridgeData,"bridges")
+        const shouldToolsShow = useMemo(() => {
+            if (!modelsList || !model || !service) return false;
+            return modelsList?.[modelType]?.[model]?.validationConfig?.tools
+        }, [modelsList, model, service, modelType]);
     const handleOpenModal = (functionId) => {
         setFunctionId(functionId);
         setfunctionData(function_data?.[functionId]);

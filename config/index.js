@@ -525,15 +525,15 @@ export const createDuplicateBridge = async (bridge_id) => {
   }
 };
 
-export const getAllModels = async (service) => {
-  try {
-    const response = await axios.get(`${PYTHON_URL}/api/v1/config/service/models/${service}`);
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    throw new Error(error);
-  }
-};
+// export const getAllModels = async (service) => {
+//   try {
+//     const response = await axios.get(`${PYTHON_URL}/api/v1/config/service/models/${service}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error(error);
+//   }
+// };
 
 export const saveApiKeys = async (data) => {
   try {

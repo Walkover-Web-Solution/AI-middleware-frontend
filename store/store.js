@@ -22,6 +22,7 @@ import flowDataReducer from "./reducer/flowDataReducer";
 import integrationReducer from "./reducer/integrationReducer";
 import authReducer from "./reducer/authReducer";
 import gtwyAgentReducer from "./reducer/gwtyAgentReducer";
+import { modelApi } from "./services/modelApi";
 
 const createNoopStorage = () => {
     return {
@@ -44,6 +45,7 @@ const persistConfig = { key: 'root', storage, version: 1 };
 const rootReducer = combineReducers({
     // Add the RTK Query API reducer
     [bridgeApi.reducerPath]: bridgeApi.reducer,
+    [modelApi.reducerPath]: modelApi.reducer,
     bridgeReducer,
     modelReducer,
     historyReducer,
@@ -71,10 +73,18 @@ export const store = configureStore({
         getDefaultMiddleware({
             serializableCheck: {
                 // Add RTK Query actions to ignored actions
-                ignoredActions: ['persist/PERSIST', ...bridgeApi.reducerPath],
+                ignoredActions: [
+                    'persist/PERSIST',
+                    'persist/REHYDRATE',
+                    `${bridgeApi.reducerPath}/executeQuery/fulfilled`,
+                    `${bridgeApi.reducerPath}/executeMutation/fulfilled`,
+                    `${modelApi.reducerPath}/executeQuery/fulfilled`,
+                    `${modelApi.reducerPath}/executeMutation/fulfilled`,
+                    // Other RTK Query action types you want to ignore
+                  ],
                 ignoredPaths: ['register'], // Adjust the paths as necessary
             },
-        }).concat(bridgeApi.middleware),
+        }).concat(bridgeApi.middleware).concat(modelApi.middleware),
 });
 
 export const persistor = persistStore(store);

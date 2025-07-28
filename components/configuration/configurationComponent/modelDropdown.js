@@ -3,6 +3,8 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
+import { useGetAllModelsQuery } from '@/store/services/modelApi';
 
 // Model Preview component to display model specifications
 const ModelPreview = memo(({ hoveredModel, modelSpecs }) => {
@@ -97,14 +99,23 @@ ModelPreview.displayName = 'ModelPreview';
 const ModelDropdown = ({ params }) => {
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
-    const { model, fineTuneModel, modelType, modelsList, bridgeType } = useCustomSelector((state) => ({
-        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
-        fineTuneModel: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.fine_tune_model?.current_model,
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
-        modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service],
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-    }));
-
+   
+    const {
+        data: {
+          bridge: {
+            bridgeType,
+            service,
+            configuration: {
+              type: modelType,
+              model,
+              fine_tune_model: {
+                current_model: fineTuneModel
+              } = {}
+            } = {}
+          } = {}
+        } = {}
+      } = useGetSingleBridgeQuery(params?.id);   
+    const { data: modelsList } = useGetAllModelsQuery(service);
     const [hoveredModel, setHoveredModel] = useState(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [modelSpecs, setModelSpecs] = useState();

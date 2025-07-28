@@ -8,30 +8,32 @@ import FunctionParameterModal from './functionParameterModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import InfoTooltip from '@/components/InfoTooltip';
+import { useGetAllBridgesQuery, useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
+import { useGetAllModelsQuery } from '@/store/services/modelApi';
 
 const PreEmbedList = ({ params }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
     const [preFunctionId, setPreFunctionId] = useState(null);
     const [preFunctionName, setPreFunctionName] = useState(null);
     const [preToolData, setPreToolData] = useState(null);
-    const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken } = useCustomSelector((state) => {
+    const { integrationData, function_data, bridge_pre_tools, embedToken } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
-        const modelReducer = state?.modelReducer?.serviceModels;
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
         return {
             integrationData: orgData?.integrationData || {},
             function_data: orgData?.functionData || {},
             bridge_pre_tools: versionData?.pre_tools || [],
-            modelType: modelTypeName,
-            model: modelName,
-            service: serviceName,
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
         };
     });
+    const { data: { bridge:{service, configuration:{model,type:modelType}} } } = useGetSingleBridgeQuery(params?.id)
+        const { data: modelsList } = useGetAllModelsQuery(service);
+        const {data: {bridge:bridgeData}} = useGetAllBridgesQuery(params?.orgId);
+        console.log(bridgeData,"bridges")
+        const shouldToolsShow = useMemo(() => {
+            if (!modelsList || !model || !service) return false;
+            return modelsList?.[modelType]?.[model]?.validationConfig?.tools
+        }, [modelsList, model, service, modelType]);
     const dispatch = useDispatch();
     const bridgePreFunctions = useMemo(() => bridge_pre_tools.map((id) => function_data?.[id]), [bridge_pre_tools, function_data, params]);
     const handleOpenModal = (functionId) => {

@@ -11,6 +11,8 @@ import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
 import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
+import { useGetAllModelsQuery } from '@/store/services/modelApi';
+import { useGetAllBridgesQuery, useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
 
 const ConnectedAgentList = ({ params }) => {
     const dispatch = useDispatch();
@@ -20,22 +22,22 @@ const ConnectedAgentList = ({ params }) => {
     const [agentTools, setAgentTools] = useState(null);
     const [variablesPath, setVariablesPath] = useState({});
     const router = useRouter();
-    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
-        const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
+    let { connect_agents, variables_path } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
-        const modelReducer = state?.modelReducer?.serviceModels;
-        const serviceName = versionData?.service;
-        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-        const modelName = versionData?.configuration?.model;
         return {
-            bridgeData: bridges,
             connect_agents: versionData?.connected_agents || {},
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
-            model: modelName,
             variables_path: versionData?.variables_path || {},
         };
     });
-
+    const { data: { bridge:{service, configuration:{model,type:modelType}} } } = useGetSingleBridgeQuery(params?.id)
+    const { data: modelsList } = useGetAllModelsQuery(service);
+    const {data: {bridge:bridgeData}} = useGetAllBridgesQuery(params?.orgId);
+    console.log(bridgeData,"bridges")
+    const shouldToolsShow = useMemo(() => {
+        if (!modelsList || !model || !service) return false;
+        return modelsList?.[modelType]?.[model]?.validationConfig?.tools
+    }, [modelsList, model, service, modelType]);
+    console.log(shouldToolsShow,"shouldToolsShow",modelsList ,"modellist")
     const handleSaveAgent = () => {
         try {
             if (!description && !selectedBridge?.description) {
@@ -79,7 +81,7 @@ const ConnectedAgentList = ({ params }) => {
         setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
         setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
-    }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
+    }, [openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
     const handleRemoveAgent = () => {
         dispatch(
@@ -144,9 +146,7 @@ const ConnectedAgentList = ({ params }) => {
     }
 
     const handleAgentClicked = (item) => {
-        console.log(item)
         const bridge = bridgeData?.find((bridge) => bridge?._id === item?.bridge_id)
-        console.log(bridge)
         if (bridge) {
             router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
         }
