@@ -1,5 +1,5 @@
 "use client";
-import { getInvitedUsers, inviteUser } from '@/config';
+import { getInvitedUsers, inviteUser, removeUsersFromOrg } from '@/config';
 import Protected from '@/components/protected';
 import { useEffect, useState} from 'react';
 import { toast } from 'react-toastify';
@@ -17,6 +17,7 @@ function InvitePage({ params }) {
   const [page, setPage] = useState(1);
   const [isInviting, setIsInviting] = useState(false);
   const [totalMembers, setTotalMembers] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -126,6 +127,30 @@ function InvitePage({ params }) {
     }
   };
 
+  const deleteUser = async (member) => {
+    if(isDeleting){
+      return;
+    }
+    console.log(member);
+    setIsDeleting(true);
+    try {
+    
+      const response = await removeUsersFromOrg(member?.id).then((data)=>{
+       console.log(data)
+        if(data)
+        {
+          setInvitedMembers([]);
+          fetchInvitedMembers();
+        }
+      });
+
+    } catch (error) {
+      toast.error('An error occurred while deleting member.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="mx-auto p-6 overflow-hidden">
       {/* Header */}
@@ -197,6 +222,15 @@ function InvitePage({ params }) {
                         <div className="font-medium">{member.name}</div>
                         <div className="text-sm text-base-content/70">{member.email}</div>
                       </div>
+                    </div>
+                    <div>
+                    <button
+                      onClick={() =>deleteUser(member)}
+                      disabled = {isDeleting}
+                      className="btn btn-primary"
+                    >
+                      {isDeleting?'Deleting...':'Delete User'}
+                    </button>
                     </div>
                   </div>
                 ))
