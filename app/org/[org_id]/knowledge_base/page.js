@@ -85,15 +85,20 @@ const Page = ({ params }) => {
 
   return (
     <div className="w-full">
-      <div className="px-4 pt-4">
+      <div className="px-2 pt-4">
         <MainLayout>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between w-full mb-4">
             <PageHeader
               title="Knowledge Base"
               description="A knowledge base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."
               docLink="https://blog.gtwy.ai/features/knowledgebase"
             />
-            <div className="flex-shrink-0 mt-4 sm:mt-0">
+            {/* <div className="flex flex-wrap justify-end items-center gap-2">
+            </div> */}
+            <div className="flex flex-shrink-0 gap-2 mt-4 sm:mt-0">
+              <button className="btn" onClick={() => toggleSidebar("knowledgeBase-integration-slider","right")}>
+                <BookIcon /> Integration Guide
+              </button>
               <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>+ create knowledge base</button>
             </div>
           </div>
@@ -102,25 +107,7 @@ const Page = ({ params }) => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
 
           <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} />
-          <div className="flex flex-wrap justify-end items-center gap-2">
-            <button className="btn" onClick={() => toggleSidebar("knowledgeBase-integration-slider","right")}>
-              <BookIcon /> Integration Guide
-            </button>
-            <div className="join">
-              <button
-                className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
-                onClick={() => setViewMode('grid')}
-              >
-                <LayoutGridIcon size={16} />
-              </button>
-              <button
-                className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
-                onClick={() => setViewMode('table')}
-              >
-                <TableIcon size={16} />
-              </button>
-            </div>
-          </div>
+          
         </div>
       </div>
 
