@@ -103,14 +103,14 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
         const firstResult = result[0];
         const threadId = firstResult.thread_id;
         const subThreadId = firstResult.sub_thread?.[0]?.sub_thread_id || threadId;
-        
+
         router.push(
           `${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=`,
           undefined,
           { shallow: true }
         );
       }
-            return;
+      return;
     }
 
     setSearchLoading(true);
