@@ -436,7 +436,7 @@ function MainSlider({ isEmbedUser }) {
                     <span className="truncate text-xs">Auth 2.0</span>
                   </button>
 
-                  <button
+                  {/* <button
                     onClick={()=>{
                       router.push(`/org/${orgId}/addNewModel`);
                     }}
@@ -444,7 +444,7 @@ function MainSlider({ isEmbedUser }) {
                   >
                     <AddIcon size={14} className="shrink-0" />
                     <span className="truncate text-xs">Add new Model</span>
-                  </button>
+                  </button> */}
 
                   <button
                     onClick={handleLogout}

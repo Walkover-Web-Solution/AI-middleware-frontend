@@ -187,7 +187,7 @@ const KnowledgebaseList = ({ params }) => {
                                     </li>
                                 ))
                             }
-                            <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => {if(window?.openRag) window.openRag()}}>
+                            <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => {openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)}}>
                                 <div>
                                     <AddIcon size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
                                 </div>
