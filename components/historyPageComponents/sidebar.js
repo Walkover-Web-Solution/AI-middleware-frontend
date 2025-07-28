@@ -92,8 +92,25 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const handleSearch = async (e) => {
     e?.preventDefault();
     if (e.target.value === '') {
-      router.push(`${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${params.subThread_id}&start=&end=`,undefined,{ shallow: true });
-      return;
+
+      dispatch(clearThreadData())
+      dispatch(clearSubThreadData())
+      const result = await dispatch(
+        getHistoryAction(params?.id, null, null, 1, null)
+      );
+
+      if (result?.length) {
+        const firstResult = result[0];
+        const threadId = firstResult.thread_id;
+        const subThreadId = firstResult.sub_thread?.[0]?.sub_thread_id || threadId;
+        
+        router.push(
+          `${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=`,
+          undefined,
+          { shallow: true }
+        );
+      }
+            return;
     }
 
     setSearchLoading(true);
