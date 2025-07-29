@@ -3,12 +3,17 @@ import { getInvitedUsers, inviteUser, removeUsersFromOrg } from '@/config';
 import Protected from '@/components/protected';
 import { useEffect, useState} from 'react';
 import { toast } from 'react-toastify';
-import { UserCircleIcon } from '@/components/Icons';
+import { TrashIcon, UserCircleIcon } from '@/components/Icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { useCustomSelector } from '@/customHooks/customSelector';
+import DeleteModal from '@/components/UI/DeleteModal';
+import { closeModal, openModal } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
 
 export const runtime = 'edge';
 
 function InvitePage({ params }) {
+  const userEmailData = useCustomSelector((state) => state?.userDetailsReducer?.userDetails?.email)
   const [email, setEmail] = useState('');
   const [invitedMembers, setInvitedMembers] = useState([]);
   const [query, setQuery] = useState('');
@@ -17,7 +22,7 @@ function InvitePage({ params }) {
   const [page, setPage] = useState(1);
   const [isInviting, setIsInviting] = useState(false);
   const [totalMembers, setTotalMembers] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState();
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -128,26 +133,17 @@ function InvitePage({ params }) {
   };
 
   const deleteUser = async (member) => {
-    if(isDeleting){
-      return;
-    }
-    console.log(member);
-    setIsDeleting(true);
     try {
-    
-      const response = await removeUsersFromOrg(member?.id).then((data)=>{
-       console.log(data)
-        if(data)
+      const response = await removeUsersFromOrg(member?.id)
+        if(response)
         {
           setInvitedMembers([]);
           fetchInvitedMembers();
         }
-      });
-
     } catch (error) {
       toast.error('An error occurred while deleting member.');
     } finally {
-      setIsDeleting(false);
+      closeModal(MODAL_TYPE.DELETE_MODAL)
     }
   };
 
@@ -214,7 +210,7 @@ function InvitePage({ params }) {
                 filteredMembers.map((member, index) => (
                   <div
                     key={member.id || `member-${index}`}
-                    className="flex items-center justify-between p-4 border border-base-200 rounded-box hover:bg-base-200"
+                    className="flex items-center justify-between p-2 border border-base-200 rounded-box hover:bg-base-200"
                   >
                     <div className="flex items-center gap-3">
                       <UserCircleIcon size={20} className="text-base-content/70" />
@@ -224,13 +220,12 @@ function InvitePage({ params }) {
                       </div>
                     </div>
                     <div>
-                    <button
-                      onClick={() =>deleteUser(member)}
-                      disabled = {isDeleting}
-                      className="btn btn-primary"
+                    {userEmailData !==member?.email && <button
+                      onClick={() => {setMemberToDelete(member); openModal(MODAL_TYPE.DELETE_MODAL)}}
+                      className="btn-sm text-error"
                     >
-                      {isDeleting?'Deleting...':'Delete User'}
-                    </button>
+                      <TrashIcon size={20}/>
+                    </button>}
                     </div>
                   </div>
                 ))
@@ -254,6 +249,7 @@ function InvitePage({ params }) {
           </InfiniteScroll>
         </div>
       </div>
+      <DeleteModal onConfirm={deleteUser} item={memberToDelete} description={`Are you sure you want to remove the "${memberToDelete?.name}" from your organization.`} title='Remove User From Organization' />
     </div>
   );
 }
