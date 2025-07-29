@@ -3,7 +3,7 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
+import { useGetBridgeVersionQuery, useGetSingleBridgeQuery, useUpdateBridgeVersionMutation } from '@/store/services/bridgeApi';
 import { useGetAllModelsQuery } from '@/store/services/modelApi';
 
 // Model Preview component to display model specifications
@@ -99,7 +99,7 @@ ModelPreview.displayName = 'ModelPreview';
 const ModelDropdown = ({ params }) => {
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
-   
+  
     const {
         data: {
           bridge: {
@@ -114,15 +114,17 @@ const ModelDropdown = ({ params }) => {
             } = {}
           } = {}
         } = {}
-      } = useGetSingleBridgeQuery(params?.id);   
+      } = useGetBridgeVersionQuery(params?.version);  
+      console.log(model,"model") 
     const { data: modelsList } = useGetAllModelsQuery(service);
+    const [updateBridgeVersion] = useUpdateBridgeVersionMutation();
     const [hoveredModel, setHoveredModel] = useState(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [modelSpecs, setModelSpecs] = useState();
 
     const handleFinetuneModelChange = (e) => {
         const selectedFineTunedModel = e.target.value;
-        dispatch(updateBridgeVersionAction({
+        const {data} = updateBridgeVersion({
             bridgeId: params.id,
             versionId: params.version,
             dataToSend: {
@@ -132,7 +134,8 @@ const ModelDropdown = ({ params }) => {
                     }
                 }
             }
-        }));
+        });
+        console.log(data,"updateversion")
     }
 
     const handleModelHover = (modelName) => {
@@ -148,13 +151,14 @@ const ModelDropdown = ({ params }) => {
         setModelSpecs(modelSpec);
     };
 
-    const handleModelClick = (group, modelName) => {
+    const handleModelClick =  (group, modelName) => {
         const selectedModelType = group;
-        dispatch(updateBridgeVersionAction({
+       const {data} =  updateBridgeVersion({
             bridgeId: params.id,
             versionId: params.version,
             dataToSend: { configuration: { model: modelName, type: selectedModelType } }
-        }));
+        });
+        console.log(data,"updateversion")   
         setHoveredModel(null);
         setIsDropdownOpen(false);
     };

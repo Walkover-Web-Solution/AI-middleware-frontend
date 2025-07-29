@@ -8,7 +8,7 @@ import FunctionParameterModal from './functionParameterModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import InfoTooltip from '@/components/InfoTooltip';
-import { useGetAllBridgesQuery, useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
+import { useGetAllBridgesQuery, useGetBridgeVersionQuery } from '@/store/services/bridgeApi';
 import { useGetAllModelsQuery } from '@/store/services/modelApi';
 
 const PreEmbedList = ({ params }) => {
@@ -26,9 +26,9 @@ const PreEmbedList = ({ params }) => {
             embedToken: orgData?.embed_token,
         };
     });
-    const { data: { bridge:{service, configuration:{model,type:modelType}} } } = useGetSingleBridgeQuery(params?.id)
+    const { data: { bridge:{service, configuration:{model,type:modelType}=[]}=[] }=[] } = useGetBridgeVersionQuery(params?.version)
         const { data: modelsList } = useGetAllModelsQuery(service);
-        const {data: {bridge:bridgeData}} = useGetAllBridgesQuery(params?.orgId);
+        const {data: {bridge:bridgeData}=[]} = useGetAllBridgesQuery(params?.orgId);
         console.log(bridgeData,"bridges")
         const shouldToolsShow = useMemo(() => {
             if (!modelsList || !model || !service) return false;

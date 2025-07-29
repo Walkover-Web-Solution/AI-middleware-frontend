@@ -12,23 +12,17 @@ import { openModal, toggleSidebar } from "@/utils/utility";
 import IntegrationModal from "@/components/modals/IntegrationModal";
 import GtwyIntegrationGuideSlider from "@/components/sliders/gtwyIntegrationGuideSlider";
 import SearchItems from "@/components/UI/SearchItems";
+import {  useGetAllIntegrationDataQuery } from "@/store/services/IntegrationApi";
 
 export const runtime = 'edge';
 
 const Page = ({ params }) => {
   const dispatch = useDispatch();
-  const { integrationData } = useCustomSelector((state) =>
-  ({
-    integrationData: state?.integrationReducer?.integrationData?.[params?.org_id] || [],
-  })
-  );
+
+  const { data: {data:integrationData}=[{}] } = useGetAllIntegrationDataQuery();
   const [selectedIntegration, setSelectedIntegration] = useState(null);
   const [filterIntegration, setFilterIntegration] = useState(integrationData);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
-
-  useEffect(() => {
-    dispatch(getAllIntegrationDataAction(params?.org_id));
-  }, [dispatch, params?.org_id]);
 
   useEffect(() => {
     setFilterIntegration(integrationData);
@@ -85,7 +79,7 @@ const Page = ({ params }) => {
         {/* Content Section */}
         <div className="w-full">
           <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="integration" />
-          {filterIntegration.length > 0 ? (
+          {filterIntegration?.length > 0 ? (
               <div className="w-full">
                 <CustomTable
                   data={tableData}

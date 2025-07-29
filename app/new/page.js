@@ -8,12 +8,12 @@ import { getModelAction } from '@/store/action/modelAction';
 import { switchOrg } from '@/config';
 import { toast } from 'react-toastify';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { createBridgeAction } from '@/store/action/bridgeAction';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LoadingSpinner from '@/components/loadingSpinner';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { switchUser } from '@/config';
 import { useCreateBridgeMutation } from '@/store/services/bridgeApi';
+import { useGetAllModelsQuery } from '@/store/services/modelApi';
 
 const URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const INITIAL_FORM_STATE = {
@@ -36,13 +36,15 @@ function Page({ params }) {
     const [formState, setFormState] = useState(INITIAL_FORM_STATE);
     const [isInitialLoading, setIsInitialLoading] = useState(false);
 
-    const { organizations, modelsList, SERVICES, DEFAULT_MODEL } = useCustomSelector(state => ({
+    const { organizations,  SERVICES, DEFAULT_MODEL } = useCustomSelector(state => ({
         organizations: state.userDetailsReducer.organizations,
-        modelsList: state?.modelReducer?.serviceModels[formState.selectedService],
         SERVICES: state?.serviceReducer?.services,
         DEFAULT_MODEL: state?.serviceReducer?.default_model
     }));
-   const [createBridgeMutation] = useCreateBridgeMutation();
+    const {data: servicesList} = useGetAllServicesQuery();
+    console.log(servicesList,"servicesList");
+    const {data: modelsList} = useGetAllModelsQuery(formState.selectedService);
+    const [createBridgeMutation] = useCreateBridgeMutation();
     const templateId = searchParams.get('template_id');
 
      useEffect(() => {

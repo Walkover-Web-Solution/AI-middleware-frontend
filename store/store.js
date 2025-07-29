@@ -23,6 +23,9 @@ import integrationReducer from "./reducer/integrationReducer";
 import authReducer from "./reducer/authReducer";
 import gtwyAgentReducer from "./reducer/gwtyAgentReducer";
 import { modelApi } from "./services/modelApi";
+import { serviceApi } from "./services/serviceApi";
+import { apiKeyApi } from "./services/apiKeyApi";
+import { integrationApi } from "./services/IntegrationApi";
 
 const createNoopStorage = () => {
     return {
@@ -46,6 +49,9 @@ const rootReducer = combineReducers({
     // Add the RTK Query API reducer
     [bridgeApi.reducerPath]: bridgeApi.reducer,
     [modelApi.reducerPath]: modelApi.reducer,
+    [serviceApi.reducerPath]: serviceApi.reducer,
+    [apiKeyApi.reducerPath]: apiKeyApi.reducer,
+    [integrationApi.reducerPath]: integrationApi.reducer,
     bridgeReducer,
     modelReducer,
     historyReducer,
@@ -62,7 +68,8 @@ const rootReducer = combineReducers({
     gtwyAgentReducer,
     flowDataReducer,
     integrationReducer,
-    authReducer
+    authReducer,
+
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -76,15 +83,21 @@ export const store = configureStore({
                 ignoredActions: [
                     'persist/PERSIST',
                     'persist/REHYDRATE',
+                    `${serviceApi.reducerPath}/executeQuery/fulfilled`,
+                    `${serviceApi.reducerPath}/executeMutation/fulfilled`,
                     `${bridgeApi.reducerPath}/executeQuery/fulfilled`,
                     `${bridgeApi.reducerPath}/executeMutation/fulfilled`,
                     `${modelApi.reducerPath}/executeQuery/fulfilled`,
                     `${modelApi.reducerPath}/executeMutation/fulfilled`,
+                    `${apiKeyApi.reducerPath}/executeQuery/fulfilled`,
+                    `${apiKeyApi.reducerPath}/executeMutation/fulfilled`,
+                    `${integrationApi.reducerPath}/executeQuery/fulfilled`,
+                    `${integrationApi.reducerPath}/executeMutation/fulfilled`,
                     // Other RTK Query action types you want to ignore
                   ],
                 ignoredPaths: ['register'], // Adjust the paths as necessary
             },
-        }).concat(bridgeApi.middleware).concat(modelApi.middleware),
+        }).concat(bridgeApi.middleware).concat(modelApi.middleware).concat(serviceApi.middleware).concat(apiKeyApi.middleware).concat(integrationApi.middleware),
 });
 
 export const persistor = persistStore(store);

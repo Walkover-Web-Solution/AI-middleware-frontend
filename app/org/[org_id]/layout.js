@@ -13,7 +13,6 @@ import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunct
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
 import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { updateUserMetaOnboarding } from "@/store/action/orgAction";
-import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
@@ -24,7 +23,7 @@ import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 import { getApiKeyGuideAction, getTutorialDataAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
-import { useGetAllBridgesQuery } from "@/store/services/bridgeApi";
+import { useGetAllBridgesQuery, useGetBridgeVersionQuery, useGetSingleBridgeQuery } from "@/store/services/bridgeApi";
 
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -36,17 +35,15 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES } = useCustomSelector((state) => ({
-    embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
-    alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
-    versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
+  const { organizations, currentUser } = useCustomSelector((state) => ({
     organizations: state.userDetailsReducer.organizations,
-    preTools: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.pre_tools || {},
-    SERVICES: state?.serviceReducer?.services,
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
+  const {data:{bridge:{apiCalls:versionData,configuration:{pre_tools:preTools}={}}={}}={}}= useGetBridgeVersionQuery(version_id)
   const { data: bridgesData, isLoading: loading } = useGetAllBridgesQuery(params.org_id);
+  const embedToken=bridgesData?.embed_token;
+  const alertingEmbedToken=bridgesData?.alerting_embed_token;
   useEffect(() => {
     if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(getTutorialDataAction()); 
@@ -107,11 +104,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     }
   }, [params, organizations]);
 
-  useEffect(() => {
-    if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-      dispatch(getServiceAction({ orgid: params.orgid }))
-    }
-  }, [SERVICES]);
+
 
   useEffect(() => {
     if (isValidOrg) {
@@ -121,17 +114,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   }, [isValidOrg, currentUser?.meta?.onboarding?.bridgeCreation]);
 
   useEffect(() => {
-    if (isValidOrg) {
-      Array?.isArray(SERVICES) && SERVICES?.map((service) => {
-        dispatch(getModelAction({ service: service?.value }));
-        return null; // to satisfy map's return
-      });
-    }
-  }, [isValidOrg]);
-
-  useEffect(() => {
     if (isValidOrg && params?.org_id) {
-      dispatch(getAllApikeyAction(params?.org_id));
       dispatch(getAllKnowBaseDataAction(params?.org_id))
       dispatch(getPrebuiltToolsAction())
     }

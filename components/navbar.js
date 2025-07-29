@@ -14,6 +14,7 @@ import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import ConfigHistorySlider from './sliders/configHistorySlider';
 import Protected from './protected';
+import { useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,
@@ -35,19 +36,18 @@ const Navbar = ({ isEmbedUser }) => {
   const bridgeId = pathParts[5];
   const dispatch = useDispatch();
 
-  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton } = useCustomSelector(state => ({
+  const { organizations, bridgeStatus, isPublishing, isUpdatingBridge, activeTab, hideHomeButton } = useCustomSelector(state => ({
     organizations: state.userDetailsReducer.organizations,
-    bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
-    bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
-    publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
-    isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted ?? false,
     bridgeStatus: state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridge_status ?? BRIDGE_STATUS.ACTIVE,
-    isArchived: state.bridgeReducer.allBridgesMap?.[bridgeId]?.status ?? false,
     isPublishing: state.bridgeReducer.isPublishing ?? false,
     isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
     activeTab: pathname.includes('configure') ? 'configure' : pathname.includes('history') ? 'history' : pathname.includes('testcase') ? 'testcase' : 'configure',
     hideHomeButton:  state.userDetailsReducer.userDetails.hideHomeButton || false
   }));
+  const { data: { bridge = {} } = {} } = useGetSingleBridgeQuery(bridgeId);
+  const publishedVersion = bridge?.published_version_id;
+  const isDrafted = bridge?.is_drafted;
+  const isArchived = bridge?.status;
 
   // Define tabs based on user type
   const TABS = useMemo(() => {
@@ -64,7 +64,7 @@ const Navbar = ({ isEmbedUser }) => {
     return baseTabs;
   }, [isEmbedUser]);
 
-  const agentName = useMemo(() => bridgeData?.name || 'Customer Support AI', [bridgeData?.name]);
+  const agentName = useMemo(() => bridge?.name || 'Customer Support AI', [bridge?.name]);
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Acme Corp', [organizations, orgId]);
 
   const shouldShowNavbar = useCallback(() => {

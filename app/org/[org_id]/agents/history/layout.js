@@ -1,13 +1,14 @@
 "use client";
 import { useEffect } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
+import { useGetAllBridgesQuery } from "@/store/services/bridgeApi";
 
 export default function layoutHistoryPage({ children, params }) {
-    const {chatbot_token, history_page_chatbot_token} = useCustomSelector((state) => ({
+    const {chatbot_token} = useCustomSelector((state) => ({
         chatbot_token: state?.ChatBot?.chatbot_token || '',
-        history_page_chatbot_token : state?.bridgeReducer?.org?.[params?.org_id]?.history_page_chatbot_token
       }));
-      
+  const {data:{history_page_chatbot_token}}=useGetAllBridgesQuery(params.org_id)
+  console.log(history_page_chatbot_token,"ldskfj")
   const scriptId = "chatbot-main-script";
   const scriptSrcProd = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC_PROD;
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;

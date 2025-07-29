@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import Modal from '../UI/Modal';
+import { useSaveApiKeysMutation, useUpdateApikeyMutation } from '@/store/services/apiKeyApi';
 
 const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id }) => {
     const pathName = usePathname();
@@ -19,7 +20,8 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
         setSelectedApiKey(null);
         setIsEditing(false);
     }, [setSelectedApiKey, setIsEditing]);
-
+    const [saveApiKeys] = useSaveApiKeysMutation();
+    const [updateApikey] = useUpdateApikeyMutation();
     const handleSubmit = useCallback(async (event) => {
         event.preventDefault();
         const formData = new FormData(event.target);
@@ -39,14 +41,14 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
 
             if (!isIdChange) {
                 const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, apikey: data.apikey, comment: data.comment };
-                dispatch(updateApikeyAction(dataToSend));
+                updateApikey(dataToSend);
             }
             if (!isNameChange || !isCommentChange) {
                 const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, comment: data.comment };
-                dispatch(updateApikeyAction(dataToSend));
+                updateApikey(dataToSend);
             }
         } else {
-            const response = await dispatch(saveApiKeysAction(data, orgId));
+            const response = await saveApiKeys(data);
             if (service && response?._id) {
                 const updated = { ...bridgeApikey_object_id, [service]: response._id };
                 dispatch(updateBridgeVersionAction({

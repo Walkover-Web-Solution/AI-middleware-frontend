@@ -9,7 +9,7 @@ import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import { isEqual } from 'lodash';
 import InfoTooltip from '@/components/InfoTooltip';
-import { useGetAllBridgesQuery, useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
+import { useGetAllBridgesQuery, useGetBridgeVersionQuery } from '@/store/services/bridgeApi';
 import { useGetAllModelsQuery } from '@/store/services/modelApi';
 
 function getStatusClass(status) {
@@ -47,9 +47,9 @@ const EmbedList = ({ params }) => {
             variables_path: versionData?.variables_path || {},
         };
     });
-    const { data: { bridge:{service, configuration:{model,type:modelType}} } } = useGetSingleBridgeQuery(params?.id)
+    const { data: { bridge:{service, configuration:{model,type:modelType}=[]}=[] }=[] } = useGetBridgeVersionQuery(params?.version)
         const { data: modelsList } = useGetAllModelsQuery(service);
-        const {data: {bridge:bridgeData}} = useGetAllBridgesQuery(params?.orgId);
+        const {data: {bridge:bridgeData}=[]} = useGetAllBridgesQuery(params?.orgId);
         console.log(bridgeData,"bridges")
         const shouldToolsShow = useMemo(() => {
             if (!modelsList || !model || !service) return false;

@@ -4,6 +4,7 @@ import SearchItems from '@/components/UI/SearchItems';
 import { getMetricsDataApi } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useGetAllBridgesQuery } from '@/store/services/bridgeApi';
+import { useGetAllApiKeyQuery } from '@/store/services/apiKeyApi';
 import { METRICS_FACTOR_OPTIONS, TIME_RANGE_OPTIONS } from '@/utils/enums';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
@@ -54,9 +55,8 @@ function Page({ params }) {
   const [bridge, setBridge] = useState(null);
   const [loading, setLoading] = useState(false);
   const [metricsBarChartData, setMetricsBarChartData] = useState({ series: [], categories: [] });
-  const {  apikeyData } = useCustomSelector((state) => ({
-    apikeyData: state?.bridgeReducer?.apikeys[org_id] || []
-  })); 
+ 
+  const {data:{result:apikeyData}=[{}]}=useGetAllApiKeyQuery(org_id)
   const {data:bridgesData}=useGetAllBridgesQuery(org_id)
   const [filterBridges, setFilterBridges] = useState(bridgesData?.bridge||[]);
 

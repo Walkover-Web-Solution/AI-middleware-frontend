@@ -5,13 +5,24 @@ import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Protected from '@/components/protected';
 import InfoTooltip from '@/components/InfoTooltip';
-import { useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
+import { useGetBridgeVersionQuery, useGetSingleBridgeQuery, useUpdateBridgeMutation } from '@/store/services/bridgeApi';
 
 const BridgeTypeToggle = ({ params, isEmbedUser }) => {
     const dispatch = useDispatch();
     
 
-    const { data: { bridge: { bridgeType,service,configuration:{type:modelType} } = {} } = {} } = useGetSingleBridgeQuery(params?.id);
+    const { data: { bridge: { bridgeType } = {} } = {} } = useGetSingleBridgeQuery(params?.id);
+const {
+        data: {
+          bridge: {
+            service,
+            configuration: {
+              type: modelType,
+            } = {}
+          } = {}
+        } = {}
+      } = useGetBridgeVersionQuery(params?.version);  
+         const [updateBridge]=useUpdateBridgeMutation()
     const handleInputChange = (e) => {
         let newCheckedValue;
         if (e.target.type === 'checkbox') {
@@ -24,19 +35,19 @@ const BridgeTypeToggle = ({ params, isEmbedUser }) => {
             bridgeType: newCheckedValue
         };
 
-        dispatch(updateBridgeAction({
+        updateBridge({
             bridgeId: params.id,
             dataToSend: { ...updatedDataToSend }
-        }));
+        });
     };
     
    useEffect(() => {
     if (!service || !bridgeType) return; 
     if (service !== 'openai' && bridgeType === 'batch') {
-        dispatch(updateBridgeAction({
+        updateBridge({
             bridgeId: params.id,
             dataToSend: { bridgeType: 'api' }
-        }));
+        });
     }
 }, [params.version, service, bridgeType]);
 

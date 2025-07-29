@@ -5,19 +5,21 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 import Modal from '@/components/UI/Modal'
 import { toast } from 'react-toastify'
+import { useCreateIntegrationMutation } from '@/store/services/IntegrationApi'
 
 const IntegrationModal = ({ params }) => {
   const integrationNameRef = React.useRef('');
   const dispatch = useDispatch();
+  const [createIntegration] = useCreateIntegrationMutation();
   const handleCreateNewIntegration = () => {
     if(integrationNameRef?.current?.value?.trim()===""){
      toast.error("Integration name should not be empty");
       return;
     }
-    dispatch(createIntegrationAction({
+   createIntegration({
       name: integrationNameRef?.current?.value,
       orgId: params.org_id
-    }))
+    })
     closeModal(MODAL_TYPE.INTEGRATION_MODAL);
     integrationNameRef.current.value = '';
   }

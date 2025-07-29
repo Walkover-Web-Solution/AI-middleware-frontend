@@ -22,8 +22,8 @@ const Page = ({ searchParams }) => {
   const params = searchParams;
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const {data:bridgeData}=useGetSingleBridgeQuery(params.id)
-  console.log(bridgeData,'bridgeDatasdfds')
+  const {data:bridgeData}=useGetSingleBridgeQuery(params?.id)
+  console.log(bridgeData,'bridgeData')
   const [isDesktop, setIsDesktop] = useState(false);
   const [leftWidth, setLeftWidth] = useState(50); // Width of the left panel in percentage
   const [isResizing, setIsResizing] = useState(false);
@@ -43,7 +43,6 @@ const Page = ({ searchParams }) => {
  const bridgeType=bridgeData?.bridge?.bridgeType
  const versionService=bridgeData?.bridge?.versions[0]
  const bridgeName=bridgeData?.bridge?.name
- console.log(versionService,"versionService")
   // Enhanced responsive detection
   useEffect(() => {
     const handleResize = () => {

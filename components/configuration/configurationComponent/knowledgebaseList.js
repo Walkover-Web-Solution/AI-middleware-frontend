@@ -12,7 +12,7 @@ import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
 import { useGetAllModelsQuery } from '@/store/services/modelApi';
-import { useGetAllBridgesQuery, useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
+import { useGetAllBridgesQuery, useGetBridgeVersionQuery } from '@/store/services/bridgeApi';
 
 const KnowledgebaseList = ({ params }) => {
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase } = useCustomSelector((state) => {
@@ -24,9 +24,9 @@ const KnowledgebaseList = ({ params }) => {
             isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
         };
     });
-    const { data: { bridge:{service, configuration:{model,type:modelType}} } } = useGetSingleBridgeQuery(params?.id)
+    const { data: { bridge:{service, configuration:{model,type:modelType}=[]}=[] }=[] } = useGetBridgeVersionQuery(params?.version)
         const { data: modelsList } = useGetAllModelsQuery(service);
-        const {data: {bridge:bridgeData}} = useGetAllBridgesQuery(params?.orgId);
+        const {data: {bridge:bridgeData}={bridge:[]}} = useGetAllBridgesQuery(params?.orgId);
         console.log(bridgeData,"bridges")
         const shouldToolsShow = useMemo(() => {
             if (!modelsList || !model || !service) return false;

@@ -3,7 +3,6 @@ import CustomTable from "@/components/customTable/customTable";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import ApiKeyModal from '@/components/modals/ApiKeyModal';
 import PageHeader from "@/components/Pageheader";
-import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, getAllApikeyAction } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
 import { closeModal, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
@@ -14,25 +13,17 @@ import { useDispatch } from 'react-redux';
 import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
 import ApiKeyGuideSlider from "@/components/configuration/configurationComponent/ApiKeyGuide";
+import { useDeleteApikeyMutation, useGetAllApiKeyQuery } from "@/store/services/apiKeyApi";
 
 export const runtime = 'edge';
 
 const Page = () => {
   const pathName = usePathname();
-  const dispatch = useDispatch();
   const path = pathName?.split('?')[0].split('/');
   const orgId = path[2] || '';
-  const { apikeyData } = useCustomSelector((state) => ({
-    apikeyData: state?.bridgeReducer?.apikeys[orgId] || []
-  }));
+  const { data: { result: apikeyData } = { result: [] } } = useGetAllApiKeyQuery(orgId);
+  const [deleteApikey, { isLoading: deleteLoading }] = useDeleteApikeyMutation();
   const [filterApiKeys, setFilterApiKeys] = useState(apikeyData);
-
-  useEffect(() => {
-    if (orgId) {
-      dispatch(getAllApikeyAction(orgId));
-    }
-  }, [dispatch, orgId]);
-
   useEffect(() => {
     setFilterApiKeys(apikeyData);
   }, [apikeyData]);
@@ -48,18 +39,16 @@ const Page = () => {
     [MODAL_TYPE, openModal]
   );
 
-  const deleteApikey = useCallback(
+  const handleDeleteApikey = useCallback(
     (item) => {
       closeModal(MODAL_TYPE?.DELETE_MODAL)
-      dispatch(
-        deleteApikeyAction({
-          org_id: item.org_id,
-          name: item.name,
-          id: item._id,
-        })
-      )
+      deleteApikey(item._id).then(e=>{
+        if(e?.data?.success){
+          toast.success(e?.data?.message)
+        }
+      })
     },
-    [dispatch]
+    []
   );
 
   const dataWithIcons = filterApiKeys.map((item) => ({
@@ -145,7 +134,7 @@ const Page = () => {
       <ApiKeyModal orgId={orgId} isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} />
       
       <ApiKeyGuideSlider/>
-      <DeleteModal onConfirm={deleteApikey} item={selectedDataToDelete} title="Delete API Key" description={`Are you sure you want to delete the API key "${selectedDataToDelete?.name}"? This action cannot be undone.`}
+      <DeleteModal onConfirm={handleDeleteApikey} item={selectedDataToDelete} title="Delete API Key" description={`Are you sure you want to delete the API key "${selectedDataToDelete?.name}"? This action cannot be undone.`}
       />
     </div>
   );

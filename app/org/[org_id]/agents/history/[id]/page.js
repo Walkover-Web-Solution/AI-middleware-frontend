@@ -10,6 +10,7 @@ import Protected from "@/components/protected";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import { getSingleMessage } from "@/config";
 import { ChatLoadingSkeleton } from "@/components/historyPageComponents/ChatLayoutLoader";
+import { useGetBridgeVersionQuery } from "@/store/services/bridgeApi";
 
 // Lazy load the components to reduce initial render time
 const ThreadContainer = React.lazy(() => import('@/components/historyPageComponents/threadContainer'));
@@ -24,13 +25,13 @@ function Page({ searchParams }) {
   const dispatch = useDispatch();
   const sidebarRef = useRef(null);
   const searchRef = useRef();
-  const { historyData, thread, selectedVersion, previousPrompt } = useCustomSelector((state) => ({
+  const { historyData, thread, selectedVersion } = useCustomSelector((state) => ({
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
     selectedVersion: state?.historyReducer?.selectedVersion || 'all',
-    previousPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
   }));
-
+  const {data:{bridge:{configuration:{prompt:previousPrompt}}}}=useGetBridgeVersionQuery(params.version)
+  console.log(previousPrompt,"previousPrompt")
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [page, setPage] = useState(1);
