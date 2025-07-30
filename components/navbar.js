@@ -14,6 +14,8 @@ import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import ConfigHistorySlider from './sliders/configHistorySlider';
 import Protected from './protected';
+import GuideSlider from './sliders/ChatbotConfigSlider';
+import { FilterSliderIcon } from './Icons';
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,
@@ -35,13 +37,14 @@ const Navbar = ({ isEmbedUser }) => {
   const bridgeId = pathParts[5];
   const dispatch = useDispatch();
 
-  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory} = useCustomSelector(state => ({
+  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType,  isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory} = useCustomSelector(state => ({
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
     publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
     isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted ?? false,
     bridgeStatus: state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridge_status ?? BRIDGE_STATUS.ACTIVE,
+    bridgeType: state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridgeType,
     isArchived: state.bridgeReducer.allBridgesMap?.[bridgeId]?.status ?? false,
     isPublishing: state.bridgeReducer.isPublishing ?? false,
     isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
@@ -164,6 +167,7 @@ const Navbar = ({ isEmbedUser }) => {
   const toggleOrgSidebar = useCallback(() => toggleSidebar('default-org-sidebar'), []);
   const toggleBridgeSidebar = useCallback(() => toggleSidebar('default-agent-sidebar'), []);
   const toggleConfigHistorySidebar = () => toggleSidebar("default-config-history-slider", "right");
+  const toggleIntegrationGuideSlider = () => toggleSidebar("integration-guide-slider", "right");
   const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router]);
 
   const breadcrumbItems = useMemo(() => ([
@@ -387,6 +391,12 @@ const Navbar = ({ isEmbedUser }) => {
               )}
             </div>
 
+            <button
+              className="btn btn-sm"
+              onClick={toggleIntegrationGuideSlider}
+            >
+            <FilterSliderIcon size={14}/>  Integration Guide
+            </button>
             {/* Ellipsis menu - only for normal users */}
             {!isEmbedUser && pathname.includes("configure") && <EllipsisMenu />}
           </div>
@@ -422,17 +432,6 @@ const Navbar = ({ isEmbedUser }) => {
       {isMobile && activeTab === 'configure' && !isEmbedUser && (
         <div className="bg-base-100 border-b border-base-200 p-3">
           <div className="flex gap-2">
-            {/* Pause/Resume */}
-            {/* <button
-              className={`btn btn-sm flex-1 gap-2 ${
-                bridgeStatus === BRIDGE_STATUS.PAUSED ? 'bg-green-200 hover:bg-green-300' : 'bg-red-200 hover:bg-red-300'
-              } ${isUpdatingBridge ? 'loading' : ''}`}
-              onClick={handlePauseBridge}
-              disabled={isUpdatingBridge}
-            >
-              {!isUpdatingBridge && (bridgeStatus === BRIDGE_STATUS.PAUSED ? <Play size={14}/> : <Pause size={14}/>)}
-              {bridgeStatus === BRIDGE_STATUS.PAUSED ? 'Resume' : 'Pause'}
-            </button> */}
             {!isEmbedUser && activeTab === 'configure' && <button className="btn btn-sm m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
               <HistoryIcon size={16} />
             </button>}
@@ -469,6 +468,7 @@ const Navbar = ({ isEmbedUser }) => {
           <BridgeSlider />
           <ChatBotSlider />
           <ConfigHistorySlider versionId={versionId} />
+          <GuideSlider params={{ org_id: orgId, id: bridgeId, version:versionId }} bridgeType={bridgeType}/>
         </>
       )}
     </div>
