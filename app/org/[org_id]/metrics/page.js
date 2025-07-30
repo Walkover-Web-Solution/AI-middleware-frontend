@@ -178,12 +178,37 @@ function Page({ params }) {
             ))}
           </ul>
         </details>
-        <div className='flex justify-end mb-3 items-center'>
+        <div className='flex justify-end mb-3 items-center' >
           <label className="mr-1">Select Agent:</label>
          <details
   className={`dropdown dropdown-end z-high ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}
+  ref={(node) => {
+    // Add click outside listener when mounted
+    if (node) {
+      const handleClickOutside = (event) => {
+        // Don't close if clicking on search input or dropdown items
+        const isClickInsideSearch = event.target.closest('.search-container');
+        const isClickInsideItem = event.target.closest('.dropdown-item');
+        
+        // Only close if clicking outside the dropdown entirely
+        if (!node.contains(event.target) && !isClickInsideSearch && !isClickInsideItem) {
+          node.removeAttribute('open');
+        }
+      };
+      
+      // Add the event listener
+      document.addEventListener('mousedown', handleClickOutside);
+      
+      // Store the handler to remove it later
+      node._clickOutsideHandler = handleClickOutside;
+    }
+  }}
+  onBlur={(e) => {
+    // Do nothing on blur - we'll handle this with the click outside handler
+  }}
 >
   <summary className="btn m-1">
+    
     {bridge?.['bridge_name']
       ? bridge?.['bridge_name'].length > 15
         ? bridge?.['bridge_name'].substring(0, 15) + '...'
@@ -194,18 +219,21 @@ function Page({ params }) {
 
   <ul
     className="menu dropdown-content bg-base-100 pr-6 rounded-box z-high w-52 p-2 shadow-sm flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
-    <SearchItems setFilterItems={setFilterBridges} data={allBridges} />
+    <div className="search-container">
+      <SearchItems setFilterItems={setFilterBridges} data={allBridges} />
+    </div>
 
     {filterBridges.map((item, index) => (
       <li key={index}>
         <a
           onClick={(e) => {
+            e.stopPropagation(); // Prevent event bubbling
             handleBridgeChange(item?._id, item?.name);
             // Close the dropdown manually
             const details = e.currentTarget.closest('details');
             if (details) details.removeAttribute('open');
           }}
-          className={`w-72 mb-1 ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}
+          className={`w-72 mb-1 dropdown-item ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}
         >
           {item.name}
         </a>
