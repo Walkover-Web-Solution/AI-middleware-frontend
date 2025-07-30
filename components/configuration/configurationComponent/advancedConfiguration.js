@@ -3,12 +3,9 @@ import { useDispatch } from 'react-redux';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { ONBOARDING_VIDEOS } from '@/utils/enums';
-import { generateRandomID } from '@/utils/utility';
 import ResponseFormatSelector from './responseFormatSelector';
-import OnBoarding from '@/components/OnBoarding';
-import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
+import ToolCallCount from './toolCallCount';
 
 const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -84,7 +81,7 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
         }}
       >
         <InfoTooltip 
-          tooltipContent="Advanced configuration options for customizing your bridge setup, including response formats and API key management." 
+          tooltipContent="Advanced configuration options for customizing your agent setup" 
           className="cursor-pointer mr-2"
         >
           <div className="cursor-pointer label-text inline-block ml-1">   
@@ -100,16 +97,16 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
 
       <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'} transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
         
+        <>
         {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && (
-          <>
             <div className="form-control w-full mt-2">
               <ResponseFormatSelector params={params} />
             </div>
-
+          )}
             {/* Multiple API Keys Section */}
             <div className="form-control w-full">
               <label className="label">
-                <InfoTooltip tooltipContent="Add multiple API keys from different services to use with your bridge">
+                <InfoTooltip tooltipContent="Add multiple API keys from different services to use with your agent">
                   <span className="label-text info">Multiple API Keys</span>
                 </InfoTooltip>
               </label>
@@ -117,7 +114,7 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
               <div className="w-full">
                 <div className="relative">
                   <div
-                    className="flex items-center gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer"
+                    className="flex items-center mb-4 gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer"
                     onClick={toggleApiKeys}
                   >
                     <span className="text-base-content">
@@ -165,13 +162,14 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
                           )}
                         </div>
                       ))}
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
-          </>
-        )}
+            <ToolCallCount params={params} />
+          </div>
+        </>
+        
               </div>
     </div>
   );

@@ -19,8 +19,7 @@ import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
-import ToolCallCount from "./configurationComponent/toolCallCount";
-import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/utils/enums";
+import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
 import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import TriggersList from "./configurationComponent/TriggersList";
@@ -111,14 +110,13 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             <ModelDropdown params={params} />
             <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
             <AdvancedParameters params={params} />
-            {modelType !== "image" && modelType !== 'embedding' && bridgeType=='api'&& (
-                    <AdvancedConfiguration params={params} bridgeType={bridgeType} modelType={modelType} />
-            )}
+            
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
+                <AdvancedConfiguration params={params} bridgeType={bridgeType} modelType={modelType} />
                     <AddVariable params={params} />
                     <GptMemory params={params} />
-                    <ToolCallCount params={params} />
+                   
                 </>
             )}
         </>
