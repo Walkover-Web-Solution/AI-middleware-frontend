@@ -1,26 +1,23 @@
 import CreateVariableModal from '@/components/modals/createVariableModal';
 import OptimizePromptModal from '@/components/modals/optimizePromptModal';
-import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { generateRandomID, openModal } from '@/utils/utility';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import ToneDropdown from './toneDropdown'; 
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
+import { useGetVariablesQuery } from '@/store/services/bridgeLocalApi';
+import { useGetBridgeVersionQuery, useUpdateBridgeVersionMutation } from '@/store/services/bridgeApi';
 
 const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
-    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
-        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-        serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type || "",
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service || "",
-        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
-    }));
-
-    const [keyName, setKeyName] = useState('');
+   
+    const {data}=useGetVariablesQuery({bridgeId:params.id,versionId:params.version})
+    const {data:{bridge:{configuration:{prompt:reduxPrompt,type:serviceType},service}}} = useGetBridgeVersionQuery(params?.version);
+    const [updateBridgeVersion] = useUpdateBridgeVersionMutation();
+   const variablesKeyValue = data?.bridgeVersionMapping?.[params.id]?.[params.version]?.variables || [];
+   const [keyName, setKeyName] = useState('');
     const suggestionListRef = useRef(null);
     const textareaRef = useRef(null);
     const [prompt, setPrompt] = useState(reduxPrompt);
@@ -28,7 +25,6 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
     const [messages, setMessages] = useState([]);
     const thread_id = useMemo(() => generateRandomID(), []);
-    const dispatch = useDispatch();
 
     useEffect(() => {
         setPrompt(reduxPrompt);
@@ -52,16 +48,16 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
     setShowSuggestions(false);
 
     if (newValue !== reduxPrompt.trim()) {
-      dispatch(updateBridgeVersionAction({
+      updateBridgeVersion({
         versionId: params.version,
         dataToSend: {
           configuration: {
             prompt: newValue
           }
         }
-      }));
+      });
     }
-  }, [dispatch, params.version, reduxPrompt]);
+  }, [params.version, reduxPrompt]);
     const getCaretCoordinatesAdjusted = () => {
         if (textareaRef.current) {
             const textarea = textareaRef.current;

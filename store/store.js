@@ -26,6 +26,7 @@ import { modelApi } from "./services/modelApi";
 import { serviceApi } from "./services/serviceApi";
 import { apiKeyApi } from "./services/apiKeyApi";
 import { integrationApi } from "./services/IntegrationApi";
+import { bridgeLocalApi } from "./services/bridgeLocalApi";
 
 const createNoopStorage = () => {
     return {
@@ -52,6 +53,7 @@ const rootReducer = combineReducers({
     [serviceApi.reducerPath]: serviceApi.reducer,
     [apiKeyApi.reducerPath]: apiKeyApi.reducer,
     [integrationApi.reducerPath]: integrationApi.reducer,
+    [bridgeLocalApi.reducerPath]: bridgeLocalApi.reducer,
     bridgeReducer,
     modelReducer,
     historyReducer,
@@ -93,11 +95,13 @@ export const store = configureStore({
                     `${apiKeyApi.reducerPath}/executeMutation/fulfilled`,
                     `${integrationApi.reducerPath}/executeQuery/fulfilled`,
                     `${integrationApi.reducerPath}/executeMutation/fulfilled`,
+                    `${bridgeLocalApi.reducerPath}/executeQuery/fulfilled`,
+                    `${bridgeLocalApi.reducerPath}/executeMutation/fulfilled`,
                     // Other RTK Query action types you want to ignore
                   ],
                 ignoredPaths: ['register'], // Adjust the paths as necessary
             },
-        }).concat(bridgeApi.middleware).concat(modelApi.middleware).concat(serviceApi.middleware).concat(apiKeyApi.middleware).concat(integrationApi.middleware),
+        }).concat(bridgeApi.middleware).concat(modelApi.middleware).concat(serviceApi.middleware).concat(apiKeyApi.middleware).concat(integrationApi.middleware).concat(bridgeLocalApi.middleware),
 });
 
 export const persistor = persistStore(store);

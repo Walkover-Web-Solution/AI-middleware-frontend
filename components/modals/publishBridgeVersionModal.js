@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 import Modal from "../UI/Modal";
 import { useCustomSelector } from '@/customHooks/customSelector';
+import { usePublishBridgeVersionMutation } from "@/store/services/bridgeApi";
 
 function PublishBridgeVersionModal({ params, agent_name, agent_description, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -20,7 +21,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
   const { bridge } = useCustomSelector((state) => ({
     bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config
   }));
-
+  const [publishBridgeVersion] = usePublishBridgeVersionMutation();
   const [formData, setFormData] = useState({
     url_slugname: bridge?.url_slugname || '',
     availability: bridge?.availability || 'public',
@@ -100,14 +101,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
       }
 
       // Then publish the bridge version
-      await dispatch(
-        publishBridgeVersionAction({
-          bridgeId: params?.id,
-          versionId: params?.version,
-          orgId: params?.org_id,
-          isPublic: isPublicAgent,
-        })
-      );
+       publishBridgeVersion(params?.version)
 
       if (isEmbedUser) {
         window.parent.postMessage({
@@ -121,7 +115,6 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
         }, '*');
       }
 
-      dispatch(getAllBridgesAction());
       closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
     } catch (error) {
       if (isPublicAgent) {

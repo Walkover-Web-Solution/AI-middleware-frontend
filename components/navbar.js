@@ -14,7 +14,7 @@ import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import ConfigHistorySlider from './sliders/configHistorySlider';
 import Protected from './protected';
-import { useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
+import { useGetBridgeVersionQuery, useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,
@@ -45,10 +45,10 @@ const Navbar = ({ isEmbedUser }) => {
     hideHomeButton:  state.userDetailsReducer.userDetails.hideHomeButton || false
   }));
   const { data: { bridge = {} } = {} } = useGetSingleBridgeQuery(bridgeId);
-  const publishedVersion = bridge?.published_version_id;
-  const isDrafted = bridge?.is_drafted;
+  const { data: { bridge: versionBridge = {} } = {} } = useGetBridgeVersionQuery(versionId);
+  const isDrafted = versionBridge?.is_drafted;
   const isArchived = bridge?.status;
-
+  
   // Define tabs based on user type
   const TABS = useMemo(() => {
     const baseTabs = [

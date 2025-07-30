@@ -9,18 +9,24 @@ import { useDispatch } from "react-redux";
 import OnBoarding from "./OnBoarding";
 import { ONBOARDING_VIDEOS } from "@/utils/enums";
 import TutorialSuggestionToast from "./tutorialSuggestoinToast";
+import { useGetVariablesQuery, useUpdateVariablesMutation } from "@/store/services/bridgeLocalApi";
+import { useGetBridgeVersionQuery, useUpdateBridgeVersionMutation } from "@/store/services/bridgeApi";
 
 const AddVariable = ({ params }) => {
   const versionId = params.version;
-  const { variablesKeyValue, prompt, isFirstVariable,  } = useCustomSelector((state) => ({
-    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
-    prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+  const { isFirstVariable,  } = useCustomSelector((state) => ({
     isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
   }));
+  const {data:{bridge:{configuration:{prompt}}}} = useGetBridgeVersionQuery(versionId);
+  const [updateVariables] = useUpdateVariablesMutation();
+  const {data} = useGetVariablesQuery({bridgeId:params.id, versionId:params.version});
+  const variablesKeyValue = data?.bridgeVersionMapping?.[params.id]?.[params.version]?.variables || [];
+  const [updateBridgeVersion] = useUpdateBridgeVersionMutation();
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
     showSuggestion: false
   });
+  console.log(variablesKeyValue,"variablesKeyValue")
   const [keyValuePairs, setKeyValuePairs] = useState([]);
   const [isFormData, setIsFormData] = useState(true);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
@@ -47,12 +53,12 @@ const AddVariable = ({ params }) => {
     )?.map(pair => ({
       [pair?.key]: pair?.required ? 'required' : 'optional'
     }));
-    dispatch(updateBridgeVersionAction({
+    updateBridgeVersion({
       versionId: params?.version,
       dataToSend: {
         'variables_state': Object.assign({}, ...filteredPairs)
       }
-    }));
+    });
   }
 
   const extractVariablesFromPrompt = () => {
@@ -60,7 +66,7 @@ const AddVariable = ({ params }) => {
     const matches = [...prompt.matchAll(regex)];
     const variables = [...new Set(matches.map(match => match[1].trim()))];
 
-    const existingPairsMap = new Map(variablesKeyValue.map(pair => [pair.key, pair]));
+    const existingPairsMap = new Map(variablesKeyValue?.map(pair => [pair.key, pair]));
 
     const newVariables = variables.filter(v => !existingPairsMap.has(v));
 
@@ -76,11 +82,11 @@ const AddVariable = ({ params }) => {
     ];
 
     setKeyValuePairs(updatedPairs);
-    dispatch(updateVariables({
+    updateVariables({
       data: updatedPairs,
       bridgeId: params.id,
       versionId
-    }));
+    });
     updateVersionVariable(updatedPairs);
   };
 
@@ -93,7 +99,7 @@ const AddVariable = ({ params }) => {
   // Initialize keyValuePairs from Redux store
   useEffect(() => {
     setKeyValuePairs(variablesKeyValue);
-  }, [variablesKeyValue]);
+  }, []);
 
   // Helper function to check if all pairs are valid
   const areAllPairsValid = (pairs) => {
@@ -108,7 +114,7 @@ const AddVariable = ({ params }) => {
       setError(false);
       const updatedPairs = [...keyValuePairs, newPair];
       setKeyValuePairs(updatedPairs);
-      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
+      updateVariables({ data: updatedPairs, bridgeId: params.id, versionId });
     } else {
       setError(true);
     }
@@ -118,7 +124,7 @@ const AddVariable = ({ params }) => {
   const handleRemoveKeyValuePair = (index) => {
     const updatedPairs = keyValuePairs.filter((_, i) => i !== index);
     setKeyValuePairs(updatedPairs);
-    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
+    updateVariables({ data: updatedPairs, bridgeId: params.id, versionId });
 
     // Reset error if after removal all remaining pairs are valid
     if (areAllPairsValid(updatedPairs)) {
@@ -134,7 +140,7 @@ const AddVariable = ({ params }) => {
 
     // Dispatch update if the current pair is valid
     if (updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
-      dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
+      updateVariables({ data: updatedPairs, bridgeId: params.id, versionId });
     }
 
     setError(false);
@@ -149,7 +155,7 @@ const AddVariable = ({ params }) => {
       required: !updatedPairs[index].required,
     };
     setKeyValuePairs(updatedPairs);
-    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
+    updateVariables({ data: updatedPairs, bridgeId: params.id, versionId });
     updateVersionVariable(updatedPairs)
   };
 
@@ -195,7 +201,7 @@ const AddVariable = ({ params }) => {
 
     if (pairs.length > 0) {
       setKeyValuePairs(pairs);
-      dispatch(updateVariables({ data: pairs, bridgeId: params.id, versionId }));
+      updateVariables({ data: pairs, bridgeId: params.id, versionId });
       updateVersionVariable();
       if (areAllPairsValid(pairs)) {
         setError(false);
@@ -355,7 +361,7 @@ const AddVariable = ({ params }) => {
                     Please fill out all existing key-value pairs before adding a new one.
                   </p>
                 )}
-                {variablesKeyValue.length === 0 && (
+                {variablesKeyValue?.length === 0 && (
                   <p className="text-center text-lg font-semibold w-full">No Variables Found</p>
                 )}
                 <button
