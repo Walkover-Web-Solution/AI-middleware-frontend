@@ -298,6 +298,17 @@ export const getInvitedUsers = async ({page, limit}) => {
   }
 }
 
+export const removeUsersFromOrg = async (user_id) =>{
+  try{
+    const response = await axios.delete(`${URL}/user/deleteUser`, {
+      data:{user_id}});
+    return response.data;
+  }catch(error){
+    console.error(error);
+    return error;
+  }
+}
+
 export const getMetricsData = async (org_id, startDate, endDate) => {
   try {
     const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`, {
