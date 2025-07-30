@@ -50,7 +50,7 @@ function Page({ params }) {
   const { org_id } = params;
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [factor, setFactor] = useState(parseInt(searchParams.get('factor')) || 0);
   const [range, setRange] = useState(parseInt(searchParams.get('range')) || 0);
   const [level, setLevel] = useState(searchParams.get('level') || 'Organization');
@@ -61,15 +61,15 @@ function Page({ params }) {
   });
   const [loading, setLoading] = useState(false);
   const [metricsBarChartData, setMetricsBarChartData] = useState({ series: [], categories: [] });
-  
+
   const { allBridges, apikeyData } = useCustomSelector((state) => ({
     allBridges: state.bridgeReducer.org[params.org_id]?.orgs || [],
     apikeyData: state?.bridgeReducer?.apikeys[org_id] || []
-  })); 
+  }));
   const [filterBridges, setFilterBridges] = useState(allBridges);
   const updateURLParams = (newParams) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
-    
+
     Object.entries(newParams).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== '') {
         current.set(key, value);
@@ -109,7 +109,7 @@ function Page({ params }) {
       return categories;
     }
   }
-  
+
   const fetchMetricsData = async (range) => {
     setLoading(true);
     const result = await getMetricsDataApi({ range: range + 1, org_id, factor: METRICS_FACTOR_OPTIONS[factor], bridge_id: bridge?.['bridge_id'] });
@@ -126,13 +126,13 @@ function Page({ params }) {
   const handleLevelChange = (index) => {
     const newLevel = index === 0 ? 'Organization' : 'Agent';
     setLevel(newLevel);
-    
+
     if (index === 0) {
       setBridge(null);
-      updateURLParams({ 
-        level: newLevel, 
-        bridge_id: null, 
-        bridge_name: null 
+      updateURLParams({
+        level: newLevel,
+        bridge_id: null,
+        bridge_name: null
       });
     } else {
       updateURLParams({ level: newLevel });
@@ -142,10 +142,10 @@ function Page({ params }) {
   const handleBridgeChange = (bridge_id, bridge_name) => {
     const newBridge = { bridge_id, bridge_name };
     setBridge(newBridge);
-   
-    updateURLParams({ 
-      bridge_id: bridge_id, 
-      bridge_name: bridge_name 
+
+    updateURLParams({
+      bridge_id: bridge_id,
+      bridge_name: bridge_name
     });
   }
 
@@ -159,11 +159,11 @@ function Page({ params }) {
 
       <div className='flex gap-8 justify-center'>
         <details className="dropdown" tabIndex={0} onBlur={(e) => {
-  // Check if the blur is happening because focus moved outside the dropdown
-  if (!e.currentTarget.contains(e.relatedTarget)) {
-    e.currentTarget.removeAttribute('open');
-  }
-}}>
+          // Check if the blur is happening because focus moved outside the dropdown
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            e.currentTarget.removeAttribute('open');
+          }
+        }}>
           <summary className="btn m-1">{level} level
 
 
@@ -171,76 +171,68 @@ function Page({ params }) {
           </summary>
           <ul tabIndex="0" className="dropdown-content z-very-high  menu p-2 shadow bg-base-100 rounded-box w-52">
             {['Organization', 'Agent'].map((item, index) => (
-              <li key={index}><a onClick={(e) =>{ handleLevelChange(index);
+              <li key={index}><a onClick={(e) => {
+                handleLevelChange(index);
                 const details = e.currentTarget.closest('details');
                 if (details) details.removeAttribute('open');
               }} className={level === item ? 'active mb-1' : 'mb-1'}>{item} Level</a></li>
             ))}
           </ul>
         </details>
-        <div className='flex justify-end mb-3 items-center' >
+        <div className='flex justify-end mb-3 items-center'>
           <label className="mr-1">Select Agent:</label>
-         <details
-  className={`dropdown dropdown-end z-high ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}
-  ref={(node) => {
-    // Add click outside listener when mounted
-    if (node) {
-      const handleClickOutside = (event) => {
-        // Don't close if clicking on search input or dropdown items
-        const isClickInsideSearch = event.target.closest('.search-container');
-        const isClickInsideItem = event.target.closest('.dropdown-item');
-        
-        // Only close if clicking outside the dropdown entirely
-        if (!node.contains(event.target) && !isClickInsideSearch && !isClickInsideItem) {
-          node.removeAttribute('open');
-        }
-      };
-      
-      // Add the event listener
-      document.addEventListener('mousedown', handleClickOutside);
-      
-      // Store the handler to remove it later
-      node._clickOutsideHandler = handleClickOutside;
-    }
-  }}
-  onBlur={(e) => {
-    // Do nothing on blur - we'll handle this with the click outside handler
-  }}
->
-  <summary className="btn m-1">
-    
-    {bridge?.['bridge_name']
-      ? bridge?.['bridge_name'].length > 15
-        ? bridge?.['bridge_name'].substring(0, 15) + '...'
-        : bridge?.['bridge_name']
-      : 'Select Agent'}
-    <ChevronDownIcon className="w-4 h-4 ml-2" />
-  </summary>
+          <details
+            className={`dropdown dropdown-end z-high ${level !== 'Agent' ? 'opacity-50 pointer-events-none' : ''}`}
+            ref={(node) => {
+              if (node) {
+                const handleClickOutside = (event) => {
+                  const isClickInsideSearch = event.target.closest('.search-container');
+                  const isClickInsideItem = event.target.closest('.dropdown-item');
+                  if (!node.contains(event.target) && !isClickInsideSearch && !isClickInsideItem) {
+                    node.removeAttribute('open');
+                  }
+                };
+                document.addEventListener('mousedown', handleClickOutside);
 
-  <ul
-    className="menu dropdown-content bg-base-100 pr-6 rounded-box z-high w-52 p-2 shadow-sm flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
-    <div className="search-container">
-      <SearchItems setFilterItems={setFilterBridges} data={allBridges} />
-    </div>
+                // Store the handler to remove it later
+                node._clickOutsideHandler = handleClickOutside;
+              }
+            }}
+          >
+            <summary className="btn m-1">
 
-    {filterBridges.map((item, index) => (
-      <li key={index}>
-        <a
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent event bubbling
-            handleBridgeChange(item?._id, item?.name);
-            // Close the dropdown manually
-            const details = e.currentTarget.closest('details');
-            if (details) details.removeAttribute('open');
-          }}
-          className={`w-72 mb-1 dropdown-item ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}
-        >
-          {item.name}
-        </a>
-      </li>
-    ))}
-  </ul>
-</details>
+              {bridge?.['bridge_name']
+                ? bridge?.['bridge_name'].length > 15
+                  ? bridge?.['bridge_name'].substring(0, 15) + '...'
+                  : bridge?.['bridge_name']
+                : 'Select Agent'}
+              <ChevronDownIcon className="w-4 h-4 ml-2" />
+            </summary>
+
+            <ul
+              className="menu dropdown-content bg-base-100 pr-6 rounded-box z-high w-52 p-2 shadow-sm flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
+              <div className="search-container">
+                <SearchItems setFilterItems={setFilterBridges} data={allBridges} />
+              </div>
+
+              {filterBridges.map((item, index) => (
+                <li key={index}>
+                  <a
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent event bubbling
+                      handleBridgeChange(item?._id, item?.name);
+                      // Close the dropdown manually
+                      const details = e.currentTarget.closest('details');
+                      if (details) details.removeAttribute('open');
+                    }}
+                    className={`w-72 mb-1 dropdown-item ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}
+                  >
+                    {item.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
 
         </div>
       </div>
