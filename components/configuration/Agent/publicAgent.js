@@ -16,7 +16,7 @@ const PublicAgent = ({ agents, searchTerm, setSearchTerm}) => {
             <div className="max-w-7xl mx-auto px-6 py-8">
                 {/* Header */}
                 <div className='flex items-center justify-between'>
-                <div className="flex items-center  justify-between gap-4 mb-4">
+                <div className="flex items-center  justify-between gap-2 mb-4">
                     <div className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-lg">
                         <Users className="w-4 h-4 text-white" />
                     </div>

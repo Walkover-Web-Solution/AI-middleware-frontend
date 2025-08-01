@@ -72,7 +72,7 @@ const Page = ({ params }) => {
         document.head.removeChild(scriptToRemove);
       }
     };
-  }, [token]);
+  }, [token, selectedAgent, isPublicAgent, publicAgentData, privateAgentData]);
 
   return (
     <>

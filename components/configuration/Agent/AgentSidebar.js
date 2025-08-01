@@ -135,7 +135,7 @@ const AgentSidebar = ({
                 GTWY Agents
               </h1>
               <p className="text-xs text-gray-500">
-                Available assistants
+                Available Agents
               </p>
             </div>
           </div>
