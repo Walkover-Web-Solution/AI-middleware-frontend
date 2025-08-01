@@ -549,7 +549,7 @@ export const saveApiKeys = async (data) => {
 
 export const updateApikey = async (dataToSend) => {
   try {
-    const response = await axios.put(`${URL}/apikeysdfsds/${dataToSend.apikey_object_id}`, dataToSend)
+    const response = await axios.put(`${URL}/apikeys/${dataToSend.apikey_object_id}`, dataToSend)
 
     return response;
   } catch (error) {
