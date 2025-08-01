@@ -159,7 +159,6 @@ export default function AddNewModelModal() {
     }, {});
 
     const initialService = SERVICE_CONFIGS.openai ? 'openai' : Object.keys(SERVICE_CONFIGS)[0];
-    console.log(SERVICE_CONFIGS)
     const [config, setConfig] = useState(SERVICE_CONFIGS[initialService] || {});
     const [selectedKeys, setSelectedKeys] = useState(Object.keys(SERVICE_CONFIGS[initialService]?.configuration?.additional_parameters || {}));
     const [expandedKeys, setExpandedKeys] = useState(new Set());
