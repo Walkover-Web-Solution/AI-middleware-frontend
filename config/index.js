@@ -118,6 +118,7 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
   } catch (error) {
     console.error(error)
     toast.error(error?.response?.data?.error);
+    throw error;
   }
 }
 

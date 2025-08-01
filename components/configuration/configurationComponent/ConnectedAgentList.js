@@ -144,9 +144,7 @@ const ConnectedAgentList = ({ params }) => {
     }
 
     const handleAgentClicked = (item) => {
-        console.log(item)
         const bridge = bridgeData?.find((bridge) => bridge?._id === item?.bridge_id)
-        console.log(bridge)
         if (bridge) {
             router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
         }

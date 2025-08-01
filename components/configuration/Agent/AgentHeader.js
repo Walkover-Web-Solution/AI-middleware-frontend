@@ -1,18 +1,8 @@
 'use client';
 import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Users, 
-  Lock, 
-  Globe, 
-  Bot, 
+
   Sparkles, 
   Zap, 
-  ArrowLeft,
-  MessageCircle,
-  Coffee,
-  Clock,
-  User
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
@@ -38,7 +28,7 @@ const Header = ({}) => {
           </div>
 
           {/* Welcome Message */}
-          <div className="hidden md:flex items-center gap-2 text-secondary font-medium">
+          <div className="flex items-center gap-2 text-secondary font-medium">
             <Sparkles className="w-5 h-5 text-accent" />
             <span className="text-sm">
               {localStorage.getItem('publicAgentProxyToken') ? 'Welcome back!' : 'Discover AI Agents'}
