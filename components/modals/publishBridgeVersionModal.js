@@ -1,8 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { X, AlertTriangle, Settings, Globe, CircleX } from "lucide-react";
 import {
-  getAllBridgesAction,
-  publishBridgeVersionAction,
   updateBridgeAction,
 } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
@@ -11,17 +9,12 @@ import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 import Modal from "../UI/Modal";
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { usePublishBridgeVersionMutation } from "@/store/services/bridgeApi";
+import { useGetAllBridgesQuery, usePublishBridgeVersionMutation, useUpdateBridgeMutation } from "@/store/services/bridgeApi";
 
 function PublishBridgeVersionModal({ params, agent_name, agent_description, isEmbedUser }) {
-  const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [isPublicAgent, setIsPublicAgent] = useState(false);
-
-  const { bridge } = useCustomSelector((state) => ({
-    bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config
-  }));
-  const [publishBridgeVersion] = usePublishBridgeVersionMutation();
+  const {data:{bridge:{page_config:bridge}}}=useGetAllBridgesQuery(params?.id)
+  const [publishBridgeVersion,{isLoading:isPublishBridgeVersionLoading}] = usePublishBridgeVersionMutation();
   const [formData, setFormData] = useState({
     url_slugname: bridge?.url_slugname || '',
     availability: bridge?.availability || 'public',
@@ -29,6 +22,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
     allowedUsers: bridge?.allowedUsers || [],
     newEmail: ''
   });
+  const [updateBridge,{isLoading:isUpdateBridgeLoading}]=useUpdateBridgeMutation();
 
   const handleCloseModal = useCallback((e) => {
     e?.preventDefault();
@@ -92,10 +86,10 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
           }
         };
 
-        await dispatch(updateBridgeAction({
+        await updateBridge({
           bridgeId: params?.id,
           dataToSend: payload
-        }));
+        });
 
         toast.success("Configuration saved successfully!");
       }
@@ -124,7 +118,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
     } finally {
       setIsLoading(false);
     }
-  }, [dispatch, params, isPublicAgent, formData, agent_name, agent_description, isEmbedUser]);
+  }, [params, isPublicAgent, formData, agent_name, agent_description, isEmbedUser]);
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
@@ -313,16 +307,16 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
           <button
             className="btn"
             onClick={handleCloseModal}
-            disabled={isLoading}
+            disabled={isUpdateBridgeLoading || isPublishBridgeVersionLoading}
           >
             Cancel
           </button>
           <button
-            className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
+            className={`btn btn-primary ${isUpdateBridgeLoading || isPublishBridgeVersionLoading ? 'loading' : ''}`}
             onClick={handlePublishBridge}
-            disabled={isLoading || (isPublicAgent && !formData.url_slugname.trim())}
+            disabled={isUpdateBridgeLoading || isPublishBridgeVersionLoading || (isPublicAgent && !formData.url_slugname.trim())}
           >
-            {isLoading ? (
+            {isUpdateBridgeLoading || isPublishBridgeVersionLoading ? (
               <>
                 <span className="loading loading-spinner loading-sm"></span>
                 {isPublicAgent ? 'Saving & Publishing...' : 'Publishing...'}

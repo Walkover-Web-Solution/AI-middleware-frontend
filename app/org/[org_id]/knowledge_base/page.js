@@ -5,24 +5,26 @@ import { truncate } from "@/components/historyPageComponents/assistFile";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import KnowledgeBaseModal from "@/components/modals/knowledgeBaseModal";
 import PageHeader from "@/components/Pageheader";
-import { useCustomSelector } from '@/customHooks/customSelector';
-import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
 import { closeModal, GetFileTypeIcon, openModal, toggleSidebar } from "@/utils/utility";
 import { BookIcon, EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from "react-redux";
 import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
+import { useDeleteKnowledgeBaseMutation, useGetAllKnowledgeBaseQuery } from "@/store/services/knowledgeBaseApi";
 
 export const runtime = 'edge';
 
 const Page = ({ params }) => {
-  const dispatch = useDispatch();
-  const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id]);
+  const [deleteKnowledgeBaseMutation] = useDeleteKnowledgeBaseMutation();
+  // Use RTK Query hook instead of Redux selector
+  const { data, isLoading } = useGetAllKnowledgeBaseQuery(params.org_id);
+  
+  // Get organization-specific knowledge base data from the query result
+  const knowledgeBaseData = data?.knowledgeBaseData?.[params?.org_id] || [];
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
-  const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData)
+  const [filterKnowledgeBase, setFilterKnowledgeBase] = useState([])
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
   useEffect(() => {
     const updateScreenSize = () => {
@@ -32,7 +34,6 @@ const Page = ({ params }) => {
         setViewMode('table');
       }
     };
-    dispatch(getAllKnowBaseDataAction(params?.org_id))
     updateScreenSize();
     setFilterKnowledgeBase(knowledgeBaseData)
     window.addEventListener('resize', updateScreenSize);
@@ -60,7 +61,11 @@ const Page = ({ params }) => {
 
   const handleDeleteKnowledgebase = (item) => {
     closeModal(MODAL_TYPE.DELETE_MODAL);
-    dispatch(deleteKnowBaseDataAction({ data: { id: item?._id, orgId: params?.org_id } }))
+    // Properly structure the parameters for deleteKnowledgeBase mutation
+    deleteKnowledgeBaseMutation({ 
+      id: item?._id, 
+      orgId: params?.org_id 
+    });
   };
   const EndComponent = ({ row }) => {
     return (

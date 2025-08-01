@@ -16,18 +16,20 @@ import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import DeleteModal from '@/components/UI/DeleteModal'
 import SearchItems from '@/components/UI/SearchItems'
+import { useGetUserDetailsQuery } from '@/store/services/userApi'
 
 export const runtime = 'edge';
 
 function Page({ params }) {
   const dispatch = useDispatch();
-  const { authData, isFirstPauthCreation, } = useCustomSelector((state) => {
-    const user = state.userDetailsReducer.userDetails || [];
+  const { authData } = useCustomSelector((state) => {
     return {
       authData: state?.authDataReducer?.authData || [],
-      isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
     };
   });
+  const {data:user}=useGetUserDetailsQuery();
+  const isFirstPauthCreation=user?.meta?.onboarding?.PauthKey;
+  console.log(isFirstPauthCreation,"isFirstPauthCreation")
   const [filterPauthKeys, setFilterPauthKeys] = useState(authData);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
   const [isCreating, setIsCreating] = useState(false);

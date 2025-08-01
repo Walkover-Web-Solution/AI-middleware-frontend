@@ -1,4 +1,5 @@
-import { useCustomSelector } from "@/customHooks/customSelector";
+import { useGetSingleBridgeQuery, useGetBridgeVersionQuery } from "@/store/services/bridgeApi";
+import { useGetUserDetailsQuery } from "@/store/services/userApi";
 import { BotIcon, SettingsIcon, FilterSliderIcon } from "@/components/Icons";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -38,13 +39,19 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const view = searchParams.get('view') || 'config';
     const [currentView, setCurrentView] = useState(view);
 
-    const { bridgeType, modelType, modelName, showGuide, showConfigType } = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
-        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
-        showGuide: state.userDetailsReducer.userDetails.showGuide,
-        showConfigType: state.userDetailsReducer.userDetails.showConfigType,
-    }));
+    // Fetch data using RTK Query hooks instead of Redux selectors
+    const { data: bridgeData = {} } = useGetSingleBridgeQuery(params?.id);
+    const { data: { bridge: versionBridge = {} } = {} } = useGetBridgeVersionQuery(params?.version);
+    const { data: userDetails = {} } = useGetUserDetailsQuery();
+    console.log(userDetails,"userDetails")
+    // Extract the needed data from the query results
+    const bridgeType = bridgeData?.bridge?.bridgeType?.trim()?.toLowerCase() || 'api';
+    const modelType = versionBridge?.configuration?.type?.toLowerCase();
+    const modelName = versionBridge?.configuration?.model;
+    const showGuide = userDetails?.showGuide;
+    const showConfigType = userDetails?.showConfigType;
+    console.log("bridgeType",bridgeType,modelType,modelName,showGuide,showConfigType)
+    
    useEffect(()=>{
       if(bridgeType==='trigger'||bridgeType=='api'||bridgeType==='batch'){
         if(currentView==='chatbot-config'||bridgeType==='trigger'){

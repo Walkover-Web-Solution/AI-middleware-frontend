@@ -7,13 +7,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import Modal from '../UI/Modal';
+import { useGetBridgeVersionQuery } from '@/store/services/bridgeApi';
 
 const PromptSummaryModal = ({ params }) => {
     const dispatch = useDispatch();
-    const { bridge_summary, prompt } = useCustomSelector((state) => ({
-        bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
-        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-    }));
+    const {data:{bridge:{configuration:{prompt, bridge_summary}}}}=useGetBridgeVersionQuery(params?.version);
+    console.log("bridge_summary",bridge_summary,prompt);
     const [summary, setSummary] = useState(bridge_summary || "");
     const [isEditing, setIsEditing] = useState(false);
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);

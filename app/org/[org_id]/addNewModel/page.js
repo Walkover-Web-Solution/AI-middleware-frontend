@@ -12,6 +12,7 @@ import { deleteModelAction } from '@/store/action/modelAction';
 import { useDispatch } from 'react-redux';
 import ModelUsageDetailsModal from '@/components/modals/ModelUsageDetailsModal';
 import DeleteModal from '@/components/UI/DeleteModal';
+import { useGetAllModelsQuery } from '@/store/services/modelApi';
 
 export const runtime = 'edge';
 
@@ -22,8 +23,6 @@ const Page = ({params}) => {
     const { modelInfo} = useCustomSelector((state) => ({
         modelInfo: state?.modelReducer?.serviceModels
     }));
-   console.log(modelInfo,"modelInfo")
-
     const findModelsWithOrgId = (data, parentKey = null, rootKey = null, results = []) => {
         if (typeof data !== 'object' || data === null) return results;
 

@@ -8,13 +8,14 @@ import LoadingSpinner from './loadingSpinner';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import timezoneData from '@/utils/timezoneData';
+import { useCreateOrgMutation } from '@/store/services/orgApi';
 
 const CreateOrg = ({ handleSwitchOrg }) => {
     const [orgDetails, setOrgDetails] = useState({ name: '', about: '', timezone: 'Asia/Kolkata' });
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
     const route = useRouter();
-
+    const [createOrg] = useCreateOrgMutation();
     const handleChange = useCallback((e) => {
         const { name, value } = e.target;
         setOrgDetails((prevDetails) => ({
@@ -40,13 +41,34 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                     timezone: selectedTimezone?.offSet
                 },
             };
-
-            dispatch(createOrgAction(dataToSend, (data) => {
+            console.log(dataToSend,"dataToSend")
+            setIsLoading(true);
+            try {
+                // Call the mutation and get the result
+                const result = await createOrg(dataToSend);
+                console.log('Full RTK result:', result);
+                
+                // Extract data from result
+                const data = result.data;
+                console.log('Extracted data:', data);
+                
                 dispatch(userDetails());
-                handleSwitchOrg(data.id, data.name);
-                toast.success('Organization created successfully');
-                route.push(`/org/${data.id}/agents`);
-            }));
+                
+                // Now we can access the data properties safely
+                if (data && data.id) {
+                    handleSwitchOrg(data.id, data.name);
+                    toast.success('Organization created successfully');
+                    route.push(`/org/${data.id}/agents`);
+                } else {
+                    console.error('Invalid data structure returned:', data);
+                    toast.error('Created organization but received unexpected response format');
+                }
+            } catch (apiError) {
+                console.error('API Error:', apiError);
+                toast.error('Failed to create organization: ' + (apiError.data?.message || 'Unknown error'));
+            }
+            setIsLoading(false);
+          
         } catch (error) {
             toast.error('Failed to create organization');
             console.error(error);

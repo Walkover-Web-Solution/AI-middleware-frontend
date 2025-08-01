@@ -14,7 +14,7 @@ import { useGetBridgeVersionQuery, useUpdateBridgeVersionMutation } from '@/stor
 const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
    
     const {data}=useGetVariablesQuery({bridgeId:params.id,versionId:params.version})
-    const {data:{bridge:{configuration:{prompt:reduxPrompt,type:serviceType},service}}} = useGetBridgeVersionQuery(params?.version);
+    const {data:{bridge:{configuration:{prompt:reduxPrompt,type:serviceType}={prompt:'',type:''},service}={service:''}}={}} = useGetBridgeVersionQuery(params?.version);
     const [updateBridgeVersion] = useUpdateBridgeVersionMutation();
    const variablesKeyValue = data?.bridgeVersionMapping?.[params.id]?.[params.version]?.variables || [];
    const [keyName, setKeyName] = useState('');

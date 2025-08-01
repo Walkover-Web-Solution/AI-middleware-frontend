@@ -1,23 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { CircleAlertIcon, RocketIcon, SparklesIcon } from '@/components/Icons';
 import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
-import { useCustomSelector } from '@/customHooks/customSelector';
-
+import { useGetBridgeVersionQuery } from '@/store/services/bridgeApi';
+import { useGetAllModelsQuery } from '@/store/services/modelApi';
+import { useGetAllApiKeyQuery } from '@/store/services/apiKeyApi';
 const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) => {
-  const { bridgeApiKey, prompt,shouldPromptShow } = useCustomSelector((state) => {
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
-    const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
-    const modelReducer = state?.modelReducer?.serviceModels;
-    const serviceName = versionData?.service;
-    const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-    const modelName = versionData?.configuration?.model;
-    return {
-      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
-      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-      shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt   
-   };
+  const { data: versionData, isLoading: isVersionLoading } = useGetBridgeVersionQuery(params.version, {
+    skip: !params.version
   });
-
+  console.log(versionData,'versionData')
+  const service = versionData?.bridge?.service;
+  const { data: modelsData } = useGetAllModelsQuery(service);
+  const {data:apikeyData}=useGetAllApiKeyQuery(params.org_id,{
+    skip:!params.org_id
+  })  
+  console.log(apikeyData,'apikeyData')
+  // Extract required data from RTK Query responses
+  const configuration = versionData?.bridge?.configuration;
+  const apikey_object_id = versionData?.bridge?.apikey_object_id;
+  const modelTypeName = configuration?.type?.toLowerCase();
+  const modelName = configuration?.model;
+  // Find model validation config
+  const modelConfig = modelsData?.[modelTypeName]?.[modelName];
+  const bridgeApiKey = apikey_object_id?.[service === 'openai_response' ? 'openai' : service];
+  const prompt = configuration?.prompt || "";
+  const shouldPromptShow = modelConfig?.validationConfig?.system_prompt;
+  console.log("shouldPromptShow",shouldPromptShow)
+console.log("prompt",prompt)
+console.log("bridgeApiKey",bridgeApiKey)
   const [isVisible, setIsVisible] = useState(!bridgeApiKey || (prompt === ""&&(shouldPromptShow) ))
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');

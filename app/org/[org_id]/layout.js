@@ -6,7 +6,6 @@ import Navbar from "@/components/navbar";
 import Protected from "@/components/protected";
 import MainSlider from "@/components/sliders/mainSlider";
 import { getSingleMessage, switchOrg } from "@/config";
-import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
@@ -23,7 +22,8 @@ import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 import { getApiKeyGuideAction, getTutorialDataAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
-import { useGetAllBridgesQuery, useGetBridgeVersionQuery, useGetSingleBridgeQuery } from "@/store/services/bridgeApi";
+import { useGetAllBridgesQuery, useGetBridgeVersionQuery } from "@/store/services/bridgeApi";
+import { useGetUserDetailsQuery } from "@/store/services/userApi";
 
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -35,11 +35,14 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   const [selectedItem, setSelectedItem] = useState(null)
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
-  const { organizations, currentUser } = useCustomSelector((state) => ({
-    organizations: state.userDetailsReducer.organizations,
-    currentUser: state.userDetailsReducer.userDetails,
-    doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
-  }));
+
+  const {data, isLoading, error, refetch} = useGetUserDetailsQuery(
+    {}, 
+    { refetchOnMountOrArgChange: true, refetchOnReconnect: true, refetchOnFocus: true }
+  );
+  const currentUser=data||{};
+  const organizations = data?.organizations||{};  
+  console.log(currentUser,"currentUser")
   const {data:{bridge:{apiCalls:versionData,configuration:{pre_tools:preTools}={}}={}}={}}= useGetBridgeVersionQuery(version_id)
   const { data: bridgesData, isLoading: loading } = useGetAllBridgesQuery(params.org_id);
   const embedToken=bridgesData?.embed_token;

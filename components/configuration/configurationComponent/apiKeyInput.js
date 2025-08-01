@@ -1,98 +1,51 @@
 import ApiKeyModal from '@/components/modals/ApiKeyModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { useGetAllApiKeyQuery } from '@/store/services/apiKeyApi';
+import { useGetBridgeVersionQuery, useUpdateBridgeVersionMutation } from '@/store/services/bridgeApi';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal } from '@/utils/utility';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const ApiKeyInput = ({ params,apiKeySectionRef }) => {
+const ApiKeyInput = ({ params, apiKeySectionRef }) => {
     const dispatch = useDispatch();
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [selectedApiKeys, setSelectedApiKeys] = useState({});
 
-
-    const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id, currentService, SERVICES } = useCustomSelector((state) => {
+    const { bridge_apiKey } = useCustomSelector((state) => {
         const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version] || {};
-        const apikeys = state?.bridgeReducer?.apikeys || {};
-
         return {
-            bridge: bridgeMap,
             bridge_apiKey: bridgeMap?.apikey,
-            apikeydata: apikeys[params?.org_id] || [], // Ensure apikeydata is an array
-            bridgeApikey_object_id: bridgeMap?.apikey_object_id,
-            currentService: bridgeMap?.service === 'openai_response' ? 'openai' : bridgeMap?.service,
-            SERVICES: state?.serviceReducer?.services
         };
     });
-
+    console.log(bridge_apiKey,'bridge_apiKey')
+    const {data:{bridge}={}}=useGetBridgeVersionQuery(params.version)
+    const currentService=bridge?.service==='openai_response'?'openai':bridge?.service
+    const bridgeApikey_object_id=bridge?.apikey_object_id
+    console.log(bridge,'versdlkjfdslkfj')
+    const {data:apikeyResponse}=useGetAllApiKeyQuery(params.org_id,{
+      skip:!params.org_id
+    })
+    // Extract result array from response
+    const apikeydata = apikeyResponse?.result || []
+    const [updateBridgeVersion]=useUpdateBridgeVersionMutation();
+  console.log(apikeydata,'apikeydatasdfsdf')
     // Memoize filtered API keys
     const filteredApiKeys = useMemo(() => {
         return apikeydata.filter(apiKey =>
-            apiKey?.service === (bridge?.service === 'openai_response' ? 'openai' : bridge?.service)
-        );
-    }, [apikeydata, bridge?.service]);
-
-    useEffect(() => {
-        if (bridgeApikey_object_id) {
-            if (typeof bridgeApikey_object_id === 'string') {
-                const apiKey = apikeydata.find(apiKey => apiKey?._id === bridgeApikey_object_id);
-                if (apiKey) {
-                    setSelectedApiKeys({ [bridge?.service === 'openai_response' ? 'openai' : bridge?.service]: apiKey._id });
-                }
-            }
-            else
-                setSelectedApiKeys(bridgeApikey_object_id);
-        } else if (bridge?.apikey) {
-            const apiKey = apikeydata.find(apiKey => apiKey?._id === bridge?.apikey);
-            if (apiKey) {
-                setSelectedApiKeys({ [apiKey?.service]: apiKey._id });
-            }
-        }
-    }, [bridge, apikeydata]);
-
-    const filterApiKeysByService = (service) => {
-        return apikeydata.filter(apiKey => apiKey?.service === service);
-    };
-
-    const handleSelectionChange = useCallback((service, apiKeyId) => {
-        setSelectedApiKeys(prev => {
-            const updated = { ...prev, [service]: apiKeyId };
-            dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
-            return updated;
-        });
-    }, [dispatch, params?.id, params?.version]);
-
-    const toggleDropdown = () => {
-        setShowDropdown(prev => !prev);
-    };
-
-    const handleClickOutside = useCallback((event) => {
-        if (apiKeySectionRef.current && !apiKeySectionRef.current.contains(event.target)) {
-            setShowDropdown(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [handleClickOutside]);
-
+            apiKey?.service === currentService
+        ) 
+    }, [apikeydata, currentService]);
+   console.log(filteredApiKeys,'filteredApiKeys')
     const handleDropdownChange = useCallback((e) => {
         const selectedApiKeyId = e.target.value;
         if (selectedApiKeyId === 'add_new') {
             openModal(MODAL_TYPE.API_KEY_MODAL);
         } else {
-            setSelectedApiKeys(prev => {
-                const service = bridge?.service === 'openai_response' ? 'openai' : bridge?.service;
-                const updated = { ...prev, [service]: selectedApiKeyId };
-                dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
-                return updated;
-            });
+            const service = bridge?.service === 'openai_response' ? 'openai' : bridge?.service;
+            const updated = { [service]: selectedApiKeyId };
+            updateBridgeVersion({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } });
         }
-    }, [dispatch, params.id, params.version, bridge?.service]);
+    }, [params.id, params.version, bridge?.service]);
 
     // Determine the currently selected value
     const selectedValue = useMemo(() => {
@@ -109,7 +62,7 @@ const ApiKeyInput = ({ params,apiKeySectionRef }) => {
     const maxChar = 20;
 
     return (
-        <div className="relative form-control max-w-xs text-base-content" ref={apiKeySectionRef} >
+        <div className="relative form-control max-w-xs text-base-content" ref={apiKeySectionRef}>
             <div className="label">
                 <span className="label-text font-medium">Service's API Key</span>
             </div>
@@ -146,43 +99,6 @@ const ApiKeyInput = ({ params,apiKeySectionRef }) => {
                         )}
                         <option value="add_new" className="add-new-option">+  Add new API Key </option>
                     </select>
-                    <div className='text-[10px] text-end '>
-                        <button
-                            type="button"
-                            onClick={toggleDropdown}
-                        >
-                            Add multiple api keys
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    {showDropdown && (
-                        <div className="absolute w-full bg-white border border-gray-300 rounded-md shadow-lg z-low max-h-80 overflow-auto">
-                            {SERVICES?.filter(service => service?.value !== bridge?.service).map(service => (
-                                <div key={service?.value} className="px-4 py-2 border-b last:border-b-0">
-                                    <div className="font-semibold capitalize mb-1">{service?.displayName}</div>
-                                    {filterApiKeysByService(service?.value)?.map(apiKey => (
-                                        <label key={apiKey?._id} className="flex items-center mb-1">
-                                            <input
-                                                type="radio"
-                                                name={`apiKey-${service?.value}`}
-                                                value={apiKey?._id}
-                                                checked={selectedApiKeys[service?.value] === apiKey?._id}
-                                                onChange={() => handleSelectionChange(service?.value, apiKey?._id)}
-                                                className="radio h-4 w-4"
-                                            />
-                                            <span className="ml-2 text-sm">
-                                                {truncateText(apiKey?.name, maxChar)}
-                                            </span>
-                                        </label>
-                                    ))}
-                                    {filterApiKeysByService(service?.value)?.length === 0 && (
-                                        <span className="text-sm text-gray-500">No API keys available</span>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
             <ApiKeyModal params={params} service={currentService} bridgeApikey_object_id={bridgeApikey_object_id} />

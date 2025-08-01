@@ -19,24 +19,18 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import SearchItems from "@/components/UI/SearchItems";
 import { useGetAllBridgesQuery } from "@/store/services/bridgeApi";
-
+import { useGetUserDetailsQuery } from "@/store/services/userApi";
 export const runtime = 'edge';
 
 function Home({ params, isEmbedUser }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  
-  const {  averageResponseTime, isFirstBridgeCreation } = useCustomSelector((state) => {
-    const orgData = state.bridgeReducer.org[params.org_id] || {};
-    const user = state.userDetailsReducer.userDetails
-    return {
-      averageResponseTime: orgData.average_response_time || [],
-      // isLoading: state.bridgeReducer.loading,
-      isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
-    };
-  });
+ 
   const { data: bridgesData, isLoading } = useGetAllBridgesQuery(params?.org_id);
+  const averageResponseTime = bridgesData?.average_response_time || [];
+  const {data:user}=useGetUserDetailsQuery();
+  const isFirstBridgeCreation=user?.meta?.onboarding?.bridgeCreation;
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [filterBridges,setFilterBridges]=useState(bridgesData?.bridge||[]);
   const [tutorialState, setTutorialState] = useState({

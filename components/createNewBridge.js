@@ -1,5 +1,4 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { createBridgeAction, createBridgeWithAiAction } from "@/store/action/bridgeAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -11,7 +10,8 @@ import { getServiceAction } from "@/store/action/serviceAction";
 import { BotIcon, CheckIcon, CircleAlertIcon, ClockTenIcon, WebhookIcon } from "@/components/Icons";
 import Protected from "./protected";
 import { useCreateBridgeMutation, useGetAllBridgesQuery } from "@/store/services/bridgeApi";
-
+import { useGetAllServicesQuery } from "@/store/services/serviceApi";
+import { useGetAllModelsQuery } from "@/store/services/modelApi";
   function CreateNewBridge({ orgid, isEmbedUser }) {
     const [selectedService, setSelectedService] = useState('openai');
     const [selectedModel, setSelectedModel] = useState("gpt-4o");
@@ -28,11 +28,11 @@ import { useCreateBridgeMutation, useGetAllBridgesQuery } from "@/store/services
 
     const {data:bridgesData}=useGetAllBridgesQuery(orgid)
     const [createBridgeMutation,{isLoading}] = useCreateBridgeMutation();    
-    const {  modelsList, SERVICES } = useCustomSelector((state) => ({
-        SERVICES: state?.serviceReducer?.services,
-        modelsList: state?.modelReducer?.serviceModels[selectedService],
-    }));
-
+    
+    const { data: modelsList } = useGetAllModelsQuery(selectedService);
+    
+    const {data:{services:SERVICES}}=useGetAllServicesQuery();
+    
     useEffect(() => {
         if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
             dispatch(getServiceAction({ orgid }))
@@ -135,7 +135,6 @@ import { useCreateBridgeMutation, useGetAllBridgesQuery } from "@/store/services
        
         const dataToSend = { purpose, bridgeType: selectedBridgeTypeCard }
        const {data}=await createBridgeMutation(dataToSend)
-       console.log(data,"created")
        route.push(`/org/${orgid}/agents/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
        closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
        cleanState();

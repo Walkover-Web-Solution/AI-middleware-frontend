@@ -1,13 +1,11 @@
-import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateUserMetaOnboarding } from '@/store/action/orgAction';
-import React, { useEffect } from 'react'
+import { useGetUserDetailsQuery } from '@/store/services/userApi';
+import React from 'react'
 import { useDispatch } from 'react-redux';
 
 const OnBoarding = ({ video, setShowTutorial, flagKey }) => {
-  const { currentUser } = useCustomSelector((state) => ({
-    currentUser: state.userDetailsReducer?.userDetails
-  }));
 
+  const {data:currentUser}=useGetUserDetailsQuery();
   const dispatch = useDispatch();
   const handleVideoEnd = async () => {
     try {

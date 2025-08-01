@@ -65,10 +65,7 @@ const Page = ({ params }) => {
         fetchClientInfo();
     }, [searchParams]);
     
-    const { organizations } = useCustomSelector(state => ({
-        organizations: state.userDetailsReducer.organizations
-    }));
-
+   const {data:{organizations={}}, error} = useGetUserDetailsQuery();
     const updateFormState = useCallback((updates) => {
         setFormState(prev => ({ ...prev, ...updates }));
     }, []); 

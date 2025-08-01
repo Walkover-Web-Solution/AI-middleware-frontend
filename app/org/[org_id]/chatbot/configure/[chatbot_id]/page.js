@@ -16,10 +16,10 @@ export const runtime = 'edge';
 
 function Page({ params }) {
 
-    const { ChatbotDetails, bridgeData } = useCustomSelector((state) => ({
+    const { ChatbotDetails } = useCustomSelector((state) => ({
         ChatbotDetails: (state?.ChatBot?.ChatBotMap?.[params?.chatbot_id] || {}),
-        bridgeData: state?.bridgeReducer?.org?.[params?.org_id]
     }))
+    const { data: bridgeData } = useGetAllBridgesQuery(org_id)
 
 
     const dispatch = useDispatch()

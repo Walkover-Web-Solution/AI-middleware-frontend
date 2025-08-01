@@ -1,19 +1,24 @@
-import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
+import { logoutUserFromMsg91, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
+import { useSwitchOrgMutation, useGetAllOrgQuery } from '@/store/services/orgApi';
 import { filterOrganizations, openModal, toggleSidebar } from '@/utils/utility';
 import { KeyRoundIcon, LogoutIcon, MailIcon, CloseIcon, SettingsIcon, SettingsAltIcon, BuildingIcon, ChevronDownIcon } from '@/components/Icons';
 import { usePathname, useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
 import React, { useCallback, useState } from 'react';
 import CreateOrg from '../createNewOrg';
 import { MODAL_TYPE } from '@/utils/enums';
 
 function OrgSlider() {
     const router = useRouter();
+    const dispatch = useDispatch();
     const pathName = usePathname();
     const path = pathName.split('?')[0].split('/');
     const [searchQuery, setSearchQuery] = useState('');
-    const organizations = useCustomSelector((state) => state.userDetailsReducer.organizations);
+    const { data: organizationsData } = useGetAllOrgQuery();
+    const organizations = organizationsData?.data?.data || useCustomSelector((state) => state.userDetailsReducer.organizations) || [];
+    const [switchOrg] = useSwitchOrgMutation();
     const userdetails = useCustomSelector((state) => state?.userDetailsReducer?.userDetails);
 
     const filteredOrganizations = filterOrganizations(organizations,searchQuery);
@@ -35,7 +40,7 @@ function OrgSlider() {
 
     const handleSwitchOrg = async (id, name) => {
         try {
-            const response = await switchOrg(id);
+            await switchOrg(id);
             if (process.env.NEXT_PUBLIC_ENV === 'local') {
                 const localToken = await switchUser({
                     orgId: id,
@@ -44,10 +49,7 @@ function OrgSlider() {
                 localStorage.setItem('local_token', localToken.token);
             }
             router.push(`/org/${id}/agents`);
-            dispatch(setCurrentOrgIdAction(id));
-            if (response.status !== 200) {
-                console.error('Failed to switch organization', response.data);
-            }
+            // No need to dispatch as the mutation will handle storing the current org ID
         } catch (error) {
             console.error('Error switching organization', error);
         }

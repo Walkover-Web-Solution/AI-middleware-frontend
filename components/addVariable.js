@@ -1,6 +1,4 @@
 "use client";
-import { useCustomSelector } from "@/customHooks/customSelector";
-import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
 import { updateOnBoardingDetails } from "@/utils/utility";
 import { ChevronUpIcon, ChevronDownIcon, InfoIcon, TrashIcon } from "@/components/Icons";
@@ -11,12 +9,12 @@ import { ONBOARDING_VIDEOS } from "@/utils/enums";
 import TutorialSuggestionToast from "./tutorialSuggestoinToast";
 import { useGetVariablesQuery, useUpdateVariablesMutation } from "@/store/services/bridgeLocalApi";
 import { useGetBridgeVersionQuery, useUpdateBridgeVersionMutation } from "@/store/services/bridgeApi";
+import { useGetUserDetailsQuery } from "@/store/services/userApi";
 
 const AddVariable = ({ params }) => {
   const versionId = params.version;
-  const { isFirstVariable,  } = useCustomSelector((state) => ({
-    isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
-  }));
+  const {data:user}=useGetUserDetailsQuery();
+  const isFirstVariable=user?.meta?.onboarding?.Addvariables;
   const {data:{bridge:{configuration:{prompt}}}} = useGetBridgeVersionQuery(versionId);
   const [updateVariables] = useUpdateVariablesMutation();
   const {data} = useGetVariablesQuery({bridgeId:params.id, versionId:params.version});

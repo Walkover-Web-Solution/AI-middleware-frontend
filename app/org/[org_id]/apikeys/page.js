@@ -3,7 +3,6 @@ import CustomTable from "@/components/customTable/customTable";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import ApiKeyModal from '@/components/modals/ApiKeyModal';
 import PageHeader from "@/components/Pageheader";
-import { deleteApikeyAction, getAllApikeyAction } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
 import { closeModal, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
 import { BookIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
@@ -14,6 +13,7 @@ import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
 import ApiKeyGuideSlider from "@/components/configuration/configurationComponent/ApiKeyGuide";
 import { useDeleteApikeyMutation, useGetAllApiKeyQuery } from "@/store/services/apiKeyApi";
+import { useGetAllServicesQuery } from "@/store/services/serviceApi";
 
 export const runtime = 'edge';
 
@@ -27,7 +27,8 @@ const Page = () => {
   useEffect(() => {
     setFilterApiKeys(apikeyData);
   }, [apikeyData]);
-
+ const {data}=useGetAllServicesQuery();
+ console.log(data,'data')
   const [selectedApiKey, setSelectedApiKey] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);

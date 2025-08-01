@@ -5,15 +5,16 @@ import timezoneData from '@/utils/timezoneData';
 import { PencilIcon, GlobeIcon, MailIcon, BuildingIcon } from '@/components/Icons';
 import React, { useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { useGetUserDetailsQuery } from '@/store/services/userApi';
 
 export const runtime = 'edge';
 
 export default function SettingsPage({ params }) {
   const dispatch = useDispatch();
-  const userDetails = useCustomSelector((state) =>
-    state?.userDetailsReducer?.organizations?.[params.org_id]
-  );
-
+  const {data:user}=useGetUserDetailsQuery();
+  const userDetails=user?.organizations?.[params.org_id];
+  
+  console.log(userDetails,"userDetails")
   const [isContentOpen, setIsContentOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTimezone, setSelectedTimezone] = useState(() =>

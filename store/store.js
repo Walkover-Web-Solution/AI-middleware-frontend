@@ -27,7 +27,9 @@ import { serviceApi } from "./services/serviceApi";
 import { apiKeyApi } from "./services/apiKeyApi";
 import { integrationApi } from "./services/IntegrationApi";
 import { bridgeLocalApi } from "./services/bridgeLocalApi";
-
+import { orgApi } from "./services/orgApi";
+import { userApi } from "./services/userApi";
+import { knowledgeBaseApi } from "./services/knowledgeBaseApi";
 const createNoopStorage = () => {
     return {
         getItem(_key) {
@@ -54,6 +56,8 @@ const rootReducer = combineReducers({
     [apiKeyApi.reducerPath]: apiKeyApi.reducer,
     [integrationApi.reducerPath]: integrationApi.reducer,
     [bridgeLocalApi.reducerPath]: bridgeLocalApi.reducer,
+    [userApi.reducerPath]: userApi.reducer,
+    [knowledgeBaseApi.reducerPath]: knowledgeBaseApi.reducer,
     bridgeReducer,
     modelReducer,
     historyReducer,
@@ -97,11 +101,17 @@ export const store = configureStore({
                     `${integrationApi.reducerPath}/executeMutation/fulfilled`,
                     `${bridgeLocalApi.reducerPath}/executeQuery/fulfilled`,
                     `${bridgeLocalApi.reducerPath}/executeMutation/fulfilled`,
+                    `${orgApi.reducerPath}/executeQuery/fulfilled`,
+                    `${orgApi.reducerPath}/executeMutation/fulfilled`,
+                    `${userApi.reducerPath}/executeQuery/fulfilled`,
+                    `${userApi.reducerPath}/executeMutation/fulfilled`,
+                    `${knowledgeBaseApi.reducerPath}/executeQuery/fulfilled`,
+                    `${knowledgeBaseApi.reducerPath}/executeMutation/fulfilled`,
                     // Other RTK Query action types you want to ignore
                   ],
                 ignoredPaths: ['register'], // Adjust the paths as necessary
             },
-        }).concat(bridgeApi.middleware).concat(modelApi.middleware).concat(serviceApi.middleware).concat(apiKeyApi.middleware).concat(integrationApi.middleware).concat(bridgeLocalApi.middleware),
+        }).concat(bridgeApi.middleware).concat(modelApi.middleware).concat(serviceApi.middleware).concat(apiKeyApi.middleware).concat(integrationApi.middleware).concat(bridgeLocalApi.middleware).concat(orgApi.middleware).concat(userApi.middleware).concat(knowledgeBaseApi.middleware),
 });
 
 export const persistor = persistStore(store);

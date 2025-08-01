@@ -15,6 +15,7 @@ import ChatBotSlider from './sliders/chatBotSlider';
 import ConfigHistorySlider from './sliders/configHistorySlider';
 import Protected from './protected';
 import { useGetBridgeVersionQuery, useGetSingleBridgeQuery } from '@/store/services/bridgeApi';
+import { useGetUserDetailsQuery } from '@/store/services/userApi';
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,
@@ -36,19 +37,22 @@ const Navbar = ({ isEmbedUser }) => {
   const bridgeId = pathParts[5];
   const dispatch = useDispatch();
 
-  const { organizations, bridgeStatus, isPublishing, isUpdatingBridge, activeTab, hideHomeButton } = useCustomSelector(state => ({
-    organizations: state.userDetailsReducer.organizations,
-    bridgeStatus: state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridge_status ?? BRIDGE_STATUS.ACTIVE,
-    isPublishing: state.bridgeReducer.isPublishing ?? false,
-    isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
-    activeTab: pathname.includes('configure') ? 'configure' : pathname.includes('history') ? 'history' : pathname.includes('testcase') ? 'testcase' : 'configure',
+  const { hideHomeButton } = useCustomSelector(state => ({
     hideHomeButton:  state.userDetailsReducer.userDetails.hideHomeButton || false
   }));
+
   const { data: { bridge = {} } = {} } = useGetSingleBridgeQuery(bridgeId);
   const { data: { bridge: versionBridge = {} } = {} } = useGetBridgeVersionQuery(versionId);
+  const {data:user}=useGetUserDetailsQuery();
+  const activeTab=pathname.includes('configure') ? 'configure' : pathname.includes('history') ? 'history' : pathname.includes('testcase') ? 'testcase' : 'configure';
+  const bridgeStatus=versionBridge?.bridge_status||BRIDGE_STATUS.ACTIVE;
+  const isPublishing=false;
+  const isUpdatingBridge=false;
   const isDrafted = versionBridge?.is_drafted;
   const isArchived = bridge?.status;
+  const organizations=user?.organizations;
   
+
   // Define tabs based on user type
   const TABS = useMemo(() => {
     const baseTabs = [

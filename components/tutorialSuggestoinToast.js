@@ -1,9 +1,9 @@
-import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { TUTORIALS } from "@/utils/enums";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { ClockIcon, PlayIcon } from "./Icons";
+import { useGetUserDetailsQuery } from "@/store/services/userApi";
 
 const TIMER_DURATION = 10;
 
@@ -12,7 +12,7 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
 
   // Memoize current user selection to prevent unnecessary re-renders
-  const currentUser = useCustomSelector(state => state.userDetailsReducer?.userDetails);
+  const {data:currentUser}=useGetUserDetailsQuery();
 
   // Memoize tutorial lookup
   const currentTutorial = useMemo(() => 

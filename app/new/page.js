@@ -14,6 +14,8 @@ import { getServiceAction } from '@/store/action/serviceAction';
 import { switchUser } from '@/config';
 import { useCreateBridgeMutation } from '@/store/services/bridgeApi';
 import { useGetAllModelsQuery } from '@/store/services/modelApi';
+import { useGetUserDetailsQuery } from '@/store/services/userApi';
+import { useGetAllServicesQuery } from '@/store/services/serviceApi';
 
 const URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const INITIAL_FORM_STATE = {
@@ -36,13 +38,10 @@ function Page({ params }) {
     const [formState, setFormState] = useState(INITIAL_FORM_STATE);
     const [isInitialLoading, setIsInitialLoading] = useState(false);
 
-    const { organizations,  SERVICES, DEFAULT_MODEL } = useCustomSelector(state => ({
-        organizations: state.userDetailsReducer.organizations,
-        SERVICES: state?.serviceReducer?.services,
-        DEFAULT_MODEL: state?.serviceReducer?.default_model
-    }));
-    const {data: servicesList} = useGetAllServicesQuery();
-    console.log(servicesList,"servicesList");
+    const {data:{organizations={}}, error} = useGetUserDetailsQuery();
+    const {data}=useGetAllServicesQuery();
+    const SERVICES=data?.services||{};  
+    const DEFAULT_MODEL=data?.default_model||{};  
     const {data: modelsList} = useGetAllModelsQuery(formState.selectedService);
     const [createBridgeMutation] = useCreateBridgeMutation();
     const templateId = searchParams.get('template_id');

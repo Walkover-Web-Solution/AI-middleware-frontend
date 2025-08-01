@@ -1,11 +1,13 @@
 "use client"
 import CreateOrg from '@/components/createNewOrg';
 import Protected from '@/components/protected';
-import { switchOrg, switchUser } from '@/config';
+import { switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { userDetails } from '@/store/action/userDetailsAction';
+import { useGetAllOrgQuery, useSwitchOrgMutation } from '@/store/services/orgApi';
+import { useGetUserDetailsQuery } from '@/store/services/userApi';
 import { MODAL_TYPE } from '@/utils/enums';
 import { filterOrganizations, openModal } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
@@ -20,11 +22,16 @@ function Page() {
   const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const route = useRouter()
-  const organizations = useCustomSelector(state => state.userDetailsReducer.organizations);
 
+  // Use RTK Query for organization data
+  const [switchOrg] = useSwitchOrgMutation();
+  const {data, isLoading, error} = useGetUserDetailsQuery({}, 
+    { refetchOnMountOrArgChange: true, refetchOnReconnect: true, refetchOnFocus: true });
+  const currentUser=data||{};
+  const organizations = currentUser?.organizations||{};
   const handleSwitchOrg = useCallback(async (id, name) => {
     try {
-      const response = await switchOrg(id);
+      const response = switchOrg(id);
       if (process.env.NEXT_PUBLIC_ENV === 'local') {
         const localToken = await switchUser({ orgId: id, orgName: name });
         localStorage.setItem('local_token', localToken.token);
