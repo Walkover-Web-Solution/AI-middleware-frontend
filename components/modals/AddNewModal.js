@@ -216,7 +216,7 @@ export default function AddNewModelModal() {
         }
 
         // Construct the final object with the flattened configuration
-        const finalConfig = {
+        let finalConfig = {
             ...config,
             configuration: {
                 ...baseConfiguration, // Spread base properties like 'model'
@@ -224,7 +224,14 @@ export default function AddNewModelModal() {
             },
             outputConfig: { ...newOutPutConfig }
         };
-        return finalConfig;
+        
+        return {
+            ...finalConfig,
+            configuration: {
+                ...finalConfig.configuration,
+                model: { ...finalConfig.configuration?.model, level: 1 }
+            }
+        };
     };
 
 
