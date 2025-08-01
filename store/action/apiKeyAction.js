@@ -1,5 +1,5 @@
 import { deleteApikey, getAllApikey, saveApiKeys, updateApikey } from "@/config";
-import { apikeyDataReducer, apikeyDeleteReducer, apikeyUpdateReducer, createApiKeyReducer } from "../reducer/bridgeReducer";
+import { apikeyDataReducer, apikeyDeleteReducer, apikeyRollBackReducer, apikeyUpdateReducer, backupApiKeysReducer, createApiKeyReducer } from "../reducer/bridgeReducer";
 import { toast } from "react-toastify";
 
 
@@ -16,25 +16,64 @@ export const saveApiKeysAction = (data, orgId) => async (dispatch) => {
 };
 
 export const updateApikeyAction = (dataToSend) => async (dispatch) => {
+  // Step 1: Create a backup of the current state
+  dispatch(backupApiKeysReducer({ org_id: dataToSend.org_id }));
+  
+  // Step 2: Perform optimistic update in the UI
+  dispatch(apikeyUpdateReducer({ 
+    org_id: dataToSend.org_id, 
+    id: dataToSend.apikey_object_id, 
+    name: dataToSend.name, 
+    data: dataToSend.apikey, 
+    comment: dataToSend.comment 
+  }));
+  
   try {
+    // Step 3: Make the actual API call
     const response = await updateApikey(dataToSend);
-    if (response.data.success)
-      dispatch(apikeyUpdateReducer({ org_id: dataToSend.org_id, name: dataToSend.name, id: dataToSend.apikey_object_id, data: response.data.apikey, comment: dataToSend.comment }))
-
+    if (response.data?.success) {
+      dispatch(apikeyUpdateReducer({ 
+        org_id: dataToSend.org_id, 
+        id: dataToSend.apikey_object_id, 
+        name: dataToSend.name, 
+        data: response.data.apikey, 
+        comment: dataToSend.comment 
+      }));
+    }
+    else{
+      toast.error('Failed to update API key');
+      dispatch(apikeyRollBackReducer({ org_id: dataToSend.org_id }));
+    }
   } catch (error) {
-    toast.error(error);
+    // API call failed with exception
+    toast.error(error?.message || 'Error updating API key');
     console.error(error);
+    // Roll back to the original state
+    dispatch(apikeyRollBackReducer({ org_id: dataToSend.org_id }));
   }
 }
-export const deleteApikeyAction = ({ org_id, name, id }) => async (dispatch) => {
-  try {
-    const response = await deleteApikey(id);
-    if (response.data.success)
-      dispatch(apikeyDeleteReducer({ org_id, name }))
 
+export const deleteApikeyAction = ({ org_id, name, id }) => async (dispatch, getState) => {
+  // Step 1: Create a backup of the current state
+  dispatch(backupApiKeysReducer({ org_id })); 
+  // Step 2: Optimistically delete from UI immediately
+  dispatch(apikeyDeleteReducer({ org_id, name })); 
+  try {
+    // Step 3: Make the API call in the background
+    const response = await deleteApikey(id);
+    if (response.data?.success) {
+      dispatch(apikeyDeleteReducer({ org_id, name }));
+    }
+    else{
+      toast.error('Failed to delete API key');
+      dispatch(apikeyRollBackReducer({ org_id }));
+    }
   } catch (error) {
-    toast.error(error);
+    // API call failed with exception
+    toast.error(error?.message || 'Error deleting API key');
     console.error(error);
+    // Roll back to original state
+    dispatch(apikeyRollBackReducer({ org_id }));
   }
 }
 
