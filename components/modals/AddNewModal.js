@@ -159,6 +159,7 @@ export default function AddNewModelModal() {
     }, {});
 
     const initialService = SERVICE_CONFIGS.openai ? 'openai' : Object.keys(SERVICE_CONFIGS)[0];
+    console.log(SERVICE_CONFIGS)
     const [config, setConfig] = useState(SERVICE_CONFIGS[initialService] || {});
     const [selectedKeys, setSelectedKeys] = useState(Object.keys(SERVICE_CONFIGS[initialService]?.configuration?.additional_parameters || {}));
     const [expandedKeys, setExpandedKeys] = useState(new Set());
@@ -216,7 +217,7 @@ export default function AddNewModelModal() {
         }
 
         // Construct the final object with the flattened configuration
-        const finalConfig = {
+        let finalConfig = {
             ...config,
             configuration: {
                 ...baseConfiguration, // Spread base properties like 'model'
@@ -224,7 +225,14 @@ export default function AddNewModelModal() {
             },
             outputConfig: { ...newOutPutConfig }
         };
-        return finalConfig;
+        
+        return {
+            ...finalConfig,
+            configuration: {
+                ...finalConfig.configuration,
+                model: { ...finalConfig.configuration?.model, level: 1 }
+            }
+        };
     };
 
 
@@ -451,6 +459,7 @@ export default function AddNewModelModal() {
 
     const handleAddModel = async () => {
         const refactored = getCleanedConfigForApi()
+        console.log(refactored)
         dispatch(addNewModelAction({ service: config?.service, type: config?.validationConfig?.type, newModelObject: refactored }))
             .then((data) => {
                 if (data?.data?.success) {
