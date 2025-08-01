@@ -20,7 +20,7 @@ const PublicAgent = ({ agents, searchTerm, setSearchTerm}) => {
                     <div className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-lg">
                         <Users className="w-4 h-4 text-white" />
                     </div>
-                    <h2 className="text-xl font-bold text-slate-900 ml-2">Public Assistants</h2>
+                    <h2 className="text-xl font-bold text-slate-900 ml-2">Public Agents</h2>
                 </div>
                 <div className="flex items-center justify-between mb-8">
                 {typeof window !== 'undefined' && !localStorage.getItem('publicAgentProxyToken') && (
@@ -32,7 +32,7 @@ const PublicAgent = ({ agents, searchTerm, setSearchTerm}) => {
                 </div>
                 {/* Grid Layout */}
                 {agents?.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
                         {agents.map((agent) => (
                             <div
                                 key={agent._id}

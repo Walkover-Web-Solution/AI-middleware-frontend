@@ -1,7 +1,7 @@
 'use client'
-import { Bot, Lock, Search, ArrowRight } from 'lucide-react';
+import { Bot, Lock, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React from 'react';
 
 const PrivateAgent = ({ agents, searchTerm, setSearchTerm }) => {
     const router = useRouter()
@@ -13,15 +13,29 @@ const PrivateAgent = ({ agents, searchTerm, setSearchTerm }) => {
         <div className="bg-gradient-to-br from-slate-50 to-slate-100/50">
             <div className="max-w-7xl mx-auto px-6 py-8">
                 {/* Header */}
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-lg">
-                        <Lock className="w-4 h-4 text-yellow-400" />
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                        <div className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-lg">
+                            <Lock className="w-4 h-4 text-yellow-400" />
+                        </div>
+                        <h2 className="text-xl font-bold text-slate-900">
+                            Private Agents
+                        </h2>
                     </div>
-                    <h2 className="text-xl font-bold text-slate-900">Private Assistants</h2>
+
+                    <button
+                        onClick={() => {
+                            localStorage.removeItem('publicAgentProxyToken');
+                            window.location.reload();
+                        }}
+                        className="btn text-red-500 hover:bg-red-50"
+                    >
+                        Logout
+                    </button>
                 </div>
                 {/* Grid Layout */}
                 {agents?.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
                         {agents.map((agent) => (
                             <div
                                 key={agent._id}
