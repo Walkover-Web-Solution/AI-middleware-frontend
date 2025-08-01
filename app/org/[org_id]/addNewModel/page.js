@@ -77,7 +77,6 @@ const Page = ({params}) => {
             {
                 setUsageDetailsData(error.response?.data?.usageDetails)
                 openModal(MODAL_TYPE.USAGE_DETAILS_MODAL)
-                console.log(error.response?.data?.usageDetails)
             }
           });
     }
