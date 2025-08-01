@@ -458,7 +458,6 @@ export default function AddNewModelModal() {
 
     const handleAddModel = async () => {
         const refactored = getCleanedConfigForApi()
-        console.log(refactored)
         dispatch(addNewModelAction({ service: config?.service, type: config?.validationConfig?.type, newModelObject: refactored }))
             .then((data) => {
                 if (data?.data?.success) {
