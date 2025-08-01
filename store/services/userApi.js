@@ -98,6 +98,34 @@ export const userApi = createApi({
         body: data
       }),
     }),
+    generateGtwyAccessTokenApi: builder.query({
+      query: (orgId) => ({
+        url: '/gtwyEmbed/token',
+        method: 'GET',
+      }),
+      transformResponse: (response, meta, arg) => {
+        const orgId = arg;
+        const gtwyAccessToken = response?.data?.gtwyAccessToken;
+        
+        // Return transformed response in a structure that matches what was used in the reducer
+        return {
+          organizations: {
+            [orgId]: {
+              meta: {
+                gtwyAccessToken: gtwyAccessToken
+              }
+            }
+          },
+          // Keep the original response accessible
+          originalResponse: response
+        };
+      },
+      // Make sure to provide the orgId as part of the tag for proper cache invalidation
+      providesTags: (result, error, orgId) => [
+        { type: 'User', id: orgId },
+        'User'
+      ]
+    })
   }),
 });
 
@@ -108,4 +136,7 @@ export const {
   useCreateAuthKeyMutation,
   useDeleteAuthKeyMutation,
   useSwitchUserMutation,
+  useGenerateGtwyAccessTokenApiQuery,
 } = userApi;
+
+

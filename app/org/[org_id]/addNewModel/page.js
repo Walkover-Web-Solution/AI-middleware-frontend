@@ -23,6 +23,7 @@ const Page = ({params}) => {
     const { modelInfo} = useCustomSelector((state) => ({
         modelInfo: state?.modelReducer?.serviceModels
     }));
+    console.log(modelInfo,"dlkfjsd")
     const findModelsWithOrgId = (data, parentKey = null, rootKey = null, results = []) => {
         if (typeof data !== 'object' || data === null) return results;
 
