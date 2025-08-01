@@ -16,7 +16,8 @@ import {
   MessageCircleMoreIcon,
   MessageSquareMoreIcon,
   Blocks,
-  User
+  User,
+  FileSliders
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
@@ -38,6 +39,7 @@ import { AddIcon, KeyIcon } from '../Icons';
 const ITEM_ICONS = {
   org: <Building2 size={16} />,
   agents: <Bot size={16} />,
+  chatbotConfig: <FileSliders size={16} />,
   chatbot: <MessageSquare size={16} />,
   pauthkey: <Shield size={16} />,
   apikeys: <Database size={16} />,
@@ -50,7 +52,7 @@ const ITEM_ICONS = {
 };
 
 const NAV_SECTIONS = [
-  { items: ['agents'] },
+  { items: ['agents', 'chatbotConfig'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
   { title: 'INTEGRATION', items: ['integration', 'knowledge_base'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
@@ -115,6 +117,7 @@ function MainSlider({ isEmbedUser }) {
   const displayName = key => {
     const names = {
       knowledge_base: 'Knowledge base',
+      chatbotConfig: 'Configure Chatbot',
       feedback: 'Feedback',
       tutorial: 'Tutorial',
       'speak-to-us': 'Speak to Us',
