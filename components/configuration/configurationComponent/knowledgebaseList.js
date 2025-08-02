@@ -14,7 +14,7 @@ import InfoTooltip from '@/components/InfoTooltip';
 import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
 
 const KnowledgebaseList = ({ params }) => {
-    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
+    const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model, versionData } = useCustomSelector((state) => {
         const user = state.userDetailsReducer.userDetails || []
         const modelReducer = state?.modelReducer?.serviceModels;
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
@@ -26,10 +26,10 @@ const KnowledgebaseList = ({ params }) => {
             knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids||[],
             isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
-            model: modelName
+            model: modelName,
+            versionData: versionData
         };
     });
-
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
     const [tutorialState, setTutorialState] = useState({
@@ -43,13 +43,13 @@ const KnowledgebaseList = ({ params }) => {
         if (knowbaseVersionData?.includes(id)) return; // Check if ID already exists
         dispatch(updateBridgeVersionAction({
             versionId: params.version,
-            dataToSend: { doc_ids: [...(knowbaseVersionData || []), id] }
+            dataToSend: { ...versionData, doc_ids: [...(knowbaseVersionData || []), id] }
         }));
     };
     const handleDeleteKnowledgebase = (id) => {
         dispatch(updateBridgeVersionAction({
             versionId: params.version,
-            dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== id) }
+            dataToSend: { ...versionData, doc_ids: knowbaseVersionData.filter(docId => docId !== id) }
         }));
     };
 

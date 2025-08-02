@@ -6,6 +6,7 @@ const initialState = {
   org: {},
   apikeys: {},
   loading: false,
+  bridgeVersionBackup: null, // Storage for bridge state backup used in rollbacks
 };
 
 export const bridgeReducer = createSlice({
@@ -114,6 +115,84 @@ export const bridgeReducer = createSlice({
         }
       }
       state.loading = false;
+    },
+    
+    // Backup bridge version data before making changes for potential rollback
+    backupBridgeVersionReducer: (state, action) => {
+      const { bridgeId, versionId } = action.payload;
+      if(versionId){
+        
+      // Initialize the state.bridgeVersionMapping if it doesn't exist
+      if (!state.bridgeVersionMapping) {
+        state.bridgeVersionMapping = {};
+      }
+      
+      // Initialize the bridgeId path if it doesn't exist
+      if (!state.bridgeVersionMapping[bridgeId]) {
+        state.bridgeVersionMapping[bridgeId] = {};
+      }
+      
+      // Verify if paths exist in state
+      
+      // Create a backup regardless, even if the path doesn't exist - we'll create an empty object
+      // This ensures we can roll back to 'nothing' if needed
+      const dataToBackup = JSON.parse(JSON.stringify(state.bridgeVersionMapping[bridgeId][versionId])) || {};
+      
+      // Ensure bridgeBackup is actually created and populated
+      
+      state.bridgeVersionBackup = {
+        bridgeId,
+          versionId,
+          data: dataToBackup
+        };
+      }
+      // In the else branch for bridge updates:
+      else {
+        // For bridge backup (not version), we back up from allBridgesMap directly
+        const dataToBackup = JSON.parse(JSON.stringify(state.allBridgesMap[bridgeId])) || {};
+
+        state.bridgeVersionBackup = {
+          bridgeId,
+          data: dataToBackup
+        };
+      }
+    },
+
+    // Rollback to previous state if an operation fails
+    bridgeVersionRollBackReducer: (state, action) => {
+      const { bridgeId, versionId } = action.payload;
+      if(versionId){
+        
+      
+      // Initialize state paths if they don't exist
+      if (!state.bridgeVersionMapping) {
+        state.bridgeVersionMapping = {};
+      }
+      
+      if (!state.bridgeVersionMapping[bridgeId]) {
+        state.bridgeVersionMapping[bridgeId] = {};
+      }
+      
+      // Ensure we have a backup to restore from
+      if (state.bridgeVersionBackup && 
+          state.bridgeVersionBackup.bridgeId === bridgeId && 
+          state.bridgeVersionBackup.versionId === versionId) {
+        
+        // Restore the version state from backup (using a deep copy)
+          state.bridgeVersionMapping[bridgeId][versionId] = JSON.parse(JSON.stringify(state.bridgeVersionBackup?.data));
+
+          // Clear the backup after restoring
+          state.bridgeVersionBackup = null;
+        }
+      }
+      // In the else branch for bridge rollbacks:
+      else {
+        // Check if we have a valid backup for this bridge
+        if (state.bridgeVersionBackup && state.bridgeVersionBackup.bridgeId === bridgeId) {
+          state.allBridgesMap[bridgeId] = JSON.parse(JSON.stringify(state.bridgeVersionBackup.data));
+          state.bridgeVersionBackup = null;
+        } 
+      }
     },
     updateBridgeVersionReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
@@ -286,6 +365,8 @@ export const {
   updateBridgeActionReducer,
   updateFunctionReducer,
   optimizePromptReducer,
+  backupBridgeVersionReducer,
+  bridgeVersionRollBackReducer,
   updateTriggerDataReducer,
   removeFunctionDataReducer,
   webhookURLForBatchAPIReducer,

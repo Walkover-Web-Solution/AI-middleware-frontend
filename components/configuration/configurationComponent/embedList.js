@@ -34,7 +34,7 @@ const EmbedList = ({ params }) => {
     const [function_name, setFunctionName] = useState("");
     const [variablesPath, setVariablesPath] = useState({});
     const dispatch = useDispatch();
-    const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path } = useCustomSelector((state) => {
+    const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, versionData } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -50,6 +50,7 @@ const EmbedList = ({ params }) => {
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
             variables_path: versionData?.variables_path || {},
+            versionData: versionData
         };
     });
 
@@ -69,6 +70,7 @@ const EmbedList = ({ params }) => {
                 bridgeId: params.id,
                 versionId: params.version,
                 dataToSend: {
+                    ...versionData,
                     functionData: {
                         function_id: functionId,
                         function_operation: "1"
@@ -84,6 +86,7 @@ const EmbedList = ({ params }) => {
                 bridgeId: params.id,
                 versionId: params.version,
                 dataToSend: {
+                    ...versionData,
                     functionData: {
                         function_id: functionId,
                         function_name: function_name,
@@ -111,7 +114,7 @@ const EmbedList = ({ params }) => {
                 updateBridgeVersionAction({
                     bridgeId: params.id,
                     versionId: params.version,
-                    dataToSend: { variables_path: { [function_name]: variablesPath } },
+                    dataToSend: { ...versionData, variables_path: { [function_name]: variablesPath } },
                 })
             );
         }
