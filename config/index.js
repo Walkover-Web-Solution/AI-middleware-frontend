@@ -1135,7 +1135,6 @@ export const addNewModel = async(newModelObj) =>{
     return response;
   } catch (error) {
     throw error
-    toast.error(error?.response?.data?.error)
   }
 }
 export const deleteModel = async(dataToSend) =>{
