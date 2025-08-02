@@ -22,7 +22,6 @@ const Page = ({params}) => {
     const { modelInfo} = useCustomSelector((state) => ({
         modelInfo: state?.modelReducer?.serviceModels
     }));
-    console.log(modelInfo,"modelInfo")
 
 
     const findModelsWithOrgId = (data, parentKey = null, rootKey = null, results = []) => {
@@ -72,9 +71,6 @@ const Page = ({params}) => {
         }
         closeModal(MODAL_TYPE?.DELETE_MODAL)
         dispatch(deleteModelAction(dataToSend))
-          .then(result => {
-            console.log('Delete model success:', result);
-          })
           .catch(error => {
             if(error.response?.data?.usageDetails)
             {

@@ -474,7 +474,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     >
                       <span className="flex items-center gap-3">
                         <CircleAlertIcon className="w-4 h-4 text-warning" />
-                        <span className="font-medium">Retry Attempt with {item?.model}</span>
+                        <span className="font-medium">Retry Attempt with {item?.fallback_model}</span>
                       </span>
                       <ChevronDownIcon className="w-4 h-4 transform peer-checked:rotate-180 transition-transform" />
                     </label>
