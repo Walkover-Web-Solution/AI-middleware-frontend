@@ -7,7 +7,6 @@ export const getAllAgentAction = () => async (dispatch) => {
   try {
     const response = await getAllAgentsApi();
     if (response) {
-      debugger
       dispatch(getAllAgentReducer({ data: response?.data}))
     }
   } catch (error) {
@@ -17,10 +16,11 @@ export const getAllAgentAction = () => async (dispatch) => {
 };
 
 export const publicAgentLoginAction = () => async (dispatch) => {
+  const user_id = localStorage.getItem('publicAgentUserId')
   try {
-    const response = await publicAgentLoginApi();
+    const response = await publicAgentLoginApi(user_id != "undefined" &&  user_id ? user_id : {});
     localStorage.setItem('AgentToken', response?.data?.token)
-    localStorage.setItem('AgentUserId',response?.data?.userid)
+    localStorage.setItem('publicAgentUserId',response?.data?.user_id)
     if (response) {
         dispatch(getPublicAgentDataReducer({ data: response?.data}))
     }
@@ -31,10 +31,11 @@ export const publicAgentLoginAction = () => async (dispatch) => {
 };
 
 export const privateAgentLoginAction = () => async (dispatch) => {
+  const user_id = localStorage.getItem('privateAgentUserId')
   try {
-    const response = await privateAgentLoginApi();
+    const response = await privateAgentLoginApi(user_id != "undefined" &&  user_id ? user_id : {});
     localStorage.setItem('AgentToken', response?.data?.token)
-    localStorage.setItem('AgentUserId',response?.data?.userid)
+    localStorage.setItem('privateAgentUserId',response?.data?.user_id)
     if (response) {
         dispatch(getPrivateAgentDataReducer({ data: response?.data}))
     }

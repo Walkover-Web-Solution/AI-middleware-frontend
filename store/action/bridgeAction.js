@@ -165,6 +165,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
   } catch (error) {
     console.error(error);
     dispatch(isError());
+    throw error;
   }
 };
 

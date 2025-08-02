@@ -18,7 +18,8 @@ export const addNewModelAction = ({ service, type, newModelObject }) => async (d
     dispatch(addNewModelReducer({ service, type, modelData: data?.data?.result }))
     return data;
   } catch (error) {
-    console.error(error)
+    console.error(error,"error")
+    throw error
   }
 }
 export const deleteModelAction = (dataToSend) => async (dispatch) => {

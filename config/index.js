@@ -118,6 +118,7 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
   } catch (error) {
     console.error(error)
     toast.error(error?.response?.data?.error);
+    throw error;
   }
 }
 
@@ -1133,8 +1134,7 @@ export const addNewModel = async(newModelObj) =>{
     const response = await axios.post(`${URL}/modelConfiguration/user`, newModelObj)
     return response;
   } catch (error) {
-    console.log(error)
-    toast.error(error?.response?.data?.error)
+    throw error
   }
 }
 export const deleteModel = async(dataToSend) =>{
@@ -1143,9 +1143,8 @@ export const deleteModel = async(dataToSend) =>{
     toast.success(response?.data?.message)
     return response;
   } catch (error) {
-    console.log(error)
-    toast.error(error?.response?.data?.error || error?.response?.data?.message )
     throw error
+    toast.error(error?.response?.data?.error || error?.response?.data?.message )
   }
 }
 
@@ -1159,9 +1158,9 @@ export const getAllAgentsApi = async () => {
   }
 }
 
-export const publicAgentLoginApi = async () =>{
+export const publicAgentLoginApi = async (user_id) =>{
   try {
-    const repsonse = await axios.post(`${PYTHON_URL}/publicAgent/public/login`)
+    const repsonse = await axios.post(`${PYTHON_URL}/publicAgent/public/login`, {user_id})
     return repsonse;
   } catch (error) {
     console.error(error)
@@ -1169,9 +1168,9 @@ export const publicAgentLoginApi = async () =>{
   }
 }
   
-export const privateAgentLoginApi = async () => {
+export const privateAgentLoginApi = async (user_id) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/publicAgent/login`)
+    const response = await axios.post(`${PYTHON_URL}/publicAgent/login`, {user_id})
     return response;
   } catch (error) {
     console.error(error)

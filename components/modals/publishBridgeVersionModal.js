@@ -17,6 +17,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [isPublicAgent, setIsPublicAgent] = useState(false);
+  const [error,setError] = useState(null)
 
   const { bridge } = useCustomSelector((state) => ({
     bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config
@@ -92,11 +93,18 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
           }
         };
 
-        await dispatch(updateBridgeAction({
-          bridgeId: params?.id,
-          dataToSend: payload
-        }));
-
+        try {
+          const response = await dispatch(updateBridgeAction({
+            bridgeId: params?.id,
+            dataToSend: payload
+          }));
+        } catch (error) {
+          if (error?.response?.data?.detail?.includes('DuplicateKey')) {
+            setError({"error": 'This slug name already exists. Please choose a different one.'});
+          }
+          setIsLoading(false);
+          return;
+        }
         toast.success("Configuration saved successfully!");
       }
 
@@ -159,7 +167,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
         </div>
 
         {/* Public Agent Toggle */}
-        {/* <div className="bg-base-200/30 p-4 rounded-lg mb-6">
+        <div className="bg-base-200/30 p-4 rounded-lg mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Globe className="h-5 w-5 text-primary" />
@@ -181,7 +189,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
               </label>
             </div>
           </div>
-        </div> */}
+        </div>
 
         {/* Public Agent Configuration Form */}
         {isPublicAgent && (
@@ -206,11 +214,16 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
                   type="text"
                   name="url_slugname"
                   placeholder="Enter a unique slug name"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full ${error?.error ? 'input-error' : ''}`}
                   value={formData.url_slugname}
                   onChange={handleChange}
                   required
                 />
+                {error?.error && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">{error?.error}</span>
+                  </label>
+                )}
               </div>
 
               {/* Description Field */}

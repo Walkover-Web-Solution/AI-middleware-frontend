@@ -393,7 +393,6 @@ const Navbar = ({ isEmbedUser }) => {
         </div>
 
         {/* Tabs section */}
-        {console.log(showHistory, isEmbedUser)}
         {(isEmbedUser && showHistory || !isEmbedUser) && 
         <div className="border-t border-base-200">
           <div className="px-1 h-10">

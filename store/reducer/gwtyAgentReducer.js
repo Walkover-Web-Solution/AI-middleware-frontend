@@ -10,7 +10,6 @@ export const gtwyAgentReducer = createSlice({
   initialState,
   reducers: {
     getAllAgentReducer: (state, action) => {
-      debugger
       const agent = action.payload.data?.data;
       state.gwtyAgent.publicAgent = agent.filter(item => item.page_config.availability === 'public');
       state.gwtyAgent.privateAgent = agent.filter(item => item.page_config.availability === 'private');
@@ -23,6 +22,13 @@ export const gtwyAgentReducer = createSlice({
     getPrivateAgentDataReducer: (state, action) => {
       state.gwtyAgent.privateAgentData = action.payload.data;
       state.loading = false;
+    },
+    clearAgentsData: (state) => {
+      state.gwtyAgent.publicAgent = [];
+      state.gwtyAgent.privateAgent = [];
+      state.gwtyAgent.publicAgentData = {};
+      state.gwtyAgent.privateAgentData = {};
+      state.loading = false;
     }
   }
 });
@@ -30,7 +36,8 @@ export const gtwyAgentReducer = createSlice({
 export const {
   getAllAgentReducer,
   getPublicAgentDataReducer,
-  getPrivateAgentDataReducer
+  getPrivateAgentDataReducer,
+  clearAgentsData
 } = gtwyAgentReducer.actions;
 
 export default gtwyAgentReducer.reducer;

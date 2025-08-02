@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import Modal from '../UI/Modal';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { addNewModelAction } from '@/store/action/modelAction';
+import { addNewModelAction, getModelAction } from '@/store/action/modelAction';
 import { useDispatch } from 'react-redux';
 
 // --- Placeholder Examples for UI ---
@@ -157,7 +157,7 @@ export default function AddNewModelModal() {
         }
         return acc;
     }, {});
-
+    const [error, setError] = useState({});
     const initialService = SERVICE_CONFIGS.openai ? 'openai' : Object.keys(SERVICE_CONFIGS)[0];
     const [config, setConfig] = useState(SERVICE_CONFIGS[initialService] || {});
     const [selectedKeys, setSelectedKeys] = useState(Object.keys(SERVICE_CONFIGS[initialService]?.configuration?.additional_parameters || {}));
@@ -176,7 +176,7 @@ export default function AddNewModelModal() {
         setSelectedKeys(Object.keys(initialConfig.configuration.additional_parameters || {}));
         setExpandedKeys(new Set());
     };
-
+  
     /**
      * CORRECTED: This function now prepares the API payload with a flat
      * configuration structure, as requested.
@@ -216,7 +216,7 @@ export default function AddNewModelModal() {
         }
 
         // Construct the final object with the flattened configuration
-        const finalConfig = {
+        let finalConfig = {
             ...config,
             configuration: {
                 ...baseConfiguration, // Spread base properties like 'model'
@@ -224,7 +224,14 @@ export default function AddNewModelModal() {
             },
             outputConfig: { ...newOutPutConfig }
         };
-        return finalConfig;
+        
+        return {
+            ...finalConfig,
+            configuration: {
+                ...finalConfig.configuration,
+                model: { ...finalConfig.configuration?.model, level: 1 }
+            }
+        };
     };
 
 
@@ -450,15 +457,33 @@ export default function AddNewModelModal() {
     });
 
     const handleAddModel = async () => {
-        const refactored = getCleanedConfigForApi()
-        dispatch(addNewModelAction({ service: config?.service, type: config?.validationConfig?.type, newModelObject: refactored }))
-            .then((data) => {
-                if (data?.data?.success) {
-                    closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL);
-                    resetFormToDefault();
-                    toast.success("Model added successfully!");
-                }
+        setError({}); // Clear previous errors
+        const refactored = getCleanedConfigForApi();
+        
+        try {
+            const result = await dispatch(addNewModelAction({ 
+                service: config?.service, 
+                type: config?.validationConfig?.type, 
+                newModelObject: refactored 
+            }));
+            
+            if (result?.data?.success) {
+                closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL);
+                setTimeout(() => dispatch(getModelAction({ service: config?.service })), 5000);
+                resetFormToDefault();
+            } else {
+                // Handle server response with error but not exception
+                setError({
+                    message: result?.data?.message || "Failed to add model",
+                    details: result?.data?.error || {}
+                });
+            }
+        } catch (error) {
+            setError({
+                message: error?.response?.data?.message || error?.message || "An error occurred while adding the model",
+                details: error?.response?.data?.error || {}
             });
+        }
     }
 
     // --- Validation logic for the save button ---
@@ -607,6 +632,7 @@ export default function AddNewModelModal() {
                                                     <label className="label"><span className="label-text">Description<span className="text-error">*</span></span></label>
                                                     <textarea value={config.validationConfig.specification.description}
                                                         onChange={e => handleSpecificationChange('description', e.target.value)}
+                                                        onBlur={e => handleSpecificationChange('description', e.target.value.trim())}
                                                         className="textarea textarea-bordered w-full" rows={3}
                                                         placeholder={PLACEHOLDERS[config.service]?.description}></textarea>
                                                 </div>
@@ -614,13 +640,15 @@ export default function AddNewModelModal() {
                                                     <label className="label"><span className="label-text">Knowledge Cutoff<span className="text-error">*</span></span></label>
                                                     <input type="text" value={config.validationConfig.specification.knowledge_cutoff}
                                                         onChange={e => handleSpecificationChange('knowledge_cutoff', e.target.value)}
+                                                        onBlur={e => handleSpecificationChange('knowledge_cutoff', e.target.value.trim())}
                                                         className="input input-bordered w-full"
                                                         placeholder={PLACEHOLDERS[config.service]?.knowledge_cutoff} />
                                                 </div>
                                                 <div className="form-control">
-                                                    <label className="label"><span className="label-text">Use Cases<span className="text-error">*</span></span></label>
+                                                    <label className="label"><span className="label-text">Use Case</span></label>
                                                     <textarea value={(config.validationConfig.specification.usecase || []).join('\n')}
                                                         onChange={e => handleSpecificationChange('usecase', e.target.value.split('\n').filter(Boolean))}
+                                                        onBlur={e => handleSpecificationChange('usecase', e.target.value.trim().split('\n'))}
                                                         className="textarea textarea-bordered w-full"
                                                         rows={3}
                                                         placeholder={PLACEHOLDERS[config.service]?.usecase} />
@@ -675,6 +703,13 @@ export default function AddNewModelModal() {
                                     </div>
                                 </div>
                                 <div className="card-actions justify-end border-t border-base-200 pt-6 mt-8">
+                                {error?.message && (
+                                    <div className="w-full mb-4">
+                                        <div className="error-container p-4 bg-red-50 border-l-4 border-red-500 rounded-md shadow-sm">
+                                           {error?.message}
+                                        </div>
+                                    </div>
+                                )}
                                     <button type="button" onClick={() => closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL)} className="btn">
                                         Close
                                     </button>

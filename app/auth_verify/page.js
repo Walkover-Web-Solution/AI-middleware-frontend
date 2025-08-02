@@ -80,7 +80,6 @@ const Page = ({ params }) => {
     const handleSwitchOrg = useCallback(async (id) => {
         try {
           const response = await switchOrg(id);
-          console.log(response)
         } catch (error) {
           console.error("Error switching organization", error);
         }

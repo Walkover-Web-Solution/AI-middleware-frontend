@@ -246,7 +246,6 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
         config: configuration
       }
       await dispatch(updateIntegrationDataAction(data?.org_id, dataToSend));
-      console.log('Configuration saved successfully:', configuration);
     } catch (error) {
       console.error('Failed to save configuration:', error);
     } finally {
