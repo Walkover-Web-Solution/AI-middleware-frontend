@@ -1160,9 +1160,9 @@ export const getAllAgentsApi = async () => {
   }
 }
 
-export const publicAgentLoginApi = async () =>{
+export const publicAgentLoginApi = async (user_id) =>{
   try {
-    const repsonse = await axios.post(`${PYTHON_URL}/publicAgent/public/login`)
+    const repsonse = await axios.post(`${PYTHON_URL}/publicAgent/public/login`, {user_id})
     return repsonse;
   } catch (error) {
     console.error(error)
@@ -1170,9 +1170,9 @@ export const publicAgentLoginApi = async () =>{
   }
 }
   
-export const privateAgentLoginApi = async () => {
+export const privateAgentLoginApi = async (user_id) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/publicAgent/login`)
+    const response = await axios.post(`${PYTHON_URL}/publicAgent/login`, {user_id})
     return response;
   } catch (error) {
     console.error(error)

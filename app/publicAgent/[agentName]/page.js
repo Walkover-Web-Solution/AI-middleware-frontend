@@ -24,7 +24,7 @@ const Page = ({ params }) => {
   }, [isPublicAgent, publicAgentData, privateAgentData]);
 
   useEffect(() => {
-    if (!localStorage.getItem('AgentToken')) {
+    if (!localStorage.getItem('AgentToken') && !localStorage.getItem('publicAgentUserId')) {
       dispatch(clearAgentsData())
       dispatch(publicAgentLoginAction()).then(() => {
         dispatch(getAllAgentAction()).then(() => {
@@ -37,6 +37,14 @@ const Page = ({ params }) => {
   const onSelectAgent = (agentId) => {
     router.push(`/publicAgent/${agentId}`);
   };
+
+  useEffect(() => {
+    if(localStorage.getItem('AgentToken')) {
+      dispatch(getAllAgentAction()).then(() => {
+        router.push(`/publicAgent/${params.agentName}`)
+      })
+    }
+  }, []);
 
   const handleBack = () => {
     router.push('/publicAgent');

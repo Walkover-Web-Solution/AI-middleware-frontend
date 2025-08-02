@@ -26,6 +26,7 @@ const PrivateAgent = ({ agents, searchTerm, setSearchTerm }) => {
                     <button
                         onClick={() => {
                             localStorage.removeItem('publicAgentProxyToken');
+                            localStorage.removeItem('privateAgentUserId');
                             window.location.reload();
                         }}
                         className="btn text-red-500 hover:bg-red-50"
