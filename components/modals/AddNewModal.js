@@ -157,7 +157,7 @@ export default function AddNewModelModal() {
         }
         return acc;
     }, {});
-
+    const [error,setError]=useState({});
     const initialService = SERVICE_CONFIGS.openai ? 'openai' : Object.keys(SERVICE_CONFIGS)[0];
     const [config, setConfig] = useState(SERVICE_CONFIGS[initialService] || {});
     const [selectedKeys, setSelectedKeys] = useState(Object.keys(SERVICE_CONFIGS[initialService]?.configuration?.additional_parameters || {}));
@@ -458,6 +458,7 @@ export default function AddNewModelModal() {
 
     const handleAddModel = async () => {
         const refactored = getCleanedConfigForApi()
+        try{
         dispatch(addNewModelAction({ service: config?.service, type: config?.validationConfig?.type, newModelObject: refactored }))
             .then((data) => {
                 if (data?.data?.success) {
@@ -465,7 +466,16 @@ export default function AddNewModelModal() {
                     resetFormToDefault();
                     toast.success("Model added successfully!");
                 }
+                else{
+                    console.log(data,"data")
+                   setError(data);
+                }
             });
+        }
+        catch(error){
+            console.log(error,"kdsjfhsjdkjfslkdjkl")
+            setError(error);
+        }
     }
 
     // --- Validation logic for the save button ---
