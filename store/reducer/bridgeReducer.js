@@ -122,7 +122,6 @@ export const bridgeReducer = createSlice({
       const { bridgeId, versionId } = action.payload;
       if(versionId){
         
-      console.log("backupBridgeVersionReducer", state.bridgeVersionMapping);
       // Initialize the state.bridgeVersionMapping if it doesn't exist
       if (!state.bridgeVersionMapping) {
         state.bridgeVersionMapping = {};
@@ -149,7 +148,6 @@ export const bridgeReducer = createSlice({
       }
       // In the else branch for bridge updates:
       else {
-        console.log("[backupBridgeVersionReducer] Bridge backup for:", bridgeId);
         // For bridge backup (not version), we back up from allBridgesMap directly
         const dataToBackup = JSON.parse(JSON.stringify(state.allBridgesMap[bridgeId])) || {};
 
@@ -189,15 +187,11 @@ export const bridgeReducer = createSlice({
       }
       // In the else branch for bridge rollbacks:
       else {
-        console.log("[bridgeVersionRollBackReducer] Bridge rollback for:", bridgeId);
         // Check if we have a valid backup for this bridge
         if (state.bridgeVersionBackup && state.bridgeVersionBackup.bridgeId === bridgeId) {
           state.allBridgesMap[bridgeId] = JSON.parse(JSON.stringify(state.bridgeVersionBackup.data));
           state.bridgeVersionBackup = null;
-          console.log("[bridgeVersionRollBackReducer] Bridge rollback completed successfully");
-        } else {
-          console.log("[bridgeVersionRollBackReducer] No valid backup found for bridge:", bridgeId);
-        }
+        } 
       }
     },
     updateBridgeVersionReducer: (state, action) => {
