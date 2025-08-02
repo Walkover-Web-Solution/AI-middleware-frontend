@@ -124,11 +124,12 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
 
 export const updateBridgeVersionApi = async ({ versionId, dataToSend }) => {
   try {
-    const response = await axios.put(`${PYTHON_URL}/bridge/versions/update/${versionId}`, dataToSend);
+    const response = await axios.put(`${PYTHON_URL}/bridge/versions/sdfsdupdate/${versionId}`, dataToSend);
     return response?.data
   } catch (error) {
     console.error(error)
     toast.error(error?.response?.data?.error);
+    throw error
   }
 }
 
