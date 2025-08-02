@@ -157,7 +157,7 @@ export default function AddNewModelModal() {
         }
         return acc;
     }, {});
-
+    const [error, setError] = useState({});
     const initialService = SERVICE_CONFIGS.openai ? 'openai' : Object.keys(SERVICE_CONFIGS)[0];
     const [config, setConfig] = useState(SERVICE_CONFIGS[initialService] || {});
     const [selectedKeys, setSelectedKeys] = useState(Object.keys(SERVICE_CONFIGS[initialService]?.configuration?.additional_parameters || {}));
@@ -176,7 +176,7 @@ export default function AddNewModelModal() {
         setSelectedKeys(Object.keys(initialConfig.configuration.additional_parameters || {}));
         setExpandedKeys(new Set());
     };
-
+  
     /**
      * CORRECTED: This function now prepares the API payload with a flat
      * configuration structure, as requested.
@@ -457,15 +457,32 @@ export default function AddNewModelModal() {
     });
 
     const handleAddModel = async () => {
-        const refactored = getCleanedConfigForApi()
-        dispatch(addNewModelAction({ service: config?.service, type: config?.validationConfig?.type, newModelObject: refactored }))
-            .then((data) => {
-                if (data?.data?.success) {
-                    closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL);
-                    resetFormToDefault();
-                    toast.success("Model added successfully!");
-                }
+        setError({}); // Clear previous errors
+        const refactored = getCleanedConfigForApi();
+        
+        try {
+            const result = await dispatch(addNewModelAction({ 
+                service: config?.service, 
+                type: config?.validationConfig?.type, 
+                newModelObject: refactored 
+            }));
+            
+            if (result?.data?.success) {
+                closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL);
+                resetFormToDefault();
+            } else {
+                // Handle server response with error but not exception
+                setError({
+                    message: result?.data?.message || "Failed to add model",
+                    details: result?.data?.error || {}
+                });
+            }
+        } catch (error) {
+            setError({
+                message: error?.response?.data?.message || error?.message || "An error occurred while adding the model",
+                details: error?.response?.data?.error || {}
             });
+        }
     }
 
     // --- Validation logic for the save button ---
@@ -682,6 +699,13 @@ export default function AddNewModelModal() {
                                     </div>
                                 </div>
                                 <div className="card-actions justify-end border-t border-base-200 pt-6 mt-8">
+                                {error?.message && (
+                                    <div className="w-full mb-4">
+                                        <div className="error-container p-4 bg-red-50 border-l-4 border-red-500 rounded-md shadow-sm">
+                                           {error?.message}
+                                        </div>
+                                    </div>
+                                )}
                                     <button type="button" onClick={() => closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL)} className="btn">
                                         Close
                                     </button>

@@ -1134,8 +1134,7 @@ export const addNewModel = async(newModelObj) =>{
     const response = await axios.post(`${URL}/modelConfiguration/user`, newModelObj)
     return response;
   } catch (error) {
-    console.log(error)
-    toast.error(error?.response?.data?.error)
+    throw error
   }
 }
 export const deleteModel = async(dataToSend) =>{
@@ -1144,9 +1143,8 @@ export const deleteModel = async(dataToSend) =>{
     toast.success(response?.data?.message)
     return response;
   } catch (error) {
-    console.log(error)
-    toast.error(error?.response?.data?.error || error?.response?.data?.message )
     throw error
+    toast.error(error?.response?.data?.error || error?.response?.data?.message )
   }
 }
 
