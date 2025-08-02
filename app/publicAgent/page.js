@@ -36,14 +36,11 @@ const Page = () => {
   }, [])
 
   useEffect(() => {
-    if(!localStorage.getItem('publicAgentProxyToken')){
-      dispatch(publicAgentLoginAction())
-    }
-  }, []);
-
-  useEffect(() => {
     if(!localStorage.getItem('publicAgentProxyToken') && !localStorage.getItem('AgentToken')){
-      dispatch(clearAgentsData())
+       dispatch(clearAgentsData())
+        dispatch(publicAgentLoginAction()).then(() => {
+          dispatch(getAllAgentAction())
+        })
     }
   }, []);
 
