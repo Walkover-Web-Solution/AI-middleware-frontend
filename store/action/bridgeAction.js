@@ -158,11 +158,31 @@ export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) =
 
 export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch) => {
   try {
+    // Create backup of the current bridge state
+    dispatch(backupBridgeVersionReducer({ bridgeId }));
+    
+    // Optimistic update - must use updateBridgeReducer, not updateBridgeVersionReducer
+    dispatch(updateBridgeReducer({
+      bridges: {
+        _id: bridgeId,
+        ...dataToSend,
+        configuration: dataToSend.configuration || {}
+      },
+      functionData: dataToSend?.functionData || null
+    }));
+    
+    // Set loading state after optimistic update
     dispatch(isPending());
+    
+    // API call
     const data = await updateBridge({ bridgeId, dataToSend });
+    
+    // Update with actual response data
     dispatch(updateBridgeReducer({ bridges: data.data.bridge, functionData: dataToSend?.functionData || null }));
     return { success: true };
   } catch (error) {
+    // Rollback on failure
+    dispatch(bridgeVersionRollBackReducer({ bridgeId }));
     console.error(error);
     dispatch(isError());
     throw error;
