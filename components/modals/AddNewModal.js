@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import Modal from '../UI/Modal';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
-import { addNewModelAction } from '@/store/action/modelAction';
+import { addNewModelAction, getModelAction } from '@/store/action/modelAction';
 import { useDispatch } from 'react-redux';
 
 // --- Placeholder Examples for UI ---
@@ -469,6 +469,7 @@ export default function AddNewModelModal() {
             
             if (result?.data?.success) {
                 closeModal(MODAL_TYPE?.ADD_NEW_MODEL_MODAL);
+                setTimeout(() => dispatch(getModelAction({ service: config?.service })), 5000);
                 resetFormToDefault();
             } else {
                 // Handle server response with error but not exception
@@ -631,6 +632,7 @@ export default function AddNewModelModal() {
                                                     <label className="label"><span className="label-text">Description<span className="text-error">*</span></span></label>
                                                     <textarea value={config.validationConfig.specification.description}
                                                         onChange={e => handleSpecificationChange('description', e.target.value)}
+                                                        onBlur={e => handleSpecificationChange('description', e.target.value.trim())}
                                                         className="textarea textarea-bordered w-full" rows={3}
                                                         placeholder={PLACEHOLDERS[config.service]?.description}></textarea>
                                                 </div>
@@ -638,13 +640,15 @@ export default function AddNewModelModal() {
                                                     <label className="label"><span className="label-text">Knowledge Cutoff<span className="text-error">*</span></span></label>
                                                     <input type="text" value={config.validationConfig.specification.knowledge_cutoff}
                                                         onChange={e => handleSpecificationChange('knowledge_cutoff', e.target.value)}
+                                                        onBlur={e => handleSpecificationChange('knowledge_cutoff', e.target.value.trim())}
                                                         className="input input-bordered w-full"
                                                         placeholder={PLACEHOLDERS[config.service]?.knowledge_cutoff} />
                                                 </div>
                                                 <div className="form-control">
-                                                    <label className="label"><span className="label-text">Use Cases<span className="text-error">*</span></span></label>
+                                                    <label className="label"><span className="label-text">Use Case</span></label>
                                                     <textarea value={(config.validationConfig.specification.usecase || []).join('\n')}
                                                         onChange={e => handleSpecificationChange('usecase', e.target.value.split('\n').filter(Boolean))}
+                                                        onBlur={e => handleSpecificationChange('usecase', e.target.value.trim().split('\n'))}
                                                         className="textarea textarea-bordered w-full"
                                                         rows={3}
                                                         placeholder={PLACEHOLDERS[config.service]?.usecase} />
