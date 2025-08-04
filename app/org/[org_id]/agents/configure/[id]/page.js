@@ -12,6 +12,7 @@ import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
 import { updateTitle } from "@/utils/utility";
 import AgentSetupGuide from "@/components/AgentSetupGuide";
+import { useRouter } from "next/navigation";
 
 export const runtime = 'edge';
 
@@ -19,6 +20,7 @@ const Page = ({ searchParams }) => {
   const apiKeySectionRef = useRef(null);
   const promptTextAreaRef = useRef(null);
   const params = searchParams;
+  const router = useRouter();
   const mountRef = useRef(false);
   const dispatch = useDispatch();
   const [isDesktop, setIsDesktop] = useState(false);
@@ -28,13 +30,15 @@ const Page = ({ searchParams }) => {
   // Ref for the main container to calculate percentage-based width
   const containerRef = useRef(null); 
 
-  const { bridgeType, versionService, bridgeName } = useCustomSelector((state) => {
+  const { bridgeType, versionService, bridgeName, allbridges} = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+    const allbridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs;
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
       bridgeType: bridgeData?.bridgeType,
       versionService: versionData?.service,
       bridgeName: bridgeData?.name,
+      allbridges
     };
   });
 
@@ -61,15 +65,28 @@ const Page = ({ searchParams }) => {
   
   // Data fetching and other effects...
   useEffect(() => {
-    dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
-    return () => {
-      try {
-        if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
-          window.handleclose();
-        }
-      } catch (error) {
-        console.error("Error in handleclose:", error);
+    (async () => {
+      const agentName = allbridges?.find((bridge) => bridge._id === params?.id)
+      if (!agentName) {
+        router.push(`/org/${params?.org_id}/agents`);
+        return
       }
+      try {
+        await dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
+      } catch (error) {
+        console.error("Error in getSingleBridgesAction:", error);
+      }
+    })();
+    return () => {
+      (async () => {
+        try {
+          if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
+            await window.handleclose();
+          }
+        } catch (error) {
+          console.error("Error in handleclose:", error);
+        }
+      })();
     };
   }, []);
 

@@ -26,7 +26,7 @@ export const getSingleMessage = async ({ bridge_id, message_id }) => {
     return messageData.data.system_prompt
   } catch (error) {
     console.error(error)
-    throw new Error(error)
+    throw error
   }
 }
 
@@ -35,8 +35,11 @@ export const getSingleBridge = async (bridgeId) => {
     const response = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/${bridgeId}`)
     return response
   } catch (error) {
-    console.error(error)
-    throw new Error(error)
+    if (error.response) {
+      throw error.response;
+    } else {
+      throw error;
+    }
   }
 }
 
