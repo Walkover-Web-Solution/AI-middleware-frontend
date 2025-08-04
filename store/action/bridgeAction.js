@@ -13,6 +13,7 @@ export const getSingleBridgesAction = ({ id, version }) => async (dispatch, getS
   } catch (error) {
     dispatch(isError())
     console.error(error);
+    throw error.response;
   }
 };
 

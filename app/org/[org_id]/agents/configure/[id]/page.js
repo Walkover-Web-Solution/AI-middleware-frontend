@@ -72,15 +72,28 @@ const Page = ({ searchParams }) => {
   
   // Data fetching and other effects...
   useEffect(() => {
-    dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
-    return () => {
-      try {
-        if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
-          window.handleclose();
-        }
-      } catch (error) {
-        console.error("Error in handleclose:", error);
+    (async () => {
+      const agentName = allbridges?.find((bridge) => bridge._id === params?.id)
+      if (!agentName) {
+        router.push(`/org/${params?.org_id}/agents`);
+        return
       }
+      try {
+        await dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
+      } catch (error) {
+        console.error("Error in getSingleBridgesAction:", error);
+      }
+    })();
+    return () => {
+      (async () => {
+        try {
+          if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
+            await window.handleclose();
+          }
+        } catch (error) {
+          console.error("Error in handleclose:", error);
+        }
+      })();
     };
   }, []);
 
