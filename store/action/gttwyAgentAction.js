@@ -7,7 +7,6 @@ export const getAllAgentAction = () => async (dispatch) => {
   try {
     const response = await getAllAgentsApi();
     if (response) {
-      debugger
       dispatch(getAllAgentReducer({ data: response?.data}))
     }
   } catch (error) {

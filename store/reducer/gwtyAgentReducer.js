@@ -10,7 +10,6 @@ export const gtwyAgentReducer = createSlice({
   initialState,
   reducers: {
     getAllAgentReducer: (state, action) => {
-      debugger
       const agent = action.payload.data?.data;
       state.gwtyAgent.publicAgent = agent.filter(item => item.page_config.availability === 'public');
       state.gwtyAgent.privateAgent = agent.filter(item => item.page_config.availability === 'private');
