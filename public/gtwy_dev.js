@@ -701,7 +701,8 @@
             if (!iframeComponent) return;
             let encodedData = '';
             let tempData = data.data;
-            tempData.agent_id = this.state.tempDataToSend?.agent_id;
+            this.state.tempDataToSend?.agent_id && (tempData.agent_id = this.state.tempDataToSend?.agent_id);
+            this.state.tempDataToSend?.agent_name && (tempData.agent_name = this.state.tempDataToSend?.agent_name);
             encodedData = encodeURIComponent(JSON.stringify(tempData));
             const modifiedUrl = `${this.urls.gtwyUrl}?interfaceDetails=${encodedData}`;
             iframeComponent.src = modifiedUrl;
