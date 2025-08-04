@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReducer';
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
-import { createBridgeAction, getAllBridgesAction, getSingleBridgesAction } from '@/store/action/bridgeAction';
+import { createBridgeAction, getAllBridgesAction} from '@/store/action/bridgeAction';
 import { sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
