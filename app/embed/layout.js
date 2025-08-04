@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation';
 import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReducer';
@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction } from '@/store/action/bridgeAction'; 
 import { sendDataToParent, toBoolean } from '@/utils/utility';
+import { useCustomSelector } from '@/customHooks/customSelector';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -18,6 +19,10 @@ const Layout = ({ children }) => {
   const decodedParam = interfaceDetailsParam ? decodeURIComponent(interfaceDetailsParam) : null;
   const urlParamsObj = decodedParam ? JSON.parse(decodedParam) : {};
 
+  const {allbridges} = useCustomSelector((state) => ({
+    allbridges: state?.bridgeReducer?.org?.[urlParamsObj.org_id]?.orgs || {}
+  }));
+
   useEffect(() => {
     window.parent.postMessage({ type: 'gtwyLoaded', data: 'gtwyLoaded' }, '*');
   }, []);
@@ -25,6 +30,29 @@ const Layout = ({ children }) => {
   useEffect(() => {
     dispatch(getServiceAction())
   }, [])
+
+  const createAgent = useMemo(() => (agent_name, orgId) => {
+    setTimeout(async () => {
+      const agent = allbridges?.find(agent => agent?.name === agent_name);
+      if(agent){
+        router.push(`/org/${orgId}/agents/configure/${agent?._id}?version=${agent?.published_version_id? agent?.published_version_id : agent?.versions[0]}`);
+      }
+      else{
+        const dataToSend = {
+        service: "openai",
+        model: "gpt-4o", 
+        name: agent_name,
+        slugName: agent_name,
+        bridgeType: "api",
+        type: "chat"
+      };
+      dispatch(createBridgeAction({ dataToSend, orgid: orgId }, (response) => {
+      sendDataToParent("drafted", {name: response?.data?.bridge?.name, agent_id: response?.data?.bridge?._id}, "Agent created Successfully")
+      router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}`);
+      })).catch(() => setIsLoading(false));
+      }
+    }, 1000);
+  }, [allbridges]);
 
   useEffect(() => {
     if ((urlParamsObj.org_id && urlParamsObj.token && urlParamsObj.folder_id) || urlParamsObj?.hideHomeButton) {
@@ -46,8 +74,8 @@ const Layout = ({ children }) => {
           }
         });
       }
-
-      router.push(`org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
+      urlParamsObj?.agent_name && createAgent(urlParamsObj.agent_name, urlParamsObj.org_id);
+      urlParamsObj?.agent_id ? router.push(`/org/${urlParamsObj.org_id}/agents/configure/${urlParamsObj.agent_id}?isEmbedUser=true`) : router.push(`/org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
     }
   }, [urlParamsObj, router, dispatch]);
 
@@ -61,20 +89,9 @@ const Layout = ({ children }) => {
 
       // Handle agent creation/configuration
       if (messageData?.agent_name) {
-        const dataToSend = {
-          service: "openai",
-          model: "gpt-4o", 
-          name: messageData.agent_name,
-          slugName: messageData.agent_name,
-          bridgeType: "api",
-          type: "chat"
-        };
-        dispatch(createBridgeAction({ dataToSend, orgid: orgId }, (response) => {
-        sendDataToParent("drafted", {name: response?.data?.bridge?.name, agent_id: response?.data?.bridge?._id}, "Agent created Successfully")
-        router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}`);
-        })).catch(() => setIsLoading(false));
-
-      } else if (messageData?.agent_id) {
+        createAgent(messageData.agent_name, orgId);
+      }
+      else if (messageData?.agent_id) {
         try {
           setIsLoading(true);
           router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);

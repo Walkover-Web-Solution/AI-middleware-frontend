@@ -2,7 +2,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { updateVariables } from "@/store/reducer/bridgeReducer";
-import { updateOnBoardingDetails } from "@/utils/utility";
+import { sendDataToParent, } from "@/utils/utility";
 import { ChevronUpIcon, ChevronDownIcon, InfoIcon, TrashIcon } from "@/components/Icons";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -10,13 +10,15 @@ import OnBoarding from "./OnBoarding";
 import { ONBOARDING_VIDEOS } from "@/utils/enums";
 import TutorialSuggestionToast from "./tutorialSuggestoinToast";
 import InfoTooltip from "./InfoTooltip";
+import Protected from "./protected";
 
-const AddVariable = ({ params }) => {
+const AddVariable = ({ params, isEmbedUser }) => {
   const versionId = params.version;
-  const { variablesKeyValue, prompt, isFirstVariable,  } = useCustomSelector((state) => ({
+  const { variablesKeyValue, prompt, isFirstVariable, bridgeName } = useCustomSelector((state) => ({
     variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
     isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
+    bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
   }));
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
@@ -54,6 +56,7 @@ const AddVariable = ({ params }) => {
         'variables_state': Object.assign({}, ...filteredPairs)
       }
     }));
+   isEmbedUser && sendDataToParent("updated", { name: bridgeName, agent_id: params?.id, agent_version_id: params?.version, variables: variablesKeyValue }, "Agent Version Updated")
   }
 
   const extractVariablesFromPrompt = () => {
@@ -151,6 +154,7 @@ const AddVariable = ({ params }) => {
     };
     setKeyValuePairs(updatedPairs);
     dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
+    sendDataToParent("updated", { name: bridgeName, agent_id: params?.id, agent_version_id: params?.version, variables: updatedPairs}, "Agent Version Updated")
     updateVersionVariable(updatedPairs)
   };
 
@@ -197,6 +201,7 @@ const AddVariable = ({ params }) => {
     if (pairs.length > 0) {
       setKeyValuePairs(pairs);
       dispatch(updateVariables({ data: pairs, bridgeId: params.id, versionId }));
+      sendDataToParent("updated", { name: bridgeName, agent_id: params?.id, agent_version_id: params?.version, variables: pairs}, "Agent Version Updated")
       updateVersionVariable();
       if (areAllPairsValid(pairs)) {
         setError(false);
@@ -379,4 +384,4 @@ const AddVariable = ({ params }) => {
   );
 };
 
-export default AddVariable;
+export default Protected(AddVariable);
