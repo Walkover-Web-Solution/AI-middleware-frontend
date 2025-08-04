@@ -100,7 +100,7 @@ export const getAllBridgesAction = (onSuccess) => async (dispatch) => {
     const doctstar_embed_token=response?.data?.doctstar_embed_token;
 
 
-    if (onSuccess) onSuccess(response?.data?.bridge?.length)
+    if (onSuccess) onSuccess(response?.data?.bridge)
     dispatch(fetchAllBridgeReducer({ bridges: response?.data?.bridge, orgId: response?.data?.org_id, embed_token,doctstar_embed_token, alerting_embed_token, history_page_chatbot_token, triggerEmbedToken, average_response_time }));
 
     const integrationData = await integration(embed_token);
