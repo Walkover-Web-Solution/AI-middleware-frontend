@@ -66,6 +66,7 @@ const Page = ({ searchParams }) => {
   // Data fetching and other effects...
   useEffect(() => {
     (async () => {
+      debugger
       const agentName = allbridges?.find((bridge) => bridge._id === params?.id)
       if (!agentName) {
         router.push(`/org/${params?.org_id}/agents`);
