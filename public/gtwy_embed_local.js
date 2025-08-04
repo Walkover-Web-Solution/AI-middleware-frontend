@@ -39,7 +39,7 @@
                 return {};
             }
 
-            const attributes = ['embedToken', 'hideCloseButton', 'parentId', 'hideFullScreenButton', 'hideHeader', 'defaultOpen', 'slide'];
+            const attributes = ['embedToken', 'hideCloseButton', 'parentId', 'hideFullScreenButton', 'hideHeader', 'defaultOpen', 'slide', 'agent_id', 'agent_name','version_id'];
 
             return attributes.reduce((props, attr) => {
                 if (interfaceScript.hasAttribute(attr)) {
@@ -700,10 +700,11 @@
             const iframeComponent = document.getElementById('iframe-component-gtwyInterfaceEmbed');
             if (!iframeComponent) return;
             let encodedData = '';
-            encodedData = encodeURIComponent(JSON.stringify(data.data));
-            //console.log(encodedData);
+            let tempData = data.data;
+            this.state.tempDataToSend?.agent_id && (tempData.agent_id = this.state.tempDataToSend?.agent_id);
+            this.state.tempDataToSend?.agent_name && (tempData.agent_name = this.state.tempDataToSend?.agent_name);
+            encodedData = encodeURIComponent(JSON.stringify(tempData));
             const modifiedUrl = `${this.urls.gtwyUrl}?interfaceDetails=${encodedData}`;
-            //console.log(modifiedUrl);
             iframeComponent.src = modifiedUrl;
 
             this.config = { ...this.config, ...(data?.data?.config || {}) };
