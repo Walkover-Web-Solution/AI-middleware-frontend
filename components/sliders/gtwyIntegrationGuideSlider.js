@@ -6,6 +6,7 @@ import { generateGtwyAccessTokenAction } from '@/store/action/orgAction';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateIntegrationDataAction } from "@/store/action/integrationAction";
+import GenericTable from "../table/table";
 
 // Configuration Schema - easily extensible
 const CONFIG_SCHEMA = [
@@ -23,6 +24,14 @@ const CONFIG_SCHEMA = [
     label: 'Show Guide',
     description: 'Display helpful user guides',
     defaultValue: false,
+    section: 'Interface Options'
+  },
+  {
+    key: 'showAgentTypeOnCreateAgent',
+    type: 'toggle',
+    label: 'Show Agent Type on Create Agent',
+    description: 'Display agent type on create agent',
+    defaultValue: true,
     section: 'Interface Options'
   },
   {
@@ -298,6 +307,8 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     embedToken="Your embed token"
     src="https://app.gtwy.ai/gtwy.js"
     parentId="${configuration.parentId || 'Your_parent_id'}"
+    agent_id= 'Your_agent_id'
+    agent_name= 'Your_agent_name'
    ></script>`;
 
   const helperFunctions = `window.openGtwy() //To open GTWY;
@@ -319,6 +330,13 @@ window.addEventListener('message', (event) => {
     }
 });
 </script>`;
+
+const tableData = [
+  ['parentId', 'To open GTWY in a specific container'],
+   ['agent_id', 'To open agent in a specific agent'],
+   ['agent_name', 'To create an agent with a specific name, or redirect if the agent already exists.']
+]
+const tableHeaders = ['Key', 'Description'];
 
   return (
     <aside
@@ -469,6 +487,8 @@ window.addEventListener('message', (event) => {
                       <pre data-prefix=">"><code className="text-error">  embedToken=</code><code className="text-warning">"Your embed token"</code></pre>
                       <pre data-prefix=">"><code className="text-error">  src=</code><code className="text-warning">"https://app.gtwy.ai/gtwy.js"</code></pre>
                       <pre data-prefix=">"><code className="text-error">  parentId=</code><code className="text-warning">"{'Your_parent_id'}"</code></pre>
+                      <pre data-prefix=">"><code className="text-error">  agent_id=</code><code className="text-warning">"{'Your_agent_id'}"</code></pre>
+                      <pre data-prefix=">"><code className="text-error">  agent_name=</code><code className="text-warning">"{'Your_agent_name'}"</code></pre>
                       <pre data-prefix=">"><code className="text-error">&gt;&lt;/script&gt;</code></pre>
                     </div>
                     <CopyButton
@@ -478,6 +498,7 @@ window.addEventListener('message', (event) => {
                     />
                   </div>
                 </div>
+                <GenericTable data={tableData} headers={tableHeaders}/>
               </div>
             </div>
 

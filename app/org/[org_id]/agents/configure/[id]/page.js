@@ -41,14 +41,7 @@ const Page = ({ searchParams }) => {
       allbridges
     };
   });
-
-  useEffect(() => {
-    const agentName = allbridges?.find((bridge) => bridge.id === params?.id)
-    if (!agentName) {
-      router.push(`/org/${params?.org_id}/agents`);
-    }
-  }, [allbridges]);
-
+  
   // Enhanced responsive detection
   useEffect(() => {
     const handleResize = () => {

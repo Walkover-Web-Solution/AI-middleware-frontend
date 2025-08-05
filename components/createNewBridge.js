@@ -25,12 +25,13 @@ import Protected from "./protected";
     });
     const [globalError, setGlobalError] = useState(""); // New state for global error messages
 
-    const { allBridgeList, modelsList, SERVICES } = useCustomSelector((state) => ({
+    const { allBridgeList, modelsList, SERVICES, showAgentType } = useCustomSelector((state) => ({
         SERVICES: state?.serviceReducer?.services,
         allBridgeList: (state.bridgeReducer.org[orgid]?.orgs) || [],
         modelsList: state?.modelReducer?.serviceModels[selectedService],
+        showAgentType: state?.userDetailsReducer?.userDetails?.showAgentTypeOnCreateAgent
     }));
-
+    
     useEffect(() => {
         if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
             dispatch(getServiceAction({ orgid }))
@@ -81,7 +82,7 @@ import Protected from "./protected";
           "model": selectedModel,
           "name": name,
           "slugName": slugname || name,
-          "bridgeType": selectedBridgeTypeCard || bridgeType,
+          "bridgeType":isEmbedUser && !showAgentType ? "api" : selectedBridgeTypeCard || bridgeType,
           "type": selectedType,
         };
         dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
@@ -126,7 +127,7 @@ import Protected from "./protected";
         }
 
         // Validate bridge type
-        if (!selectedBridgeTypeCard) {
+        if (!selectedBridgeTypeCard && !isEmbedUser && !showAgentType) {
             newValidationErrors.bridgeType = "Select Agent Type";
             hasErrors = true;
         }
@@ -139,7 +140,7 @@ import Protected from "./protected";
         }
 
         setIsAiLoading(true);
-        const dataToSend = { purpose, bridgeType: selectedBridgeTypeCard }
+        const dataToSend = { purpose, bridgeType: isEmbedUser && !showAgentType ? "api" : selectedBridgeTypeCard }
         dispatch(createBridgeWithAiAction({ dataToSend, orgId: orgid }))
             .then((response) => {
                 const data = response.data;
@@ -161,8 +162,8 @@ import Protected from "./protected";
       <div>
         {isLoading && <LoadingSpinner />}
         <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
-          <div className="bg-base-100 px-2 md:px-10 py-4 md:py-4 rounded-lg max-w-[90%] md:max-w-[80%] overflow-auto max-h-[98vh] mx-auto">
-            <h3 className="font-bold text-xl md:text-xl text-gray-800 pl-2">
+          <div className={`bg-base-100 px-2 md:px-10 py-4 md:py-4 rounded-lg ${isEmbedUser && !showAgentType ? "min-w-[70%] md:min-w-[70%]" : "max-w-[90%] md:max-w-[80%]"} overflow-auto max-h-[98vh] mx-auto`}>
+            <h3 className="font-bold text-xl md:text-xl text-gray-800">
               Create Agent
             </h3>
 
@@ -173,7 +174,7 @@ import Protected from "./protected";
               </div>
             )}
 
-            <div className="space-y-2 pb-2 p-2 mt-2 ml-4 text-semi-bold">
+           {((isEmbedUser && showAgentType) || !isEmbedUser) && <div className="space-y-2 pb-2 p-2 mt-2 ml-4 text-semi-bold">
               <div className="flex justify-between items-center">
                 <label className="text-md  text-gray-800">
                   Select Agent Type
@@ -319,7 +320,7 @@ import Protected from "./protected";
                   </div>
                 </div>}
               </div>
-            </div>
+            </div>}
 
             {/* {!isManualMode ? ( */}
             <div className="mt-4 md:mt-4">
@@ -340,7 +341,7 @@ import Protected from "./protected";
                     placeholder="Describe the purpose of this agent..."
                     ref={textAreaPurposeRef}
                     onChange={handlePurposeInput}
-                    className={`textarea textarea-bordered w-full min-h-[50px] md:min-h-[50px] bg-white transition-all duration-300 placeholder-gray-400 text-sm md:text-base ${
+                    className={`textarea textarea-bordered w-full ${isEmbedUser && !showAgentType ? "min-h-[100px]" : "min-h-[50px] md:min-h-[50px]"} bg-white transition-all duration-300 placeholder-gray-400 text-sm md:text-base ${
                       validationErrors.purpose
                         ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
                         : "border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"

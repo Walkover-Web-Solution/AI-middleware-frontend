@@ -8,7 +8,6 @@ import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction} from '@/store/action/bridgeAction';
 import { sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { useCustomSelector } from '@/customHooks/customSelector';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -94,7 +93,6 @@ const Layout = ({ children }) => {
     try {
        let bridges = allBridges;
        allBridges.length === 0 && await dispatch(getAllBridgesAction((data)=>{
-        console.log(data)
         bridges = data
        }));
 
@@ -146,7 +144,7 @@ const Layout = ({ children }) => {
     };
 
     initialize();
-  }, [dispatch, router, decodedParam]);
+  }, [decodedParam]);
 
   useEffect(() => {
     if (currentAgentName) {
@@ -155,7 +153,7 @@ const Layout = ({ children }) => {
         handleAgentNavigation(currentAgentName, orgId);
       }
     }
-  }, [currentAgentName, urlParamsObj.org_id, handleAgentNavigation]);
+  }, [currentAgentName, urlParamsObj.org_id]);
 
   useEffect(() => {
     const handleMessage = (event) => {
@@ -184,9 +182,9 @@ const Layout = ({ children }) => {
     window.addEventListener('message', handleMessage);
 
     return () => {
-      window.removeEventListener('message', handleMessage);
+      // window.removeEventListener('message', handleMessage);
     };
-  }, [dispatch, router]);
+  }, []);
 
 
   if (isLoading) {
