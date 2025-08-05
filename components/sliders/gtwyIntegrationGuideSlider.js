@@ -323,7 +323,7 @@ window.GtwyEmbed.sendDataToGtwy({
     agent_id: "your_agent_id" // Redirect to specific agent
 });`;
 
-  const eventListenerScript = `<scrip>
+  const eventListenerScript = `<script>
 window.addEventListener('message', (event) => {
     if (event.data.type === 'gtwy') {
         console.log('Received gtwy event:', event.data);
