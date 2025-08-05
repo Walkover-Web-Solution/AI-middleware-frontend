@@ -6,7 +6,7 @@ import Chatbot from "@/components/configuration/chatbot";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getSingleBridgesAction } from "@/store/action/bridgeAction";
+import { getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
 import { useEffect, useRef, useState } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
@@ -66,7 +66,13 @@ const Page = ({ searchParams }) => {
   // Data fetching and other effects...
   useEffect(() => {
     (async () => {
-      const agentName = allbridges?.find((bridge) => bridge._id === params?.id)
+      let bridges = allbridges;
+      if(allbridges.length === 0){
+        await dispatch(getAllBridgesAction((data)=>{
+          bridges = data
+        }));
+      }
+      const agentName = bridges?.find((bridge) => bridge._id === params?.id)
       if (!agentName) {
         router.push(`/org/${params?.org_id}/agents`);
         return

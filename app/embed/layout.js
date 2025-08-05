@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReducer';
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
-import { createBridgeAction, getAllBridgesAction} from '@/store/action/bridgeAction';
+import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
 import { sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
@@ -156,7 +156,7 @@ const Layout = ({ children }) => {
   }, [currentAgentName, urlParamsObj.org_id]);
 
   useEffect(() => {
-    const handleMessage = (event) => {
+    const handleMessage = async (event) => {
       if (event.data?.data?.type !== "gtwyInterfaceData") return;
 
       const messageData = event.data.data.data;
@@ -166,7 +166,25 @@ const Layout = ({ children }) => {
         setCurrentAgentName(messageData.agent_name);
       } else if (messageData?.agent_id && orgId) {
         setIsLoading(true);
-        router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+        await router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+      }
+      if(messageData?.meta && messageData?.agent_id && orgId){
+        let bridges = allBridges;
+       allBridges.length === 0 && await dispatch(getAllBridgesAction((data)=>{
+        bridges = data
+       }));
+       const bridge = bridges.find((bridge) => bridge._id === messageData.agent_id)
+       if(!bridge){
+          return
+        }
+        dispatch(updateBridgeAction({
+          dataToSend: {meta: messageData.meta},
+          bridgeId: messageData.agent_id
+        }, response => {
+          if(response?.data?.bridge){
+            router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+          }
+        }))
       }
 
       const uiUpdates = {};
