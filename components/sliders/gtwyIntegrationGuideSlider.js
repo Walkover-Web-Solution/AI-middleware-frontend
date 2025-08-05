@@ -341,7 +341,7 @@ window.openGtwy(
 `;
 
 const getDataUsingUserId = () => {
-  return `curl --location '${process.env.NEXT_PUBLIC_SERVER_URL}/gtwyEmbed/:user_id' \
+  return `curl --location '${process.env.NEXT_PUBLIC_SERVER_URL}/gtwyEmbed/getAgents' \
 --header 'pauthkey: \''your_pauth_key'\'''`
 }
 
