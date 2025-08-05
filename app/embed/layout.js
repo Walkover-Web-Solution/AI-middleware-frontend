@@ -161,9 +161,8 @@ const Layout = ({ children }) => {
 
       const messageData = event.data.data.data;
       const orgId = sessionStorage.getItem('gtwy_org_id');
-
       if (messageData?.agent_name) {
-        setCurrentAgentName(messageData.agent_name);
+        handleAgentNavigation(messageData.agent_name, orgId)
       } else if (messageData?.agent_id && orgId) {
         setIsLoading(true);
         await router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);

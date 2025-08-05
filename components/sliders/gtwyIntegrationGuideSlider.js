@@ -332,17 +332,17 @@ window.addEventListener('message', (event) => {
 </script>`;
 
 const metaUpdateScript = `
-window.openGtwy(
-    "your_agent_id",
-    {
+window.openGtwy({
+    "agent_id": "your_agent_id",
+    "meta": {
       "meta_data": "your_meta_data"
     }
-);
+});
 `;
 
 const getDataUsingUserId = () => {
   return `curl --location '${process.env.NEXT_PUBLIC_SERVER_URL}/gtwyEmbed/getAgents' \
---header 'pauthkey: \''your_pauth_key'\'''`
+--header 'Authorization: \'your_embed_token\'''`
 }
 
 const tableData = [

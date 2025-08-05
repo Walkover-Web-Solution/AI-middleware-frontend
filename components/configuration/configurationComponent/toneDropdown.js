@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -77,6 +77,10 @@ const ToneDropdown = ({ params }) => {
   const dispatch = useDispatch();
 
   const [selectedTone, setSelectedTone] = useState(reduxTone?.value || "");
+
+  useEffect(() => {
+    setSelectedTone(reduxTone?.value || "");
+  }, [reduxTone]);
 
   const handleToneChange = (e) => {
     const toneValue = e.target.value;
