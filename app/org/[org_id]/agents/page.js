@@ -258,7 +258,7 @@ function Home({ params, isEmbedUser }) {
 
         />
       )}
-      <CreateNewBridge />
+      <CreateNewBridge orgid={params.org_id}/>
       {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col items-start justify-start">

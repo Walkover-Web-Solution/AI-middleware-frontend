@@ -27,7 +27,7 @@ import Protected from "./protected";
 
     const { allBridgeList, modelsList, SERVICES, showAgentType } = useCustomSelector((state) => ({
         SERVICES: state?.serviceReducer?.services,
-        allBridgeList: (state.bridgeReducer.org[orgid]?.orgs) || [],
+        allBridgeList: state.bridgeReducer.org[orgid]?.orgs || [],
         modelsList: state?.modelReducer?.serviceModels[selectedService],
         showAgentType: state?.userDetailsReducer?.userDetails?.showAgentTypeOnCreateAgent
     }));
@@ -64,12 +64,12 @@ import Protected from "./protected";
 
     const createBridgeHandler = (name, slugname) => {
       name = isEmbedUser ? 'untitled' : 'Untitled';
-      const matches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.name?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
+      const matches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.name?.match(/^untitled_agent_(?:\d+)$/)) : allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
       const newCount = matches?.length + 1 || 0;
-      name = isEmbedUser ? `untitled${newCount}` : `Untitled${newCount}`;
-      const slugNameMatches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.slugName?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
+      name = isEmbedUser ? `untitled_agent_${newCount}` : `Untitled${newCount}`;
+      const slugNameMatches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.slugName?.match(/^untitled_agent_(?:\d+)$/)) : allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
       const slugNameCount = slugNameMatches?.length + 1 || 0;
-      slugname = isEmbedUser ? `untitled${slugNameCount}` : `Untitled${slugNameCount}`
+      slugname = isEmbedUser ? `untitled_agent_${slugNameCount}` : `Untitled${slugNameCount}`
       if (!selectedBridgeTypeCard) {
         setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
         return;
