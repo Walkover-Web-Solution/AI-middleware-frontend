@@ -18,7 +18,7 @@
                 hideHeader: 'false'
             };
             this.urls = {
-                gtwyUrl: 'http://localhost:3000/embed',
+                gtwyUrl: 'https://dev-ai.viasocket.com/embed',
                 login: 'https://dev-db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {
