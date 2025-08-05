@@ -156,7 +156,7 @@ const Layout = ({ children }) => {
   }, [currentAgentName, urlParamsObj.org_id]);
 
   useEffect(() => {
-    const handleMessage = (event) => {
+    const handleMessage = async (event) => {
       if (event.data?.data?.type !== "gtwyInterfaceData") return;
 
       const messageData = event.data.data.data;
@@ -166,11 +166,15 @@ const Layout = ({ children }) => {
         setCurrentAgentName(messageData.agent_name);
       } else if (messageData?.agent_id && orgId) {
         setIsLoading(true);
-        router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+        await router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
       }
       if(messageData?.meta && messageData?.agent_id && orgId){
-        const agent = allBridges.find((bridge) => bridge._id === messageData.agent_id)
-        if(!agent){
+        let bridges = allBridges;
+       allBridges.length === 0 && await dispatch(getAllBridgesAction((data)=>{
+        bridges = data
+       }));
+       const bridge = bridges.find((bridge) => bridge._id === messageData.agent_id)
+       if(!bridge){
           return
         }
         dispatch(updateBridgeAction({

@@ -323,13 +323,27 @@ window.GtwyEmbed.sendDataToGtwy({
     agent_id: "your_agent_id" // Redirect to specific agent
 });`;
 
-  const eventListenerScript = `<script>
+  const eventListenerScript = `<scrip>
 window.addEventListener('message', (event) => {
     if (event.data.type === 'gtwy') {
         console.log('Received gtwy event:', event.data);
     }
 });
 </script>`;
+
+const metaUpdateScript = `
+window.openGtwy(
+    "your_agent_id",
+    {
+      "meta_data": "your_meta_data"
+    }
+);
+`;
+
+const getDataUsingUserId = () => {
+  return `curl --location '${process.env.NEXT_PUBLIC_SERVER_URL}/gtwyEmbed/:user_id' \
+--header 'pauthkey: \''your_pauth_key'\'''`
+}
 
 const tableData = [
   ['parentId', 'To open GTWY in a specific container'],
@@ -551,6 +565,51 @@ const tableHeaders = ['Key', 'Description'];
                 </div>
               </div>
             </div>
+
+            <div className="card bg-base-100 border mt-4">
+                <div className="card-body">
+                  <h4 className="card-title text-base">Add Meta Data</h4>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Use this script to add meta data to GTWY </span>
+                    </label>
+                    <div className="relative">
+                      <div className="mockup-code">
+                        <pre data-prefix=">"><code className="text-error">  window.GtwyEmbed.openGtwy({`{"agent_id":"your gtwy agentid" , "meta": {"meta_data": "your_meta_data"}}`})</code></pre>
+                      </div>
+                      <CopyButton
+                        data={metaUpdateScript}
+                        onCopy={() => handleCopy(metaUpdateScript, 'metaUpdate')}
+                        copied={copied.metaUpdate}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card bg-base-100 border mt-4">
+                <div className="card-body">
+                  <h4 className="card-title text-base">Get Agent Data Using User ID</h4>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Use this script to get data using user id</span>
+                    </label>
+                    <div className="relative">
+                      <div className="mockup-code">
+                        <pre data-prefix=">"><code className="text-error">  {getDataUsingUserId()}</code></pre>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-4">
+                        Note: Pass <code>variable=true</code> in the api params if you want to get the variable data of agents.
+                      </p>
+                      <CopyButton
+                        data={getDataUsingUserId()}
+                        onCopy={() => handleCopy(getDataUsingUserId(), 'getDataUsingUserId')}
+                        copied={copied.getDataUsingUserId}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
             {/* Event Listener */}
             <div className="card bg-base-100 border">
