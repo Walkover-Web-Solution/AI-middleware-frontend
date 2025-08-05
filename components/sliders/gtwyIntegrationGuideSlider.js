@@ -599,7 +599,7 @@ const tableHeaders = ['Key', 'Description'];
                         <pre data-prefix=">"><code className="text-error">  {getDataUsingUserId()}</code></pre>
                       </div>
                       <p className="text-sm text-gray-600 mt-4">
-                        Note: Pass <code>variable=true</code> in the api params if you want to get the variable data of agents.
+                        Note: Pass <code>agent_id="your_agent_id"</code> in the params if you want to get the data of specific agent.
                       </p>
                       <CopyButton
                         data={getDataUsingUserId()}
