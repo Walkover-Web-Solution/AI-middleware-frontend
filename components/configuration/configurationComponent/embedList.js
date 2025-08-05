@@ -71,6 +71,7 @@ const EmbedList = ({ params }) => {
                 versionId: params.version,
                 dataToSend: {
                     ...versionData,
+                    function_ids: [ ...versionData.function_ids, functionId],
                     functionData: {
                         function_id: functionId,
                         function_operation: "1"
@@ -87,15 +88,15 @@ const EmbedList = ({ params }) => {
                 versionId: params.version,
                 dataToSend: {
                     ...versionData,
+                    function_ids: versionData.function_ids.filter(id => id !== functionId),
                     functionData: {
                         function_id: functionId,
                         function_name: function_name,
-                    },
+                    }
                 },
             })
-        ).then(() => {
-            closeModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL);
-        });
+        )
+        closeModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL);
     };
 
     const handleSaveFunctionData = () => {

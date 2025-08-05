@@ -80,6 +80,7 @@ export const bridgeReducer = createSlice({
       state.allBridgesMap[bridgeId].versions.push(newVersionId);
     },
     updateBridgeReducer: (state, action) => {
+      console.log("action.payload", action.payload);
       const { bridges, functionData } = action.payload;
       const { _id, configuration, ...extraData } = bridges;
 
@@ -120,6 +121,7 @@ export const bridgeReducer = createSlice({
     // Backup bridge version data before making changes for potential rollback
     backupBridgeVersionReducer: (state, action) => {
       const { bridgeId, versionId } = action.payload;
+      console.log("backupBridgeVersionReducer", bridgeId, versionId)
       if(versionId){
         
       // Initialize the state.bridgeVersionMapping if it doesn't exist
@@ -160,6 +162,7 @@ export const bridgeReducer = createSlice({
 
     // Rollback to previous state if an operation fails
     bridgeVersionRollBackReducer: (state, action) => {
+      console.log("rollback",action.payload);
       const { bridgeId, versionId } = action.payload;
       if(versionId){
         
@@ -195,6 +198,7 @@ export const bridgeReducer = createSlice({
       }
     },
     updateBridgeVersionReducer: (state, action) => {
+      console.log("action.updateBridgeVersionReducer", action.payload);
       const { bridges, functionData } = action.payload;
       const { _id, configuration, ...extraData } = bridges;
       state.bridgeVersionMapping[bridges.parent_id][bridges._id] = {
