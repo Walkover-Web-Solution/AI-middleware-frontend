@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -43,10 +43,11 @@ const ResponseStyleDropdown = ({ params }) => {
   }));
   const dispatch = useDispatch();
 
-  const [selectedStyle, setSelectedStyle] = useState(
-    reduxResponseStyle?.value || ""
-  );
-
+  const [selectedStyle, setSelectedStyle] = useState(reduxResponseStyle?.value || "");
+  
+  useEffect(() => {
+    setSelectedStyle(reduxResponseStyle?.value || "");
+  }, [reduxResponseStyle]);
   const handleStyleChange = (e) => {
     const styleValue = e.target.value;
 
@@ -75,14 +76,14 @@ const ResponseStyleDropdown = ({ params }) => {
   return (
     <label className="form-control w-full">
       <div className="flex items-center pb-1">
-   <InfoTooltip tooltipContent={"Select the depth of response (optional)."} >
-    <div
-      className="label-text info"
-    >
-      Response Style
-    </div>
-  </InfoTooltip>
-</div>
+        <InfoTooltip tooltipContent={"Select the depth of response (optional)."} >
+          <div
+            className="label-text info"
+          >
+            Response Style
+          </div>
+        </InfoTooltip>
+      </div>
 
 
       <div className="flex items-center gap-2">

@@ -4,7 +4,7 @@ export const ChatLoadingSkeleton = () => {
       {[...Array(2)].map((_, index) => (
         <div key={index} className="mb-6 animate-pulse">
           {/* User message skeleton */}
-          <div className="chat chat-end">
+          <div className="chat chat-end mt-9">
             <div className="chat-image avatar">
               <div className="w-10 rounded-full">
                 <div className="bg-base-200 w-10 h-10 rounded-full animate-pulse"></div>
