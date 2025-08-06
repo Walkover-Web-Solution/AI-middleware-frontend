@@ -26,7 +26,7 @@ function Chat({ params }) {
     <div className="px-4 pt-4">
       <div className="w-full flex justify-between items-center px-2">
         <span className="label-text">Playground</span>
-        {conversation?.length > 0 && <button className="btn btn-sm" onClick={handleResetChat}>Reset Chat</button>}
+        {messages?.length > 0 && <button className="btn btn-sm" onClick={handleResetChat}>Reset Chat</button>}
       </div>
 
       <div className="sm:p-2 mt-4 justify-between flex flex-col h-[83vh] border rounded-md w-full z-low">
