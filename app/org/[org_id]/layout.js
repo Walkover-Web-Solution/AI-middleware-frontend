@@ -56,30 +56,38 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       dispatch(getApiKeyGuideAction()); 
     }
   }, [pathName]);
-
   useEffect(() => {
-    const updateUserMeta = async () => {
-      if (currentUser?.meta === null) {
-        const updatedUser = {
-          ...currentUser,
-          meta: {
-            onboarding: {
-              bridgeCreation: true,
-              FunctionCreation: true,
-              knowledgeBase: true,
-              Addvariables: true,
-              AdvanceParameter: true,
-              PauthKey: true,
-              CompleteBridgeSetup: true,
-              TestCasesSetup:true
-            },
+    const reference_id=localStorage.getItem("reference_id");
+    console.log("sdfds",reference_id)
+    if (currentUser?.meta === null) {
+      const updatedUser = {
+        ...currentUser,
+        meta: {
+          onboarding: {
+            bridgeCreation: true,
+            FunctionCreation: true,
+            knowledgeBase: true,
+            Addvariables: true,
+            AdvanceParameter: true,
+            PauthKey: true,
+            CompleteBridgeSetup: true,
+            TestCasesSetup:true
           },
-        };
-        await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
-      }
-    };
-
-    updateUserMeta();
+        },
+      };
+      dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+    }
+    if (reference_id && !currentUser?.meta?.reference_id) {
+      const updatedUser = {
+        ...currentUser,
+        meta: {
+          ...currentUser.meta,
+          reference_id: reference_id
+        },
+      };
+      dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+    }
+    
   }, []);
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
