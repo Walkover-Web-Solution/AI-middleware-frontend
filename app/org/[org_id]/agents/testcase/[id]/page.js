@@ -23,10 +23,10 @@ function TestCases({ params }) {
   const bridgeVersion = searchParams.get('version');
   const [selectedVersion, setSelectedVersion] = useState(searchParams.get('versionId') || '');
 
-  const allBridges = useCustomSelector((state) => state.bridgeReducer.org[params.org_id]?.orgs || []).slice().reverse();
+  const allBridges = useCustomSelector((state) => state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []).slice().reverse();
   const { testCases,isFirstTestcase } = useCustomSelector((state) => ({
-    testCases: state.testCasesReducer?.testCases?.[params?.id] || {},
-     isFirstTestcase: state.userDetailsReducer.userDetails?.meta?.onboarding?.TestCasesSetup || "",
+    testCases: state?.testCasesReducer?.testCases?.[params?.id] || {},
+     isFirstTestcase: state?.userDetailsReducer?.userDetails?.meta?.onboarding?.TestCasesSetup || "",
   }));
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
@@ -61,28 +61,28 @@ function TestCases({ params }) {
   };
 
   const handleEditClick = (e, index, testCase) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setEditingIndex(index);
-    setEditUserInput(testCase.conversation[testCase.conversation.length - 1]?.content || '');
-    setEditExpectedOutput(testCase.expected.tool_calls
-      ? JSON.stringify(testCase.expected.tool_calls)
-      : testCase.expected.response || '');
+    setEditUserInput(testCase?.conversation?.[testCase?.conversation?.length - 1]?.content || '');
+    setEditExpectedOutput(testCase?.expected?.tool_calls
+      ? JSON.stringify(testCase?.expected?.tool_calls)
+      : testCase?.expected?.response || '');
   };
 
   const handleSaveEdit = (e, testCase) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     const updatedTestCase = {
       ...testCase,
-      conversation: testCase.conversation.map((message, i) =>
-        i === testCase.conversation.length - 1 && message.role === 'user'
+      conversation: testCase?.conversation?.map((message, i) =>
+        i === testCase?.conversation?.length - 1 && message?.role === 'user'
           ? { ...message, content: editUserInput }
           : message
       ),
-      expected: testCase.type === 'function'
+      expected: testCase?.type === 'function'
         ? { tool_calls: JSON.parse(editExpectedOutput) }
         : { response: editExpectedOutput }
     };
-    dispatch(updateTestCaseAction({ bridge_id: params?.id, dataToUpdate: updatedTestCase }))
+    dispatch?.(updateTestCaseAction({ bridge_id: params?.id, dataToUpdate: updatedTestCase }))
     setEditingIndex(null);
   };
 
@@ -140,16 +140,16 @@ function TestCases({ params }) {
               </thead>
               <tbody className="divide-y divide-gray-200 w-full">
                 {Array.isArray(testCases) ? testCases.map((testCase, index) => {
-                  const lastUserMessage = testCase.conversation
-                    .filter(message => message.role === 'user')
-                    .pop()?.content || 'N/A';
+                  const lastUserMessage = testCase?.conversation
+                    ?.filter(message => message?.role === 'user')
+                    ?.pop()?.content || 'N/A';
 
-                  const expectedOutput = testCase.expected.tool_calls
-                    ? JSON.stringify(testCase.expected.tool_calls)
-                    : testCase.expected.response || 'N/A';
+                  const expectedOutput = testCase?.expected?.tool_calls
+                    ? JSON.stringify(testCase?.expected?.tool_calls)
+                    : testCase?.expected?.response || 'N/A';
 
                   const testCaseVersionArray = testCase?.version_history?.[selectedVersion];
-                  const model_output = JSON.stringify(testCaseVersionArray?.[testCaseVersionArray.length - 1]?.model_output);
+                  const model_output = JSON.stringify(testCaseVersionArray?.[testCaseVersionArray?.length - 1]?.model_output);
 
                   const isExpanded = expandedRows[index] || false;
 
@@ -168,18 +168,18 @@ function TestCases({ params }) {
                           </div>
                         </td>
                         <td className="p-3 max-w-xs truncate" title={lastUserMessage}>
-                          {lastUserMessage.substring(0, 30)}{lastUserMessage.length > 30 ? '...' : ''}
+                          {lastUserMessage?.substring(0, 30)}{lastUserMessage?.length > 30 ? '...' : ''}
                         </td>
                         <td className="p-3 max-w-xs truncate" title={expectedOutput}>
-                          {expectedOutput.substring(0, 30)}{expectedOutput.length > 30 ? '...' : ''}
+                          {expectedOutput?.substring(0, 30)}{expectedOutput?.length > 30 ? '...' : ''}
                         </td>
                         <td className="p-3 max-w-xs truncate" title={model_output}>
-                          {model_output ? model_output.substring(0, 30) + (model_output.length > 30 ? '...' : '') : 'N/A'}
+                          {model_output ? model_output?.substring(0, 30) + (model_output?.length > 30 ? '...' : '') : 'N/A'}
                         </td>
                         <td className="p-3 max-w-xs truncate" title={testCase?.matching_type}> {testCase?.matching_type}</td>
-                        {versions.map((version, versionIndex) => {
+                        {versions?.map((version, versionIndex) => {
                           const versionArray = testCase?.version_history?.[version];
-                          const versionScore = versionArray?.[versionArray.length - 1]?.score;
+                          const versionScore = versionArray?.[versionArray?.length - 1]?.score;
                           return (
                             <td key={versionIndex} className="p-3 truncate max-w-20">
                               {versionScore ? `${(versionScore * 100).toFixed(2)}%` : 'N/A'}
@@ -260,8 +260,8 @@ function TestCases({ params }) {
                                 )}
                                 <button
                                   onClick={(e) => {
-                                    e.stopPropagation();
-                                    dispatch(deleteTestCaseAction({ testCaseId: testCase?._id, bridgeId: params?.id }));
+                                    e?.stopPropagation();
+                                    dispatch?.(deleteTestCaseAction({ testCaseId: testCase?._id, bridgeId: params?.id }));
                                   }}
                                   className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-sm flex items-center gap-1.5 transition-colors"
                                 >
@@ -272,11 +272,11 @@ function TestCases({ params }) {
                               <div>
                                 <h3 className="text-sm font-medium text-gray-700 mb-1">Version Scores</h3>
                                 <div className="flex flex-wrap gap-2">
-                                  {versions.map((version, versionIndex) => {
+                                  {versions?.map((version, versionIndex) => {
                                     const versionArray = testCase?.version_history?.[version];
-                                    const versionScore = versionArray?.[versionArray.length - 1]?.score;
+                                    const versionScore = versionArray?.[versionArray?.length - 1]?.score;
                                     const progressValue = versionScore ? Math.round(versionScore * 100) : 0;
-                                    const lastRun = versionArray?.[versionArray.length - 1]?.created_at;
+                                    const lastRun = versionArray?.[versionArray?.length - 1]?.created_at;
                                     return (
                                       <div
                                         key={versionIndex}
@@ -291,7 +291,7 @@ function TestCases({ params }) {
                                           </div>
                                         </div>
                                         <div className="text-xs text-gray-500">
-                                          Last run: {lastRun ? new Date(lastRun).toLocaleString() : '-'}
+                                          Last run: {lastRun ? new Date(lastRun)?.toLocaleString() : '-'}
                                         </div>
                                       </div>
                                     );
