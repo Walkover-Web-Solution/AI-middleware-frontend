@@ -193,7 +193,7 @@ export const updateBridgeVersionAction = ({ versionId, dataToSend, bridgeId='' }
   
   try {
   // Step 1: Create a backup of the current bridge version state
-  dispatch(backupBridgeVersionReducer({ 
+  dispatch(backupBridgeVersionReducer({
       bridgeId: bridgeId || dataToSend?.parent_id || dataToSend?.parentId, 
       versionId 
     }));
@@ -272,11 +272,14 @@ export const createApiAction = (org_id, dataFromEmbed) => async (dispatch) => {
 
 export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) => {
   try {
+    dispatch(backupBridgeVersionReducer({ bridgeId: bridge_id, versionId: dataFromEmbed?.version_id }));
+    dispatch(updateBridgeVersionReducer({ bridges: dataFromEmbed }));
     const data = await updateapi(bridge_id, dataFromEmbed);
     // dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
     dispatch(updateBridgeVersionReducer({ bridges: data?.data?.bridge }));
   } catch (error) {
     console.error(error)
+    dispatch(bridgeVersionRollBackReducer({ bridgeId: bridge_id, versionId: dataFromEmbed?.version_id }));
   }
 }
 

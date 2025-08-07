@@ -14,7 +14,7 @@ const PreEmbedList = ({ params }) => {
     const [preFunctionId, setPreFunctionId] = useState(null);
     const [preFunctionName, setPreFunctionName] = useState(null);
     const [preToolData, setPreToolData] = useState(null);
-    const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken } = useCustomSelector((state) => {
+    const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken, versiondata } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -30,6 +30,7 @@ const PreEmbedList = ({ params }) => {
             service: serviceName,
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
+            versiondata: versionData,
         };
     });
     const dispatch = useDispatch();
@@ -44,6 +45,7 @@ const PreEmbedList = ({ params }) => {
 
     const onFunctionSelect = (id) => {
         dispatch(updateApiAction(params.id, {
+            ...versiondata,
             pre_tools: [id],
             version_id: params.version
         }))
@@ -51,6 +53,7 @@ const PreEmbedList = ({ params }) => {
 
     const removePreFunction = () => {
         dispatch(updateApiAction(params.id, {
+            ...versiondata,
             pre_tools: [],
             version_id: params.version
         }))
