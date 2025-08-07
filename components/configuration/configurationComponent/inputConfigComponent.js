@@ -13,11 +13,12 @@ import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
 const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
-    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
+    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue,versionData } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type || "",
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service || "",
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
+        versionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]
     }));
 
     const [keyName, setKeyName] = useState('');
@@ -55,6 +56,7 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
       dispatch(updateBridgeVersionAction({
         versionId: params.version,
         dataToSend: {
+          ...versionData,
           configuration: {
             prompt: newValue
           }
