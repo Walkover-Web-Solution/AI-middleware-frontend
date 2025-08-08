@@ -19,12 +19,12 @@ import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 import { getApiKeyGuideAction, getTutorialDataAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
-
+import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
@@ -46,7 +46,6 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
-  
   useEffect(() => {
     if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(getTutorialDataAction()); 
@@ -56,9 +55,8 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       dispatch(getApiKeyGuideAction()); 
     }
   }, [pathName]);
-  useEffect(() => {
+  useEffect(async() => {
     const reference_id=localStorage.getItem("reference_id");
-    console.log("sdfds",reference_id)
     if (currentUser?.meta === null) {
       const updatedUser = {
         ...currentUser,
@@ -77,9 +75,18 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       };
       dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
     }
-    if (reference_id && !currentUser?.meta?.reference_id) {
-      const updatedUser = {
-        ...currentUser,
+    if (reference_id && currentUser?.meta?.reference_id) {
+     const data= await dispatch(storeMarketingRefUserAction({
+         ref_id: reference_id,
+            client_id: currentUser.id,
+         client_email: currentUser.email,
+         client_name: currentUser.name,
+         created_at: currentUser.created_at,
+       }));
+       console.log(data,"data")
+    if(data==="data is available"){
+    const updatedUser = {
+      ...currentUser,
         meta: {
           ...currentUser.meta,
           reference_id: reference_id
@@ -87,7 +94,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       };
       dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
     }
-    
+    }
   }, []);
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);

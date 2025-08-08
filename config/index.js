@@ -644,7 +644,16 @@ export const updateFunctionApi = async ({ function_id, dataToSend }) => {
     throw new Error(error);
   }
 };
-
+export const storeMarketingRefUser = async (data) => {
+  try {
+    const response = await axios.post("https://flow.sokt.io/func/scribmgUXqSE", data);
+    console.log(response,"INDEX")
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
 export const archiveBridgeApi = async (bridge_id, newStatus) => {
   try {
     const response = await axios.put(`${URL}/api/v1/config/bridge-status/${bridge_id}`, { status: newStatus });
