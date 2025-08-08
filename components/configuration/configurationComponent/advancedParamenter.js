@@ -38,6 +38,7 @@ const AdvancedParameters = ({ params }) => {
       isFirstParameter:user?.meta?.onboarding?.AdvanceParameter
     };
   });
+  const [inputConfiguration, setInputConfiguration] = useState(configuration);
   const { tool_choice: tool_choice_data, type, model } = configuration || {};
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
@@ -75,6 +76,10 @@ const AdvancedParameters = ({ params }) => {
   }, [tool_choice_data])
 
   const handleInputChange = (e, key, isSlider = false) => {
+    setInputConfiguration((prev) => ({
+      ...prev,
+      [key]: e.target.value,
+    }))
     let newValue = e.target.value;
     let newCheckedValue = e.target.checked;
     if (e.target.type === 'number') {
@@ -149,6 +154,10 @@ const AdvancedParameters = ({ params }) => {
   };
 
   const setSliderValue = (value, key) => {
+    setInputConfiguration((prev) => ({
+      ...prev,
+      [key]: value,
+    }))
     let updatedDataToSend = {
       configuration: {
         [key]: value
@@ -189,7 +198,7 @@ const AdvancedParameters = ({ params }) => {
       )}
       <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
 
-        {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
+        {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min=0, max, step, default: defaultValue, options }]) => {
           const rowDefaultValue =
             key === 'response_type'
               ? (typeof modelInfoData?.[key]?.default === 'object'
@@ -352,7 +361,13 @@ const AdvancedParameters = ({ params }) => {
               {field === 'text' && (
                 <input
                   type="text"
-                  defaultValue={configuration?.[key] === 'default' ? '' : configuration?.[key] || ''}
+                  value={inputConfiguration?.[key] === 'default' ? '' : inputConfiguration?.[key] || ''}
+                  onChange={(e) =>
+                    setInputConfiguration((prev) => ({
+                      ...prev,
+                      [key]: e.target.value,
+                    }))
+                  }
                   onBlur={(e) => handleInputChange(e, key)}
                   className="input input-bordered input-sm w-full"
                   name={key}
@@ -364,7 +379,13 @@ const AdvancedParameters = ({ params }) => {
                   min={min}
                   max={max}
                   step={step}
-                  defaultValue={configuration?.[key] || 0}
+                  value={inputConfiguration?.[key]==="default"? 0 :inputConfiguration?.[key]}
+                  onChange={(e) =>
+                    setInputConfiguration((prev) => ({
+                      ...prev,
+                      [key]: e.target.value,
+                    }))
+                  }
                   onBlur={(e) => handleInputChange(e, key)}
                   className="input input-bordered input-sm w-full"
                   name={key}
@@ -376,7 +397,7 @@ const AdvancedParameters = ({ params }) => {
                     name={key}
                     type="checkbox"
                     className="toggle"
-                    defaultChecked={configuration?.[key] || false}
+                    checked={inputConfiguration?.[key]==="default" ? false : inputConfiguration?.[key]}
                     onChange={(e) => handleInputChange(e, key)}
                   />
                 </label>
