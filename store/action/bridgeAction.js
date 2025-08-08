@@ -1,6 +1,6 @@
 import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBridgeVersionApi, createBridgeWithAiAPi, createDuplicateBridge, createapi, deleteBridge, deleteFunctionApi, discardBridgeVersionApi, genrateSummary, getAllBridges, getAllFunctionsApi, getAllResponseTypesApi, getBridgeVersionApi, getChatBotOfBridge, getPrebuiltToolsApi, getSingleBridge, getTestcasesScrore, integration, publishBridgeVersionApi, updateBridge, updateBridgeVersionApi, updateFunctionApi, updateapi, uploadImage } from "@/config";
 import { toast } from "react-toastify";
-import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
+import { backupBridgeVersionReducer, bridgeVersionRollBackReducer, createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
 
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
@@ -159,27 +159,82 @@ export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) =
 
 export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch) => {
   try {
+    // Create backup of the current bridge state
+    dispatch(backupBridgeVersionReducer({ bridgeId }));
+    
+    // Optimistic update - must use updateBridgeReducer, not updateBridgeVersionReducer
+    dispatch(updateBridgeReducer({
+      bridges: {
+        _id: bridgeId,
+        ...dataToSend,
+        configuration: dataToSend.configuration || {}
+      },
+      functionData: dataToSend?.functionData || null
+    }));
+    
+    // Set loading state after optimistic update
     dispatch(isPending());
+    
+    // API call
     const data = await updateBridge({ bridgeId, dataToSend });
+    
+    // Update with actual response data
     dispatch(updateBridgeReducer({ bridges: data.data.bridge, functionData: dataToSend?.functionData || null }));
     return { success: true };
   } catch (error) {
+    // Rollback on failure
+    dispatch(bridgeVersionRollBackReducer({ bridgeId }));
     console.error(error);
     dispatch(isError());
     throw error;
   }
 };
 
-export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (dispatch) => {
+export const updateBridgeVersionAction = ({ versionId, dataToSend, bridgeId='' }) => async (dispatch) => {
+  
   try {
+  // Step 1: Create a backup of the current bridge version state
+  dispatch(backupBridgeVersionReducer({
+      bridgeId: bridgeId || dataToSend?.parent_id || dataToSend?.parentId, 
+      versionId 
+    }));
+    
+    // Step 2: First, optimistically update the UI immediately with a properly formatted payload
+    // Make sure all required fields are present in the optimistic update
+    const parentId = bridgeId || dataToSend?.parent_id || dataToSend?.parentId;
+    
+    const optimisticBridgeData = {
+      ...dataToSend,
+      _id: versionId,
+      parent_id: parentId,
+      // Ensure we have a valid configuration object
+      configuration: dataToSend.configuration || {}
+    };
+    
+    // Perform the optimistic update
+    dispatch(updateBridgeVersionReducer({
+      bridges: optimisticBridgeData,
+      functionData: dataToSend?.functionData || null
+    }));
+    
+    // Step 3: Now set loading state after the optimistic update
+    // This way loading state doesn't interfere with optimistic changes
     dispatch(isPending());
+    
+    // Step 4: Make the actual API call
     const data = await updateBridgeVersionApi({ versionId, dataToSend });
     if (data?.success) {
       dispatch(updateBridgeVersionReducer({ bridges: data.bridge, functionData: dataToSend?.functionData || null }));
     }
   } catch (error) {
-    console.error(error);
+    // Step 6: If API call fails, roll back to previous state
+    dispatch(bridgeVersionRollBackReducer({ 
+      bridgeId: bridgeId || dataToSend?.parent_id || dataToSend?.parentId, 
+      versionId 
+    }));
+    
     dispatch(isError());
+    toast.error('Failed to update bridge version');
   }
 };
 
@@ -218,11 +273,14 @@ export const createApiAction = (org_id, dataFromEmbed) => async (dispatch) => {
 
 export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) => {
   try {
+    dispatch(backupBridgeVersionReducer({ bridgeId: bridge_id, versionId: dataFromEmbed?.version_id }));
+    dispatch(updateBridgeVersionReducer({ bridges: dataFromEmbed }));
     const data = await updateapi(bridge_id, dataFromEmbed);
     // dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
     dispatch(updateBridgeVersionReducer({ bridges: data?.data?.bridge }));
   } catch (error) {
     console.error(error)
+    dispatch(bridgeVersionRollBackReducer({ bridgeId: bridge_id, versionId: dataFromEmbed?.version_id }));
   }
 }
 
