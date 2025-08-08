@@ -167,7 +167,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
         </div>
 
         {/* Public Agent Toggle */}
-        {/* <div className="bg-base-200/30 p-4 rounded-lg mb-6">
+        <div className="bg-base-200/30 p-4 rounded-lg mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Globe className="h-5 w-5 text-primary" />
@@ -189,7 +189,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
               </label>
             </div>
           </div>
-        </div> */}
+        </div>
 
         {/* Public Agent Configuration Form */}
         {isPublicAgent && (
