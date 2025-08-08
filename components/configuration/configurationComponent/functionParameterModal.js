@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Modal from "@/components/UI/Modal";
+import { PlusIcon } from "lucide-react";
 
 function FunctionParameterModal({
   name = "",
@@ -31,6 +32,15 @@ function FunctionParameterModal({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
+  const [showAddFieldForm, setShowAddFieldForm] = useState(false);
+  const [newFieldData, setNewFieldData] = useState({
+    name: '',
+    type: 'string',
+    description: '',
+    required: false,
+    enum: [],
+    parentPath: ''
+  });
   const dispatch = useDispatch();
 
   // Memoize properties to prevent unnecessary re-renders
@@ -46,40 +56,48 @@ function FunctionParameterModal({
   const [objectFieldValue, setObjectFieldValue] = useState("");
   const [isTextareaVisible, setIsTextareaVisible] = useState(false);
 
-  // Memoize flattenedParameters to prevent recalculation
-  const flattenedParameters = useMemo(() =>
-    flattenParameters(toolData?.fields || {}),
-    [toolData?.fields]
-  );
+  // Memoize flattenedParameters to prevent recalculation with null checks
+  const flattenedParameters = useMemo(() => {
+    if (!toolData || !toolData.fields) {
+      return [];
+    }
+    return flattenParameters(toolData.fields);
+  }, [toolData?.fields]);
 
   const [isOldFieldViewTrue, setIsOldFieldViewTrue] = useState(false);
 
   // Fix: Add proper dependencies and use useCallback to prevent infinite loops
   useEffect(() => {
-    // Only update if function_details actually changed
-    if (!isEqual(toolData, function_details)) {
+    // Only update if function_details actually changed and is not null
+    if (function_details && !isEqual(toolData, function_details)) {
       setToolData(function_details);
     }
-  }, [function_details, setToolData]); // Add setToolData to dependencies
+  }, [function_details, setToolData]);
 
   useEffect(() => {
     // Only update if variables_path[functionName] actually changed
-    const newVariablesPath = variables_path[functionName] || {};
-    if (!isEqual(variablesPath, newVariablesPath)) {
-      setVariablesPath(newVariablesPath);
+    if (variables_path && functionName) {
+      const newVariablesPath = variables_path[functionName] || {};
+      if (!isEqual(variablesPath, newVariablesPath)) {
+        setVariablesPath(newVariablesPath);
+      }
     }
-  }, [variables_path, functionName]); // Remove variablesPath from dependencies to prevent loop
+  }, [variables_path, functionName]);
 
   // Fix: Separate the isModified calculations into different effects
   useEffect(() => {
-    setIsModified(!isEqual(toolData, function_details));
+    if (toolData && function_details) {
+      setIsModified(!isEqual(toolData, function_details));
+    }
   }, [toolData, function_details]);
 
   useEffect(() => {
     // Only check if variablesPath is different from the original
-    const originalVariablesPath = variables_path[functionName] || {};
-    if (!isEqual(variablesPath, originalVariablesPath)) {
-      setIsModified(true);
+    if (variables_path && functionName) {
+      const originalVariablesPath = variables_path[functionName] || {};
+      if (!isEqual(variablesPath, originalVariablesPath)) {
+        setIsModified(true);
+      }
     }
   }, [variablesPath, variables_path, functionName]);
 
@@ -224,10 +242,15 @@ function FunctionParameterModal({
   }, [resetModalData, Model_Name]);
 
   const handleTypeChange = useCallback((key, newType) => {
+    if (!toolData || !toolData.fields) {
+      toast.error('Tool data is not available');
+      return;
+    }
+    
     let updatedField;
     if (newType === "array") {
       updatedField = updateField(
-        toolData?.fields,
+        toolData.fields,
         key?.split("."),
         (field) => ({
           ...field,
@@ -322,7 +345,11 @@ function FunctionParameterModal({
 
   const handleToggleChange = useCallback((e) => {
     if (e.target.checked) {
-      setObjectFieldValue(JSON.stringify(toolData["fields"], undefined, 4));
+      if (toolData && toolData.fields) {
+        setObjectFieldValue(JSON.stringify(toolData["fields"], undefined, 4));
+      } else {
+        setObjectFieldValue('{}');
+      }
       setIsTextareaVisible((prev) => !prev);
     } else if (!e.target.checked) {
       try {
@@ -412,7 +439,7 @@ function FunctionParameterModal({
         toast.error('Failed to update description. Please try again.');
       }
     }
-  }, [toolData, functionId]);
+  }, [toolData, functionId, embedToken, name]);
 
   const handleSaveData = useCallback(() => {
     if (toolData?.description?.trim() != function_details?.description?.trim()) {
@@ -423,9 +450,176 @@ function FunctionParameterModal({
     closeModal(Model_Name)
   }, [toolData?.description, function_details?.description, handleSaveDescription, handleSave, resetModalData, Model_Name]);
 
+  const handleAddField = useCallback(() => {
+    if (!newFieldData.name.trim()) {
+      toast.error('Field name is required');
+      return;
+    }
+
+    if (!toolData || !toolData.fields) {
+      toast.error('Tool data is not available');
+      return;
+    }
+
+    const fieldPath = newFieldData.parentPath 
+      ? `${newFieldData.parentPath}.${newFieldData.name}`
+      : newFieldData.name;
+
+    // Check if field already exists
+    const existingField = getNestedFieldValue(toolData.fields, fieldPath.split('.'));
+    if (existingField && Object.keys(existingField).length > 0) {
+      toast.error('Field with this name already exists');
+      return;
+    }
+
+    const newField = {
+      type: newFieldData.type,
+      description: newFieldData.description,
+      ...(newFieldData.enum.length > 0 ? { enum: newFieldData.enum } : {}),
+      ...(newFieldData.type === 'object' ? { parameter: {}, required_params: [] } : {}),
+      ...(newFieldData.type === 'array' ? { items: { type: 'string' } } : {})
+    };
+
+    setToolData(prevData => {
+      const updatedFields = { ...prevData.fields };
+      const pathParts = fieldPath.split('.');
+      
+      if (pathParts.length === 1) {
+        // Top-level field
+        updatedFields[newFieldData.name] = newField;
+        
+        // Add to required params if needed
+        const updatedRequiredParams = newFieldData.required 
+          ? [...(prevData.required_params || []), newFieldData.name]
+          : prevData.required_params || [];
+          
+        return {
+          ...prevData,
+          fields: updatedFields,
+          required_params: updatedRequiredParams
+        };
+      } else {
+        // Nested field
+        const parentPath = pathParts.slice(0, -1);
+        const fieldName = pathParts[pathParts.length - 1];
+        
+        const updatedFieldsNested = updateField(
+          updatedFields,
+          parentPath,
+          (parentField) => {
+            const nestedKey = parentField.type === 'array' ? 'items' : 'parameter';
+            const updatedNested = {
+              ...parentField,
+              [nestedKey]: {
+                ...parentField[nestedKey],
+                [fieldName]: newField
+              }
+            };
+            
+            if (newFieldData.required) {
+              updatedNested.required_params = [
+                ...(parentField.required_params || []),
+                fieldName
+              ];
+            }
+            
+            return updatedNested;
+          }
+        );
+        
+        return {
+          ...prevData,
+          fields: updatedFieldsNested
+        };
+      }
+    });
+
+    // Reset form
+    setNewFieldData({
+      name: '',
+      type: 'string',
+      description: '',
+      required: false,
+      enum: [],
+      parentPath: ''
+    });
+    setShowAddFieldForm(false);
+    toast.success('Field added successfully');
+  }, [newFieldData, toolData?.fields, getNestedFieldValue, updateField]);
+
+  const handleDeleteField = useCallback((fieldKey) => {
+    const keyParts = fieldKey.split('.');
+    
+    setToolData(prevData => {
+      if (keyParts.length === 1) {
+        // Top-level field
+        const { [keyParts[0]]: deletedField, ...remainingFields } = prevData.fields;
+        const updatedRequiredParams = (prevData.required_params || []).filter(
+          param => param !== keyParts[0]
+        );
+        
+        return {
+          ...prevData,
+          fields: remainingFields,
+          required_params: updatedRequiredParams
+        };
+      } else {
+        // Nested field
+        const parentPath = keyParts.slice(0, -1);
+        const fieldName = keyParts[keyParts.length - 1];
+        
+        const updatedFields = updateField(
+          prevData.fields,
+          parentPath,
+          (parentField) => {
+            const nestedKey = parentField.type === 'array' ? 'items' : 'parameter';
+            const { [fieldName]: deletedField, ...remainingNested } = parentField[nestedKey] || {};
+            
+            const updatedRequiredParams = (parentField.required_params || []).filter(
+              param => param !== fieldName
+            );
+            
+            return {
+              ...parentField,
+              [nestedKey]: remainingNested,
+              required_params: updatedRequiredParams
+            };
+          }
+        );
+        
+        return {
+          ...prevData,
+          fields: updatedFields
+        };
+      }
+    });
+    
+    // Also remove from variablesPath if exists
+    setVariablesPath(prevPath => {
+      const { [fieldKey]: deletedPath, ...remainingPaths } = prevPath;
+      return remainingPaths;
+    });
+    
+    toast.success('Field deleted successfully');
+  }, [updateField, setVariablesPath]);
+
+  // Early return if essential data is not available
+  if (!toolData) {
+    return (
+      <Modal MODAL_ID={Model_Name}>
+        <div className="modal-box w-11/12 max-w-6xl">
+          <div className="flex justify-center items-center h-32">
+            <span className="loading loading-spinner loading-lg"></span>
+            <span className="ml-2">Loading function data...</span>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
+
   return (
     <Modal MODAL_ID={Model_Name}>
-      <div className="modal-box w-11/12 max-w-6xl">
+      <div className="modal-box w-[95%] max-w-[95vw]">
         <div className="flex flex-row justify-between mb-3">
           <span className="flex flex-row items-center gap-4">
             <h3 className="font-bold text-lg">Configure fields</h3>
@@ -538,6 +732,15 @@ function FunctionParameterModal({
           <p>No Parameters used in the function</p>
         ) : !isTextareaVisible ? (
           <div className="overflow-x-auto border rounded-md">
+            <div className="flex justify-between items-center p-3 border-b">
+              <h4 className="font-semibold">Parameters</h4>
+              <button
+                onClick={() => setShowAddFieldForm(true)}
+                className="btn btn-sm btn-primary"
+              >
+                Add Field
+              </button>
+            </div>
             <table className="table">
               <thead>
                 <tr>
@@ -549,12 +752,13 @@ function FunctionParameterModal({
                   <th>Enum: comma separated</th>
                   <th>Fill with AI</th>
                   <th>Value Path: your_path</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {flattenedParameters.map((param, index) => {
                   const currentField = getNestedFieldValue(
-                    toolData.fields,
+                    toolData?.fields || {},
                     param.key.split(".")
                   );
                   const currentType = currentField?.type || param.type || "";
@@ -596,7 +800,7 @@ function FunctionParameterModal({
                             } else {
                               const parentKeyParts = keyParts.slice(0, -1);
                               const nestedField = getNestedFieldValue(
-                                toolData.fields,
+                                toolData?.fields || {},
                                 parentKeyParts
                               );
                               return (
@@ -664,6 +868,30 @@ function FunctionParameterModal({
                           }}
                         />
                       </td>
+                      <td>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setNewFieldData({
+                                ...newFieldData,
+                                parentPath: param.key
+                              });
+                              setShowAddFieldForm(true);
+                            }}
+                            className="btn btn-xs"
+                            title="Add nested field"
+                          >
+                            <PlusIcon size={12} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteField(param.key)}
+                            className="btn btn-xs btn-error text-white"
+                            title="Delete field"
+                          >
+                            <TrashIcon size={12} />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -693,6 +921,132 @@ function FunctionParameterModal({
             )}
           </div>
         )}
+        
+        {/* Add New Field Form */}
+        {showAddFieldForm && (
+          <div className="mt-4 p-4 border rounded-lg bg-base-100">
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="font-semibold">
+                Add New Field {newFieldData.parentPath && `to ${newFieldData.parentPath}`}
+              </h4>
+              <button
+                onClick={() => {
+                  setShowAddFieldForm(false);
+                  setNewFieldData({
+                    name: '',
+                    type: 'string',
+                    description: '',
+                    required: false,
+                    enum: [],
+                    parentPath: ''
+                  });
+                }}
+                className="btn btn-sm btn-ghost"
+              >
+                <CloseIcon size={16} />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="label">
+                  <span className="label-text">Field Name *</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter field name"
+                  className="input input-sm input-bordered w-full"
+                  value={newFieldData.name}
+                  onChange={(e) => setNewFieldData({ ...newFieldData, name: e.target.value.replace(/\s/g, '_') })}
+                />
+              </div>
+              
+              <div>
+                <label className="label">
+                  <span className="label-text">Type</span>
+                </label>
+                <select
+                  className="select select-sm select-bordered w-full"
+                  value={newFieldData.type}
+                  onChange={(e) => setNewFieldData({ ...newFieldData, type: e.target.value })}
+                >
+                  {parameterTypes.map((type, index) => (
+                    <option key={index} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="label">
+                  <span className="label-text">Description</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter field description"
+                  className="input input-sm input-bordered w-full"
+                  value={newFieldData.description}
+                  onChange={(e) => setNewFieldData({ ...newFieldData, description: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <label className="label">
+                  <span className="label-text">Enum Values (optional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="['option1', 'option2']"
+                  className="input input-sm input-bordered w-full"
+                  onChange={(e) => {
+                    try {
+                      if (e.target.value.trim()) {
+                        const parsed = JSON.parse(e.target.value.replace(/'/g, '"'));
+                        if (Array.isArray(parsed)) {
+                          setNewFieldData({ ...newFieldData, enum: parsed });
+                        }
+                      } else {
+                        setNewFieldData({ ...newFieldData, enum: [] });
+                      }
+                    } catch (error) {
+                      // Ignore parsing errors while typing
+                    }
+                  }}
+                />
+              </div>
+              
+              <div className="flex items-center">
+                <label className="label cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="checkbox"
+                    checked={newFieldData.required}
+                    onChange={(e) => setNewFieldData({ ...newFieldData, required: e.target.checked })}
+                  />
+                  <span className="label-text ml-2">Required</span>
+                </label>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => setShowAddFieldForm(false)}
+                className="btn btn-ghost"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddField}
+                className="btn btn-primary"
+                disabled={!newFieldData.name.trim()}
+              >
+                Add Field
+              </button>
+            </div>
+          </div>
+        )}
+        
         <div className="modal-action">
           <form method="dialog" className="flex flex-row gap-2">
             <button className="btn" onClick={handleCloseModal}>
