@@ -52,7 +52,7 @@ const EmbedList = ({ params }) => {
             variables_path: versionData?.variables_path || {},
         };
     });
-
+   
     const handleOpenModal = (functionId) => {
         setFunctionId(functionId);
         setfunctionData(function_data?.[functionId]);
