@@ -75,7 +75,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       };
       dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
     }
-    if (reference_id && currentUser?.meta?.reference_id) {
+    if (reference_id && !currentUser?.meta?.reference_id) {
      const data= await dispatch(storeMarketingRefUserAction({
          ref_id: reference_id,
             client_id: currentUser.id,
@@ -83,7 +83,6 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
          client_name: currentUser.name,
          created_at: currentUser.created_at,
        }));
-       console.log(data,"data")
     if(data==="data is available"){
     const updatedUser = {
       ...currentUser,
