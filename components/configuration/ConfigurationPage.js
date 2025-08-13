@@ -1,7 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { BotIcon, SettingsIcon, FilterSliderIcon } from "@/components/Icons";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
@@ -30,21 +30,114 @@ import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import Protected from "../protected";
+import { modelSuggestionApi } from "@/config";
 
 const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const view = searchParams.get('view') || 'config';
     const [currentView, setCurrentView] = useState(view);
+    const [modelRecommendations, setModelRecommendations] = useState(null);
+    const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
 
-    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType } = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
-        reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt,
-        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
-        showGuide: state.userDetailsReducer.userDetails.showGuide,
-        showConfigType: state.userDetailsReducer.userDetails.showConfigType,
-    }));
+    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType, bridgeApiKey, shouldPromptShow, prompt } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const service = versionData?.service;
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
+        return {
+            bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
+            modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
+            reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt,
+            modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
+            showGuide: state.userDetailsReducer.userDetails.showGuide,
+            showConfigType: state.userDetailsReducer.userDetails.showConfigType,
+            bridgeApiKey: versionData?.apikey_object_id?.[
+                service === 'openai_response' ? 'openai' : service
+            ],
+            prompt: versionData?.configuration?.prompt || "",
+            shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt
+        };
+    });
+    
+    const resetBorder = (ref, selector) => {
+        if (ref?.current) {
+            const element = ref.current.querySelector(selector);
+            if (element) {
+                element.style.borderColor = "";
+            }
+        }
+    };
+
+    const setErrorBorder = (ref, selector, scrollToView = false) => {
+        if (ref?.current) {
+            if (scrollToView) {
+                ref.current.scrollIntoView({ behavior: 'smooth' });
+            }
+            setTimeout(() => {
+                const element = ref.current.querySelector(selector);
+                if (element) {
+                    element.focus();
+                    element.style.borderColor = "red";
+                }
+            }, 300);
+        }
+    };
+
+    useEffect(() => {
+        const hasPrompt = prompt !== "";
+        const hasApiKey = !!bridgeApiKey;
+        if (hasPrompt) {
+          resetBorder(promptTextAreaRef, 'textarea');
+        }
+        
+        if (hasApiKey) {
+          resetBorder(apiKeySectionRef, 'select');
+        }
+        
+    }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef]);
+
+    const handleGetRecommendations = useCallback(async () => {
+        setIsLoadingRecommendations(true);
+        
+        try {
+            const currentPrompt = promptTextAreaRef.current?.querySelector('textarea')?.value?.trim() || "";
+            
+            if (bridgeApiKey && currentPrompt !== "") {
+                const response = await modelSuggestionApi({ versionId: params?.version });
+                if (response?.success) {
+                    setModelRecommendations({
+                        available: {
+                            service: response.data.available.service,
+                            model: response.data.available.model
+                        },
+                        unavailable: {
+                            service: response.data.unavailable.service,
+                            model: response.data.unavailable.model
+                        }
+                    });
+                } else {
+                    setModelRecommendations({ error: 'Failed to get model recommendations.' });
+                }
+            } else {
+                if (currentPrompt === "") {
+                    setModelRecommendations({ error: 'Prompt is missing. Please enter a prompt' });
+                    setErrorBorder(promptTextAreaRef, 'textarea', true);        
+                } else {
+                    setModelRecommendations({ error: 'API key is missing. Please add an API key' });
+                    setErrorBorder(apiKeySectionRef, 'select', true);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching recommended model:', error);
+            setModelRecommendations({ error: 'Error fetching recommended model' });
+        } finally {
+            setIsLoadingRecommendations(false);
+        }
+    }, [bridgeApiKey, params?.version, promptTextAreaRef, apiKeySectionRef]);
+
     useEffect(() => {
         if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
             if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
@@ -68,6 +161,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
         }, 1000);
         return () => clearTimeout(timeoutId);
     }, [bridgeType, reduxPrompt]);
+
     const handleNavigation = (target) => {
         setCurrentView(target);
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=${target}`);
@@ -95,7 +189,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 <>
                     <PreEmbedList params={params} />
                     <InputConfigComponent params={params} promptTextAreaRef={promptTextAreaRef} />
-                    {/* <NewInputConfigComponent params={params} /> */}
                     <EmbedList params={params} />
                     <hr className="my-0 p-0" />
                     <ConnectedAgentList params={params} />
@@ -105,10 +198,51 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     <PrebuiltToolsList params={params} />
                 </>
             )}
+            <div className="flex flex-col gap-3">
+                {shouldPromptShow && (
+                    <div className="flex flex-col items-start gap-2">
+                        <button
+                            className="flex items-center gap-2 px-1 py-2 rounded-md bg-gradient-to-r from-blue-800 to-orange-600 text-sm text-transparent bg-clip-text hover:opacity-80 transition-opacity"
+                            onClick={handleGetRecommendations}
+                            disabled={isLoadingRecommendations}
+                        >
+                            {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
+                        </button>
 
-            <ServiceDropdown params={params} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} />
-            <ModelDropdown params={params} />
-            <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
+                        {modelRecommendations && (
+                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 w-full mb-2">
+                                {modelRecommendations.error ? (
+                                    <p className="text-red-500 text-sm">{modelRecommendations.error}</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <p className="text-gray-700">
+                                            <span className="font-medium">Recommended Provider:</span> {modelRecommendations?.available?.service}
+                                        </p>
+                                        <p className="text-gray-700">
+                                            <span className="font-medium">Recommended Model:</span> {modelRecommendations?.available?.model}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="w-full">
+                        <ModelDropdown params={params} />
+                    </div>
+                    <div className="w-full">
+                        <ServiceDropdown 
+                            params={params} 
+                            apiKeySectionRef={apiKeySectionRef} 
+                            promptTextAreaRef={promptTextAreaRef}
+                        />
+                    </div>
+                    <div className="w-full">
+                        <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
+                    </div>
+                </div>
+            </div>
             <AdvancedParameters params={params} />
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
@@ -119,10 +253,10 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             )}
             {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
         </>
-    ), [bridgeType, modelType, params, modelName]);
+    ), [bridgeType, modelType, params, modelName, modelRecommendations, isLoadingRecommendations, shouldPromptShow, handleGetRecommendations]);
+
     const renderChatbotConfigView = useMemo(() => () => (
         <>
-
             <UserRefernceForRichText params={params} />
             <StarterQuestionToggle params={params} />
             <ActionList params={params} />
