@@ -46,17 +46,23 @@ const GptMemory = ({ params }) => {
                         className="toggle"
                     />
                 </div>
-                <div className='tooltip tooltip-top flex justify-end' data-tip={"Customize the context you’d like the LLM to remember for future conversations; or else, it’ll store only your basic personal information by default."}>
-                    {(gpt_memory && gpt_memory_context?.length === 0) && (
+                <div
+                    className="tooltip tooltip-top flex justify-end"
+                    data-tip={
+                        "Customize the context you’d like the LLM to remember for future conversations; or else, it’ll store only your basic personal information by default."
+                    }
+                >
+                    {gpt_memory && gpt_memory_context?.length === 0 && (
                         <button
                             onClick={() => setShowInput(!showInput)}
-                            className="btn btn-sm gap-1"
+                            className="flex items-center gap-1 px-3 py-1 rounded-lg bg-primary text-white text-sm font-medium shadow hover:bg-primary/80 hover:shadow-md active:scale-95 transition-all duration-150 cursor-pointer"
                         >
-                            <PencilIcon size={12} />
-                            customize
+                            <PencilIcon size={14} />
+                            Customize
                         </button>
                     )}
                 </div>
+
             </div>
 
             {showInput && gpt_memory && (
