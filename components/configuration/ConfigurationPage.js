@@ -40,7 +40,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const [modelRecommendations, setModelRecommendations] = useState(null);
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
 
-    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType, bridgeApiKey, shouldPromptShow, prompt,bridge_functions,connect_agents,knowbaseVersionData } = useCustomSelector((state) => {
+    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
         const service = versionData?.service;
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -61,7 +61,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
             bridge_functions: versionData?.function_ids || [],
             connect_agents: versionData?.connected_agents || {},
-            knowbaseVersionData: versionData?.doc_ids||[],
+            knowbaseVersionData: versionData?.doc_ids || [],
         };
     });
     const [showConnectAgent, setShowConnectAgent] = useState(Object.keys(connect_agents).length === 0);
@@ -75,12 +75,12 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             }
         }
     };
-   useEffect(() => {
-    setShowConnectAgent(Object.keys(connect_agents).length === 0);
-    setShowEmbed(bridge_functions.length === 0);
-    setShowKnowledgebase(knowbaseVersionData.length === 0);
-   }, [connect_agents, bridge_functions, knowbaseVersionData]);
-   console.log(showConnectAgent, showEmbed, showKnowledgebase);
+    useEffect(() => {
+        setShowConnectAgent(Object.keys(connect_agents).length === 0);
+        setShowEmbed(bridge_functions.length === 0);
+        setShowKnowledgebase(knowbaseVersionData.length === 0);
+    }, [connect_agents, bridge_functions, knowbaseVersionData]);
+    console.log(showConnectAgent, showEmbed, showKnowledgebase);
     const setErrorBorder = (ref, selector, scrollToView = false) => {
         if (ref?.current) {
             if (scrollToView) {
@@ -100,21 +100,21 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
         const hasPrompt = prompt !== "";
         const hasApiKey = !!bridgeApiKey;
         if (hasPrompt) {
-          resetBorder(promptTextAreaRef, 'textarea');
+            resetBorder(promptTextAreaRef, 'textarea');
         }
-        
+
         if (hasApiKey) {
-          resetBorder(apiKeySectionRef, 'select');
+            resetBorder(apiKeySectionRef, 'select');
         }
-        
+
     }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef]);
 
     const handleGetRecommendations = useCallback(async () => {
         setIsLoadingRecommendations(true);
-        
+
         try {
             const currentPrompt = promptTextAreaRef.current?.querySelector('textarea')?.value?.trim() || "";
-            
+
             if (bridgeApiKey && currentPrompt !== "") {
                 const response = await modelSuggestionApi({ versionId: params?.version });
                 if (response?.success) {
@@ -134,7 +134,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             } else {
                 if (currentPrompt === "") {
                     setModelRecommendations({ error: 'Prompt is missing. Please enter a prompt' });
-                    setErrorBorder(promptTextAreaRef, 'textarea', true);        
+                    setErrorBorder(promptTextAreaRef, 'textarea', true);
                 } else {
                     setModelRecommendations({ error: 'API key is missing. Please add an API key' });
                     setErrorBorder(apiKeySectionRef, 'select', true);
@@ -190,8 +190,8 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 </a>
             </div>
         );
-    }; 
-    console.log(connect_agents,'connect_agents')
+    };
+    console.log(connect_agents, 'connect_agents')
 
     const renderSetupView = useMemo(() => () => (
         console.log(showConnectAgent, showEmbed, showKnowledgebase),
@@ -206,45 +206,45 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     {/* Responsive layout - side by side on desktop, stacked on mobile */}
                     {/* Desktop layout */}
                     <div className="hidden md:block my-4">
-  <div className="grid grid-cols-3 gap-4">
-      {[
-        { Component: EmbedList, condition: showEmbed },
-        { Component: ConnectedAgentList, condition: showConnectAgent },
-        { Component: KnowledgebaseList, condition: showKnowledgebase },
-      ].map(({ Component, condition }, index) =>
-        condition ? <Component key={index} params={params} /> : null
-      )}
-    </div>
-    <hr className="my-4" />
-  <div className="flex flex-col gap-4">
-    {[
-      { Component: EmbedList, condition: !showEmbed },
-      { Component: ConnectedAgentList, condition: !showConnectAgent },
-      { Component: KnowledgebaseList, condition: !showKnowledgebase },
-    ].map(({ Component, condition }, index) =>
-      condition ? (
-        // Full width row if length > 0
-        <div key={index}>
-          <Component params={params} />
-          <hr className="my-4" />
-        </div>
-      ) : null
-    )}
+                        <div className="flex flex-col gap-4">
+                            {[
+                                { Component: EmbedList, condition: !showEmbed },
+                                { Component: ConnectedAgentList, condition: !showConnectAgent },
+                                { Component: KnowledgebaseList, condition: !showKnowledgebase },
+                            ].map(({ Component, condition }, index) =>
+                                condition ? (
+                                    // Full width row if length > 0
+                                    <div key={index}>
+                                        <Component params={params} />
+                                        <hr className="my-4" />
+                                    </div>
+                                ) : null
+                            )}
 
-    {/* Row for remaining ones with length = 0 */}
-    
-  </div>
-</div>
+                            {/* Row for remaining ones with length = 0 */}
+                            <div className="grid grid-cols-3 gap-4">
+                                {[
+                                    { Component: EmbedList, condition: showEmbed },
+                                    { Component: ConnectedAgentList, condition: showConnectAgent },
+                                    { Component: KnowledgebaseList, condition: showKnowledgebase },
+                                ].map(({ Component, condition }, index) =>
+                                    condition ? <Component key={index} params={params} /> : null
+                                )}
+                            </div>
+                            <hr className="my-4" />
 
-{/* Mobile layout */}
-<div className="block md:hidden">
-  <EmbedList params={params} />
-  <hr className="my-4" />
-  <ConnectedAgentList params={params} />
-  <hr className="my-4" />
-  <KnowledgebaseList params={params} />
-  <hr className="my-4" />
-</div>
+                        </div>
+                    </div>
+
+                    {/* Mobile layout */}
+                    <div className="block md:hidden">
+                        <EmbedList params={params} />
+                        <hr className="my-4" />
+                        <ConnectedAgentList params={params} />
+                        <hr className="my-4" />
+                        <KnowledgebaseList params={params} />
+                        <hr className="my-4" />
+                    </div>
 
                     <PrebuiltToolsList params={params} />
                 </>
@@ -283,9 +283,9 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                         <ModelDropdown params={params} />
                     </div>
                     <div className="w-full">
-                        <ServiceDropdown 
-                            params={params} 
-                            apiKeySectionRef={apiKeySectionRef} 
+                        <ServiceDropdown
+                            params={params}
+                            apiKeySectionRef={apiKeySectionRef}
                             promptTextAreaRef={promptTextAreaRef}
                         />
                     </div>

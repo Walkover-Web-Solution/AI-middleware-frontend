@@ -9,10 +9,10 @@ import React, { useMemo, useState } from 'react';
 import InfoTooltip from '@/components/InfoTooltip';
 
 function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
-     const [tutorialState, setTutorialState] = useState({
+    const [tutorialState, setTutorialState] = useState({
         showTutorial: false,
         showSuggestion: false
-      });
+    });
     const { integrationData, function_data, embedToken, isFirstFunction } = useCustomSelector((state) => {
         const orgId = Number(params?.org_id);
         const orgData = state?.bridgeReducer?.org?.[orgId] || {};
@@ -23,13 +23,13 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             function_data: orgData.functionData,
             embedToken: orgData.embed_token,
             isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
-            
+
         };
     });
     const handleTutorial = () => {
-        setTutorialState(prev=>({
+        setTutorialState(prev => ({
             ...prev,
-            showSuggestion:isFirstFunction
+            showSuggestion: isFirstFunction
         }));
     };
     const [searchQuery, setSearchQuery] = useState('');
@@ -65,7 +65,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 const title = integrationData?.[functionName]?.title || 'Untitled';
 
                 return (
-                   <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
+                    <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
                         <div className="flex justify-between items-center w-full">
                             <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
                                 {title}
@@ -86,44 +86,46 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             <div className="flex items-end gap-2">
                 {name === "preFunction" ? (
                     <div className=" flex flex-col items-start gap-2">
-                        <InfoTooltip  tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
-                        <p className="text-base font-semibold info">Pre Tool Configuration</p>
-                       
+                        <InfoTooltip tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
+                            <p className="text-base font-semibold info">Pre Tool Configuration</p>
+
                         </InfoTooltip>
 
                         {/* Plus Icon Button */}
                         <button
-                           tabIndex={0}
-                           className="btn btn-outline btn-sm"                  
+                            tabIndex={0}
+                            className="btn btn-outline btn-sm"
                         >
-                                <AddIcon size={16} />
-                               {"Connect Pre Tool"}
+                            <AddIcon size={16} />
+                            {"Connect Pre Tool"}
                         </button>
                     </div>
                 ) : (
                     <div className="flex flex-col items-start gap-2">
                         {connectedFunctions.length === 0 && (
-                            <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"Tool calling lets LLMs use external tools to get real-time data and perform complex tasks."} >
-                                <p className=" label-text info">Tool Configuration</p>
+                            <>
+                                <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"Tool calling lets LLMs use external tools to get real-time data and perform complex tasks."} >
+                                    <p className=" label-text info">Tool Configuration</p>
 
-                            </InfoTooltip>
+                                </InfoTooltip>
+
+                                <div className='flex flex-wrap items-center gap-2 w-full lg:mr-0 mr-5'>
+                                    <button
+                                        tabIndex={0}
+                                        disabled={!shouldToolsShow}
+                                        onClick={() => handleTutorial()}
+                                        className="btn btn-outline btn-sm "
+                                    >
+                                        <AddIcon size={16} />
+                                        <span className="truncate">Connect Tool</span>
+                                    </button>
+                                </div>
+                            </>
                         )}
-
-                        <div className='flex flex-wrap items-center gap-2 w-full lg:mr-0 mr-5'>
-                            <button
-                                tabIndex={0}
-                                disabled={!shouldToolsShow}
-                                onClick={() => handleTutorial()}
-                                className="btn btn-outline btn-sm "
-                            >
-                                <AddIcon size={16} />
-                                <span className="truncate">Connect Tool</span>
-                            </button>
-                        </div>
                     </div>
                 )}
                 {
-                    !shouldToolsShow && name !== "preFunction"&&
+                    !shouldToolsShow && name !== "preFunction" &&
                     <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
                         <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                         <span className='label-text-alt text-xs leading-tight'>
@@ -133,10 +135,10 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 }
             </div>
             {tutorialState?.showSuggestion && (
-                <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"FunctionCreation"} TutorialDetails={"Tool Configuration"}/>
+                <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"FunctionCreation"} TutorialDetails={"Tool Configuration"} />
             )}
             {tutorialState?.showTutorial && (
-                <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.FunctionCreation}  flagKey={"FunctionCreation"} />
+                <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.FunctionCreation} flagKey={"FunctionCreation"} />
             )}
             {!tutorialState?.showTutorial && (
                 <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
