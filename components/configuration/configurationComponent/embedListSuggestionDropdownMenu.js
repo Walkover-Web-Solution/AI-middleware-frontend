@@ -102,8 +102,8 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                     </div>
                 ) : (
                     <div className="flex flex-col items-start gap-2">
-                        {connectedFunctions.length === 0 && (
-                            <>
+                        {connectedFunctions?.length === 0 && (
+                            <>  
                                 <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"Tool calling lets LLMs use external tools to get real-time data and perform complex tasks."} >
                                     <p className=" label-text info">Tool Configuration</p>
 

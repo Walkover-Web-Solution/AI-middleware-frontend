@@ -119,7 +119,7 @@ const EmbedList = ({ params }) => {
     };
 
     return (bridge_functions &&
-        <div>
+        <div >
             <FunctionParameterModal
                 name="Tool"
                 functionId={functionId}
@@ -136,7 +136,7 @@ const EmbedList = ({ params }) => {
                 setVariablesPath={setVariablesPath}
                 variablesPath={variablesPath}
             />
-            <div className="label flex-col items-start mb-2">
+            <div className="label flex-col items-start mb-2 dropdown dropdown-bottom">
                 {
                     shouldToolsShow && bridgeFunctions.length > 0 &&
                     <>
@@ -148,21 +148,28 @@ const EmbedList = ({ params }) => {
                                 <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
                             </InfoTooltip>
 
-                            <button
-                                onClick={() => handleOpenModal(MODAL_TYPE.FUNCTION_MODAL, { name: "Function" })}
-                                className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-24 mb-2"
-                            >
-                                <AddIcon className="w-4 h-4" />
-                                Add Tool
-                            </button>
+                            <div>
+                                <button
+                                    tabIndex={0}
+                                    className="flex  items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-24 mb-2 "
+                                >
+                                    <AddIcon className="w-4 h-4" />
+                                    Add Tool
+                                </button>
+                               
+                            </div>
+                        <EmbedListSuggestionDropdownMenu name={"Function"} params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />
                         </div>
+
                         <div className="flex flex-wrap gap-4">
                             <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" />
                         </div>
                     </>
                 }
             </div>
+            {bridgeFunctions.length === 0 &&
             <EmbedListSuggestionDropdownMenu name={"Function"} params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />
+            }
         </div>
     );
 };
