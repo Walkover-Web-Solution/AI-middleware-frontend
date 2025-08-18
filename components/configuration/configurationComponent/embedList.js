@@ -151,10 +151,10 @@ const EmbedList = ({ params }) => {
                             <div>
                                 <button
                                     tabIndex={0}
-                                    className="flex  items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-24 mb-2 "
+                                    className="flex  items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-32 mb-2 "
                                 >
                                     <AddIcon className="w-4 h-4" />
-                                    Add Tool
+                                    Add 
                                 </button>
                                
                             </div>

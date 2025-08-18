@@ -113,7 +113,7 @@ const KnowledgebaseList = ({ params }) => {
     ), [knowbaseVersionData, knowledgeBaseData]);
     return (
         <div className="label flex-col items-start p-0">
-            <div className='label flex-col items-start mb-2'>
+            <div className='label flex-col items-start mb-0'>
 
                 {Array.isArray(knowbaseVersionData) && shouldToolsShow && knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
                     <React.Fragment>
@@ -121,16 +121,16 @@ const KnowledgebaseList = ({ params }) => {
                             <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."}>
                                 <p className="label-text font-medium whitespace-nowrap mb-2 info">KnowledgeBase</p>
                             </InfoTooltip>
-                            <div className="dropdown dropdown-bottom-end">
+                            <div className="dropdown dropdown-right">
                                 <button
                                     tabIndex={0}
-                                    className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-7 mb-2"
+                                    className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-14 mb-2"
                                 >
                                     <AddIcon className="w-4 h-4" />
-                                    Add Knowledgebase
+                                    Add 
                                 </button>
                                 {!tutorialState?.showTutorial && (
-                                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto overflow-x-hidden pb-1 right-4">
+                                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high mb-2 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto overflow-x-hidden pb-1 right-4">
                                         <div className='flex flex-col gap-2 w-full'>
                                             <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
                                             <input
@@ -188,7 +188,7 @@ const KnowledgebaseList = ({ params }) => {
                         <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
                             <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
                             <span className='label-text-alt text-xs leading-tight'>
-                                {`The ${modelName} does not support KnowledgeBase Querying`}
+                                {`The ${model} does not support KnowledgeBase Querying`}
                             </span>
                         </div>
                     }
@@ -200,7 +200,7 @@ const KnowledgebaseList = ({ params }) => {
                     <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
                 )}
                 {!tutorialState?.showTutorial && (
-                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto overflow-x-hidden pb-1">
+                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto overflow-x-hidden pb-1 pr-20">
                         <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
                             <input

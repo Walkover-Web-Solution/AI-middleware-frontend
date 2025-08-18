@@ -205,45 +205,49 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
 
                     {/* Responsive layout - side by side on desktop, stacked on mobile */}
                     {/* Desktop layout */}
-                    <div className="hidden md:block my-4">
-                        <div className="flex flex-col gap-4">
+                    {/* Desktop layout */}
+                    <div className="hidden md:block my-0">
+                        <div className="flex flex-col gap-2">
+                            {/* Always rendered lists (only when they have data) */}
                             {[
                                 { Component: EmbedList, condition: !showEmbed },
                                 { Component: ConnectedAgentList, condition: !showConnectAgent },
                                 { Component: KnowledgebaseList, condition: !showKnowledgebase },
                             ].map(({ Component, condition }, index) =>
                                 condition ? (
-                                    // Full width row if length > 0
-                                    <div key={index}>
+                                    <div key={index} className="pb-2 border-b border-gray-200 last:border-b-0">
                                         <Component params={params} />
-                                        <hr className="my-4" />
                                     </div>
                                 ) : null
                             )}
 
-                            {/* Row for remaining ones with length = 0 */}
-                            <div className="grid grid-cols-3 gap-4">
+                            {/* Render empty ones side-by-side in a compact grid */}
+                            <div className="grid grid-cols-3 gap-2">
                                 {[
                                     { Component: EmbedList, condition: showEmbed },
                                     { Component: ConnectedAgentList, condition: showConnectAgent },
                                     { Component: KnowledgebaseList, condition: showKnowledgebase },
                                 ].map(({ Component, condition }, index) =>
-                                    condition ? <Component key={index} params={params} /> : null
+                                    condition ? (
+                                            <Component params={params} />
+                                    ) : null
                                 )}
                             </div>
                             <hr className="my-4" />
 
+
                         </div>
                     </div>
+
 
                     {/* Mobile layout */}
                     <div className="block md:hidden">
                         <EmbedList params={params} />
-                        <hr className="my-4" />
+                        <hr className="my-0" />
                         <ConnectedAgentList params={params} />
-                        <hr className="my-4" />
+                        <hr className="my-0" />
                         <KnowledgebaseList params={params} />
-                        <hr className="my-4" />
+                        <hr className="my-0" />
                     </div>
 
                     <PrebuiltToolsList params={params} />
@@ -253,7 +257,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 {shouldPromptShow && (
                     <div className="flex flex-col items-start gap-2">
                         <button
-                            className="flex items-center gap-2 px-1 py-2 rounded-md bg-gradient-to-r from-blue-800 to-orange-600 text-sm text-transparent bg-clip-text hover:opacity-80 transition-opacity"
+                            className="flex items-center gap-2  rounded-md bg-gradient-to-r from-blue-800 to-orange-600 text-sm text-transparent bg-clip-text hover:opacity-80 transition-opacity"
                             onClick={handleGetRecommendations}
                             disabled={isLoadingRecommendations}
                         >

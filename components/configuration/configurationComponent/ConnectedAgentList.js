@@ -194,7 +194,7 @@ const ConnectedAgentList = ({ params }) => {
 
     return (
         <div>
-            <div className="label flex-col items-start mb-2">
+            <div className="label flex-col items-start mb-0">
                 {shouldToolsShow && Object.keys(connect_agents).length > 0 && (
                     <>
                         <div className="flex items-center gap-2 dropdown dropdown-bottom-end">
@@ -205,10 +205,10 @@ const ConnectedAgentList = ({ params }) => {
                             <div>
                                 <button
                                     tabIndex={0}
-                                    className="flex  items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-20 mb-2"
+                                    className="flex  items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-28 mb-2"
                                 >
                                     <AddIcon className="w-4 h-4" />
-                                    Add Agent
+                                    Add 
                                 </button>
                             </div>
                                 <ConnectedAgentListSuggestion 
