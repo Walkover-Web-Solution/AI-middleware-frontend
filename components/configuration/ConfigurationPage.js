@@ -243,11 +243,11 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     {/* Mobile layout */}
                     <div className="block md:hidden">
                         <EmbedList params={params} />
-                        <hr className="my-0" />
+                        <hr className="my-4" />
                         <ConnectedAgentList params={params} />
-                        <hr className="my-0" />
+                        <hr className="my-4" />
                         <KnowledgebaseList params={params} />
-                        <hr className="my-0" />
+                        <hr className="my-4" />
                     </div>
 
                     <PrebuiltToolsList params={params} />

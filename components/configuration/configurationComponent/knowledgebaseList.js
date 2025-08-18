@@ -174,11 +174,11 @@ const KnowledgebaseList = ({ params }) => {
             {!Array.isArray(knowbaseVersionData) || !knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
                 <>
                 <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} >
-                    <p className="label-text info mb-2">Knowledgebase Configuration</p>
+                    <p className="label-text info mb-0">Knowledgebase Configuration</p>
                 </InfoTooltip>
             <div className="dropdown dropdown-bottom ">
                 <div className='flex items-center gap-2'>
-                    <button tabIndex={0} className="btn btn-outline btn-sm mt-0"
+                    <button tabIndex={0} className="btn btn-outline btn-sm "
                         disabled={!shouldToolsShow}
                         onClick={() => handleTutorial()}>
                         <AddIcon size={16} />Connect Knowledgebase
