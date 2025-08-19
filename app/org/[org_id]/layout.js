@@ -19,12 +19,12 @@ import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 import { getApiKeyGuideAction, getTutorialDataAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
-
+import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
@@ -46,7 +46,6 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
-  
   useEffect(() => {
     if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(getTutorialDataAction()); 
@@ -56,9 +55,11 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       dispatch(getApiKeyGuideAction()); 
     }
   }, [pathName]);
-
   useEffect(() => {
     const updateUserMeta = async () => {
+      const reference_id = localStorage.getItem("reference_id");
+  
+      // If user meta is null, initialize onboarding meta
       if (currentUser?.meta === null) {
         const updatedUser = {
           ...currentUser,
@@ -75,12 +76,41 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
             },
           },
         };
-        await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+        dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+      }
+  
+      // If reference_id exists but user has no reference_id in meta
+      if (reference_id && !currentUser?.meta?.reference_id) {
+        try {
+          const data = await dispatch(
+            storeMarketingRefUserAction({
+              ref_id: reference_id,
+              client_id: currentUser.id,
+              client_email: currentUser.email,
+              client_name: currentUser.name,
+              created_at: currentUser.created_at,
+            })
+          );
+  
+          if (data?.status) {
+            const updatedUser = {
+              ...currentUser,
+              meta: {
+                ...currentUser.meta,
+                reference_id: reference_id,
+              },
+            };
+            dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+          }
+        } catch (err) {
+          console.error("Error storing marketing ref:", err);
+        }
       }
     };
-
+  
     updateUserMeta();
-  }, []);
+  }, [currentUser, dispatch]);
+  
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
