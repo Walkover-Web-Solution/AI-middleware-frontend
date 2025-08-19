@@ -80,7 +80,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       }
   
       // If reference_id exists but user has no reference_id in meta
-      if (reference_id && currentUser?.meta?.reference_id) {
+      if (reference_id && !currentUser?.meta?.reference_id) {
         try {
           const data = await dispatch(
             storeMarketingRefUserAction({
