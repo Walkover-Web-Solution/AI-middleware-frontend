@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Modal from "@/components/UI/Modal";
+import InfoTooltip from "@/components/InfoTooltip";
 
 function FunctionParameterModal({
   name = "",
@@ -425,7 +426,7 @@ function FunctionParameterModal({
 
   return (
     <Modal MODAL_ID={Model_Name}>
-      <div className="modal-box w-11/12 max-w-6xl">
+      <div className="modal-box w-11/12 max-w-6xl overflow-x-hidden">
         <div className="flex flex-row justify-between mb-3">
           <span className="flex flex-row items-center gap-4">
             <h3 className="font-bold text-lg">Configure fields</h3>
@@ -525,6 +526,25 @@ function FunctionParameterModal({
               here
             </a>
           </p>
+          {name==='Agent'&&
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
+                <label className="label info">
+                  Agent’s Thread ID
+                </label>
+              </InfoTooltip>
+              <input
+                type="checkbox"
+                className="toggle"
+                onChange={(e) => {
+                  setToolData({ ...toolData, thread_id: e.target.checked });
+                  setIsModified(true);
+                }}
+                checked={toolData?.thread_id}
+                title="Toggle to include thread_id while calling function"
+              />
+            </div>
+          }
           {isTextareaVisible && (
             <p
               className="cursor-pointer label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
