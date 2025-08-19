@@ -14,14 +14,12 @@ import EmbedList from "./configurationComponent/embedList";
 import InputConfigComponent from "./configurationComponent/inputConfigComponent";
 import ModelDropdown from "./configurationComponent/modelDropdown";
 import PreEmbedList from "./configurationComponent/preEmbedList";
-import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
-import ToolCallCount from "./configurationComponent/toolCallCount";
-import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/utils/enums";
+import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
 import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import TriggersList from "./configurationComponent/TriggersList";
@@ -30,6 +28,7 @@ import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import Protected from "../protected";
+import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
 
 const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef }) => {
     const router = useRouter();
@@ -110,14 +109,14 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             <ModelDropdown params={params} />
             <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
             <AdvancedParameters params={params} />
+            
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
                     <AddVariable params={params} />
+                    <AdvancedConfiguration params={params} bridgeType={bridgeType} modelType={modelType} />
                     <GptMemory params={params} />
-                    <ToolCallCount params={params} />
                 </>
             )}
-            {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
         </>
     ), [bridgeType, modelType, params, modelName]);
     const renderChatbotConfigView = useMemo(() => () => (
