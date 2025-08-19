@@ -62,7 +62,8 @@ const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
           </div>
 
           <div className="flex-1 overflow-auto p-6">
-            <div className="bg-base-200 rounded-lg p-6 h-auto overflow-auto">
+            <div className="bg-base-200 rounded-lg p-6 h-auto overflow-auto relative">
+              <CopyButton data={JSON.stringify(modalContent, null, 2)} btnStyle="text-sm"/>
               {modalContent && Object.entries(modalContent).map(([key, value]) => (
                 <div key={key} className="mb-6 last:mb-0">
                   <h4 className="text-lg font-semibold mb-2">{key}</h4>
@@ -71,7 +72,6 @@ const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
                       {value.map((item, index) => (
                         <li key={index} className="break-words">
                           <div className="bg-base-100 p-4 rounded-lg shadow-inner break-words whitespace-pre-wrap relative">
-                            <CopyButton data={Array.isArray(value) ? JSON.stringify(value, null, 2) : (typeof value === 'object' && value !== null ? JSON.stringify(value, null, 2) : String(value))} btnStyle="text-sm"  />
                             {typeof item === 'object' && item !== null && key === 'messages' ? (
                               renderFlattenedMessage(item)
                             ) : (
@@ -85,7 +85,6 @@ const ChatAiConfigDeatilViewModal = ({ modalContent }) => {
                     </ul>
                   ) : (
                     <div className="bg-base-100 p-4 rounded-lg shadow-inner relative">      
-                    <CopyButton data={Array.isArray(value) ? JSON.stringify(value, null, 2) : (typeof value === 'object' && value !== null ? JSON.stringify(value, null, 2) : String(value))} btnStyle="text-sm " />
                       {typeof value === 'object' && value !== null ? (
                         <pre className="text-base-content/80 break-words whitespace-pre-wrap">
                           {JSON.stringify(value, null, 2)}
