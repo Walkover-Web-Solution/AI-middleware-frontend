@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateIntegrationDataAction } from "@/store/action/integrationAction";
 import GenericTable from "../table/table";
+import CopyButton from "../copyButton/copyButton";
 
 // Configuration Schema - easily extensible
 const CONFIG_SCHEMA = [
@@ -169,6 +170,7 @@ const ConfigSection = ({ title, configs, configuration, onChange }) => {
   );
 };
 
+
 function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   const dispatch = useDispatch();
   const [copied, setCopied] = useState({ 
@@ -286,15 +288,6 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     return groups;
   }, {});
 
-  const CopyButton = ({ data, onCopy, copied: isCopied }) => (
-    <button
-      onClick={onCopy}
-      className={`btn btn-sm btn-ghost absolute top-2 right-2 text-base-100 ${isCopied ? 'btn-success' : ''}`}
-    >
-      {isCopied ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
-      {isCopied ? 'Copied!' : 'Copy'}
-    </button>
-  );
 
   const jwtPayload = `{
   "org_id": "${data?.org_id}",
