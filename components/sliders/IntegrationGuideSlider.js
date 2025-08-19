@@ -10,6 +10,9 @@ import { toggleSidebar } from "@/utils/utility";
 
 function GuideSlider({ params, bridgeType }) {
   const [activeTab, setActiveTab] = useState(bridgeType != "trigger" ? bridgeType : "chatbot");
+  useEffect(()=>{
+    setActiveTab(bridgeType != "trigger" ? bridgeType : "chatbot");
+  },[bridgeType])
   const { slugName } = useCustomSelector((state) => ({
     slugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
 }));
@@ -63,7 +66,7 @@ function GuideSlider({ params, bridgeType }) {
               </button>
             ))}
           </div>
-          <div className="overflow-y-auto h-[calc(100vh-180px)] scrollbar-hide rounded-lg bg-base-100 p-4 shadow-sm">
+          <div className="overflow-y-auto h-full scrollbar-hide rounded-lg bg-base-100 p-4 shadow-sm">
             {renderTabContent()}
           </div>
         </div>
