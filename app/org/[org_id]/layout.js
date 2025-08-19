@@ -76,7 +76,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
             },
           },
         };
-        dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+        await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
       }
   
       // If reference_id exists but user has no reference_id in meta
@@ -100,7 +100,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
                 reference_id: reference_id,
               },
             };
-            dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+            await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
           }
         } catch (err) {
           console.error("Error storing marketing ref:", err);
@@ -109,7 +109,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     };
   
     updateUserMeta();
-  }, [currentUser, dispatch]);
+  }, []);
   
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
