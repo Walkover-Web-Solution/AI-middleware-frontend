@@ -9,6 +9,7 @@ import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import { isEqual } from 'lodash';
 import InfoTooltip from '@/components/InfoTooltip';
+import { AddIcon } from '@/components/Icons';
 
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
@@ -118,7 +119,7 @@ const EmbedList = ({ params }) => {
     };
 
     return (bridge_functions &&
-        <div>
+        <div >
             <FunctionParameterModal
                 name="Tool"
                 functionId={functionId}
@@ -131,24 +132,44 @@ const EmbedList = ({ params }) => {
                 setToolData={setToolData}
                 function_details={functionData}
                 variables_path={variables_path}
-                functionName={function_name} 
+                functionName={function_name}
                 setVariablesPath={setVariablesPath}
                 variablesPath={variablesPath}
             />
-            <div className="label flex-col items-start mb-2">
+            <div className="label flex-col items-start mb-2 dropdown dropdown-bottom">
                 {
                     shouldToolsShow && bridgeFunctions.length > 0 &&
                     <>
-                        <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation}  tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
-                            <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
-                        </InfoTooltip>
+                        <div className="flex items-center gap-2">
+                            <InfoTooltip
+                                video={ONBOARDING_VIDEOS.FunctionCreation}
+                                tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks."
+                            >
+                                <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
+                            </InfoTooltip>
+
+                            <div>
+                                <button
+                                    tabIndex={0}
+                                    className="flex  items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-32 mb-2 "
+                                >
+                                    <AddIcon className="w-4 h-4" />
+                                    Add 
+                                </button>
+                               
+                            </div>
+                        <EmbedListSuggestionDropdownMenu name={"Function"} params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />
+                        </div>
+
                         <div className="flex flex-wrap gap-4">
                             <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" />
                         </div>
                     </>
                 }
             </div>
+            {bridgeFunctions.length === 0 &&
             <EmbedListSuggestionDropdownMenu name={"Function"} params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />
+            }
         </div>
     );
 };
