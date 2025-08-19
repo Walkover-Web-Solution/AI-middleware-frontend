@@ -647,7 +647,7 @@ export const updateFunctionApi = async ({ function_id, dataToSend }) => {
 export const storeMarketingRefUser = async (data) => {
   try {
     const response = await axios.post("https://flow.sokt.io/func/scribmgUXqSE", data);
-    return response.data;
+    return response;
   } catch (error) {
     console.error(error);
     throw new Error(error);

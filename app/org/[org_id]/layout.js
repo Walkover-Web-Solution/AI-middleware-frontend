@@ -55,46 +55,62 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       dispatch(getApiKeyGuideAction()); 
     }
   }, [pathName]);
-  useEffect(async() => {
-    const reference_id=localStorage.getItem("reference_id");
-    if (currentUser?.meta === null) {
-      const updatedUser = {
-        ...currentUser,
-        meta: {
-          onboarding: {
-            bridgeCreation: true,
-            FunctionCreation: true,
-            knowledgeBase: true,
-            Addvariables: true,
-            AdvanceParameter: true,
-            PauthKey: true,
-            CompleteBridgeSetup: true,
-            TestCasesSetup:true
+  useEffect(() => {
+    const updateUserMeta = async () => {
+      const reference_id = localStorage.getItem("reference_id");
+  
+      // If user meta is null, initialize onboarding meta
+      if (currentUser?.meta === null) {
+        const updatedUser = {
+          ...currentUser,
+          meta: {
+            onboarding: {
+              bridgeCreation: true,
+              FunctionCreation: true,
+              knowledgeBase: true,
+              Addvariables: true,
+              AdvanceParameter: true,
+              PauthKey: true,
+              CompleteBridgeSetup: true,
+              TestCasesSetup:true
+            },
           },
-        },
-      };
-      dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
-    }
-    if (reference_id && !currentUser?.meta?.reference_id) {
-     const data= await dispatch(storeMarketingRefUserAction({
-         ref_id: reference_id,
-            client_id: currentUser.id,
-         client_email: currentUser.email,
-         client_name: currentUser.name,
-         created_at: currentUser.created_at,
-       }));
-    if(data==="data is available"){
-    const updatedUser = {
-      ...currentUser,
-        meta: {
-          ...currentUser.meta,
-          reference_id: reference_id
-        },
-      };
-      dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
-    }
-    }
-  }, []);
+        };
+        dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+      }
+  
+      // If reference_id exists but user has no reference_id in meta
+      if (reference_id && !currentUser?.meta?.reference_id) {
+        try {
+          const data = await dispatch(
+            storeMarketingRefUserAction({
+              ref_id: reference_id,
+              client_id: currentUser.id,
+              client_email: currentUser.email,
+              client_name: currentUser.name,
+              created_at: currentUser.created_at,
+            })
+          );
+  
+          if (data?.status) {
+            const updatedUser = {
+              ...currentUser,
+              meta: {
+                ...currentUser.meta,
+                reference_id: reference_id,
+              },
+            };
+            dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+          }
+        } catch (err) {
+          console.error("Error storing marketing ref:", err);
+        }
+      }
+    };
+  
+    updateUserMeta();
+  }, [currentUser, dispatch]);
+  
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
