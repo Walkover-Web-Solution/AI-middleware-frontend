@@ -1,5 +1,5 @@
 import { getSingleMessage } from "@/config";
-import { CircleAlertIcon, BotIcon, ChevronDownIcon, FileClockIcon, ParenthesesIcon, PencilIcon, AddIcon, SquareFunctionIcon, UserIcon, CodeMessageIcon, BotMessageIcon } from "@/components/Icons";
+import { CircleAlertIcon, BotIcon, ChevronDownIcon, FileClockIcon, ParenthesesIcon, PencilIcon, AddIcon, SquareFunctionIcon, UserIcon, CodeMessageIcon, BotMessageIcon, FileTextIcon } from "@/components/Icons";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -9,6 +9,107 @@ import ToolsDataModal from "./toolsDataModal";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { openModal } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
+import { PdfIcon } from "@/icons/pdfIcon";
+import { ExternalLink } from "lucide-react";
+
+// Helper function to normalize image data with enhanced fallback
+const normalizeImageUrls = (imageData) => {
+  if (!imageData) return [];
+  
+  // If it's already an array, return filtered valid images
+  if (Array.isArray(imageData)) {
+    return imageData.filter(img => {
+      if (!img) return false;
+      return img.permanent_url;
+    });
+  }  
+  return [];
+};
+
+// Enhanced fallback component with better UX
+const ImageFallback = ({ type = 'large', url = '', error = 'failed_to_load' }) => {
+  const isLarge = type === 'large';
+  const containerSize = isLarge ? 'w-[180px] h-[180px]' : 'w-16 h-16';
+  
+  const getErrorMessage = () => {
+    switch (error) {
+      case 'failed_to_load':
+        return 'Failed to Load image';
+      default:
+        return 'Preview unavailable';
+    }
+  };
+
+  const getIcon = () => {
+    return (
+      <FileTextIcon />
+    );
+  };
+  
+  return (
+    <div className={`flex items-center justify-center bg-base-200/50 border border-base-300/50 rounded-lg ${containerSize} group hover:bg-base-200/70 transition-colors duration-200`}>
+      <div className="text-center p-3">
+        <div className="mb-2 flex justify-center">
+          {getIcon()}
+        </div>
+        {isLarge && (
+          <>
+            <p className="text-sm text-base-content/60 font-medium mb-2">
+              {getErrorMessage()}
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Enhanced image component with loading states
+const EnhancedImage = ({ src, alt, width, height, className, type = 'large', onError, onLoad }) => {
+  const [imageState, setImageState] = useState('loading');
+  const [hasError, setHasError] = useState(false);
+
+  const handleImageLoad = () => {
+    setImageState('loaded');
+    if (onLoad) onLoad();
+  };
+
+  const handleImageError = (e) => {
+    setImageState('error');
+    setHasError(true);
+    if (onError) onError(e);
+  };
+
+  if (hasError) {
+    return <ImageFallback type={type} url={src} error="failed_to_load" />;
+  }
+
+  return (
+    <div className="relative group">
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        className={`${className} transition-opacity duration-200 ${imageState === 'loading' ? 'opacity-0' : 'opacity-100'} hover:opacity-90 rounded-lg`}
+        loading="lazy"
+        onLoad={handleImageLoad}
+        onError={handleImageError}
+      />
+      {imageState === 'loaded' && type === 'large' && (
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button 
+            onClick={() => window.open(src, '_blank')}
+            className="btn btn-xs btn-circle btn-ghost bg-base-100/80 hover:bg-base-100"
+            title="Open in new tab"
+          >
+            <ExternalLink size={14} className="text-base-primary"/>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integrationData, params, threadRefs, searchMessageId, setSearchMessageId, handleAddTestCase, setModalInput }) => {
   const [messageType, setMessageType] = useState(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
@@ -173,9 +274,48 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     });
     setTimeout(() => window.openChatbot(), 100)
   }
+
   const handleUserButtonClick = (value) => {
     threadHandler(item.thread_id, item, value)
   }
+
+  // Render assistant images with enhanced fallback
+  const renderAssistantImages = () => {
+    const imageUrls = normalizeImageUrls(item?.image_urls || item?.image_url);
+    
+    if (imageUrls.length === 0) return null;
+    
+    return (
+      <div className="mb-4">
+        <div className="flex flex-wrap gap-3">
+          {imageUrls.map((attachment, index) => {
+            const imageUrl = attachment.permanent_url;
+            
+            if (!imageUrl) {
+              return (
+                <div key={`assistant-img-fallback-${index}`} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
+                  <ImageFallback type="large" error="failed_to_load" />
+                </div>
+              );
+            }
+            
+            return (
+              <div key={`assistant-img-${index}`} className="relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
+                <EnhancedImage
+                  src={imageUrl}
+                  alt={`Assistant attachment ${index + 1}`}
+                  width={300}
+                  height={300}
+                  className="max-w-full max-h-96 w-auto h-auto object-cover"
+                  type="large"
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div key={`item-id-${item?.id}`} id={`message-${messageId}`} ref={(el) => (threadRefs.current[messageId] = el)} className="">
@@ -201,7 +341,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         <div className="show-on-hover" >
           <div className={`chat ${item.role === "assistant" ? "chat-start" : "chat-end"}`}>
             <div className="chat-image avatar flex justify-center items-center">
-              <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center">
+              <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors">
                 <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                   {item.role === "assistant" ? (
                     <div>
@@ -264,70 +404,89 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             </div>
             <div className="chat-header flex gap-4 items-center mb-1">
-              {messageType === 2 && <p className="text-xs opacity-50">Edited</p>}
+              {messageType === 2 && <p className="text-xs opacity-50 badge badge-sm badge-outline">Edited</p>}
             </div>
 
             <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1 `}
               style={{ overflowWrap: "anywhere" }}>
-              <div className={`${item.role === "assistant" ? "bg-base-200  text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300`}>
-                {item?.role === "assistant" && item?.image_url && (
-                  <div className="chat chat-start">
-                    <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
-                      <Image
-                        src={item.image_url}
-                        alt="Attached"
-                        width={300} // Adjust width as needed
-                        height={300} // Adjust height as needed
-                        className="max-w-full max-h-96 w-auto h-auto rounded-md"
-                        loading="lazy"
-                      />
+              <div className={`${item.role === "assistant" ? "bg-base-200 text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300 relative group`}>
+                
+                {/* Render assistant images with enhanced fallback */}
+                {item?.role === "assistant" && renderAssistantImages()}
+                
+                {/* Render user attachments with enhanced UI */}
+                {item?.role === "user" && item?.urls?.length > 0 && (
+                  <div className="mb-3">
+                    <div className="flex flex-wrap gap-2">
+                      {item.urls.map((url, index) => {
+                        if (!url) {
+                          return (
+                            <div key={`user-attachment-empty-${index}`}>
+                              <ImageFallback type="small" error="no_url" />
+                            </div>
+                          );
+                        }
+                        
+                        const isPdf = url.endsWith(".pdf");
+                        return (
+                          <div key={`user-attachment-${index}`} className="pr-4">
+                            {isPdf ? (
+                              <a 
+                                href={url} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="flex items-center space-x-2 p-2 bg-base-200 rounded-lg hover:bg-base-300 group"
+                              >
+                                <PdfIcon height={20} width={20} />
+                                <span className="text-sm font-medium max-w-[5rem] truncate text-primary">
+                                  {truncate(url.split('/').pop() || 'PDF', 20)}
+                                </span>
+                                <ExternalLink className="text-base-conten" size={14}/>
+                              </a>
+                            ) : (
+                              <EnhancedImage
+                                src={url}
+                                alt={`User attachment ${index + 1}`}
+                                width={64}
+                                height={64}
+                                className="max-w-full max-h-16 w-auto h-auto object-cover"
+                                type="small"
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
-                {item?.role === "user" && (
-                  <div className="flex flex-wrap">
-                    {item?.urls?.map((url, index) => (
-                      <div key={index} className="chat chat-end flex-grow-1">
-                        <div className="">
-                          <Image
-                            src={url}
-                            alt="Attached"
-                            width={64} // Adjust width as needed
-                            height={64} // Adjust height as needed
-                            className="max-w-full max-h-16 w-auto h-auto rounded-md"
-                            loading="lazy"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+
+                {/* First attempt error section */}
                 {item?.firstAttemptError && item?.role === "assistant" && (
-                  <div className="collapse bg-base-200/50  p-0">
+                  <div className="collapse bg-base-200/50 p-0 mb-4 border border-base-300/50 rounded-lg">
                     <input
                       type="checkbox"
                       className="peer"
-                    // id={`errorCollapse-${item.id || index}`}
+                      id={`errorCollapse-${item.id || index}`}
                     />
                     <label
                       htmlFor={`errorCollapse-${item.id || index}`}
-                      className="collapse-title text-sm font-medium cursor-pointer flex items-center justify-between  hover:bg-base-300/50 transition-colors p-0"
+                      className="collapse-title text-sm font-medium cursor-pointer flex items-center justify-between hover:bg-base-300/50 transition-colors p-3"
                     >
-                      <span className="flex items-center gap-4">
+                      <span className="flex items-center gap-3">
                         <CircleAlertIcon className="w-4 h-4 text-warning" />
-                        <span className="font-light">Retry Attempt with {item?.model}</span>
-                        <ChevronDownIcon className="w-4 h-4 transform peer-checked:rotate-180 transition-transform" />
+                        <span className="font-medium">Retry Attempt with {item?.fallback_model}</span>
                       </span>
-
+                      <ChevronDownIcon className="w-4 h-4 transform peer-checked:rotate-180 transition-transform" />
                     </label>
-                    <div className="collapse-content bg-base-100/50 rounded-b-md text-sm  border-t border-base-300">
-                      <div className="text-error font-mono break-words bg-base-200/50 rounded-md p-2">
-                        <pre className="whitespace-pre-wrap">{item?.firstAttemptError}</pre>
+                    <div className="collapse-content bg-base-100/50 rounded-b-lg text-sm border-t border-base-300/50">
+                      <div className="text-error font-mono break-words bg-error/10 rounded-md p-3 m-3">
+                        <pre className="whitespace-pre-wrap text-xs">{item?.firstAttemptError}</pre>
                       </div>
                     </div>
                   </div>
                 )}
 
+                {/* Message content */}
                 <ReactMarkdown components={{
                   code: ({ node, inline, className, children, ...props }) => (
                     <CodeBlock
@@ -339,104 +498,113 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     </CodeBlock>
                   )
                 }}>
-                  {!item.image_url && getMessageToDisplay()}
+                  {getMessageToDisplay()}
                 </ReactMarkdown>
-                {!item.image_url && item?.role === 'assistant' && !item?.fromRTLayer && (
-                  <div className="flex gap-2 tooltip absolute top-2 right-2 text-sm cursor-pointer" data-tip="Edit response">
-                    <PencilIcon
-                      size={16}
+                
+                {/* Edit button for assistant messages */}
+                {item?.role === 'assistant' && !item?.fromRTLayer && !item?.image_urls && (
+                  <div className="tooltip absolute top-2 right-2 text-sm cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" data-tip="Edit response">
+                    <button 
+                      className="btn btn-xs btn-circle btn-ghost hover:btn-primary"
                       onClick={handleEdit}
-                    />
+                    >
+                      <PencilIcon
+                        size={14}
+                      />
+                    </button>
                   </div>
                 )}
-                {item?.role === 'assistant' && <div className=" absolute bottom-[-30px] left-0 flex gap-2">
-                  <button
-                    className="btn btn-xs see-on-hover"
-                    onClick={() => handleAddTestCase(item, index)}
-                  >
-                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                
+                {/* Action buttons for assistant messages */}
+                {item?.role === 'assistant' && (
+                  <div className="absolute bottom-[-35px] left-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      className="btn btn-xs btn-outline hover:btn-primary see-on-hover"
+                      onClick={() => handleAddTestCase(item, index)}
+                    >
                       <AddIcon className="h-3 w-3" />
                       <span>Test Case</span>
-                    </div>
-                  </button>
-                  <button
-                    className="btn btn-xs see-on-hover"
-                    onClick={() => handleAskAi(item)}
-                  >
-                    <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                    </button>
+                    <button
+                      className="btn btn-xs btn-outline hover:btn-primary see-on-hover"
+                      onClick={() => handleAskAi(item)}
+                    >
                       <BotMessageIcon className="h-3 w-3" />
                       <span>Ask AI</span>
-                    </div>
-                  </button>
-                </div>}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
-            {item?.role === "user" && <div className="flex flex-row-reverse gap-2 m-1 overflow-wrap: anywhere items-center">
-              <time className="text-xs opacity-50 chat-end">
-                {formatDateAndTime(item.createdAt)}
-              </time>
-              <div className="flex gap-1">
-                <button
-                  className="btn btn-xs see-on-hover"
-                  onClick={() => handleUserButtonClick("AiConfig")}
-                >
-                  <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+            
+            {/* User message footer with timestamp and actions */}
+            {item?.role === "user" && (
+              <div className="flex flex-row-reverse gap-2 m-1 overflow-wrap: anywhere items-center">
+                <time className="text-xs opacity-50 chat-end">
+                  {formatDateAndTime(item.createdAt)}
+                </time>
+                <div className="flex gap-1 opacity-70 hover:opacity-100 transition-opacity">
+                  <button
+                    className="btn btn-xs hover:btn-primary see-on-hover"
+                    onClick={() => handleUserButtonClick("AiConfig")}
+                  >
                     <SquareFunctionIcon className="h-3 w-3" />
-                    <span>Ai config</span>
-                  </div>
-                </button>
-                <button
-                  className="btn btn-xs see-on-hover"
-                  onClick={() => handleUserButtonClick("variables")}
-                >
-                  <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                    <span>AI Config</span>
+                  </button>
+                  <button
+                    className="btn btn-xs hover:btn-primary see-on-hover"
+                    onClick={() => handleUserButtonClick("variables")}
+                  >
                     <ParenthesesIcon className="h-3 w-3" />
                     <span>Variables</span>
-                  </div>
-                </button>
-                <button
-                  className="btn btn-xs see-on-hover"
-                  onClick={() => handleUserButtonClick("system Prompt")}
-                >
-                  <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                  </button>
+                  <button
+                    className="btn btn-xs  hover:btn-primary see-on-hover"
+                    onClick={() => handleUserButtonClick("system Prompt")}
+                  >
                     <FileClockIcon className="h-3 w-3" />
                     <span>System Prompt</span>
-                  </div>
-                </button>
-                <button
-                  className="btn btn-xs see-on-hover"
-                  onClick={() => handleUserButtonClick("more")}
-                >
-                  <div className="flex items-center gap-1 text-xs font-medium px-1 py-1 rounded-md text-primary hover:text-primary/80 transition-colors">
+                  </button>
+                  <button
+                    className="btn btn-xs hover:btn-primary see-on-hover"
+                    onClick={() => handleUserButtonClick("more")}
+                  >
                     <AddIcon className="h-3 w-3" />
                     <span>More...</span>
-                  </div>
-                </button>
+                  </button>
+                </div>
               </div>
-            </div>}
+            )}
           </div>
-          {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && <div className="flex justify-center items-center my-4">
-            <p className="border-t border-base-300 w-full"></p>
-            <p className="bg-error text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
-              History cleared
-            </p>
-            <p className="border-t border-base-300 w-full"></p>
-          </div>}
-          {
-            item?.error && (
-              <div className="chat chat-start break-all break-words">
-                <div>
-                  <div className="flex  flex-row-reverse items-end justify-end gap-1">
-                    <div className="bg-base-200 text-error pr-10 chat-bubble transition-all ease-in-out duration-300">
+          
+          {/* History cleared indicator */}
+          {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && (
+            <div className="flex justify-center items-center my-6">
+              <div className="divider divider-error">
+                <span className="badge badge-error badge-sm">History cleared</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Error message display */}
+          {item?.error && (
+            <div className="chat chat-start break-all break-words">
+              <div>
+                <div className="flex flex-row-reverse items-end justify-end gap-1">
+                  <div className="bg-error/10 text-error border border-error/20 pr-10 chat-bubble transition-all ease-in-out duration-300">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CircleAlertIcon className="w-4 h-4" />
                       <span className="font-bold">Error</span>
-                      <p>{item?.error}</p>
                     </div>
-                    <div className="w-100 p-3 rounded-full bg-base-300 flex justify-center items-center"><BotIcon size={20} /></div>
+                    <p className="text-sm">{item?.error}</p>
+                  </div>
+                  <div className="w-100 p-3 rounded-full bg-error/20 flex justify-center items-center">
+                    <BotIcon size={20} />
                   </div>
                 </div>
               </div>
-            )
-          }
+            </div>
+          )}
         </div>
       )}
 

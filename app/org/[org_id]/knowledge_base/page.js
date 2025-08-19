@@ -113,7 +113,7 @@ const Page = ({ params }) => {
               <button className="btn" onClick={() => toggleSidebar("knowledgeBase-integration-slider","right")}>
                 <BookIcon /> Integration Guide
               </button>
-              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>+ create knowledge base</button>
+              <button className="btn btn-primary" onClick={() => {if(window.openRag){window.openRag()} else {openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)}}}>+ create knowledge base</button>
             </div>
           </div>
         </MainLayout>

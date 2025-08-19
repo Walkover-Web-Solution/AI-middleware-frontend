@@ -77,7 +77,7 @@ const ConnectedAgentList = ({ params }) => {
         setSelectedBridge({ name: name, ...item })
         const {fields, required_params} =(item?.variables && Object.keys(item?.variables)?.length>0) ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
         setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
-        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
+        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params, thread_id: item?.thread_id?item?.thread_id:false })
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
@@ -118,7 +118,8 @@ const ConnectedAgentList = ({ params }) => {
                                 "description": agentTools?.description ? agentTools?.description : selectedBridge?.description,
                                 "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
                                 "agent_variables": selectedBridge?.agent_variables,
-                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
+                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params },
+                                "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false
                             }
                         },
                         agent_status: "1"
@@ -144,9 +145,7 @@ const ConnectedAgentList = ({ params }) => {
     }
 
     const handleAgentClicked = (item) => {
-        console.log(item)
         const bridge = bridgeData?.find((bridge) => bridge?._id === item?.bridge_id)
-        console.log(bridge)
         if (bridge) {
             router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
         }

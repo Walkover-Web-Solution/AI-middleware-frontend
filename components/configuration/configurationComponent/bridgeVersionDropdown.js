@@ -39,10 +39,15 @@ function BridgeVersionDropdown({ params, isEmbedUser }) {
     };
 
     useEffect(() => {
-        if (!params.version && bridgeVersionsArray.length > 0) {
+        if ((!params?.version && bridgeVersionsArray.length > 0) || (!params?.version && publishedVersion.length > 0)) {
             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${publishedVersion?.length > 0 ? publishedVersion : bridgeVersionsArray[0]}`);
+            dispatch(getBridgeVersionAction({ versionId: publishedVersion?.length > 0 ? publishedVersion : bridgeVersionsArray[0], version_description:versionDescriptionRef }));
         }
-    }, [params.version, bridgeVersionsArray]);
+        else{
+            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}`);
+            dispatch(getBridgeVersionAction({ versionId: params.version, version_description:versionDescriptionRef }));
+        }
+    }, [params?.version, bridgeVersionsArray, publishedVersion]);
 
     const handleCreateNewVersion = () => {
         // create new version

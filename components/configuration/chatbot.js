@@ -47,7 +47,7 @@ const Chatbot = ({ params }) => {
   useEffect(() => {
     if (window?.SendDataToChatbot) {
       window.SendDataToChatbot({ 
-        isModelChange: configuration?.model 
+        modelChanged: configuration?.model 
       });
     }
   }, [configuration?.model]);
@@ -55,7 +55,7 @@ const Chatbot = ({ params }) => {
   useEffect(() => {
     if (window?.SendDataToChatbot) {
       window.SendDataToChatbot({ 
-        isServiceChange: service 
+        serviceChanged: service 
       });
     }
   }, [service]);

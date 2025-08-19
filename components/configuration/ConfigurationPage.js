@@ -37,9 +37,10 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const view = searchParams.get('view') || 'config';
     const [currentView, setCurrentView] = useState(view);
 
-    const { bridgeType, modelType, modelName, showGuide, showConfigType } = useCustomSelector((state) => ({
+    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
+        reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt,
         modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
         showGuide: state.userDetailsReducer.userDetails.showGuide,
         showConfigType: state.userDetailsReducer.userDetails.showConfigType,
@@ -54,21 +55,19 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     }, [bridgeType])
 
     useEffect(() => {
-        if ((bridgeType === 'api' || bridgeType === 'chatbot' || bridgeType === 'batch') &&             promptTextAreaRef?.current?.querySelector('textarea')?.value?.trim() === "") {
-            setTimeout(() => {
-                if (promptTextAreaRef?.current) {
-                  promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
-                }
-              }, 500); 
-        
-             setTimeout(() => {
-                const element = promptTextAreaRef?.current?.querySelector('textarea');
-                if (element) {
-                  element.focus();
-                }
-              }, 200); 
-        }
-    }, [bridgeType])
+        const shouldScrollAndFocus = (bridgeType === 'api' || bridgeType === 'chatbot' || bridgeType === 'batch') && reduxPrompt?.trim() === "";
+        if (!shouldScrollAndFocus) return;
+        const timeoutId = setTimeout(() => {
+            const textareaElement = promptTextAreaRef?.current?.querySelector('textarea');
+            if (textareaElement) {
+                promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => {
+                    textareaElement.focus();
+                }, 500);
+            }
+        }, 1000);
+        return () => clearTimeout(timeoutId);
+    }, [bridgeType, reduxPrompt]);
     const handleNavigation = (target) => {
         setCurrentView(target);
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=${target}`);

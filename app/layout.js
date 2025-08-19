@@ -2,6 +2,7 @@ import { Syne } from "next/font/google";
 import "./globals.css";
 import Wrapper from "@/wrapper/Wrapper";
 import Head from "next/head";
+import Script from "next/script";
 
 const inter = Syne({ subsets: ["latin"] });
 
@@ -22,11 +23,28 @@ export default function RootLayout({ children }) {
         <link rel="canonical" href="https://gtwy.ai" />
       </Head>
       <body suppressHydrationWarning>
-        <Wrapper>
-          {children}
-        </Wrapper>
+        {/* Google Tag Manager */}
+        <Script id="gtm-script" strategy="afterInteractive">
+          {`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-PCV9RTTL');
+          `}
+        </Script>
+
+        {/* GTM NoScript Fallback */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-PCV9RTTL"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          ></iframe>
+        </noscript>
+        <Wrapper>{children}</Wrapper>
       </body>
     </html>
   );
 }
-

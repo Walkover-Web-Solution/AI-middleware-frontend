@@ -99,7 +99,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
     const handleGetRecommendations = async () => {
         setIsLoadingRecommendations(true);
         try {
-        if(bridgeApiKey && prompt.promptTextAreaRef && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""){
+        if(bridgeApiKey && promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""){
             const response = await modelSuggestionApi({ versionId: params?.version });
             if (response?.success) {
                 setModelRecommendations({

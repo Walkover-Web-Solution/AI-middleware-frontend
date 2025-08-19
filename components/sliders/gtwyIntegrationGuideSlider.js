@@ -6,6 +6,7 @@ import { generateGtwyAccessTokenAction } from '@/store/action/orgAction';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateIntegrationDataAction } from "@/store/action/integrationAction";
+import GenericTable from "../table/table";
 
 // Configuration Schema - easily extensible
 const CONFIG_SCHEMA = [
@@ -23,6 +24,14 @@ const CONFIG_SCHEMA = [
     label: 'Show Guide',
     description: 'Display helpful user guides',
     defaultValue: false,
+    section: 'Interface Options'
+  },
+  {
+    key: 'showAgentTypeOnCreateAgent',
+    type: 'toggle',
+    label: 'Show Agent Type on Create Agent',
+    description: 'Display agent type on create agent',
+    defaultValue: true,
     section: 'Interface Options'
   },
   {
@@ -246,7 +255,6 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
         config: configuration
       }
       await dispatch(updateIntegrationDataAction(data?.org_id, dataToSend));
-      console.log('Configuration saved successfully:', configuration);
     } catch (error) {
       console.error('Failed to save configuration:', error);
     } finally {
@@ -299,6 +307,8 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     embedToken="Your embed token"
     src="https://app.gtwy.ai/gtwy.js"
     parentId="${configuration.parentId || 'Your_parent_id'}"
+    agent_id= 'Your_agent_id'
+    agent_name= 'Your_agent_name'
    ></script>`;
 
   const helperFunctions = `window.openGtwy() //To open GTWY;
@@ -320,6 +330,27 @@ window.addEventListener('message', (event) => {
     }
 });
 </script>`;
+
+const metaUpdateScript = `
+window.openGtwy({
+    "agent_id": "your_agent_id",
+    "meta": {
+      "meta_data": "your_meta_data"
+    }
+});
+`;
+
+const getDataUsingUserId = () => {
+  return `curl --location '${process.env.NEXT_PUBLIC_SERVER_URL}/gtwyEmbed/getAgents' \
+--header 'Authorization: \'your_embed_token\'''`
+}
+
+const tableData = [
+  ['parentId', 'To open GTWY in a specific container'],
+   ['agent_id', 'To open agent in a specific agent'],
+   ['agent_name', 'To create an agent with a specific name, or redirect if the agent already exists.']
+]
+const tableHeaders = ['Key', 'Description'];
 
   return (
     <aside
@@ -470,6 +501,8 @@ window.addEventListener('message', (event) => {
                       <pre data-prefix=">"><code className="text-error">  embedToken=</code><code className="text-warning">"Your embed token"</code></pre>
                       <pre data-prefix=">"><code className="text-error">  src=</code><code className="text-warning">"https://app.gtwy.ai/gtwy.js"</code></pre>
                       <pre data-prefix=">"><code className="text-error">  parentId=</code><code className="text-warning">"{'Your_parent_id'}"</code></pre>
+                      <pre data-prefix=">"><code className="text-error">  agent_id=</code><code className="text-warning">"{'Your_agent_id'}"</code></pre>
+                      <pre data-prefix=">"><code className="text-error">  agent_name=</code><code className="text-warning">"{'Your_agent_name'}"</code></pre>
                       <pre data-prefix=">"><code className="text-error">&gt;&lt;/script&gt;</code></pre>
                     </div>
                     <CopyButton
@@ -479,6 +512,7 @@ window.addEventListener('message', (event) => {
                     />
                   </div>
                 </div>
+                <GenericTable data={tableData} headers={tableHeaders}/>
               </div>
             </div>
 
@@ -531,6 +565,51 @@ window.addEventListener('message', (event) => {
                 </div>
               </div>
             </div>
+
+            <div className="card bg-base-100 border mt-4">
+                <div className="card-body">
+                  <h4 className="card-title text-base">Add Meta Data</h4>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Use this script to add meta data to GTWY </span>
+                    </label>
+                    <div className="relative">
+                      <div className="mockup-code">
+                        <pre data-prefix=">"><code className="text-error">  window.GtwyEmbed.openGtwy({`{"agent_id":"your gtwy agentid" , "meta": {"meta_data": "your_meta_data"}}`})</code></pre>
+                      </div>
+                      <CopyButton
+                        data={metaUpdateScript}
+                        onCopy={() => handleCopy(metaUpdateScript, 'metaUpdate')}
+                        copied={copied.metaUpdate}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card bg-base-100 border mt-4">
+                <div className="card-body">
+                  <h4 className="card-title text-base">Get Agent Data Using User ID</h4>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">Use this script to get data using user id</span>
+                    </label>
+                    <div className="relative">
+                      <div className="mockup-code">
+                        <pre data-prefix=">"><code className="text-error">  {getDataUsingUserId()}</code></pre>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-4">
+                        Note: Pass <code>agent_id="your_agent_id"</code> in the params if you want to get the data of specific agent.
+                      </p>
+                      <CopyButton
+                        data={getDataUsingUserId()}
+                        onCopy={() => handleCopy(getDataUsingUserId(), 'getDataUsingUserId')}
+                        copied={copied.getDataUsingUserId}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
             {/* Event Listener */}
             <div className="card bg-base-100 border">

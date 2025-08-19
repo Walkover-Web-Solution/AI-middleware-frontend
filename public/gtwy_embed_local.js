@@ -39,7 +39,7 @@
                 return {};
             }
 
-            const attributes = ['embedToken', 'hideCloseButton', 'parentId', 'hideFullScreenButton', 'hideHeader', 'defaultOpen', 'slide'];
+            const attributes = ['embedToken', 'hideCloseButton', 'parentId', 'hideFullScreenButton', 'hideHeader', 'defaultOpen', 'slide', 'agent_id', 'agent_name','version_id'];
 
             return attributes.reduce((props, attr) => {
                 if (interfaceScript.hasAttribute(attr)) {
@@ -393,7 +393,7 @@
             }
         }
 
-        openGtwy(agent_id = null) {
+        openGtwy(agent_id = null, meta={}, agent_name=null) {
             if (!this.state.isInitialized) {
                 this.initializeGtwyEmbed().then(() => {
                     this.openGtwy(agent_id); // Retry after initialization
@@ -403,6 +403,14 @@
             if(agent_id)
             {
                 SendDataToGtwyEmbed(agent_id)
+            }
+            if(agent_id && meta)
+            {
+                SendDataToGtwyEmbed({agent_id, meta})
+            }
+            if (agent_name)
+            {
+                SendDataToGtwyEmbed({agent_name})
             }
 
             const gtwyInterfaceEmbed = document.getElementById('gtwyInterfaceEmbed');
@@ -700,10 +708,11 @@
             const iframeComponent = document.getElementById('iframe-component-gtwyInterfaceEmbed');
             if (!iframeComponent) return;
             let encodedData = '';
-            encodedData = encodeURIComponent(JSON.stringify(data.data));
-            //console.log(encodedData);
+            let tempData = data.data;
+            this.state.tempDataToSend?.agent_id && (tempData.agent_id = this.state.tempDataToSend?.agent_id);
+            this.state.tempDataToSend?.agent_name && (tempData.agent_name = this.state.tempDataToSend?.agent_name);
+            encodedData = encodeURIComponent(JSON.stringify(tempData));
             const modifiedUrl = `${this.urls.gtwyUrl}?interfaceDetails=${encodedData}`;
-            //console.log(modifiedUrl);
             iframeComponent.src = modifiedUrl;
 
             this.config = { ...this.config, ...(data?.data?.config || {}) };
@@ -890,15 +899,14 @@
     }
 
     // New GTWY specific functions - FIXED WITH PROPER INITIALIZATION
-    window.openGtwy = (agent_id = null) => {
-        //console.log('window.openGtwy called');
-        gtwyEmbedManager.openGtwy(agent_id);
+    window.openGtwy = ({agent_id = null, meta={}, agent_name=null}) => {
+        gtwyEmbedManager.openGtwy(agent_id, meta, agent_name);
     };
     window.closeGtwy = () => gtwyEmbedManager.closeGtwy();
 
     window.GtwyEmbed = {
         open: () => {
-            gtwyEmbedManager.openGtwy(agent_id = null);
+            gtwyEmbedManager.openGtwy(agent_id = null, meta={}, agent_name=null);
         },
         close: () => {
             gtwyEmbedManager.closeGtwy();
