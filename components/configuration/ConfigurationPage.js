@@ -191,7 +191,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             </div>
         );
     };
-    console.log(connect_agents, 'connect_agents')
 
     const renderSetupView = useMemo(() => () => (
         console.log(showConnectAgent, showEmbed, showKnowledgebase),
