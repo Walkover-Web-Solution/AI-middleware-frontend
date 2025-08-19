@@ -113,10 +113,9 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
-                <AdvancedConfiguration params={params} bridgeType={bridgeType} modelType={modelType} />
                     <AddVariable params={params} />
+                    <AdvancedConfiguration params={params} bridgeType={bridgeType} modelType={modelType} />
                     <GptMemory params={params} />
-                   
                 </>
             )}
         </>

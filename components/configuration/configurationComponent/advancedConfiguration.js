@@ -51,10 +51,10 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
   const handleSelectionChange = useCallback((service, apiKeyId) => {
     setSelectedApiKeys(prev => {
       const updated = { ...prev, [service]: apiKeyId };
-      dispatch(updateBridgeVersionAction({ 
-        bridgeId: params?.id, 
-        versionId: params?.version, 
-        dataToSend: { apikey_object_id: updated } 
+      dispatch(updateBridgeVersionAction({
+        bridgeId: params?.id,
+        versionId: params?.version,
+        dataToSend: { apikey_object_id: updated }
       }));
       return updated;
     });
@@ -73,18 +73,18 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
   };
 
   return (
-    <div className="z-very-low text-base-content w-full cursor-pointer" tabIndex={0}>
-      <div 
-        className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} 
+    <div className="z-very-low text-base-content w-full cursor-pointer mt-2" tabIndex={0}>
+      <div
+        className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
         onClick={() => {
           toggleAccordion();
         }}
       >
-        <InfoTooltip 
-          tooltipContent="Advanced configuration options for customizing your agent setup" 
+        <InfoTooltip
+          tooltipContent="Advanced configuration options for customizing your agent setup"
           className="cursor-pointer mr-2"
         >
-          <div className="cursor-pointer label-text inline-block ml-1">   
+          <div className="cursor-pointer label-text inline-block ml-1">
             Advanced Configuration
           </div>
         </InfoTooltip>
@@ -94,83 +94,78 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
         </span>
       </div>
 
-
-      <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'} transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
-        
-        <>
+      <div className={`w-full gap-4 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'} transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
         {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && (
-            <div className="form-control w-full mt-2">
-              <ResponseFormatSelector params={params} />
-            </div>
-          )}
-            {/* Multiple API Keys Section */}
-            <div className="form-control w-full">
-              <label className="label">
-                <InfoTooltip tooltipContent="Add multiple API keys from different services to use with your agent">
-                  <span className="label-text info">Multiple API Keys</span>
-                </InfoTooltip>
-              </label>
-              
-              <div className="w-full">
-                <div className="relative">
-                  <div
-                    className="flex items-center mb-4 gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer"
-                    onClick={toggleApiKeys}
-                  >
-                    <span className="text-base-content">
-                     Configure API keys...
-                    </span>
-                    <div className="ml-auto">
-                      {showApiKeysToggle ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
-                    </div>
-                  </div>
+          <div className="form-control w-full mt-2">
+            <ResponseFormatSelector params={params} />
+          </div>
+        )}
+        {/* Multiple API Keys Section */}
+        <div className="form-control w-full">
+          <label className="label">
+            <InfoTooltip tooltipContent="Add multiple API keys from different services to use with your agent">
+              <span className="label-text info">Multiple API Keys</span>
+            </InfoTooltip>
+          </label>
 
-                  {showApiKeysToggle && (
-                    <div className="bg-base-100 border border-base-200 rounded-md shadow-lg z-low max-h-80 overflow-y-auto mt-1 p-2">
-                      {SERVICES?.filter(service => service?.value !== bridge?.service).map(service => (
-                        <div key={service?.value} className="p-2 border-b last:border-b-0">
-                          <div className="font-semibold capitalize mb-2 text-sm">
-                            {service?.displayName}
-                          </div>
-                          
-                          {filterApiKeysByService(service?.value)?.length > 0 ? (
-                            filterApiKeysByService(service?.value).map(apiKey => (
-                              <div
-                                key={apiKey?._id}
-                                className="p-2 hover:bg-base-200 cursor-pointer rounded"
-                                onClick={() => handleSelectionChange(service?.value, apiKey?._id)}
-                              >
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name={`apiKey-${service?.value}`}
+          <div className="w-full">
+            <div className="relative">
+              <div
+                className={`flex items-center gap-2 input input-bordered input-sm w-full min-h-[2.5rem] cursor-pointer ${showApiKeysToggle ? 'rounded-x-md rounded-b-none rounded-t-md' : 'rounded-md'}`}
+                onClick={toggleApiKeys}
+              >
+                <span className="text-base-content">
+                  Configure API keys...
+                </span>
+                <div className="ml-auto">
+                  {showApiKeysToggle ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
+                </div>
+              </div>
+
+              {showApiKeysToggle && (
+                <div className={`bg-base-100 border border-base-200 z-low max-h-80 overflow-y-auto p-2 transition-all ${showApiKeysToggle ? 'rounded-x-lg rounded-t-none rounded-b-lg duration-300 ease-in-out' : ''}`}>
+                  {SERVICES?.filter(service => service?.value !== bridge?.service).map(service => (
+                    <div key={service?.value} className="p-2 border-b last:border-b-0">
+                      <div className="font-semibold capitalize mb-2 text-sm">
+                        {service?.displayName}
+                      </div>
+
+                      {filterApiKeysByService(service?.value)?.length > 0 ? (
+                        filterApiKeysByService(service?.value).map(apiKey => (
+                          <div
+                            key={apiKey?._id}
+                            className="p-2 hover:bg-base-200 cursor-pointer rounded"
+                            onClick={() => handleSelectionChange(service?.value, apiKey?._id)}
+                          >
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`apiKey-${service?.value}`}
                                 value={apiKey?._id}
                                 checked={selectedApiKeys[service?.value] === apiKey?._id}
                                 onChange={() => handleSelectionChange(service?.value, apiKey?._id)}
                                 className="radio radio-sm h-4 w-4"
-                                  />
-                                  <span className="text-sm">
-                                    {truncateText(apiKey?.name, 25)}
-                                  </span>
-                                </label>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="p-2 text-sm text-gray-500">
-                              No API keys available for {service?.displayName}
-                            </div>
-                          )}
+                              />
+                              <span className="text-sm">
+                                {truncateText(apiKey?.name, 25)}
+                              </span>
+                            </label>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-2 text-sm text-gray-500">
+                          No API keys available for {service?.displayName}
                         </div>
-                      ))}
-                  </div>
-                )}
-              </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <ToolCallCount params={params} />
           </div>
-        </>
-        
-              </div>
+        </div>
+      <ToolCallCount params={params} />
+      </div>
     </div>
   );
 };
