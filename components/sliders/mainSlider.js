@@ -132,7 +132,11 @@ function MainSlider({ isEmbedUser }) {
       });
       localStorage.clear();
       sessionStorage.clear();
-      router.replace('/');
+      if(process.env.NEXT_PUBLIC_ENV === 'PROD') {
+        router.replace('https://gtwy.ai/');
+      } else {
+        router.replace('/');
+      }
     } catch (e) {
       console.error(e);
     }
