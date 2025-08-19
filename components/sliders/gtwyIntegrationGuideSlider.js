@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateIntegrationDataAction } from "@/store/action/integrationAction";
 import GenericTable from "../table/table";
+import CopyButton from "../copyButton/copyButton";
 
 // Configuration Schema - easily extensible
 const CONFIG_SCHEMA = [
@@ -167,7 +168,7 @@ const ConfigSection = ({ title, configs, configuration, onChange }) => {
       </div>
     </div>
   );
-};import CopyButton from "../copyButton/copyButton";
+};
 
 
 function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
