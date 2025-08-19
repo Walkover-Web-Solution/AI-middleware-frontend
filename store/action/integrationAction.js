@@ -1,11 +1,11 @@
-import { createIntegrationApi, getAllIntegrationApi } from "@/config";
+import { createIntegrationApi, getAllIntegrationApi, updateIntegrationData } from "@/config";
 import { toast } from "react-toastify";
-import { addIntegrationDataReducer, fetchAllIntegrationData } from "../reducer/integrationReducer";
+import { addIntegrationDataReducer, fetchAllIntegrationData, updateIntegrationDataReducer } from "../reducer/integrationReducer";
 
 
 export const createIntegrationAction = (data) => async (dispatch) => {
   try {
-    const response = await createIntegrationApi(data?.name);
+    const response = await createIntegrationApi(data);
     if (response.data) {
       dispatch(addIntegrationDataReducer({
         orgId: data?.orgId,
@@ -30,6 +30,19 @@ export const getAllIntegrationDataAction = (orgId) => async (dispatch) => {
     console.error(error);
   }
 };
+
+export const updateIntegrationDataAction = (orgId, dataToSend) => async (dispatch) =>{
+  try {
+    const response = await updateIntegrationData(dataToSend);
+    if(response.data)
+    {
+     dispatch(updateIntegrationDataReducer({data:response?.data?.data, orgId}))
+    }
+  } catch (error) {
+    toast.error("Something went Wrong")
+    console.error(error)
+  }
+}
 
 
 

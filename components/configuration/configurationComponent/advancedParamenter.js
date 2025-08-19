@@ -3,7 +3,7 @@ import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bri
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import { generateRandomID, openModal } from '@/utils/utility';
-import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -170,24 +170,24 @@ const AdvancedParameters = ({ params }) => {
   }, [dispatch, params?.id, params?.version]);
 
   return (
-    <div className="collapse z-very-low  text-base-content" tabIndex={0}>
-      <input type="radio" name="my-accordion-1" onClick={() => {
+    <div className="z-very-low mt-2 text-base-content w-full cursor-pointer" tabIndex={0}>
+      <div className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
         handleTutorial()
         toggleAccordion()
-      }}
-        className='cursor-pointer' />
-      <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
-        <span className="mr-2 cursor-pointer">
-          Advanced Parameters
-        </span>
+      }}>
+        <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type." className="cursor-pointer mr-2">
+          <div className="cursor-pointer label-text inline-block ml-1">   
+            Advanced Parameters
+          </div>
+        </InfoTooltip>
 
-        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+       <span className="cursor-pointer"> {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
       </div>
-      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"}/>)}
+      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"} />)}
       {tutorialState.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
-      {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
+      <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
           const rowDefaultValue =
@@ -201,12 +201,12 @@ const AdvancedParameters = ({ params }) => {
           const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
           let error = false;
           return (
-            <div key={key} className="form-control">
+            <div key={key} className="form-control w-full">
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                  {description ? <InfoTooltip tooltipContent={description}>
-                    <span className="label-text capitalize info">{name || key}</span>        
+                    {description ? <InfoTooltip tooltipContent={description}>
+                      <span className="label-text capitalize info">{name || key}</span>
                     </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
                   </div>
                   <div>
@@ -382,7 +382,7 @@ const AdvancedParameters = ({ params }) => {
                 </label>
               )}
               {field === 'select' && (
-                <label className='items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+                <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
                   <select value={configuration?.[key] === 'default' ? rowDefaultValue : configuration?.[key]?.type || configuration?.[key]} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
                     <option value='default' disabled> Select response mode </option>
                     {options?.map((service, index) => (
@@ -415,14 +415,14 @@ const AdvancedParameters = ({ params }) => {
                             4
                           )
                         }
-                        className="textarea textarea-bordered border w-[450px] min-h-96 resize-y"
+                        className="textarea textarea-bordered border w-full min-h-96 resize-y"
                         onBlur={(e) =>
                           handleSelectChange(e, "json_schema")
                         }
                         placeholder="Enter valid JSON object here..."
                       />
 
-                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages} thread_id={thread_id}/>
+                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages} thread_id={thread_id} />
                     </>
                   )}
 
@@ -431,7 +431,7 @@ const AdvancedParameters = ({ params }) => {
             </div>
           );
         })}
-      </div>}
+      </div>
     </div>
   );
 };

@@ -6,16 +6,18 @@ import {
   updateBridgeAction,
 } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { closeModal } from "@/utils/utility";
+import { closeModal, sendDataToParent } from "@/utils/utility";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 import Modal from "../UI/Modal";
 import { useCustomSelector } from '@/customHooks/customSelector';
+import Protected from "../protected";
 
 function PublishBridgeVersionModal({ params, agent_name, agent_description, isEmbedUser }) {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [isPublicAgent, setIsPublicAgent] = useState(false);
+  const [error,setError] = useState(null)
 
   const { bridge } = useCustomSelector((state) => ({
     bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config
@@ -91,11 +93,18 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
           }
         };
 
-        await dispatch(updateBridgeAction({
-          bridgeId: params?.id,
-          dataToSend: payload
-        }));
-
+        try {
+          const response = await dispatch(updateBridgeAction({
+            bridgeId: params?.id,
+            dataToSend: payload
+          }));
+        } catch (error) {
+          if (error?.response?.data?.detail?.includes('DuplicateKey')) {
+            setError({"error": 'This slug name already exists. Please choose a different one.'});
+          }
+          setIsLoading(false);
+          return;
+        }
         toast.success("Configuration saved successfully!");
       }
 
@@ -109,17 +118,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
         })
       );
 
-      if (isEmbedUser) {
-        window.parent.postMessage({
-          type: 'gtwy',
-          status: "agent_published",
-          data: {
-            "agent_id": params?.id,
-            "agent_name": agent_name,
-            "agent_description": agent_description
-          }
-        }, '*');
-      }
+      isEmbedUser && sendDataToParent("published", { name: agent_name, agent_description: agent_description, agent_id: params?.id, agent_version_id: params?.version }, "Agent Published Successfully")
 
       dispatch(getAllBridgesAction());
       closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
@@ -215,11 +214,16 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
                   type="text"
                   name="url_slugname"
                   placeholder="Enter a unique slug name"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full ${error?.error ? 'input-error' : ''}`}
                   value={formData.url_slugname}
                   onChange={handleChange}
                   required
                 />
+                {error?.error && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">{error?.error}</span>
+                  </label>
+                )}
               </div>
 
               {/* Description Field */}
@@ -348,4 +352,4 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
   );
 }
 
-export default PublishBridgeVersionModal;
+export default Protected(PublishBridgeVersionModal);

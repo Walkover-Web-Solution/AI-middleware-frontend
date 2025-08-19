@@ -1,14 +1,15 @@
 import PublishBridgeVersionModal from '@/components/modals/publishBridgeVersionModal';
 import VersionDescriptionModal from '@/components/modals/versionDescriptionModal';
+import Protected from '@/components/protected';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { createBridgeVersionAction, getBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
-import { closeModal, openModal } from '@/utils/utility';
+import { closeModal, openModal, sendDataToParent } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-function BridgeVersionDropdown({ params }) {
+function BridgeVersionDropdown({ params, isEmbedUser }) {
     const router = useRouter();
     const dispatch = useDispatch();
     const versionDescriptionRef = React?.useRef('');
@@ -38,14 +39,21 @@ function BridgeVersionDropdown({ params }) {
     };
 
     useEffect(() => {
-        if (!params.version && bridgeVersionsArray.length > 0) {
+        if ((!params?.version && bridgeVersionsArray.length > 0) || (!params?.version && publishedVersion.length > 0)) {
             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${publishedVersion?.length > 0 ? publishedVersion : bridgeVersionsArray[0]}`);
+            dispatch(getBridgeVersionAction({ versionId: publishedVersion?.length > 0 ? publishedVersion : bridgeVersionsArray[0], version_description:versionDescriptionRef }));
         }
-    }, [params.version, bridgeVersionsArray]);
+        else{
+            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}`);
+            dispatch(getBridgeVersionAction({ versionId: params.version, version_description:versionDescriptionRef }));
+        }
+    }, [params?.version, bridgeVersionsArray, publishedVersion]);
 
     const handleCreateNewVersion = () => {
         // create new version
+        const version_description_input  = versionDescriptionRef?.current?.value;
         dispatch(createBridgeVersionAction({ parentVersionId: params?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value }, (data) => {
+            isEmbedUser && sendDataToParent("updated", { name: bridgeName, agent_description: version_description_input , agent_id: params?.id, agent_version_id: data?.version_id }, "Agent Version Created Successfully")
             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${data.version_id}`);
         }))
         versionDescriptionRef.current.value = ''
@@ -87,4 +95,4 @@ function BridgeVersionDropdown({ params }) {
     );
 }
 
-export default BridgeVersionDropdown
+export default Protected(BridgeVersionDropdown)

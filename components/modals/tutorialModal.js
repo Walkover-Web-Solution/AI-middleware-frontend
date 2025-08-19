@@ -29,7 +29,7 @@ const iconMap = {
 };
 const TutorialModal = () => {
   const {tutorialData}=useCustomSelector((state)=>({
-    tutorialData:state.tutorialReducer?.tutorialData
+    tutorialData:state.flowDataReducer?.flowData?.tutorialData || []
   }))
   const [activeIndex, setActiveIndex] = useState(null);
   const videoRefs = useRef({});

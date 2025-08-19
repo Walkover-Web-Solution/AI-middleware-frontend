@@ -35,7 +35,7 @@ const Navbar = ({ isEmbedUser }) => {
   const bridgeId = pathParts[5];
   const dispatch = useDispatch();
 
-  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton } = useCustomSelector(state => ({
+  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory} = useCustomSelector(state => ({
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
@@ -46,7 +46,8 @@ const Navbar = ({ isEmbedUser }) => {
     isPublishing: state.bridgeReducer.isPublishing ?? false,
     isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
     activeTab: pathname.includes('configure') ? 'configure' : pathname.includes('history') ? 'history' : pathname.includes('testcase') ? 'testcase' : 'configure',
-    hideHomeButton:  state.userDetailsReducer.userDetails.hideHomeButton || false
+    hideHomeButton:  state.userDetailsReducer?.userDetails?.hideHomeButton || false,
+    showHistory:  state.userDetailsReducer?.userDetails?.showHistory,
   }));
 
   // Define tabs based on user type
@@ -392,6 +393,7 @@ const Navbar = ({ isEmbedUser }) => {
         </div>
 
         {/* Tabs section */}
+        {(isEmbedUser && showHistory || !isEmbedUser) && 
         <div className="border-t border-base-200">
           <div className="px-1 h-10">
             <div className="tabs tabs-lifted h-10">
@@ -412,7 +414,7 @@ const Navbar = ({ isEmbedUser }) => {
               ))}
             </div>
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* Mobile action buttons - only for normal users on configure tab */}
