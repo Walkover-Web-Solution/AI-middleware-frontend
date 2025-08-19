@@ -96,7 +96,7 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
 
       <div className={`w-full gap-4 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'} transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
         {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && (
-          <div className="form-control w-full mt-2">
+          <div className="form-control w-full mt-2 border border-base-300 rounded-lg p-2">
             <ResponseFormatSelector params={params} />
           </div>
         )}
