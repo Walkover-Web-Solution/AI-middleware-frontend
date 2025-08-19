@@ -48,7 +48,7 @@ const GptMemory = ({ params }) => {
             <div className="p-2">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <span className="text-base-content text-sm">LLM Memory</span>
+                        <span className="text-base-content text-sm ml-1">LLM Memory</span>
                         <InfoTooltip tooltipContent="If this feature is enabled we will pass the stored memory data by default in history/conversation">
                             <div className="p-1.5 rounded-full bg-base-300 hover:bg-base-200 transition-colors cursor-help border border-base-200">
                                 <InfoIcon size={12} className="text-base-content" />
