@@ -58,7 +58,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   useEffect(() => {
     const updateUserMeta = async () => {
       const reference_id = localStorage.getItem("reference_id");
-  
+      let currentUserMeta = currentUser?.meta;
       // If user meta is null, initialize onboarding meta
       if (currentUser?.meta === null) {
         const updatedUser = {
@@ -76,7 +76,10 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
             },
           },
         };
-        await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+      const data= await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+      if (data?.status) {
+        currentUserMeta = data?.data?.data?.data?.user?.meta;
+      }
       }
   
       // If reference_id exists but user has no reference_id in meta
@@ -96,7 +99,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
             const updatedUser = {
               ...currentUser,
               meta: {
-                ...currentUser.meta,
+                ...currentUserMeta,
                 reference_id: reference_id,
               },
             };
