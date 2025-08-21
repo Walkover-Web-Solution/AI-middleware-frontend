@@ -45,12 +45,12 @@ export const userDetailsReducer = createSlice({
       }
     },
     updateUserMeta: (state, action) => {
-      const { user_id, user } = action.payload;
+      const { user } = action.payload;
       state.userDetails = {
         ...state.userDetails,
         meta: {
           ...state.userDetails.meta,
-          onboarding: user?.meta?.onboarding
+          ...user?.meta,
         }
       }
     },

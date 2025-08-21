@@ -58,7 +58,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   useEffect(() => {
     const updateUserMeta = async () => {
       const reference_id = localStorage.getItem("reference_id");
-      let currentUserMeta = currentUser?.meta;
+        let currentUserMeta = currentUser?.meta;
       // If user meta is null, initialize onboarding meta
       if (currentUser?.meta === null) {
         const updatedUser = {
@@ -77,8 +77,9 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           },
         };
       const data= await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
-      if (data?.status) {
-        currentUserMeta = data?.data?.data?.data?.user?.meta;
+      console.log(data,"sldkjfksd")
+      if (data?.data?.status) {
+        currentUserMeta = data?.data?.data?.user?.meta;
       }
       }
   
