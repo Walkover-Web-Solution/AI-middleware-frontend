@@ -86,10 +86,13 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             </div>
         );
     };
+    const renderTrigerConfig=()=>{
+        console.log("he")
+        {!isEmbedUser && <TriggersList params={params} />}
 
+    }
     const renderSetupView = useMemo(() => () => (
         <>
-            {bridgeType === 'trigger' && !isEmbedUser && <TriggersList params={params} />}
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
                 <>
                     <PreEmbedList params={params} />
@@ -167,6 +170,13 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                             <SettingsIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
                         </button>
+                        <button
+                            onClick={() => handleNavigation('trigger')}
+                            className={`${currentView === 'trigger' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
+                        >
+                            <SettingsIcon size={16} className="shrink-0" />
+                            <span className={`${currentView === 'trigger' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Trigger Config</span>
+                        </button>
                         {bridgeType === 'chatbot' &&
                             <button
                                 onClick={() => handleNavigation('chatbot-config')}
@@ -186,7 +196,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     </div>}
                 </div>
             </div>}
-            {currentView === 'chatbot-config' && bridgeType === 'chatbot' ? renderChatbotConfigView() : currentView === 'guide' && currentView !== 'trigger' ? renderGuideView() : renderSetupView()}
+            {currentView === 'chatbot-config' && bridgeType === 'chatbot' ? renderChatbotConfigView() : currentView === 'guide' ? renderGuideView() :currentView === 'trigger' ? renderTrigerConfig(): renderSetupView()}
             {renderNeedHelp()}
         </div>
     );
