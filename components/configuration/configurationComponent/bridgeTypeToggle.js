@@ -44,7 +44,7 @@ const BridgeTypeToggle = ({ params, isEmbedUser }) => {
 }, [params.version, service, bridgeType]);
 
     return (
-        <div className='w-full bg-base-100 text-base-content'>
+        <div className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content mb-4'>
             {/* Main container with flex layout */}
             <div className='flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4'>
                 
