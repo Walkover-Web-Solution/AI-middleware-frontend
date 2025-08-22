@@ -7,13 +7,14 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteApikeyAction, getAllApikeyAction } from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
 import { closeModal, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
-import { BookIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
+import { BookIcon, InfoIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
 import ApiKeyGuideSlider from "@/components/configuration/configurationComponent/ApiKeyGuide";
+import ConnectedAgentsModal from '@/components/modals/ConnectedAgentsModal';
 
 export const runtime = 'edge';
 
@@ -40,6 +41,14 @@ const Page = () => {
   const [selectedApiKey, setSelectedApiKey] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
+  const [selectedApiKeyForAgents, setSelectedApiKeyForAgents] = useState(null);
+
+  useEffect(() => {
+    if (selectedApiKeyForAgents) {
+      openModal(MODAL_TYPE.CONNECTED_AGENTS_MODAL);
+    }
+  }, [selectedApiKeyForAgents]);
+
   const handleUpdateClick = useCallback((item) => {
     setSelectedApiKey(item);
     setIsEditing(true);
@@ -62,6 +71,11 @@ const Page = () => {
     [dispatch]
   );
 
+  const showConnectedAgents = useCallback((item) => {
+    setSelectedApiKeyForAgents(item);
+    openModal(MODAL_TYPE.CONNECTED_AGENTS_MODAL);
+  }, []);
+
   const dataWithIcons = filterApiKeys.map((item) => ({
     ...item,
     actualName: item.name,
@@ -75,18 +89,25 @@ const Page = () => {
 
   const EndComponent = ({ row }) => {
     return (
-      <div className="flex gap-3 justify-center items-center">
+      <div className="flex gap-3 justify-center items-center" onClick={(e) => e.stopPropagation()}>
         <div
           className="tooltip tooltip-primary"
           data-tip="delete"
-          onClick={() => { setselectedDataToDelete(row); openModal(MODAL_TYPE.DELETE_MODAL) }}
+          onClick={(e) => { 
+            e.stopPropagation();
+            setselectedDataToDelete(row); 
+            openModal(MODAL_TYPE.DELETE_MODAL);
+          }}
         >
           <TrashIcon size={16} />
         </div>
         <div
           className="tooltip tooltip-primary"
           data-tip="Update"
-          onClick={() => handleUpdateClick(row)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleUpdateClick(row);
+          }}
         >
           <SquarePenIcon size={16} />
         </div>
@@ -139,6 +160,8 @@ const Page = () => {
             sortingColumns={["name"]}
             keysToWrap={["apikey", "comment"]}
             endComponent={EndComponent}
+            handleRowClick={(data) => showConnectedAgents(items.find(item => item._id === data._id))}
+            keysToExtractOnRowClick={["_id"]}
           />
         </div>
       ))}
@@ -147,6 +170,7 @@ const Page = () => {
       <ApiKeyGuideSlider/>
       <DeleteModal onConfirm={deleteApikey} item={selectedDataToDelete} title="Delete API Key" description={`Are you sure you want to delete the API key "${selectedDataToDelete?.name}"? This action cannot be undone.`}
       />
+      <ConnectedAgentsModal apiKey={selectedApiKeyForAgents} orgId={orgId} />
     </div>
   );
 };
