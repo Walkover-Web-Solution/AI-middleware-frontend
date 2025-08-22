@@ -8,6 +8,7 @@ import {
 } from '@floating-ui/react';
 import Tutorial from './tutorial';
 import { ExternalLinkIcon } from './Icons';
+import SmartLink from './smartLink';
 
 const InfoTooltip = ({ video = "", children, tooltipContent,docLink }) => {
   const [open, setOpen] = useState(false); // for hover state
@@ -71,16 +72,14 @@ const InfoTooltip = ({ video = "", children, tooltipContent,docLink }) => {
             "
           >
             <p className="whitespace-pre-line">{tooltipContent}
-            {docLink&&
-            <a href={docLink}
-              className="inline-flex  items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300  font-medium group"
-              target="_blank"
-              rel="noopener noreferrer">
-              <span>Learn more</span>
-              <ExternalLinkIcon size={12} />
-            </a>
-            }   
-           </p>
+              {docLink &&
+                <SmartLink href={docLink}
+                >
+                  <span className="inline-flex  items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300  font-medium group">Learn more</span>
+                  <ExternalLinkIcon size={12} />
+                </SmartLink>
+              }
+            </p>
             {video !== "" && (
               <button
               onClick={() => setShowTutorial(true)}
