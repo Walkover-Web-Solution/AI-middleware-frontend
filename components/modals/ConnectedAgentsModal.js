@@ -7,78 +7,52 @@ import { BotIcon } from '../Icons';
 
 const ConnectedAgentsModal = ({ apiKey, orgId }) => {
     // Get all bridges/agents from the store
-    const { bridges, bridgeVersionMapping, apikeyData } = useCustomSelector((state) => ({
+    const { bridges, apikeyData } = useCustomSelector((state) => ({
         bridges: state?.bridgeReducer?.allBridgesMap || {},
-        bridgeVersionMapping: state?.bridgeReducer?.bridgeVersionMapping || {},
         apikeyData: state?.bridgeReducer?.apikeys[orgId] || []
     }));
-  console.log(bridges,"sdlfj");
+    
     // Find bridges/agents that use this API key
     const connectedAgents = useMemo(() => {
-        const result = [];
-
-        if (!apiKey || !apiKey._id) return result;
-
-        // Loop through all bridges
+        if (!apiKey || !apiKey._id) return [];
+        
+        // Get version IDs associated with this API key from the full apikeys data
+        const currentApiKey = apikeyData?.find(item => item._id === apiKey._id);
+        const connectedVersionIds = currentApiKey?.version_ids || [];
+         if (!connectedVersionIds.length) {
+            return [];
+        }
+        
+        // Create a map to collect bridges by their ID
+        const bridgeMap = new Map();
+        
+        // Check all bridges to see if they include any of the connected versions
         Object.values(bridges).forEach(bridge => {
-            // Check if this bridge uses the API key
-            if (bridge?.apikey_object_id) {
-                const apikeyObjectIds = Object.values(bridge.apikey_object_id || {});
-
-                if (apikeyObjectIds.includes(apiKey?._id)) {
-                    // Get versions for this bridge
-                    const versionsData = [];
-
-                    if (bridge._id && bridgeVersionMapping && bridgeVersionMapping[bridge._id]) {
-                        const versions = Object.values(bridgeVersionMapping[bridge._id])
-                            .filter(version => version?.apikey_object_id &&
-                                Object.values(version.apikey_object_id || {}).includes(apiKey?._id));
-
-                        versions.forEach((version, index) => {
-                            versionsData.push({
-                                index: `V${index + 1}`,
-                                id: version._id
-                            });
-                        });
-                    }
-
-                    result.push({
-                        name: bridge.name,
-                        bridgeId: bridge._id,
-                        versions: versionsData
-                    });
-                }
-            }
-
-            // Check versions of this bridge too
-            else if (bridge._id && bridgeVersionMapping && bridgeVersionMapping[bridge._id]) {
-                const versionsWithApiKey = [];
-
-                Object.values(bridgeVersionMapping[bridge._id]).forEach((version, index) => {
-                    if (version?.apikey_object_id) {
-                        const versionApikeyIds = Object.values(version.apikey_object_id || {});
-
-                        if (versionApikeyIds.includes(apiKey?._id)) {
-                            versionsWithApiKey.push({
-                                index: `V${index + 1}`,
-                                id: version._id
-                            });
-                        }
-                    }
+            if (!bridge || !bridge._id || !Array.isArray(bridge.versions)) return;
+            
+            // Find all versions that match between this bridge and our API key
+            const matchingVersions = bridge.versions.filter(
+                versionId => connectedVersionIds.includes(versionId)
+            );
+            
+            if (matchingVersions.length > 0) {
+                
+                bridgeMap.set(bridge._id, {
+                    name: bridge.name ,
+                    bridgeId: bridge._id,
+                    versions: matchingVersions.map(vId => ({ id: vId }))
                 });
-
-                if (versionsWithApiKey.length > 0) {
-                    result.push({
-                        name: bridge.name,
-                        bridgeId: bridge._id,
-                        versions: versionsWithApiKey
-                    });
-                }
             }
         });
-
+        
+        const result = Array.from(bridgeMap.values());
         return result;
-    }, [bridges, bridgeVersionMapping, apiKey]);
+    }, [bridges, apiKey, apikeyData]);
+
+
+    if (!apiKey) {
+        return null;
+    }
 
     return (
         <Modal MODAL_ID={MODAL_TYPE.CONNECTED_AGENTS_MODAL}>
@@ -105,7 +79,7 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
                                             <div className="flex flex-col gap-1">
                                                 {agent.versions.map((version, i) => (
                                                     <span key={i} className="inline text-xs font-mono bg-base-300 p-1 rounded w-fit">
-                                                        {version.index}: {version.id}
+                                                        {version.id}
                                                     </span>
                                                 ))}
                                             </div>
