@@ -77,7 +77,6 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           },
         };
       const data= await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
-      console.log(data,"sldkjfksd")
       if (data?.data?.status) {
         currentUserMeta = data?.data?.data?.user?.meta;
       }
