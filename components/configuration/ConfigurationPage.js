@@ -75,14 +75,14 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const renderNeedHelp = () => {
         return (
             <div className="mb-4 mt-4">
-                <a
+                {!isEmbedUser && <a
                     href="/faq/how-to-use-gtwy-ai"
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
                     Need help? Visit FAQ →
-                </a>
+                </a>}
             </div>
         );
     };

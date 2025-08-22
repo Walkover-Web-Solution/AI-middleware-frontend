@@ -283,6 +283,7 @@ function Home({ params, isEmbedUser }) {
                         title="Agents"
                         description="Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."
                         docLink="https://blog.gtwy.ai/features/bridge"
+                        isEmbedUser={isEmbedUser}
                       />
                       <div className="flex-shrink-0 mt-4 sm:mt-0">
                         <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ create new agent</button>
