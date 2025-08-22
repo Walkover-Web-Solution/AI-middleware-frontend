@@ -6,7 +6,7 @@ import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReduce
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
-import { sendDataToParent, toBoolean } from '@/utils/utility';
+import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
 const Layout = ({ children }) => {
@@ -35,7 +35,7 @@ const Layout = ({ children }) => {
       service: 'openai',
       model: 'gpt-4o',
       name: agent_name.trim(),
-      slugName: agent_name.trim(),
+      slugName: generateRandomID(),
       bridgeType: 'api',
       type: 'chat',
     };
@@ -78,11 +78,11 @@ const Layout = ({ children }) => {
     }
 
     setIsLoading(true);
-    const trimmedAgentName = agentName.trim().toLowerCase();
+    const trimmedAgentName = agentName.trim();
 
     if (allBridges && allBridges.length > 0) {
       const agentInStore = allBridges.find(
-        (agent) => agent?.name?.trim().toLowerCase() === trimmedAgentName
+        (agent) => agent?.name?.trim() === trimmedAgentName
       );
       if (agentInStore) {
         navigateToExistingAgent(agentInStore, orgId);

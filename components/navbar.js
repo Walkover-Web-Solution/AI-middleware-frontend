@@ -161,8 +161,8 @@ const Navbar = ({ isEmbedUser }) => {
     router.push(base + (versionId ? `?version=${versionId}` : ''));
   }, [router, orgId, bridgeId, versionId]);
 
-  const toggleOrgSidebar = useCallback(() => toggleSidebar('default-org-sidebar'), []);
-  const toggleBridgeSidebar = useCallback(() => toggleSidebar('default-agent-sidebar'), []);
+  const toggleOrgSidebar = useCallback(() => router.push(`/org`), [router]);
+  const toggleBridgeSidebar = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
   const toggleConfigHistorySidebar = () => toggleSidebar("default-config-history-slider", "right");
   const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router]);
 
@@ -464,8 +464,6 @@ const Navbar = ({ isEmbedUser }) => {
       {/* Sliders - only for non-embed users */}
       {!isEmbedUser && (
         <>
-          <OrgSlider />
-          <BridgeSlider />
           <ChatBotSlider />
           <ConfigHistorySlider versionId={versionId} />
         </>
