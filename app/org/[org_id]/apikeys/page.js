@@ -111,7 +111,7 @@ const Page = () => {
              <BookIcon />  API Key Guide
             </button>
             <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>
-              + create new api key
+              + Add New Api Key
             </button>
           </div>
         </div>

@@ -75,7 +75,7 @@ const Page = ({ params }) => {
               className="btn btn-primary" 
               onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}
             >
-              + create new integration
+              + Create New Integration
             </button>
           </div>
         </div>
