@@ -396,7 +396,7 @@
         openGtwy(agent_id = null, meta={}, agent_name=null) {
             if (!this.state.isInitialized) {
                 this.initializeGtwyEmbed().then(() => {
-                    this.openGtwy(agent_id); // Retry after initialization
+                    this.openGtwy(); // Retry after initialization
                 });
                 return;
             }
@@ -899,14 +899,14 @@
     }
 
     // New GTWY specific functions - FIXED WITH PROPER INITIALIZATION
-    window.openGtwy = ({agent_id = null, meta={}, agent_name=null}) => {
+    window.openGtwy = ({agent_id = "", meta={}, agent_name=""} = "") => {
         gtwyEmbedManager.openGtwy(agent_id, meta, agent_name);
     };
     window.closeGtwy = () => gtwyEmbedManager.closeGtwy();
 
     window.GtwyEmbed = {
         open: () => {
-            gtwyEmbedManager.openGtwy(agent_id = null, meta={}, agent_name=null);
+            gtwyEmbedManager.openGtwy(agent_id = "", meta={}, agent_name="");
         },
         close: () => {
             gtwyEmbedManager.closeGtwy();

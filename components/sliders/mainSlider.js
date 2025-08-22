@@ -22,7 +22,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { truncate } from '@/components/historyPageComponents/assistFile';
-import { openModal } from '@/utils/utility';
+import { openModal, toggleSidebar } from '@/utils/utility';
 import OrgSlider from './orgSlider';
 import TutorialModal from '@/components/modals/tutorialModal';
 import DemoModal from '../modals/DemoModal';
@@ -276,7 +276,7 @@ function MainSlider({ isEmbedUser }) {
               {pathParts.length >= 4 && (
                 <button
                   onClick={() => {
-                    router.push('/org');
+                    pathParts.length > 4 ? toggleSidebar('default-org-sidebar') : router.push('/org');
                     if (isMobile) setIsOpen(false);
                   }}
                   onMouseEnter={e => onItemEnter('org', e)}
@@ -309,7 +309,11 @@ function MainSlider({ isEmbedUser }) {
                         <button
                           key={key}
                           onClick={() => {
-                            router.push(`/org/${orgId}/${key}`);
+                            if(key === 'agents' &&  pathParts.length >  4){
+                              toggleSidebar(`default-agent-sidebar`)
+                            }else{
+                              router.push(`/org/${orgId}/${key}`);
+                            }
                             if (isMobile) setIsOpen(false);
                           }}
                           onMouseEnter={e => onItemEnter(key, e)}
