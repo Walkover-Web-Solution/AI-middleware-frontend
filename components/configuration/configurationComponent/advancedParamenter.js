@@ -35,7 +35,7 @@ const AdvancedParameters = ({ params }) => {
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
-      isFirstParameter:user?.meta?.onboarding?.AdvanceParameter
+      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);
@@ -45,15 +45,15 @@ const AdvancedParameters = ({ params }) => {
   }));
 
   const handleTutorial = () => {
-    setTutorialState(prev=>({
+    setTutorialState(prev => ({
       ...prev,
-      showSuggestion:isFirstParameter
+      showSuggestion: isFirstParameter
 
     }))
   };
 
   useEffect(() => {
-    setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) :null ); 
+    setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) : null);
   }, [configuration?.response_type?.json_schema]);
 
   useEffect(() => {
@@ -95,56 +95,34 @@ const AdvancedParameters = ({ params }) => {
     }
   };
 
-  const handleSelectChange = (e, key) => {
+  const handleSelectChange = (e, key, defaultValue, Objectvalue = {}) => {
     let newValue;
     let is_json = false
     try {
-      newValue = e.target.value ? JSON.parse(e.target.value) : JSON.parse("{}");
+      newValue = Objectvalue ? JSON.parse(Objectvalue) : JSON.parse("{}");
       setObjectFieldValue(JSON.stringify(newValue, undefined, 4));
       is_json = true
     } catch (error) {
-      newValue = e.target.value;
+      newValue = Objectvalue;
     }
     let updatedDataToSend = {
       configuration: {
-        [key]: newValue,
+        [key]: {
+          [defaultValue?.key]: e.target.value
+        },
       }
     };
-    if (key === "size") {
+    if (Object.entries(newValue).length > 0) {
       updatedDataToSend = {
         configuration: {
-          'size': newValue
+          [key]: {
+            [defaultValue?.key]: e.target.value,
+            [e.target.value]: newValue
+          },
         }
       }
     }
-    if (key === "quality") {
-      updatedDataToSend = {
-        configuration: {
-          'quality': newValue
-        }
-      }
-    }
-    if (key === 'json_schema') {
-      if (!is_json) return toast.error('Json schema is not parsable JSON');
-      updatedDataToSend = {
-        configuration: {
-          "response_type": {
-            "type": 'json_schema',
-            [key]: newValue
-          }
-        }
-      }
-    }
-    if (key === 'response_type') {
-      updatedDataToSend = {
-        configuration: {
-          "response_type": {
-            "type": newValue,
-          }
-        }
-      }
-    }
-    if (newValue !== configuration?.[key]) {
+    if (e.target.value !== configuration?.[key]) {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
@@ -185,12 +163,12 @@ const AdvancedParameters = ({ params }) => {
         toggleAccordion()
       }}>
         <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type." className="cursor-pointer mr-2">
-          <div className="cursor-pointer label-text inline-block ml-1">   
+          <div className="cursor-pointer label-text inline-block ml-1">
             Advanced Parameters
           </div>
         </InfoTooltip>
 
-       <span className="cursor-pointer"> {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
+        <span className="cursor-pointer"> {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
       </div>
       {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"} />)}
       {tutorialState.showTutorial && (
@@ -198,13 +176,11 @@ const AdvancedParameters = ({ params }) => {
       )}
       <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
 
-        {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min=0, max, step, default: defaultValue, options }]) => {
-          const rowDefaultValue =
-            key === 'response_type'
-              ? (typeof modelInfoData?.[key]?.default === 'object'
-                ? modelInfoData?.[key]?.default?.type
-                : modelInfoData?.[key]?.default)
-              : undefined;
+        {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min = 0, max, step, default: defaultValue, options }]) => {
+          const rowDefaultValue = typeof modelInfoData?.[key]?.default === 'object'
+            ? modelInfoData?.[key]?.default?.type
+            : modelInfoData?.[key]?.default;
+
           if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
           const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
           const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
@@ -379,7 +355,7 @@ const AdvancedParameters = ({ params }) => {
                   min={min}
                   max={max}
                   step={step}
-                  value={inputConfiguration?.[key]==="default"? 0 :inputConfiguration?.[key]}
+                  value={inputConfiguration?.[key] === "default" ? 0 : inputConfiguration?.[key]}
                   onChange={(e) =>
                     setInputConfiguration((prev) => ({
                       ...prev,
@@ -397,15 +373,15 @@ const AdvancedParameters = ({ params }) => {
                     name={key}
                     type="checkbox"
                     className="toggle"
-                    checked={inputConfiguration?.[key]==="default" ? false : inputConfiguration?.[key]}
+                    checked={inputConfiguration?.[key] === "default" ? false : inputConfiguration?.[key]}
                     onChange={(e) => handleInputChange(e, key)}
                   />
                 </label>
               )}
               {field === 'select' && (
                 <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
-                  <select value={configuration?.[key] === 'default' ? rowDefaultValue : configuration?.[key]?.type || configuration?.[key]} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
-                    <option value='default' disabled> Select response mode </option>
+                  <select value={configuration?.[key] === 'default' ? 'default' : configuration?.[key]?.[defaultValue?.key] || configuration?.[key]} onChange={(e) => handleSelectChange(e, key, defaultValue)} className="select select-sm max-w-xs select-bordered capitalize">
+                    <option value='default' disabled> Select {key} mode </option>
                     {options?.map((service, index) => (
                       <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
                     ))}
@@ -438,7 +414,7 @@ const AdvancedParameters = ({ params }) => {
                         }
                         className="textarea textarea-bordered border w-full min-h-96 resize-y"
                         onBlur={(e) =>
-                          handleSelectChange(e, "json_schema")
+                          handleSelectChange({ target: { value: "json_schema" } }, "response_type", { key: "type" }, e.target.value)
                         }
                         placeholder="Enter valid JSON object here..."
                       />
