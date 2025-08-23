@@ -266,12 +266,48 @@ function Home({ params, isEmbedUser }) {
           <div className="w-full">
             {allBridges.length === 0 ? (
               <div className="text-center w-full h-screen flex justify-center items-center py-10">
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="w-16 h-16 text-primary">
+                <div className="flex flex-col items-center justify-center space-y-4 max-w-xl px-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="w-16 h-16 text-primary mb-2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  <p className="text-lg font-semibold text-base-content">Create Your First Agent</p>
-                  <button className="btn mt-2 btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ create new agent</button>
+                  
+                  <h2 className="text-2xl font-bold text-base-content">Create Your First Agent</h2>
+                  
+                  <div className="text-center">
+                    <p className="text-base-content/70 max-w-md mb-2">
+                      Connect your app to AI models like OpenAI with zero setup. Smart prompts, real-time context, focus on what matters.
+                    </p>
+                    <a 
+                      href="https://blog.gtwy.ai/features/bridge" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-primary hover:text-primary/80 text-xs underline"
+                    >
+                      Learn more →
+                    </a>
+                  </div>
+                  
+                  <button 
+                    className="btn btn-primary mt-4" 
+                    onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}
+                  >
+                    + Create New Agent
+                  </button>
+                  
+                  <div className="flex items-center gap-6 mt-6 text-xs text-base-content/60">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                      Zero boilerplate
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                      Smart prompts
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                      Real-time context
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : (
