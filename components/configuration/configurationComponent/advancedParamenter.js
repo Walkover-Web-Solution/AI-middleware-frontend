@@ -95,21 +95,28 @@ const AdvancedParameters = ({ params }) => {
     }
   };
 
-  const handleSelectChange = (e, key, defaultValue, Objectvalue = {}) => {
+  const handleSelectChange = (e, key, defaultValue, Objectvalue = {}, isDeafaultObject = true) => {
     let newValue;
-    let is_json = false
     try {
+      if (Objectvalue && !JSON.parse(Objectvalue)) {
+        toast.error("Invalid JSON provided");
+        return;
+      }
       newValue = Objectvalue ? JSON.parse(Objectvalue) : JSON.parse("{}");
       setObjectFieldValue(JSON.stringify(newValue, undefined, 4));
-      is_json = true
     } catch (error) {
-      newValue = Objectvalue;
+      toast.error("Invalid JSON provided");
+      return;
     }
-    let updatedDataToSend = {
+    let updatedDataToSend = isDeafaultObject ? {
       configuration: {
         [key]: {
           [defaultValue?.key]: e.target.value
         },
+      }
+    } : {
+      configuration: {
+        [key]: e.target.value
       }
     };
     if (Object.entries(newValue).length > 0) {
@@ -117,7 +124,7 @@ const AdvancedParameters = ({ params }) => {
         configuration: {
           [key]: {
             [defaultValue?.key]: e.target.value,
-            [e.target.value]: newValue
+            [e.target.value]: typeof newValue === 'string' ? JSON.parse(newValue) : newValue
           },
         }
       }
@@ -177,10 +184,7 @@ const AdvancedParameters = ({ params }) => {
       <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min = 0, max, step, default: defaultValue, options }]) => {
-          const rowDefaultValue = typeof modelInfoData?.[key]?.default === 'object'
-            ? modelInfoData?.[key]?.default?.type
-            : modelInfoData?.[key]?.default;
-
+          const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
           if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
           const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
           const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
@@ -380,7 +384,7 @@ const AdvancedParameters = ({ params }) => {
               )}
               {field === 'select' && (
                 <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
-                  <select value={configuration?.[key] === 'default' ? 'default' : configuration?.[key]?.[defaultValue?.key] || configuration?.[key]} onChange={(e) => handleSelectChange(e, key, defaultValue)} className="select select-sm max-w-xs select-bordered capitalize">
+                  <select value={configuration?.[key] === 'default' ? 'default' : configuration?.[key]?.[defaultValue?.key] || configuration?.[key]} onChange={(e) => handleSelectChange(e, key, defaultValue, {}, isDeafaultObject)} className="select select-sm max-w-xs select-bordered capitalize">
                     <option value='default' disabled> Select {key} mode </option>
                     {options?.map((service, index) => (
                       <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
