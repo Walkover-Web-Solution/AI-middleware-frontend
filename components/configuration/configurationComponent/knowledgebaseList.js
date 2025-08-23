@@ -173,16 +173,23 @@ const KnowledgebaseList = ({ params }) => {
             </div>
             {!Array.isArray(knowbaseVersionData) || !knowbaseVersionData.some(docId => knowledgeBaseData?.find(kb => kb._id === docId)) && (
                 <>
-                <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} >
-                    <p className="label-text info mb-0">Knowledgebase Configuration</p>
-                </InfoTooltip>
             <div className="dropdown dropdown-bottom ">
-                <div className='flex items-center gap-2'>
-                    <button tabIndex={0} className="btn btn-outline btn-sm "
-                        disabled={!shouldToolsShow}
-                        onClick={() => handleTutorial()}>
-                        <AddIcon size={16} />Connect Knowledgebase
-                    </button>
+                <div className='flex items-center gap-2 flex-wrap'>
+                    <div className="flex items-center gap-2 max-w-full">
+                            <button 
+                                tabIndex={0} 
+                                className="btn btn-outline btn-sm flex items-center  justify-start px-2"
+                                disabled={!shouldToolsShow}
+                                onClick={() => handleTutorial()}
+                            >
+                        <InfoTooltip tooltipContent={"A knowledgebase stores helpful info like docs and FAQs. Agents use it to give accurate answers without hardcoding, and it's easy to update."} >
+                            <div className="flex items-center gap-1">
+                                <AddIcon size={16} className="flex-shrink-0 mr-1" />
+                                <span className="truncate">Connect Knowledgebase</span>
+                            </div>
+                        </InfoTooltip>
+                            </button>
+                    </div>
                     {
                         !shouldToolsShow && model !== "preFunction" &&
                         <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">

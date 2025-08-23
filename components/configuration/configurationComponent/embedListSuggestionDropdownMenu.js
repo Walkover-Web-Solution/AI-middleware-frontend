@@ -87,27 +87,24 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 {name === "preFunction" ? (
                     <div className=" flex flex-col items-start gap-2">
                         <InfoTooltip tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
-                            <p className="text-base font-semibold info">Pre Tool Configuration</p>
 
-                        </InfoTooltip>
 
                         {/* Plus Icon Button */}
                         <button
                             tabIndex={0}
                             className="btn btn-outline btn-sm"
-                        >
+                            >
                             <AddIcon size={16} />
                             {"Connect Pre Tool"}
                         </button>
+                            </InfoTooltip>
                     </div>
                 ) : (
                     <div className="flex flex-col items-start gap-2">
                         {connectedFunctions?.length === 0 && (
                             <>  
                                 <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"Tool calling lets LLMs use external tools to get real-time data and perform complex tasks."} >
-                                    <p className=" label-text info">Tool Configuration</p>
 
-                                </InfoTooltip>
 
                                 <div className='flex flex-wrap items-center gap-2 w-full lg:mr-0 mr-5'>
                                     <button
@@ -115,11 +112,12 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                                         disabled={!shouldToolsShow}
                                         onClick={() => handleTutorial()}
                                         className="btn btn-outline btn-sm "
-                                    >
+                                        >
                                         <AddIcon size={16} />
                                         <span className="truncate">Connect Tool</span>
                                     </button>
                                 </div>
+                                        </InfoTooltip>
                             </>
                         )}
                     </div>

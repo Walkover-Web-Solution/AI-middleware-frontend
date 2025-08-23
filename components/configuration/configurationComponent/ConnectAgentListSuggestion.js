@@ -59,16 +59,15 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
             <div className="flex flex-col mt-3 gap-2">
                 {Object.keys(connect_agents).length=== 0 &&(
                     <>
-                <InfoTooltip tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
-                    <p className=" label-text info">Agents Configuration </p>
-                </InfoTooltip>
                 <div className='flex items-center gap-2'>
+                <InfoTooltip tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
                     <button tabIndex={0}
                         className="btn btn-outline btn-sm"
                         disabled={!shouldToolsShow}
                         >
                         <AddIcon size={16} />{name || "Connect Agent"}
                     </button>
+                            </InfoTooltip>
                     {
                         !shouldToolsShow && name !== "preFunction" &&
                         <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
