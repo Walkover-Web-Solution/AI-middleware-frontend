@@ -185,7 +185,6 @@ const AdvancedParameters = ({ params }) => {
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min = 0, max, step, default: defaultValue, options }]) => {
           const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
-          console.log(isDeafaultObject)
           if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
           const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
           const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
