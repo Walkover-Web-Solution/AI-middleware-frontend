@@ -35,9 +35,6 @@ function VersionDescriptionInput({ params, isEmbedUser }) {
     return (
         <div className='mb-2'>
             <div className='flex flex-row items-center'>
-                <div className="label pl-0  whitespace-nowrap">
-                    <span className="label-text capitalize font-medium">Version Description :</span>
-                </div>
                 <div className="relative w-full">
                     <input
                         type="text"
