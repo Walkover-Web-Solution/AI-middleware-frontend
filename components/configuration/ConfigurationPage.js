@@ -86,10 +86,12 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             </div>
         );
     };
-    const renderTrigerConfig=()=>{
-        console.log("he")
-        {!isEmbedUser && <TriggersList params={params} />}
-
+    const renderTrigerConfig = () => {
+        return (
+            <>
+                {!isEmbedUser && <TriggersList params={params} />}
+            </>
+        );
     }
     const renderSetupView = useMemo(() => () => (
         <>
