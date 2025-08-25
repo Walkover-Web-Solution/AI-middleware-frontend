@@ -45,7 +45,6 @@ const CustomTable = ({
                 
                 if (valueA === "-") return ascending ? -1 : 1;
                 if (valueB === "-") return ascending ? 1 : -1;
-                
                 if (valueA < valueB) return ascending ? -1 : 1;
                 if (valueA > valueB) return ascending ? 1 : -1;
                 return 0;
