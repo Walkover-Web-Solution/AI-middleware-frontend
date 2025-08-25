@@ -774,7 +774,7 @@ export const updateOrganizationData = async (orgId, orgDetails) => {
         'reference-id': NEXT_PUBLIC_REFERENCEID
       }
     });
-    return response.data;
+    return response?.data;
   } catch (error) {
 
     toast.error('Error updating organization:', error);
