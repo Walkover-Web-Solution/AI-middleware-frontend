@@ -384,7 +384,11 @@ const AdvancedParameters = ({ params }) => {
               )}
               {field === 'select' && (
                 <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
-                  <select value={configuration?.[key] === 'default' ? 'default' : configuration?.[key]?.[defaultValue?.key] || configuration?.[key]} onChange={(e) => handleSelectChange(e, key, defaultValue, {}, isDeafaultObject)} className="select select-sm max-w-xs select-bordered capitalize">
+                  <select
+                    value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
+                    onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
+                    className="select select-sm max-w-xs select-bordered capitalize"
+                  >
                     <option value='default' disabled> Select {key} mode </option>
                     {options?.map((service, index) => (
                       <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
