@@ -67,7 +67,7 @@ const UserReferenceForRichText = ({ params }) => {
             <div className="mt-3">
                 <textarea
                     placeholder="Please provide a user reference for the rich text"
-                    className="textarea textarea-bordered border w-full min-h-[10rem] resize-y"
+                    className="textarea textarea-bordered border border-base-300 w-full min-h-[10rem] resize-y"
                     defaultValue={user_reference}
                     key={user_reference}
                     onBlur={handleUserReferenceChange}

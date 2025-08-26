@@ -31,6 +31,7 @@ import { MODAL_TYPE } from '@/utils/enums';
 import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
 import { AddIcon, KeyIcon } from '../Icons';
+import ThemeToggle from '../UI/ThemeUi';
 
 /* -------------------------------------------------------------------------- */
 /*                                    Consts                                  */
@@ -235,7 +236,7 @@ function MainSlider({ isEmbedUser }) {
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar left-0 top-0 h-screen bg-base-100 border transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar left-0 top-0 h-screen bg-base-100 border border-base-300 transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
           style={{ 
             width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '256px' : '50px'),
             transform: (!isSideBySideMode && pathParts.length > 3) ? (isMobile && !isOpen ? 'translateX(-200px)' : 'translateX(0)') : 'none'
@@ -457,6 +458,8 @@ function MainSlider({ isEmbedUser }) {
                     <span className="truncate text-xs">Add new Model</span>
                   </button>
 
+                  <ThemeToggle/>
+
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm text-error"
@@ -464,6 +467,7 @@ function MainSlider({ isEmbedUser }) {
                     <LogOut size={14} className="shrink-0" />
                     <span className="truncate text-xs">Logout</span>
                   </button>
+
                 </div>
               )}
 
@@ -493,10 +497,10 @@ function MainSlider({ isEmbedUser }) {
         {/* ------------------------------------------------------------------ */}
         {hovered && !isOpen && !isMobile && (
           <div
-            className="fixed bg-base-300 text-base-content py-2 px-3 rounded-lg shadow-lg whitespace-nowrap border pointer-events-none z-50"
+            className="fixed bg-base-300 text-base-content py-2 px-3 rounded-lg shadow-lg whitespace-nowrap border border-base-300 pointer-events-none z-50"
             style={{ top: tooltipPos.top - 20, left: tooltipPos.left }}
           >
-            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border rotate-45 -left-1 border-r-0 border-b-0" />
+            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border rotate-45 -left-1 border-r-0 border-b-0 border-base-300" />
             {displayName(hovered)}
           </div>
         )}

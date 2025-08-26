@@ -15,7 +15,7 @@ const PageHeader = ({ title, description, docLink }) => {
     <div className="mb-6">
       <h1 className="text-2xl font-bold mb-1">{title}</h1>
       {description && (
-        <p className="text-base text-gray-700">
+        <p className="text-base text-base-content opacity-80">
           {description}
           <SmartLink 
            href={docLink}>

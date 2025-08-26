@@ -61,8 +61,8 @@ function BridgeVersionDropdown({ params, isEmbedUser }) {
     return (
         <div className='flex items-center gap-2'>
             <div className="dropdown dropdown-bottom dropdown-end mr-2">
-                <div tabIndex={0} role="button" className={`btn ${params.version === publishedVersion ? 'bg-green-100 hover:bg-green-200' : ''}`}>
-                    V {bridgeVersionsArray.indexOf(params.version) + 1 || 'Select'}
+                <div tabIndex={0} role="button" className={`btn ${params.version === publishedVersion ? 'bg-green-100 hover:bg-green-200 text-base-content' : ''}`}>
+                    <span className={`${params.version === publishedVersion ? 'text-black' : 'text-base-content'}`}>V{bridgeVersionsArray.indexOf(params.version) + 1 || 'Select'}</span>
                     {params.version === publishedVersion &&
                         <span className="relative inline-flex items-center ml-2">
                             <span className="text-green-600 ml-1">●</span>

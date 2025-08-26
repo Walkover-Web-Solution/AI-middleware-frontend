@@ -134,7 +134,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
-      <div className="modal-box w-11/12 max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+      <div className="modal-box w-11/12 max-w-4xl max-h-[90vh] overflow-y-auto bg-base-100">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold text-base-content">

@@ -119,7 +119,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                     <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
                         {finalTestCases?.map((message, index) => (
                             <div key={index} className="space-y-2">
-                                <div className="text-xs font-medium uppercase text-gray-500 tracking-wide">
+                                <div className="text-xs font-medium uppercase text-base-content tracking-wide">
                                     {message.role.replace('_', ' ')}
                                 </div>
                                 {message.role === "tools_call" ? (
@@ -157,7 +157,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
 
                     <div className="flex justify-between items-center p-6 pt-4 bg-base-200 sticky bottom-0">
                         <div className="flex items-center gap-3">
-                            <label className="text-sm text-gray-600">Matching strategy:</label>
+                            <label className="text-sm text-base-content">Matching strategy:</label>
                             <select 
                                 className="select select-sm bg-transparent focus:outline-none border-none"
                                 value={responseType} 

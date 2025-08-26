@@ -145,11 +145,11 @@ const Page = ({ params }) => {
             {/* Authentication Verification Section */}
             <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 w-full">
                 <div className="w-full max-w-md">
-                    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div className="bg-base-100 rounded-xl shadow-lg overflow-hidden">
                         {/* Header */}
                         <div className="bg-blue-600 text-white p-6 text-center">
                             <div className="flex justify-center mb-3">
-                                <div className="p-3 bg-white/20 rounded-full">
+                                <div className="p-3 bg-base-100/20 rounded-full">
                                     <Shield size={24} />
                                 </div>
                             </div>

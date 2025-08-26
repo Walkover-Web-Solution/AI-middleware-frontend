@@ -74,7 +74,7 @@ function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, set
         )}
       </div>
 
-      <div className="sm:p-2 mt-4 justify-between flex flex-col border rounded-md w-full z-low" style={{ height }}>
+      <div className="sm:p-2 mt-4 justify-between flex flex-col border border-base-300 rounded-md w-full z-low" style={{ height }}>
         <div id="messages" className="flex flex-col w-full overflow-y-auto overflow-x-hidden mb-4 pr-2">
           {messages.map((message, index) => (
             <div
@@ -110,12 +110,12 @@ function Canvas({ OptimizePrompt, height = "60vh", width = "100%", messages, set
           )}
         </div>
 
-        <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-10">
+        <div className="border-t-2 border-base-300 px-4 pt-4 mb-2 sm:mb-0 w-full z-10">
           <div className="flex flex-row gap-2 items-end">
             <div className="flex-1">
               <textarea
                 ref={textareaRef}
-                className="textarea textarea-bordered w-full focus:border-primary max-h-[100px] resize-none overflow-y-auto"
+                className="textarea textarea-bordered w-full focus:border-primary border-base-300 max-h-[100px] resize-none overflow-y-auto"
                 placeholder="Type your instruction..."
                 value={instruction}
                 rows={1}

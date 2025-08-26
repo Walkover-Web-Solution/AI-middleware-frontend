@@ -158,7 +158,7 @@ const ConnectedAgentList = ({ params }) => {
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200`}
+                    className={`flex w-[250px] flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200`}
                 >
                     <div
                         className="p-4 w-full h-full flex flex-col justify-between"
@@ -178,7 +178,7 @@ const ConnectedAgentList = ({ params }) => {
                             </p>
                         </div>
                         <div className="mt-4">
-                            <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content bg-green-100`}>
+                            <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-black bg-green-100`}>
                                 {!item?.description ? "Description Required" : "Active"}
                             </span>
                         </div>

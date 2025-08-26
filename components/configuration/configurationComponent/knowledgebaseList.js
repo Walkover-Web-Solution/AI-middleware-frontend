@@ -79,7 +79,7 @@ const KnowledgebaseList = ({ params }) => {
         (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
             const item = knowledgeBaseData?.find(kb => kb._id === docId);
             return item ? (
-                <div key={docId} className="flex w-[250px] flex-col items-start rounded-md border cursor-pointer bg-base-100 hover:bg-base-200 relative">
+                <div key={docId} className="flex w-[250px] flex-col items-start rounded-md border border-base-300 cursor-pointer bg-base-100 hover:bg-base-200 relative">
                     <div className="p-4 w-full h-full flex flex-col justify-between">
                         <div>
                             <div className="flex justify-between items-center">
@@ -187,7 +187,7 @@ const KnowledgebaseList = ({ params }) => {
                                     </li>
                                 ))
                             }
-<li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => {if(window.openRag){window.openRag()} else {openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)}}}>
+<li className="mt-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => {if(window.openRag){window.openRag()} else {openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)}}}>
                                 <div>
                                     <AddIcon size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
                                 </div>

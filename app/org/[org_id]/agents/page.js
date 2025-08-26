@@ -141,7 +141,7 @@ function Home({ params, isEmbedUser }) {
 
   const renderBridgeCard = (item) => {
     return (
-      <div className="flex rounded-md border cursor-pointer hover:shadow-lg bg-base-100 p-4 relative w-full">
+      <div className="flex rounded-md border border-base-300 cursor-pointer hover:shadow-lg bg-base-100 p-4 relative w-full">
         <div key={item._id} className="flex flex-col items-center w-full" onClick={() => onClickConfigure(item._id, item?.published_version_id || item?.versions?.[0])}>
           
           <div className="flex flex-col h-[200px] gap-2 w-full">
@@ -320,7 +320,7 @@ function Home({ params, isEmbedUser }) {
                   <div className="">
                     <div className="flex justify-center items-center my-4">
                       <p className="border-t border-base-300 w-full"></p>
-                      <p className="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+                      <p className="bg-base-300 text-white py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
                         Archived Agents
                       </p>
                       <p className="border-t border-base-300 w-full"></p>

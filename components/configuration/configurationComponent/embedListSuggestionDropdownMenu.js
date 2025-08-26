@@ -71,7 +71,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                                 {title}
                             </p>
                             <div>
-                                <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(status)}`}>
+                                <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(status)}`}>
                                     {value?.description?.trim() === "" ? "Ongoing" : status}
                                 </span>
                             </div>
@@ -154,7 +154,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         ) : (
                             <li className="text-center mt-2">No tools found</li>
                         )}
-                        {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined,
+                        {!hideCreateFunction && <li className="mt-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => openViasocket(undefined,
                             {
                                 embedToken,
                                 meta: {

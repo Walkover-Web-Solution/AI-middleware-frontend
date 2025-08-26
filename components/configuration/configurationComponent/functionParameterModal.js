@@ -450,7 +450,7 @@ function FunctionParameterModal({
 
         {/* Description Editor Section */}
         {isDescriptionEditing && (
-          <div className="mb-4 p-4 border rounded-lg bg-base-100">
+          <div className="mb-4 p-4 border border-base-300 rounded-lg bg-base-100">
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-semibold">Update Function Description</h4>
               <button
@@ -557,7 +557,7 @@ function FunctionParameterModal({
         {!isDataAvailable ? (
           <p>No Parameters used in the function</p>
         ) : !isTextareaVisible ? (
-          <div className="overflow-x-auto border rounded-md">
+          <div className="overflow-x-auto border border-base-300 rounded-md">
             <table className="table">
               <thead>
                 <tr>
@@ -695,7 +695,7 @@ function FunctionParameterModal({
             <textarea
               type="input"
               value={objectFieldValue}
-              className="textarea textarea-bordered border w-full min-h-96 resize-y"
+              className="textarea textarea-bordered border border-base-300 w-full min-h-96 resize-y"
               onChange={(e) => setObjectFieldValue(e.target.value)}
               onBlur={handleTextFieldChange}
               placeholder="Enter valid JSON object here..."
@@ -708,7 +708,7 @@ function FunctionParameterModal({
                     ? JSON.stringify(toolData["old_fields"], undefined, 4)
                     : ""
                 }
-                className="textarea textarea-bordered border w-full min-h-96 resize-y"
+                className="textarea textarea-bordered border border-base-300 w-full min-h-96 resize-y"
               />
             )}
           </div>

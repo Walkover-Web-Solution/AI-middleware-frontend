@@ -109,11 +109,11 @@ const AgentSidebar = ({
   };
 
   return (
-    <div className={`${sidebarCollapsed ? 'w-20' : 'w-80'} bg-white border-r border-gray-300 transition-all duration-300 relative h-full flex flex-col`}>
+    <div className={`${sidebarCollapsed ? 'w-20' : 'w-80'} bg-base-100 border-r border-gray-300 transition-all duration-300 relative h-full flex flex-col`}>
       {/* Toggle Button */}
       <button
         onClick={toggleSidebar}
-        className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-300 rounded-full hover:bg-gray-50 transition-all duration-200 flex items-center justify-center z-10"
+        className="absolute -right-3 top-6 w-6 h-6 bg-base-100 border border-gray-300 rounded-full hover:bg-gray-50 transition-all duration-200 flex items-center justify-center z-10"
         title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         {sidebarCollapsed ? (

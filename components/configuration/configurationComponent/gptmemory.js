@@ -63,7 +63,7 @@ const GptMemory = ({ params }) => {
                 <div className="mt-3">
                     <textarea
                         placeholder="Provide context for LLM memory (e.g., user preferences, conversation style, key information to remember)"
-                        className=" textarea textarea-bordered border w-full min-h-[10rem] resize-y"
+                        className=" textarea textarea-bordered border border-base-300 w-full min-h-[10rem] resize-y"
                         defaultValue={gpt_memory_context}
                         key={gpt_memory_context}
                         onBlur={handleUserReferenceChange}

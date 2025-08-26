@@ -153,8 +153,8 @@ function Page({ params }) {
     <div className="p-10 min-h-screen">
       {/* Page Header */}
       <header className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Metrics Dashboard</h1>
-        <p className="text-gray-600">Monitor your application's key metrics at a glance.</p>
+        <h1 className="text-3xl font-bold text-base-content">Metrics Dashboard</h1>
+        <p className="text-base-content">Monitor your application's key metrics at a glance.</p>
       </header>
 
       <div className='flex gap-8 justify-center'>
@@ -260,7 +260,7 @@ function Page({ params }) {
           </ul>
         </details>
 
-        <div className="join border">
+        <div className="join border border-base-300">
           {['Bridges', 'API Keys', 'Models'].map((item, index) => (
             <button key={index} className={`btn join-item ${factor === index ? 'btn-primary' : ''}`} onClick={() => handleFactorChange(index)}>{item}</button>
           ))}
@@ -271,13 +271,13 @@ function Page({ params }) {
       {/* <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-6"> */}
       <div className='justify-center flex'>
 
-        {/* <div className="bg-white shadow-lg rounded-lg p-4">
+        {/* <div className="bg-base-100 shadow-lg rounded-lg p-4">
           <h2 className="text-lg font-bold mb-4">Line Chart</h2>
           <div className="h-96">
             <Chart options={state.options} series={state.series} type="line" height={350} />
           </div>
         </div> */}
-        <div className="bg-white shadow-md rounded-lg p-4 w-full lg:w-2/3">
+        <div className="bg-base-100 shadow-md rounded-lg p-4 w-full lg:w-2/3">
           <h2 className="text-lg font-bold mb-4">Bar Chart</h2>
           <div className="h-96">
             <Chart

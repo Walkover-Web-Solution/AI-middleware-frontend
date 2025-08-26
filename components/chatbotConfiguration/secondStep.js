@@ -53,7 +53,7 @@ const SecondStep = ({slugName}) => {
     ];
 
     return (
-        <div className="flex w-full flex-col gap-4 bg-white rounded-lg shadow p-4">
+        <div className="flex w-full flex-col gap-4 bg-base-100 rounded-lg shadow p-4">
             <Section title="Step 2" caption="Add below code in your product." />
             <div className="mockup-code">
                 <CopyButton data={DataObject.script} />

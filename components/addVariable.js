@@ -239,7 +239,7 @@ const AddVariable = ({ params, isEmbedUser }) => {
   return (
     <div className="text-base-content mb-2" tabIndex={0}>
       <div
-        className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
+        className={`info p-2 ${isAccordionOpen ? 'border border-base-content rounded-x-lg rounded-t-lg' : 'border border-base-content rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
         onClick={() => {
           handleTutorial();
           toggleAccordion();
@@ -261,12 +261,12 @@ const AddVariable = ({ params, isEmbedUser }) => {
       <div
         id="accordion-content"
         ref={accordionContentRef}
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : ''}`}
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isAccordionOpen ? 'border-x border-b border-base-content rounded-x-lg rounded-b-lg' : ''}`}
         style={{
           height: `${height}px`,
         }}
       >
-        <div className="min-h-[300px] w-full p-4">
+        <div className="min-h-[300px] w-full border border-base-100 rounded-md p-4">
           <div className="w-full flex flex-col gap-2">
             {/* Radio Buttons for Form Data and Raw Data */}
             <div className="flex flex-row gap-4">
@@ -303,7 +303,7 @@ const AddVariable = ({ params, isEmbedUser }) => {
             {/* Conditional Rendering based on isFormData */}
             {!isFormData ? (
               <textarea
-                className="border-2 border-gray-200 rounded-md p-4 w-full max-h-[400px] focus:outline-none resize-none"
+                className="border-2 border-base-300 rounded-md p-4 w-full max-h-[400px] focus:outline-none resize-none"
                 placeholder={`key: value\nkey: value\nkey: value`}
                 rows="8"
                 onBlur={(e) => onBlurHandler(e.target.value)}
@@ -335,7 +335,7 @@ const AddVariable = ({ params, isEmbedUser }) => {
                     />
                     <input
                       type="text"
-                      className="input input-bordered input-sm w-full"
+                      className="input input-bordered border-base-300 input-sm w-full"
                       placeholder="Enter key"
                       value={pair?.key || ""}
                       onChange={(e) =>
@@ -344,7 +344,7 @@ const AddVariable = ({ params, isEmbedUser }) => {
                     />
                     <input
                       type="text"
-                      className="input input-bordered input-sm w-full"
+                      className="input input-bordered border-base-300 input-sm w-full"
                       placeholder="Enter value"
                       value={pair?.value || ""}
                       onChange={(e) =>

@@ -154,7 +154,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
                     </div>
                 </div>
                 {modelRecommendations && (
-                    <div className="mb-2 p-4 bg-gray-50 rounded-lg border border-gray-200 max-w-xs">
+                    <div className="mb-2 p-4 bg-base-100 rounded-lg border border-base-content max-w-xs">
                         {modelRecommendations.error ? (
                             <p className="text-red-500 text-sm">{modelRecommendations.error}</p>
                         ) : (
@@ -173,7 +173,7 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
                     <select
                         value={selectedService}
                         onChange={handleServiceChange}
-                        className="select select-sm select-bordered capitalize w-full max-w-xs"
+                        className="select select-sm select-bordered border-base-content capitalize w-full max-w-xs"
                         disabled={isDisabled}
                     >
                         <option disabled>Select a Service</option>

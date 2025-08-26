@@ -325,7 +325,7 @@ export default function FormSection({ params, chatbotId = null }) {
     return (
         <div className="space-y-6">
             {/* Display Settings Section */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-base-200 rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-6 border-b pb-2">Display Settings</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -450,7 +450,7 @@ export default function FormSection({ params, chatbotId = null }) {
             </div>
 
             {/* Agent Switch Section */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-base-200 rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4 border-b pb-2">Agent Configuration</h3>
                 
                 <div className="space-y-4">
@@ -484,9 +484,9 @@ export default function FormSection({ params, chatbotId = null }) {
             </div>
 
             {/* Preview Section */}
-            <div className="bg-white rounded-lg shadow-lg border border-gray-100">
+            <div className="bg-base-200 rounded-lg shadow-lg border border-gray-100">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200 rounded-t-lg">
+                <div className="bg-base-200 px-6 py-4 border-b border-gray-200 rounded-t-lg">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
@@ -495,16 +495,16 @@ export default function FormSection({ params, chatbotId = null }) {
                                 </svg>
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-800">Live Preview</h3>
-                                <p className="text-sm text-gray-600">See how your chatbot will appear to users</p>
+                                <h3 className="text-lg font-semibold text-base-content">Live Preview</h3>
+                                <p className="text-sm text-base-content">See how your chatbot will appear to users</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button 
                                 className={`btn btn-sm gap-2 transition-all duration-200 ${
                                     isRefreshing 
-                                        ? 'btn-ghost bg-blue-50 text-blue-600' 
-                                        : 'btn-ghost hover:bg-blue-50 hover:text-blue-600'
+                                        ? 'bg-base-200 text-blue-600' 
+                                        : 'hover:bg-base-200 hover:text-blue-600'
                                 }`}
                                 onClick={handleRefreshConfiguration}
                                 disabled={isRefreshing}
@@ -524,20 +524,20 @@ export default function FormSection({ params, chatbotId = null }) {
                     <div className="relative">
                         {/* Loading Overlay */}
                         {isRefreshing && (
-                            <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10 rounded-b-lg">
+                            <div className="absolute inset-0 bg-base-200 bg-opacity-90 flex items-center justify-center z-10 rounded-b-lg">
                                 <div className="flex flex-col items-center gap-3">
                                     <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                                    <p className="text-sm text-gray-600 font-medium">Updating preview...</p>
+                                    <p className="text-sm text-base-content font-medium">Updating preview...</p>
                                 </div>
                             </div>
                         )}
 
                         {/* Iframe Container */}
-                        <div className="relative bg-white rounded-b-lg overflow-hidden shadow-inner h-[80vh]">
+                        <div className="relative bg-base-200 rounded-b-lg overflow-hidden shadow-inner h-[80vh]">
                             <iframe
                                 ref={iframeRef}
                                 src={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/chatbotPreview`}
-                                className="w-full h-full border-none transition-opacity duration-300"
+                                className="w-full h-full border-none transition-opacity duration-300 bg-transparent"
                                 style={{ opacity: isRefreshing ? 0.5 : 1 }}
                             />
                         </div>

@@ -117,7 +117,49 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
-  
+
+  // Theme initialization with full system theme support
+  useEffect(() => {
+    const getSystemTheme = () => {
+      if (typeof window !== 'undefined') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return 'light';
+    };
+
+    const applyTheme = (themeToApply) => {
+      if (typeof window !== 'undefined') {
+        document.documentElement.setAttribute('data-theme', themeToApply);
+      }
+    };
+
+    const savedTheme = localStorage.getItem("theme") || "system";
+    const systemTheme = getSystemTheme();
+    
+    if (savedTheme === "system") {
+      applyTheme(systemTheme);
+    } else {
+      applyTheme(savedTheme);
+    }
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = (e) => {
+      const newSystemTheme = e.matches ? 'dark' : 'light';
+      const currentSavedTheme = localStorage.getItem("theme") || "system";
+      
+      // Only update if currently using system theme
+      if (currentSavedTheme === "system") {
+        applyTheme(newSystemTheme);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    };
+  }, []);
   
   useEffect(() => {
     const validateOrg = async () => {
@@ -365,7 +407,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           {/* Main Content Area */}
           <div className={`flex-1 ${path.length > 4 ? 'ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+            <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
               <Navbar params={params} />
             </div>
 
@@ -396,7 +438,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           {/* Main Content Area for Embed Users */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+            <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
               <Navbar params={params} />
             </div>
 

@@ -338,12 +338,12 @@ const Navbar = ({ isEmbedUser }) => {
               {/* Discard button */}
               {isDrafted && activeTab === 'configure' && (
                 <button
-                  className="btn btn-sm bg-red-200 hover:bg-red-300 gap-2"
+                  className="btn btn-sm bg-red-200 hover:bg-red-300 gap-2 text-base-content"
                   onClick={handleDiscardChanges}
                   disabled={isUpdatingBridge || isPublishing}
                 >
-                  <ClipboardX size={14} />
-                  <span>Discard</span>
+                  <ClipboardX size={14} className='text-black'/>
+                  <span className="text-black">Discard</span>
                 </button>
               )}
 
@@ -354,8 +354,8 @@ const Navbar = ({ isEmbedUser }) => {
                   onClick={handlePublish}
                   disabled={!isDrafted || isPublishing}
                 >
-                  {!isPublishing && <BookCheck size={14} />}
-                  <span>{isPublishing ? 'Publishing...' : 'Publish'}</span>
+                  {!isPublishing && <BookCheck size={14} className="text-black" />}
+                  <span className="text-black">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                 </button>
               )}
             </div>
@@ -367,13 +367,13 @@ const Navbar = ({ isEmbedUser }) => {
                   {/* Discard icon - only show if there are drafts */}
                   {isDrafted && (
                     <button
-                      className="btn btn-sm flex gap-2 bg-red-200 hover:bg-red-300"
+                      className="btn btn-sm flex gap-2 bg-red-200 hover:bg-red-300 text-base-content"
                       onClick={handleDiscardChanges}
                       disabled={isUpdatingBridge || isPublishing}
                       title="Discard changes"
                     >
-                      <span><ClipboardX size={16} /></span>
-                      <span>Discard</span>
+                      <span className="text-black"><ClipboardX size={16} className='text-black'/></span>
+                      <span className="text-black">Discard</span>
                     </button>
                   )}
 
@@ -384,8 +384,8 @@ const Navbar = ({ isEmbedUser }) => {
                     disabled={!isDrafted || isPublishing}
                     title={isPublishing ? 'Publishing...' : 'Publish'}
                   >
-                    <span>{!isPublishing && <BookCheck size={16} />}</span>
-                    <span>{isPublishing ? 'Publishing...' : 'Publish'}</span>
+                    <span className="text-black">{!isPublishing && <BookCheck size={16} className='text-black'/>}</span>
+                    <span className="text-black">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                   </button>
                 </>
               )}
@@ -412,8 +412,8 @@ const Navbar = ({ isEmbedUser }) => {
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`tab gap-2 h-10 ${activeTab === tab.id
-                    ? 'tab-active [--tab-bg:theme(colors.base-200)] [--tab-border-color:theme(colors.base-300)] bg-base-200'
+                  className={`tab gap-2 h-[42px] ${activeTab === tab.id
+                    ? 'tab-active [--tab-bg:theme(colors.base-300)] [--tab-border-color:theme(colors.base-300)] bg-base-300'
                     : 'hover:bg-base-200/50'
                     }`}
                 >
@@ -443,8 +443,8 @@ const Navbar = ({ isEmbedUser }) => {
                 onClick={handleDiscardChanges}
                 disabled={isUpdatingBridge || isPublishing}
               >
-                <ClipboardX size={14} />
-                Discard
+                <ClipboardX size={14} className='text-black' />
+                <span className="text-black">Discard</span>
               </button>
             )}
 
@@ -454,8 +454,8 @@ const Navbar = ({ isEmbedUser }) => {
               onClick={handlePublish}
               disabled={!isDrafted || isPublishing}
             >
-              {!isPublishing && <BookCheck size={14} />}
-              {isPublishing ? 'Publishing...' : 'Publish'}
+              {!isPublishing && <BookCheck size={14} className='text-black' />}
+              <span className="text-black">{isPublishing ? 'Publishing...' : 'Publish'}</span>
             </button>
           </div>
         </div>

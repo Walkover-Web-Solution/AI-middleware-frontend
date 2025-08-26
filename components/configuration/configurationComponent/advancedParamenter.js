@@ -165,7 +165,7 @@ const AdvancedParameters = ({ params }) => {
 
   return (
     <div className="z-very-low mt-4 text-base-content w-full cursor-pointer" tabIndex={0}>
-      <div className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
+      <div className={`info p-2 ${isAccordionOpen ? 'border border-base-content rounded-x-lg rounded-t-lg' : 'border border-base-content rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
         handleTutorial()
         toggleAccordion()
       }}>
@@ -181,7 +181,7 @@ const AdvancedParameters = ({ params }) => {
       {tutorialState.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
-      <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+      <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content-x border-b border-base-content rounded-x-lg rounded-b-lg' : 'border border-base-content rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min = 0, max, step, default: defaultValue, options }]) => {
           const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
@@ -333,7 +333,7 @@ const AdvancedParameters = ({ params }) => {
                     onInput={(e) => {
                       document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
                     }}
-                    className="range range-xs w-full"
+                    className="range h-2"
                     name={key}
                   />
                 </div>
@@ -420,7 +420,7 @@ const AdvancedParameters = ({ params }) => {
                             4
                           )
                         }
-                        className="textarea textarea-bordered border w-full min-h-96 resize-y"
+                        className="textarea textarea-bordered border border-base-content w-full min-h-96 resize-y"
                         onBlur={(e) =>
                           handleSelectChange({ target: { value: "json_schema" } }, "response_type", { key: "type" }, e.target.value)
                         }
