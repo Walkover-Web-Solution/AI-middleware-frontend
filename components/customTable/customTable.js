@@ -88,6 +88,7 @@ const CustomTable = ({
             if (row[column] === 0) {
                 return "Not used in 24h";
             }
+            return `${row[column]} s`
         }
         
         // Default handling for other columns
