@@ -81,6 +81,27 @@ const CustomTable = ({
         });
     };
 
+    // Helper function to render cell content with special handling for averageResponseTime
+    const renderCellContent = (row, column) => {
+        // Special handling for averageResponseTime column
+        if (column === 'averageResponseTime') {
+            if (row[column] === 0) {
+                return "Not used in 24h";
+            }
+        }
+        
+        // Default handling for other columns
+        if (row[column] === undefined) {
+            return "not available";
+        } else if (keysToWrap.includes(column) && row[column] && typeof row[column] === 'string') {
+            return row[column].length > 30
+                ? `${row[column].substring(0, 30)}...`
+                : row[column];
+        } else {
+            return row[column] || String(row[column]) || "-";
+        }
+    };
+
     return (
         <div className="overflow-x-auto m-2">
             <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
@@ -149,15 +170,7 @@ const CustomTable = ({
                                         key={column}
                                         className="py-3 px-4 table-cell w-60"
                                     >
-                                        {
-                                        row[column] === undefined ? ( "not available") :     
-                                        keysToWrap.includes(column) && row[column] && typeof row[column] === 'string' ? (
-                                            row[column].length > 30
-                                                ? `${row[column].substring(0, 30)}...`
-                                                : row[column]
-                                        ) : (
-                                            row[column] || String(row[column]) || "-"
-                                        )}
+                                        {renderCellContent(row, column)}
                                     </td>
                                 ))}
                                 {endComponent && (

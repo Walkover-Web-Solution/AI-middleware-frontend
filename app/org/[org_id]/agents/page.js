@@ -95,7 +95,7 @@ function Home({ params, isEmbedUser }) {
     bridge_status: item.bridge_status,
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
-    averageResponseTime: averageResponseTime[item?._id]===0 
+    averageResponseTime: averageResponseTime[item?._id]
   }));
 
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
