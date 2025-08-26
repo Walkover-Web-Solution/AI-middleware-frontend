@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { GetFileTypeIcon, openModal } from '@/utils/utility';
@@ -11,6 +11,7 @@ import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
+import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
 
 const KnowledgebaseList = ({ params }) => {
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
@@ -59,11 +60,26 @@ const KnowledgebaseList = ({ params }) => {
         }))
     };
 
+    useEffect(() => {
+        const handleMessage = (e) => {
+            if (e.data?.type === 'rag') {
+                if (e.data?.status == "create") {
+                    dispatch(getAllKnowBaseDataAction(params.org_id));
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => {
+            window.removeEventListener('message', handleMessage);
+        };
+    }, [params.org_id]);
+
     const renderKnowledgebase = useMemo(() => (
         (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
             const item = knowledgeBaseData?.find(kb => kb._id === docId);
             return item ? (
-                <div key={docId} className="flex w-[250px] flex-col items-start rounded-md border cursor-pointer bg-base-100 hover:bg-base-200 relative">
+                <div key={docId} className="flex w-[250px] flex-col items-start rounded-md border border-base-300 cursor-pointer bg-base-100 hover:bg-base-200 relative">
                     <div className="p-4 w-full h-full flex flex-col justify-between">
                         <div>
                             <div className="flex justify-between items-center">
@@ -171,7 +187,7 @@ const KnowledgebaseList = ({ params }) => {
                                     </li>
                                 ))
                             }
-                            <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => { openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL) }}>
+<li className="mt-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => {if(window.openRag){window.openRag()} else {openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)}}}>
                                 <div>
                                     <AddIcon size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
                                 </div>

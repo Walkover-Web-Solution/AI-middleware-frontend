@@ -138,9 +138,9 @@ function OptimiseBaseModal({
 
   return (
     <Modal MODAL_ID={modalType}>
-      <div className="modal-box max-w-screen-xl w-[calc(100%-8rem)] mx-auto bg-white overflow-hidden flex flex-col">
+      <div className="modal-box max-w-screen-xl w-[calc(100%-8rem)] mx-auto bg-base-100 overflow-hidden flex flex-col">
         {/* Fixed Header */}
-        <div className="flex justify-between items-center pb-2 pt-2 bg-white z-low">
+        <div className="flex justify-between items-center pb-2 pt-2 bg-base-100 z-low">
           <h3 className="font-bold text-lg">{title}</h3>
           <button
             className="btn btn-sm btn-primary"
@@ -192,7 +192,7 @@ function OptimiseBaseModal({
                   <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                     AI generated {contentLabel.toLowerCase()}
                     {isStreaming && (
-                      <span className="ml-2 text-sm text-gray-500 animate-pulse">
+                      <span className="ml-2 text-sm text-base-content animate-pulse">
                         ✨ Generating...
                       </span>
                     )}
@@ -233,7 +233,7 @@ function OptimiseBaseModal({
                   {...textareaProps}
                 />
                 {isStreaming && (
-                  <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-white px-2 py-1 rounded-md shadow-sm border">
+                  <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-base-100 px-2 py-1 rounded-md shadow-sm border border-base-300">
                     <div className="flex space-x-1">
                       <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce"></div>
                       <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -248,7 +248,7 @@ function OptimiseBaseModal({
         </div>
 
         {/* Fixed Footer */}
-        <div className="border-t bg-white pt-1 flex justify-end gap-3">
+        <div className="border-t bg-base-100 pt-1 flex justify-end gap-3">
           <button
             onClick={handleCloseModal}
             className="btn"

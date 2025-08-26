@@ -12,7 +12,6 @@ const Chatbot = ({ params }) => {
     variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
     configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
     service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
-    modelInfo: state?.modelReducer?.serviceModels
   }));
 
   // Convert variables array to object
@@ -25,9 +24,6 @@ const Chatbot = ({ params }) => {
     }, {});
   }, [variablesKeyValue]);
 
-  const isVision = useMemo(() => {
-    return modelInfo?.[service]?.[configuration?.type]?.[configuration?.model]?.validationConfig?.vision;
-  }, [modelInfo, service, configuration?.type, configuration?.model]);
 
   // Send bridge name as threadId when it changes
   useEffect(() => {
@@ -51,10 +47,20 @@ const Chatbot = ({ params }) => {
   useEffect(() => {
     if (window?.SendDataToChatbot) {
       window.SendDataToChatbot({ 
-        vision: { vision: isVision } 
+        modelChanged: configuration?.model 
       });
     }
-  }, [isVision]);
+  }, [configuration?.model]);
+
+  useEffect(() => {
+    if (window?.SendDataToChatbot) {
+      window.SendDataToChatbot({ 
+        serviceChanged: service 
+      });
+    }
+  }, [service]);
+
+
 
   // Send variables when they change
   useEffect(() => {
@@ -107,7 +113,7 @@ const Chatbot = ({ params }) => {
       {isLoading ? (
         <div
           id="chatbot-loader"
-          className="flex flex-col gap-4 justify-center items-center h-full w-full bg-white text-black"
+          className="flex flex-col gap-4 justify-center items-center h-full w-full bg-base-100 text-base-content"
         >
           <p className="text-lg font-semibold animate-pulse">Loading chatbot...</p>
         </div>

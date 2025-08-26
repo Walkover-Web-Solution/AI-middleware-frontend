@@ -56,6 +56,8 @@ const Page = ({params}) => {
         type: model?.validationConfig?.type,
         input_cost: model?.validationConfig?.specification?.input_cost,
         output_cost: model?.validationConfig?.specification?.output_cost,
+        description: model?.validationConfig?.specification?.description,
+        knowledge_cutoff: model?.validationConfig?.specification?.knowledge_cutoff,
         service: model?.service,
     }));
 
@@ -69,15 +71,11 @@ const Page = ({params}) => {
         }
         closeModal(MODAL_TYPE?.DELETE_MODAL)
         dispatch(deleteModelAction(dataToSend))
-          .then(result => {
-            console.log('Delete model success:', result);
-          })
           .catch(error => {
             if(error.response?.data?.usageDetails)
             {
                 setUsageDetailsData(error.response?.data?.usageDetails)
                 openModal(MODAL_TYPE.USAGE_DETAILS_MODAL)
-                console.log(error.response?.data?.usageDetails)
             }
           });
     }

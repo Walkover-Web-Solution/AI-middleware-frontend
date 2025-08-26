@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import LoadingSpinner from "./loadingSpinner";
-import { closeModal } from "@/utils/utility";
+import { closeModal, sendDataToParent } from "@/utils/utility";
 import { MODAL_TYPE } from "@/utils/enums";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { BotIcon, CheckIcon, CircleAlertIcon, ClockTenIcon, WebhookIcon } from "@/components/Icons";
@@ -25,12 +25,13 @@ import Protected from "./protected";
     });
     const [globalError, setGlobalError] = useState(""); // New state for global error messages
 
-    const { allBridgeList, modelsList, SERVICES } = useCustomSelector((state) => ({
+    const { allBridgeList, modelsList, SERVICES, showAgentType } = useCustomSelector((state) => ({
         SERVICES: state?.serviceReducer?.services,
-        allBridgeList: (state.bridgeReducer.org[orgid]?.orgs) || [],
+        allBridgeList: state.bridgeReducer.org[orgid]?.orgs || [],
         modelsList: state?.modelReducer?.serviceModels[selectedService],
+        showAgentType: state?.userDetailsReducer?.userDetails?.showAgentTypeOnCreateAgent
     }));
-
+    
     useEffect(() => {
         if (!SERVICES || Object?.entries(SERVICES)?.length === 0) {
             dispatch(getServiceAction({ orgid }))
@@ -63,12 +64,12 @@ import Protected from "./protected";
 
     const createBridgeHandler = (name, slugname) => {
       name = isEmbedUser ? 'untitled' : 'Untitled';
-      const matches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.name?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
+      const matches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.name?.match(/^untitled_agent_(?:\d+)$/)) : allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
       const newCount = matches?.length + 1 || 0;
-      name = isEmbedUser ? `untitled${newCount}` : `Untitled${newCount}`;
-      const slugNameMatches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.slugName?.match(/^untitled(?:(\d+))?$/)) : allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
+      name = isEmbedUser ? `untitled_agent_${newCount}` : `Untitled${newCount}`;
+      const slugNameMatches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.slugName?.match(/^untitled_agent_(?:\d+)$/)) : allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
       const slugNameCount = slugNameMatches?.length + 1 || 0;
-      slugname = isEmbedUser ? `untitled${slugNameCount}` : `Untitled${slugNameCount}`
+      slugname = isEmbedUser ? `untitled_agent_${slugNameCount}` : `Untitled${slugNameCount}`
       if (!selectedBridgeTypeCard) {
         setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
         return;
@@ -81,11 +82,12 @@ import Protected from "./protected";
           "model": selectedModel,
           "name": name,
           "slugName": slugname || name,
-          "bridgeType": selectedBridgeTypeCard || bridgeType,
+          "bridgeType":isEmbedUser && !showAgentType ? "api" : selectedBridgeTypeCard || bridgeType,
           "type": selectedType,
         };
         dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
           // setShowFileUploadModal(false);
+          isEmbedUser && sendDataToParent("drafted", {name: data?.bridge?.name, agent_id: data?.bridge?._id}, "Agent created Successfully")
           route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
           closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
           setIsLoading(false);
@@ -125,7 +127,7 @@ import Protected from "./protected";
         }
 
         // Validate bridge type
-        if (!selectedBridgeTypeCard) {
+        if (!selectedBridgeTypeCard && !isEmbedUser && !showAgentType) {
             newValidationErrors.bridgeType = "Select Agent Type";
             hasErrors = true;
         }
@@ -138,10 +140,11 @@ import Protected from "./protected";
         }
 
         setIsAiLoading(true);
-        const dataToSend = { purpose, bridgeType: selectedBridgeTypeCard }
+        const dataToSend = { purpose, bridgeType: isEmbedUser && !showAgentType ? "api" : selectedBridgeTypeCard }
         dispatch(createBridgeWithAiAction({ dataToSend, orgId: orgid }))
             .then((response) => {
                 const data = response.data;
+                isEmbedUser && sendDataToParent("drafted", {name: data?.name, agent_id: data?.bridge?._id}, "Agent created Successfully")
                 route.push(`/org/${orgid}/agents/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
                 closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
                 setIsAiLoading(false);
@@ -159,8 +162,8 @@ import Protected from "./protected";
       <div>
         {isLoading && <LoadingSpinner />}
         <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
-          <div className="bg-base-100 px-2 md:px-10 py-4 md:py-4 rounded-lg max-w-[90%] md:max-w-[80%] overflow-auto max-h-[98vh] mx-auto">
-            <h3 className="font-bold text-xl md:text-xl text-gray-800 pl-2">
+          <div className={`bg-base-100 px-2 md:px-10 py-4 md:py-4 rounded-lg ${isEmbedUser && !showAgentType ? "min-w-[70%] md:min-w-[70%]" : "max-w-[90%] md:max-w-[80%]"} overflow-auto max-h-[98vh] mx-auto`}>
+            <h3 className="font-bold text-xl md:text-xl text-base-content">
               Create Agent
             </h3>
 
@@ -171,9 +174,9 @@ import Protected from "./protected";
               </div>
             )}
 
-            <div className="space-y-2 pb-2 p-2 mt-2 ml-4 text-semi-bold">
+           {((isEmbedUser && showAgentType) || !isEmbedUser) && <div className="space-y-2 pb-2 p-2 mt-2 ml-4 text-semi-bold">
               <div className="flex justify-between items-center">
-                <label className="text-md  text-gray-800">
+                <label className="text-md  text-base-content">
                   Select Agent Type
                 </label>
                 {validationErrors.bridgeType && (
@@ -191,7 +194,7 @@ import Protected from "./protected";
               >
                 {/* API Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-300 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "api"
                       ? "ring-2 ring-blue-500"
                       : ""
@@ -208,11 +211,11 @@ import Protected from "./protected";
                       </div>
                     )}
                       </div>
-                      <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                      <h2 className="card-title text-lg md:text-xl font-semibold text-base-content">
                         API
                       </h2>
                     </div>
-                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                    <p className="text-xs md:text-sm text-base-content leading-relaxed">
                       Easily integrate AI into your backend using our API. Send
                       prompts, receive intelligent responses, and automate
                       tasks—no frontend needed. It's fast, flexible, and works
@@ -223,7 +226,7 @@ import Protected from "./protected";
 
                 {/* Chatbot Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-300 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "chatbot"
                       ? "ring-2 ring-green-500"
                       : ""
@@ -240,11 +243,11 @@ import Protected from "./protected";
                       </div>
                     )}
                       </div>
-                      <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                      <h2 className="card-title text-lg md:text-xl font-semibold text-base-content">
                         Chatbot
                       </h2>
                     </div>
-                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                    <p className="text-xs md:text-sm text-base-content leading-relaxed">
                       Quickly embed an AI-powered chatbot into your app or
                       website. It responds in real time, handles user queries,
                       and delivers smart, conversational experiences—fully
@@ -255,7 +258,7 @@ import Protected from "./protected";
 
                 {/* Batch API Card */}
                 <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-300 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "batch"
                       ? "ring-2 ring-purple-500"
                       : ""
@@ -272,11 +275,11 @@ import Protected from "./protected";
                        </div>
                     )}
                       </div>
-                      <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                      <h2 className="card-title text-lg md:text-xl font-semibold text-base-content">
                         Batch API
                       </h2>
                     </div>
-                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                    <p className="text-xs md:text-sm text-base-content leading-relaxed">
                       Process multiple prompts or data inputs in a single
                       request using the Batch API. Ideal for large-scale tasks
                       like summarization, generation, or classification—fast,
@@ -287,7 +290,7 @@ import Protected from "./protected";
 
                 {/* Triggers Card */}
                 {!isEmbedUser && <div
-                  className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${
+                  className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-300 rounded-xl min-w-[280px] md:min-w-0 ${
                     selectedBridgeTypeCard === "trigger"
                       ? "ring-2 ring-amber-500"
                       : ""
@@ -304,11 +307,11 @@ import Protected from "./protected";
                       </div>
                     )}
                       </div>
-                      <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                      <h2 className="card-title text-lg md:text-xl font-semibold text-base-content">
                         Triggers
                       </h2>
                     </div>
-                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                    <p className="text-xs md:text-sm text-base-content leading-relaxed">
                       Automate workflows using Triggers. Set conditions to
                       auto-run actions like sending prompts, generating
                       responses, or forwarding data—no manual input required.
@@ -317,13 +320,13 @@ import Protected from "./protected";
                   </div>
                 </div>}
               </div>
-            </div>
+            </div>}
 
             {/* {!isManualMode ? ( */}
             <div className="mt-4 md:mt-4">
               <div className="form-control">
                 <label className="label pb-1 md:pb-2">
-                  <span className="label-text font-medium text-base md:text-lg text-gray-800">
+                  <span className="label-text font-medium text-base-content md:text-lg">
                     Agent Purpose
                   </span>
                   {validationErrors.purpose && (
@@ -338,10 +341,10 @@ import Protected from "./protected";
                     placeholder="Describe the purpose of this agent..."
                     ref={textAreaPurposeRef}
                     onChange={handlePurposeInput}
-                    className={`textarea textarea-bordered w-full min-h-[50px] md:min-h-[50px] bg-white transition-all duration-300 placeholder-gray-400 text-sm md:text-base ${
+                    className={`textarea textarea-bordered w-full ${isEmbedUser && !showAgentType ? "min-h-[100px]" : "min-h-[50px] md:min-h-[50px]"} bg-base-100 transition-all duration-300 placeholder-base-content text-sm md:text-base ${
                       validationErrors.purpose
                         ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                        : "border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        : "border-base-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     }`}
                     required
                     aria-label="Agent purpose description"
@@ -357,7 +360,7 @@ import Protected from "./protected";
             <div className="modal-action mb-4 flex flex-col-reverse md:flex-row justify-between gap-4">
               <div className="w-full md:w-auto">
                 <button
-                  className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full"
+                  className="btn btn-primary text-sm md:text-base w-full"
                   onClick={createBridgeHandler}
                   disabled={isLoading}
                 >
@@ -372,23 +375,23 @@ import Protected from "./protected";
               </div>
 
               <div className="flex items-center justify-center gap-2 mb-2 w-full my-2 md:my-0 md:w-auto">
-                <hr className="flex-1 border-t-2 border-gray-200 md:w-8" />
-                <span className="text-gray-400 text-xs sm:text-sm mx-2">
+                <hr className="flex-1 border-t-2 border-base-content md:w-8" />
+                <span className="text-base-content text-xs sm:text-sm mx-2">
                   or
                 </span>
-                <hr className="flex-1 border-t-2 border-gray-200 md:w-8" />
+                <hr className="flex-1 border-t-2 border-base-content md:w-8" />
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row items-center gap-3 w-full md:w-auto px-2">
                 <button
-                  className="btn btn-base-200 text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                  className="btn text-sm md:text-base w-full sm:w-1/2 md:w-auto"
                   onClick={() => closeModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}
                 >
                   Cancel
                 </button>
                 {isManualMode ? (
                   <button
-                    className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                    className="btn btn-primary text-sm md:text-base w-full sm:w-1/2 md:w-auto"
                     onClick={handleCreateBridge}
                     disabled={isLoading}
                   >
@@ -402,7 +405,7 @@ import Protected from "./protected";
                   </button>
                 ) : (
                   <button
-                    className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base w-full sm:w-1/2 md:w-auto"
+                    className="btn btn-primary text-sm md:text-base w-full sm:w-1/2 md:w-auto"
                     onClick={handleCreateBridgeUsingAI}
                     disabled={isAiLoading || isLoading}
                   >

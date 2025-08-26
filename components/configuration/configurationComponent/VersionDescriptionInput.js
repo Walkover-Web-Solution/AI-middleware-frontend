@@ -1,14 +1,16 @@
 import Protected from '@/components/protected';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { sendDataToParent } from '@/utils/utility';
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 function VersionDescriptionInput({ params, isEmbedUser }) {
     const dispatch = useDispatch();
-    const { versionDescription } = useCustomSelector((state) => ({
+    const { versionDescription, bridgeName } = useCustomSelector((state) => ({
         versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.version_description || "",
+        bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
     }));
 
     const saveBridgeVersionDescription = useCallback((e) => {
@@ -20,7 +22,7 @@ function VersionDescriptionInput({ params, isEmbedUser }) {
             return;
         }
         dispatch(updateBridgeVersionAction({ versionId: params?.version, dataToSend: { version_description: newValue } }));
-        isEmbedUser && window.parent.postMessage({type: 'gtwy', status:"agent_description_update", data:{agent_description: newValue}}, '*');
+        isEmbedUser && sendDataToParent("updated", {name: bridgeName, agent_description: newValue, agent_id: params?.id, agent_version_id: params?.version }, "Agent Version Description Updated")
     }, [dispatch, params?.version, versionDescription]);
 
     const handleKeyDown = useCallback((e) => {
@@ -31,15 +33,12 @@ function VersionDescriptionInput({ params, isEmbedUser }) {
     }, [saveBridgeVersionDescription]);
 
     return (
-        <div className='mb-2'>
+        <div className='mb-2 '>
             <div className='flex flex-row items-center'>
-                <div className="label pl-0  whitespace-nowrap">
-                    <span className="label-text capitalize font-medium">Version Description :</span>
-                </div>
                 <div className="relative w-full">
                     <input
                         type="text"
-                        className="text-md outline-none w-full"
+                        className="text-md outline-none w-full bg-transparent"
                         onBlur={saveBridgeVersionDescription}
                         onKeyDown={handleKeyDown}
                         defaultValue={versionDescription}

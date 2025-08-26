@@ -11,7 +11,7 @@ import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
-import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
+import { getAllKnowBaseDataAction, getKnowledgeBaseTokenAction } from "@/store/action/knowledgeBaseAction";
 import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
@@ -19,12 +19,12 @@ import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { getTutorialDataAction } from "@/store/action/tutotrialAction";
+import { getApiKeyGuideAction, getTutorialDataAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
-
+import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
@@ -36,7 +36,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   const [isSliderOpen, setIsSliderOpen] = useState(false)
   const [isValidOrg, setIsValidOrg] = useState(true);
   const [loading, setLoading] = useState(true);
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token,tutorialData } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[params?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[version_id]?.apiCalls || {},
@@ -46,16 +46,20 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[params.org_id]?.doctstar_embed_token || "",
   }));
-  
   useEffect(() => {
     if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(getTutorialDataAction()); 
       dispatch(userDetails());
     }
+    if (pathName.endsWith("apikeys")&& !isEmbedUser) {
+      dispatch(getApiKeyGuideAction()); 
+    }
   }, [pathName]);
-
   useEffect(() => {
     const updateUserMeta = async () => {
+      const reference_id = localStorage.getItem("reference_id");
+        let currentUserMeta = currentUser?.meta;
+      // If user meta is null, initialize onboarding meta
       if (currentUser?.meta === null) {
         const updatedUser = {
           ...currentUser,
@@ -72,16 +76,90 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
             },
           },
         };
-        await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+      const data= await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+      if (data?.data?.status) {
+        currentUserMeta = data?.data?.data?.user?.meta;
+      }
+      }
+  
+      // If reference_id exists but user has no reference_id in meta
+      if (reference_id && !currentUser?.meta?.reference_id) {
+        try {
+          const data = await dispatch(
+            storeMarketingRefUserAction({
+              ref_id: reference_id,
+              client_id: currentUser.id,
+              client_email: currentUser.email,
+              client_name: currentUser.name,
+              created_at: currentUser.created_at,
+            })
+          );
+  
+          if (data?.status) {
+            const updatedUser = {
+              ...currentUser,
+              meta: {
+                ...currentUserMeta,
+                reference_id: reference_id,
+              },
+            };
+            await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+          }
+        } catch (err) {
+          console.error("Error storing marketing ref:", err);
+        }
       }
     };
-
+  
     updateUserMeta();
   }, []);
+  
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
-  
+
+  // Theme initialization with full system theme support
+  useEffect(() => {
+    const getSystemTheme = () => {
+      if (typeof window !== 'undefined') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return 'light';
+    };
+
+    const applyTheme = (themeToApply) => {
+      if (typeof window !== 'undefined') {
+        document.documentElement.setAttribute('data-theme', themeToApply);
+      }
+    };
+
+    const savedTheme = localStorage.getItem("theme") || "system";
+    const systemTheme = getSystemTheme();
+    
+    if (savedTheme === "system") {
+      applyTheme(systemTheme);
+    } else {
+      applyTheme(savedTheme);
+    }
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = (e) => {
+      const newSystemTheme = e.matches ? 'dark' : 'light';
+      const currentSavedTheme = localStorage.getItem("theme") || "system";
+      
+      // Only update if currently using system theme
+      if (currentSavedTheme === "system") {
+        applyTheme(newSystemTheme);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    };
+  }, []);
   
   useEffect(() => {
     const validateOrg = async () => {
@@ -113,7 +191,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   useEffect(() => {
     if (isValidOrg) {
       dispatch(getAllBridgesAction((data) => {
-        if (data === 0 && !currentUser?.meta?.onboarding?.bridgeCreation) {
+        if (data?.length === 0 && !currentUser?.meta?.onboarding?.bridgeCreation) {
           openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
         }
         setLoading(false);
@@ -190,6 +268,26 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       window.removeEventListener('focus', onFocus);
     }
   }, [isValidOrg, params])
+
+  // useEffect(() => {
+  //   const updateScript = (token) => {
+  //     const existingScript = document.getElementById("rag-main-script");
+  //     if (existingScript) {
+  //       document.head.removeChild(existingScript);
+  //     }
+  //     if (!token) return;
+  //     const script = document.createElement("script");
+  //     script.id = "rag-main-script";
+  //     script.src = process.env.NEXT_PUBLIC_RAG_EMBED_URL;
+  //     script.setAttribute("embedToken", token);
+  //     document.head.appendChild(script);
+  //   };
+
+  //   dispatch(getKnowledgeBaseTokenAction(params.org_id)).then((data) => {
+  //     const token = data?.response;
+  //     updateScript(token);
+  //   });
+  // }, [params.org_id]);
 
   // const docstarScriptId = "docstar-main-script";
   // const docstarScriptSrc = "https://app.docstar.io/scriptProd.js";
@@ -309,7 +407,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           {/* Main Content Area */}
           <div className={`flex-1 ${path.length > 4 ? 'ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+            <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
               <Navbar params={params} />
             </div>
 
@@ -340,7 +438,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           {/* Main Content Area for Embed Users */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+            <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
               <Navbar params={params} />
             </div>
 

@@ -49,24 +49,34 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
 }`;
 
         return (
-            <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
+            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
                 <Section title="Step 1: Connect Knowledge Base" caption="Use the following API configuration and access key." />
                 <div className="mockup-code">
                     <CopyButton data={apiConfig} />
                         <pre data-prefix=">" className="text-error"><code>org_id=</code><code className="text-warning">{orgId}</code></pre>
                         <pre data-prefix=">" className="text-error"><code>user_id=</code><code className="text-warning">"unique_user_id"</code></pre>
                 </div>
+                <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">JWT Access Key</span>
+                </label>
                 {access_key ? (
                     <div className="mockup-code">
                         <CopyButton data={access_key} />
                         <pre data-prefix=">" className="text-error">
                             <code>Access Key: </code>
                             <code className="text-warning">{access_key}</code>
-                        </pre>
+                        </pre> 
                     </div>
                 ) : (
-                    <button className='btn mt-4 text-base-content' onClick={handleGenerateAccessKey}>Generate Access key</button>
-                )}
+                  <button
+                    onClick={handleGenerateAccessKey}
+                    className="btn btn-primary btn-sm w-56"
+                  >
+                    Show Access Key
+                  </button>     
+                       )}
+                </div>
             </div>
         );
     }
@@ -77,7 +87,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
         };
 
         return (
-            <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
+            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
                 <Section title="Step 2" caption="Add below code in your product." />
                 <div className="mockup-code">
                     <CopyButton data={DataObject.script} />
@@ -96,7 +106,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
     }
     const renderStepThree = () => {
         return (
-            <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
+            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
                 <Section title="Step 3" caption="Use this function to show list or add Document modal" />
                 <div className="mockup-code">
                     <pre data-prefix=">" className="text-error" ><code className="text-warning">window.openRag() /* to open add document modal */</code></pre>
@@ -110,7 +120,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
     return (
          <aside
             id="knowledgeBase-integration-slider"
-            className="fixed inset-y-0 right-0 border-l-2 bg-base-100 shadow-2xl rounded-md w-full md:w-1/2 lg:w-1/2 
+            className="fixed inset-y-0 right-0 border-l-2 border-base-300 bg-base-100 shadow-2xl rounded-md w-full md:w-1/2 lg:w-1/2 
                      overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-medium
                      translate-x-full"
             aria-label="Api Keys guide slider"

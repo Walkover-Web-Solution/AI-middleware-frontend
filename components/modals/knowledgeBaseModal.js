@@ -111,7 +111,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.KNOWLEDGE_BASE_MODAL}>
-      <div className="modal-box w-11/12 max-w-3xl border-2">
+      <div className="modal-box w-11/12 max-w-3xl border-2 border-base-300">
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
           <h3 className="font-bold text-xl">{selectedKnowledgeBase ? 'Update' : 'New'} Knowledge Base Configuration</h3>
           <button
@@ -309,7 +309,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
             </button>
             <button
               type="submit"
-              className="btn btn-primary text-white hover:bg-primary-focus"
+              className="btn btn-primary hover:bg-primary-focus"
               disabled={isLoading}
             >
               {isLoading ? (selectedKnowledgeBase ? 'Updating...' : 'Creating...') : (selectedKnowledgeBase ? 'Update' : 'Create') + ' Knowledge Base'}

@@ -19,7 +19,7 @@ export const runtime = 'edge';
 
 const Page = ({ params }) => {
   const dispatch = useDispatch();
-  const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id]);
+  const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id])||[];
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData)
@@ -83,6 +83,20 @@ const Page = ({ params }) => {
     );
   };
 
+  useEffect(() => {
+    const handleMessage = (e) => {
+        if (e.data?.type === 'rag') {
+            if (e.data?.status === "create") {
+                dispatch(getAllKnowBaseDataAction(params.org_id));
+            }
+        }
+    }
+    window.addEventListener('message', handleMessage);
+    return () => {
+        window.removeEventListener('message', handleMessage);
+    };
+}, [params.org_id]);
+
   return (
     <div className="w-full">
       <div className="px-4 pt-4">
@@ -94,7 +108,7 @@ const Page = ({ params }) => {
               docLink="https://blog.gtwy.ai/features/knowledgebase"
             />
             <div className="flex-shrink-0 mt-4 sm:mt-0">
-              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL)}>+ create knowledge base</button>
+<button className="btn btn-primary" onClick={() => {if(window.openRag){window.openRag()} else {openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)}}}>+ create knowledge base</button>
             </div>
           </div>
         </MainLayout>
@@ -131,7 +145,7 @@ const Page = ({ params }) => {
               {filterKnowledgeBase.map((item, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"
+                  className="bg-base-100 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"
                 >
                   <div className="dropdown dropdown-right absolute top-2 right-2">
                     <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>
