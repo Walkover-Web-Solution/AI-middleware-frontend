@@ -68,7 +68,7 @@ const NAV_SECTIONS = [
 
 /** Small horizontal rule visible only when sidebar is collapsed */
 const HRCollapsed = () => (
-  <hr className="my-2 w-6 border-base-300 mx-auto" />
+  <hr className="my-2 w-6 border-base-content/30 mx-auto" />
 );
 
 /* -------------------------------------------------------------------------- */
@@ -241,12 +241,12 @@ function MainSlider({ isEmbedUser }) {
         />
       )}
 
-      <div className="relative">
+      <div className="relative ">
         {/* ------------------------------------------------------------------ */}
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar left-0 top-0 h-screen bg-base-100 border border-base-300 transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
           style={{ 
             width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '256px' : '50px'),
             transform: (!isSideBySideMode && pathParts.length > 3) ? (isMobile && !isOpen ? 'translateX(-200px)' : 'translateX(0)') : 'none'

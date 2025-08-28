@@ -7,7 +7,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
     return (
         <div className={`space-y-2 pb-2 p-2 mt-2 ml-4 text-semi-bold ${isModal ? "bg-base-200 rounded-xl p-6" : ""}`}>
             <div className="flex justify-between items-center">
-                <label className="text-md  text-gray-800">
+                <label className="text-md  text-base-content">
                     Select Agent Type
                 </label>
                 {validationErrors?.bridgeType && (
@@ -24,7 +24,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
             >
                 {/* API Card */}
                 <div
-                    className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "api"
+                    className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-200 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "api"
                         ? "ring-2 ring-blue-500"
                         : ""
                         }`}
@@ -32,7 +32,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                 >
                     <div className="card-body p-4 md:p-6">
                         <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                            <div className="p-2 md:p-3 rounded-lg bg-blue-50">
+                            <div className="p-2 md:p-3 rounded-lg bg-base-200">
                                 <WebhookIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
                                 {selectedBridgeTypeCard === "api" && (
                                     <div className="absolute top-3 right-3 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
@@ -40,11 +40,11 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                                     </div>
                                 )}
                             </div>
-                            <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                            <h2 className="card-title text-lg md:text-xl font-semibold text-base-content">
                                 API
                             </h2>
                         </div>
-                        <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                        <p className="text-xs md:text-sm text-base-content leading-relaxed">
                             Easily integrate AI into your backend using our API. Send
                             prompts, receive intelligent responses, and automate
                             tasks—no frontend needed. It's fast, flexible, and works
@@ -55,7 +55,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
 
                 {/* Chatbot Card */}
                 <div
-                    className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "chatbot"
+                    className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-200 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "chatbot"
                         ? "ring-2 ring-green-500"
                         : ""
                         }`}
@@ -63,7 +63,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                 >
                     <div className="card-body p-4 md:p-6">
                         <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                            <div className="p-2 md:p-3 rounded-lg bg-green-50">
+                            <div className="p-2 md:p-3 rounded-lg bg-base-200">
                                 <BotIcon className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
                                 {selectedBridgeTypeCard === "chatbot" && (
                                     <div className="absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
@@ -71,11 +71,11 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                                     </div>
                                 )}
                             </div>
-                            <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                            <h2 className="card-title text-lg md:text-xl font-semibold text-base-content">
                                 Chatbot
                             </h2>
                         </div>
-                        <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                        <p className="text-xs md:text-sm text-base-content leading-relaxed">
                             Quickly embed an AI-powered chatbot into your app or
                             website. It responds in real time, handles user queries,
                             and delivers smart, conversational experiences—fully
@@ -86,7 +86,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
 
                 {/* Batch API Card */}
                 {!isModal && <div
-                    className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "batch"
+                    className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-content rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "batch"
                         ? "ring-2 ring-purple-500"
                         : ""
                         }`}
@@ -102,11 +102,11 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                                     </div>
                                 )}
                             </div>
-                            <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                            <h2 className="card-title text-lg md:text-xl font-semibold text-base-content">
                                 Batch API
                             </h2>
                         </div>
-                        <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                        <p className="text-xs md:text-sm text-base-content leading-relaxed">
                             Process multiple prompts or data inputs in a single
                             request using the Batch API. Ideal for large-scale tasks
                             like summarization, generation, or classification—fast,
@@ -117,7 +117,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
 
                 {/* Triggers Card */}
                 {!isEmbedUser && <div
-                    className={`card bg-white hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "trigger"
+                    className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "trigger"
                         ? "ring-2 ring-amber-500"
                         : ""
                         }`}
@@ -125,7 +125,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                 >
                     <div className="card-body p-4 md:p-6">
                         <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                            <div className="p-2 md:p-3 rounded-lg bg-amber-50">
+                            <div className="p-2 md:p-3 rounded-lg bg-base-200">
                                 <CircleAlertIcon className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
                                 {selectedBridgeTypeCard === "trigger" && (
                                     <div className="absolute top-3 right-3 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
@@ -133,11 +133,11 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                                     </div>
                                 )}
                             </div>
-                            <h2 className="card-title text-lg md:text-xl font-semibold text-gray-800">
+                            <h2 className="card-title text-lg md:text-xl font-semibold text-base-content">
                                 Triggers
                             </h2>
                         </div>
-                        <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
+                        <p className="text-xs md:text-sm text-base-content leading-relaxed">
                             Automate workflows using Triggers. Set conditions to
                             auto-run actions like sending prompts, generating
                             responses, or forwarding data—no manual input required.

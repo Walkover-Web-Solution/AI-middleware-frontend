@@ -42,7 +42,7 @@ function SlideOver({
       {/* Panel */}
       <aside
         data-state={isOpen ? 'open' : 'closed'}
-        className={`fixed top-0 right-0 h-full ${widthClass} bg-base-100 border-l border-base-200 ${panelZ}
+        className={`fixed top-0 right-0 h-full ${widthClass} bg-base-100 border border-base-content/50 ${panelZ}
           transform-gpu transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : 'translate-x-full'} ${className}`}
         style={{ transition: 'transform 300ms ease-in-out' }} // fallback if utilities get purged
@@ -590,7 +590,14 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
    Flow Control Panel (uses SlideOver for Chat)
 -------------------------------------------------------- */
 export function FlowControlPanel({
-  onSaveAgent, bridgeType = 'default', name, description, createdFlow, isModified, setIsLoading,
+  onSaveAgent,
+  onDiscard, // ← optional: pass a handler to discard changes
+  bridgeType = 'default',
+  name,
+  description,
+  createdFlow,
+  isModified,
+  setIsLoading,
   params
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -618,6 +625,27 @@ export function FlowControlPanel({
     setIsOpen(false);
   };
 
+  const handleDiscard = () => {
+    const ok = confirm('Discard all unsaved changes?');
+    if (!ok) return;
+
+    // Prefer a parent-provided discard handler if available
+    if (typeof onDiscard === 'function') {
+      onDiscard();
+      return;
+    }
+
+    // Fallback: reset local state and hard refresh to ensure full revert
+    setIsChatOpen(false);
+    setSaveData({
+      name: name || '',
+      description: description || '',
+      status: 'publish',
+    });
+    // Force a reload to revert any upstream editor state
+    // window.location.reload();
+  };
+
   const handleChange = (e) => {
     setSaveData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -640,31 +668,53 @@ export function FlowControlPanel({
 
   return (
     <div className="relative z-[9990]">
-      {/* Publish Button */}
-      <div className="absolute top-4 right-4">
+      {/* Top-right Controls */}
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        {/* Discard button: show only when createdFlow && isModified */}
+        {createdFlow && isModified && (
+          <button
+            className="btn btn-outline btn-error"
+            onClick={handleDiscard}
+            title="Discard unsaved changes"
+          >
+            Discard
+          </button>
+        )}
+
+        {/* Publish/Update button */}
         <button
-          className={`btn ${isModified ? 'btn-primary' : 'btn-neutral'} shadow-lg`}
+          className="btn btn-primary bg-primary shadow-lg text-base-content"
           onClick={() => setIsOpen(true)}
           disabled={!isModified}
           title="Publish Flow"
         >
-          {createdFlow ? <Upload className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
-          {createdFlow ? 'Update Flow' : 'Publish Flow'}
+          <span className="text-white">
+            {createdFlow ? <Upload className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+          </span>
+          <span className="text-white">
+            {createdFlow ? 'Update Flow' : 'Publish Flow'}
+          </span>
         </button>
       </div>
 
-      {/* Quick Test Input */}
+      {/* Quick Test Input with highlight ring */}
       {!isModified && !isChatOpen && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
-          <div className="flex items-center gap-2 bg-base-100/95 backdrop-blur-md border border-base-200 rounded-full px-4 py-3 shadow-lg">
-            <TestTube className="h-5 w-5 text-primary" />
-            <input
-              type="text"
-              placeholder="Test the model..."
-              className="bg-transparent outline-none text-sm w-64 focus:w-80 transition-all"
-              onKeyDown={handleQuickTestKeyDown}
-            />
-            <div className="text-xs text-base-content/60 border-l pl-3">Press Enter</div>
+          <div className="relative">
+            {/* Outer ring */}
+            <div className="absolute inset-0 rounded-full ring-2 ring-primary animate-pulse"></div>
+
+            {/* Main content */}
+            <div className="relative flex items-center gap-2 bg-base-100/95 backdrop-blur-md border border-base-200 rounded-full px-4 py-3 shadow-lg">
+              <TestTube className="h-5 w-5 text-primary" />
+              <input
+                type="text"
+                placeholder="Test the model..."
+                className="bg-transparent outline-none text-sm w-64 focus:w-80 transition-all"
+                onKeyDown={handleQuickTestKeyDown}
+              />
+              <div className="text-xs text-base-content/60 border-l pl-3">Press Enter</div>
+            </div>
           </div>
         </div>
       )}
@@ -681,7 +731,9 @@ export function FlowControlPanel({
 
               <div className="form-control mt-2">
                 <label className="label">
-                  <span className="label-text">Flow Name <span className="text-error">*</span></span>
+                  <span className="label-text">
+                    Flow Name <span className="text-error">*</span>
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -728,7 +780,7 @@ export function FlowControlPanel({
         panelZ="z-[9969]"
         backDropBlur={false}
         header={
-          <div className="px-5 py-1 border-b border-base-200 flex items-center justify-between rounded-t-lg">
+          <div className="px-5 py-1 border-b border-base-content/30 flex items-center justify-between rounded-t-lg">
             <div className="flex items-center gap-2">
               <TestTube className="h-5 w-5 text-primary" />
               <h4 className="text-base font-semibold">Test Your Model</h4>
@@ -752,6 +804,7 @@ export function FlowControlPanel({
     </div>
   );
 }
+
 
 /* -------------------------------------------------------
    Agent Config Sidebar (uses SlideOver)

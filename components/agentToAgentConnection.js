@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import {ReactFlow,applyNodeChanges,applyEdgeChanges,addEdge,Handle,Position,ReactFlowProvider,Controls,Background,BackgroundVariant,} from '@xyflow/react';
+import {ReactFlow,applyNodeChanges,applyEdgeChanges,addEdge,Handle,Position,ReactFlowProvider,Controls,Background,BackgroundVariant, ColorMode,} from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Plus, PlusIcon, Settings, Bot, X } from 'lucide-react';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -73,7 +73,7 @@ function BridgeNode({ id, data }) {
         {!data.hasMasterAgent && !bridgeConfig && <span className="text-xs font-medium relative z-10">Start</span>}
       </button>
 
-      <span className="mt-3 text-sm font-medium text-slate-700">{bridgeConfig ? `${bridgeConfig.name} Bridge` : 'Select Bridge Type'}</span>
+      <span className="mt-3 text-sm font-medium text-base-content">{bridgeConfig ? `${bridgeConfig.name} Bridge` : 'Select Bridge Type'}</span>
 
       <Handle type="source" position={Position.Right} className="!bg-transparent !border-0" />
     </div>
@@ -174,8 +174,8 @@ function AgentNode({ id, data }) {
             />
 
             <div className="flex items-center justify-center">
-              <div className={`text-base-primary rounded-full p-4 shadow-inner ${isMasterAgent ? 'bg-gradient-to-br from-amber-100 to-amber-200' : 'bg-gradient-to-br from-blue-50 to-blue-100'}`}>
-                <Bot className="w-8 h-8" />
+              <div className={`text-base-primary rounded-full p-4 shadow-inner ${isMasterAgent ? 'bg-gradient-to-br from-amber-100 to-amber-200' : 'bg-gradient-to-br from-primary/50 to-primary/70'}`}>
+                <Bot className="w-8 h-8 text-base-100" />
                 {isMasterAgent && (
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold">M</span>
@@ -210,7 +210,7 @@ function AgentNode({ id, data }) {
           <div
             className={`px-4 py-2.5 text-sm font-semibold cursor-pointer transition-all duration-300 rounded-xl shadow-sm hover:shadow-md border ${isMasterAgent
                 ? 'text-amber-800 hover:text-amber-900 bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200 hover:border-amber-300'
-                : 'text-slate-700 hover:text-base-300 '
+                : 'text-base-content hover:text-base-content '
               }`}
             onClick={handleRelabel}
           >
@@ -274,6 +274,14 @@ const defaultEdgeOptions = {
   style: { animated: true },
 };
 function Flow({ params, orchestralData, name, description, createdFlow, setIsLoading }) {
+  const [edges, setEdges] = useState(() => { const seed = orchestralData?.edges ?? [];return seed;});
+  const [shouldLayout, setShouldLayout] = useState(false);
+  const [isModified, setIsModified] = useState(false);
+  const agents = useCustomSelector((state) => state.bridgeReducer.org?.[params.org_id]?.orgs ?? {});
+  const router = useRouter()
+  const [masterAgent, setMasterAgent] = useState(null);
+  const dispatch = useDispatch();
+  const [isDiscard, setIsDiscard] = useState(false);
   const [nodes, setNodes] = useState(() => {
     const seed =
     orchestralData?.nodes ??
@@ -288,7 +296,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       },
     }));
   });
-  const agents = useCustomSelector((state) => state.bridgeReducer.org?.[params.org_id]?.orgs ?? {});
   const [configSidebar, setConfigSidebar] = useState({
     isOpen: false,
     nodeId: null,
@@ -314,11 +321,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     });
   }, []);
 
-  const [edges, setEdges] = useState(() => { const seed = orchestralData?.edges ?? [];return seed;});
-
-  const [shouldLayout, setShouldLayout] = useState(false);
-  const [isModified, setIsModified] = useState(false);
-  const router = useRouter()
+  
   useEffect(() => {
     setIsModified(!orchestralData.length > 0 ?  (nodes.length !== orchestralData?.nodes?.length || edges.length !== orchestralData?.edges?.length) : nodes.length > 0);
   }, [nodes, edges]);
@@ -327,10 +330,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       (orchestralData?.nodes || []).find?.((n) => n.type === 'bridgeNode') ||
       (Array.isArray(orchestralData) ? orchestralData.find((n) => n.type === 'bridgeNode') : null);
     return bridgeNode?.data?.bridgeType || '';
-  });
-
-  const [masterAgent, setMasterAgent] = useState(null);
-  const dispatch = useDispatch();
+  });  
 
   const [sidebar, setSidebar] = useState({
     isOpen: false,
@@ -379,6 +379,30 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     );
   }, []); // eslint-disable-line
 
+  const handleDiscard = () => {
+    setNodes(() => {
+      const seed =
+      orchestralData?.nodes ??
+      (Array.isArray(orchestralData) ? orchestralData : []) ??
+      [];
+      return seed.map((node) => ({
+        ...node,
+        data: {
+          ...(node.data || {}),
+          onFlowChange: null,
+          openSidebar: null,
+        },
+      }));
+    });
+    setEdges(() => { const seed = orchestralData?.edges ?? [];return seed;})
+    setSelectedBridgeType(() => { const bridgeNode =
+        (orchestralData?.nodes || []).find?.((n) => n.type === 'bridgeNode') ||
+        (Array.isArray(orchestralData) ? orchestralData.find((n) => n.type === 'bridgeNode') : null);
+      return bridgeNode?.data?.bridgeType || '';
+    })
+    setIsDiscard(!isDiscard)
+  };
+
   // RUNTIME IMPORT of initialFlow (e.g., navigation/redirect with prebuilt graph)
   useEffect(() => {
     if (orchestralData?.nodes || orchestralData?.edges) {
@@ -397,7 +421,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       setEdges(orchestralData.edges || []);
       setShouldLayout(true);
     }
-  }, [orchestralData]); // eslint-disable-line
+  }, [orchestralData, isDiscard]); // eslint-disable-line
 
   const selectAgentForNode = useCallback((nodeId, agent) => {
     setNodes((nds) => nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, selectedAgent: agent } } : n)));
@@ -745,11 +769,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   // UI
   return (
     <div className="w-full h-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 relative overflow-hidden">
-      <div className="absolute top-4 left-4 z-50 bg-white/90 p-2 rounded text-xs font-mono">
-        Nodes: {nodes.length} | Edges: {edges.length} | Bridge: {selectedBridgeType || 'none'}
-      </div>
-
-      <FlowControlPanel onSaveAgent={handleSaveAgentStructure} bridgeType={selectedBridgeType} name={name} description={description} createdFlow={createdFlow} isModified={isModified} setIsLoading={setIsLoading} params={params}/>
+      <FlowControlPanel onSaveAgent={handleSaveAgentStructure} onDiscard={handleDiscard} bridgeType={selectedBridgeType} name={name} description={description} createdFlow={createdFlow} isModified={isModified} setIsLoading={setIsLoading} params={params}/>
 
       <ReactFlow
         nodes={nodes}
@@ -765,6 +785,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         nodesConnectable={false}   // editable
         fitView
         fitViewOptions={{ padding: 0.2, duration: 800, includeHiddenNodes: false }}
+        colorMode={localStorage.getItem('theme') || 'light'}
       >
         <Controls showInteractive={false} className="!bg-white/80 !backdrop-blur-md !border-white/60 !shadow-lg !rounded-xl" />
         <Background variant={BackgroundVariant.Dots} gap={32} size={1.5} color="#e2e8f0" className="opacity-60" />

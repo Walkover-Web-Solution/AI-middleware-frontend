@@ -131,7 +131,7 @@ export default function FlowsPage({ params = { org_id: '8537' } }) {
 
             {/* Quick Stats */}
             <div className="flex gap-4">
-              <div className="bg-base-100 rounded-xl p-4 shadow-sm border border-base-200">
+              <div className="bg-base-100 rounded-xl p-4 shadow-sm border border-base-content/30">
                 <div className="flex items-center gap-2">
                   <Activity className="w-5 h-5 text-base-primary" />
                   <div>
@@ -140,7 +140,7 @@ export default function FlowsPage({ params = { org_id: '8537' } }) {
                   </div>
                 </div>
               </div>
-              <div className="bg-base-100 rounded-xl p-4 shadow-sm border border-base-200">
+              <div className="bg-base-100 rounded-xl p-4 shadow-sm border border-base-content/30">
                 <div className="flex items-center gap-2">
                   <Zap className="w-5 h-5 text-success" />
                   <div>
@@ -155,7 +155,7 @@ export default function FlowsPage({ params = { org_id: '8537' } }) {
           </div>
 
           {/* Search and Filter Bar */}
-          <div className="flex gap-4 items-center bg-base-100 rounded-xl p-4 shadow-sm border border-base-200">
+          <div className="flex gap-4 items-center bg-base-100 rounded-xl p-4 shadow-sm border border-base-content/30">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content w-5 h-5" />
               <input
@@ -163,7 +163,7 @@ export default function FlowsPage({ params = { org_id: '8537' } }) {
                 placeholder="Search flows..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-base-200 rounded-lg 
+                className="w-full pl-10 pr-4 py-2 border border-base-content/30 rounded-lg 
                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -173,7 +173,7 @@ export default function FlowsPage({ params = { org_id: '8537' } }) {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-base-200 rounded-lg focus:outline-none 
+                className="px-3 py-2 border border-base-content/30 rounded-lg focus:outline-none 
                          focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Status</option>
@@ -200,30 +200,30 @@ export default function FlowsPage({ params = { org_id: '8537' } }) {
 
             <div className="relative z-10 text-center">
               <div className="mb-6 transform group-hover:scale-110 transition-transform duration-300">
-                <div className="w-16 h-16 bg-base-200/20 rounded-full flex items-center justify-center 
-                              backdrop-blur-sm border border-base-200/30 mx-auto">
-                  <Plus className="w-8 h-8 text-base-100" />
+                <div className="w-16 h-16 bg-base-content/20 rounded-full flex items-center justify-center 
+                              backdrop-blur-sm border border-base-content/30/30 mx-auto">
+                  <Plus className="w-8 h-8 text-white" />
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold text-base-content mb-3">
+              <h3 className="text-xl font-bold text-white mb-3">
                 Create New Flow
               </h3>
-              <p className="text-base-content text-sm leading-relaxed">
+              <p className="text-white text-sm leading-relaxed">
                 Start building your AI agent workflow with our intuitive flow builder
               </p>
 
               <div className="mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="text-xs text-base-content font-medium">
+                <div className="text-xs text-white font-medium">
                   Click to get started →
                 </div>
               </div>
             </div>
 
             {/* Animated Background Elements */}
-            <div className="absolute top-4 right-4 w-2 h-2 bg-base-200/30 rounded-full 
+            <div className="absolute top-4 right-4 w-2 h-2 bg-base-content/30 rounded-full 
                           animate-pulse group-hover:animate-bounce" />
-            <div className="absolute bottom-6 left-4 w-1 h-1 bg-base-200/40 rounded-full 
+            <div className="absolute bottom-6 left-4 w-1 h-1 bg-base-content/40 rounded-full 
                           animate-pulse delay-1000" />
           </div>
 
@@ -239,7 +239,7 @@ export default function FlowsPage({ params = { org_id: '8537' } }) {
                 onClick={() => handleOpenFlow(flow._id)}
                 className="group relative bg-base-100 rounded-2xl p-6 cursor-pointer 
                          transition-all duration-300 hover:scale-105 hover:shadow-xl
-                         border border-base-200 hover:border-blue-300 min-h-[320px]
+                         border border-base-content/30 hover:border-blue-300 min-h-[320px]
                          flex flex-col"
               >
                 {/* Card Header */}
@@ -292,7 +292,7 @@ export default function FlowsPage({ params = { org_id: '8537' } }) {
                 </div>
 
                 {/* Footer Info */}
-                <div className="border-t border-base-200 pt-4 mt-auto">
+                <div className="border-t border-base-content/30 pt-4 mt-auto">
                   <div className="flex items-center justify-between text-xs text-base-content">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
