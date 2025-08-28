@@ -3,14 +3,22 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import CodeBlock from "../codeBlock/codeBlock";
 import ChatTextInput from "./chatTextInput";
+import { dryRun } from "@/config";
 
-function Chat({ params }) {
+function Chat({ params, userMessage, isOrchestralModel = false }) {
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const inputRef = useRef(null);
   const [uploadedImages, setUploadedImages] = useState([]);
-  const [conversation, setConversation] = useState([]);
-
+  const [loading, setLoading] = useState(false);
+  const [conversation, setConversation] = useState(userMessage ? [{
+    id: Date.now(),
+    sender: "user",
+    content: userMessage,
+    time: new Date().toLocaleString()
+  }] : []);
+  
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -19,8 +27,87 @@ function Chat({ params }) {
     setMessages([]);
     setConversation([]);
   }
+
+  const handleSendMessageForOrchestralModel = async (userMessage) => {
+    const newMessage = userMessage ? userMessage.replace(/\r?\n/g, '\n') : inputRef?.current?.value.replace(/\r?\n/g, '\n');
+    if (newMessage?.trim() === "") return;
+    if (inputRef.current) {
+      inputRef.current.style.height = '40px'; // Set initial height
+    }
+    setErrorMessage("");
+    inputRef.current.value = "";
+    setLoading(true);
+    try {
+      const newChat = {
+        id: conversation.length + 1,
+        sender: "user",
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        content: newMessage.replace(/\n/g, "  \n"), // Markdown line break
+      };
+      let response, responseData;
+      let data;
+      data = {
+        role: "user",
+        content: newMessage,
+      };
+      setMessages(prevMessages => [...prevMessages, newChat]);
+      responseData = await dryRun({
+        localDataToSend: {
+          
+          configuration: {
+            conversation: conversation,
+          },
+          user: data.content,
+          orchestrator_id: params.orchestralId
+        },
+        orchestrator_id: params.orchestralId
+      });
+
+      response = responseData.response?.data;
+      const content = response?.content || "";
+      const assistConversation = {
+        role: response?.role || "assistant",
+        content: content,
+        fallback: response?.fallback,
+        firstAttemptError: response?.firstAttemptError,
+        image_urls: response?.image_urls || [],
+        model: response?.model
+      };
+
+      setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
+      const newChatAssist = {
+        id: conversation.length + 2,
+        sender: "Assist",
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        content: Array.isArray(content) ? content.join(", ") : content.toString(),
+        image_urls: assistConversation.image_urls,
+        fallback: assistConversation?.fallback,
+        firstAttemptError: response?.firstAttemptError,
+        modelName: assistConversation?.model
+      };
+
+      setMessages(prevMessages => [...prevMessages, newChatAssist]);
+    } catch (error) {
+      console.log(error);
+      setErrorMessage("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+      setUploadedImages([]);
+    }
+
+  }
+  useEffect(() => {
+    handleSendMessageForOrchestralModel(userMessage);
+  }, [userMessage]);
+
   return (
-    <div className="px-4 pt-4">
+    <div className="px-4 pt-4 bg-base-100">
       <div className="w-full flex justify-between items-center px-2">
         <span className="label-text">Playground</span>
         {conversation?.length > 0 && <button className="btn btn-sm" onClick={handleResetChat}>Reset Chat</button>}
@@ -108,7 +195,20 @@ function Chat({ params }) {
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-low">
           <div className="relative flex flex-col gap-4 w-full">
             <div className="flex flex-row gap-2">
-              <ChatTextInput setErrorMessage={setErrorMessage} setMessages={setMessages} message={messages} params={params} uploadedImages={uploadedImages} setUploadedImages={setUploadedImages} conversation={conversation} setConversation={setConversation} />
+              <ChatTextInput
+                setErrorMessage={setErrorMessage}
+                setMessages={setMessages}
+                message={messages}
+                params={params}
+                uploadedImages={uploadedImages}
+                setUploadedImages={setUploadedImages}
+                conversation={conversation}
+                setConversation={setConversation}
+                isOrchestralModel={isOrchestralModel}
+                handleSendMessageForOrchestralModel={handleSendMessageForOrchestralModel}
+                inputRef={inputRef}
+                loading={loading}
+                setLoading={setLoading} />
             </div>
           </div>
           {errorMessage && (

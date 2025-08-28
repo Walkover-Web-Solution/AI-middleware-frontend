@@ -19,6 +19,7 @@ import serviceReducer from "./reducer/serviceReducer";
 import tutorialReducer from "./reducer/tutorialReducer";
 import integrationReducer from "./reducer/integrationReducer";
 import authReducer from "./reducer/authReducer";
+import orchestralFlowReducer from "./reducer/orchestralFlowReducer";
 
 const createNoopStorage = () => {
     return {
@@ -54,7 +55,8 @@ const rootReducer = combineReducers({
     serviceReducer,
     tutorialReducer,
     integrationReducer,
-    authReducer
+    authReducer,
+    orchestralFlowReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

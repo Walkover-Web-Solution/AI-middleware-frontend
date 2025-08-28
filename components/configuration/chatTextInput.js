@@ -8,11 +8,9 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { CloseCircleIcon, ImageUploadIcon, SendHorizontalIcon } from '@/components/Icons';
 
-function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation }) {
-    const [loading, setLoading] = useState(false);
+function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading }) {
     const [uploading, setUploading] = useState(false);
     const dispatch = useDispatch();
-    const inputRef = useRef(null);
     const fileInputRef = useRef(null);
     const versionId = params?.version;
     const { bridge, modelType, modelName, variablesKeyValue, prompt, configuration, modelInfo, service } = useCustomSelector((state) => ({
@@ -197,12 +195,12 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     // Only prevent default and send if not loading
                     if (!loading && !uploading) {
                         event.preventDefault();
-                        handleSendMessage(event);
+                        isOrchestralModel ? handleSendMessageForOrchestralModel() : handleSendMessage(event);
                     }
                 }
             }
         },
-        [loading, uploading, conversation, prompt]
+        [loading, uploading, conversation, prompt, isOrchestralModel]
     );
     const handleFileChange = async (e) => {
         const files = fileInputRef.current.files;
@@ -279,7 +277,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             </button>}
             <button
                 className="btn"
-                onClick={handleSendMessage}
+                onClick={() => {isOrchestralModel ? handleSendMessageForOrchestralModel() : handleSendMessage()}}
                 disabled={loading || uploading || (modelType === 'image')}
             >
                 {(loading || uploading) ? (

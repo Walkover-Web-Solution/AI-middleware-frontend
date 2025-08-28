@@ -16,7 +16,8 @@ import {
   MessageCircleMoreIcon,
   MessageSquareMoreIcon,
   Blocks,
-  User
+  User,
+  Workflow
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
@@ -38,6 +39,7 @@ import { KeyIcon } from '../Icons';
 const ITEM_ICONS = {
   org: <Building2 size={16} />,
   agents: <Bot size={16} />,
+  orchestratal_model: <Workflow size={16} />,
   chatbot: <MessageSquare size={16} />,
   pauthkey: <Shield size={16} />,
   apikeys: <Database size={16} />,
@@ -50,7 +52,7 @@ const ITEM_ICONS = {
 };
 
 const NAV_SECTIONS = [
-  { items: ['agents'] },
+  { items: ['agents', 'orchestratal_model'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
   { title: 'INTEGRATION', items: ['integration', 'knowledge_base'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
@@ -114,6 +116,7 @@ function MainSlider({ isEmbedUser }) {
   /** Nice display names for items */
   const displayName = key => {
     const names = {
+      orchestratal_model: 'Orchestral Model',
       knowledge_base: 'Knowledge base',
       feedback: 'Feedback',
       tutorial: 'Tutorial',
@@ -199,6 +202,13 @@ function MainSlider({ isEmbedUser }) {
       setIsSettingsOpen(prev => !prev);
     }
   };
+
+  const betaBadge = () =>{
+    return(
+      <span className="badge badge-success mb-1 text-base-100 text-xs">Beta</span>
+    )
+  }
+
 
   /* ------------------------------------------------------------------------ */
   /*                                  Render                                  */
@@ -318,8 +328,12 @@ function MainSlider({ isEmbedUser }) {
                         >
                           <div className="shrink-0">{ITEM_ICONS[key]}</div>
                           {(isOpen || isMobile) && (
-                            <span className="font-medium text-sm truncate">{displayName(key)}</span>
+                           <div className='flex items-center gap-2 justify-center'>
+                             <span className="font-medium text-sm truncate">{displayName(key)}</span> 
+                             <span>{key === 'orchestratal_model' && betaBadge()}</span>
+                           </div>
                           )}
+                          
                         </button>
                       ))}
                     </div>
