@@ -6,44 +6,49 @@ import Chatbot from "@/components/configuration/chatbot";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getSingleBridgesAction } from "@/store/action/bridgeAction";
+import { getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
 import { useEffect, useRef, useState } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
 import { updateTitle } from "@/utils/utility";
 import AgentSetupGuide from "@/components/AgentSetupGuide";
+import { useRouter } from "next/navigation";
 
 export const runtime = 'edge';
 
 const Page = ({ searchParams }) => {
   const apiKeySectionRef = useRef(null);
-  const resizerRef = useRef(null);
+  const promptTextAreaRef = useRef(null);
   const params = searchParams;
+  const router = useRouter();
   const mountRef = useRef(false);
   const dispatch = useDispatch();
   const [isDesktop, setIsDesktop] = useState(false);
-  const [leftWidth, setLeftWidth] = useState(50);
+  const [leftWidth, setLeftWidth] = useState(50); // Width of the left panel in percentage
   const [isResizing, setIsResizing] = useState(false);
 
-  const { bridgeType, versionService, bridgeName } = useCustomSelector((state) => {
+  // Ref for the main container to calculate percentage-based width
+  const containerRef = useRef(null); 
+
+  const { bridgeType, versionService, bridgeName, allbridges} = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
+    const allbridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs;
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
     return {
       bridgeType: bridgeData?.bridgeType,
       versionService: versionData?.service,
       bridgeName: bridgeData?.name,
+      allbridges
     };
   });
-
+  
   // Enhanced responsive detection
   useEffect(() => {
     const handleResize = () => {
       const desktop = window.innerWidth >= 1024;
       setIsDesktop(desktop);
-      
-      // Reset layout for mobile
       if (!desktop) {
-        setLeftWidth(50);
+        setLeftWidth(50); // Reset on mobile
       }
     };
 
@@ -57,17 +62,37 @@ const Page = ({ searchParams }) => {
       updateTitle(`GTWY Ai | ${bridgeName}`);
     }
   }, [bridgeName]);
-
+  
+  // Data fetching and other effects...
   useEffect(() => {
-    dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
-    return () => {
-      try {
-        if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
-          window.handleclose();
-        }
-      } catch (error) {
-        console.error("Error in handleclose:", error);
+    (async () => {
+      let bridges = allbridges;
+      if(allbridges.length === 0){
+        await dispatch(getAllBridgesAction((data)=>{
+          bridges = data
+        }));
       }
+      const agentName = bridges?.find((bridge) => bridge._id === params?.id)
+      if (!agentName) {
+        router.push(`/org/${params?.org_id}/agents`);
+        return
+      }
+      try {
+        await dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
+      } catch (error) {
+        console.error("Error in getSingleBridgesAction:", error);
+      }
+    })();
+    return () => {
+      (async () => {
+        try {
+          if (typeof window !== 'undefined' && window?.handleclose && document.getElementById('iframe-viasocket-embed-parent-container')) {
+            await window.handleclose();
+          }
+        } catch (error) {
+          console.error("Error in handleclose:", error);
+        }
+      })();
     };
   }, []);
 
@@ -94,69 +119,70 @@ const Page = ({ searchParams }) => {
     mountRef.current = true;
   }, [bridgeType]);
 
-  // Initialize resizer only for desktop
+  // --- REFACTORED RESIZER LOGIC ---
   useEffect(() => {
-    if (isDesktop) {
-      const cleanup = initializeResizer();
-      return cleanup;
-    }
-  }, [isDesktop]);
-
-  const initializeResizer = () => {
-    if (typeof window === 'undefined') return;
+    if (!isDesktop) return;
 
     const resizer = document.querySelector(".resizer");
-    if (!resizer) return;
+    const container = containerRef.current;
+    if (!resizer || !container) return;
 
-    const leftSide = resizer.previousElementSibling;
-    const rightSide = resizer.nextElementSibling;
-    const container = resizer.parentElement;
+    let x = 0;
+    let initialLeftWidth = 0;
+    let overlay = null;
 
-    let startX = 0;
-    let startLeftWidth = 0;
-
-    const onMouseDown = (e) => {
-      e.preventDefault();
+    const mouseDownHandler = (e) => {
+      e.preventDefault(); // Prevent text selection
       setIsResizing(true);
+      x = e.clientX;
+
+      const leftSide = resizer.previousElementSibling;
+      initialLeftWidth = leftSide.getBoundingClientRect().width;
       
-      startX = e.clientX;
-      startLeftWidth = leftWidth;
-      
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-      
-      // Prevent text selection
-      document.body.style.userSelect = 'none';
-      document.body.style.cursor = 'col-resize';
+      // Create and append the overlay to fix the iframe mouse capture issue
+      overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.inset = '0';
+      overlay.style.cursor = 'col-resize';
+      overlay.style.zIndex = '9999';
+      document.body.appendChild(overlay);
+
+      document.addEventListener("mousemove", mouseMoveHandler);
+      document.addEventListener("mouseup", mouseUpHandler);
     };
 
-    const onMouseMove = (e) => {
-      if (!container) return;
+    const mouseMoveHandler = (e) => {
+      const dx = e.clientX - x;
+      const containerWidth = container.getBoundingClientRect().width;
+      const newPixelWidth = initialLeftWidth + dx;
       
-      const containerWidth = container.offsetWidth;
-      const deltaX = e.clientX - startX;
-      const deltaPercentage = (deltaX / containerWidth) * 100;
+      // Calculate new width as a percentage of the container
+      const newPercentageWidth = (newPixelWidth / containerWidth) * 100;
       
-      const newLeftWidth = Math.max(20, Math.min(80, startLeftWidth + deltaPercentage));
-      
-      setLeftWidth(newLeftWidth);
+      // Constrain the width and update the React state
+      const constrainedWidth = Math.max(25, Math.min(newPercentageWidth, 75));
+      setLeftWidth(constrainedWidth);
     };
 
-    const onMouseUp = () => {
+    const mouseUpHandler = () => {
       setIsResizing(false);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
       
-      document.body.style.userSelect = '';
-      document.body.style.cursor = '';
+      // Clean up the overlay and event listeners
+      if (overlay) {
+        overlay.remove();
+        overlay = null;
+      }
+      
+      document.removeEventListener("mousemove", mouseMoveHandler);
+      document.removeEventListener("mouseup", mouseUpHandler);
     };
 
-    resizer.addEventListener('mousedown', onMouseDown);
+    resizer.addEventListener("mousedown", mouseDownHandler);
 
     return () => {
-      resizer.removeEventListener('mousedown', onMouseDown);
+      resizer.removeEventListener("mousedown", mouseDownHandler);
     };
-  };
+  }, [isDesktop]); // Rerun when switching between desktop/mobile
 
   if (!bridgeType) {
     return (
@@ -166,46 +192,44 @@ const Page = ({ searchParams }) => {
     );
   }
 
+
   return (
-    <div className={`w-full h-full max-h-[calc(100vh-4rem)] ${isDesktop ? 'flex flex-row overflow-hidden' : 'overflow-y-auto'}`}>
+    <div 
+      ref={containerRef} // Add ref to the main container
+      className={`w-full h-full max-h-[calc(100vh-4rem)] ${isDesktop ? 'flex flex-row overflow-hidden' : 'overflow-y-auto'}`}
+    >
       {/* Configuration Panel */}
       <div 
         className={`
-          w-full
-          ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen'} 
-          bg-white
-          ${isDesktop ? 'border-r border-gray-200' : 'border-b border-gray-200'}
-          ${isResizing ? 'transition-none' : 'transition-all duration-200'}
+          ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen border-b border-base-300'} 
+          bg-base-100
         `}
         style={isDesktop ? { width: `${leftWidth}%` } : {}}
       >
         <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} px-4 py-4`}>
-          <ConfigurationPage apiKeySectionRef={apiKeySectionRef} params={params} />
+          <ConfigurationPage apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef}  params={params} />
         </div>
       </div>
 
       {/* Desktop Resizer */}
       {isDesktop && (
         <div 
-          className="w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors duration-200 flex-shrink-0 resizer"
-          style={{ backgroundColor: isResizing ? '#3B82F6' : '' }}
+          className={`w-1 hover:bg-blue-400 cursor-col-resize transition-colors duration-200 flex-shrink-0 resizer ${isResizing ? 'bg-blue-500' : 'bg-base-200'}`}
         />
       )}
 
-      {/* Chat Panel */}
+      {/* Chat Panel (Right Side) */}
       <div 
         className={`
-          w-full
           ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen'} 
           relative
-          ${isResizing ? 'transition-none' : 'transition-all duration-200'}
         `}
         style={isDesktop ? { width: `${100 - leftWidth}%` } : {}}
         id="parentChatbot"
       >
         <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} pb-4`}>
           <div className={`${isDesktop ? 'h-full flex flex-col' : ''}`}>
-            <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} params={params} />
+            <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} params={params} />
             <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
               {bridgeType === 'batch' && versionService === 'openai' ? (
                 <WebhookForm params={params} />

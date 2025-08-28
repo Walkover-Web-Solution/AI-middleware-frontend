@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-const SearchItems = ({ data, setFilterItems }) => {
+const SearchItems = ({ data, setFilterItems ,item }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const filtered = data?.filter(item =>
-      (item?.name && item?.name?.toLowerCase()?.includes(searchTerm.toLowerCase())) ||
-      (item?.slugName && item?.slugName?.toLowerCase()?.includes(searchTerm.toLowerCase())) ||
-      (item?.service && item?.service?.toLowerCase()?.includes(searchTerm.toLowerCase())) ||
-      (item?._id && item?._id?.toLowerCase()?.includes(searchTerm.toLowerCase()))
+      (item?.name && item?.name?.toLowerCase()?.includes(searchTerm.toLowerCase().trim())) ||
+      (item?.slugName && item?.slugName?.toLowerCase()?.includes(searchTerm.toLowerCase().trim())) ||
+      (item?.service && item?.service?.toLowerCase()?.includes(searchTerm.toLowerCase().trim())) ||
+      (item?._id && item?._id?.toLowerCase()?.includes(searchTerm.toLowerCase().trim()))
     ) || [];
     setFilterItems(filtered);
   }, [data, searchTerm, setFilterItems]);
@@ -16,7 +16,7 @@ const SearchItems = ({ data, setFilterItems }) => {
     <div className="flex-1 max-w-md">
       <input
         type="text"
-        placeholder="Search API keys..."
+        placeholder={`Search ${item}...`}
         className="input input-bordered w-full ml-3 mb-3"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}

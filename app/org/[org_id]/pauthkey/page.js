@@ -40,6 +40,12 @@ function Page({ params }) {
     dispatch(getAllAuthData())
     setFilterPauthKeys(authData)
   }, []); // Removed authData from dependencies to avoid infinite loop
+
+const maskAuthKey = (authkey) => {
+  if (!authkey) return '';
+  return authkey.substring(0, 3) + '*'.repeat(9) + authkey.substring(authkey.length - 3);
+};
+
   /**
    * Copies given content to clipboard
    * @param {string} content Content to be copied
@@ -107,7 +113,7 @@ function Page({ params }) {
         </div>
         <div
           className="tooltip tooltip-primary"
-          onClick={() => copyToClipboard(row["authkey"])}
+          onClick={() => copyToClipboard(row["originalAuthkey"])}
           data-tip="copy auth key"
         >
           <CopyIcon size={16} />
@@ -146,7 +152,7 @@ function Page({ params }) {
             </div>
           </div>
         </MainLayout>
-        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} />
+        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="Pauth keys"/>
 
         {isCreating ? (
           <div className="flex justify-center items-center h-64">
@@ -157,7 +163,9 @@ function Page({ params }) {
             <CustomTable
               data={filterPauthKeys.map(item => ({
                 ...item,
-                actualName: item.name || 'Unnamed Key',
+                actualName: item?.name || 'Unnamed Key',
+                originalAuthkey: item?.authkey,
+                authkey: maskAuthKey(item?.authkey), 
               }))}
               columnsToShow={PAUTH_KEY_COLUMNS}
               sorting

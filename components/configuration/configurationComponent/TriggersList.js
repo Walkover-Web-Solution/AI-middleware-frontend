@@ -113,7 +113,7 @@ export default function TriggersList({ params, isEmbedUser }) {
                 {triggers?.length ? (triggers?.map(trigger => {
                     return (
                         <div key={trigger?.id} onClick={() => { openTrigger(trigger?.id) }}
-                            className="flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative hover:bg-base-200">
+                            className="flex w-[250px] flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative hover:bg-base-200">
                             <div className="p-2 w-full h-full flex flex-col justify-between">
                                 <div>
                                     <div className="flex justify-between items-center">

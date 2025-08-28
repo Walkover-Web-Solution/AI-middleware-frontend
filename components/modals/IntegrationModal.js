@@ -4,14 +4,30 @@ import { closeModal, RequiredItem } from '@/utils/utility'
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import Modal from '@/components/UI/Modal'
+import { toast } from 'react-toastify'
 
 const IntegrationModal = ({ params }) => {
   const integrationNameRef = React.useRef('');
   const dispatch = useDispatch();
   const handleCreateNewIntegration = () => {
+    if(integrationNameRef?.current?.value?.trim()===""){
+     toast.error("Integration name should not be empty");
+      return;
+    }
     dispatch(createIntegrationAction({
       name: integrationNameRef?.current?.value,
-      orgId: params.org_id
+      orgId: params.org_id,
+      config:{
+            "hideHomeButton": false,
+            "showGuide": true,
+            "showHistory": false,
+            "showConfigType": false,
+            "slide": "right",
+            "defaultOpen": true,
+            "hideFullScreenButton": false,
+            "hideCloseButton": false,
+            "hideHeader": false
+        }
     }))
     closeModal(MODAL_TYPE.INTEGRATION_MODAL);
     integrationNameRef.current.value = '';

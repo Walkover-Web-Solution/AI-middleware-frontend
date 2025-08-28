@@ -4,6 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import CodeBlock from "../codeBlock/codeBlock";
 import ChatTextInput from "./chatTextInput";
 import { dryRun } from "@/config";
+import { PdfIcon } from "@/icons/pdfIcon";
+import { truncate } from "../historyPageComponents/assistFile";
 
 function Chat({ params, userMessage, isOrchestralModel = false }) {
   const messagesEndRef = useRef(null);
@@ -18,7 +20,8 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
     content: userMessage,
     time: new Date().toLocaleString()
   }] : []);
-  
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -110,10 +113,10 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
     <div className="px-4 pt-4 bg-base-100">
       <div className="w-full flex justify-between items-center px-2">
         <span className="label-text">Playground</span>
-        {conversation?.length > 0 && <button className="btn btn-sm" onClick={handleResetChat}>Reset Chat</button>}
+        {messages?.length > 0 && <button className="btn btn-sm" onClick={handleResetChat}>Reset Chat</button>}
       </div>
 
-      <div className="sm:p-2 mt-4 justify-between flex flex-col h-[83vh] border rounded-md w-full z-low">
+      <div className="sm:p-2 mt-4 justify-between flex flex-col h-[83vh] border border-base-300 rounded-md w-full z-low">
         <div
           id="messages"
           className="flex flex-col w-full overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2"
@@ -156,9 +159,9 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
                   )}
                 </div>
                 <div>
-                  {message?.image_urls && message?.image_urls?.length > 0 && (
+                  {message?.images && message?.images?.length > 0 && (
                     <div className="flex flex-wrap mt-2 items-end justify-end">
-                      {message?.image_urls.map((url, imgIndex) => (
+                      {message?.images.map((url, imgIndex) => (
                         <Image
                           key={imgIndex}
                           src={url}
@@ -168,6 +171,16 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
                           className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer"
                           onClick={() => window.open(url, '_blank')}
                         />
+                      ))}
+                    </div>
+                  )}
+                  {message?.files && message?.files?.length > 0 && (
+                    <div className="flex flex-wrap mt-2 items-end justify-end space-x-2 bg-base-200 p-2 rounded-md mb-1">
+                      {message?.files.map((url, fileIndex) => (
+                        <a key={fileIndex} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 hover:underline">
+                          <PdfIcon height={20} width={20} />
+                          <span className="text-sm overflow-hidden truncate max-w-[10rem]">{truncate(url.split('/').pop(), 20)}</span>
+                        </a>
                       ))}
                     </div>
                   )}
@@ -192,7 +205,7 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
         </div>
 
 
-        <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0 w-full z-low">
+        <div className="border-t-2 border-base-300 px-4 pt-4 mb-2 sm:mb-0 w-full z-low">
           <div className="relative flex flex-col gap-4 w-full">
             <div className="flex flex-row gap-2">
               <ChatTextInput
@@ -208,7 +221,9 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
                 handleSendMessageForOrchestralModel={handleSendMessageForOrchestralModel}
                 inputRef={inputRef}
                 loading={loading}
-                setLoading={setLoading} />
+                setLoading={setLoading} 
+                uploadedFiles={uploadedFiles} 
+                setUploadedFiles={setUploadedFiles}/>
             </div>
           </div>
           {errorMessage && (

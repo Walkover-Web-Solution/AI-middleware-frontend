@@ -12,7 +12,7 @@ import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new c
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const InputConfigComponent = ({ params }) => {
+const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type || "",
@@ -47,15 +47,21 @@ const InputConfigComponent = ({ params }) => {
         };
     }, [prompt, reduxPrompt]);
 
-    const savePrompt = useCallback((newPrompt) => {
-        const newValue = newPrompt || "";
-        setShowSuggestions(false);
-        if (newValue !== reduxPrompt) {
-            // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { configuration: { prompt: newValue } } }));
-            dispatch(updateBridgeVersionAction({ versionId: params.version, dataToSend: { configuration: { prompt: newValue } } }));
-        }
-    }, [dispatch, params.version, reduxPrompt]);
+  const savePrompt = useCallback((newPrompt) => {
+    const newValue = (newPrompt || "").trim();
+    setShowSuggestions(false);
 
+    if (newValue !== reduxPrompt.trim()) {
+      dispatch(updateBridgeVersionAction({
+        versionId: params.version,
+        dataToSend: {
+          configuration: {
+            prompt: newValue
+          }
+        }
+      }));
+    }
+  }, [dispatch, params.version, reduxPrompt]);
     const getCaretCoordinatesAdjusted = () => {
         if (textareaRef.current) {
             const textarea = textareaRef.current;
@@ -206,7 +212,7 @@ const InputConfigComponent = ({ params }) => {
                     ref={suggestionListRef}
                     tabIndex={0}
                     role="listbox"
-                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-high w-60 p-2 shadow-xl border overflow-scroll overflow-y-auto"
+                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-high w-60 p-2 shadow-xl border border-base-300 overflow-scroll overflow-y-auto"
                 >
                     <div className="flex flex-col w-full">
                         <label className="label label-text-alt">Available variables</label>
@@ -247,7 +253,7 @@ const InputConfigComponent = ({ params }) => {
     if (service === "google" && serviceType === "chat") return null;
 
     return (
-      <div>
+      <div ref={promptTextAreaRef}>
         <div className="flex justify-between items-center mb-2">
           <div className="label flex items-center gap-2">
             <span className="label-text capitalize font-medium">Prompt</span>
@@ -258,7 +264,7 @@ const InputConfigComponent = ({ params }) => {
                   openModal(MODAL_TYPE?.PROMPT_SUMMARY);
                 }}
               >
-                <InfoTooltip tooltipContent={"Prompt summary is only for the agent not for the Versions"}>
+                <InfoTooltip tooltipContent={"Prompt Summary is a brief description of the agent’s prompt and applies to all versions of the agent, not just one."}>
                 <span className='label-text  capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
                 </InfoTooltip>
               </button>
@@ -291,7 +297,7 @@ const InputConfigComponent = ({ params }) => {
         <div className="form-control h-full">
           <textarea
             ref={textareaRef}
-            className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-low caret-black p-2 rounded-b-none"
+            className="textarea textarea-bordered border border-base-content w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-low caret-black p-2 rounded-b-none"
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
@@ -303,7 +309,7 @@ const InputConfigComponent = ({ params }) => {
             <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
               <div className="flex items-center gap-2 ">
                 <span className="text-nowrap">Default Variables</span>
-                <p role="alert" className="label-text-alt alert p-2 bg-base-300">
+                <p role="alert" className="label-text-alt alert p-2 bg-base-200">
                   <InfoIcon size={16} className="" />
                   Use these variables in prompt to get their functionality
                 </p>

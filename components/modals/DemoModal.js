@@ -30,10 +30,10 @@ const DemoModal = ({ speakToUs }) => {
             <div
                 className={`modal-box flex flex-col gap-6  ${speakToUs
                         ? "bg-base-100 text-base-content border max-w-[95vw] w-[700px] border-base-300"
-                        : "bg-gradient-to-br from-slate-900 to-slate-800 max-w-[95vw] w-[1300px] text-slate-100 border border-slate-700/50"
+                        : "bg-gradient-to-br from-slate-900 to-slate-800 max-w-[95vw] w-[1300px] text-base-content border border-base-300/50"
                     } shadow-2xl`}
             >
-                <div className="flex justify-between items-center pb-4 border-b border-slate-700">
+                <div className="flex justify-between items-center pb-4 border-b border-base-300">
                     <h3 className="font-bold text-2xl">
                         {speakToUs ? 'Speak to Us' : 'Discover GTWY AI'}
                     </h3>
@@ -73,7 +73,7 @@ const DemoModal = ({ speakToUs }) => {
                         </p>
                     </div>
                 ) : (
-                    <div className="relative group rounded-xl overflow-hidden border-2 border-slate-700/50 shadow-xl hover:border-purple-300/30 transition-all duration-300">
+                    <div className="relative group rounded-xl overflow-hidden border-2 border-base-300/50 shadow-xl hover:border-base-300/30 transition-all duration-300">
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 pointer-events-none" />
                         <div className="aspect-video w-full overflow-hidden rounded-lg">
                             <iframe

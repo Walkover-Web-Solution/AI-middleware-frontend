@@ -71,7 +71,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                                 {title}
                             </p>
                             <div>
-                                <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(status)}`}>
+                                <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(status)}`}>
                                     {value?.description?.trim() === "" ? "Ongoing" : status}
                                 </span>
                             </div>
@@ -86,7 +86,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
             <div className="flex items-end gap-2">
                 {name === "preFunction" ? (
                     <div className=" flex flex-col items-start gap-2">
-                        <InfoTooltip tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
+                        <InfoTooltip  tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
                         <p className="text-base font-semibold info">Pre Tool Configuration</p>
                        
                         </InfoTooltip>
@@ -103,7 +103,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 ) : (
                     <div className="flex flex-col items-start gap-2">
                         {connectedFunctions.length === 0 && (
-                            <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"The Tools are set up for the whole organization, so any agent can use them."} >
+                            <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"Tool calling lets LLMs use external tools to get real-time data and perform complex tasks."} >
                                 <p className=" label-text info">Tool Configuration</p>
 
                             </InfoTooltip>
@@ -154,7 +154,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         ) : (
                             <li className="text-center mt-2">No tools found</li>
                         )}
-                        {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined,
+                        {!hideCreateFunction && <li className="mt-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => openViasocket(undefined,
                             {
                                 embedToken,
                                 meta: {

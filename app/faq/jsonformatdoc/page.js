@@ -29,7 +29,7 @@ const JsonFomatDocGuide = async () => {
                 {/* JSON Examples Section */}
                 <div className="space-y-8">
                     {JSONFORMATDATA.map(({ title, json }) => (
-                        <div key={title} className="bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                        <div key={title} className="bg-base-100 rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md">
                             <div className="px-6 py-4 border-b border-gray-100">
                                 <h3 className="text-lg font-medium text-gray-900">{title}</h3>
                             </div>

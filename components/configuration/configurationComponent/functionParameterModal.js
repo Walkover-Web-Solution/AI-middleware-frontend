@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Modal from "@/components/UI/Modal";
+import InfoTooltip from "@/components/InfoTooltip";
 
 function FunctionParameterModal({
   name = "",
@@ -425,7 +426,7 @@ function FunctionParameterModal({
 
   return (
     <Modal MODAL_ID={Model_Name}>
-      <div className="modal-box w-11/12 max-w-6xl">
+      <div className="modal-box w-11/12 max-w-6xl overflow-x-hidden">
         <div className="flex flex-row justify-between mb-3">
           <span className="flex flex-row items-center gap-4">
             <h3 className="font-bold text-lg">Configure fields</h3>
@@ -449,7 +450,7 @@ function FunctionParameterModal({
 
         {/* Description Editor Section */}
         {isDescriptionEditing && (
-          <div className="mb-4 p-4 border rounded-lg bg-base-100">
+          <div className="mb-4 p-4 border border-base-300 rounded-lg bg-base-100">
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-semibold">Update Function Description</h4>
               <button
@@ -525,6 +526,25 @@ function FunctionParameterModal({
               here
             </a>
           </p>
+          {name==='Agent'&&
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
+                <label className="label info">
+                  Agent’s Thread ID
+                </label>
+              </InfoTooltip>
+              <input
+                type="checkbox"
+                className="toggle"
+                onChange={(e) => {
+                  setToolData({ ...toolData, thread_id: e.target.checked });
+                  setIsModified(true);
+                }}
+                checked={toolData?.thread_id}
+                title="Toggle to include thread_id while calling function"
+              />
+            </div>
+          }
           {isTextareaVisible && (
             <p
               className="cursor-pointer label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
@@ -537,7 +557,7 @@ function FunctionParameterModal({
         {!isDataAvailable ? (
           <p>No Parameters used in the function</p>
         ) : !isTextareaVisible ? (
-          <div className="overflow-x-auto border rounded-md">
+          <div className="overflow-x-auto border border-base-300 rounded-md">
             <table className="table">
               <thead>
                 <tr>
@@ -675,7 +695,7 @@ function FunctionParameterModal({
             <textarea
               type="input"
               value={objectFieldValue}
-              className="textarea textarea-bordered border w-full min-h-96 resize-y"
+              className="textarea textarea-bordered border border-base-300 w-full min-h-96 resize-y"
               onChange={(e) => setObjectFieldValue(e.target.value)}
               onBlur={handleTextFieldChange}
               placeholder="Enter valid JSON object here..."
@@ -688,7 +708,7 @@ function FunctionParameterModal({
                     ? JSON.stringify(toolData["old_fields"], undefined, 4)
                     : ""
                 }
-                className="textarea textarea-bordered border w-full min-h-96 resize-y"
+                className="textarea textarea-bordered border border-base-300 w-full min-h-96 resize-y"
               />
             )}
           </div>

@@ -3,7 +3,7 @@ import { ADVANCED_BRIDGE_PARAMETERS, KEYS_NOT_TO_DISPLAY } from '@/jsonFiles/bri
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import { generateRandomID, openModal } from '@/utils/utility';
-import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -35,24 +35,25 @@ const AdvancedParameters = ({ params }) => {
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
-      isFirstParameter:user?.meta?.onboarding?.AdvanceParameter
+      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter
     };
   });
+  const [inputConfiguration, setInputConfiguration] = useState(configuration);
   const { tool_choice: tool_choice_data, type, model } = configuration || {};
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
 
   const handleTutorial = () => {
-    setTutorialState(prev=>({
+    setTutorialState(prev => ({
       ...prev,
-      showSuggestion:isFirstParameter
+      showSuggestion: isFirstParameter
 
     }))
   };
 
   useEffect(() => {
-    setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) :null ); 
+    setObjectFieldValue(configuration?.response_type?.json_schema ? JSON.stringify(configuration?.response_type?.json_schema, undefined, 4) : null);
   }, [configuration?.response_type?.json_schema]);
 
   useEffect(() => {
@@ -75,6 +76,10 @@ const AdvancedParameters = ({ params }) => {
   }, [tool_choice_data])
 
   const handleInputChange = (e, key, isSlider = false) => {
+    setInputConfiguration((prev) => ({
+      ...prev,
+      [key]: e.target.value,
+    }))
     let newValue = e.target.value;
     let newCheckedValue = e.target.checked;
     if (e.target.type === 'number') {
@@ -90,56 +95,41 @@ const AdvancedParameters = ({ params }) => {
     }
   };
 
-  const handleSelectChange = (e, key) => {
+  const handleSelectChange = (e, key, defaultValue, Objectvalue = {}, isDeafaultObject = true) => {
     let newValue;
-    let is_json = false
     try {
-      newValue = e.target.value ? JSON.parse(e.target.value) : JSON.parse("{}");
+      if (Objectvalue && !JSON.parse(Objectvalue)) {
+        toast.error("Invalid JSON provided");
+        return;
+      }
+      newValue = Objectvalue ? JSON.parse(Objectvalue) : JSON.parse("{}");
       setObjectFieldValue(JSON.stringify(newValue, undefined, 4));
-      is_json = true
     } catch (error) {
-      newValue = e.target.value;
+      toast.error("Invalid JSON provided");
+      return;
     }
-    let updatedDataToSend = {
+    let updatedDataToSend = isDeafaultObject ? {
       configuration: {
-        [key]: newValue,
+        [key]: {
+          [defaultValue?.key]: e.target.value
+        },
+      }
+    } : {
+      configuration: {
+        [key]: e.target.value
       }
     };
-    if (key === "size") {
+    if (Object.entries(newValue).length > 0) {
       updatedDataToSend = {
         configuration: {
-          'size': newValue
+          [key]: {
+            [defaultValue?.key]: e.target.value,
+            [e.target.value]: typeof newValue === 'string' ? JSON.parse(newValue) : newValue
+          },
         }
       }
     }
-    if (key === "quality") {
-      updatedDataToSend = {
-        configuration: {
-          'quality': newValue
-        }
-      }
-    }
-    if (key === 'json_schema') {
-      if (!is_json) return toast.error('Json schema is not parsable JSON');
-      updatedDataToSend = {
-        configuration: {
-          "response_type": {
-            "type": 'json_schema',
-            [key]: newValue
-          }
-        }
-      }
-    }
-    if (key === 'response_type') {
-      updatedDataToSend = {
-        configuration: {
-          "response_type": {
-            "type": newValue,
-          }
-        }
-      }
-    }
-    if (newValue !== configuration?.[key]) {
+    if (e.target.value !== configuration?.[key]) {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
@@ -149,6 +139,10 @@ const AdvancedParameters = ({ params }) => {
   };
 
   const setSliderValue = (value, key) => {
+    setInputConfiguration((prev) => ({
+      ...prev,
+      [key]: value,
+    }))
     let updatedDataToSend = {
       configuration: {
         [key]: value
@@ -170,43 +164,38 @@ const AdvancedParameters = ({ params }) => {
   }, [dispatch, params?.id, params?.version]);
 
   return (
-    <div className="collapse z-very-low  text-base-content" tabIndex={0}>
-      <input type="radio" name="my-accordion-1" onClick={() => {
+    <div className="z-very-low mt-4 text-base-content w-full cursor-pointer" tabIndex={0}>
+      <div className={`info p-2 ${isAccordionOpen ? 'border border-base-content rounded-x-lg rounded-t-lg' : 'border border-base-content rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
         handleTutorial()
         toggleAccordion()
-      }}
-        className='cursor-pointer' />
-      <div className="collapse-title p-0 flex items-center justify-start font-medium cursor-pointer" onClick={toggleAccordion}>
-        <span className="mr-2 cursor-pointer">
-          Advanced Parameters
-        </span>
+      }}>
+        <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type." className="cursor-pointer mr-2">
+          <div className="cursor-pointer label-text inline-block ml-1">
+            Advanced Parameters
+          </div>
+        </InfoTooltip>
 
-        {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+        <span className="cursor-pointer"> {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
       </div>
-      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"}/>)}
+      {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"} />)}
       {tutorialState.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
-      {isAccordionOpen && <div className="collapse-content gap-3 flex flex-col p-3 border rounded-md">
+      <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content-x border-b border-base-content rounded-x-lg rounded-b-lg' : 'border border-base-content rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
 
-        {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min, max, step, default: defaultValue, options }]) => {
-          const rowDefaultValue =
-            key === 'response_type'
-              ? (typeof modelInfoData?.[key]?.default === 'object'
-                ? modelInfoData?.[key]?.default?.type
-                : modelInfoData?.[key]?.default)
-              : undefined;
+        {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min = 0, max, step, default: defaultValue, options }]) => {
+          const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
           if (KEYS_NOT_TO_DISPLAY?.includes(key)) return null;
           const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
           const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
           let error = false;
           return (
-            <div key={key} className="form-control">
+            <div key={key} className="form-control w-full">
               <label className="label">
                 <div className='flex gap-2'>
                   <div className='flex flex-row gap-2 items-center'>
-                  {description ? <InfoTooltip tooltipContent={description}>
-                    <span className="label-text capitalize info">{name || key}</span>        
+                    {description ? <InfoTooltip tooltipContent={description}>
+                      <span className="label-text capitalize info">{name || key}</span>
                     </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
                   </div>
                   <div>
@@ -344,7 +333,7 @@ const AdvancedParameters = ({ params }) => {
                     onInput={(e) => {
                       document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
                     }}
-                    className="range range-xs w-full"
+                    className="range h-2"
                     name={key}
                   />
                 </div>
@@ -352,7 +341,13 @@ const AdvancedParameters = ({ params }) => {
               {field === 'text' && (
                 <input
                   type="text"
-                  defaultValue={configuration?.[key] === 'default' ? '' : configuration?.[key] || ''}
+                  value={inputConfiguration?.[key] === 'default' ? '' : inputConfiguration?.[key] || ''}
+                  onChange={(e) =>
+                    setInputConfiguration((prev) => ({
+                      ...prev,
+                      [key]: e.target.value,
+                    }))
+                  }
                   onBlur={(e) => handleInputChange(e, key)}
                   className="input input-bordered input-sm w-full"
                   name={key}
@@ -364,7 +359,13 @@ const AdvancedParameters = ({ params }) => {
                   min={min}
                   max={max}
                   step={step}
-                  defaultValue={configuration?.[key] || 0}
+                  value={inputConfiguration?.[key] === "default" ? 0 : inputConfiguration?.[key]}
+                  onChange={(e) =>
+                    setInputConfiguration((prev) => ({
+                      ...prev,
+                      [key]: e.target.value,
+                    }))
+                  }
                   onBlur={(e) => handleInputChange(e, key)}
                   className="input input-bordered input-sm w-full"
                   name={key}
@@ -376,15 +377,19 @@ const AdvancedParameters = ({ params }) => {
                     name={key}
                     type="checkbox"
                     className="toggle"
-                    defaultChecked={configuration?.[key] || false}
+                    checked={inputConfiguration?.[key] === "default" ? false : inputConfiguration?.[key]}
                     onChange={(e) => handleInputChange(e, key)}
                   />
                 </label>
               )}
               {field === 'select' && (
-                <label className='items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
-                  <select value={configuration?.[key] === 'default' ? rowDefaultValue : configuration?.[key]?.type || configuration?.[key]} onChange={(e) => handleSelectChange(e, key)} className="select select-sm max-w-xs select-bordered capitalize">
-                    <option value='default' disabled> Select response mode </option>
+                <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
+                  <select
+                    value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
+                    onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
+                    className="select select-sm max-w-xs select-bordered capitalize"
+                  >
+                    <option value='default' disabled> Select {key} mode </option>
                     {options?.map((service, index) => (
                       <option key={index} value={service?.type}>{service?.type ? service?.type : service}</option>
                     ))}
@@ -415,14 +420,14 @@ const AdvancedParameters = ({ params }) => {
                             4
                           )
                         }
-                        className="textarea textarea-bordered border w-[450px] min-h-96 resize-y"
+                        className="textarea textarea-bordered border border-base-content w-full min-h-96 resize-y"
                         onBlur={(e) =>
-                          handleSelectChange(e, "json_schema")
+                          handleSelectChange({ target: { value: "json_schema" } }, "response_type", { key: "type" }, e.target.value)
                         }
                         placeholder="Enter valid JSON object here..."
                       />
 
-                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages} thread_id={thread_id}/>
+                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages} thread_id={thread_id} />
                     </>
                   )}
 
@@ -431,7 +436,7 @@ const AdvancedParameters = ({ params }) => {
             </div>
           );
         })}
-      </div>}
+      </div>
     </div>
   );
 };

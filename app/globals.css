@@ -8,7 +8,7 @@ body {
   display: none;
 }
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 /* global.css or index.css */
 .info {
@@ -139,8 +139,8 @@ html {
   z-index: 999999;
 }
 
-#iframe-parent-container{
-  z-index: 0 !important;
+#parentChatbot{
+  z-index: 1;
 }
 
 

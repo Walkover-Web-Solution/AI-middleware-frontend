@@ -36,7 +36,7 @@ export default function PrivateFormSection({ params, ChooseChatbot, setChatBotId
         }
     };
     return (
-        <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
+        <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow p-4">
             <div>
                 <h3 className="text-lg font-semibold">Step 1</h3>
                 <p className="text-sm text-gray-600">Generate a JWT token</p>
@@ -74,14 +74,14 @@ export default function PrivateFormSection({ params, ChooseChatbot, setChatBotId
                     <InputWithCopyButton label="Access Key" placeholder="Access Key" value={accessKey} />
                 ) : (
                     <button className="btn btn-primary w-fit btn-sm" onClick={handleGetAccessKey}>
-                        Your AccessKey
+                        Show Access Key
                     </button>
                 )}
             </div>
             <p className="text-sm">
                 Generate a JWT token using org_id, chatbot_id, and user_id variables, then sign it with the access key.
             </p>
-            <a className="link link-hover text-sm" target="_blank" href="/faq/create-jwt-for-chatbot">
+            <a className="link link-hover text-sm text-primary" target="_blank" href="/faq/create-jwt-for-chatbot">
                 Learn, How to create JWT token?
             </a>
         </div>
@@ -105,12 +105,16 @@ function ChatbotDropdown({ params, setChatBotId }) {
         setSelectedChatbot(chatbot);
         setChatBotId(chatbot);
     };
-    return (<div className="dropdown dropdown-end">
+    return (
+        <>
+            {/* <div className="dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn m-1">{selectedChatbot ? selectedChatbot.title : 'Select a chatbot'}</div>
         <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
             {chatbots.map((chatbot, index) => (
                 <li key={index} onClick={() => handleSelectChatbot(chatbot)}><a>{chatbot.title}</a></li>
             ))}
         </ul>
-    </div>)
+    </div> */}
+        </>
+    )
 }

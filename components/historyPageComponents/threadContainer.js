@@ -132,7 +132,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       clearTimeout(timeoutId);
     };
 
-  }, [params?.thread_id, filterOption,search, params?.subThread_id,  selectedVersion]);
+  }, [params?.thread_id, filterOption,search, params?.subThread_id,params,  selectedVersion]);
   
   const fetchMoreThreadData = useCallback(async () => {
     if (isFetchingMore) return;

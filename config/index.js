@@ -26,7 +26,7 @@ export const getSingleMessage = async ({ bridge_id, message_id }) => {
     return messageData.data.system_prompt
   } catch (error) {
     console.error(error)
-    throw new Error(error)
+    throw error
   }
 }
 
@@ -35,8 +35,11 @@ export const getSingleBridge = async (bridgeId) => {
     const response = await axios.get(`${PYTHON_URL}/api/v1/config/getbridges/${bridgeId}`)
     return response
   } catch (error) {
-    console.error(error)
-    throw new Error(error)
+    if (error.response) {
+      throw error.response;
+    } else {
+      throw error;
+    }
   }
 }
 
@@ -118,6 +121,7 @@ export const updateBridge = async ({ bridgeId, dataToSend }) => {
   } catch (error) {
     console.error(error)
     toast.error(error?.response?.data?.error);
+    throw error;
   }
 }
 
@@ -640,7 +644,15 @@ export const updateFunctionApi = async ({ function_id, dataToSend }) => {
     throw new Error(error);
   }
 };
-
+export const storeMarketingRefUser = async (data) => {
+  try {
+    const response = await axios.post("https://flow.sokt.io/func/scribmgUXqSE", data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
 export const archiveBridgeApi = async (bridge_id, newStatus) => {
   try {
     const response = await axios.put(`${URL}/api/v1/config/bridge-status/${bridge_id}`, { status: newStatus });
@@ -762,7 +774,7 @@ export const updateOrganizationData = async (orgId, orgDetails) => {
         'reference-id': NEXT_PUBLIC_REFERENCEID
       }
     });
-    return response.data;
+    return response?.data;
   } catch (error) {
 
     toast.error('Error updating organization:', error);
@@ -802,6 +814,15 @@ export const getAllKnowBaseData = async () => {
   try {
     const response = await axios.get(`${URL}/rag/docs`);
     return response?.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+export const getKnowledgeBaseToken = async () => {
+  try {
+    const response = await axios.get(`${URL}/rag/docs/token`);
+    return response?.data?.result;
   } catch (error) {
     console.error(error);
     return error;
@@ -1030,10 +1051,18 @@ export const getTutorial =async ()=>{
     throw new Error(error);
   }
 }
-
-export const createIntegrationApi = async (name) => {
+export const getApiKeyGuide =async ()=>{
   try {
-    const response = await axios.post(`${URL}/gtwyEmbed/`, {name});
+    const response=await axios.get("https://flow.sokt.io/func/scriDewB9Jk2");
+    return response;
+  }
+  catch(error){
+    throw new Error(error);
+  }
+}
+export const createIntegrationApi = async (data) => {
+  try {
+    const response = await axios.post(`${URL}/gtwyEmbed/`, data);
     return response?.data;
   } catch (error) {
     console.error(error);
@@ -1047,6 +1076,16 @@ export const getAllIntegrationApi = async () => {
   } catch (error) {
     console.error(error);
     return error;
+  }
+}
+
+export const updateIntegrationData = async (dataToSend) => {
+  try {
+    const response = await axios.put(`${URL}/gtwyEmbed/`, {folder_id : dataToSend?.folder_id,  config: dataToSend?.config})
+    return response
+  } catch (error) {
+    console.error(error)
+    throw error
   }
 }
   
@@ -1140,3 +1179,51 @@ export const deleteOrchetralFlow = async (data) => {
     return error;
   }
 }
+export const addNewModel = async(newModelObj) =>{
+  try {
+    const response = await axios.post(`${URL}/modelConfiguration/user`, newModelObj)
+    return response;
+  } catch (error) {
+    throw error
+  }
+}
+export const deleteModel = async(dataToSend) =>{
+  try {
+    const response = await axios.delete(`${URL}/modelConfiguration/user?${new URLSearchParams(dataToSend).toString()}`)
+    toast.success(response?.data?.message)
+    return response;
+  } catch (error) {
+    throw error
+    toast.error(error?.response?.data?.error || error?.response?.data?.message )
+  }
+}
+
+export const getAllAgentsApi = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/publicAgent/all`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
+
+export const publicAgentLoginApi = async (user_id) =>{
+  try {
+    const repsonse = await axios.post(`${PYTHON_URL}/publicAgent/public/login`, {user_id})
+    return repsonse;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error);
+  }
+}
+  
+export const privateAgentLoginApi = async (user_id) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/publicAgent/login`, {user_id})
+    return response;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error);
+  }
+} 

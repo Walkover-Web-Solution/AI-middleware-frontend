@@ -45,7 +45,7 @@ function ChatBotSlider() {
                     placeholder="Search..."
                     value={chatbotSearchQuery}
                     onChange={handleChatbotSearchChange}
-                    className="border border-gray-300 rounded p-2 w-full"
+                    className="border border-base-300 rounded p-2 w-full"
                 />
                 {/* Render filtered chatbot list */}
                 <ul className="menu p-0 w-full  text-base-content">

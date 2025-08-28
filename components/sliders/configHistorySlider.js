@@ -67,7 +67,7 @@ function ConfigHistorySlider({ versionId }) {
   return (
     <aside
       id="default-config-history-slider"
-      className="sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-1/3 lg:w-1/4 opacity-100 h-screen bg-base-200 transition-all duration-300 border-l overflow-y-auto translate-x-full"
+      className="sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-1/3 lg:w-1/4 opacity-100 h-screen bg-base-200 transition-all duration-300 border-l border-base-300 overflow-y-auto translate-x-full "
       aria-label="Config History Slider"
     >
       <div className="flex flex-col w-full gap-4">
@@ -98,7 +98,7 @@ function ConfigHistorySlider({ versionId }) {
               }
               endMessage={
                 historyData.length > 0 && (
-                  <div className="text-center py-4 text-gray-500">
+                  <div className="text-center py-4 text-base-content">
                     <p>No more history to load</p>
                   </div>
                 )
@@ -119,11 +119,11 @@ function ConfigHistorySlider({ versionId }) {
                             {item?.type}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-base-content">
                           <UserIcon className="w-4 h-4" />
                           <span>{item?.user_name || "Unknown User"}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-base-content">
                           <ClockIcon className="w-4 h-4" />
                           <span>{formatTime(item?.time)}</span>
                         </div>
@@ -131,7 +131,7 @@ function ConfigHistorySlider({ versionId }) {
                     </li>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-base-content">
                     <FileTextIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p>No history available</p>
                   </div>
