@@ -54,7 +54,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                 </div>
 
                 {/* Chatbot Card */}
-                <div
+                {!isModal && <div
                     className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-200 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "chatbot"
                         ? "ring-2 ring-green-500"
                         : ""
@@ -82,7 +82,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                             customizable and easy to deploy.
                         </p>
                     </div>
-                </div>
+                </div>}
 
                 {/* Batch API Card */}
                 {!isModal && <div
@@ -116,7 +116,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                 </div>}
 
                 {/* Triggers Card */}
-                {!isEmbedUser && <div
+                {!isEmbedUser && !isModal && <div
                     className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 rounded-xl min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "trigger"
                         ? "ring-2 ring-amber-500"
                         : ""
