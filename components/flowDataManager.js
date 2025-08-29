@@ -622,7 +622,6 @@ export function FlowControlPanel({
     description: description || '',
     status: 'publish',
   });
-  console.log(isVariableModified);
   const handlePublish = () => {
     if (!saveData.name.trim()) {
       alert('Please enter a flow name');
