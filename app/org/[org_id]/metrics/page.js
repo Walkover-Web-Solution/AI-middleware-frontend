@@ -494,12 +494,14 @@ function Page({ params }) {
                 minWidth: Math.max(800, rawData.length * 60) + 'px',
                 height: '400px'
               }}>
-                <Chart
+               <Chart
                   options={{
                     chart: {
                       type: 'bar',
                       height: 350,
                       width: Math.max(800, rawData.length * 60),
+                      background: 'transparent',
+                      foreColor: 'oklch(var(--bc))',
                       toolbar: {
                         show: true,
                         tools: {
@@ -515,7 +517,10 @@ function Page({ params }) {
                         enabled: true,
                         easing: 'easeinout',
                         speed: 800,
-                      }
+                      },
+                    },
+                    theme: {
+                      mode: 'dark'
                     },
                     plotOptions: {
                       bar: {
@@ -542,35 +547,47 @@ function Page({ params }) {
                         trim: false,
                         style: {
                           fontSize: '11px',
-                          fontWeight: '400'
+                          colors: 'oklch(var(--bc))'
                         }
                       },
                       axisBorder: {
-                        show: true
+                        show: true,
+                        color: 'oklch(var(--bc))'
                       },
                       axisTicks: {
-                        show: true
+                        show: true,
+                        
                       }
                     },
                     yaxis: {
                       title: {
-                        text: 'Cost ( in $ )'
+                        text: 'Cost ( in $ )',
+                        style: {
+                          color: 'oklch(var(--bc))'
+                        }
                       },
                       labels: {
+                        style: {
+                          colors: 'oklch(var(--bc))'
+                        },
                         formatter: function (value) {
                           return '$' + (value?.toFixed(2) || '0.00');
                         }
-                      }
+                      },
                     },
                     fill: {
                       opacity: 0.9
                     },
                     colors: ['#4ade80'],
                     grid: {
-                      borderColor: '#e7e7e7',
+                      borderColor: 'oklch(var(--bc) / 0.2)',
                       strokeDashArray: 3
                     },
                     tooltip: {
+                      theme: 'dark',
+                      style: {
+                        fontSize: '12px',
+                      },
                       custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                         const periodData = rawData[dataPointIndex];
                         if (!periodData) return '';
@@ -646,7 +663,13 @@ function Page({ params }) {
                 </div>
               `;
                       }
+                    },
+                    legend: {
+                      labels: {
+                        colors: 'oklch(var(--bc))'
+                      }
                     }
+                    
                   }}
                   series={chartData.series}
                   type="bar"
