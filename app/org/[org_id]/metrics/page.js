@@ -18,7 +18,7 @@ const formatDate = (dateString, rangeType = 'day') => {
     const date = new Date(dateString);
     // Check if the date is valid
     if (isNaN(date.getTime())) return dateString;
-    
+
     // Format based on range type
     if (rangeType === 'hour') {
       // For hourly data, show time in HH:MM format
@@ -45,9 +45,9 @@ const convertApiData = (apiData, factor = 0, range = 1, allBridges = [], apiKeys
   let intervalType = 'day';
   let timePoints = [];
   let intervalMs = 24 * 60 * 60 * 1000; // Default to daily intervals
-  
+
   // Configure time range and intervals based on selected range
-  switch(range) {
+  switch (range) {
     case 0: // 1 hour
       intervalType = 'hour';
       intervalMs = 15 * 60 * 1000; // 15 minutes intervals
@@ -103,10 +103,10 @@ const convertApiData = (apiData, factor = 0, range = 1, allBridges = [], apiKeys
   const groupedByDate = {};
   timePoints.forEach(date => {
     // Format date according to interval type
-    const dateStr = intervalType === 'hour' 
+    const dateStr = intervalType === 'hour'
       ? new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date)
       : new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(date);
-    
+
     groupedByDate[dateStr] = {
       items: [],
       totalCost: 0,
@@ -117,24 +117,24 @@ const convertApiData = (apiData, factor = 0, range = 1, allBridges = [], apiKeys
   // Process API data
   apiData.forEach((entry) => {
     const entryDate = new Date(entry.created_at);
-    
+
     // Skip entries older than our start time
     if (entryDate >= startTime) {
       // Find the appropriate time bucket for this entry
       let targetDate = null;
-      
+
       for (let i = 0; i < timePoints.length - 1; i++) {
         if (entryDate >= timePoints[i] && entryDate < timePoints[i + 1]) {
           targetDate = timePoints[i];
           break;
         }
       }
-      
+
       // If not found in any interval, use the last interval
       if (!targetDate && entryDate >= timePoints[timePoints.length - 1]) {
         targetDate = timePoints[timePoints.length - 1];
       }
-      
+
       if (targetDate) {
         // Format the date string for the bucket
         const dateStr = intervalType === 'hour'
@@ -152,7 +152,7 @@ const convertApiData = (apiData, factor = 0, range = 1, allBridges = [], apiKeys
         } else {
           name = entry.model || 'Unknown Model';
         }
-        
+
         // Add the entry to the appropriate bucket
         if (groupedByDate[dateStr]) {
           groupedByDate[dateStr].items.push({
@@ -162,13 +162,13 @@ const convertApiData = (apiData, factor = 0, range = 1, allBridges = [], apiKeys
             tokens: entry.total_token_count || 0,
             successCount: entry.success_count || 0,
           });
-          
+
           groupedByDate[dateStr].totalCost += (entry.cost_sum || 0);
         }
       }
     }
   });
-  
+
   // Convert to array format and sort by date
   return Object.keys(groupedByDate).map(date => ({
     period: date,
@@ -182,14 +182,14 @@ const convertApiData = (apiData, factor = 0, range = 1, allBridges = [], apiKeys
 const aggregateDataByFactor = (rawData) => {
   // Initialize empty object to store aggregated data
   const aggregated = {};
-  
+
   // Loop through all time periods in rawData
   rawData.forEach(period => {
     // Loop through all items in each period
     period.items.forEach(item => {
       const itemId = item.id;
       const itemName = item.name;
-      
+
       // Create entry if it doesn't exist
       if (!aggregated[itemId]) {
         aggregated[itemId] = {
@@ -200,14 +200,14 @@ const aggregateDataByFactor = (rawData) => {
           successCount: 0
         };
       }
-      
+
       // Add to the totals
       aggregated[itemId].tokens += item.tokens;
       aggregated[itemId].cost += item.cost;
       aggregated[itemId].successCount += item.successCount;
     });
   });
-  
+
   // Convert to array and sort by tokens (descending)
   return Object.values(aggregated).sort((a, b) => b.tokens - a.tokens);
 };
@@ -257,13 +257,13 @@ function Page({ params }) {
 
   const fetchMetricsData = async () => {
     setLoading(true);
-    const response = await getMetricsDataApi({ 
-      bridge_id:bridge?.bridge_id,
-      range: range+1, 
-      org_id: orgId, 
+    const response = await getMetricsDataApi({
+      bridge_id: bridge?.bridge_id,
+      range: range + 1,
+      org_id: orgId,
       factor: METRICS_FACTOR_OPTIONS[factor],
     });
-    const data= convertApiData(response,factor,range, allBridges, apikeyData) 
+    const data = convertApiData(response, factor, range, allBridges, apikeyData)
     setRawData(data);
     setLoading(false);
   };
@@ -274,16 +274,16 @@ function Page({ params }) {
 
   const handleFactorChange = (index) => {
     setFactor(index);
-    updateURLParams({factor:index})
+    updateURLParams({ factor: index })
   };
 
   const handleTimeRangeChange = (index) => {
     setRange(index);
-    updateURLParams({range:index})
+    updateURLParams({ range: index })
   };
 
   const handleBridgeChange = (bridge_id, bridge_name) => {
-    setBridge({ 
+    setBridge({
       bridge_id: bridge_id,
       bridge_name: bridge_name
     });
@@ -317,8 +317,8 @@ function Page({ params }) {
           {/* Middle - Group By Dropdown */}
           <div className='flex items-center gap-2'>
             <span className="font-medium">Group by:</span>
-            <details className="dropdown dropdown-end" 
-              tabIndex={0} 
+            <details className="dropdown dropdown-end"
+              tabIndex={0}
               onBlur={(e) => {
                 if (!e.currentTarget.contains(e.relatedTarget)) {
                   e.currentTarget.removeAttribute('open');
@@ -332,8 +332,8 @@ function Page({ params }) {
               <ul tabIndex="0" className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-52 z-high">
                 {['Bridges', 'API Keys', 'Models'].map((item, index) => (
                   <li key={index}>
-                    <a 
-                      className={`${factor === index ? 'active' : ''}`} 
+                    <a
+                      className={`${factor === index ? 'active' : ''}`}
                       onClick={(e) => {
                         handleFactorChange(index);
                         const details = e.currentTarget.closest('details');
@@ -351,22 +351,22 @@ function Page({ params }) {
           {/* Left side - Agent Selection with "All" option */}
           <div className='flex items-center gap-2'>
             <span className="font-medium">Agent:</span>
-            <details className="dropdown dropdown-end z-high" 
-             ref={(node) => {
-              if (node) {
-                const handleClickOutside = (event) => {
-                  const isClickInsideSearch = event.target.closest('.search-container');
-                  const isClickInsideItem = event.target.closest('.dropdown-item');
-                  if (!node.contains(event.target) && !isClickInsideSearch && !isClickInsideItem) {
-                    node.removeAttribute('open');
-                  }
-                };
-                document.addEventListener('mousedown', handleClickOutside);
+            <details className="dropdown dropdown-end z-high"
+              ref={(node) => {
+                if (node) {
+                  const handleClickOutside = (event) => {
+                    const isClickInsideSearch = event.target.closest('.search-container');
+                    const isClickInsideItem = event.target.closest('.dropdown-item');
+                    if (!node.contains(event.target) && !isClickInsideSearch && !isClickInsideItem) {
+                      node.removeAttribute('open');
+                    }
+                  };
+                  document.addEventListener('mousedown', handleClickOutside);
 
-                // Store the handler to remove it later
-                node._clickOutsideHandler = handleClickOutside;
-              }
-            }}
+                  // Store the handler to remove it later
+                  node._clickOutsideHandler = handleClickOutside;
+                }
+              }}
             >
               <summary className="btn btn-sm m-1">
                 {bridge?.['bridge_name']
@@ -382,11 +382,11 @@ function Page({ params }) {
                 <div className="search-container">
                   <SearchItems setFilterItems={setFilterBridges} data={allBridges} item="Agent" />
                 </div>
-                
+
                 <li>
                   <a
                     onClick={(e) => {
-                      updateURLParams({bridge_id:null,bridge_name:null})
+                      updateURLParams({ bridge_id: null, bridge_name: null })
                       setBridge(null);
                       const details = e.currentTarget.closest('details');
                       if (details) details.removeAttribute('open');
@@ -402,17 +402,17 @@ function Page({ params }) {
                   <li key={index}>
                     <a
                       onClick={(e) => {
-                                                                    
+
                         // Explicitly construct bridge object to ensure proper format
-                       
-                        
-                        handleBridgeChange(item?._id,item?.name);
-                        
+
+
+                        handleBridgeChange(item?._id, item?.name);
+
                         // Close dropdown after a small delay to ensure state update
-                      
+
                         const details = e.currentTarget.closest('details');
                         if (details) details.removeAttribute('open');
-                        
+
                       }}
                       className={`w-72 mb-1 dropdown-item ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}
                     >
@@ -427,8 +427,8 @@ function Page({ params }) {
           {/* Right side - Time Range */}
           <div className='flex items-center gap-2'>
             <span className="font-medium">Time Range:</span>
-            <details className="dropdown dropdown-end" 
-              tabIndex={0} 
+            <details className="dropdown dropdown-end"
+              tabIndex={0}
               onBlur={(e) => {
                 if (!e.currentTarget.contains(e.relatedTarget)) {
                   e.currentTarget.removeAttribute('open');
@@ -442,8 +442,8 @@ function Page({ params }) {
               <ul tabIndex="0" className="z-high dropdown-content menu p-1 shadow bg-base-100 rounded-box w-52">
                 {TIME_RANGE_OPTIONS.map((item, index) => (
                   <li key={index}>
-                    <a 
-                      className={`${index === range ? 'active' : ''}`} 
+                    <a
+                      className={`${index === range ? 'active' : ''}`}
                       onClick={(e) => {
                         handleTimeRangeChange(index);
                         const details = e.currentTarget.closest('details');
@@ -484,100 +484,100 @@ function Page({ params }) {
       <div className="bg-base-100 shadow-md rounded-lg p-6 mb-6">
         <h2 className="text-lg font-bold mb-4">Metrics Visualization</h2>
         <div className="h-96">
-        {rawData.length > 0 ? (
-  <div style={{
-    width: '100%',
-    overflowX: 'auto',
-    overflowY: 'hidden'
-  }}>
-    <div style={{
-      minWidth: Math.max(800, rawData.length * 60) + 'px',
-      height: '400px'
-    }}>
-      <Chart
-        options={{
-          chart: {
-            type: 'bar',
-            height: 350,
-            width: Math.max(800, rawData.length * 60),
-            toolbar: {
-              show: true,
-              tools: {
-                download: true,
-                selection: true,
-                zoom: true,
-                zoomin: true,
-                zoomout: true,
-                pan: true,
-              }
-            },
-            animations: {
-              enabled: true,
-              easing: 'easeinout',
-              speed: 800,
-            }
-          },
-          plotOptions: {
-            bar: {
-              horizontal: false,
-              columnWidth: '40px', // Fixed width in pixels
-              borderRadius: 4,
-              borderRadiusApplication: 'end',
-              distributed: false
-            },
-          },
-          dataLabels: {
-            enabled: false
-          },
-          stroke: {
-            show: true,
-            width: 2,
-            colors: ['transparent']
-          },
-          xaxis: {
-            categories: chartData.categories,
-            labels: {
-              rotate: 0,
-              hideOverlappingLabels: false,
-              trim: false,
-              style: {
-                fontSize: '11px',
-                fontWeight: '400'
-              }
-            },
-            axisBorder: {
-              show: true
-            },
-            axisTicks: {
-              show: true
-            }
-          },
-          yaxis: {
-            title: {
-              text: 'Cost ( in $ )'
-            },
-            labels: {
-              formatter: function (value) {
-                return '$' + (value?.toFixed(2) || '0.00');
-              }
-            }
-          },
-          fill: {
-            opacity: 0.9
-          },
-          colors: ['#4ade80'],
-          grid: {
-            borderColor: '#e7e7e7',
-            strokeDashArray: 3
-          },
-          tooltip: {
-            custom: function({ series, seriesIndex, dataPointIndex, w }) {
-              const periodData = rawData[dataPointIndex];
-              if (!periodData) return '';
-              
-              const totalCost = series[seriesIndex][dataPointIndex];
-              
-              return `
+          {rawData.length > 0 ? (
+            <div style={{
+              width: '100%',
+              overflowX: 'auto',
+              overflowY: 'hidden'
+            }}>
+              <div style={{
+                minWidth: Math.max(800, rawData.length * 60) + 'px',
+                height: '400px'
+              }}>
+                <Chart
+                  options={{
+                    chart: {
+                      type: 'bar',
+                      height: 350,
+                      width: Math.max(800, rawData.length * 60),
+                      toolbar: {
+                        show: true,
+                        tools: {
+                          download: true,
+                          selection: true,
+                          zoom: true,
+                          zoomin: true,
+                          zoomout: true,
+                          pan: true,
+                        }
+                      },
+                      animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800,
+                      }
+                    },
+                    plotOptions: {
+                      bar: {
+                        horizontal: false,
+                        columnWidth: '40px', // Fixed width in pixels
+                        borderRadius: 4,
+                        borderRadiusApplication: 'end',
+                        distributed: false
+                      },
+                    },
+                    dataLabels: {
+                      enabled: false
+                    },
+                    stroke: {
+                      show: true,
+                      width: 2,
+                      colors: ['transparent']
+                    },
+                    xaxis: {
+                      categories: chartData.categories,
+                      labels: {
+                        rotate: 0,
+                        hideOverlappingLabels: false,
+                        trim: false,
+                        style: {
+                          fontSize: '11px',
+                          fontWeight: '400'
+                        }
+                      },
+                      axisBorder: {
+                        show: true
+                      },
+                      axisTicks: {
+                        show: true
+                      }
+                    },
+                    yaxis: {
+                      title: {
+                        text: 'Cost ( in $ )'
+                      },
+                      labels: {
+                        formatter: function (value) {
+                          return '$' + (value?.toFixed(2) || '0.00');
+                        }
+                      }
+                    },
+                    fill: {
+                      opacity: 0.9
+                    },
+                    colors: ['#4ade80'],
+                    grid: {
+                      borderColor: '#e7e7e7',
+                      strokeDashArray: 3
+                    },
+                    tooltip: {
+                      custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                        const periodData = rawData[dataPointIndex];
+                        if (!periodData) return '';
+
+                        const totalCost = series[seriesIndex][dataPointIndex];
+
+                        return `
                 <div style="
                   background: #fff;
                   border: none;
@@ -645,17 +645,17 @@ function Page({ params }) {
                   `).join('')}
                 </div>
               `;
-            }
-          }
-        }}
-        series={chartData.series}
-        type="bar"
-        height={350}
-        width={Math.max(800, rawData.length * 60)}
-      />
-    </div>
-  </div>
-) : (
+                      }
+                    }
+                  }}
+                  series={chartData.series}
+                  type="bar"
+                  height={350}
+                  width={Math.max(800, rawData.length * 60)}
+                />
+              </div>
+            </div>
+          ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <div className="text-base-content opacity-60">No data available</div>
@@ -673,14 +673,14 @@ function Page({ params }) {
             // Calculate width percentage for visualization (max width 95%)
             const maxTokens = Math.max(...aggregateDataByFactor(rawData).map(i => i.tokens));
             const widthPercentage = maxTokens > 0 ? (item.tokens / maxTokens) * 95 : 0;
-            
+
             return (
               <div key={index} className="relative mb-2">
-                <div 
+                <div
                   className="absolute inset-0 bg-base-300 rounded transition-all duration-300"
                   style={{ width: `${widthPercentage}%` }}
                 ></div>
-                
+
                 <div className="relative flex items-center justify-between p-2 z-10">
                   <div className="flex-grow overflow-hidden text-ellipsis">
                     <div className="text-base-content font-medium text-sm">
@@ -697,7 +697,7 @@ function Page({ params }) {
               </div>
             );
           })}
-          
+
           {aggregateDataByFactor(rawData).length === 0 && (
             <div className="text-center py-4">
               <div className="text-base-content opacity-60">No data available</div>
