@@ -63,22 +63,22 @@ module.exports = {
           "error": "oklch(55% 0.12 30)",
           "error-content": "oklch(16% 0.06 30)",
 
-          "--rounded-box": "0.5rem",
-          "--rounded-btn": "0.5rem",
-          "--rounded-badge": "0.5rem",
+          "--rounded-box": "0.6rem",
+          "--rounded-btn": "0.6rem",
+          "--rounded-badge": "0.6rem",
           "--border-btn": "0.5px",
-          "--tab-radius": "0.5rem",
+          "--tab-radius": "0.6rem",
           "--btn-text-case": "none",
         },
       },
       {
-        "gtwy-dark": {
+        "dark": {
           "color-scheme": "dark",
       
           /* Background layering */
-          "base-100": "oklch(22% 0 0)",   // lighter dark (canvas, main background)
-          "base-200": "oklch(18% 0 0)",   // darker (cards, panels)
-          "base-300": "oklch(14% 0 0)",   // darkest (borders, separators)
+          "base-100": "oklch(25% 0 0)",   // lighter dark (canvas, main background)
+          "base-200": "oklch(22% 0 0)",   // slightly darker (cards, panels)
+          "base-300": "oklch(18% 0 0)",   // darkest (borders, separators)
           "base-content": "oklch(96% 0 0)", // white text
       
           /* Brand neutrals */
@@ -105,14 +105,14 @@ module.exports = {
           "--rounded-box": "0.5rem",
           "--rounded-btn": "0.5rem",
           "--rounded-badge": "0.5rem",
-          "--border-btn": "0.5px",
+          "--border-btn": "0.3px",
           "--tab-radius": "0.5rem",
           "--btn-text-case": "none",
           "--border-select": "0.5px",
         }
       }
     ],
-    darkTheme: "gtwy-dark",
+    darkTheme: "dark",
     base: true,
     styled: true,
     utils: true,

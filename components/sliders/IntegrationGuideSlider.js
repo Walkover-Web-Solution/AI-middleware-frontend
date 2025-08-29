@@ -41,7 +41,7 @@ function GuideSlider({ params, bridgeType }) {
   return (
     <aside
       id="integration-guide-slider"
-      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-1/3 lg:w-1/2 opacity-100 h-screen bg-base-200 transition-all duration-300 border-l overflow-y-auto translate-x-full`}
+      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-1/3 lg:w-1/2 opacity-100 h-screen bg-base-200 transition-all duration-300 overflow-y-auto translate-x-full`}
       aria-label="integration-guide-slider"
     >
       <div className="flex flex-col w-full gap-4">

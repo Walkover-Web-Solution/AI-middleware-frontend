@@ -18,10 +18,25 @@ export default function ThemeToggle() {
     return 'light';
   };
 
-  // Apply theme to document
+  // Apply theme to document - updated to handle multiple methods
   const applyTheme = (themeToApply) => {
     if (typeof window !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', themeToApply);
+      const root = document.documentElement;
+      
+      // Method 1: Set data-theme attribute (for DaisyUI and similar frameworks)
+      root.setAttribute('data-theme', themeToApply);
+      
+      // Method 2: Add/remove dark class (for Tailwind and similar frameworks)
+      if (themeToApply === 'dark') {
+        root.classList.add('dark');
+        root.classList.remove('light');
+      } else {
+        root.classList.add('light');
+        root.classList.remove('dark');
+      }
+      
+      // Method 3: Set CSS custom property (for custom CSS variables)
+      root.style.setProperty('--theme', themeToApply);
     }
   };
 
@@ -32,15 +47,23 @@ export default function ThemeToggle() {
     
     setTheme(savedTheme);
     
+    let themeToApply;
     if (savedTheme === "system") {
+      themeToApply = systemTheme;
       setActualTheme(systemTheme);
     } else {
+      themeToApply = savedTheme;
       setActualTheme(savedTheme);
     }
+    
+    // Apply the theme immediately
+    applyTheme(themeToApply);
   }, []);
 
   // Listen for system theme changes to update display
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleSystemThemeChange = (e) => {
       const newSystemTheme = e.matches ? 'dark' : 'light';
@@ -48,6 +71,7 @@ export default function ThemeToggle() {
       // Only update display if currently using system theme
       if (theme === "system") {
         setActualTheme(newSystemTheme);
+        applyTheme(newSystemTheme);
       }
     };
 
@@ -81,14 +105,17 @@ export default function ThemeToggle() {
     localStorage.setItem("theme", newTheme);
 
     // Apply the theme
+    let themeToApply;
     if (newTheme === "system") {
       const systemTheme = getSystemTheme();
+      themeToApply = systemTheme;
       setActualTheme(systemTheme);
-      applyTheme(systemTheme);
     } else {
+      themeToApply = newTheme;
       setActualTheme(newTheme);
-      applyTheme(newTheme);
     }
+    
+    applyTheme(themeToApply);
 
     setTimeout(() => setLoading(false), 500);
   };
@@ -104,7 +131,7 @@ export default function ThemeToggle() {
     if (theme === "system") {
       return <MonitorIcon size={16} />;
     }
-    return theme === "light" ? <MoonIcon size={16} /> : <SunIcon size={16} />;
+    return theme === "light" ? <SunIcon size={16} /> : <MoonIcon size={16} />;
   };
 
   const toggleDropdown = () => {
@@ -113,7 +140,6 @@ export default function ThemeToggle() {
 
   return (
     <>
-      {loading && <LoadingSpinner height={"100vh"} width={"100vw"} />}
       <div className="w-full" data-dropdown="theme-toggle">
         <button 
           onClick={toggleDropdown}

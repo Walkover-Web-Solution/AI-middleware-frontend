@@ -375,11 +375,11 @@ import Protected from "./protected";
               </div>
 
               <div className="flex items-center justify-center gap-2 mb-2 w-full my-2 md:my-0 md:w-auto">
-                <hr className="flex-1 border-t-2 border-base-content md:w-8" />
+                <hr className="flex-1 border-t-2 border-base-content/20 md:w-8" />
                 <span className="text-base-content text-xs sm:text-sm mx-2">
                   or
                 </span>
-                <hr className="flex-1 border-t-2 border-base-content md:w-8" />
+                <hr className="flex-1 border-t-2 border-base-content/20 md:w-8" />
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row items-center gap-3 w-full md:w-auto px-2">
