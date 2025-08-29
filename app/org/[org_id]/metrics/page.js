@@ -283,7 +283,6 @@ function Page({ params }) {
   };
 
   const handleBridgeChange = (bridge_id, bridge_name) => {
-    console.log("Selected bridge:", bridge_id, bridge_name);
     setBridge({ 
       bridge_id: bridge_id,
       bridge_name: bridge_name
