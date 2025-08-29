@@ -11,15 +11,15 @@ const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handle
                     <div className="label">
                         <span className="label-text font-medium text-red-600">Original Prompt</span>
                     </div>
-                    <div className="flex-1 border border-base-300 rounded-lg overflow-auto">
+                    <div className="flex-1 border border-base-content/20 rounded-lg overflow-auto">
                         <div className="h-full overflow-y-auto bg-red-50">
                             {diffData.map((line, index) => (
                                 <div
                                     key={index}
-                                    className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-base-300 ${line.type === 'deleted' ? 'bg-red-200' :
-                                            line.type === 'modified' ? 'bg-red-100' :
-                                                line.type === 'equal' ? 'bg-base-100' :
-                                                    'bg-base-100 opacity-30'
+                                    className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-base-content/20 ${line.type === 'deleted' ? 'bg-red-200' :
+                                            line.type === 'modified' ? 'bg-red-100 text-black' :
+                                                line.type === 'equal' ? 'bg-base-100 text-base-content' :
+                                                    'bg-base-100 opacity-30 text-content'
                                         }`}
                                 >
                                     <span className="text-gray-400 mr-3 select-none">{line.lineNumber}</span>
@@ -49,15 +49,15 @@ const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handle
                             )}
                         </span>
                     </div>
-                    <div className="flex-1 border border-base-300 rounded-lg overflow-auto relative">
+                    <div className="flex-1 border border-base-content/20 rounded-lg overflow-auto relative">
                         <div className="h-full overflow-y-auto bg-green-50">
                             {diffData.map((line, index) => (
                                 <div
                                     key={index}
-                                    className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-base-300 text-base-content ${line.type === 'added' ? 'bg-green-200' :
-                                            line.type === 'modified' ? 'bg-green-100' :
-                                                line.type === 'equal' ? 'bg-base-100' :
-                                                    'bg-base-100 opacity-30'
+                                    className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-base-content/20 ${line.type === 'added' ? 'bg-green-200 text-base-content' :
+                                            line.type === 'modified' ? 'bg-green-100 text-black' :
+                                                line.type === 'equal' ? 'bg-base-100 text-base-content' :
+                                                    'bg-base-100 text-content opacity-30'
                                         }`}
                                 >
                                     <span className="text-base-content mr-3 select-none">{line.lineNumber}</span>

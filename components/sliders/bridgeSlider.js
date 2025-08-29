@@ -81,7 +81,7 @@ function BridgeSlider() {
                     onChange={handleBridgeSearchChange}
                     className="border border-base-300 rounded p-2 w-full"
                 />
-                <button className="bg-base-100 border-0 rounded-md box-border text-base-content font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-base-200" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
+                <button className="btn" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
                     + Create new agent
                 </button>
                 {filteredBridgesList.length === 0 ? (

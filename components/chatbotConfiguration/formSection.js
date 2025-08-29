@@ -136,7 +136,7 @@ function BridgesToSwitch({ chatBotId, handleSave, orgId }) {
     }
 
     return (
-        <div className="border p-4 rounded-lg bg-gray-50">
+        <div className="border border-base-content/20 p-4 rounded-lg bg-base-200">
             <div className="overflow-x-auto min-h-20 h-auto max-h-72 overflow-y-auto">
                 <table className="table">
                     <thead>
@@ -326,7 +326,7 @@ export default function FormSection({ params, chatbotId = null }) {
         <div className="space-y-6">
             {/* Display Settings Section */}
             <div className="bg-base-200 rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-6 border-b pb-2">Display Settings</h3>
+                <h3 className="text-lg font-semibold mb-6 border-b border-base-content/20 pb-2">Display Settings</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Basic Information */}
@@ -450,8 +450,8 @@ export default function FormSection({ params, chatbotId = null }) {
             </div>
 
             {/* Agent Switch Section */}
-            <div className="bg-base-200 rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4 border-b pb-2">Agent Configuration</h3>
+            <div className="bg-base-100 rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4 border-b border-base-content/20 pb-2">Agent Configuration</h3>
                 
                 <div className="space-y-4">
                     <label className="flex items-center gap-3">
@@ -484,13 +484,13 @@ export default function FormSection({ params, chatbotId = null }) {
             </div>
 
             {/* Preview Section */}
-            <div className="bg-base-200 rounded-lg shadow-lg border border-gray-100">
+            <div className="bg-base-200 rounded-lg shadow-lg border border-base-content/40">
                 {/* Header */}
-                <div className="bg-base-200 px-6 py-4 border-b border-gray-200 rounded-t-lg">
+                <div className="bg-base-200 px-6 py-4 border-b border-base-content/20 rounded-t-lg">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-base-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
                             </div>
@@ -524,7 +524,7 @@ export default function FormSection({ params, chatbotId = null }) {
                     <div className="relative">
                         {/* Loading Overlay */}
                         {isRefreshing && (
-                            <div className="absolute inset-0 bg-base-200 bg-opacity-90 flex items-center justify-center z-10 rounded-b-lg">
+                            <div className="absolute inset-0 bg-base-100 bg-opacity-90 flex items-center justify-center z-10 rounded-b-lg">
                                 <div className="flex flex-col items-center gap-3">
                                     <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                                     <p className="text-sm text-base-content font-medium">Updating preview...</p>

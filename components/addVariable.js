@@ -239,7 +239,7 @@ const AddVariable = ({ params, isEmbedUser }) => {
   return (
     <div className="text-base-content mb-2" tabIndex={0}>
       <div
-        className={`info p-2 ${isAccordionOpen ? 'border border-base-content rounded-x-lg rounded-t-lg' : 'border border-base-content rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
+        className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
         onClick={() => {
           handleTutorial();
           toggleAccordion();
@@ -261,7 +261,7 @@ const AddVariable = ({ params, isEmbedUser }) => {
       <div
         id="accordion-content"
         ref={accordionContentRef}
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${isAccordionOpen ? 'border-x border-b border-base-content rounded-x-lg rounded-b-lg' : ''}`}
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isAccordionOpen ? 'border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : ''}`}
         style={{
           height: `${height}px`,
         }}

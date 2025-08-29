@@ -79,7 +79,7 @@ const PromptSummaryModal = ({ params }) => {
                 ref={textareaRef}
                 value={summary}
                 onChange={(e)=>setSummary(e.target.value)}
-                className="textarea textarea-bordered w-full min-h-96 resize-y focus:border-primary caret-black p-2"
+                className="textarea textarea-bordered w-full min-h-96 resize-y focus:border-primary caret-base-content p-2"
             />
             <button className="btn btn-ghost btn-sm" onClick={() => { setIsEditing(false); setSummary(bridge_summary) }}>
                 Cancel

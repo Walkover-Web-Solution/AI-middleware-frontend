@@ -284,7 +284,12 @@ function Page({ params }) {
               options={{
                 chart: {
                   type: 'bar',
-                  height: 350
+                  height: 350,
+                  background: 'transparent',
+                  foreColor: 'oklch(var(--bc))', // DaisyUI base content color
+                },
+                theme: {
+                  mode: 'dark' // Enable dark mode for ApexCharts
                 },
                 plotOptions: {
                   bar: {
@@ -304,21 +309,47 @@ function Page({ params }) {
                 },
                 xaxis: {
                   categories: metricsBarChartData?.categories || [],
+                  labels: {
+                    style: {
+                      colors: 'oklch(var(--bc))' // DaisyUI base content color
+                    }
+                  },
+                  axisBorder: {
+                    color: 'oklch(var(--bc))'
+                  },
+                  axisTicks: {
+                    color: 'oklch(var(--bc))'
+                  }
                 },
                 yaxis: {
                   title: {
-                    text: 'Cost ( in $ )'
+                    text: 'Cost ( in $ )',
+                    style: {
+                      color: 'oklch(var(--bc))'
+                    }
                   },
                   labels: {
+                    style: {
+                      colors: 'oklch(var(--bc))'
+                    },
                     formatter: function (value) {
                       return value.toFixed(2);
                     }
                   }
                 },
+                grid: {
+                  borderColor: 'oklch(var(--bc) / 0.2)', // Subtle grid lines
+                  strokeDashArray: 3
+                },
                 fill: {
                   opacity: 1
                 },
                 tooltip: {
+                  theme: 'dark', // Use dark theme for tooltip
+                  style: {
+                    fontSize: '12px',
+                  },
+                  // Remove the custom background/color as they conflict with theme: 'dark'
                   y: {
                     formatter: function (val, { seriesIndex }) {
                       if (seriesIndex === 0) { // Cost
@@ -328,9 +359,16 @@ function Page({ params }) {
                       }
                     }
                   }
+                },
+                legend: {
+                  labels: {
+                    colors: 'oklch(var(--bc))'
+                  }
                 }
               }}
-              series={metricsBarChartData?.series} type="bar" height={350} />
+              series={metricsBarChartData?.series}
+              type="bar"
+              height={350} />
           </div>
         </div>
       </div>
