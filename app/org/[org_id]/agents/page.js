@@ -141,7 +141,7 @@ function Home({ params, isEmbedUser }) {
 
   const renderBridgeCard = (item) => {
     return (
-      <div className="flex rounded-md border cursor-pointer hover:shadow-lg bg-base-100 p-4 relative w-full">
+      <div className="flex rounded-md border border-base-300 cursor-pointer hover:shadow-lg bg-base-100 p-4 relative w-full">
         <div key={item._id} className="flex flex-col items-center w-full" onClick={() => onClickConfigure(item._id, item?.published_version_id || item?.versions?.[0])}>
           
           <div className="flex flex-col h-[200px] gap-2 w-full">
@@ -248,7 +248,7 @@ function Home({ params, isEmbedUser }) {
   }, []);
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-x-hidden">
       {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"} />}
       {tutorialState?.showTutorial && (
         <OnBoarding
@@ -283,6 +283,7 @@ function Home({ params, isEmbedUser }) {
                         title="Agents"
                         description="Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."
                         docLink="https://blog.gtwy.ai/features/bridge"
+                        isEmbedUser={isEmbedUser}
                       />
                       <div className="flex-shrink-0 mt-4 sm:mt-0">
                         <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ create new agent</button>
@@ -319,7 +320,7 @@ function Home({ params, isEmbedUser }) {
                   <div className="">
                     <div className="flex justify-center items-center my-4">
                       <p className="border-t border-base-300 w-full"></p>
-                      <p className="bg-black text-base-100 py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
+                      <p className="bg-base-300 text-white py-1 px-2 rounded-full mx-4 whitespace-nowrap text-sm">
                         Archived Agents
                       </p>
                       <p className="border-t border-base-300 w-full"></p>

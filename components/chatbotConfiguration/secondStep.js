@@ -3,11 +3,11 @@ import CopyButton from "../copyButton/copyButton";
 import GenericTable from '../table/table';
 
 const DataObject = {
-    script: `<script\n      id="chatbot-main-script"\n      embedToken=" <embed token here> "\n      src="https://chatbot-embed.viasocket.com/chatbot-prod.js"\n     ></script>`,
+    script: `<script\n      id="chatbot-main-script"\n      embedToken=" <embed token here> "\n      bridgeName="<slugName_of_bridge>"\n      threadId="<thread_id>"\n      subthreadId="<subthread_id>"\n      parentId="<parent_container_id>"\n      src="https://chatbot-embed.viasocket.com/chatbot-prod.js"\n     ></script>`,
     event: `window.addEventListener('message', (event) => {
         const receivedData = event.data;
      });`,
-    sendData: `window.Chatbot.sendData({ \n      bridgeName: '<slugName_of_bridge>',\n      threadId: <id>,\n      parentId: '<parent_container_id>',\n      fullScreen: 'true/false',\n      hideCloseButton: 'true/false',\n      hideIcon: 'true/false',\n      variables: {}\n    });`,
+    sendData: `window.Chatbot.sendData({ \n      bridgeName: '<slugName_of_bridge>',\n      threadId: '<thread_id>',\n      subthreadId: '<subthread_id>',\n      parentId: '<parent_container_id>',\n      fullScreen: 'true/false',\n      hideCloseButton: 'true/false',\n      hideIcon: 'true/false',\n      variables: {}\n    });`,
     openChatbot: `window.Chatbot.open();`,
     closeChatbot: `window.Chatbot.close();`,
     showIcon: `window.Chatbot.show();`,
@@ -41,7 +41,7 @@ const Section = ({ title, caption, children }) => (
     </div>
 );
 
-const SecondStep = () => {
+const SecondStep = ({slugName}) => {
     const methods = [
         { label: '1. Use This method to send data when needed', code: DataObject.sendData },
         { label: '2. Use this method to open chatbot explicitly', code: DataObject.openChatbot },
@@ -53,7 +53,7 @@ const SecondStep = () => {
     ];
 
     return (
-        <div className="flex w-full flex-col gap-4 bg-white rounded-lg shadow p-4">
+        <div className="flex w-full flex-col gap-4 bg-base-100 rounded-lg shadow p-4">
             <Section title="Step 2" caption="Add below code in your product." />
             <div className="mockup-code">
                 <CopyButton data={DataObject.script} />
@@ -61,6 +61,10 @@ const SecondStep = () => {
                 <pre data-prefix=">" className="text-error"><code className="text-error"> id= </code><code className="text-warning">"chatbot-main-script"</code></pre>
                 <pre data-prefix=">" className="text-error"><code> embedToken=</code><code className="text-warning">"Enter Embed Token here"</code></pre>
                 <pre data-prefix=">" className="text-error"><code> src=</code><code className="text-warning">"https://chatbot-embed.viasocket.com/chatbot-prod.js"</code><code className='text-error'>&gt;</code></pre>
+                <pre data-prefix=">" className="text-error"><code> threadId=</code><code className="text-warning">"Enter Thread ID here"</code></pre>
+                <pre data-prefix=">" className="text-error"><code> bridgeName=</code><code className="text-warning"> {slugName} </code></pre>
+                <pre data-prefix=">" className="text-error"><code> subThreadId=</code><code className="text-warning">"Enter Sub Thread ID here"</code></pre>
+                <pre data-prefix=">" className="text-error"><code> parentId=</code><code className="text-warning">"Enter Parent ID here"</code></pre>
                 <pre data-prefix=">" className="text-error"><code>&lt;/script&gt;</code></pre>
             </div>
 

@@ -204,7 +204,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           </div>
         </div>
         <div className="flex gap-3">
-          <div className="tooltip tooltip-top relative" data-tip="function logs">
+          <div className="tooltip tooltip-top relative text-base-content" data-tip="function logs">
             <SquareFunctionIcon size={22}
               onClick={() => openViasocket(tool.id, {
                 flowHitId: tool?.metadata?.flowHitId, embedToken, meta: {
@@ -214,7 +214,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               })}
               className="opacity-80 cursor-pointer" />
           </div>
-          <div className="tooltip tooltip-top pr-2 relative" data-tip="function data">
+          <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function data">
             <FileClockIcon
               size={22}
               onClick={() => {
@@ -242,7 +242,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
           {truncate(integrationData?.[funcName]?.title || funcName, 20)}
         </div>
       </div>
-      <div className="tooltip tooltip-top pr-2" data-tip="function logs">
+      <div className="tooltip tooltip-top pr-2 relative text-base-content" data-tip="function logs">
         <SquareFunctionIcon size={22}
           onClick={() => openViasocket(funcName, {
             flowHitId: JSON?.parse(item.function[funcName] || '{}')?.metadata?.flowHitId, embedToken, meta: {
@@ -346,12 +346,12 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                   {item.role === "assistant" ? (
                     <div>
                       <BotIcon
-                        className=" cursor-pointer bot-icon"
+                        className=" cursor-pointer bot-icon text-base-content"
                         size={20}
                         onClick={() => setIsDropupOpen(!isDropupOpen)}
                       /></div>
                   ) : (
-                    <UserIcon size={20} />
+                    <UserIcon size={20} className="text-base-content"/>
                   )}
                 </div>
                 {isDropupOpen && item.role === "assistant" && (
@@ -369,7 +369,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                             onClick={() => selectMessageType(0)}
                           >
                             <div className="tooltip tooltip-left" data-tip="Chatbot Response">
-                              <BotIcon className="" size={16} />
+                              <BotIcon className="text-base-100" size={16} />
                             </div>
                           </button>
                         </li>
@@ -381,7 +381,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                           onClick={() => selectMessageType(1)}
                         >
                           <div className="tooltip tooltip-left" data-tip="Normal Response">
-                            <CodeMessageIcon className="" size={16} />
+                            <CodeMessageIcon className="text-base-100" size={16} />
                           </div>
                         </button>
                       </li>
@@ -393,7 +393,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                             onClick={() => selectMessageType(2)}
                           >
                             <div className="tooltip tooltip-left" data-tip="Updated Message">
-                              <PencilIcon className="" size={16} />
+                              <PencilIcon className="text-base-100" size={16} />
                             </div>
                           </button>
                         </li>
@@ -598,8 +598,8 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     </div>
                     <p className="text-sm">{item?.error}</p>
                   </div>
-                  <div className="w-100 p-3 rounded-full bg-error/20 flex justify-center items-center">
-                    <BotIcon size={20} />
+                  <div className="w-100 p-2 rounded-full bg-error/20 flex justify-center items-center">
+                    <BotIcon className="text-base-content" size={18} />
                   </div>
                 </div>
               </div>

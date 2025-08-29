@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateIntegrationDataAction } from "@/store/action/integrationAction";
 import GenericTable from "../table/table";
+import CopyButton from "../copyButton/copyButton";
 
 // Configuration Schema - easily extensible
 const CONFIG_SCHEMA = [
@@ -169,6 +170,7 @@ const ConfigSection = ({ title, configs, configuration, onChange }) => {
   );
 };
 
+
 function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   const dispatch = useDispatch();
   const [copied, setCopied] = useState({ 
@@ -286,15 +288,6 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
     return groups;
   }, {});
 
-  const CopyButton = ({ data, onCopy, copied: isCopied }) => (
-    <button
-      onClick={onCopy}
-      className={`btn btn-sm btn-ghost absolute top-2 right-2 text-base-100 ${isCopied ? 'btn-success' : ''}`}
-    >
-      {isCopied ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
-      {isCopied ? 'Copied!' : 'Copy'}
-    </button>
-  );
 
   const jwtPayload = `{
   "org_id": "${data?.org_id}",
@@ -355,11 +348,11 @@ const tableHeaders = ['Key', 'Description'];
   return (
     <aside
       id="gtwy-integration-slider"
-      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-[60%] lg:w-[70%] xl:w-[80%] 2xl:w-[70%] opacity-100 h-screen bg-base-200 transition-all overflow-auto duration-300 border-l ${isOpen ? '' : 'translate-x-full'}`}
+      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-[60%] lg:w-[70%] xl:w-[80%] 2xl:w-[70%] opacity-100 h-screen bg-base-200 transition-all overflow-auto duration-300  ${isOpen ? '' : 'translate-x-full'}`}
       aria-label="Integration Guide Slider"
     >
       <div className="flex flex-col w-full gap-4">
-        <div className="flex justify-between items-center border-b pb-4">
+        <div className="flex justify-between items-center border-b border-base-300 pb-4">
           <h3 className="font-bold text-lg">Integration Setup</h3>
           <CloseIcon
             className="cursor-pointer hover:text-error transition-colors"
@@ -409,7 +402,7 @@ const tableHeaders = ['Key', 'Description'];
           {/* Right Column - Generated Scripts */}
           <div className="space-y-6 overflow-y-auto h-[calc(100vh-100px)] scrollbar-hide mb-4">
             {/* Script Integration */}
-            <div className="card bg-base-100 border">
+            <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
                 <h4 className="card-title text-base">Step 1: Connect Integration</h4>
                 <div className="space-y-6">
@@ -487,7 +480,7 @@ const tableHeaders = ['Key', 'Description'];
             </div>
 
 
-            <div className="card bg-base-100 border">
+            <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
                 <h4 className="card-title text-base">Step 2: Add Script</h4>
                 <div className="form-control">
@@ -517,7 +510,7 @@ const tableHeaders = ['Key', 'Description'];
             </div>
 
             {/* Interface Configuration */}
-            <div className="card bg-base-100 border">
+            <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
                 <h4 className="card-title text-base">Configure Interface</h4>
                 <div className="form-control">
@@ -542,7 +535,7 @@ const tableHeaders = ['Key', 'Description'];
             </div>
 
             {/* Helper Functions */}
-            <div className="card bg-base-100 border">
+            <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
                 <h4 className="card-title text-base">Step 3: Integration Functions</h4>
                 <div className="form-control">
@@ -566,7 +559,7 @@ const tableHeaders = ['Key', 'Description'];
               </div>
             </div>
 
-            <div className="card bg-base-100 border mt-4">
+            <div className="card bg-base-100 border mt-4 border-base-300">
                 <div className="card-body">
                   <h4 className="card-title text-base">Add Meta Data</h4>
                   <div className="form-control">
@@ -587,7 +580,7 @@ const tableHeaders = ['Key', 'Description'];
                 </div>
               </div>
 
-              <div className="card bg-base-100 border mt-4">
+              <div className="card bg-base-100  mt-4">
                 <div className="card-body">
                   <h4 className="card-title text-base">Get Agent Data Using User ID</h4>
                   <div className="form-control">
@@ -612,7 +605,7 @@ const tableHeaders = ['Key', 'Description'];
               </div>
 
             {/* Event Listener */}
-            <div className="card bg-base-100 border">
+            <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
                 <h4 className="card-title text-base">Add Event Listener</h4>
                 <div className="form-control">

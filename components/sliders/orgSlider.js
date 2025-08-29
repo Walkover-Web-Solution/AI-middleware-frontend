@@ -73,11 +73,9 @@ function OrgSlider() {
                     placeholder="Search org..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border border-gray-300 rounded p-2 w-full"
+                    className="border border-base-300 rounded p-2 w-full"
                 />
-                <button onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="  bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50 ">
-                    <span className='flex justify-center items-center gap-2 text-gray font-semibold'>+ Create New Org<BuildingIcon size={16} /></span>
-                </button>
+                <button onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="btn">+ Create New Org<BuildingIcon size={16} /></button>
                 <ul className="menu p-0 w-full text-base-content">
                     {filteredOrganizations.length === 0 ? (
                         <div className='max-w-full'>
@@ -99,10 +97,10 @@ function OrgSlider() {
             </div>
             <div className='mt-auto w-full'>
                 <details
-                    className="overflow-hidden rounded border border-gray-300 [&_summary::-webkit-details-marker]:hidden"
+                    className="overflow-hidden rounded border border-base-300 [&_summary::-webkit-details-marker]:hidden"
                 >
                     <summary
-                        className="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition"
+                        className="flex cursor-pointer items-center justify-between gap-2 bg-base-100 p-4 text-base-content transition"
                     >
                         <span className="text-sm font-medium flex justify-center items-center gap-2">
                             <SettingsAltIcon size={16} /> Setting
@@ -113,7 +111,7 @@ function OrgSlider() {
                         </span>
                     </summary>
 
-                    <div className="border-t border-gray-200 bg-white">
+                    <div className="border-t border-base-300 bg-base-100">
                         <ul className="menu w-full   text-base-content">
                             <li> <a className='py-2 px-2 rounded-md'> <MailIcon className="h-4 w-4" /> {userdetails.email}</a> </li>
                             <li> <a className={`py-2 px-2  ${path[3] === 'Pauthkey' ? "active" : ""}  rounded-md`} onClick={() => { router.push(`/org/${path[2]}/pauthkey`) }}> <KeyRoundIcon className="h-4 w-4" />Pauth key</a> </li>

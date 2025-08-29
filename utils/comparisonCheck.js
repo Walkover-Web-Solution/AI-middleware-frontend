@@ -11,15 +11,15 @@ const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handle
                     <div className="label">
                         <span className="label-text font-medium text-red-600">Original Prompt</span>
                     </div>
-                    <div className="flex-1 border border-gray-300 rounded-lg overflow-auto">
+                    <div className="flex-1 border border-base-content/20 rounded-lg overflow-auto">
                         <div className="h-full overflow-y-auto bg-red-50">
                             {diffData.map((line, index) => (
                                 <div
                                     key={index}
-                                    className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-gray-200 ${line.type === 'deleted' ? 'bg-red-200' :
-                                            line.type === 'modified' ? 'bg-red-100' :
-                                                line.type === 'equal' ? 'bg-white' :
-                                                    'bg-gray-100 opacity-30'
+                                    className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-base-content/20 ${line.type === 'deleted' ? 'bg-red-200' :
+                                            line.type === 'modified' ? 'bg-red-100 text-black' :
+                                                line.type === 'equal' ? 'bg-base-100 text-base-content' :
+                                                    'bg-base-100 opacity-30 text-content'
                                         }`}
                                 >
                                     <span className="text-gray-400 mr-3 select-none">{line.lineNumber}</span>
@@ -29,7 +29,7 @@ const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handle
                                 </div>
                             ))}
                             {diffData.length === 0 && (
-                                <div className="p-4 text-gray-500 text-center">
+                                <div className="p-4 text-base-content text-center">
                                     Generate a new prompt to see differences
                                 </div>
                             )}
@@ -43,43 +43,43 @@ const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handle
                         <span className="label-text font-medium text-green-600">
                             AI Generated Prompt
                             {isStreaming && (
-                                <span className="ml-2 text-sm text-gray-500 animate-pulse">
+                                <span className="ml-2 text-sm text-base-content animate-pulse">
                                     ✨ Generating...
                                 </span>
                             )}
                         </span>
                     </div>
-                    <div className="flex-1 border border-gray-300 rounded-lg overflow-auto relative">
+                    <div className="flex-1 border border-base-content/20 rounded-lg overflow-auto relative">
                         <div className="h-full overflow-y-auto bg-green-50">
                             {diffData.map((line, index) => (
                                 <div
                                     key={index}
-                                    className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-gray-200 ${line.type === 'added' ? 'bg-green-200' :
-                                            line.type === 'modified' ? 'bg-green-100' :
-                                                line.type === 'equal' ? 'bg-white' :
-                                                    'bg-gray-100 opacity-30'
+                                    className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-base-content/20 ${line.type === 'added' ? 'bg-green-200 text-base-content' :
+                                            line.type === 'modified' ? 'bg-green-100 text-black' :
+                                                line.type === 'equal' ? 'bg-base-100 text-black' :
+                                                    'bg-base-100 text-black opacity-30'
                                         }`}
                                 >
-                                    <span className="text-gray-400 mr-3 select-none">{line.lineNumber}</span>
-                                    <span className={line.type === 'added' || line.type === 'modified' ? 'font-semibold' : ''}>
+                                    <span className="text-black mr-3 select-none">{line.lineNumber}</span>
+                                    <span className={line.type === 'added' || line.type === 'modified' ? 'font-semibold text-black' : ''}>
                                         {line.newLine || (line.type === 'deleted' ? ' ' : '')}
                                     </span>
                                 </div>
                             ))}
                             {diffData.length === 0 && (
-                                <div className="p-4 text-gray-500 text-center">
+                                <div className="p-4 text-base-content text-center">
                                     Generated prompt will appear here
                                 </div>
                             )}
                         </div>
                         {isStreaming && (
-                            <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-white px-2 py-1 rounded-md shadow-sm border">
+                            <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-base-100 px-2 py-1 rounded-md shadow-sm border border-base-300">
                                 <div className="flex space-x-1">
                                     <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce"></div>
                                     <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                                     <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                                 </div>
-                                <span className="text-xs text-gray-600">Streaming</span>
+                                <span className="text-xs text-base-content">Streaming</span>
                             </div>
                         )}
                     </div>
@@ -89,7 +89,7 @@ const ComparisonCheck = ({ diffData, isStreaming, handleUndo = () => { }, handle
             {/* Controls for diff view */}
             {displayPrompt && (
                 <div className="flex justify-between items-center mt-2">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-base-content">
                         <span className="inline-block w-4 h-4 bg-red-200 rounded mr-2"></span>Removed
                         <span className="inline-block w-4 h-4 bg-green-200 rounded mr-2 ml-4"></span>Added
                         <span className="inline-block w-4 h-4 bg-yellow-100 rounded mr-2 ml-4"></span>Modified

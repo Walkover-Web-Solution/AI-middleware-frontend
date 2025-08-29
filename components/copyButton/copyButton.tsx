@@ -1,7 +1,7 @@
-import { CopyIcon } from '@/components/Icons';
+import { CheckCircleIcon, CopyIcon } from '@/components/Icons';
 import React, { useState } from 'react';
 
-const CopyButton = ({data}) => {
+const CopyButton = ({ data, btnStyle = "text-base-100" }) => {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboardSendData = () => {
@@ -18,16 +18,17 @@ const CopyButton = ({data}) => {
   };
 
   return (
-    <div className='absolute right-5 top-5'>
-      <CopyIcon
-        className=" cursor-pointer text-white"
-        size={'20px'}
-        onClick={copyToClipboardSendData}
-      />
-      {copied && (
-        <span className=" text-sm text-green-500">
+    <div className='absolute  right-5 top-5'>
+      {copied ? (
+        <span className="text-sm text-success flex flex-row items-center gap-2 t">
+          <CheckCircleIcon size={14} />
           Copied!
         </span>
+      ) : (
+        <button onClick={copyToClipboardSendData} className={`${btnStyle} flex flex-row items-center gap-2 text-base-content`}>
+          <CopyIcon size={14} />
+          Copy
+        </button>
       )}
     </div>
   );

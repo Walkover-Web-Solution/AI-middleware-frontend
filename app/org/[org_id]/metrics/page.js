@@ -153,8 +153,8 @@ function Page({ params }) {
     <div className="p-10 min-h-screen">
       {/* Page Header */}
       <header className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Metrics Dashboard</h1>
-        <p className="text-gray-600">Monitor your application's key metrics at a glance.</p>
+        <h1 className="text-3xl font-bold text-base-content">Metrics Dashboard</h1>
+        <p className="text-base-content">Monitor your application's key metrics at a glance.</p>
       </header>
 
       <div className='flex gap-8 justify-center'>
@@ -260,7 +260,7 @@ function Page({ params }) {
           </ul>
         </details>
 
-        <div className="join border">
+        <div className="join border border-base-300">
           {['Bridges', 'API Keys', 'Models'].map((item, index) => (
             <button key={index} className={`btn join-item ${factor === index ? 'btn-primary' : ''}`} onClick={() => handleFactorChange(index)}>{item}</button>
           ))}
@@ -271,20 +271,25 @@ function Page({ params }) {
       {/* <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-6"> */}
       <div className='justify-center flex'>
 
-        {/* <div className="bg-white shadow-lg rounded-lg p-4">
+        {/* <div className="bg-base-100 shadow-lg rounded-lg p-4">
           <h2 className="text-lg font-bold mb-4">Line Chart</h2>
           <div className="h-96">
             <Chart options={state.options} series={state.series} type="line" height={350} />
           </div>
         </div> */}
-        <div className="bg-white shadow-md rounded-lg p-4 w-full lg:w-2/3">
+        <div className="bg-base-100 shadow-md rounded-lg p-4 w-full lg:w-2/3">
           <h2 className="text-lg font-bold mb-4">Bar Chart</h2>
           <div className="h-96">
             <Chart
               options={{
                 chart: {
                   type: 'bar',
-                  height: 350
+                  height: 350,
+                  background: 'transparent',
+                  foreColor: 'oklch(var(--bc))', // DaisyUI base content color
+                },
+                theme: {
+                  mode: 'dark' // Enable dark mode for ApexCharts
                 },
                 plotOptions: {
                   bar: {
@@ -304,21 +309,47 @@ function Page({ params }) {
                 },
                 xaxis: {
                   categories: metricsBarChartData?.categories || [],
+                  labels: {
+                    style: {
+                      colors: 'oklch(var(--bc))' // DaisyUI base content color
+                    }
+                  },
+                  axisBorder: {
+                    color: 'oklch(var(--bc))'
+                  },
+                  axisTicks: {
+                    color: 'oklch(var(--bc))'
+                  }
                 },
                 yaxis: {
                   title: {
-                    text: 'Cost ( in $ )'
+                    text: 'Cost ( in $ )',
+                    style: {
+                      color: 'oklch(var(--bc))'
+                    }
                   },
                   labels: {
+                    style: {
+                      colors: 'oklch(var(--bc))'
+                    },
                     formatter: function (value) {
                       return value.toFixed(2);
                     }
                   }
                 },
+                grid: {
+                  borderColor: 'oklch(var(--bc) / 0.2)', // Subtle grid lines
+                  strokeDashArray: 3
+                },
                 fill: {
                   opacity: 1
                 },
                 tooltip: {
+                  theme: 'dark', // Use dark theme for tooltip
+                  style: {
+                    fontSize: '12px',
+                  },
+                  // Remove the custom background/color as they conflict with theme: 'dark'
                   y: {
                     formatter: function (val, { seriesIndex }) {
                       if (seriesIndex === 0) { // Cost
@@ -328,9 +359,16 @@ function Page({ params }) {
                       }
                     }
                   }
+                },
+                legend: {
+                  labels: {
+                    colors: 'oklch(var(--bc))'
+                  }
                 }
               }}
-              series={metricsBarChartData?.series} type="bar" height={350} />
+              series={metricsBarChartData?.series}
+              type="bar"
+              height={350} />
           </div>
         </div>
       </div>

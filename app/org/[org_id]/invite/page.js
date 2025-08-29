@@ -5,13 +5,13 @@ import { useEffect, useState} from 'react';
 import { toast } from 'react-toastify';
 import { UserCircleIcon } from '@/components/Icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import SearchItems from '@/components/UI/SearchItems';
 
 export const runtime = 'edge';
 
 function InvitePage({ params }) {
   const [email, setEmail] = useState('');
   const [invitedMembers, setInvitedMembers] = useState([]);
-  const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
@@ -69,12 +69,7 @@ function InvitePage({ params }) {
     return emailRegex.test(email);
   };
 
-  const filteredMembers = !query
-    ? invitedMembers
-    : invitedMembers.filter(member =>
-      member.email.toLowerCase().includes(query.toLowerCase()) ||
-      member.name.toLowerCase().includes(query.toLowerCase())
-    );
+ const [filteredMembers, setFilteredMembers] = useState(invitedMembers);
 
   const isEmailAlreadyInvited = (email) => {
     return invitedMembers.some(member => member.email === email);
@@ -120,10 +115,9 @@ function InvitePage({ params }) {
   };
 
   const loadMoreMembers = () => {
-    if (!query) { // Only load more if not searching
       const nextPage = page + 1;
       fetchInvitedMembers(nextPage, false);
-    }
+    
   };
 
   return (
@@ -161,12 +155,10 @@ function InvitePage({ params }) {
           <h2 className="text-md font-semibold">
             Team Members ({totalMembers})
           </h2>
-          <input
-            type="text"
-            placeholder="Search members..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="input input-bordered w-96"
+          <SearchItems
+            data={invitedMembers}
+            setFilterItems={setFilteredMembers}
+            item='members'
           />
         </div>
 
@@ -175,7 +167,7 @@ function InvitePage({ params }) {
           <InfiniteScroll
             dataLength={filteredMembers.length}
             next={loadMoreMembers}
-            hasMore={hasMore && !query}
+            hasMore={hasMore}
             loader={
               <div className="text-center py-4">
                 <span className="loading loading-spinner loading-md"></span>

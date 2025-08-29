@@ -38,6 +38,7 @@ const AdvancedParameters = ({ params }) => {
       isFirstParameter: user?.meta?.onboarding?.AdvanceParameter
     };
   });
+  const [inputConfiguration, setInputConfiguration] = useState(configuration);
   const { tool_choice: tool_choice_data, type, model } = configuration || {};
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
@@ -75,6 +76,10 @@ const AdvancedParameters = ({ params }) => {
   }, [tool_choice_data])
 
   const handleInputChange = (e, key, isSlider = false) => {
+    setInputConfiguration((prev) => ({
+      ...prev,
+      [key]: e.target.value,
+    }))
     let newValue = e.target.value;
     let newCheckedValue = e.target.checked;
     if (e.target.type === 'number') {
@@ -90,7 +95,7 @@ const AdvancedParameters = ({ params }) => {
     }
   };
 
-  const handleSelectChange = (e, key, defaultValue, Objectvalue = '{}', isDeafaultObject = true) => {
+  const handleSelectChange = (e, key, defaultValue, Objectvalue = {}, isDeafaultObject = true) => {
     let newValue;
     try {
       if (Objectvalue && !JSON.parse(Objectvalue)) {
@@ -134,6 +139,10 @@ const AdvancedParameters = ({ params }) => {
   };
 
   const setSliderValue = (value, key) => {
+    setInputConfiguration((prev) => ({
+      ...prev,
+      [key]: value,
+    }))
     let updatedDataToSend = {
       configuration: {
         [key]: value
@@ -155,8 +164,8 @@ const AdvancedParameters = ({ params }) => {
   }, [dispatch, params?.id, params?.version]);
 
   return (
-    <div className="z-very-low mt-2 text-base-content w-full cursor-pointer" tabIndex={0}>
-      <div className={`info p-2 ${isAccordionOpen ? 'border border-base-300 rounded-x-lg rounded-t-lg' : 'border border-base-300 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
+    <div className="z-very-low mt-4 text-base-content w-full cursor-pointer" tabIndex={0}>
+      <div className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
         handleTutorial()
         toggleAccordion()
       }}>
@@ -172,7 +181,7 @@ const AdvancedParameters = ({ params }) => {
       {tutorialState.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
-      <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-300 rounded-x-lg rounded-b-lg' : 'border border-base-300 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+      <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
 
         {modelInfoData && Object.entries(modelInfoData || {})?.map(([key, { field, min = 0, max, step, default: defaultValue, options }]) => {
           const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
@@ -324,7 +333,7 @@ const AdvancedParameters = ({ params }) => {
                     onInput={(e) => {
                       document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
                     }}
-                    className="range range-xs w-full"
+                    className="range range-accent range-sm h-3 range-extra-small-thumb"
                     name={key}
                   />
                 </div>
@@ -332,7 +341,13 @@ const AdvancedParameters = ({ params }) => {
               {field === 'text' && (
                 <input
                   type="text"
-                  defaultValue={configuration?.[key] === 'default' ? '' : configuration?.[key] || ''}
+                  value={inputConfiguration?.[key] === 'default' ? '' : inputConfiguration?.[key] || ''}
+                  onChange={(e) =>
+                    setInputConfiguration((prev) => ({
+                      ...prev,
+                      [key]: e.target.value,
+                    }))
+                  }
                   onBlur={(e) => handleInputChange(e, key)}
                   className="input input-bordered input-sm w-full"
                   name={key}
@@ -344,7 +359,13 @@ const AdvancedParameters = ({ params }) => {
                   min={min}
                   max={max}
                   step={step}
-                  defaultValue={configuration?.[key] || 0}
+                  value={inputConfiguration?.[key] === "default" ? 0 : inputConfiguration?.[key]}
+                  onChange={(e) =>
+                    setInputConfiguration((prev) => ({
+                      ...prev,
+                      [key]: e.target.value,
+                    }))
+                  }
                   onBlur={(e) => handleInputChange(e, key)}
                   className="input input-bordered input-sm w-full"
                   name={key}
@@ -356,7 +377,7 @@ const AdvancedParameters = ({ params }) => {
                     name={key}
                     type="checkbox"
                     className="toggle"
-                    defaultChecked={configuration?.[key] || false}
+                    checked={inputConfiguration?.[key] === "default" ? false : inputConfiguration?.[key]}
                     onChange={(e) => handleInputChange(e, key)}
                   />
                 </label>
@@ -399,7 +420,7 @@ const AdvancedParameters = ({ params }) => {
                             4
                           )
                         }
-                        className="textarea textarea-bordered border w-full min-h-96 resize-y"
+                        className="textarea border border-base-content/20 w-full min-h-96 resize-y"
                         onBlur={(e) =>
                           handleSelectChange({ target: { value: "json_schema" } }, "response_type", { key: "type" }, e.target.value)
                         }

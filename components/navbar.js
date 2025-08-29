@@ -14,6 +14,8 @@ import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import ConfigHistorySlider from './sliders/configHistorySlider';
 import Protected from './protected';
+import GuideSlider from './sliders/IntegrationGuideSlider';
+import { FilterSliderIcon } from './Icons';
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,
@@ -35,13 +37,14 @@ const Navbar = ({ isEmbedUser }) => {
   const bridgeId = pathParts[5];
   const dispatch = useDispatch();
 
-  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory} = useCustomSelector(state => ({
+  const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType,  isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory} = useCustomSelector(state => ({
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
     publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
     isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted ?? false,
     bridgeStatus: state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridge_status ?? BRIDGE_STATUS.ACTIVE,
+    bridgeType: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.bridgeType,
     isArchived: state.bridgeReducer.allBridgesMap?.[bridgeId]?.status ?? false,
     isPublishing: state.bridgeReducer.isPublishing ?? false,
     isUpdatingBridge: state.bridgeReducer.isUpdatingBridge ?? false,
@@ -164,6 +167,7 @@ const Navbar = ({ isEmbedUser }) => {
   const toggleOrgSidebar = useCallback(() => router.push(`/org`), [router]);
   const toggleBridgeSidebar = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
   const toggleConfigHistorySidebar = () => toggleSidebar("default-config-history-slider", "right");
+  const toggleIntegrationGuideSlider = () => toggleSidebar("integration-guide-slider", "right");
   const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router]);
 
   const breadcrumbItems = useMemo(() => ([
@@ -334,12 +338,12 @@ const Navbar = ({ isEmbedUser }) => {
               {/* Discard button */}
               {isDrafted && activeTab === 'configure' && (
                 <button
-                  className="btn btn-sm bg-red-200 hover:bg-red-300 gap-2"
+                  className="btn btn-sm bg-red-200 hover:bg-red-300 gap-2 text-base-content"
                   onClick={handleDiscardChanges}
                   disabled={isUpdatingBridge || isPublishing}
                 >
-                  <ClipboardX size={14} />
-                  <span>Discard</span>
+                  <ClipboardX size={14} className='text-black'/>
+                  <span className="text-black">Discard</span>
                 </button>
               )}
 
@@ -350,8 +354,8 @@ const Navbar = ({ isEmbedUser }) => {
                   onClick={handlePublish}
                   disabled={!isDrafted || isPublishing}
                 >
-                  {!isPublishing && <BookCheck size={14} />}
-                  <span>{isPublishing ? 'Publishing...' : 'Publish'}</span>
+                  {!isPublishing && <BookCheck size={14} className="text-black" />}
+                  <span className="text-black">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                 </button>
               )}
             </div>
@@ -363,13 +367,13 @@ const Navbar = ({ isEmbedUser }) => {
                   {/* Discard icon - only show if there are drafts */}
                   {isDrafted && (
                     <button
-                      className="btn btn-sm flex gap-2 bg-red-200 hover:bg-red-300"
+                      className="btn btn-sm flex gap-2 bg-red-200 hover:bg-red-300 text-base-content"
                       onClick={handleDiscardChanges}
                       disabled={isUpdatingBridge || isPublishing}
                       title="Discard changes"
                     >
-                      <span><ClipboardX size={16} /></span>
-                      <span>Discard</span>
+                      <span className="text-black"><ClipboardX size={16} className='text-black'/></span>
+                      <span className="text-black">Discard</span>
                     </button>
                   )}
 
@@ -380,13 +384,20 @@ const Navbar = ({ isEmbedUser }) => {
                     disabled={!isDrafted || isPublishing}
                     title={isPublishing ? 'Publishing...' : 'Publish'}
                   >
-                    <span>{!isPublishing && <BookCheck size={16} />}</span>
-                    <span>{isPublishing ? 'Publishing...' : 'Publish'}</span>
+                    <span className="text-black">{!isPublishing && <BookCheck size={16} className='text-black'/>}</span>
+                    <span className="text-black">{isPublishing ? 'Publishing...' : 'Publish'}</span>
                   </button>
                 </>
               )}
             </div>
 
+            {!isEmbedUser && <button
+              className={`btn btn-sm ${isMobile ? "flex-row" : "flex-col"} items-center gap-2`}
+              onClick={toggleIntegrationGuideSlider}
+            >
+              <FilterSliderIcon size={14}/>
+              {isMobile ? null : <span className="hidden sm:block">Integration Guide</span>}
+            </button>}
             {/* Ellipsis menu - only for normal users */}
             {!isEmbedUser && pathname.includes("configure") && <EllipsisMenu />}
           </div>
@@ -401,8 +412,8 @@ const Navbar = ({ isEmbedUser }) => {
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`tab gap-2 h-10 ${activeTab === tab.id
-                    ? 'tab-active [--tab-bg:theme(colors.base-200)] [--tab-border-color:theme(colors.base-300)] bg-base-200'
+                  className={`tab gap-2 h-[42px] ${activeTab === tab.id
+                    ? 'tab-active [--tab-bg:theme(colors.base-300)] [--tab-border-color:theme(colors.base-300)] bg-base-300'
                     : 'hover:bg-base-200/50'
                     }`}
                 >
@@ -421,17 +432,6 @@ const Navbar = ({ isEmbedUser }) => {
       {isMobile && activeTab === 'configure' && !isEmbedUser && (
         <div className="bg-base-100 border-b border-base-200 p-3">
           <div className="flex gap-2">
-            {/* Pause/Resume */}
-            {/* <button
-              className={`btn btn-sm flex-1 gap-2 ${
-                bridgeStatus === BRIDGE_STATUS.PAUSED ? 'bg-green-200 hover:bg-green-300' : 'bg-red-200 hover:bg-red-300'
-              } ${isUpdatingBridge ? 'loading' : ''}`}
-              onClick={handlePauseBridge}
-              disabled={isUpdatingBridge}
-            >
-              {!isUpdatingBridge && (bridgeStatus === BRIDGE_STATUS.PAUSED ? <Play size={14}/> : <Pause size={14}/>)}
-              {bridgeStatus === BRIDGE_STATUS.PAUSED ? 'Resume' : 'Pause'}
-            </button> */}
             {!isEmbedUser && activeTab === 'configure' && <button className="btn btn-sm m-1 tooltip tooltip-left" data-tip="Updates History" onClick={toggleConfigHistorySidebar}>
               <HistoryIcon size={16} />
             </button>}
@@ -443,8 +443,8 @@ const Navbar = ({ isEmbedUser }) => {
                 onClick={handleDiscardChanges}
                 disabled={isUpdatingBridge || isPublishing}
               >
-                <ClipboardX size={14} />
-                Discard
+                <ClipboardX size={14} className='text-black' />
+                <span className="text-black">Discard</span>
               </button>
             )}
 
@@ -454,8 +454,8 @@ const Navbar = ({ isEmbedUser }) => {
               onClick={handlePublish}
               disabled={!isDrafted || isPublishing}
             >
-              {!isPublishing && <BookCheck size={14} />}
-              {isPublishing ? 'Publishing...' : 'Publish'}
+              {!isPublishing && <BookCheck size={14} className='text-black' />}
+              <span className="text-black">{isPublishing ? 'Publishing...' : 'Publish'}</span>
             </button>
           </div>
         </div>
@@ -466,6 +466,7 @@ const Navbar = ({ isEmbedUser }) => {
         <>
           <ChatBotSlider />
           <ConfigHistorySlider versionId={versionId} />
+          <GuideSlider params={{ org_id: orgId, id: bridgeId, version:versionId }} bridgeType={bridgeType}/>
         </>
       )}
     </div>
