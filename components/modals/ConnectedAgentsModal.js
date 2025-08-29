@@ -80,9 +80,9 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
     );
 };
 
-// Extracted component for better readability and potential reusability
+// Fixed AgentCard component with stable shadow to prevent layout shifts
 const AgentCard = ({ agent }) => (
-    <div className="mb-4 p-4 border rounded-lg bg-base-200 hover:shadow-md transition-shadow">
+    <div className="mb-4 p-4 border rounded-lg bg-base-200 shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out">
         <div className="flex items-center gap-2 mb-2">
             <BotIcon className="text-primary" />
             <h4 className="font-semibold text-base-content">{agent.name}</h4>
@@ -99,7 +99,7 @@ const AgentCard = ({ agent }) => (
                 <div className="flex flex-row gap-2 mt-2">
                     <div className="font-medium mb-1">Versions:</div>
                     <div className="flex flex-col gap-1">
-                        {agent.versions.map((version, i) => (
+                        {agent.versions.map((version) => (
                             <span 
                                 key={version.id} 
                                 className="inline text-xs font-mono bg-base-300 p-1 rounded w-fit"
