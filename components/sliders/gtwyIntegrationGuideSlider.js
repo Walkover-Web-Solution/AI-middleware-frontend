@@ -348,7 +348,7 @@ const tableHeaders = ['Key', 'Description'];
   return (
     <aside
       id="gtwy-integration-slider"
-      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-[60%] lg:w-[70%] xl:w-[80%] 2xl:w-[70%] opacity-100 h-screen bg-base-200 transition-all overflow-auto duration-300 border-l ${isOpen ? '' : 'translate-x-full'}`}
+      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-[60%] lg:w-[70%] xl:w-[80%] 2xl:w-[70%] opacity-100 h-screen bg-base-200 transition-all overflow-auto duration-300  ${isOpen ? '' : 'translate-x-full'}`}
       aria-label="Integration Guide Slider"
     >
       <div className="flex flex-col w-full gap-4">

@@ -75,9 +75,7 @@ function OrgSlider() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="border border-base-300 rounded p-2 w-full"
                 />
-                <button onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="  bg-base-100 border-0 rounded-md box-border text-base-content font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-base-200 ">
-                    <span className='flex justify-center items-center gap-2 text-base-content font-semibold'>+ Create New Org<BuildingIcon size={16} /></span>
-                </button>
+                <button onClick={()=>openModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="btn">+ Create New Org<BuildingIcon size={16} /></button>
                 <ul className="menu p-0 w-full text-base-content">
                     {filteredOrganizations.length === 0 ? (
                         <div className='max-w-full'>

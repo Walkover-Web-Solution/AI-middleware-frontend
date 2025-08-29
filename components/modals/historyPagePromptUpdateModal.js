@@ -31,7 +31,7 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
               <span className="label-text">Previous Prompt</span>
             </div>
             <textarea
-              className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-black p-2"
+              className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
               value={previousPrompt}
               readOnly
             />
@@ -41,7 +41,7 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
               <span className="label-text">Updated Prompt</span>
             </div>
             <textarea
-              className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-black p-2"
+              className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
               value={promotToUpdate}
               readOnly
             />

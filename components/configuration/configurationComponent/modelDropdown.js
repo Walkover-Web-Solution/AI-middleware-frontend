@@ -9,7 +9,7 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs }) => {
     if (!hoveredModel || !modelSpecs) return null;
 
     return (
-        <div className="max-w-[500px] bg-base-100 border border-base-content rounded-lg shadow-lg p-6 mt-8 top-0 absolute left-[320px] transition-transform duration-300 ease-in-out z-low-medium transform hover:scale-105">
+        <div className="max-w-[500px] bg-base-100 border border-base-content/20 rounded-lg shadow-lg p-6 mt-8 top-0 absolute left-[320px] transition-transform duration-300 ease-in-out z-low-medium transform hover:scale-105">
             <div className="space-y-4">
                 <div className="border-b border-base-300 pb-3">
                     <h3 className="text-xl font-bold text-base-content">{hoveredModel}</h3>
@@ -177,7 +177,7 @@ const ModelDropdown = ({ params }) => {
                     <div
                         tabIndex={0}
                         role="button"
-                        className="btn btn-sm w-full justify-between border border-base-content bg-base-100 hover:bg-base-200 font-normal"
+                        className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
                         onClick={toggleDropdown}
                     >
                         {model?.length > 30 ? `${model.substring(0, 30)}...` : model|| "Select a Model"}

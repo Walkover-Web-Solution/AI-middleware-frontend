@@ -248,7 +248,7 @@ function Home({ params, isEmbedUser }) {
   }, []);
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-x-hidden">
       {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"} />}
       {tutorialState?.showTutorial && (
         <OnBoarding

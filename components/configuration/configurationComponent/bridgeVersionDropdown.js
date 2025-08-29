@@ -47,12 +47,12 @@ function BridgeVersionDropdown({ params, isEmbedUser }) {
             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}`);
             dispatch(getBridgeVersionAction({ versionId: params.version, version_description:versionDescriptionRef }));
         }
-    }, [params?.version, bridgeVersionsArray, publishedVersion]);
+    }, [params?.version, publishedVersion]);
 
     const handleCreateNewVersion = () => {
         // create new version
         const version_description_input  = versionDescriptionRef?.current?.value;
-        dispatch(createBridgeVersionAction({ parentVersionId: params?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value }, (data) => {
+         dispatch(createBridgeVersionAction({ parentVersionId: params?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value }, (data) => {
             isEmbedUser && sendDataToParent("updated", { name: bridgeName, agent_description: version_description_input , agent_id: params?.id, agent_version_id: data?.version_id }, "Agent Version Created Successfully")
             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${data.version_id}`);
         }))
