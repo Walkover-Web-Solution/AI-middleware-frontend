@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-const SearchItems = ({ data, setFilterItems ,item }) => {
+const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -17,7 +17,7 @@ const SearchItems = ({ data, setFilterItems ,item }) => {
       <input
         type="text"
         placeholder={`Search ${item}...`}
-        className="input input-bordered w-full ml-3 mb-3"
+        className={`${style?  style:'input input-bor0dered w-full ml-3 mb-3'}`}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />

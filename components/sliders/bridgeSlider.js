@@ -73,7 +73,8 @@ function BridgeSlider() {
                <SearchItems
                     data={bridgesList}
                     setFilterItems={setFilteredBridgesList}
-                    item='bridges'
+                    item='agents'
+                    style='input input-bor0dered w-full mb-0 ml-0 border border-base-content/50'
                 />
                 <button className="btn" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
                     + Create new agent
