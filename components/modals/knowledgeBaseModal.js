@@ -29,25 +29,31 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
     setIsLoading(true);
     const formData = new FormData(event.target);
     const newName = formData.get("name").trim();
-        if (!newName) {
+    if (!newName) {
       toast.error('Please enter a valid name.');
-      setIsLoading(false)
+      setIsLoading(false);
+      return;
+    }
+    const newDescription = formData.get("description").trim();
+    if (!newDescription) {
+      toast.error('Please enter a valid description.');
+      setIsLoading(false);
       return;
     }
     const isDuplicate = knowledgeBaseData.some(kb => 
       kb.name?.trim().toLowerCase() === newName.toLowerCase()?.trim() && kb._id !== selectedKnowledgeBase?._id
     );
-
+    
     if (isDuplicate) {
       toast.error('Knowledge Base name already exists. Please choose a different name.');
-      setIsLoading(false)
+      setIsLoading(false);
       return;
     }
     // Create payload object
     const payload = {
       orgId: params?.org_id,
-      name: formData.get('name'),
-      description: formData.get('description'),
+      name: newName,
+      description: newDescription,
     };
 
     if (selectedKnowledgeBase?._id) {
