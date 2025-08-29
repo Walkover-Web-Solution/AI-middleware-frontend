@@ -1,18 +1,45 @@
 'use client'
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import {ReactFlow,applyNodeChanges,applyEdgeChanges,addEdge,Handle,Position,ReactFlowProvider,Controls,Background,BackgroundVariant, ColorMode,} from '@xyflow/react';
+import {
+  ReactFlow,
+  applyNodeChanges,
+  applyEdgeChanges,
+  addEdge,
+  Handle,
+  Position,
+  ReactFlowProvider,
+  Controls,
+  Background,
+  BackgroundVariant,
+} from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Plus, PlusIcon, Settings, Bot, X } from 'lucide-react';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { usePathname,useRouter } from 'next/navigation';
-import {serializeAgentFlow,BRIDGE_TYPES,useAgentLookup,normalizeConnectedRefs,shallowEqual,AgentSidebar,FlowControlPanel,AgentConfigSidebar,} from '@/components/flowDataManager';
-import { closeModal, openModal } from '@/utils/utility';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  serializeAgentFlow,
+  BRIDGE_TYPES,
+  useAgentLookup,
+  normalizeConnectedRefs,
+  shallowEqual,
+  AgentSidebar,
+  FlowControlPanel,
+  AgentConfigSidebar,
+  IntegrationGuide,
+} from '@/components/flowDataManager';
+import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import CreateBridgeCards from './CreateBridgeCards';
-import { createNewOrchestralFlowAction, updateOrchestralFlowAction } from '@/store/action/orchestralFlowAction';
+import {
+  createNewOrchestralFlowAction,
+  updateOrchestralFlowAction,
+} from '@/store/action/orchestralFlowAction';
 import { useDispatch } from 'react-redux';
+import FunctionParameterModal from './configuration/configurationComponent/functionParameterModal';
+import { flushSync } from 'react-dom';
 
+/* ========================= Helpers ========================= */
 
 function hydrateNodes(rawNodes, ctx) {
   const {
@@ -24,6 +51,7 @@ function hydrateNodes(rawNodes, ctx) {
     hasMasterAgent,
     agents,
     onOpenConfigSidebar,
+    openAgentVariableModal,
   } = ctx;
 
   return (rawNodes || []).map((node) => {
@@ -33,28 +61,24 @@ function hydrateNodes(rawNodes, ctx) {
       onSelectAgent: selectAgentForNode,
       agents,
       onOpenConfigSidebar,
+      openAgentVariableModal,
     };
     const extra =
       node.type === 'bridgeNode'
         ? {
-            onBridgeTypeSelect: handleBridgeTypeSelect,
-            bridgeType: node?.data?.bridgeType ?? selectedBridgeType,
-            hasMasterAgent,
-          }
+          onBridgeTypeSelect: handleBridgeTypeSelect,
+          bridgeType: node?.data?.bridgeType ?? selectedBridgeType,
+          hasMasterAgent,
+        }
         : {};
-
     return { ...node, data: { ...(node.data || {}), ...common, ...extra } };
   });
 }
 
-/* =========================================================
-   NODES (Bridge / Agent) + EDGE COMPONENTS
-   ========================================================= */
-function BridgeNode({ id, data }) {
-  const handleBridgeClick = () => {
-    openModal(MODAL_TYPE.BRIDGE_TYPE_MODAL);
-  };
+/* ========================= Nodes ========================= */
 
+function BridgeNode({ data }) {
+  const handleBridgeClick = () => openModal(MODAL_TYPE.BRIDGE_TYPE_MODAL);
   const bridgeConfig = BRIDGE_TYPES[data.bridgeType];
   const Icon = bridgeConfig?.icon || Plus;
 
@@ -63,7 +87,9 @@ function BridgeNode({ id, data }) {
       <Handle type="target" position={Position.Left} className="!bg-transparent !border-0" />
       <button
         onClick={handleBridgeClick}
-        className={`text-white rounded-2xl w-20 h-20 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 nodrag relative overflow-hidden ${bridgeConfig ? `bg-gradient-to-r ${bridgeConfig.color} hover:opacity-90` : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
+        className={`text-white rounded-2xl w-20 h-20 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 nodrag relative overflow-hidden ${bridgeConfig
+            ? `bg-gradient-to-r ${bridgeConfig.color} hover:opacity-90`
+            : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
           }`}
         title={bridgeConfig ? `${bridgeConfig.name} Bridge - Click to change` : 'Select Bridge Type'}
       >
@@ -73,52 +99,62 @@ function BridgeNode({ id, data }) {
         {!data.hasMasterAgent && !bridgeConfig && <span className="text-xs font-medium relative z-10">Start</span>}
       </button>
 
-      <span className="mt-3 text-sm font-medium text-base-content">{bridgeConfig ? `${bridgeConfig.name} Bridge` : 'Select Bridge Type'}</span>
+      <span className="mt-3 text-sm font-medium text-base-content">
+        {bridgeConfig ? `${bridgeConfig.name} Bridge` : 'Select Bridge Type'}
+      </span>
 
       <Handle type="source" position={Position.Right} className="!bg-transparent !border-0" />
     </div>
   );
 }
 
-// Updated AgentNode - Remove sidebar from here
 function AgentNode({ id, data }) {
   const pathname = usePathname();
-  const pathParts = pathname.split('?')[0].split('/');
-  const orgId = pathParts[2];
-  
-  const {allFunction, allAgent} = useCustomSelector(
-    (state) => ({
-      allFunction: state.bridgeReducer?.org?.[orgId]?.functionData || {},
-      allAgent: state.bridgeReducer.org?.[orgId]?.orgs || {}
-    })
-  );
+  const orgId = useMemo(() => pathname.split('?')[0].split('/')[2], [pathname]);
+
+  const { allFunction, allAgent } = useCustomSelector((state) => ({
+    allFunction: state.bridgeReducer?.org?.[orgId]?.functionData || {},
+    allAgent: state.bridgeReducer.org?.[orgId]?.orgs || {},
+  }));
 
   const handleRelabel = () => data.openSidebar({ mode: 'select', nodeId: id, title: 'Change agent' });
   const handleAdd = () => data.openSidebar({ mode: 'add', sourceNodeId: id, title: 'Add next agent' });
   const handleDelete = () => data.onFlowChange({ action: 'DELETE_NODE', payload: { nodeId: id } });
   const handleOpenConfig = () => data.onOpenConfigSidebar(id);
 
+  const handleUpdateVariable = () =>
+    data.openAgentVariableModal({
+      selectedAgent: { ...data.selectedAgent, variables: { ...(data.selectedAgent.variables || data.variables) } },
+    });
+
   const functions = useMemo(() => {
-    if (!allAgent.find((a) => a._id === data.selectedAgent._id)?.function_ids || !allFunction) return [];
-    return allAgent.find((a) => a._id === data.selectedAgent._id)?.function_ids.map((fid) => allFunction[fid]).filter(Boolean);
+    const selected = allAgent.find((a) => a._id === data.selectedAgent._id);
+    if (!selected?.function_ids || !allFunction) return [];
+    return selected.function_ids.map((fid) => allFunction[fid]).filter(Boolean);
   }, [allAgent, data.selectedAgent, allFunction]);
 
   const isMasterAgent = data.isFirstAgent;
 
   return (
-    <div className='w-full h-full flex flex-col items-center'>
+    <div className="w-full h-full flex flex-col items-center">
       <div className="relative flex flex-col items-center group">
         <div className="relative flex items-center justify-center">
-          {/* Delete button - Top Left */}
           <button
             onClick={handleDelete}
-            className="absolute -top-3 -left-3 w-6 h-6 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-base-100 shadow-lg hover:shadow-xl hover:from-red-600 hover:to-red-700 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-30 flex items-center justify-center"
+            className="absolute -top-6 -left-4 w-6 h-6 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-base-100 shadow-lg hover:shadow-xl hover:from-red-600 hover:to-red-700 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-30 flex items-center justify-center"
             title="Delete agent"
           >
             <X className="w-3.5 h-3.5" />
           </button>
-          
-          {/* Orbiting Functions - Left Side Only */}
+
+          <button
+            onClick={(e) => { e.stopPropagation(); handleUpdateVariable() }}
+            className="absolute -top-8 -right-3 w-10 h-10 rounded-full bg-gradient-to-br from-base-content/50 to-base-content/10 text-base-content shadow-lg hover:shadow-xl hover:from-base-content/70 hover:to-base-content/70 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-30 flex items-center justify-center"
+            title="Update Variable"
+          >
+            <Settings className="w-6 h-6" />
+          </button>
+
           <div className="absolute left-0 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out">
             {functions.length > 0 && (
               <div className="relative">
@@ -132,26 +168,21 @@ function AgentNode({ id, data }) {
                   const y = orbitRadius * Math.sin(angle);
 
                   return (
-                    <div key={fn._id} className="absolute transform -translate-x-1/2 -translate-y-1/2 group/function" style={{ left: `${x}px`, top: `${y}px` }}>
+                    <div
+                      key={fn._id}
+                      className="absolute transform -translate-x-1/2 -translate-y-1/2 group/function"
+                      style={{ left: `${x}px`, top: `${y}px` }}
+                    >
                       <div
-                        className="w-8 h-8 bg-gradient-to-br from-orange-100 to-orange-200 
-                                 border-2 border-orange-300 text-orange-600 rounded-full 
-                                 flex items-center justify-center shadow-lg hover:shadow-xl 
-                                 transition-all duration-200 hover:scale-110 hover:border-orange-400
-                                 cursor-pointer backdrop-blur-sm"
+                        className="w-8 h-8 bg-gradient-to-br from-orange-100 to-orange-200 border-2 border-orange-300 text-orange-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 hover:border-orange-400 cursor-pointer backdrop-blur-sm"
                         title={fn.endpoint_name}
                       >
                         <Settings className="w-3.5 h-3.5" />
                       </div>
 
-                      <div
-                        className="absolute right-full mr-2 top-1/2 transform -translate-y-1/2 
-                                    opacity-0 group-hover/function:opacity-100 transition-opacity duration-200
-                                    bg-slate-800 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap
-                                    shadow-lg z-50 pointer-events-none"
-                      >
+                      <div className="absolute right-full mr-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover/function:opacity-100 transition-opacity duration-200 bg-slate-800 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap shadow-lg z-50 pointer-events-none">
                         {fn.endpoint_name}
-                        <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-slate-800"></div>
+                        <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-slate-800" />
                       </div>
                     </div>
                   );
@@ -160,13 +191,13 @@ function AgentNode({ id, data }) {
             )}
           </div>
 
-          {/* Central Agent Node */}
           <div
-            className={`relative border-2 rounded-full shadow-xl hover:shadow-2xl p-6 z-20 transition-all duration-300 hover:scale-105 group-hover:shadow-blue-100 cursor-pointer ${isMasterAgent ? 'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-400 hover:border-amber-500' : 'bg-gradient-to-br from-white to-slate-50 border-slate-300 hover:border-blue-400'
+            className={`relative border-2 rounded-full shadow-xl hover:shadow-2xl p-6 z-20 transition-all duration-300 hover:scale-105 group-hover:shadow-blue-100 cursor-pointer ${isMasterAgent
+                ? 'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-400 hover:border-amber-500'
+                : 'bg-gradient-to-br from-white to-slate-50 border-slate-300 hover:border-blue-400'
               }`}
             onClick={handleOpenConfig}
           >
-            {/* Target handle */}
             <Handle
               type="target"
               position={Position.Left}
@@ -174,7 +205,10 @@ function AgentNode({ id, data }) {
             />
 
             <div className="flex items-center justify-center">
-              <div className={`text-base-primary rounded-full p-4 shadow-inner ${isMasterAgent ? 'bg-gradient-to-br from-amber-100 to-amber-200' : 'bg-gradient-to-br from-primary/50 to-primary/70'}`}>
+              <div
+                className={`text-base-primary rounded-full p-4 shadow-inner ${isMasterAgent ? 'bg-gradient-to-br from-amber-100 to-amber-200' : 'bg-gradient-to-br from-primary/50 to-primary/70'
+                  }`}
+              >
                 <Bot className="w-8 h-8 text-base-100" />
                 {isMasterAgent && (
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full flex items-center justify-center">
@@ -184,7 +218,6 @@ function AgentNode({ id, data }) {
               </div>
             </div>
 
-            {/* Add next agent */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -196,7 +229,6 @@ function AgentNode({ id, data }) {
               <PlusIcon className="w-6 h-6" />
             </button>
 
-            {/* Output handle */}
             <Handle
               type="source"
               position={Position.Right}
@@ -205,7 +237,6 @@ function AgentNode({ id, data }) {
           </div>
         </div>
 
-        {/* Label */}
         <div className="mt-4 text-center">
           <div
             className={`px-4 py-2.5 text-sm font-semibold cursor-pointer transition-all duration-300 rounded-xl shadow-sm hover:shadow-md border ${isMasterAgent
@@ -229,7 +260,10 @@ function AgentNode({ id, data }) {
     </div>
   );
 }
+
 const nodeTypes = { bridgeNode: BridgeNode, agentNode: AgentNode };
+
+/* ========================= Edges ========================= */
 
 function MakeStyleEdge(props) {
   const { sourceX, sourceY, targetX, targetY, selected, style = {} } = props;
@@ -273,64 +307,124 @@ const defaultEdgeOptions = {
   type: 'default',
   style: { animated: true },
 };
+
+/* ========================= Flow ========================= */
+
 function Flow({ params, orchestralData, name, description, createdFlow, setIsLoading }) {
-  const [edges, setEdges] = useState(() => { const seed = orchestralData?.edges ?? [];return seed;});
-  const [shouldLayout, setShouldLayout] = useState(false);
-  const [isModified, setIsModified] = useState(false);
-  const agents = useCustomSelector((state) => state.bridgeReducer.org?.[params.org_id]?.orgs ?? {});
-  const router = useRouter()
-  const [masterAgent, setMasterAgent] = useState(null);
+  const router = useRouter();
   const dispatch = useDispatch();
-  const [isDiscard, setIsDiscard] = useState(false);
+
+  const [edges, setEdges] = useState(() => orchestralData?.edges ?? []);
   const [nodes, setNodes] = useState(() => {
-    const seed =
-    orchestralData?.nodes ??
-    (Array.isArray(orchestralData) ? orchestralData : []) ??
-    [];
+    const seed = orchestralData?.nodes ?? (Array.isArray(orchestralData) ? orchestralData : []) ?? [];
     return seed.map((node) => ({
       ...node,
-      data: {
-        ...(node.data || {}),
-        onFlowChange: null,
-        openSidebar: null,
-      },
+      data: { ...(node.data || {}), onFlowChange: null, openSidebar: null },
     }));
   });
-  const [configSidebar, setConfigSidebar] = useState({
-    isOpen: false,
-    nodeId: null,
-    agent: null
-  });
 
-  // Add config sidebar handlers
-  const openConfigSidebar = useCallback((nodeId) => {
-    const node = nodes.find(n => n.id === nodeId);
-    const agent = agents.find(a => a._id === node?.data?.selectedAgent?._id || nodeId);
-    setConfigSidebar({
-      isOpen: true,
-      nodeId,
-      agent
-    });
-  }, [nodes, agents]);
+  const [shouldLayout, setShouldLayout] = useState(false);
+  const [isModified, setIsModified] = useState(false);
+  const [masterAgent, setMasterAgent] = useState(null);
+  const [isDiscard, setIsDiscard] = useState(false);
+  const [isVariableModified, setIsVariableModified] = useState(false);
 
-  const closeConfigSidebar = useCallback(() => {
-    setConfigSidebar({
-      isOpen: false,
-      nodeId: null,
-      agent: null
-    });
-  }, []);
+  const { agents, allFunction } = useCustomSelector((state) => ({
+    agents: state.bridgeReducer.org[params.org_id]?.orgs || [],
+    allFunction: state.bridgeReducer.org[params.org_id]?.functions || {},
+  }));
 
-  
-  useEffect(() => {
-    setIsModified(!orchestralData.length > 0 ?  (nodes.length !== orchestralData?.nodes?.length || edges.length !== orchestralData?.edges?.length) : nodes.length > 0);
-  }, [nodes, edges]);
+  const [configSidebar, setConfigSidebar] = useState({ isOpen: false, nodeId: null, agent: null });
+  const [integrationGuide, setIntegrationGuide] = useState({ isOpen: false, params: params });
+
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [toolData, setToolData] = useState(null);
+  const [variablesPath, setVariablesPath] = useState({});
+  const [currentVariable, setCurrentVariable] = useState({});
+
   const [selectedBridgeType, setSelectedBridgeType] = useState(() => {
     const bridgeNode =
       (orchestralData?.nodes || []).find?.((n) => n.type === 'bridgeNode') ||
       (Array.isArray(orchestralData) ? orchestralData.find((n) => n.type === 'bridgeNode') : null);
     return bridgeNode?.data?.bridgeType || '';
-  });  
+  });
+
+  const openConfigSidebar = useCallback(
+    (nodeId) => {
+      const node = nodes.find((n) => n.id === nodeId);
+      const agent = agents.find((a) => a._id === (node?.data?.selectedAgent?._id || nodeId));
+      setConfigSidebar({ isOpen: true, nodeId, agent });
+    },
+    [nodes, agents]
+  );
+
+  const openAgentVariableModal = useCallback(
+    (payload) => {
+      const sel = payload?.selectedAgent;
+      if (!sel?._id) return;
+
+      const agent = agents.find((a) => a._id === sel._id);
+      const normalized =
+        sel?.variables && Object.keys(sel.variables || {}).length > 0
+          ? sel.variables
+          : transformAgentVariableToToolCallFormat(agent?.agent_variables || {});
+
+      const base = {
+        name: sel?.name || '',
+        description: sel?.description || '',
+        fields: normalized.fields || {},
+        required_params: normalized.required_params || [],
+      };
+
+      flushSync(() => {
+        setCurrentVariable(base);
+        setSelectedAgent(sel);
+        setToolData({ ...base, thread_id: !!sel?.thread_id });
+        setVariablesPath({ ...(sel?.variables_path || {}) });
+      });
+      openModal(MODAL_TYPE.ORCHESTRAL_AGENT_PARAMETER_MODAL);
+    },
+    [agents, openModal, currentVariable, setSelectedAgent, toolData, variablesPath, transformAgentVariableToToolCallFormat]
+  );
+
+  const closeConfigSidebar = useCallback(() => setConfigSidebar({ isOpen: false, nodeId: null, agent: null }), []);
+
+  const handleSaveAgentParameters = useCallback(() => {
+    const nodeToUpdate = nodes.find(
+      (node) => node.type === 'agentNode' && node.data?.selectedAgent?._id === selectedAgent?._id
+    );
+    if (!nodeToUpdate) return;
+
+    setNodes((currentNodes) =>
+      currentNodes.map((node) =>
+        node.id === nodeToUpdate.id
+          ? {
+            ...node,
+            data: {
+              ...node.data,
+              selectedAgent: {
+                ...node.data.selectedAgent,
+                description: toolData?.description,
+                variables_path: variablesPath,
+                variables: toolData,
+                thread_id: toolData?.thread_id ? toolData?.thread_id : false,
+              },
+            },
+          }
+          : node
+      )
+    );
+    setIsModified(true);
+    setIsVariableModified(true);
+  }, [nodes, selectedAgent, variablesPath, toolData]);
+
+  useEffect(() => {
+    setIsModified(
+      !orchestralData.length > 0
+        ? nodes.length !== orchestralData?.nodes?.length || edges.length !== orchestralData?.edges?.length
+        : nodes.length > 0
+    );
+  }, [nodes, edges]); // keep logic identical
 
   const [sidebar, setSidebar] = useState({
     isOpen: false,
@@ -363,7 +457,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   const onEdgesChange = useCallback((changes) => setEdges((eds) => applyEdgeChanges(changes, eds)), []);
   const onConnect = useCallback((params) => setEdges((eds) => addEdge({ ...params, type: 'smoothstep', data: {} }, eds)), []);
 
-  // INITIAL HYDRATION (run once after mount)
+  /* Initial hydration (once) */
   useEffect(() => {
     setNodes((current) =>
       hydrateNodes(current, {
@@ -375,38 +469,35 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         hasMasterAgent: current.some((n) => n.type === 'agentNode' && n.data?.isFirstAgent),
         agents,
         onOpenConfigSidebar: openConfigSidebar,
+        openAgentVariableModal,
       })
     );
-  }, []); // eslint-disable-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleDiscard = () => {
+  const handleDiscard = useCallback(() => {
     setNodes(() => {
-      const seed =
-      orchestralData?.nodes ??
-      (Array.isArray(orchestralData) ? orchestralData : []) ??
-      [];
+      const seed = orchestralData?.nodes ?? (Array.isArray(orchestralData) ? orchestralData : []) ?? [];
       return seed.map((node) => ({
         ...node,
-        data: {
-          ...(node.data || {}),
-          onFlowChange: null,
-          openSidebar: null,
-        },
+        data: { ...(node.data || {}), onFlowChange: null, openSidebar: null },
       }));
     });
-    setEdges(() => { const seed = orchestralData?.edges ?? [];return seed;})
-    setSelectedBridgeType(() => { const bridgeNode =
+    setEdges(() => orchestralData?.edges ?? []);
+    setSelectedBridgeType(() => {
+      const bridgeNode =
         (orchestralData?.nodes || []).find?.((n) => n.type === 'bridgeNode') ||
         (Array.isArray(orchestralData) ? orchestralData.find((n) => n.type === 'bridgeNode') : null);
       return bridgeNode?.data?.bridgeType || '';
-    })
-    setIsDiscard(!isDiscard)
-  };
+    });
+    setIsDiscard((v) => !v);
+    setIsVariableModified(false);
+  }, [orchestralData]);
 
-  // RUNTIME IMPORT of initialFlow (e.g., navigation/redirect with prebuilt graph)
+  /* Load/replace flow runtime */
   useEffect(() => {
     if (orchestralData?.nodes || orchestralData?.edges) {
-      setNodes((_) =>
+      setNodes(() =>
         hydrateNodes(orchestralData.nodes || [], {
           handleFlowChange,
           openSidebar,
@@ -416,12 +507,14 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           hasMasterAgent: (orchestralData.nodes || []).some((n) => n.type === 'agentNode' && n.data?.isFirstAgent),
           agents,
           onOpenConfigSidebar: openConfigSidebar,
+          openAgentVariableModal,
         })
       );
       setEdges(orchestralData.edges || []);
       setShouldLayout(true);
     }
-  }, [orchestralData, isDiscard]); // eslint-disable-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orchestralData, isDiscard]);
 
   const selectAgentForNode = useCallback((nodeId, agent) => {
     setNodes((nds) => nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, selectedAgent: agent } } : n)));
@@ -433,8 +526,8 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       setNodes((nds) => nds.map((n) => (n.type === 'bridgeNode' ? { ...n, data: { ...n.data, bridgeType } } : n)));
       closeModal(MODAL_TYPE.BRIDGE_TYPE_MODAL);
 
-      const hasMasterAgent = nodes.some((n) => n.type === 'agentNode' && n.data?.isFirstAgent);
-      if (!hasMasterAgent) {
+      const hasMaster = nodes.some((n) => n.type === 'agentNode' && n.data?.isFirstAgent);
+      if (!hasMaster) {
         const bridgeNode = nodes.find((n) => n.type === 'bridgeNode');
         const bridgeNodeId = bridgeNode ? bridgeNode.id : 'bridge-node-root';
         openSidebar({
@@ -449,7 +542,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     [nodes, openSidebar]
   );
 
-  // Initialize with Bridge node when empty
+  /* Ensure one bridge node baseline */
   useEffect(() => {
     if (nodes.length === 0 && Object.keys(agents).length > 0) {
       setNodes([
@@ -468,9 +561,10 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         },
       ]);
     }
-  }, [agents, selectedBridgeType]); // eslint-disable-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agents, selectedBridgeType]);
 
-  // Keep node data fresh (no heavy objects inside data)
+  /* Keep node data fresh */
   useEffect(() => {
     setNodes((nds) =>
       nds.map((node) => {
@@ -484,9 +578,10 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         return { ...node, data: nextData };
       })
     );
-  }, [agents, selectedBridgeType]); // eslint-disable-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agents, selectedBridgeType]);
 
-  // Mark last nodes by edges
+  /* Mark last nodes by edges */
   useEffect(() => {
     setNodes((nds) =>
       nds.map((n) => {
@@ -499,7 +594,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     );
   }, [edges]);
 
-  // Auto layout
+  /* Auto layout */
   const applyAutoLayout = useCallback(() => {
     const HORIZONTAL_SPACING = 280;
     const VERTICAL_SPACING = 200;
@@ -578,9 +673,9 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     }
   }, [shouldLayout, applyAutoLayout, nodes.length]);
 
-  // Save flow with master agent
+  /* Save flow */
   const handleSaveAgentStructure = useCallback(
-    async(metadata) => {
+    async (metadata) => {
       try {
         !metadata.createdFlow && metadata.setIsLoading(true);
         const firstAgentNode = nodes.find((n) => n.type === 'agentNode' && n.data?.isFirstAgent && n.data?.selectedAgent);
@@ -597,27 +692,28 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           master_agent: masterAgentData.bridge_id || masterAgentData.name,
           master_agent_name: masterAgentData.name,
         });
-        console.log('Serialized Flow:', agentStructure);
-      const id = await dispatch(metadata.createdFlow ? updateOrchestralFlowAction(agentStructure, params.org_id, params.orchestralId) : createNewOrchestralFlowAction(agentStructure, params.org_id)).then(response => response.data.id);
-      if (id && !metadata.createdFlow) {
-        router.push(`/org/${params.org_id}/orchestratal_model/${id}`);
-      }
+
+        const id = await dispatch(
+          metadata.createdFlow
+            ? updateOrchestralFlowAction(agentStructure, params.org_id, params.orchestralId)
+            : createNewOrchestralFlowAction(agentStructure, params.org_id)
+        ).then((response) => response.data.id);
+        setIsVariableModified(false);
+        if (id && !metadata.createdFlow) {
+          router.push(`/org/${params.org_id}/orchestratal_model/${id}`);
+        }
       } catch (error) {
         console.error('Error saving agent structure:', error);
       }
     },
-    [nodes, edges, params.org_id, selectedBridgeType]
+    [nodes, edges, params.org_id, selectedBridgeType, dispatch, router, params.orchestralId]
   );
 
-  // subgraph / add nodes
+  /* Subgraph / add nodes */
   const createFanoutSubgraph = useCallback(
     (sourceNodeId, rootAgent, childRefs, isFirstAgent = false, visitedAgents = new Set()) => {
       const rootAgentKey = rootAgent?._id || rootAgent?.bridge_id || rootAgent?.name;
-      console.log(rootAgentKey);
-      if (!rootAgentKey || visitedAgents.has(rootAgentKey)) {
-        console.warn('Circular reference detected or invalid agent:', rootAgentKey);
-        return;
-      }
+      if (!rootAgentKey || visitedAgents.has(rootAgentKey)) return;
 
       const newVisitedAgents = new Set(visitedAgents);
       newVisitedAgents.add(rootAgentKey);
@@ -641,11 +737,17 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
             onFlowChange: handleFlowChange,
             onSelectAgent: selectAgentForNode,
             agents,
-            selectedAgent: { ...agents.find?.((bridge) => bridge._id === rootAgentKey), description: rootAgent.description },
+            selectedAgent: {
+              ...agents.find?.((bridge) => bridge._id === rootAgentKey),
+              description: rootAgent.description,
+              thread_id: rootAgent.thread_id,
+              variables: rootAgent.variables,
+            },
             isFirstAgent: !!isFirstAgent,
             openSidebar,
             isLast: true,
-            onOpenConfigSidebar: openConfigSidebar, // Add this line
+            onOpenConfigSidebar: openConfigSidebar,
+            openAgentVariableModal,
           },
           style: { transition: 'all 0.4s ease-in-out' },
         };
@@ -671,8 +773,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         .filter((a) => {
           if (!a) return false;
           const key = a.bridge_id || a.name;
-          if (newVisitedAgents.has(key)) return false;
-          if (unique.has(key)) return false;
+          if (newVisitedAgents.has(key) || unique.has(key)) return false;
           unique.add(key);
           return true;
         });
@@ -691,7 +792,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
 
       setTimeout(() => setShouldLayout(true), 200);
     },
-    [agents, selectAgentForNode, openSidebar, resolveAgent]
+    [agents, selectAgentForNode, openSidebar, resolveAgent, openConfigSidebar, openAgentVariableModal]
   );
 
   const handleFlowChange = useCallback(
@@ -706,7 +807,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           createFanoutSubgraph(sourceNodeId, agent, childrenRefs, isFirstAgent, new Set());
         } else {
           const newNodeId = `agent-${Date.now()}`;
-
           if (isFirstAgent) setMasterAgent(agent);
 
           setNodes((currentNodes) => {
@@ -730,6 +830,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
                 openSidebar,
                 isLast: true,
                 onOpenConfigSidebar: openConfigSidebar,
+                openAgentVariableModal,
               },
               style: { transition: 'all 0.4s ease-in-out' },
             };
@@ -763,13 +864,38 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         setTimeout(() => setShouldLayout(true), 100);
       }
     },
-    [selectAgentForNode, openSidebar, createFanoutSubgraph, nodes]
+    [selectAgentForNode, openSidebar, createFanoutSubgraph, nodes, openConfigSidebar, openAgentVariableModal]
   );
 
-  // UI
+  const fitViewOptions = useMemo(
+    () => ({ padding: 0.2, duration: 800, includeHiddenNodes: false }),
+    []
+  );
+
+  const openIntegrationGuide = () => {
+    setIntegrationGuide({ isOpen: true, params });
+  };
+
+  const closeIntegrationGuide = () => {
+    setIntegrationGuide({ isOpen: false, params });
+  };
+
   return (
     <div className="w-full h-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 relative overflow-hidden">
-      <FlowControlPanel onSaveAgent={handleSaveAgentStructure} onDiscard={handleDiscard} bridgeType={selectedBridgeType} name={name} description={description} createdFlow={createdFlow} isModified={isModified} setIsLoading={setIsLoading} params={params}/>
+      <FlowControlPanel
+        onSaveAgent={handleSaveAgentStructure}
+        onDiscard={handleDiscard}
+        bridgeType={selectedBridgeType}
+        name={name}
+        description={description}
+        createdFlow={createdFlow}
+        isModified={isModified}
+        setIsLoading={setIsLoading}
+        params={params}
+        isVariableModified={isVariableModified}
+        openIntegrationGuide={openIntegrationGuide}
+        closeIntegrationGuide={closeIntegrationGuide}
+      />
 
       <ReactFlow
         nodes={nodes}
@@ -781,11 +907,11 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         proOptions={{ hideAttribution: true }}
-        nodesDraggable={false}     // editable
-        nodesConnectable={false}   // editable
+        nodesDraggable={false}
+        nodesConnectable={false}
         fitView
-        fitViewOptions={{ padding: 0.2, duration: 800, includeHiddenNodes: false }}
-        colorMode={localStorage.getItem('theme') || 'light'}
+        fitViewOptions={fitViewOptions}
+        colorMode={localStorage.getItem('theme')}
       >
         <Controls showInteractive={false} className="!bg-white/80 !backdrop-blur-md !border-white/60 !shadow-lg !rounded-xl" />
         <Background variant={BackgroundVariant.Dots} gap={32} size={1.5} color="#e2e8f0" className="opacity-60" />
@@ -794,8 +920,9 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       <CreateBridgeCards
         handleBridgeTypeSelection={handleBridgeTypeSelect}
         selectedBridgeTypeCard={selectedBridgeType}
-        isModal={true}
+        isModal
       />
+
       <AgentSidebar
         isOpen={sidebar.isOpen}
         title={sidebar.title}
@@ -805,7 +932,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           if (sidebar.mode === 'add') {
             handleFlowChange({
               action: 'ADD_NODE',
-              payload: { sourceNodeId: sidebar.sourceNodeId, agent, isFirstAgent: sidebar.isFirstAgent},
+              payload: { sourceNodeId: sidebar.sourceNodeId, agent, isFirstAgent: sidebar.isFirstAgent },
             });
           } else if (sidebar.mode === 'select') {
             selectAgentForNode(sidebar.nodeId, agent);
@@ -814,24 +941,49 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         }}
         nodes={nodes}
       />
-      <AgentConfigSidebar 
-        isOpen={configSidebar.isOpen} 
-        onClose={closeConfigSidebar} 
-        agent={configSidebar.agent}
+
+      <AgentConfigSidebar isOpen={configSidebar.isOpen} onClose={closeConfigSidebar} agent={configSidebar.agent} />
+      <IntegrationGuide isOpen={integrationGuide.isOpen} onClose={closeIntegrationGuide} params={params} />
+
+      <FunctionParameterModal
+        key={selectedAgent?._id || 'no-agent'}
+        name="orchestralAgent"
+        Model_Name={MODAL_TYPE.ORCHESTRAL_AGENT_PARAMETER_MODAL}
+        function_details={currentVariable || {}}
+        functionName={selectedAgent?.name || ''}
+        functionId={selectedAgent?._id || ''}
+        toolData={toolData || {}}
+        setToolData={setToolData || (() => { })}
+        variablesPath={variablesPath || []}
+        setVariablesPath={setVariablesPath || (() => { })}
+        variables_path={{ [selectedAgent?.name || '']: variablesPath || [] }}
+        handleSave={handleSaveAgentParameters || (() => { })}
+        handleRemove={(() => { })}
       />
     </div>
   );
 }
 
-/* =========================================================
-   WRAPPER COMPONENT
-   - Accepts optional `initialFlow` (prebuilt {nodes, edges})
-   ========================================================= */
-export default function AgentToAgentConnection({ params, orchestralData = [], name, description, createdFlow = false, setIsLoading }) {
+/* ========================= Wrapper ========================= */
+
+export default function AgentToAgentConnection({
+  params,
+  orchestralData = [],
+  name,
+  description,
+  createdFlow = false,
+  setIsLoading,
+}) {
   return (
     <ReactFlowProvider>
-      <Flow params={params} orchestralData={orchestralData} name={name} description={description} createdFlow={createdFlow} setIsLoading={setIsLoading}/>
+      <Flow
+        params={params}
+        orchestralData={orchestralData}
+        name={name}
+        description={description}
+        createdFlow={createdFlow}
+        setIsLoading={setIsLoading}
+      />
     </ReactFlowProvider>
   );
 }
-

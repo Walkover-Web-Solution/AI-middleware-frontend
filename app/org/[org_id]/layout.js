@@ -131,6 +131,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     const applyTheme = (themeToApply) => {
       if (typeof window !== 'undefined') {
         document.documentElement.setAttribute('data-theme', themeToApply);
+        localStorage.setItem("theme", themeToApply);
       }
     };
 

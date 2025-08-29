@@ -1,12 +1,17 @@
 
 import {
-  Upload, Save, TestTube, Play, ChevronRight, Loader2, Plus, X, Search, Bot, PlusIcon, Settings, Zap, MessageSquare, Globe
+  Upload, Save, TestTube, Play, ChevronRight, Loader2, Plus, X, Search, Bot, PlusIcon, Settings, Zap, MessageSquare, Globe,
+  File,
+  FileSlidersIcon
 } from 'lucide-react';
 import { useEffect, useMemo, useState, useRef } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import Chat from './configuration/chat';
+import Link from 'next/link';
+import GenericTable from './table/table';
+import CopyButton from './copyButton/copyButton';
 
 /* ---------------------------------------------
    Shared SlideOver (overlay + slide animation)
@@ -117,7 +122,11 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
         name: sel.name,
         description: sel.description || `Agent: ${sel.name}`,
         parentAgents,
-        childAgents
+        childAgents,
+        thread_id: sel.thread_id ? sel.thread_id : false,
+        variables_path: sel.variables_path ? sel.variables_path : {},
+        variables: sel.variables ? sel.variables : {},
+        agent_variables: sel.agent_variables ? sel.agent_variables : {},
       };
     });
 
@@ -197,7 +206,7 @@ export function createNodesFromAgentDoc(doc) {
 
   const graph = new Map();
   Object.entries(agents).forEach(([id, a]) => {
-    graph.set(id, { name: a.name, description: a.description, children: a.childAgents || [] });
+    graph.set(id, { name: a.name, description: a.description, children: a.childAgents, variables: a.variables, thread_id:a.thread_id || [] });
   });
 
   const levels = new Map();
@@ -248,6 +257,8 @@ export function createNodesFromAgentDoc(doc) {
         selectedAgent: { _id: id, name: a.name, description: a.description },
         isFirstAgent: id === masterAgentKey,
         isLast: (a.childAgents || []).length === 0,
+        thread_id: a.thread_id,
+        variables: a.variables,
       },
     });
   });
@@ -598,7 +609,10 @@ export function FlowControlPanel({
   createdFlow,
   isModified,
   setIsLoading,
-  params
+  params,
+  isVariableModified,
+  openIntegrationGuide,
+  closeIntegrationGuide,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -608,7 +622,7 @@ export function FlowControlPanel({
     description: description || '',
     status: 'publish',
   });
-
+  console.log(isVariableModified);
   const handlePublish = () => {
     if (!saveData.name.trim()) {
       alert('Please enter a flow name');
@@ -671,7 +685,16 @@ export function FlowControlPanel({
       {/* Top-right Controls */}
       <div className="absolute top-4 right-4 flex items-center gap-2">
         {/* Discard button: show only when createdFlow && isModified */}
-        {createdFlow && isModified && (
+
+        <button
+            className="btn btn-outline"
+            onClick={openIntegrationGuide}
+            title="Integration Guide"
+          >
+           <FileSlidersIcon/> Integration Guide
+          </button>
+
+        {createdFlow && (isModified || isVariableModified) && (
           <button
             className="btn btn-outline btn-error"
             onClick={handleDiscard}
@@ -685,7 +708,7 @@ export function FlowControlPanel({
         <button
           className="btn btn-primary bg-primary shadow-lg text-base-content"
           onClick={() => setIsOpen(true)}
-          disabled={!isModified}
+          disabled={!isModified && !isVariableModified}
           title="Publish Flow"
         >
           <span className="text-white">
@@ -814,7 +837,7 @@ export function AgentConfigSidebar({ isOpen, onClose, agent }) {
     <SlideOver
       isOpen={isOpen}
       onClose={onClose}
-      widthClass="w-[380px] max-w-[90vw]"
+      widthClass="w-[380px] max-w-[80vw]"
       header={
         <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
           <h2 className="text-xl font-semibold">Agent Configuration</h2>
@@ -823,7 +846,7 @@ export function AgentConfigSidebar({ isOpen, onClose, agent }) {
           </button>
         </div>
       }
-      bodyClassName="p-6 space-y-4"
+      bodyClassName="p-6 space-y-4 pb-20"
     >
       {/* Basic Info */}
       <div className="card bg-base-200">
@@ -907,4 +930,131 @@ export function AgentConfigSidebar({ isOpen, onClose, agent }) {
       </div>
     </SlideOver>
   );
+}
+
+export function IntegrationGuide({ isOpen, onClose, params }) {
+  const headers = ['Parameter', 'Type', 'Description', 'Required']
+
+  const data = [
+    ['pauthkey', 'string', 'The key used to authenticate the request.', 'true'],
+    ['orchestrator_id', 'string', 'The orchestrator ID of the flow.', 'true'],
+    ['user', 'string', 'The user question.', 'true'],
+  ]
+
+  const orchestratorApi = (p) =>
+    (
+      `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\\n` +
+      `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
+      `--header 'Content-Type: application/json' \\\n` +
+      `--data '{\\n` +
+      `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",\\n` +
+      `    "user": "YOUR_USER_QUESTION"\\n` +
+      `}'`
+    )
+
+  const orchestratorFormat = `
+    "success": true,
+    "response": {
+         "data": {
+            "id": "chatcmpl-785654654v4ew54656",
+            "content": "Response from the AI",
+            "model": "Your selected model",
+            "role": "assistant",
+            "finish_reason": "stop"
+         },
+         "usage": {
+            "input_tokens": 269,
+            "output_tokens": 10,
+            "total_tokens": 279
+         }
+    }
+  }`
+
+  const Section = ({ title, caption, children }) => (
+    <div className="flex items-start flex-col justify-center gap-1">
+      <h3 className="text-sm font-semibold">{title}</h3>
+      {caption && <p className="text-xs text-gray-600">{caption}</p>}
+      {children}
+    </div>
+  )
+
+  return (
+    <SlideOver
+      isOpen={isOpen}
+      onClose={onClose}
+      widthClass="w-[780px] max-w-[50vw]"
+      header={
+        <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
+          <h2 className="text-xl font-semibold">Integration Guide</h2>
+          <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm" aria-label="Close sidebar">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      }
+      bodyClassName="p-6 space-y-4 pb-20"
+    >
+      {/* Step 1 */}
+      <div className="card bg-base-200">
+        <div className="card-body space-y-2">
+          <Section title="Step 1" caption={
+            <>
+              Create <code className="px-1 py-0.5 rounded bg-base-100 border">pauthkey</code>
+            </>
+          } />
+          <p className="text-sm">
+            Follow the on-screen instructions to create a new API key. Ignore if already created.
+          </p>
+          <Link
+            href={`/org/${params?.org_id}/pauthkey`}
+            target="_blank"
+            className="link link-primary text-sm"
+          >
+            Create pauthkey
+          </Link>
+        </div>
+      </div>
+
+      {/* Step 2 */}
+      <div className="card bg-base-200">
+        <div className="card-body space-y-3">
+          <Section title="Step 2" caption="Use the Chat Completion Orchestrator API" />
+          <div className="mockup-code relative">
+            <CopyButton data={orchestratorApi(params)} />
+            <pre className="break-words whitespace-pre-wrap ml-4">
+              <code>{orchestratorApi(params)}</code>
+            </pre>
+          </div>
+          <GenericTable headers={headers} data={data} />
+          <p className="text-sm">
+            Ensure your backend is ready to receive the asynchronous result on the configured webhook URL (if your orchestration sends callbacks).
+          </p>
+        </div>
+      </div>
+
+      {/* Response Format */}
+      <div className="card bg-base-200">
+        <div className="card-body space-y-3">
+          <Section title="Response Format" />
+          <div className="mockup-code relative">
+            <CopyButton data={orchestratorFormat} />
+            <pre className="break-words whitespace-pre-wrap ml-4">
+              <code>{orchestratorFormat}</code>
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      {/* Helpful Info */}
+      <div className="card bg-base-200">
+        <div className="card-body text-sm space-y-2">
+          <h3 className="card-title text-sm">Notes</h3>
+          <ul className="list-disc ml-5 space-y-1">
+            <li><span className="font-medium">Auth:</span> Pass <code className="px-1 py-0.5 bg-base-100 border rounded">pauthkey</code> in the header.</li>
+            <li><span className="font-medium">IDs:</span> <code className="px-1 py-0.5 bg-base-100 border rounded">orchestrator_id</code> refers to the published flow you want to invoke.</li>
+            <li><span className="font-medium">User input:</span> Send the end-user question in the <code className="px-1 py-0.5 bg-base-100 border rounded">user</code> field.</li>
+          </ul>
+        </div>
+      </div>
+    </SlideOver>
+  )
 }
