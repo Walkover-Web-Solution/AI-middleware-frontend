@@ -255,8 +255,8 @@ export function filterBridges(bridgesList, bridgeSearchQuery) {
 export function filterOrganizations(orgList, orgSearchQuery) {
     return Object.values(orgList).filter(
         (item) =>
-            item?.name?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase()) ||
-            item?.id?.toString()?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase())
+            item?.name?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase().trim()) ||
+            item?.id?.toString()?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase().trim())
     );
 }
 
