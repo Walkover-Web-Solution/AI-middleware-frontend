@@ -53,7 +53,7 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
 
     return (
         <Modal MODAL_ID={MODAL_TYPE.CONNECTED_AGENTS_MODAL}>
-            <div className="modal-box">
+            <div className="modal-box focus:outline-none" tabIndex="-1">
                 <h3 className="font-bold text-lg mb-4">
                     Connected Agents for API Key: {apiKey.name}
                 </h3>
@@ -70,7 +70,7 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
 
                 <div className="modal-action">
                     <form method="dialog">
-                        <button className="btn" onClick={handleClose}>
+                        <button className="btn focus:outline-none focus:ring-0" onClick={handleClose}>
                             Close
                         </button>
                     </form>
@@ -80,9 +80,16 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
     );
 };
 
-// Fixed AgentCard component with stable shadow to prevent layout shifts
+// Fixed AgentCard component to prevent scrolling text displacement
 const AgentCard = ({ agent }) => (
-    <div className="mb-4 p-4 border rounded-lg bg-base-200 shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out">
+    <div 
+        className="mb-4 p-4 border rounded-lg bg-base-200"
+        style={{
+            transform: 'translateZ(0)', // Force hardware acceleration
+            backfaceVisibility: 'hidden', // Prevent subpixel rendering issues
+            perspective: '1000px' // Establish 3D rendering context
+        }}
+    >
         <div className="flex items-center gap-2 mb-2">
             <BotIcon className="text-primary" />
             <h4 className="font-semibold text-base-content">{agent.name}</h4>
