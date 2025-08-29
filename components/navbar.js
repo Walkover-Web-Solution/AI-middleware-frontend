@@ -391,13 +391,13 @@ const Navbar = ({ isEmbedUser }) => {
               )}
             </div>
 
-            <button
+            {!isEmbedUser && <button
               className={`btn btn-sm ${isMobile ? "flex-row" : "flex-col"} items-center gap-2`}
               onClick={toggleIntegrationGuideSlider}
             >
               <FilterSliderIcon size={14}/>
               {isMobile ? null : <span className="hidden sm:block">Integration Guide</span>}
-            </button>
+            </button>}
             {/* Ellipsis menu - only for normal users */}
             {!isEmbedUser && pathname.includes("configure") && <EllipsisMenu />}
           </div>
