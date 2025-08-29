@@ -159,7 +159,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                         <div className="flex items-center gap-3">
                             <label className="text-sm text-base-content">Matching strategy:</label>
                             <select 
-                                className="select select-sm bg-transparent focus:outline-none border-none"
+                                className="select select-sm bg-base-100 focus:outline-none border-none"
                                 value={responseType} 
                                 onChange={(e) => setResponseType(e.target.value)}
                             >
