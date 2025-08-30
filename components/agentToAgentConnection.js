@@ -802,11 +802,12 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       if (action === 'ADD_NODE') {
         const { sourceNodeId, agent, isFirstAgent } = payload;
         const childrenRefs = normalizeConnectedRefs(agent.connected_agents);
+        const nodeId = agent._id || agent.id || agent.bridge_id || agent.name;
 
         if (childrenRefs.length > 0) {
           createFanoutSubgraph(sourceNodeId, agent, childrenRefs, isFirstAgent, new Set());
         } else {
-          const newNodeId = `agent-${Date.now()}`;
+          const newNodeId = nodeId;
           if (isFirstAgent) setMasterAgent(agent);
 
           setNodes((currentNodes) => {
