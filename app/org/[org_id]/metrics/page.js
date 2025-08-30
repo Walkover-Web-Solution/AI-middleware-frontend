@@ -45,7 +45,7 @@ const convertApiData = (apiData, factor = 0, range = 1, allBridges = [], apiKeys
   let intervalType = 'day';
   let timePoints = [];
   let intervalMs = 24 * 60 * 60 * 1000; // Default to daily intervals
-
+ 
   // Configure time range and intervals based on selected range
   switch (range) {
     case 0: // 1 hour
@@ -225,6 +225,7 @@ function Page({ params }) {
   });
   const [loading, setLoading] = useState(false);
   const [filterBridges, setFilterBridges] = useState([]);
+  const [currentTheme, setCurrentTheme] = useState('light');
   const orgId = params?.org_id;
   const [rawData, setRawData] = useState([]);
 
@@ -254,6 +255,53 @@ function Page({ params }) {
   useEffect(() => {
     setFilterBridges(allBridges);
   }, [allBridges]);
+
+  // Effect to track theme changes
+  useEffect(() => {
+    // Initial theme
+    const getInitialTheme = () => {
+      const savedTheme = localStorage.getItem("theme");
+      return savedTheme
+    };
+
+    setCurrentTheme(getInitialTheme());
+
+    // Set up listener for theme changes
+    const handleStorageChange = () => {
+      const newTheme = localStorage.getItem("theme");
+      if (newTheme === "dark" || newTheme === "light") {
+        setCurrentTheme(newTheme);
+      } else {
+        // System theme
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        setCurrentTheme(systemTheme);
+      }
+    };
+
+    // Listen for theme changes
+    window.addEventListener('storage', handleStorageChange);
+    document.addEventListener('themeChange', handleStorageChange);
+
+    // Setup mutation observer to watch for theme attribute changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          const newTheme = document.documentElement.getAttribute('data-theme');
+          if (newTheme === 'dark' || newTheme === 'light') {
+            setCurrentTheme(newTheme);
+          }
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('themeChange', handleStorageChange);
+      observer.disconnect();
+    };
+  }, []);
 
   const fetchMetricsData = async () => {
     setLoading(true);
@@ -499,7 +547,7 @@ function Page({ params }) {
                     chart: {
                       type: 'bar',
                       height: 350,
-                      width: Math.max(800, rawData.length * 60),
+                      width: '100%', // Changed to full width
                       background: 'transparent',
                       foreColor: 'oklch(var(--bc))',
                       toolbar: {
@@ -520,7 +568,7 @@ function Page({ params }) {
                       },
                     },
                     theme: {
-                      mode: 'dark'
+                      mode: currentTheme
                     },
                     plotOptions: {
                       bar: {
@@ -598,7 +646,7 @@ function Page({ params }) {
                 <div style="
                   background: #fff;
                   border: none;
-                  border-radius: 12px;
+                  border-radius: 0px;
                   padding: 16px;
                   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
                   min-width: 250px;
@@ -674,7 +722,6 @@ function Page({ params }) {
                   series={chartData.series}
                   type="bar"
                   height={350}
-                  width={Math.max(800, rawData.length * 60)}
                 />
               </div>
             </div>
