@@ -393,7 +393,7 @@ function FunctionParameterModal({
       toast.error('Description cannot be empty');
       return;
     }
-    if (name !== "Agent") {
+    if (name !== "Agent" && name !== "orchestralAgent") {
       try {
         const flowResponse = await updateFlowDescription(embedToken, toolData.function_name, toolData?.description);
         if (flowResponse?.metadata?.description) {
@@ -442,9 +442,9 @@ function FunctionParameterModal({
             <button onClick={() => setIsDescriptionEditing(true)} className="btn btn-sm btn-primary">
               <PencilIcon size={16} /> Update Description
             </button>
-            <button onClick={() => handleRemove()} className="btn btn-sm btn-error text-white">
+            {name !== "orchestralAgent" && <button onClick={() => handleRemove()} className="btn btn-sm btn-error text-white">
               <TrashIcon size={16} /> Remove {name}
-            </button>
+            </button>}
           </div>
         </div>
 
@@ -526,7 +526,7 @@ function FunctionParameterModal({
               here
             </a>
           </p>
-          {name==='Agent'&&
+          {name==='Agent' || name==='orchestralAgent' &&
             <div className="flex items-center justify-center gap-2 text-sm">
               <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
                 <label className="label info">
@@ -540,7 +540,7 @@ function FunctionParameterModal({
                   setToolData({ ...toolData, thread_id: e.target.checked });
                   setIsModified(true);
                 }}
-                checked={toolData?.thread_id}
+                checked={!!toolData?.thread_id}
                 title="Toggle to include thread_id while calling function"
               />
             </div>

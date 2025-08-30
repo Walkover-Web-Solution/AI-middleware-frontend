@@ -9,11 +9,9 @@ import { toast } from 'react-toastify';
 import { CloseCircleIcon, SendHorizontalIcon, UploadIcon } from '@/components/Icons';
 import { PdfIcon } from '@/icons/pdfIcon';
 
-function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles }) {
-    const [loading, setLoading] = useState(false);
+function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading }) {
     const [uploading, setUploading] = useState(false);
     const dispatch = useDispatch();
-    const inputRef = useRef(null);
     const [fileInput, setFileInput] = useState(null); // Use state for the file input element
     const versionId = params?.version;
     const { bridge, modelType, modelName, variablesKeyValue, prompt, configuration, modelInfo, service } = useCustomSelector((state) => ({
@@ -213,12 +211,12 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     // Only prevent default and send if not loading
                     if (!loading && !uploading) {
                         event.preventDefault();
-                        handleSendMessage(event);
+                        isOrchestralModel ? handleSendMessageForOrchestralModel() : handleSendMessage(event);
                     }
                 }
             }
         },
-        [loading, uploading, conversation, prompt]
+        [loading, uploading, conversation, prompt, isOrchestralModel]
     );
     const handleFileChange = async (e) => {
         const files = Array.from(e.target.files);
@@ -348,7 +346,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             </button>}
             <button
                 className="btn btn-primary btn-circle"
-                onClick={handleSendMessage}
+                onClick={() => {isOrchestralModel ? handleSendMessageForOrchestralModel() : handleSendMessage()}}
                 disabled={loading || uploading || (modelType === 'image')}
             >
                 {(loading || uploading) ? (

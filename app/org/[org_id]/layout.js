@@ -24,6 +24,7 @@ import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 import { getApiKeyGuideAction, getTutorialDataAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
+import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -130,6 +131,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
     const applyTheme = (themeToApply) => {
       if (typeof window !== 'undefined') {
         document.documentElement.setAttribute('data-theme', themeToApply);
+        localStorage.setItem("theme", themeToApply);
       }
     };
 
@@ -208,6 +210,10 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       });
     }
   }, [isValidOrg]);
+
+  useEffect(() => {
+    dispatch(getAllOrchestralFlowAction(params.org_id));
+  }, [params.org_id]);
 
   useEffect(() => {
     if (isValidOrg && params?.org_id) {
@@ -413,7 +419,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
-              <main className={`px-2 h-full ${path.length > 4 ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+              <main className={`px-2 h-full ${path.length > 4 && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
             </div>
           </div>
         </div>
@@ -449,7 +455,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
                   <LoadingSpinner />
                 </div>
               ) : (
-                <main className={`px-2 h-full ${path.length > 4 ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+                <main className={`px-2 h-full ${path.length > 4 && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
               )}
             </div>
           </div>
