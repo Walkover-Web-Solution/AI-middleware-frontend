@@ -6,6 +6,10 @@ import ChatTextInput from "./chatTextInput";
 import { dryRun } from "@/config";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { truncate } from "../historyPageComponents/assistFile";
+import { AlertIcon } from "@/components/Icons";
+import { FINISH_REASON_DESCRIPTIONS } from '@/utils/enums';
+import { ExternalLink } from "lucide-react";
+
 
 function Chat({ params, userMessage, isOrchestralModel = false }) {
   const messagesEndRef = useRef(null);
@@ -20,7 +24,7 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
     content: userMessage,
     time: new Date().toLocaleString()
   }] : []);
-    const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -59,7 +63,7 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
       setMessages(prevMessages => [...prevMessages, newChat]);
       responseData = await dryRun({
         localDataToSend: {
-          
+
           configuration: {
             conversation: conversation,
           },
@@ -77,7 +81,8 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
         fallback: response?.fallback,
         firstAttemptError: response?.firstAttemptError,
         image_urls: response?.image_urls || [],
-        model: response?.model
+        model: response?.model,
+        finish_reason: response?.finish_reason
       };
 
       setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
@@ -92,7 +97,8 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
         image_urls: assistConversation.image_urls,
         fallback: assistConversation?.fallback,
         firstAttemptError: response?.firstAttemptError,
-        modelName: assistConversation?.model
+        modelName: assistConversation?.model,
+        finish_reason: assistConversation?.finish_reason
       };
 
       setMessages(prevMessages => [...prevMessages, newChatAssist]);
@@ -157,34 +163,58 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
                       </div>
                     </div>
                   )}
+
+                  {/* Display finish_reason alert if present and not "completed" */}
+                  {message?.sender === "Assist" && message?.finish_reason &&
+                    message.finish_reason !== "completed" && message.finish_reason !== "no_reason" && (
+                      <div className="my-1">
+                        <div className="max-w-[30rem] bg-base-200/50 border border-warning/20 rounded-md px-3 py-1.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <AlertIcon size={12} className="text-warning flex-shrink-0" />
+                              <span className="text-xs text-base-content/80 leading-tight">
+                                {FINISH_REASON_DESCRIPTIONS[message.finish_reason]}
+                              </span>
+                            </div>
+                            <a
+                              href="https://gtwy.ai/blogs/finish-reasons?source=single"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-warning/70 hover:text-warning transition-colors flex-shrink-0 ml-2"
+                              title="More details"
+                            >
+                              <ExternalLink size={10} />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                 </div>
-                <div>
-                  {message?.images && message?.images?.length > 0 && (
-                    <div className="flex flex-wrap mt-2 items-end justify-end">
-                      {message?.images.map((url, imgIndex) => (
-                        <Image
-                          key={imgIndex}
-                          src={url}
-                          alt={`Message Image ${imgIndex + 1}`}
-                          width={80} // Adjust width as needed
-                          height={80} // Adjust height as needed
-                          className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer"
-                          onClick={() => window.open(url, '_blank')}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {message?.files && message?.files?.length > 0 && (
-                    <div className="flex flex-wrap mt-2 items-end justify-end space-x-2 bg-base-200 p-2 rounded-md mb-1">
-                      {message?.files.map((url, fileIndex) => (
-                        <a key={fileIndex} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 hover:underline">
-                          <PdfIcon height={20} width={20} />
-                          <span className="text-sm overflow-hidden truncate max-w-[10rem]">{truncate(url.split('/').pop(), 20)}</span>
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                {message?.images && message?.images?.length > 0 && (
+                  <div className="flex flex-wrap mt-2 items-end justify-end">
+                    {message?.images.map((url, imgIndex) => (
+                      <Image
+                        key={imgIndex}
+                        src={url}
+                        alt={`Message Image ${imgIndex + 1}`}
+                        width={80} // Adjust width as needed
+                        height={80} // Adjust height as needed
+                        className="w-20 h-20 object-cover m-1 rounded-lg cursor-pointer"
+                        onClick={() => window.open(url, '_blank')}
+                      />
+                    ))}
+                  </div>
+                )}
+                {message?.files && message?.files?.length > 0 && (
+                  <div className="flex flex-wrap mt-2 items-end justify-end space-x-2 bg-base-200 p-2 rounded-md mb-1">
+                    {message?.files.map((url, fileIndex) => (
+                      <a key={fileIndex} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 hover:underline">
+                        <PdfIcon height={20} width={20} />
+                        <span className="text-sm overflow-hidden truncate max-w-[10rem]">{truncate(url.split('/').pop(), 20)}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
                 {message?.content && <div className="chat-bubble inline-block break-all">
                   <ReactMarkdown components={{
                     code: ({ node, inline, className, children, ...props }) => (
@@ -221,9 +251,9 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
                 handleSendMessageForOrchestralModel={handleSendMessageForOrchestralModel}
                 inputRef={inputRef}
                 loading={loading}
-                setLoading={setLoading} 
-                uploadedFiles={uploadedFiles} 
-                setUploadedFiles={setUploadedFiles}/>
+                setLoading={setLoading}
+                uploadedFiles={uploadedFiles}
+                setUploadedFiles={setUploadedFiles} />
             </div>
           </div>
           {errorMessage && (

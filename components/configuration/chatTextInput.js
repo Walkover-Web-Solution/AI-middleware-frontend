@@ -167,6 +167,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 role: response?.role || "assistant",
                 content: content,
                 fallback : response?.fallback ? response?.fallback : response?.fall_back,
+                finish_reason: response?.finish_reason || "no_reason",
                 firstAttemptError: response?.firstAttemptError,
                 image_urls: response?.image_urls || [],
                 model: response?.model
@@ -187,9 +188,27 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 content: Array.isArray(content) ? content.join(", ") : content.toString(),
                 image_urls: assistConversation.image_urls,
                 fallback : assistConversation?.fallback,
+                finish_reason: assistConversation?.finish_reason,
                 firstAttemptError: response?.firstAttemptError,
                 modelName : assistConversation?.model
             };
+
+            // Show alert for non-completed finish_reason
+            // const finishReason = assistConversation?.finish_reason;
+            // if (finishReason && finishReason !== "completed" && finishReason !== "no_reason") {
+            //     const description = FINISH_REASON_DESCRIPTIONS[finishReason] || 
+            //                        FINISH_REASON_DESCRIPTIONS["other"];
+            //     toast.warning(`${finishReason}: ${description}`, {
+            //         position: "bottom-right",
+            //         autoClose: 5000,
+            //         hideProgressBar: false,
+            //         closeOnClick: true,
+            //         pauseOnHover: true,
+            //         draggable: true,
+            //         progress: undefined,
+            //         icon: () => <AlertIcon size={20} className="text-warning" />
+            //     });
+            // }
 
             setMessages(prevMessages => [...prevMessages, newChatAssist]);
         } catch (error) {
