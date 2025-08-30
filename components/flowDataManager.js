@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState, useRef } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
-import { closeModal, openModal } from '@/utils/utility';
+import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import Chat from './configuration/chat';
 import Link from 'next/link';
@@ -125,7 +125,7 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
         childAgents,
         thread_id: sel.thread_id ? sel.thread_id : false,
         variables_path: sel.variables_path ? sel.variables_path : {},
-        variables: sel.variables ? sel.variables : {},
+        variables: sel.variables ? sel.variables : sel.agent_variables ? transformAgentVariableToToolCallFormat(sel.agent_variables) : {},
         agent_variables: sel.agent_variables ? sel.agent_variables : {},
       };
     });
@@ -254,11 +254,10 @@ export function createNodesFromAgentDoc(doc) {
       type: 'agentNode',
       position: { x: 80 + level * HORIZONTAL_SPACING, y },
       data: {
-        selectedAgent: { _id: id, name: a.name, description: a.description },
+        selectedAgent: { _id: id, name: a.name, description: a.description, variables_path: a.variables_path, variables: a.variables },
         isFirstAgent: id === masterAgentKey,
         isLast: (a.childAgents || []).length === 0,
         thread_id: a.thread_id,
-        variables: a.variables,
       },
     });
   });
