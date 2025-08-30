@@ -23,7 +23,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedThreads, setExpandedThreads] = useState([]);
-  const [loadingSubThreads, setLoadingSubThreads] = useState(false);
+  const [loadingSubThreads, setLoadingSubThreads] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   const dispatch = useDispatch();
   const pathName = usePathname();
@@ -73,8 +73,21 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   };
 
   useEffect(() => {
-    setExpandedThreads([]);
-  }, [params.thread_id]);
+    if (params.thread_id) {
+      setExpandedThreads([params.thread_id]);
+      // Clear previous subthreads before loading new ones
+      dispatch(clearSubThreadData());
+      setLoadingSubThreads(true);
+      dispatch(getSubThreadsAction({ thread_id: params.thread_id, error: isErrorTrue, bridge_id: params.id }));
+    }
+  }, [params.thread_id, dispatch, isErrorTrue, params.id]);
+
+  useEffect(() => {
+    if (subThreads !== undefined) {
+      setLoadingSubThreads(false);
+      
+    }
+  }, [subThreads, params.thread_id]);
 
   const debounce = (func, delay) => {
     let timeoutId;
