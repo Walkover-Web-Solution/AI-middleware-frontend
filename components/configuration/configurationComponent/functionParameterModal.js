@@ -28,7 +28,8 @@ function FunctionParameterModal({
   variables_path = {},
   functionName = "",
   variablesPath = {},
-  setVariablesPath = () => { }
+  setVariablesPath = () => { },
+  isMasterAgent = false
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
@@ -363,6 +364,7 @@ function FunctionParameterModal({
   }, [objectFieldValue]);
 
   const handleVariablePathChange = useCallback((key, value = "") => {
+    name === "orchestralAgent" && setIsModified(true);
     setVariablesPath((prevVariablesPath) => {
       return {
         ...prevVariablesPath,
@@ -526,7 +528,7 @@ function FunctionParameterModal({
               here
             </a>
           </p>
-          {name==='Agent' || name==='orchestralAgent' &&
+          {name==='Agent' || (name==='orchestralAgent' && isMasterAgent )&&
             <div className="flex items-center justify-center gap-2 text-sm">
               <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
                 <label className="label info">
@@ -568,7 +570,7 @@ function FunctionParameterModal({
                   <th>Description</th>
                   <th>Enum: comma separated</th>
                   <th>Fill with AI</th>
-                  <th>Value Path: your_path</th>
+                  {!isMasterAgent && <th>Value Path: your_path</th>}
                 </tr>
               </thead>
               <tbody>
@@ -673,7 +675,7 @@ function FunctionParameterModal({
                           }}
                         />
                       </td>
-                      <td>
+                      {(name==='orchestralAgent' && !isMasterAgent) && <td>
                         <input
                           type="text"
                           placeholder="name"
@@ -683,7 +685,7 @@ function FunctionParameterModal({
                             handleVariablePathChange(param.key, e.target.value);
                           }}
                         />
-                      </td>
+                      </td>}
                     </tr>
                   );
                 })}

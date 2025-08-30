@@ -116,16 +116,16 @@ function AgentNode({ id, data }) {
     allFunction: state.bridgeReducer?.org?.[orgId]?.functionData || {},
     allAgent: state.bridgeReducer.org?.[orgId]?.orgs || {},
   }));
-
   const handleRelabel = () => data.openSidebar({ mode: 'select', nodeId: id, title: 'Change agent' });
   const handleAdd = () => data.openSidebar({ mode: 'add', sourceNodeId: id, title: 'Add next agent' });
   const handleDelete = () => data.onFlowChange({ action: 'DELETE_NODE', payload: { nodeId: id } });
   const handleOpenConfig = () => data.onOpenConfigSidebar(id);
 
-  const handleUpdateVariable = () =>
+  const handleUpdateVariable = () => {
     data.openAgentVariableModal({
-      selectedAgent: { ...data.selectedAgent, variables: { ...(data.selectedAgent.variables || data.variables) } },
+      selectedAgent: { ...data.selectedAgent, variables: { ...(data.selectedAgent.variables || data.variables) }, isMasterAgent: data.isFirstAgent},
     });
+  };
 
   const functions = useMemo(() => {
     const selected = allAgent.find((a) => a._id === data.selectedAgent._id);
@@ -375,16 +375,29 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         fields: normalized.fields || {},
         required_params: normalized.required_params || [],
       };
-
-      flushSync(() => {
-        setCurrentVariable(base);
-        setSelectedAgent(sel);
-        setToolData({ ...base, thread_id: !!sel?.thread_id });
-        setVariablesPath({ ...(sel?.variables_path || {}) });
+  
+      setNodes((currentNodes) => {
+        setEdges((currentEdges) => {
+          const currentNode = currentNodes.find((node) => node.data?.selectedAgent?._id === sel._id);
+          const incomingEdge = currentNode ? currentEdges.find(edge => edge.target === currentNode.id) : null;
+          const parentNode = incomingEdge ? currentNodes.find(node => node.id === incomingEdge.source) : null;
+          
+          const parentVariablesPath = parentNode?.data?.selectedAgent?.variables_path || {};
+          flushSync(() => {
+            setCurrentVariable(base);
+            setSelectedAgent(sel);
+            setToolData({ ...base, thread_id: !!sel?.thread_id});
+            setVariablesPath({ ...(parentVariablesPath[sel._id] || parentVariablesPath || {}) });
+          });
+          
+          openModal(MODAL_TYPE.ORCHESTRAL_AGENT_PARAMETER_MODAL);
+          
+          return currentEdges; // Return current edges unchanged
+        });
+        return currentNodes; // Return current nodes unchanged
       });
-      openModal(MODAL_TYPE.ORCHESTRAL_AGENT_PARAMETER_MODAL);
     },
-    [agents, openModal, currentVariable, setSelectedAgent, toolData, variablesPath, transformAgentVariableToToolCallFormat]
+    [agents, openModal, transformAgentVariableToToolCallFormat] // Removed nodes and edges from dependencies
   );
 
   const closeConfigSidebar = useCallback(() => setConfigSidebar({ isOpen: false, nodeId: null, agent: null }), []);
@@ -395,28 +408,50 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     );
     if (!nodeToUpdate) return;
 
+    const incomingEdge = edges.find(edge => edge.target === nodeToUpdate.id);
+    const parentNode = incomingEdge ? nodes.find(node => node.id === incomingEdge.source) : null;
     setNodes((currentNodes) =>
-      currentNodes.map((node) =>
-        node.id === nodeToUpdate.id
-          ? {
+      currentNodes.map((node) => {
+        if (node.id === nodeToUpdate.id) {
+          return {
             ...node,
             data: {
               ...node.data,
               selectedAgent: {
                 ...node.data.selectedAgent,
                 description: toolData?.description,
-                variables_path: variablesPath,
                 variables: toolData,
                 thread_id: toolData?.thread_id ? toolData?.thread_id : false,
+                variables_path: variablesPath || {},
               },
             },
-          }
-          : node
-      )
+          };
+        }
+        
+        if (parentNode && node.id === parentNode.id && selectedAgent?._id) {
+          // Update parent agent's variables_path with current agent's variables
+          const currentVariablesPath = node.data?.selectedAgent?.variables_path || {};
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              selectedAgent: {
+                ...node.data.selectedAgent,
+                variables_path: {
+                  ...currentVariablesPath,
+                  [selectedAgent._id]: variablesPath || {}
+                },
+              },
+            },
+          };
+        }
+        
+        return node;
+      })
     );
     setIsModified(true);
     setIsVariableModified(true);
-  }, [nodes, selectedAgent, variablesPath, toolData]);
+  }, [nodes, edges, selectedAgent, variablesPath, toolData]);
 
   useEffect(() => {
     setIsModified(
@@ -472,7 +507,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         openAgentVariableModal,
       })
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDiscard = useCallback(() => {
@@ -792,7 +826,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
 
       setTimeout(() => setShouldLayout(true), 200);
     },
-    [agents, selectAgentForNode, openSidebar, resolveAgent, openConfigSidebar, openAgentVariableModal]
+    [agents, selectAgentForNode, openSidebar, resolveAgent, openConfigSidebar, nodes]
   );
 
   const handleFlowChange = useCallback(
@@ -865,7 +899,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         setTimeout(() => setShouldLayout(true), 100);
       }
     },
-    [selectAgentForNode, openSidebar, createFanoutSubgraph, nodes, openConfigSidebar, openAgentVariableModal]
+    [selectAgentForNode, openSidebar, createFanoutSubgraph, nodes, openConfigSidebar]
   );
 
   const fitViewOptions = useMemo(
@@ -960,6 +994,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         variables_path={{ [selectedAgent?.name || '']: variablesPath || [] }}
         handleSave={handleSaveAgentParameters || (() => { })}
         handleRemove={(() => { })}
+        isMasterAgent={selectedAgent?.isMasterAgent}
       />
     </div>
   );
