@@ -206,7 +206,7 @@ export function createNodesFromAgentDoc(doc) {
 
   const graph = new Map();
   Object.entries(agents).forEach(([id, a]) => {
-    graph.set(id, { name: a.name, description: a.description, children: a.childAgents, variables: a.variables, thread_id:a.thread_id || [] });
+    graph.set(id, { name: a.name, description: a.description, children: a.childAgents, variables: a.variables, thread_id: a.thread_id || [] });
   });
 
   const levels = new Map();
@@ -507,7 +507,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
         const doesNotHaveArchivedStatus = a.status !== 0;
         return matchesSearch && notUsed && hasPublishedVersion && doesNotHavePausedStatus && doesNotHaveArchivedStatus;
       });
-  }, [agents, q, usedAgentIds,agents,nodes]);
+  }, [agents, q, usedAgentIds, agents, nodes]);
 
   const handleSelectAgent = (agent) => {
     setSelectAgent(agent);
@@ -684,13 +684,13 @@ export function FlowControlPanel({
       <div className="absolute top-4 right-4 flex items-center gap-2">
         {/* Discard button: show only when createdFlow && isModified */}
 
-        <button
-            className="btn btn-outline"
-            onClick={openIntegrationGuide}
-            title="Integration Guide"
-          >
-           <FileSlidersIcon/> Integration Guide
-          </button>
+        {createdFlow && <button
+          className="btn btn-outline"
+          onClick={openIntegrationGuide}
+          title="Integration Guide"
+        >
+          <FileSlidersIcon /> Integration Guide
+        </button>}
 
         {createdFlow && (isModified || isVariableModified) && (
           <button
@@ -831,13 +831,53 @@ export function FlowControlPanel({
    Agent Config Sidebar (uses SlideOver)
 -------------------------------------------------------- */
 export function AgentConfigSidebar({ isOpen, onClose, agent }) {
+  useEffect(() => {
+    if (agent?.org_id && agent._id) {
+      const scriptId = 'gtwy-user-script';
+      const scriptURl = 'http://localhost:3000/gtwy_embed_local.js';
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = scriptURl;
+      script.setAttribute('skipLoadGtwy', true);
+      script.setAttribute('token', localStorage.getItem('proxy_token'));
+      script.setAttribute('org_id', agent?.org_id);
+      script.setAttribute('customIframeId', 'gtwyEmbedInterface');
+      script.setAttribute('gtwy_user', true);
+      script.setAttribute('parentId', 'gtwy')
+      script.setAttribute('defaultOpen', 'true')
+      script.setAttribute('agent_id', agent?._id)
+      document.head.appendChild(script);
+    }
+    return () => {
+      const script = document.getElementById('gtwy-user-script');
+      if (script) {
+        script.remove();
+        if (!sessionStorage.getItem('embedUser')) {
+          sessionStorage.clear();
+        }
+      }
+    }
+  }, [agent]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (!sessionStorage.getItem('embedUser')) {
+        sessionStorage.clear();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <SlideOver
       isOpen={isOpen}
       onClose={onClose}
-      widthClass="w-[380px] max-w-[80vw]"
+      widthClass="w-[80vw] max-w-[80vw]"
       header={
-        <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
+        <div className="flex items-center justify-between px-6 py-4 border border-base-200">
           <h2 className="text-xl font-semibold">Agent Configuration</h2>
           <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm" aria-label="Close sidebar">
             <X className="w-4 h-4" />
@@ -846,85 +886,8 @@ export function AgentConfigSidebar({ isOpen, onClose, agent }) {
       }
       bodyClassName="p-6 space-y-4 pb-20"
     >
-      {/* Basic Info */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Basic Information</h3>
-          <div className="space-y-2 text-sm">
-            <div><span className="font-medium">ID:</span> {agent?._id}</div>
-            <div><span className="font-medium">Name:</span> {agent?.name}</div>
-            <div><span className="font-medium">Slug:</span> {agent?.slugName}</div>
-            <div><span className="font-medium">Service:</span> {agent?.service}</div>
-            <div><span className="font-medium">Bridge Type:</span> {agent?.bridgeType}</div>
-            <div><span className="font-medium">Status:</span> {agent?.status === 1 ? 'Active' : 'Inactive'}</div>
-            <div><span className="font-medium">Total Tokens:</span> {agent?.total_tokens?.toLocaleString() || 'N/A'}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Configuration */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Configuration</h3>
-          <div className="space-y-2 text-sm">
-            <div><span className="font-medium">Model:</span> {agent?.configuration?.model}</div>
-            <div className="space-y-1">
-              <span className="font-medium">Prompt:</span>
-              <pre className="bg-base-100 p-3 rounded border border-base-300 text-xs whitespace-pre-wrap">
-                {agent?.configuration?.prompt}
-              </pre>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Versions */}
-      {agent?.versions && agent?.versions?.length > 0 && (
-        <div className="card bg-base-200">
-          <div className="card-body">
-            <h3 className="card-title text-sm">Versions</h3>
-            <div className="space-y-2">
-              {agent?.versions?.map((version, index) => (
-                <div key={version} className="text-sm">
-                  <span className="font-medium">Version {index + 1}:</span> {version}
-                  {version === agent.published_version_id && (
-                    <span className="badge badge-success badge-sm ml-2">Published</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Agent Variables */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Agent Variables</h3>
-          {agent?.agent_variables && Object.keys(agent?.agent_variables).length > 0 ? (
-            <div className="space-y-1 text-sm">
-              {Object.entries(agent?.agent_variables).map(([key, value]) => (
-                <div key={key}>
-                  <span className="font-medium">{key}:</span> {JSON.stringify(value)}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-sm opacity-70">No variables configured</div>
-          )}
-        </div>
-      </div>
-
-      {/* Additional Info */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Additional Information</h3>
-          <div className="space-y-2 text-sm">
-            <div><span className="font-medium">Organization ID:</span> {agent?.org_id}</div>
-            <div><span className="font-medium">Published Version:</span> {agent?.published_version_id}</div>
-            <div><span className="font-medium">Function IDs:</span> {agent?.function_ids || 'None'}</div>
-          </div>
-        </div>
+      <div id='gtwy' className='h-full border-none w-full mx-auto flex items-center justify-center'>
+        <span className="animate-pulse">Loading...</span>
       </div>
     </SlideOver>
   );
@@ -940,15 +903,15 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
   ]
 
   const orchestratorApi = (p) =>
-    (
-      `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\\n` +
-      `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
-      `--header 'Content-Type: application/json' \\\n` +
-      `--data '{\\n` +
-      `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",\\n` +
-      `    "user": "YOUR_USER_QUESTION"\\n` +
-      `}'`
-    )
+  (
+    `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\\n` +
+    `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
+    `--header 'Content-Type: application/json' \\\n` +
+    `--data '{\\n` +
+    `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",\\n` +
+    `    "user": "YOUR_USER_QUESTION"\\n` +
+    `}'`
+  )
 
   const orchestratorFormat = `
     "success": true,

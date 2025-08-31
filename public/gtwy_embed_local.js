@@ -5,8 +5,8 @@
         constructor() {
             this.props = {};
             this.parentContainer = null;
+            this.scriptIds = {}; // Store all script IDs
             this.config = {
-                type: 'popup',
                 height: '100',
                 heightUnit: 'vh', // Changed from % to vh for full height
                 width: '100',
@@ -15,7 +15,8 @@
                 slide: 'full', // default slide behavior
                 hideCloseButton: 'false',
                 hideFullScreenButton: 'false',
-                hideHeader: 'false'
+                hideHeader: 'false',
+                skipLoadGtwy: false // New flag to control loadGtwyEmbed behavior
             };
             this.urls = {
                 gtwyUrl: 'http://localhost:3000/embed',
@@ -24,7 +25,11 @@
             this.state = {
                 bodyLoaded: false,
                 fullscreen: false,
-                tempDataToSend: null,
+                tempDataToSend: {
+                    "hideHomeButton": true,
+                    "showHistory": true,
+                    "showConfigType": true,
+                },
                 isInitialized: false, // Added initialization flag
                 hasParentContainer: false // Track if we're in a parent container
             };
@@ -33,14 +38,14 @@
         }
 
         extractScriptProps() {
-            const interfaceScript = document.getElementById('gtwy-main-script');
+            const interfaceScript = document.getElementById('gtwy-user-script') ? document.getElementById('gtwy-user-script') : document.getElementById('gtwy-main-script');
             if (!interfaceScript) {
                 //console.log('Script tag not found');
                 return {};
             }
 
-            const attributes = ['embedToken', 'hideCloseButton', 'parentId', 'hideFullScreenButton', 'hideHeader', 'defaultOpen', 'slide', 'agent_id', 'agent_name','version_id'];
 
+            const attributes = ['embedToken', 'hideCloseButton', 'parentId', 'hideFullScreenButton', 'hideHeader', 'defaultOpen', 'slide', 'agent_id', 'agent_name','version_id', 'token', 'gtwy_user', 'org_id', 'skipLoadGtwy', 'customIframeId'];
             return attributes.reduce((props, attr) => {
                 if (interfaceScript.hasAttribute(attr)) {
                     let value = interfaceScript.getAttribute(attr);
@@ -57,6 +62,9 @@
                     }
                     if (attr === 'slide' && (value === 'full' || value === 'left' || value === 'right')) {
                         this.config.slide = value || 'full';
+                    }
+                    if (attr === 'skipLoadGtwy') {
+                        this.config.skipLoadGtwy = value === 'true' || value === true;
                     }
                     if(attr === 'hideHeader' || attr === 'hideCloseButton' || attr === 'hideFullScreenButton'){
                         this.config[attr] = value;
@@ -87,13 +95,13 @@
 
         handleScriptMutations(mutation) {
             mutation.addedNodes.forEach(node => {
-                if (node.tagName === 'SCRIPT' && node.id === 'gtwy-main-script') {
+                if (node.tagName === 'SCRIPT' && (node.id === 'gtwy-user-script' || node.id === 'gtwy-main-script')) {
                     this.props = this.extractScriptProps();
                 }
             });
 
             mutation.removedNodes.forEach(node => {
-                if (node.tagName === 'SCRIPT' && node.id === 'gtwy-main-script') {
+                if (node.tagName === 'SCRIPT' && (node.id === 'gtwy-user-script' || node.id === 'gtwy-main-script')) {
                     this.cleanupGtwyEmbed();
                 }
             });
@@ -571,15 +579,65 @@
             if (this.state.bodyLoaded) return;
             this.extractScriptProps();
             this.createIframeContainer();
-            this.loadGtwyEmbed();
+            
+            // Only call loadGtwyEmbed if skipLoadGtwy is false and gtwy_user is not present
+            if (!this.config.skipLoadGtwy && !this.state.tempDataToSend?.gtwy_user) {
+                this.loadGtwyEmbed();
+            } else {
+                // If skipLoadGtwy is true, create iframe with custom content
+                this.createCustomIframe();
+            }
+            
             this.updateProps(this.state.tempDataToSend || {});
-
             this.state.bodyLoaded = true;
+        }
+
+        createCustomIframe() {
+            const iframeComponent = document.getElementById('iframe-component-gtwyInterfaceEmbed');
+            if (!iframeComponent) return;
+
+            // Check if this is a GTWY user - if so, open in new tab instead of iframe
+            if (this.state.tempDataToSend?.gtwy_user === 'true') {
+                const customIframeId = this.scriptIds.customIframeId || this.props.customIframeId;
+                if (customIframeId) {
+                    // Open configuration in new browser tab for GTWY users
+                    window.open(customIframeId, '_blank', 'noopener,noreferrer');
+                    // Close the current iframe since we opened new tab
+                    this.closeGtwy();
+                    return;
+                }
+            }
+
+            // For non-GTWY users, proceed with normal iframe behavior
+            const customIframeId = this.scriptIds.customIframeId || this.props.customIframeId;
+            
+            if (customIframeId) {
+                // Set src to custom URL or embed content
+                iframeComponent.src = customIframeId;
+            } else {
+                // Send the script data directly to the iframe without loading from server
+                const encodedData = encodeURIComponent(JSON.stringify(this.state.tempDataToSend));
+                const modifiedUrl = `${this.urls.gtwyUrl}?interfaceDetails=${encodedData}`;
+                iframeComponent.src = modifiedUrl;
+            }
+
+            // Apply any config from script attributes
+            this.applyConfig(this.config);
+            
+            if (this.state.isInitialized) {
+                window.postMessage({
+                    type: 'configLoaded',
+                    data: this.props.config
+                }, '*');
+            }
         }
 
         createIframeContainer() {
             this.parentContainer = document.createElement('div');
-            this.parentContainer.id = 'gtwy-iframe-parent-container';
+            
+            // Use custom ID if provided from script, otherwise use default
+            const customContainerId = this.scriptIds.customContainerId || 'gtwy-iframe-parent-container';
+            this.parentContainer.id = customContainerId;
 
             // Check if we have a parent container
             const parentId = this.props.parentId || this.state.tempDataToSend?.parentId || '';
@@ -612,7 +670,11 @@
             }
 
             const iframe = document.createElement('iframe');
-            iframe.id = 'iframe-component-gtwyInterfaceEmbed';
+            
+            // Use custom iframe ID if provided from script, otherwise use default
+            const customIframeId = this.scriptIds.customIframeId || 'iframe-component-gtwyInterfaceEmbed';
+            iframe.id = customIframeId;
+            
             iframe.title = 'iframe';
             iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms');
             iframe.allow = 'microphone *; camera *; midi *; encrypted-media *';
