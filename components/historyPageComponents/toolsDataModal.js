@@ -31,7 +31,7 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
                         </p>
                       ) : (
                         <div className="max-w-full ">
-                          <pre className="text-sm bg-gray-100 p-2 rounded ">
+                          <pre className="text-sm bg-base-200 p-2 rounded ">
                             {formatValue(value)}
                           </pre>
                         </div>
