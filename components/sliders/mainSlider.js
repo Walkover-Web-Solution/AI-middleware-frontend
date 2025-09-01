@@ -51,14 +51,15 @@ const ITEM_ICONS = {
   metrics: <BarChart3 size={16} />,
   knowledge_base: <BookOpen size={16} />,
   feedback: <MessageSquareMore size={16} />,
+  RAG_Embed: <Blocks size={16} /> ,
   integration: <Blocks size={16} />
 };
 
 const NAV_SECTIONS = [
-  { items: ['agents', 'orchestratal_model', 'chatbotConfig'] },
+  { items: ['agents', 'orchestratal_model', 'chatbotConfig','knowledge_base'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
-  { title: 'INTEGRATION', items: ['integration', 'knowledge_base'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
+  { title: 'Developer', items: ['integration', 'RAG_Embed'] },
   { title: 'TEAM & COLLABORATION', items: ['invite'] }
 ];
 
@@ -125,8 +126,10 @@ function MainSlider({ isEmbedUser }) {
       feedback: 'Feedback',
       tutorial: 'Tutorial',
       'speak-to-us': 'Speak to Us',
-      integration: 'Integration',
-      settings: 'Settings'
+      integration: 'GTWY as Embed',
+      settings: 'Settings',
+      rag_as_Embed: 'RAG as Embed',
+      invite: 'Members'
     };
     return names[key] || key.charAt(0).toUpperCase() + key.slice(1);
   };
@@ -248,7 +251,7 @@ function MainSlider({ isEmbedUser }) {
         <div
           className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
           style={{ 
-            width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '256px' : '50px'),
+            width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '220px' : '50px'),
             transform: (!isSideBySideMode && pathParts.length > 3) ? (isMobile && !isOpen ? 'translateX(-200px)' : 'translateX(0)') : 'none'
           }}
         >
