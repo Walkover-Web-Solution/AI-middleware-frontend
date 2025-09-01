@@ -2,7 +2,8 @@
 import {
   Upload, Save, TestTube, Play, ChevronRight, Loader2, Plus, X, Search, Bot, PlusIcon, Settings, Zap, MessageSquare, Globe,
   File,
-  FileSlidersIcon
+  FileSlidersIcon,
+  CircleArrowOutUpRight
 } from 'lucide-react';
 import { useEffect, useMemo, useState, useRef } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
@@ -12,6 +13,7 @@ import Chat from './configuration/chat';
 import Link from 'next/link';
 import GenericTable from './table/table';
 import CopyButton from './copyButton/copyButton';
+import InfoTooltip from './InfoTooltip';
 
 /* ---------------------------------------------
    Shared SlideOver (overlay + slide animation)
@@ -206,7 +208,7 @@ export function createNodesFromAgentDoc(doc) {
 
   const graph = new Map();
   Object.entries(agents).forEach(([id, a]) => {
-    graph.set(id, { name: a.name, description: a.description, children: a.childAgents, variables: a.variables, thread_id:a.thread_id || [] });
+    graph.set(id, { name: a.name, description: a.description, children: a.childAgents, variables: a.variables, thread_id: a.thread_id || [] });
   });
 
   const levels = new Map();
@@ -480,10 +482,12 @@ export function shallowEqual(a, b) {
 /* -------------------------------------------------------
    Agent Picker Sidebar (uses SlideOver)
 -------------------------------------------------------- */
-export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }) {
+export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, params }) {
   const [q, setQ] = useState('');
   const [description, setDescription] = useState('');
-  const [selectAgent, setSelectAgent] = useState(null);
+  const [selectAgent, setSelectAgent] = useState({ nameToCreate: "", org_id: params?.org_id });
+  const [isCreateAgent, setIsCreateAgent] = useState(false);
+  const [openAgentConfigSidebar, setOpenAgentConfigSidebar] = useState(false);
 
   useEffect(() => { if (isOpen) setQ(''); }, [isOpen]);
 
@@ -502,12 +506,9 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
         const key = a.bridge_id || a.name;
         const matchesSearch = (a?.name || '').toLowerCase().includes(q.toLowerCase());
         const notUsed = !usedAgentIds.has(key);
-        const hasPublishedVersion = a.published_version_id;
-        const doesNotHavePausedStatus = a.bridge_status !== 1;
-        const doesNotHaveArchivedStatus = a.status !== 0;
-        return matchesSearch && notUsed && hasPublishedVersion && doesNotHavePausedStatus && doesNotHaveArchivedStatus;
+        return matchesSearch && notUsed;
       });
-  }, [agents, q, usedAgentIds,agents,nodes]);
+  }, [agents, q, usedAgentIds, agents, nodes]);
 
   const handleSelectAgent = (agent) => {
     setSelectAgent(agent);
@@ -519,7 +520,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
     onChoose?.(selectAgent);
     closeModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL);
     setDescription('');
-    setSelectAgent(null);
+    setSelectAgent({ nameToCreate: "", org_id: params?.org_id });
   };
 
   return (
@@ -527,6 +528,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
       <SlideOver
         isOpen={isOpen}
         onClose={onClose}
+        widthClass="w-full sm:w-[460px] md:w-[620px] w-[720px] rounded-lg"
         header={
           <div className="p-5 border-b border-base-200 flex items-center justify-between">
             <div>
@@ -551,39 +553,97 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
             />
           </label>
         </div>
+        {isCreateAgent && (
+          <input
+            className='input input-bordered w-[91%] my-2 ml-[5%]'
+            placeholder='Enter Agent Name'
+            onChange={(e) => setSelectAgent({ ...selectAgent, nameToCreate: e.target.value })}
+          />
+        )}
+        <button onClick={() => { 
+          setIsCreateAgent(true); 
+          selectAgent.nameToCreate && setOpenAgentConfigSidebar(true); 
+          selectAgent.nameToCreate && onClose(); 
+          selectAgent.nameToCreate = ""
+         }}
+          className="btn btn-primary w-[91%] my-2 ml-[5%]">
+          Create New Agent
+        </button>
 
-        <div className="px-2 max-h-[calc(100vh-200px)] overflow-y-auto">
-          {list.length === 0 ? (
-            <div className="px-4 py-16 text-center text-base-content/60 text-sm">
-              {q ? `No agents for "${q}"` : 'No agents available'}
+
+        <div className="px-2 max-h-[calc(100vh-300px)] overflow-y-auto">
+  {list.length === 0 ? (
+    <div className="px-4 py-2 text-center text-base-content/60 text-sm">
+      {q ? `No agents for "${q}"` : 'No agents available'}
+    </div>
+  ) : (
+    <ul className="space-y-1">
+      {list.map((agent, idx) => {
+        const hasPublishedVersion = agent.published_version_id;
+        const doesNotHavePausedStatus = agent.bridge_status !== 1;
+        const doesNotHaveArchivedStatus = agent.status !== 0;
+        const isDisabled = !(hasPublishedVersion && doesNotHavePausedStatus && doesNotHaveArchivedStatus);
+
+        const getStatusLabel = () => {
+          if (!hasPublishedVersion) return 'Not Published';
+          if (agent.bridge_status === 1) return 'Paused';
+          if (agent.status === 0) return 'Archived';
+          return 'Active';
+        };
+
+        const statusLabel = getStatusLabel();
+
+        return (
+          <li key={(agent.bridge_id || agent.__key || `${agent.name}-${idx}`).toString()}
+          className='flex item-center justify-between group hover:bg-base-200/30 rounded-xl transition-colors gap-4'>
+            <button
+              onClick={() => handleSelectAgent(agent)}
+              disabled={isDisabled}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
+                isDisabled ? 'opacity-50 cursor-not-allowed bg-base-100' : 'hover:bg-base-200/60 cursor-pointer'
+              }`}
+            >
+              <div className={`p-2 rounded-full ${isDisabled ? 'bg-base-100' : 'bg-primary/10'}`}>
+                <Bot className={`w-4 h-4 ${isDisabled ? 'text-base-content/50' : 'text-primary'}`} />
+              </div>
+              <div className="text-left flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium">{agent.name || agent.__key}</span>
+                  {statusLabel && (
+                    <span className={`px-2 py-1 text-xs ${statusLabel === 'Active' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'} rounded-full font-medium`}>
+                      {statusLabel}
+                    </span>
+                  )}
+                </div>
+                {/* <div className="text-xs text-base-content/60">
+                  {Array.isArray(agent.connected_agents) || typeof agent.connected_agents === 'object'
+                    ? `Connected to: ${normalizeConnectedRefs(agent.connected_agents)
+                        .map((c) => (typeof c === 'object' ? c.name : String(c)))
+                        .join(', ')}`
+                    : 'AI Assistant'}
+                </div> */}
+              </div>
+            </button>
+            <div className="flex items-center justify-center">
+            <button
+              onClick={() => {
+                setSelectAgent(agent);
+                setOpenAgentConfigSidebar(true); 
+                onClose(); 
+              }}
+              className="btn btn-primary btn-outline btn-sm opacity-0 group-hover:opacity-100 duration-300 transition-transform ease-in-out mr-3 w-0 group-hover:w-auto"
+            >
+              <div className="tooltip tooltip-left" data-tip="Configure Agent">
+                <CircleArrowOutUpRight className='text-base-content' size={16}/>
+              </div>
+            </button>
             </div>
-          ) : (
-            <ul className="space-y-1">
-              {list.map((agent, idx) => (
-                <li key={(agent.bridge_id || agent.__key || `${agent.name}-${idx}`).toString()}>
-                  <button
-                    onClick={() => handleSelectAgent(agent)}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-base-200/60"
-                  >
-                    <div className="bg-primary/10 p-2 rounded-full">
-                      <Bot className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="text-left flex-1">
-                      <div className="font-medium">{agent.name || agent.__key}</div>
-                      <div className="text-xs text-base-content/60">
-                        {Array.isArray(agent.connected_agents) || typeof agent.connected_agents === 'object'
-                          ? `Connected to: ${normalizeConnectedRefs(agent.connected_agents)
-                            .map((c) => (typeof c === 'object' ? c.name : String(c)))
-                            .join(', ')}`
-                          : 'AI Assistant'}
-                      </div>
-                    </div>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</div>
 
         <AgentDescriptionModal
           setDescription={setDescription}
@@ -592,6 +652,10 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
           isAgentToAgentConnect={false}
         />
       </SlideOver>
+
+      {isCreateAgent && (
+        <AgentConfigSidebar isOpen={openAgentConfigSidebar} onClose={() => setOpenAgentConfigSidebar(false)} agent={selectAgent} />
+      )}
     </>
   );
 }
@@ -684,13 +748,13 @@ export function FlowControlPanel({
       <div className="absolute top-4 right-4 flex items-center gap-2">
         {/* Discard button: show only when createdFlow && isModified */}
 
-        <button
-            className="btn btn-outline"
-            onClick={openIntegrationGuide}
-            title="Integration Guide"
-          >
-           <FileSlidersIcon/> Integration Guide
-          </button>
+        {createdFlow && <button
+          className="btn btn-outline"
+          onClick={openIntegrationGuide}
+          title="Integration Guide"
+        >
+          <FileSlidersIcon /> Integration Guide
+        </button>}
 
         {createdFlow && (isModified || isVariableModified) && (
           <button
@@ -796,7 +860,7 @@ export function FlowControlPanel({
       <SlideOver
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
-        widthClass="w-full sm:w-[460px] md:w-[520px] mt-14 rounded-lg"
+        widthClass="w-full sm:w-[660px] md:w-[620px] w-[720px] mt-14 rounded-lg"
         overlayZ="z-[9968]"
         panelZ="z-[9969]"
         backDropBlur={false}
@@ -831,13 +895,56 @@ export function FlowControlPanel({
    Agent Config Sidebar (uses SlideOver)
 -------------------------------------------------------- */
 export function AgentConfigSidebar({ isOpen, onClose, agent }) {
+  useEffect(() => {
+    if (agent?.org_id && (agent._id || agent.nameToCreate)) {
+      const scriptId = 'gtwy-user-script';
+      const scriptURl = NEXT_PUBLIC_ENV === 'testing' ? `${NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js` : `${NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = scriptURl;
+      script.setAttribute('skipLoadGtwy', true);
+      script.setAttribute('token', sessionStorage.getItem('proxy_token') || localStorage.getItem('proxy_token'));
+      script.setAttribute('org_id', agent?.org_id);
+      script.setAttribute('customIframeId', 'gtwyEmbedInterface');
+      script.setAttribute('gtwy_user', true);
+      script.setAttribute('parentId', 'gtwy')
+      script.setAttribute('defaultOpen', 'true')
+      agent._id && script.setAttribute('agent_id', agent?._id)
+      agent.nameToCreate && script.setAttribute('agent_name', agent?.nameToCreate)
+      document.head.appendChild(script);
+    }
+    return () => {
+      const script = document.getElementById('gtwy-user-script');
+      if (script) {
+        script.remove();
+        if (!sessionStorage.getItem('embedUser')) {
+          sessionStorage.clear();
+        }
+        sessionStorage.removeItem('orchestralUser');
+      }
+    }
+  }, [agent]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (!sessionStorage.getItem('embedUser')) {
+        sessionStorage.clear();
+      }
+      sessionStorage.removeItem('orchestralUser');
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <SlideOver
       isOpen={isOpen}
       onClose={onClose}
-      widthClass="w-[380px] max-w-[80vw]"
+      widthClass="w-[80vw] max-w-[80vw]"
       header={
-        <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
+        <div className="flex items-center justify-between px-6 py-4 border border-base-200">
           <h2 className="text-xl font-semibold">Agent Configuration</h2>
           <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm" aria-label="Close sidebar">
             <X className="w-4 h-4" />
@@ -846,85 +953,8 @@ export function AgentConfigSidebar({ isOpen, onClose, agent }) {
       }
       bodyClassName="p-6 space-y-4 pb-20"
     >
-      {/* Basic Info */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Basic Information</h3>
-          <div className="space-y-2 text-sm">
-            <div><span className="font-medium">ID:</span> {agent?._id}</div>
-            <div><span className="font-medium">Name:</span> {agent?.name}</div>
-            <div><span className="font-medium">Slug:</span> {agent?.slugName}</div>
-            <div><span className="font-medium">Service:</span> {agent?.service}</div>
-            <div><span className="font-medium">Bridge Type:</span> {agent?.bridgeType}</div>
-            <div><span className="font-medium">Status:</span> {agent?.status === 1 ? 'Active' : 'Inactive'}</div>
-            <div><span className="font-medium">Total Tokens:</span> {agent?.total_tokens?.toLocaleString() || 'N/A'}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Configuration */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Configuration</h3>
-          <div className="space-y-2 text-sm">
-            <div><span className="font-medium">Model:</span> {agent?.configuration?.model}</div>
-            <div className="space-y-1">
-              <span className="font-medium">Prompt:</span>
-              <pre className="bg-base-100 p-3 rounded border border-base-300 text-xs whitespace-pre-wrap">
-                {agent?.configuration?.prompt}
-              </pre>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Versions */}
-      {agent?.versions && agent?.versions?.length > 0 && (
-        <div className="card bg-base-200">
-          <div className="card-body">
-            <h3 className="card-title text-sm">Versions</h3>
-            <div className="space-y-2">
-              {agent?.versions?.map((version, index) => (
-                <div key={version} className="text-sm">
-                  <span className="font-medium">Version {index + 1}:</span> {version}
-                  {version === agent.published_version_id && (
-                    <span className="badge badge-success badge-sm ml-2">Published</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Agent Variables */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Agent Variables</h3>
-          {agent?.agent_variables && Object.keys(agent?.agent_variables).length > 0 ? (
-            <div className="space-y-1 text-sm">
-              {Object.entries(agent?.agent_variables).map(([key, value]) => (
-                <div key={key}>
-                  <span className="font-medium">{key}:</span> {JSON.stringify(value)}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-sm opacity-70">No variables configured</div>
-          )}
-        </div>
-      </div>
-
-      {/* Additional Info */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Additional Information</h3>
-          <div className="space-y-2 text-sm">
-            <div><span className="font-medium">Organization ID:</span> {agent?.org_id}</div>
-            <div><span className="font-medium">Published Version:</span> {agent?.published_version_id}</div>
-            <div><span className="font-medium">Function IDs:</span> {agent?.function_ids || 'None'}</div>
-          </div>
-        </div>
+      <div id='gtwy' className='h-full border-none w-full mx-auto flex items-center justify-center'>
+        <span className="animate-pulse">Loading...</span>
       </div>
     </SlideOver>
   );
@@ -940,15 +970,15 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
   ]
 
   const orchestratorApi = (p) =>
-    (
-      `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\\n` +
-      `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
-      `--header 'Content-Type: application/json' \\\n` +
-      `--data '{\\n` +
-      `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",\\n` +
-      `    "user": "YOUR_USER_QUESTION"\\n` +
-      `}'`
-    )
+  (
+    `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\\n` +
+    `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
+    `--header 'Content-Type: application/json' \\\n` +
+    `--data '{\\n` +
+    `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",\\n` +
+    `    "user": "YOUR_USER_QUESTION"\\n` +
+    `}'`
+  )
 
   const orchestratorFormat = `
     "success": true,
@@ -983,7 +1013,7 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
       widthClass="w-[780px] max-w-[50vw]"
       header={
         <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
-          <h2 className="text-xl font-semibold">Integration Guide</h2>
+          <h2 className="text-xl font-semibold textbase">Integration Guide</h2>
           <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm" aria-label="Close sidebar">
             <X className="w-4 h-4" />
           </button>
@@ -995,9 +1025,9 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
       <div className="card bg-base-200">
         <div className="card-body space-y-2">
           <Section title="Step 1" caption={
-            <>
-              Create <code className="px-1 py-0.5 rounded bg-base-100 border">pauthkey</code>
-            </>
+            <span className="text-base-content">
+              Create <code className="px-1 py-0.5 rounded bg-base-100">pauthkey</code>
+            </span>
           } />
           <p className="text-sm">
             Follow the on-screen instructions to create a new API key. Ignore if already created.

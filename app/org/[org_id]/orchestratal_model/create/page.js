@@ -6,9 +6,8 @@ import React, { useState } from 'react'
 export const runtime = 'edge';
 
 const page = ({ params }) => {
-
   const [loading, setIsLoading] = useState(false);
-  return loading ? <LoadingSpinner/> : <AgentToAgentConnection params={params} setIsLoading={setIsLoading}/>
+  return loading ? <LoadingSpinner /> : <AgentToAgentConnection params={params} setIsLoading={setIsLoading} />
 }
 
 export default page
