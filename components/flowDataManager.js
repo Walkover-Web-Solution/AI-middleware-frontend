@@ -898,7 +898,7 @@ export function AgentConfigSidebar({ isOpen, onClose, agent }) {
   useEffect(() => {
     if (agent?.org_id && (agent._id || agent.nameToCreate)) {
       const scriptId = 'gtwy-user-script';
-      const scriptURl = process.env.NEXT_PUBLIC_ENV === 'testing' ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js` : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
+      const scriptURl = process.env.NEXT_PUBLIC_ENV !== 'PROD' ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js` : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
       const script = document.createElement('script');
       script.id = scriptId;
       script.src = scriptURl;
