@@ -28,7 +28,7 @@
                 tempDataToSend: {
                     "hideHomeButton": true,
                     "showHistory": true,
-                    "showConfigType": true,
+                    "showConfigType": false,
                 },
                 isInitialized: false, // Added initialization flag
                 hasParentContainer: false // Track if we're in a parent container

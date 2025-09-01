@@ -975,6 +975,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           closeSidebar();
         }}
         nodes={nodes}
+        params={params}
       />
 
       <AgentConfigSidebar isOpen={configSidebar.isOpen} onClose={closeConfigSidebar} agent={configSidebar.agent} />

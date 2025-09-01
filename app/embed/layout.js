@@ -122,6 +122,7 @@ const Layout = ({ children }) => {
           sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
           sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
           urlParamsObj?.folder_id && sessionStorage.setItem('embedUser', true);
+          urlParamsObj?.gtwy_user && sessionStorage.setItem('orchestralUser', true);
         }
 
         if (urlParamsObj.config) {

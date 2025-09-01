@@ -230,7 +230,7 @@ const Page = ({ searchParams }) => {
         <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} pb-4`}>
           <div className={`${isDesktop ? 'h-full flex flex-col' : ''}`}>
             <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} params={params} />
-            <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
+            {!sessionStorage.getItem('orchestralUser') ? <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
               {bridgeType === 'batch' && versionService === 'openai' ? (
                 <WebhookForm params={params} />
               ) : bridgeType === 'chatbot' ? (
@@ -238,7 +238,9 @@ const Page = ({ searchParams }) => {
               ) : (
                 <Chat params={params} />
               )}
-            </div>
+            </div> : <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
+                <Chat params={params} />
+            </div>}
           </div>
         </div>
       </div>
