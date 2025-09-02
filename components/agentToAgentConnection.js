@@ -978,7 +978,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         params={params}
       />
 
-      <AgentConfigSidebar isOpen={configSidebar.isOpen} onClose={closeConfigSidebar} agent={configSidebar.agent} />
+      <AgentConfigSidebar isOpen={configSidebar.isOpen} onClose={closeConfigSidebar} agent={configSidebar.agent} instanceId="agent-configuration-sidebar"/>
       <IntegrationGuide isOpen={integrationGuide.isOpen} onClose={closeIntegrationGuide} params={params} />
 
       <FunctionParameterModal
