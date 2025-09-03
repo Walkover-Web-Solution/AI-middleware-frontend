@@ -12,7 +12,7 @@ const Page = ({ params }) => {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full px-2 pt-4">
           <PageHeader
             title="Chatbot Configuration"
-            description="Customize your chatbot's appearance, behavior, and agent switching capabilities."
+            description="Customize your chatbot's tone, behavior, and responses to fit your product or brand."
             docLink="https://blog.gtwy.ai/features/-embed-chatbot?source=single"
           />
         </div>

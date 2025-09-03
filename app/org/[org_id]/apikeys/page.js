@@ -100,7 +100,7 @@ const Page = () => {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-2 pt-4">
           <PageHeader
             title="ApiKeys"
-            description="Add your model-specific API keys to enable and use different AI models in your chat."
+            description="Add and manage your LLM provider keys (e.g., OpenAI, Anthropic, etc.) to power your agents with external models.."
             docLink="https://app.docstar.io/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
           />
           <div className="flex-shrink-0 mt-4 sm:mt-0 flex gap-2">

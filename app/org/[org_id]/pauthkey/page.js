@@ -144,7 +144,7 @@ const maskAuthKey = (authkey) => {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-2 pt-4">
             <PageHeader
               title="PauthKey"
-              description="A unique key used to validate API requests for sending and receiving messages securely."
+              description=" Generate secure project-level keys to run GTWY APIs."
               docLink="https://blog.gtwy.ai/features/pauthkey"
             />
             <div className="flex-shrink-0 mt-4 sm:mt-0">

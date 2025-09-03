@@ -103,7 +103,7 @@ const Page = ({ params }) => {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
             <PageHeader
               title="Knowledge Base"
-              description="A knowledge base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."
+              description="Upload and manage knowledge bases so your AI can provide context-aware, accurate answers."
               docLink="https://blog.gtwy.ai/features/knowledgebase"
             />
             <div className="flex-shrink-0 mt-4 sm:mt-0">

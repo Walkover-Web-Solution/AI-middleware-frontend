@@ -68,7 +68,7 @@ const Page = ({ params }) => {
           <PageHeader
             title=" GTWY Embed Integration"
             docLink="https://app.docstar.io/p/features/gtwy-embed--1?collectionId=inYU67SKiHgW"
-            description="Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."
+            description="Embed GTWY into your own panel. Use this if you want to enable the agent feature directly inside your system."
           />
           <div className="flex-shrink-0 mt-4 sm:mt-0">
             <button 
