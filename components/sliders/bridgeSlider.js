@@ -77,7 +77,7 @@ function BridgeSlider() {
                     style='input input-bor0dered w-full mb-0 ml-0 border border-base-content/50'
                 />
                 <button className="btn" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
-                    + Create new agent
+                    + Create New Agent
                 </button>
                 {filteredBridgesList.length === 0 ? (
                     <div className='max-w-full'>

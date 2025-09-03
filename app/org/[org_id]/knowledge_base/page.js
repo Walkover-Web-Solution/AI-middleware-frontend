@@ -107,7 +107,7 @@ const Page = ({ params }) => {
               docLink="https://blog.gtwy.ai/features/knowledgebase"
             />
             <div className="flex-shrink-0 mt-4 sm:mt-0">
-              <button className="btn btn-primary" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } }}>+ create knowledge base</button>
+              <button className="btn btn-primary" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } }}>+ Create Knowledge Base</button>
             </div>
           </div>
         </MainLayout>
