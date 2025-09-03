@@ -33,7 +33,8 @@ const ApiKeyInput = ({ params, apiKeySectionRef }) => {
         const selectedApiKeyId = e.target.value;
         if (selectedApiKeyId === 'add_new') {
             openModal(MODAL_TYPE.API_KEY_MODAL);
-        } else {
+        } 
+        else if (selectedApiKeyId !== 'AI_ML_DEFAULT_KEY') {
             const service = bridge?.service === 'openai_response' ? 'openai' : bridge?.service;
             const updated = { [service]: selectedApiKeyId };
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { apikey_object_id: updated } }));
@@ -46,7 +47,7 @@ const ApiKeyInput = ({ params, apiKeySectionRef }) => {
             ? bridgeApikey_object_id?.[bridge?.service === 'openai_response' ? 'openai' : bridge?.service]
             : bridgeApikey_object_id;
         const currentApiKey = apikeydata.find(apiKey => apiKey?._id === serviceApiKeyId);
-        return currentApiKey ? currentApiKey._id : bridge_apiKey || '';
+        return currentService === 'ai_ml' && !bridgeApikey_object_id?.['ai_ml'] ? 'AI_ML_DEFAULT_KEY' : currentApiKey ? currentApiKey._id : bridge_apiKey || '';
     }, [apikeydata, bridge_apiKey, bridgeApikey_object_id, bridge?.service]);
 
     const truncateText = (text, maxLength) => {
@@ -77,6 +78,15 @@ const ApiKeyInput = ({ params, apiKeySectionRef }) => {
                                 {truncateText(bridge_apiKey, maxChar)}
                             </option>
                         )}
+                        {
+                            bridge.service === 'ai_ml' && (
+                                <option
+                                    maxLength="10"
+                                    value={"AI_ML_DEFAULT_KEY"}>
+                                    AI ML Default Key
+                                </option>
+                            )
+                        }
                         {filteredApiKeys.length > 0 ? (
                             filteredApiKeys.map(apiKey => (
                                 <option
