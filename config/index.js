@@ -170,13 +170,13 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
 };
 
 
-export const dryRun = async ({ localDataToSend, bridge_id }) => {
+export const dryRun = async ({ localDataToSend, bridge_id, orchestrator_id}) => {
   try {
     let dryRun
     const modelType = localDataToSend.configuration.type
-    if (modelType !== 'completion' && modelType !== 'embedding') dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
-    if (modelType === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
-    if (modelType === "embedding") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
+    if (modelType !== 'completion' && modelType !== 'embedding') dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id? bridge_id:orchestrator_id}`, localDataToSend)
+    if (modelType === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id? bridge_id:orchestrator_id}`, localDataToSend)
+    if (modelType === "embedding") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id? bridge_id:orchestrator_id}`, localDataToSend)
     if (modelType !== 'completion' && modelType !== 'embedding') {
       return dryRun.data;
     }
@@ -287,9 +287,9 @@ export const inviteUser = async (email) => {
   }
 }
 
-export const getInvitedUsers = async ({page, limit}) => {
+export const getInvitedUsers = async ({page, limit, search}) => {
   try {
-    const data = await axios.get(`${PROXY_URL}/api/c/getUsers`, {
+    const data = await axios.get(`${PROXY_URL}/api/c/getUsers?search=${search}`, {
       params: {
         pageNo:page,
         itemsPerPage:limit
@@ -774,7 +774,7 @@ export const updateOrganizationData = async (orgId, orgDetails) => {
         'reference-id': NEXT_PUBLIC_REFERENCEID
       }
     });
-    return response.data;
+    return response?.data;
   } catch (error) {
 
     toast.error('Error updating organization:', error);
@@ -1140,6 +1140,45 @@ export const getClientInfo = async (client_id)=>{
   }
 }
 
+export const createNewOrchestralFlow = async (data) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/orchestrator/`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const getAllOrchestralFlows = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/orchestrator/all`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const updateOrchestralFlow = async (data, orchestratorId) => {
+  try {
+    const response = await axios.put(`${PYTHON_URL}/orchestrator/${orchestratorId}`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const deleteOrchetralFlow = async (data) => {
+  try {
+    const response = await axios.delete(`${PYTHON_URL}/orchestrator/${data?._id}`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 export const addNewModel = async(newModelObj) =>{
   try {
     const response = await axios.post(`${URL}/modelConfiguration/user`, newModelObj)

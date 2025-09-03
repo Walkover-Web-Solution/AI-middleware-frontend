@@ -16,13 +16,15 @@ import {
   MessageCircleMoreIcon,
   MessageSquareMoreIcon,
   Blocks,
-  User
+  User,
+  Workflow,
+  FileSliders
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { truncate } from '@/components/historyPageComponents/assistFile';
-import { openModal } from '@/utils/utility';
+import { openModal, toggleSidebar } from '@/utils/utility';
 import OrgSlider from './orgSlider';
 import TutorialModal from '@/components/modals/tutorialModal';
 import DemoModal from '../modals/DemoModal';
@@ -30,6 +32,7 @@ import { MODAL_TYPE } from '@/utils/enums';
 import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
 import { AddIcon, KeyIcon } from '../Icons';
+import ThemeToggle from '../UI/ThemeUi';
 
 /* -------------------------------------------------------------------------- */
 /*                                    Consts                                  */
@@ -38,6 +41,8 @@ import { AddIcon, KeyIcon } from '../Icons';
 const ITEM_ICONS = {
   org: <Building2 size={16} />,
   agents: <Bot size={16} />,
+  orchestratal_model: <Workflow size={16} />,
+  chatbotConfig: <FileSliders size={16} />,
   chatbot: <MessageSquare size={16} />,
   pauthkey: <Shield size={16} />,
   apikeys: <Database size={16} />,
@@ -46,14 +51,15 @@ const ITEM_ICONS = {
   metrics: <BarChart3 size={16} />,
   knowledge_base: <BookOpen size={16} />,
   feedback: <MessageSquareMore size={16} />,
+  RAG_embed: <Blocks size={16} /> ,
   integration: <Blocks size={16} />
 };
 
 const NAV_SECTIONS = [
-  { items: ['agents'] },
+  { items: ['agents', 'orchestratal_model', 'chatbotConfig','knowledge_base'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
-  { title: 'INTEGRATION', items: ['integration', 'knowledge_base'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
+  { title: 'Developer', items: ['integration', 'RAG_embed'] },
   { title: 'TEAM & COLLABORATION', items: ['invite'] }
 ];
 
@@ -63,7 +69,7 @@ const NAV_SECTIONS = [
 
 /** Small horizontal rule visible only when sidebar is collapsed */
 const HRCollapsed = () => (
-  <hr className="my-2 w-6 border-base-300 mx-auto" />
+  <hr className="my-2 w-6 border-base-content/30 mx-auto" />
 );
 
 /* -------------------------------------------------------------------------- */
@@ -114,12 +120,16 @@ function MainSlider({ isEmbedUser }) {
   /** Nice display names for items */
   const displayName = key => {
     const names = {
+      orchestratal_model: 'Orchestral Model',
       knowledge_base: 'Knowledge base',
+      chatbotConfig: 'Configure Chatbot',
       feedback: 'Feedback',
       tutorial: 'Tutorial',
       'speak-to-us': 'Speak to Us',
-      integration: 'Integration',
-      settings: 'Settings'
+      integration: 'GTWY as Embed',
+      settings: 'Settings',
+      RAG_embed: 'RAG as Embed',
+      invite: 'Members'
     };
     return names[key] || key.charAt(0).toUpperCase() + key.slice(1);
   };
@@ -204,6 +214,13 @@ function MainSlider({ isEmbedUser }) {
     }
   };
 
+  const betaBadge = () =>{
+    return(
+      <span className="badge badge-success mb-1 text-base-100 text-xs">Beta</span>
+    )
+  }
+
+
   /* ------------------------------------------------------------------------ */
   /*                                  Render                                  */
   /* ------------------------------------------------------------------------ */
@@ -227,14 +244,14 @@ function MainSlider({ isEmbedUser }) {
         />
       )}
 
-      <div className="relative">
+      <div className="relative ">
         {/* ------------------------------------------------------------------ */}
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar left-0 top-0 h-screen bg-base-100 border transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
           style={{ 
-            width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '256px' : '50px'),
+            width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '220px' : '50px'),
             transform: (!isSideBySideMode && pathParts.length > 3) ? (isMobile && !isOpen ? 'translateX(-200px)' : 'translateX(0)') : 'none'
           }}
         >
@@ -276,7 +293,7 @@ function MainSlider({ isEmbedUser }) {
               {pathParts.length >= 4 && (
                 <button
                   onClick={() => {
-                    router.push('/org');
+                    pathParts.length > 4 ? toggleSidebar('default-org-sidebar') : router.push('/org');
                     if (isMobile) setIsOpen(false);
                   }}
                   onMouseEnter={e => onItemEnter('org', e)}
@@ -309,7 +326,11 @@ function MainSlider({ isEmbedUser }) {
                         <button
                           key={key}
                           onClick={() => {
-                            router.push(`/org/${orgId}/${key}`);
+                            if(key === 'agents' &&  pathParts.length >  4){
+                              toggleSidebar(`default-agent-sidebar`)
+                            }else{
+                              router.push(`/org/${orgId}/${key}`);
+                            }
                             if (isMobile) setIsOpen(false);
                           }}
                           onMouseEnter={e => onItemEnter(key, e)}
@@ -322,8 +343,12 @@ function MainSlider({ isEmbedUser }) {
                         >
                           <div className="shrink-0">{ITEM_ICONS[key]}</div>
                           {(isOpen || isMobile) && (
-                            <span className="font-medium text-sm truncate">{displayName(key)}</span>
+                           <div className='flex items-center gap-2 justify-center'>
+                             <span className="font-medium text-sm truncate">{displayName(key)}</span> 
+                             <span>{key === 'orchestratal_model' && betaBadge()}</span>
+                           </div>
                           )}
+                          
                         </button>
                       ))}
                     </div>
@@ -450,6 +475,8 @@ function MainSlider({ isEmbedUser }) {
                     <span className="truncate text-xs">Add new Model</span>
                   </button>
 
+                  <ThemeToggle/>
+
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm text-error"
@@ -457,6 +484,7 @@ function MainSlider({ isEmbedUser }) {
                     <LogOut size={14} className="shrink-0" />
                     <span className="truncate text-xs">Logout</span>
                   </button>
+
                 </div>
               )}
 
@@ -486,10 +514,10 @@ function MainSlider({ isEmbedUser }) {
         {/* ------------------------------------------------------------------ */}
         {hovered && !isOpen && !isMobile && (
           <div
-            className="fixed bg-base-300 text-base-content py-2 px-3 rounded-lg shadow-lg whitespace-nowrap border pointer-events-none z-50"
+            className="fixed bg-base-300 text-base-content py-2 px-3 rounded-lg shadow-lg whitespace-nowrap border border-base-300 pointer-events-none z-50"
             style={{ top: tooltipPos.top - 20, left: tooltipPos.left }}
           >
-            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border rotate-45 -left-1 border-r-0 border-b-0" />
+            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border rotate-45 -left-1 border-r-0 border-b-0 border-base-300" />
             {displayName(hovered)}
           </div>
         )}

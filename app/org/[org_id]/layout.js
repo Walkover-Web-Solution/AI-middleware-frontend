@@ -24,6 +24,7 @@ import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
 import { getApiKeyGuideAction, getTutorialDataAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
+import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 function layoutOrgPage({ children, params, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -58,7 +59,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
   useEffect(() => {
     const updateUserMeta = async () => {
       const reference_id = localStorage.getItem("reference_id");
-  
+        let currentUserMeta = currentUser?.meta;
       // If user meta is null, initialize onboarding meta
       if (currentUser?.meta === null) {
         const updatedUser = {
@@ -76,7 +77,10 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
             },
           },
         };
-        await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+      const data= await dispatch(updateUserMetaOnboarding(currentUser.id, updatedUser));
+      if (data?.data?.status) {
+        currentUserMeta = data?.data?.data?.user?.meta;
+      }
       }
   
       // If reference_id exists but user has no reference_id in meta
@@ -96,7 +100,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
             const updatedUser = {
               ...currentUser,
               meta: {
-                ...currentUser.meta,
+                ...currentUserMeta,
                 reference_id: reference_id,
               },
             };
@@ -114,7 +118,50 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
 
   useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
-  
+
+  // Theme initialization with full system theme support
+  useEffect(() => {
+    const getSystemTheme = () => {
+      if (typeof window !== 'undefined') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return 'light';
+    };
+
+    const applyTheme = (themeToApply) => {
+      if (typeof window !== 'undefined') {
+        document.documentElement.setAttribute('data-theme', themeToApply);
+        localStorage.setItem("theme", themeToApply);
+      }
+    };
+
+    const savedTheme = localStorage.getItem("theme") || "system";
+    const systemTheme = getSystemTheme();
+    
+    if (savedTheme === "system") {
+      applyTheme(systemTheme);
+    } else {
+      applyTheme(savedTheme);
+    }
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = (e) => {
+      const newSystemTheme = e.matches ? 'dark' : 'light';
+      const currentSavedTheme = localStorage.getItem("theme") || "system";
+      
+      // Only update if currently using system theme
+      if (currentSavedTheme === "system") {
+        applyTheme(newSystemTheme);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    };
+  }, []);
   
   useEffect(() => {
     const validateOrg = async () => {
@@ -163,6 +210,10 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
       });
     }
   }, [isValidOrg]);
+
+  useEffect(() => {
+    dispatch(getAllOrchestralFlowAction(params.org_id));
+  }, [params.org_id]);
 
   useEffect(() => {
     if (isValidOrg && params?.org_id) {
@@ -362,13 +413,13 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           {/* Main Content Area */}
           <div className={`flex-1 ${path.length > 4 ? 'ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+            <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
               <Navbar params={params} />
             </div>
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
-              <main className={`px-2 h-full ${path.length > 4 ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+              <main className={`px-2 h-full ${path.length > 4 && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
             </div>
           </div>
         </div>
@@ -393,7 +444,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
           {/* Main Content Area for Embed Users */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}
-            <div className="sticky top-0 z-medium bg-white border-b ml-2">
+            <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
               <Navbar params={params} />
             </div>
 
@@ -404,7 +455,7 @@ function layoutOrgPage({ children, params, isEmbedUser }) {
                   <LoadingSpinner />
                 </div>
               ) : (
-                <main className={`px-2 h-full ${path.length > 4 ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+                <main className={`px-2 h-full ${path.length > 4 && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
               )}
             </div>
           </div>

@@ -75,14 +75,14 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const renderNeedHelp = () => {
         return (
             <div className="mb-4 mt-4">
-                <a
+                {!isEmbedUser && <a
                     href="/faq/how-to-use-gtwy-ai"
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
                     Need help? Visit FAQ →
-                </a>
+                </a>}
             </div>
         );
     };
@@ -96,11 +96,11 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     <InputConfigComponent params={params} promptTextAreaRef={promptTextAreaRef} />
                     {/* <NewInputConfigComponent params={params} /> */}
                     <EmbedList params={params} />
-                    <hr className="my-0 p-0" />
+                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
                     <ConnectedAgentList params={params} />
-                    <hr className="my-0 p-0" />
+                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
                     <KnowledgebaseList params={params} />
-                    <hr className="my-0 p-0" />
+                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
                     <PrebuiltToolsList params={params} />
                 </>
             )}
@@ -150,7 +150,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     }, [bridgeType, params, modelType]);
 
     return (
-        <div className="flex flex-col gap-3 relative mt-4">
+        <div className="flex flex-col gap-3 relative mt-4 bg-base-100">
             <div>
                 <BridgeNameInput params={params} />
                 <VersionDescriptionInput params={params} />
@@ -160,13 +160,13 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 <div className="flex items-center">
                     <BridgeVersionDropdown params={params} />
                     {((isEmbedUser && showConfigType) || !isEmbedUser) && <div className="join group flex">
-                        <button
+                        { bridgeType === 'chatbot' && <button
                             onClick={() => handleNavigation('config')}
                             className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
                             <SettingsIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
-                        </button>
+                        </button>}
                         {bridgeType === 'chatbot' &&
                             <button
                                 onClick={() => handleNavigation('chatbot-config')}
@@ -176,13 +176,13 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                                 <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
                             </button>
                         }
-                        {((isEmbedUser && showGuide) || (!isEmbedUser && bridgeType !== 'trigger')) && <button
+                        {/* {((isEmbedUser && showGuide) || (!isEmbedUser && bridgeType !== 'trigger')) && <button
                             onClick={() => handleNavigation('guide')}
                             className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
                             <FilterSliderIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'guide' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Integration Guide</span>
-                        </button>}
+                        </button>} */}
                     </div>}
                 </div>
             </div>}

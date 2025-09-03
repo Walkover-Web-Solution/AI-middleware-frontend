@@ -44,6 +44,7 @@ export const updateUserMetaOnboarding = (userId, user) => async (dispatch) => {
   try {
     const response = await updateUser({ user_id: userId, user });
     dispatch(updateUserMeta({ userId, user: response?.data?.data?.user }))
+    return response
   }
   catch (error) {
     console.error("error updating user meta");

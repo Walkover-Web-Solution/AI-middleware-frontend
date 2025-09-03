@@ -1,5 +1,4 @@
 'use client';
-import KnowledgeBaseIntegrationSlider from "@/components/configuration/configurationComponent/knowledgeBaseIntegrationSlider";
 import CustomTable from "@/components/customTable/customTable";
 import { truncate } from "@/components/historyPageComponents/assistFile";
 import MainLayout from "@/components/layoutComponents/MainLayout";
@@ -8,8 +7,8 @@ import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
-import { closeModal, GetFileTypeIcon, openModal, toggleSidebar } from "@/utils/utility";
-import { BookIcon, EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
+import { closeModal, GetFileTypeIcon, openModal } from "@/utils/utility";
+import { EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from "react-redux";
 import DeleteModal from "@/components/UI/DeleteModal";
@@ -19,7 +18,7 @@ export const runtime = 'edge';
 
 const Page = ({ params }) => {
   const dispatch = useDispatch();
-  const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id])||[];
+  const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id]) || [];
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData)
@@ -85,17 +84,17 @@ const Page = ({ params }) => {
 
   useEffect(() => {
     const handleMessage = (e) => {
-        if (e.data?.type === 'rag') {
-            if (e.data?.status === "create") {
-                dispatch(getAllKnowBaseDataAction(params.org_id));
-            }
+      if (e.data?.type === 'rag') {
+        if (e.data?.status === "create") {
+          dispatch(getAllKnowBaseDataAction(params.org_id));
         }
+      }
     }
     window.addEventListener('message', handleMessage);
     return () => {
-        window.removeEventListener('message', handleMessage);
+      window.removeEventListener('message', handleMessage);
     };
-}, [params.org_id]);
+  }, [params.org_id]);
 
   return (
     <div className="w-full">
@@ -108,18 +107,14 @@ const Page = ({ params }) => {
               docLink="https://blog.gtwy.ai/features/knowledgebase"
             />
             <div className="flex-shrink-0 mt-4 sm:mt-0">
-<button className="btn btn-primary" onClick={() => {if(window.openRag){window.openRag()} else {openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)}}}>+ Create Knowledge Base</button>
+              <button className="btn btn-primary" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } }}>+ Create Knowledge Base</button>
             </div>
           </div>
         </MainLayout>
-
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
 
           <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} item="KnowledgeBase" />
           <div className="flex flex-wrap justify-end items-center gap-2">
-            <button className="btn" onClick={() => toggleSidebar("knowledgeBase-integration-slider","right")}>
-              <BookIcon /> Integration Guide
-            </button>
             <div className="join">
               <button
                 className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
@@ -145,7 +140,7 @@ const Page = ({ params }) => {
               {filterKnowledgeBase.map((item, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"
+                  className="bg-base-100 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"
                 >
                   <div className="dropdown dropdown-right absolute top-2 right-2">
                     <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>
@@ -190,7 +185,6 @@ const Page = ({ params }) => {
       </div>
 
       <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} knowledgeBaseData={knowledgeBaseData} />
-      <KnowledgeBaseIntegrationSlider params={params}  />
       <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedDataToDelete} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${selectedDataToDelete?.actual_name}"? This action cannot be undone.`} />
     </div>
   );

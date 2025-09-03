@@ -186,6 +186,8 @@ export const getIconOfService = (service, height, width) => {
             return <GeminiIcon height={height} width={width} />;
         case 'open_router':
             return <OpenRouter height={height} width={width} />;
+        case 'gemini':
+            return <GeminiIcon height={height} width={width} />;
         default:
             return <OpenAiIcon height={height} width={width} />;
     }
@@ -255,8 +257,8 @@ export function filterBridges(bridgesList, bridgeSearchQuery) {
 export function filterOrganizations(orgList, orgSearchQuery) {
     return Object.values(orgList).filter(
         (item) =>
-            item?.name?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase()) ||
-            item?.id?.toString()?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase())
+            item?.name?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase().trim()) ||
+            item?.id?.toString()?.toLowerCase()?.includes(orgSearchQuery?.toLowerCase().trim())
     );
 }
 

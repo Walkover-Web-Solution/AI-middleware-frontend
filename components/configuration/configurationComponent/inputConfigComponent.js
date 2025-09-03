@@ -212,7 +212,7 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
                     ref={suggestionListRef}
                     tabIndex={0}
                     role="listbox"
-                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-high w-60 p-2 shadow-xl border overflow-scroll overflow-y-auto"
+                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-high w-60 p-2 shadow-xl border border-base-300 overflow-scroll overflow-y-auto"
                 >
                     <div className="flex flex-col w-full">
                         <label className="label label-text-alt">Available variables</label>
@@ -297,7 +297,7 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
         <div className="form-control h-full">
           <textarea
             ref={textareaRef}
-            className="textarea textarea-bordered border w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-low caret-black p-2 rounded-b-none"
+            className="textarea border border-base-content/20 w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-low caret-base-content p-2 rounded-b-none"
             value={prompt}
             onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
@@ -309,7 +309,7 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
             <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
               <div className="flex items-center gap-2 ">
                 <span className="text-nowrap">Default Variables</span>
-                <p role="alert" className="label-text-alt alert p-2 bg-base-300">
+                <p role="alert" className="label-text-alt alert p-2 bg-base-200">
                   <InfoIcon size={16} className="" />
                   Use these variables in prompt to get their functionality
                 </p>

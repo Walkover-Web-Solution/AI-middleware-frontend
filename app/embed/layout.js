@@ -6,7 +6,7 @@ import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReduce
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
-import { sendDataToParent, toBoolean } from '@/utils/utility';
+import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
 const Layout = ({ children }) => {
@@ -35,7 +35,7 @@ const Layout = ({ children }) => {
       service: 'openai',
       model: 'gpt-4o',
       name: agent_name.trim(),
-      slugName: agent_name.trim(),
+      slugName: generateRandomID(),
       bridgeType: 'api',
       type: 'chat',
     };
@@ -78,11 +78,11 @@ const Layout = ({ children }) => {
     }
 
     setIsLoading(true);
-    const trimmedAgentName = agentName.trim().toLowerCase();
+    const trimmedAgentName = agentName.trim();
 
     if (allBridges && allBridges.length > 0) {
       const agentInStore = allBridges.find(
-        (agent) => agent?.name?.trim().toLowerCase() === trimmedAgentName
+        (agent) => agent?.name?.trim() === trimmedAgentName
       );
       if (agentInStore) {
         navigateToExistingAgent(agentInStore, orgId);
@@ -113,7 +113,7 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     const initialize = () => {
-      if ((urlParamsObj.org_id && urlParamsObj.token && urlParamsObj.folder_id) || urlParamsObj?.hideHomeButton) {
+      if ((urlParamsObj.org_id && urlParamsObj.token && (urlParamsObj.folder_id||urlParamsObj.gtwy_user)) || urlParamsObj?.hideHomeButton) {
         setIsLoading(true);
 
         if (urlParamsObj.token) {
@@ -121,6 +121,8 @@ const Layout = ({ children }) => {
           sessionStorage.setItem('proxy_token', urlParamsObj.token);
           sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
           sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
+          urlParamsObj?.folder_id && sessionStorage.setItem('embedUser', true);
+          urlParamsObj?.gtwy_user && sessionStorage.setItem('orchestralUser', true);
         }
 
         if (urlParamsObj.config) {
@@ -206,12 +208,12 @@ const Layout = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen bg-base-100">
         <div className="text-center">
-          <div className="text-4xl font-bold text-gray-800 mb-4">
+          <div className="text-4xl font-bold text-base-content mb-4">
             GTWY
           </div>
-          <div className="flex items-center justify-center space-x-1 text-xl text-gray-600">
+          <div className="flex items-center justify-center space-x-1 text-xl text-base-content">
             <span>is loading</span>
             <div className="flex space-x-1 ml-2">
               <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>

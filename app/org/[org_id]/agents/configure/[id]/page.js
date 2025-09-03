@@ -201,8 +201,8 @@ const Page = ({ searchParams }) => {
       {/* Configuration Panel */}
       <div 
         className={`
-          ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen border-b border-gray-200'} 
-          bg-white
+          ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen border-b border-base-300'} 
+          bg-base-100
         `}
         style={isDesktop ? { width: `${leftWidth}%` } : {}}
       >
@@ -214,7 +214,7 @@ const Page = ({ searchParams }) => {
       {/* Desktop Resizer */}
       {isDesktop && (
         <div 
-          className={`w-1 hover:bg-blue-400 cursor-col-resize transition-colors duration-200 flex-shrink-0 resizer ${isResizing ? 'bg-blue-500' : 'bg-gray-200'}`}
+          className={`w-1 hover:bg-blue-400 cursor-col-resize transition-colors duration-200 flex-shrink-0 resizer ${isResizing ? 'bg-blue-500' : 'bg-base-200'}`}
         />
       )}
 
@@ -230,7 +230,7 @@ const Page = ({ searchParams }) => {
         <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} pb-4`}>
           <div className={`${isDesktop ? 'h-full flex flex-col' : ''}`}>
             <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} params={params} />
-            <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
+            {!sessionStorage.getItem('orchestralUser') ? <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
               {bridgeType === 'batch' && versionService === 'openai' ? (
                 <WebhookForm params={params} />
               ) : bridgeType === 'chatbot' ? (
@@ -238,7 +238,9 @@ const Page = ({ searchParams }) => {
               ) : (
                 <Chat params={params} />
               )}
-            </div>
+            </div> : <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
+                <Chat params={params} />
+            </div>}
           </div>
         </div>
       </div>

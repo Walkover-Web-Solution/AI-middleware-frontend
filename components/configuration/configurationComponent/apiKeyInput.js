@@ -62,7 +62,7 @@ const ApiKeyInput = ({ params, apiKeySectionRef }) => {
             <div className=''>
                 <div className='relative'>
                     <select
-                        className="select select-bordered select-sm w-full"
+                        className="select select-sm w-full border-base-content/20"
                         onChange={handleDropdownChange}
                         maxLength="10"
                         value={selectedValue}
