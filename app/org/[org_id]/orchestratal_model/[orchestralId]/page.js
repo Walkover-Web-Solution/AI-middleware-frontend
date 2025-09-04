@@ -11,10 +11,10 @@ const page = ({ params }) => {
     state.orchestralFlowReducer.orchetralFlowData[params.org_id] || []
   );
   const orchestralData = orchestralFlowData.find((item) => item._id === params?.orchestralId)
-  const updatedData = createNodesFromAgentDoc(orchestralData)
+  const updatedData = createNodesFromAgentDoc(orchestralData?.data ? orchestralData?.data : orchestralData)
   return (
     <div style={{ height: '100vh' }}>
-      <AgentToAgentConnection params={params} orchestralData={updatedData} name={orchestralData.flow_name} description={orchestralData.flow_description} createdFlow={true} />
+      <AgentToAgentConnection params={params} orchestralData={updatedData} name={orchestralData.flow_name} description={orchestralData.flow_description} createdFlow={true} isDrafted={orchestralData.status === 'draft'}/>
     </div>
   )
 }

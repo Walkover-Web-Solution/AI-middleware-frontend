@@ -216,6 +216,7 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
       flow_name: metadata.name || 'Untitled Flow',
       flow_description: metadata.description || '',
       bridge_type: metadata.bridge_type || null,
+      data: metadata.autoSaveData
     };
 
     return result;
@@ -888,7 +889,7 @@ export function FlowControlPanel({
       </div>
 
       {/* Quick Test Input with highlight ring */}
-      {!isModified && !isChatOpen && (
+      {!isChatOpen && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
           <div className="relative">
             {/* Outer ring */}

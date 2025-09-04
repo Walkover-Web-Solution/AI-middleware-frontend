@@ -323,7 +323,7 @@ const defaultEdgeOptions = {
 
 /* ========================= Flow ========================= */
 
-function Flow({ params, orchestralData, name, description, createdFlow, setIsLoading }) {
+function Flow({ params, orchestralData, name, description, createdFlow, setIsLoading, isDrafted }) {
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -370,6 +370,8 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   const [masterAgent, setMasterAgent] = useState(null);
   const [isDiscard, setIsDiscard] = useState(false);
   const [isVariableModified, setIsVariableModified] = useState(false);
+  const [autoSaveData, setAutoSaveData] = useState(null);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
 
   const { agents } = useCustomSelector((state) => ({
     agents: state.bridgeReducer.org[params.org_id]?.orgs || []
@@ -425,6 +427,75 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     });
     closeModal(MODAL_TYPE.DELETE_MODAL)
   }, [pendingDelete]);
+
+  // Auto-save functionality
+  const performAutoSave = useCallback(async () => {
+    if (nodes.length > 0 && (isModified || isVariableModified) && !isAutoSaving) {
+      try {
+        setIsAutoSaving(true);
+        
+        // Serialize current flow state
+        const currentFlowData = serializeAgentFlow(nodes, edges, {
+          name: name || 'Auto-saved Flow',
+          description: description || '',
+          bridge_type: selectedBridgeType,
+          status: 'draft',
+        });
+        
+        // Get existing orchestral data to preserve main agents structure
+        const existingData = orchestralData || {};
+        console.log('Existing orchestral data:', existingData);
+        // Create auto-save structure preserving main agents data and adding current flow to data key
+        const autoSaveStructure = {
+          agents:serializeAgentFlow(existingData.nodes, existingData.edges, {
+            name: existingData.flow_name || 'Auto-saved Flow',
+            description: existingData.flow_description || '',
+            bridge_type: existingData.bridge_type,
+            status: existingData.status || 'draft', // Keep existing status unless it's new
+          })?.agents, // Preserve existing main structure (agents, etc.)
+          flow_name: name || 'Auto-saved Flow',
+          flow_description: description || '',
+          bridge_type: selectedBridgeType,
+          status: existingData.status || 'draft', // Keep existing status unless it's new
+          data: currentFlowData, // Store current working flow in data key
+          org_id: params.org_id,
+          master_agent: currentFlowData.master_agent,
+          master_agent_name: name || 'Auto-saved Flow',
+        };
+        
+        setAutoSaveData(autoSaveStructure);
+        console.log('Auto-saved current flow to data key, preserved main agents:', autoSaveStructure);
+        
+        // Persist the auto-save structure directly without Redux store updates
+        const { updateOrchestralFlow, createNewOrchestralFlow } = await import('@/config');
+        
+        if (params.orchestralId) {
+          await updateOrchestralFlow(autoSaveStructure, params.orchestralId);
+        } else {
+          const response = await createNewOrchestralFlow(autoSaveStructure);
+          // Update the orchestralId if this was a new flow
+          if (response.data?.data?.orchestrator_id && !params.orchestralId) {
+            // Update the URL to include the new ID without triggering navigation
+            window.history.replaceState(null, '', `/org/${params.org_id}/orchestratal_model/${response.data.data.orchestrator_id}`);
+          }
+        }
+
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      } finally {
+        setIsAutoSaving(false);
+      }
+    }
+  }, [nodes, edges, selectedBridgeType, name, description, isModified, isVariableModified, params.orchestralId, params.org_id, dispatch, orchestralData]);
+
+  // Set up auto-save interval
+  useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      performAutoSave();
+    }, 10000); // Auto-save every 10 seconds
+
+    return () => clearInterval(autoSaveInterval);
+  }, [performAutoSave]);
 
   const openAgentVariableModal = useCallback(
     (payload) => {
@@ -522,13 +593,10 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
   }, [nodes, edges, selectedAgent, variablesPath, toolData]);
 
   useEffect(() => {
-    setIsModified(
-      !orchestralData.length > 0
-        ? nodes.length !== orchestralData?.nodes?.length || edges.length !== orchestralData?.edges?.length
-        : nodes.length > 0
-    );
-  }, [nodes, edges]); // keep logic identical
-
+    setIsModified(isDrafted || (!orchestralData.length > 0
+      ? nodes.length !== orchestralData?.nodes?.length || edges.length !== orchestralData?.edges?.length
+      : nodes.length > 0));
+  }, [nodes, edges, isDrafted]); // update logic to check if orchestralData.length is truthy
   const [sidebar, setSidebar] = useState({
     isOpen: false,
     mode: null,
@@ -604,22 +672,32 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
 
   /* Load/replace flow runtime */
   useEffect(() => {
-    if (orchestralData?.nodes || orchestralData?.edges) {
+    // Don't reload during auto-save operations
+    if (isAutoSaving) {
+      return;
+    }
+    
+    // Check for auto-saved data first, fallback to main structure
+    const dataSource = orchestralData?.data || orchestralData;
+    const nodesToLoad = dataSource?.nodes || [];
+    const edgesToLoad = dataSource?.edges || [];
+    
+    if (nodesToLoad.length > 0 || edgesToLoad.length > 0) {
       setNodes(() =>
-        hydrateNodes(orchestralData.nodes || [], {
+        hydrateNodes(nodesToLoad, {
           handleFlowChange,
           openSidebar,
           selectAgentForNode,
           handleBridgeTypeSelect,
           selectedBridgeType,
-          hasMasterAgent: (orchestralData.nodes || []).some((n) => n.type === 'agentNode' && n.data?.isFirstAgent),
+          hasMasterAgent: nodesToLoad.some((n) => n.type === 'agentNode' && n.data?.isFirstAgent),
           agents,
           onOpenConfigSidebar: openConfigSidebar,
           openAgentVariableModal,
           requestDelete,
         })
       );
-      setEdges(orchestralData.edges || []);
+      setEdges(edgesToLoad);
       setShouldLayout(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -794,19 +872,44 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           return;
         }
 
-        const agentStructure = serializeAgentFlow(nodes, edges, {
-          ...metadata,
-          org_id: params.org_id,
-          bridge_type: selectedBridgeType,
-          master_agent: masterAgentData.bridge_id || masterAgentData.name,
-          master_agent_name: masterAgentData.name,
-        });
+        let agentStructure;
+          const currentFlowData = serializeAgentFlow(nodes, edges, {
+            ...metadata,
+            org_id: params.org_id,
+            bridge_type: selectedBridgeType,
+            master_agent: masterAgentData?._id || masterAgentData.bridge_id || masterAgentData.name,
+            master_agent_name: masterAgentData.name,
+          });
+          
+          agentStructure = {
+            flow_name: metadata.name || 'Draft Flow',
+            flow_description: metadata.description || '',
+            bridge_type: selectedBridgeType,
+            status: 'draft',
+            agents: serializeAgentFlow(orchestralData?.nodes, orchestralData?.edges, {
+              ...metadata,
+              org_id: params.org_id,
+              bridge_type: selectedBridgeType,
+              master_agent: masterAgentData?._id || masterAgentData.bridge_id || masterAgentData.name,
+              master_agent_name: masterAgentData.name,
+            })?.agents,
+            data: currentFlowData?.agents, // Store in data key for drafts
+            org_id: params.org_id,
+            master_agent: masterAgentData?._id || masterAgentData.bridge_id || masterAgentData.name,
+            master_agent_name: masterAgentData.name,
+          };
 
         const id = await dispatch(
           metadata.createdFlow
             ? updateOrchestralFlowAction(agentStructure, params.org_id, params.orchestralId)
             : createNewOrchestralFlowAction(agentStructure, params.org_id)
         ).then((response) => response.data.id);
+        
+        // Clear auto-save data after successful publish
+        if (metadata.status === 'publish') {
+          setAutoSaveData(null);
+        }
+        
         setIsVariableModified(false);
         if (id && !metadata.createdFlow) {
           router.push(`/org/${params.org_id}/orchestratal_model/${id}`);
@@ -815,7 +918,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         console.error('Error saving agent structure:', error);
       }
     },
-    [nodes, edges, params.org_id, selectedBridgeType, dispatch, router, params.orchestralId]
+    [nodes, edges, params.org_id, selectedBridgeType, dispatch, router, params.orchestralId, autoSaveData]
   );
 
   /* Subgraph / add nodes */
@@ -1094,6 +1197,7 @@ export default function AgentToAgentConnection({
   description,
   createdFlow = false,
   setIsLoading,
+  isDrafted = false,
 }) {
   return (
     <ReactFlowProvider>
@@ -1104,6 +1208,7 @@ export default function AgentToAgentConnection({
         description={description}
         createdFlow={createdFlow}
         setIsLoading={setIsLoading}
+        isDrafted={isDrafted}
       />
     </ReactFlowProvider>
   );
