@@ -538,8 +538,12 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     nodeId: null,
     bridgeType: null,
   });
-
-  const openSidebar = useCallback((ctx) => setSidebar((s) => ({ ...s, ...ctx, isOpen: true })), []);
+  const [lastSidebarContext, setLastSidebarContext] = useState(null);
+  const openSidebar = useCallback((ctx) => {
+    const newSidebarState = { ...ctx, isOpen: true };
+    setSidebar((s) => ({ ...s, ...newSidebarState }));
+    setLastSidebarContext(newSidebarState);
+  }, []);
   const closeSidebar = useCallback(
     () =>
       {
@@ -1036,13 +1040,14 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         agents={agents}
         onClose={closeSidebar}
         onChoose={(agent) => {
-          if (sidebar.mode === 'add') {
+          const contextToUse = sidebar.mode ? sidebar : lastSidebarContext;
+          if (contextToUse?.mode === 'add') {
             handleFlowChange({
               action: 'ADD_NODE',
-              payload: { sourceNodeId: sidebar.sourceNodeId, agent, isFirstAgent: sidebar.isFirstAgent },
+              payload: { sourceNodeId: contextToUse.sourceNodeId, agent, isFirstAgent: contextToUse.isFirstAgent },
             });
-          } else if (sidebar.mode === 'select') {
-            selectAgentForNode(sidebar.nodeId, agent);
+          } else if (contextToUse?.mode === 'select') {
+            selectAgentForNode(contextToUse.nodeId, agent);
           }
           closeSidebar();
         }}

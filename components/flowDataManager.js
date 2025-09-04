@@ -482,17 +482,30 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
 
   const handleEventListener = useCallback((event) => {
     const { type, status, data } = event.data
-    if (type === 'gtwy' && status === "published") {
-      // window.closeGtwy();
-      const bridge = agents.find((a) => a._id === data.agent_id)
+    if (type === 'gtwy' && status === "published") {      
+      let bridge = agents.find((a) => a._id === data.agent_id);
       if (bridge) {
-        onChoose(bridge)
+        onChoose(bridge);
+        setOpenAgentConfigSidebar(false);
+      } else {
+        const fallbackBridge = {
+          _id: data.agent_id,
+          name: data.name || data.agent_name || 'Published Agent',
+          description: data.description || data.agent_description || '',
+          published_version_id: data.agent_version_id
+        };
+        onChoose(fallbackBridge);
         setOpenAgentConfigSidebar(false);
       }
     }
-  }, [])
+  }, [agents, onChoose])
 
-  window.addEventListener('message', handleEventListener)
+  useEffect(() => {
+    window.addEventListener('message', handleEventListener)
+    return () => {
+      window.removeEventListener('message', handleEventListener)
+    }
+  }, [handleEventListener])
 
   useEffect(() => {
     return () => {
