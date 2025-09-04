@@ -251,7 +251,7 @@ export function createNodesFromAgentDoc(doc) {
     },
   });
 
-  const agents = doc.agents;
+  const agents = doc?.agents;
   const masterAgentKey = doc.master_agent;
 
   const graph = new Map();
@@ -513,7 +513,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
       setOpenAgentConfigSidebar(false);
       onClose();
       setSelectAgent({ nameToCreate: "", org_id: params?.org_id });
-      window.closeGtwy();
+      if(window.closeGtwy) window.closeGtwy();
     }
   }, []);
 
@@ -963,7 +963,7 @@ export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId }) {
   }, [agent])
   useEffect(() => {
     return () => {
-      window.closeGtwy();
+      if(window.closeGtwy) window.closeGtwy();
     }
   }, [isOpen])
   return (

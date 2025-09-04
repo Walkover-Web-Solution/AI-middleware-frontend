@@ -12,9 +12,10 @@ const page = ({ params }) => {
   );
   const orchestralData = orchestralFlowData.find((item) => item._id === params?.orchestralId)
   const updatedData = createNodesFromAgentDoc(orchestralData?.data ? orchestralData?.data : orchestralData)
+  const discardedData = createNodesFromAgentDoc(orchestralData)
   return (
     <div style={{ height: '100vh' }}>
-      <AgentToAgentConnection params={params} orchestralData={updatedData} name={orchestralData.flow_name} description={orchestralData.flow_description} createdFlow={true} isDrafted={orchestralData.status === 'draft'}/>
+      <AgentToAgentConnection params={params} orchestralData={updatedData} name={orchestralData.flow_name} description={orchestralData.flow_description} createdFlow={true} isDrafted={orchestralData.status === 'draft'} discardedData={discardedData}/>
     </div>
   )
 }
