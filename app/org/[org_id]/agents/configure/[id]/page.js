@@ -184,14 +184,6 @@ const Page = ({ searchParams }) => {
     };
   }, [isDesktop]); // Rerun when switching between desktop/mobile
 
-  if (!bridgeType) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
 
   return (
     <div 

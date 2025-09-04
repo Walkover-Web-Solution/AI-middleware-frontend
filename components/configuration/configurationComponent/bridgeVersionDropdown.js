@@ -47,7 +47,7 @@ function BridgeVersionDropdown({ params, isEmbedUser }) {
             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}`);
             dispatch(getBridgeVersionAction({ versionId: params.version, version_description:versionDescriptionRef }));
         }
-    }, [params?.version, publishedVersion]);
+    }, [params?.version, bridgeVersionsArray, publishedVersion]);
 
     const handleCreateNewVersion = () => {
         // create new version

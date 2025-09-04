@@ -420,15 +420,15 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
   const handleCreateAgent = () => {
     setIsCreating(true);
     window.GtwyEmbed.sendDataToGtwy({
-      [creationType === 'name' ? 'agent_name' : 'agent_purpose']: inputValue,
       parent_id: 'gtwyParentId',
+      [creationType === 'name' ? 'agent_name' : 'agent_purpose']: inputValue
     })
+    setOpenAgentConfigSidebar(true);
+    setInputValue('');
+    onClose();
     setTimeout(() => {
-      setIsCreating(false);
-      setOpenAgentConfigSidebar(true);
       window.openGtwy();
-      setInputValue('');
-    }, 1500);
+    }, 3000);
   };
 
   const handleTypeChange = (type) => {
