@@ -4,20 +4,26 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Plus, Bot, Play, Settings, Trash2, Copy, Search, Filter, Activity, Zap, GitBranch, Clock, Calendar, Users } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { deleteOrchetralFlowAction } from '@/store/action/orchestralFlowAction';
+import { createNewOrchestralFlowAction, deleteOrchetralFlowAction } from '@/store/action/orchestralFlowAction';
 import { useRouter } from 'next/navigation';
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import DeleteModal from '@/components/UI/DeleteModal';
 import MainLayout from '@/components/layoutComponents/MainLayout';
 import PageHeader from '@/components/Pageheader';
+import SearchItems from '@/components/UI/SearchItems';
+import CreateNewOrchestralFlowModal from '@/components/modals/CreateNewOrchestralFlowModal';
 
 export const runtime = 'edge';
 
 export default function FlowsPage({ params, isEmbedUser }) {
-  const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedDataToDelete, setSelectedDataToDelete] = useState(null);
+  const [saveData, setSaveData] = useState({
+    name: '',
+    description: '',
+    status: 'draft',
+  })
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -25,6 +31,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
   const orchestralFlowData = useCustomSelector((state) =>
     state.orchestralFlowReducer.orchetralFlowData[params.org_id] || []
   );
+  const [filterFlows, setFilterFlows] = useState(orchestralFlowData)
 
 
   // Helper function to count agents in a flow
@@ -68,20 +75,25 @@ export default function FlowsPage({ params, isEmbedUser }) {
     }
   };
 
-  // Filter flows based on search and status
-  const filteredFlows = useMemo(() => {
-    return orchestralFlowData.filter(flow => {
-      const matchesSearch = flow.flow_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        flow.flow_description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || flow.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [searchQuery, statusFilter, orchestralFlowData]);
-
   const handleCreateFlow = () => {
-    router.push(`/org/${params.org_id}/orchestratal_model/create`);
+    openModal(MODAL_TYPE.CREATE_ORCHESTRAL_FLOW_MODAL);
   };
 
+  const handleCreateNewFlow = () => {
+    dispatch(createNewOrchestralFlowAction({
+      org_id: params.org_id,
+      flow_name: saveData.name,
+      agents: {},
+      master_agent: "",
+      bridge_type: "api",
+      flow_description: saveData.description,
+      status: saveData.status
+    }, params.org_id)).then((data) => {
+      closeModal(MODAL_TYPE.CREATE_ORCHESTRAL_FLOW_MODAL);
+      setSaveData({ name: '', description: '', status: 'draft' });
+      router.push(`/org/${params.org_id}/orchestratal_model/${data.data.id}`);
+    });
+  }
   const handleOpenFlow = (flowId) => {
     router.push(`/org/${params.org_id}/orchestratal_model/${flowId}`);
   };
@@ -118,18 +130,14 @@ export default function FlowsPage({ params, isEmbedUser }) {
   return (
     <div className="px-2 pt-4">
       <MainLayout>
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-2">
           <PageHeader
             title="Orchestral Model"
             description="Create and manage your AI Orchestral Model workflows. Build complex agent interactions with our intuitive flow builder."
             // docLink="https://blog.gtwy.ai/features/orchestral-model"
             isEmbedUser={isEmbedUser}
           />
-        </div>
-
-        <div className="max-w-7xl mx-auto">
-          {/* Quick Stats */}
-          <div className="mb-8">
+          <div className="mb-4">
             <div className="flex gap-4">
               <div className="bg-base-100 rounded-xl p-4 shadow-sm border border-base-content/30">
                 <div className="flex items-center gap-2">
@@ -154,22 +162,18 @@ export default function FlowsPage({ params, isEmbedUser }) {
             </div>
           </div>
 
+        </div>
+
+        <div className="mx-auto">
+          {/* Quick Stats */}
+
           {/* Search and Filter Bar */}
-          <div className="flex gap-4 items-center bg-base-100 rounded-xl p-4 shadow-sm border border-base-content/30 mb-8">
+          <div className="flex gap-4 items-center mb-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search flows..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-base-content/30 rounded-lg 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <SearchItems data={orchestralFlowData} setFilterItems={setFilterFlows} item="Flows" />
             </div>
 
             <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-base-content" />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -227,7 +231,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
             </div>
 
             {/* Flow Cards */}
-            {filteredFlows.map((flow) => {
+            {filterFlows.map((flow) => {
               const agentCount = countAgents(flow.agents);
               const bridgeInfo = getBridgeTypeDisplay(flow.bridge_type);
               const masterAgent = flow.agents[flow.master_agent];
@@ -302,7 +306,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
                   </div>
 
                   {/* Hover Actions */}
-                  <div className="absolute inset-x-4 bottom-4 opacity-0 group-hover:opacity-100 
+                  <div className="absolute inset-x-4 top-4 opacity-0 group-hover:opacity-100 
                               transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
                     <div className="flex gap-2 justify-end">
                       <button
@@ -323,24 +327,18 @@ export default function FlowsPage({ params, isEmbedUser }) {
           </div>}
 
           {/* Empty State */}
-          {filteredFlows.length === 0 && searchQuery && (
+          {filterFlows.length === 0 && (
             <div className="text-center py-12">
               <div className="w-24 h-24 bg-base-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-12 h-12 text-base-content" />
               </div>
               <h3 className="text-xl font-semibold text-base-content mb-2">No flows found</h3>
               <p className="text-base-content mb-4">Try adjusting your search or filters</p>
-              <button
-                onClick={() => setSearchQuery('')}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                Clear Search
-              </button>
             </div>
           )}
 
           {/* No Data State */}
-          {orchestralFlowData.length === 0 && !searchQuery && (
+          {orchestralFlowData.length === 0 && (
             <div className="text-center py-16">
               <div className="w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <GitBranch className="w-16 h-16 text-blue-500" />
@@ -361,6 +359,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
         </div>
         <DeleteModal onConfirm={handleDeleteFlow} item={selectedDataToDelete} title="Delete Flow" description={`Are you sure you want to delete the flow "${selectedDataToDelete?.flow_name}"? This action cannot be undone.`}
         />
+        <CreateNewOrchestralFlowModal handleCreateNewFlow={handleCreateNewFlow} createdFlow={false} saveData={saveData} setSaveData={setSaveData} />
       </MainLayout>
     </div>
   );

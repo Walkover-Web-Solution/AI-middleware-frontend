@@ -30,8 +30,8 @@ const Layout = ({ children }) => {
     dispatch(getServiceAction());
   }, [dispatch]);
 
-  const createNewAgent = useCallback((agent_name, orgId) => {
-    const dataToSend = {
+  const createNewAgent = useCallback((agent_name, orgId, agent_purpose) => {
+    const dataToSend = agent_purpose ? {purpose: agent_purpose.trim()} : {
       service: 'openai',
       model: 'gpt-4o',
       name: agent_name.trim(),
@@ -168,6 +168,11 @@ const Layout = ({ children }) => {
       } else if (messageData?.agent_id && orgId) {
         setIsLoading(true);
         await router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+      }
+      else if(messageData?.agent_purpose)
+      {
+        createNewAgent('', orgId, messageData.agent_purpose)
+        setIsLoading(true);  
       }
       if(messageData?.meta && messageData?.agent_id && orgId){
         let bridges = allBridges;
