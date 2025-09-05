@@ -7,7 +7,7 @@ import ResponseFormatSelector from './responseFormatSelector';
 import InfoTooltip from '@/components/InfoTooltip';
 import ToolCallCount from './toolCallCount';
 
-const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
+const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [showApiKeysToggle, setShowApiKeysToggle] = useState(false);
   const [selectedApiKeys, setSelectedApiKeys] = useState({});
@@ -18,7 +18,7 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
   const dispatch = useDispatch();
 
   const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration } = useCustomSelector((state) => {
-    const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version] || {};
+    const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
     const apikeys = state?.bridgeReducer?.apikeys || {};
     const user = state.userDetailsReducer.userDetails;
 
@@ -53,12 +53,12 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
       const updated = { ...prev, [service]: apiKeyId };
       dispatch(updateBridgeVersionAction({
         bridgeId: params?.id,
-        versionId: params?.version,
+        versionId: searchParams?.version,
         dataToSend: { apikey_object_id: updated }
       }));
       return updated;
     });
-  }, [dispatch, params?.id, params?.version]);
+  }, [dispatch, params?.id, searchParams?.version]);
 
   const toggleApiKeys = () => {
     setShowApiKeysToggle(prev => !prev);

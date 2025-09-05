@@ -16,7 +16,7 @@ import Head from "next/head";
   If the user has not logged in, it will redirect the user to the login page.
  * If the user has already logged in, it will redirect the user to the bridges page.
  */
-function page() {
+async function page() {
   return (
     <div className="bg-black h-full w-full text-white overflow-hidden">
       <Head>

@@ -60,7 +60,7 @@ const Section = ({ title, caption, children }) => (
   </div>
 );
 
-const ApiGuide = ({ params, modelType, isEmbedUser }) => {
+const ApiGuide = ({ params, searchParams, modelType, isEmbedUser }) => {
   return (
     <div className="min-h-screen gap-4 flex flex-col">
       {!isEmbedUser && <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-md p-4">

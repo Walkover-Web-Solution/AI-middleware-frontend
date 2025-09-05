@@ -213,6 +213,7 @@ const aggregateDataByFactor = (rawData) => {
 };
 
 function Page({ params }) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -226,7 +227,7 @@ function Page({ params }) {
   const [loading, setLoading] = useState(false);
   const [filterBridges, setFilterBridges] = useState([]);
   const [currentTheme, setCurrentTheme] = useState('light');
-  const orgId = params?.org_id;
+  const orgId = resolvedParams?.org_id;
   const [rawData, setRawData] = useState([]);
 
   const FACTOR_OPTIONS = ['Bridges', 'API Keys', 'Models'];
