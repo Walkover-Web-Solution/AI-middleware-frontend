@@ -5,9 +5,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-const WebhookForm = ({ params }) => {
+const WebhookForm = ({ params, searchParams }) => {
     const { reduxWebhook } = useCustomSelector((state) => ({
-        reduxWebhook: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.[params.version]?.webhook,
+        reduxWebhook: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.[searchParams?.version]?.webhook,
     }));
     const dispatch = useDispatch();
     const [webhookUrl, setWebhookUrl] = useState(reduxWebhook?.url || "");

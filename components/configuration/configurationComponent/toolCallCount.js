@@ -33,7 +33,7 @@ function ToolCallCount({ params }) {
             <input
                 type="number"
                 placeholder="Type here"
-                class="input input-sm input-bordered w-full max-w-xs"
+                className="input input-sm input-bordered w-full max-w-xs"
                 min={1}
                 max={30}
                 key={tool_call_count}

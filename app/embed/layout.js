@@ -9,7 +9,7 @@ import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/st
 import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
-const Layout = ({ children }) => {
+const Layout = async ({ children }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const dispatch = useDispatch();

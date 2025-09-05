@@ -11,7 +11,7 @@ import { FINISH_REASON_DESCRIPTIONS } from '@/utils/enums';
 import { ExternalLink } from "lucide-react";
 
 
-function Chat({ params, userMessage, isOrchestralModel = false }) {
+function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) {
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
@@ -243,6 +243,7 @@ function Chat({ params, userMessage, isOrchestralModel = false }) {
                 setMessages={setMessages}
                 message={messages}
                 params={params}
+                searchParams={searchParams}
                 uploadedImages={uploadedImages}
                 setUploadedImages={setUploadedImages}
                 conversation={conversation}

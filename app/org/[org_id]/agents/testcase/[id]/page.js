@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
@@ -12,6 +12,7 @@ import { ONBOARDING_VIDEOS } from '@/utils/enums';
 export const runtime = 'edge';
 
 function TestCases({ params }) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const dispatch = useDispatch();
   const [isloading, setIsLoading] = useState(false);
@@ -23,9 +24,9 @@ function TestCases({ params }) {
   const bridgeVersion = searchParams.get('version');
   const [selectedVersion, setSelectedVersion] = useState(searchParams.get('versionId') || '');
 
-  const allBridges = useCustomSelector((state) => state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []).slice().reverse();
+  const allBridges = useCustomSelector((state) => state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || []).slice().reverse();
   const { testCases,isFirstTestcase } = useCustomSelector((state) => ({
-    testCases: state?.testCasesReducer?.testCases?.[params?.id] || {},
+    testCases: state?.testCasesReducer?.testCases?.[resolvedParams?.id] || {},
      isFirstTestcase: state?.userDetailsReducer?.userDetails?.meta?.onboarding?.TestCasesSetup || "",
   }));
   const [tutorialState, setTutorialState] = useState({
@@ -33,11 +34,11 @@ function TestCases({ params }) {
     showSuggestion: isFirstTestcase
   });
   const versions = useMemo(() => {
-    return allBridges.find((bridge) => bridge?._id === params?.id)?.versions || [];
-  }, [allBridges, params?.id]);
+    return allBridges.find((bridge) => bridge?._id === resolvedParams?.id)?.versions || [];
+  }, [allBridges, resolvedParams?.id]);
 
   useEffect(() => {
-    dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
+    dispatch(getAllTestCasesOfBridgeAction({ bridgeId: resolvedParams?.id }));
   }, [])
 
   useEffect(() => {
@@ -48,8 +49,8 @@ function TestCases({ params }) {
 
   const handleRunTestCase = (versionId) => {
     setIsLoading(true);
-    dispatch(runTestCaseAction({ versionId, bridgeId: params?.id }))
-      .then(() => { dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id })); setIsLoading(false); setSelectedVersion(versionId) });
+    dispatch(runTestCaseAction({ versionId, bridgeId: resolvedParams?.id }))
+      .then(() => { dispatch(getAllTestCasesOfBridgeAction({ bridgeId: resolvedParams?.id })); setIsLoading(false); setSelectedVersion(versionId) });
     router.push(`?version=${bridgeVersion}&versionId=${versionId}`);
   }
 
@@ -82,7 +83,7 @@ function TestCases({ params }) {
         ? { tool_calls: JSON.parse(editExpectedOutput) }
         : { response: editExpectedOutput }
     };
-    dispatch?.(updateTestCaseAction({ bridge_id: params?.id, dataToUpdate: updatedTestCase }))
+    dispatch?.(updateTestCaseAction({ bridge_id: resolvedParams?.id, dataToUpdate: updatedTestCase }))
     setEditingIndex(null);
   };
 
@@ -125,7 +126,7 @@ function TestCases({ params }) {
                           <button
                             className="btn btn-xs btn-circle bg-base-100 border border-base-300 hover:bg-primary hover:border-primary hover:text-base-content disabled:bg-base-100 disabled:border-base-300 disabled:text-base-content"
                             onClick={() => handleRunTestCase(version)}
-                            disabled={!params?.id || isloading}
+                            disabled={!resolvedParams?.id || isloading}
                           >
                             <PlayIcon size={12} />
                           </button>
@@ -261,7 +262,7 @@ function TestCases({ params }) {
                                 <button
                                   onClick={(e) => {
                                     e?.stopPropagation();
-                                    dispatch?.(deleteTestCaseAction({ testCaseId: testCase?._id, bridgeId: params?.id }));
+                                    dispatch?.(deleteTestCaseAction({ testCaseId: testCase?._id, bridgeId: resolvedParams?.id }));
                                   }}
                                   className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-sm flex items-center gap-1.5 transition-colors"
                                 >

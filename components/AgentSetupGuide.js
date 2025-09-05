@@ -3,17 +3,17 @@ import { CircleAlertIcon, RocketIcon, SparklesIcon } from '@/components/Icons';
 import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
-const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) => {
+const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, searchParams }) => {
   const { bridgeApiKey, prompt,shouldPromptShow,service } = useCustomSelector((state) => {
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
-    const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service;
     const modelReducer = state?.modelReducer?.serviceModels;
     const serviceName = versionData?.service;
     const modelTypeName = versionData?.configuration?.type?.toLowerCase();
     const modelName = versionData?.configuration?.model;
     return {
-      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
-      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
+      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
       shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
       service: service   
    };

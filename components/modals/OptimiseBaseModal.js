@@ -15,6 +15,7 @@ function OptimiseBaseModal({
   onApply,
   onClose,
   params,
+  searchParams,
   messages,
   setMessages,
   showHistory = false,
@@ -60,7 +61,7 @@ function OptimiseBaseModal({
     setErrorMessage("");
 
     try {
-      const result = await optimizeApi(instructionText, params);
+      const result = await optimizeApi(instructionText, params, searchParams);
       setLoading(false);
       const updatedContent = typeof result?.updated === 'object' ? JSON.stringify(result?.updated, undefined, 4) : result?.updated;
       simulateStreaming(updatedContent, setStreamedContent, setIsStreaming, () => {

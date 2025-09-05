@@ -12,11 +12,11 @@ import TutorialSuggestionToast from "./tutorialSuggestoinToast";
 import InfoTooltip from "./InfoTooltip";
 import Protected from "./protected";
 
-const AddVariable = ({ params, isEmbedUser }) => {
-  const versionId = params.version;
+const AddVariable = ({ params, isEmbedUser, searchParams }) => {
+  const versionId = searchParams?.version;
   const { variablesKeyValue, prompt, isFirstVariable, bridgeName } = useCustomSelector((state) => ({
-    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
-    prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.variables || [],
+    prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.prompt || "",
     isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
   }));
@@ -51,12 +51,12 @@ const AddVariable = ({ params, isEmbedUser }) => {
       [pair?.key]: pair?.required ? 'required' : 'optional'
     }));
     dispatch(updateBridgeVersionAction({
-      versionId: params?.version,
+      versionId: versionId,
       dataToSend: {
         'variables_state': Object.assign({}, ...filteredPairs)
       }
     }));
-   isEmbedUser && sendDataToParent("updated", { name: bridgeName, agent_id: params?.id, agent_version_id: params?.version, variables: variablesKeyValue }, "Agent Version Updated")
+   isEmbedUser && sendDataToParent("updated", { name: bridgeName, agent_id: params?.id, agent_version_id: versionId, variables: variablesKeyValue }, "Agent Version Updated")
   }
 
   const extractVariablesFromPrompt = () => {
@@ -154,7 +154,7 @@ const AddVariable = ({ params, isEmbedUser }) => {
     };
     setKeyValuePairs(updatedPairs);
     dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
-    sendDataToParent("updated", { name: bridgeName, agent_id: params?.id, agent_version_id: params?.version, variables: updatedPairs}, "Agent Version Updated")
+    sendDataToParent("updated", { name: bridgeName, agent_id: params?.id, agent_version_id: versionId, variables: updatedPairs}, "Agent Version Updated")
     updateVersionVariable(updatedPairs)
   };
 
