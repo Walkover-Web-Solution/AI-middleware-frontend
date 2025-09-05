@@ -1,4 +1,5 @@
 import { BuildingIcon, CheckCircleIcon } from "@/components/Icons";
+import AiMl from "@/icons/Ai.ml";
 import AnthropicIcon from "@/icons/AnthropicIcon";
 import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
@@ -175,6 +176,7 @@ export const toggleSidebar = (sidebarId, direction = "left") => {
 
 
 export const getIconOfService = (service, height, width) => {
+    console.log(service,"sldkfjsd")
     switch (service) {
         case 'openai':
             return <OpenAiIcon height={height} width={width} />;
@@ -188,6 +190,8 @@ export const getIconOfService = (service, height, width) => {
             return <OpenRouter height={height} width={width} />;
         case 'gemini':
             return <GeminiIcon height={height} width={width} />;
+        case 'ai_ml':
+            return <AiMl height={height} width={width}/>   ; 
         default:
             return <OpenAiIcon height={height} width={width} />;
     }

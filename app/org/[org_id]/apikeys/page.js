@@ -61,7 +61,7 @@ const Page = () => {
     },
     [dispatch]
   );
-
+  console.log(filterApiKeys,"sdf")
   const dataWithIcons = filterApiKeys.map((item) => ({
     ...item,
     actualName: item.name,
