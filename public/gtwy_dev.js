@@ -19,8 +19,8 @@
                 skipLoadGtwy: false // New flag to control loadGtwyEmbed behavior
             };
             this.urls = {
-                gtwyUrl: 'https://dev-ai.viasocket.com/embed',
-                login: 'https://dev-db.gtwy.ai/gtwyEmbed/login'
+                gtwyUrl: 'http://localhost:3000/embed',
+                login: 'http://localhost:7072/login'
             };
             this.state = {
                 bodyLoaded: false,

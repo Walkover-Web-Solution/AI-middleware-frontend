@@ -128,7 +128,7 @@ const Layout = ({ children }) => {
         if (urlParamsObj.config) {
           Object.entries(urlParamsObj.config).forEach(([key, value]) => {
             if (value !== undefined) {
-              dispatch(updateUserDetialsForEmbedUser({ [key]: toBoolean(value) }));
+             key === "apikey_object_id" ? dispatch(updateUserDetialsForEmbedUser({ [key]: value })) : dispatch(updateUserDetialsForEmbedUser({ [key]: toBoolean(value)}));
             }
           });
         }
