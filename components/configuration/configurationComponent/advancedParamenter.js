@@ -75,6 +75,17 @@ const AdvancedParameters = ({ params }) => {
     setSelectedOptions(selectedFunctiondata);
   }, [tool_choice_data])
 
+  const debounce = (func, delay) => {
+    let timeoutId;
+    return function(...args) {
+      const context = this;
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(context, args);
+      }, delay);
+    };
+  };
+
   const handleInputChange = (e, key, isSlider = false) => {
     setInputConfiguration((prev) => ({
       ...prev,
@@ -94,6 +105,11 @@ const AdvancedParameters = ({ params }) => {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
+
+  const debouncedInputChange = useCallback(
+    debounce(handleInputChange, 500),
+    [configuration, params?.id, params?.version]
+  );
 
   const handleSelectChange = (e, key, defaultValue, Objectvalue = {}, isDeafaultObject = true) => {
     let newValue;
@@ -133,6 +149,11 @@ const AdvancedParameters = ({ params }) => {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
+
+  const debouncedSelectChange = useCallback(
+    debounce(handleSelectChange, 500),
+    [configuration, params?.id, params?.version]
+  );
 
   const toggleAccordion = () => {
     setIsAccordionOpen((prevState) => !prevState);
@@ -331,9 +352,9 @@ const AdvancedParameters = ({ params }) => {
                         modelInfoData?.[key]?.[configuration?.[key]] :
                         configuration?.[key]
                     }
-                    onBlur={(e) => handleInputChange(e, key, true)}
-                    onInput={(e) => {
+                    onChange={(e) => {
                       document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
+                      debouncedInputChange(e, key, true);
                     }}
                     className="range range-accent range-sm h-3 range-extra-small-thumb"
                     name={key}
@@ -344,13 +365,13 @@ const AdvancedParameters = ({ params }) => {
                 <input
                   type="text"
                   value={inputConfiguration?.[key] === 'default' ? '' : inputConfiguration?.[key] || ''}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setInputConfiguration((prev) => ({
                       ...prev,
                       [key]: e.target.value,
-                    }))
-                  }
-                  onBlur={(e) => handleInputChange(e, key)}
+                    }));
+                    debouncedInputChange(e, key);
+                  }}
                   className="input input-bordered input-sm w-full"
                   name={key}
                 />
