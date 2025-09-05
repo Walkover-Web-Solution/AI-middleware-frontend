@@ -5,13 +5,15 @@ import timezoneData from '@/utils/timezoneData';
 import { PencilIcon, GlobeIcon, MailIcon, BuildingIcon } from '@/components/Icons';
 import React, { useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { use } from 'react';
 
 export const runtime = 'edge';
 
 export default function SettingsPage({ params }) {
+  const resolvedParams = use(params);
   const dispatch = useDispatch();
   const userDetails = useCustomSelector((state) =>
-    state?.userDetailsReducer?.organizations?.[params.org_id]
+    state?.userDetailsReducer?.organizations?.[resolvedParams.org_id]
   );
 
   const [isContentOpen, setIsContentOpen] = useState(false);
@@ -41,12 +43,12 @@ export default function SettingsPage({ params }) {
       timezone: selectedTimezone?.offSet,
     };
     try {
-      await dispatch(updateOrgTimeZone(params.org_id, updatedOrgDetails));
+      await dispatch(updateOrgTimeZone(resolvedParams.org_id, updatedOrgDetails));
       setIsContentOpen(false);
     } catch (error) {
       console.error('Failed to update timezone:', error);
     }
-  }, [dispatch, params.org_id, selectedTimezone, userDetails]);
+  }, [dispatch, resolvedParams.org_id, selectedTimezone, userDetails]);
 
   const handleCancel = useCallback(() => {
     setSelectedTimezone(timezoneData.find((tz) => tz.identifier === userDetails?.meta?.identifier));

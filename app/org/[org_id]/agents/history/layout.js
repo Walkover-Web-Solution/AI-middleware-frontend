@@ -1,11 +1,13 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, use } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
 
 export default function layoutHistoryPage({ children, params }) {
+    const resolvedParams = use(params);
+    
     const {chatbot_token, history_page_chatbot_token} = useCustomSelector((state) => ({
         chatbot_token: state?.ChatBot?.chatbot_token || '',
-        history_page_chatbot_token : state?.bridgeReducer?.org?.[params?.org_id]?.history_page_chatbot_token
+        history_page_chatbot_token : state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.history_page_chatbot_token
       }));
       
   const scriptId = "chatbot-main-script";

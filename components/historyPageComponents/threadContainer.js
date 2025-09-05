@@ -1,120 +1,246 @@
+'use client'
+
+import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import { useParams, usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
+
 import { CircleDownIcon } from '@/components/Icons';
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ThreadItem from './threadItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { scrollToBottom, scrollToTop } from './assistFile';
-import { useDispatch } from 'react-redux';
 import { getThread, updateContentHistory } from '@/store/action/historyAction';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { useRouter } from "next/navigation";
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import AddTestCaseModal from '../modals/AddTestCaseModal';
-import LoadingSpinner from '../loadingSpinner';
 import HistoryPagePromptUpdateModal from '../modals/historyPagePromptUpdateModal';
 import { ChatLoadingSkeleton } from './ChatLayoutLoader';
 import { clearThreadData } from '@/store/reducer/historyReducer';
 import EditMessageModal from '../modals/EditMessageModal';
 
+// ------------------------------------
+// Constants
+// ------------------------------------
+const PAGE_SIZE = 40;
+const SCROLL_BOTTOM_THRESHOLD = 16; // px
 
-const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId, params, pathName, search, historyData, threadHandler, setLoading, threadPage, setThreadPage, hasMoreThreadData, setHasMoreThreadData, selectedVersion, previousPrompt, isErrorTrue}) => {
-
-  const integrationData = useCustomSelector(state => state?.bridgeReducer?.org?.[params?.org_id]?.integrationData) || {};
-  const historyRef = useRef(null);
-  const dispatch = useDispatch();
+const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId,
+  pathName: pathNameProp, search, historyData, threadHandler, setLoading, threadPage, setThreadPage,
+  hasMoreThreadData, setHasMoreThreadData, selectedVersion, previousPrompt, isErrorTrue,
+}) => {
+  const routeParams = useParams();
+  const orgId = routeParams?.org_id;
+  const bridgeId = routeParams?.id;
+  const pathname = usePathname();
+  const searchParamsHook = useSearchParams();
   const router = useRouter();
+
+  const threadIdFromURL = searchParamsHook.get('thread_id');
+  const subThreadIdFromURL = searchParamsHook.get('subThread_id');
+  const versionFromURL = searchParamsHook.get('version');
+  const errorFromURL = searchParamsHook.get('error');
+
+  const dispatch = useDispatch();
+  const integrationData = useCustomSelector(
+    (state) => state?.bridgeReducer?.org?.[orgId]?.integrationData
+  ) || {};
+
+  const historyRef = useRef(null);
   const contentRef = useRef(null);
   const previousScrollHeightRef = useRef(0);
   const threadRefs = useRef({});
+  const isMountedRef = useRef(false);
+
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [flexDirection, setFlexDirection] = useState("column");
+  const [flexDirection, setFlexDirection] = useState('column');
   const [threadMessageState, setThreadMessageState] = useState();
   const [testCaseConversation, setTestCaseConversation] = useState([]);
-  const [loadingData, setLoadingData] = useState(false); // New state for loading
+  const [loadingData, setLoadingData] = useState(false);
   const [promotToUpdate, setPromptToUpdate] = useState(null);
   const [modalInput, setModalInput] = useState(null);
 
-  const handleAddTestCase = (item, index, variables = false) => {
+  const formatDateAndTime = useCallback((created_at) => {
+    const date = new Date(created_at);
+    const options = {
+      year: 'numeric',
+      month: 'numeric',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    };
+    return isNaN(date.getTime())
+      ? 'Invalid Date'
+      : date.toLocaleDateString('en-US', options);
+  }, []);
+
+  const handleAddTestCase = useCallback((item, index, variables = false) => {
     const conversation = [];
     let AiConfigForVariable = {};
+
     for (let i = index; i >= 0; i--) {
-      if (thread[i].role === "user") {
+      if (thread[i].role === 'user') {
         conversation.push(...(thread[i]?.AiConfig?.messages || []));
         AiConfigForVariable = thread[i]?.AiConfig ? thread[i]?.AiConfig : {};
-        if (thread[i].id === item.id) {
-          break;
-        }
+        if (thread[i].id === item.id) break;
       }
     }
+
     conversation.push(item || {});
     setTestCaseConversation(conversation);
-    if (variables) {
-      return AiConfigForVariable;
-    }
+    if (variables) return AiConfigForVariable;
     openModal(MODAL_TYPE.ADD_TEST_CASE_MODAL);
-  };
+  }, [thread]);
+
+  const handleSave = useCallback(() => {
+    if (!modalInput?.content?.trim()) {
+      alert('Message cannot be empty.');
+      return;
+    }
+    dispatch(
+      updateContentHistory({
+        id: modalInput?.Id,
+        bridge_id: bridgeId ?? orgId, // prefer explicit bridgeId, fallback to orgId if needed
+        message: modalInput.content,
+        index: modalInput.index,
+      })
+    );
+    setModalInput('');
+    closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
+  }, [modalInput, dispatch, bridgeId, orgId]);
+
+  const handleClose = useCallback(() => {
+    setModalInput('');
+    closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
+  }, []);
+
+  const calcFlexDirection = useCallback(() => {
+    if (historyRef.current && contentRef.current) {
+      setFlexDirection(
+        contentRef.current.clientHeight < historyRef.current.clientHeight
+          ? 'column'
+          : 'column-reverse'
+      );
+    }
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    const container = historyRef.current;
+    if (!container) return;
+    const { scrollTop, clientHeight, scrollHeight } = container;
+    const nearBottom = scrollTop + clientHeight >= scrollHeight - SCROLL_BOTTOM_THRESHOLD;
+    setShowScrollToBottom(!nearBottom);
+  }, []);
+
+  // ------------------------------------
+  // Effects: mount / cleanup
+  // ------------------------------------
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
-    let timeoutId;
-    dispatch(clearThreadData());
-    setLoadingData(true);
-    const fetchData = async () => {
-      const thread_id = params?.thread_id;
-      const startDate = search.get("start"); 
-      const endDate = search.get("end");
-      
-      setThreadPage(1);
-      setLoadingData(true);
-      let result;
-      let url;
+    calcFlexDirection();
+  }, [thread, calcFlexDirection]);
 
-      if(!thread_id && historyData &&  historyData?.length > 0) {
-        const firstThreadId = historyData?.[0]?.thread_id;
+  // Attach scroll listener via onScroll prop in JSX, but ensure first bottom snap
+  useEffect(() => {
+    if (historyRef.current && threadPage === 1) {
+      historyRef.current.scrollTop = historyRef.current.scrollHeight;
+    }
+  }, [threadPage]);
+
+  // Keep auto-scroll on new messages when already near bottom
+  useEffect(() => {
+    if (!showScrollToBottom) scrollToBottom(historyRef);
+  }, [thread, showScrollToBottom]);
+
+  // ------------------------------------
+  // Fetch logic (debounced + stale guard)
+  // ------------------------------------
+  const startDate = search?.start;
+  const endDate = search?.end;
+  const pathName = pathNameProp || pathname;
+
+  const fetchThread = useCallback(
+    async ({
+      threadId,
+      subThreadId,
+      version,
+      error,
+      page = 1,
+    }) => {
+      const result = await dispatch(
+        getThread({
+          threadId,
+          bridgeId: bridgeId ?? orgId,
+          nextPage: page,
+          user_feedback: filterOption,
+          subThreadId,
+          versionId: selectedVersion === 'all' ? '' : selectedVersion,
+          error: error || isErrorTrue,
+        })
+      );
+      return result;
+    },
+    [dispatch, bridgeId, orgId, filterOption, selectedVersion, isErrorTrue]
+  );
+
+  // Initial load + handle URL thread_id changes
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      dispatch(clearThreadData());
+      setLoadingData(true);
+
+      const thread_id = threadIdFromURL;
+      const subThreadId = subThreadIdFromURL || thread_id;
+      const error = errorFromURL || isErrorTrue;
+      const version = versionFromURL || '';
+
+      // If no thread selected, navigate to the first one from historyData
+      if (!thread_id && Array.isArray(historyData) && historyData.length > 0) {
+        const firstThreadId = historyData[0]?.thread_id;
         if (firstThreadId) {
-          router.push(`${pathName}?version=${params?.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=${params?.error}`, undefined, { shallow: true });
+          const params = new URLSearchParams(searchParamsHook.toString());
+          params.set('thread_id', firstThreadId);
+          params.set('subThread_id', firstThreadId);
+          if (version) params.set('version', version);
+          if (error) params.set('error', String(error));
+          params.set('navigated', 'true');
+          router.push(`${pathName}?${params.toString()}`, { scroll: false });
+          setLoadingData(false);
           return;
         }
       }
 
-      // Debounced thread fetching function
-      const fetchThread = async (threadId) => {
-        try {
-          url = `${pathName}?version=${params?.version}&thread_id=${threadId}&subThread_id=${params?.subThread_id || threadId}&error=${params?.error}`;
-          if (startDate && endDate) {
-            url += `&start=${startDate}&end=${endDate}`;
-          }
+      if (!thread_id || !historyData?.some((h) => h?.thread_id === thread_id)) {
+        setLoadingData(false);
+        return;
+      }
 
-          // Add 500ms delay before making the request
-          await new Promise(resolve => setTimeout(resolve, 500));
+      // small debounce to absorb rapid filter/URL changes
+      await new Promise((r) => setTimeout(r, 150));
+      const res = await fetchThread({
+        threadId: thread_id,
+        subThreadId,
+        version,
+        error,
+        page: 1,
+      });
 
-          result = await dispatch(getThread({
-            threadId,
-            bridgeId: params?.id,
-            nextPage: 1,
-            user_feedback: filterOption,
-            subThreadId: params?.subThread_id || threadId,
-            versionId: selectedVersion === "all" ? "" : selectedVersion,
-            error: params?.error || isErrorTrue
-          }));
+      if (cancelled || !isMountedRef.current) return;
 
-          return result;
-        } catch (error) {
-          console.error("Error fetching thread:", error);
-          setLoadingData(false);
-          return null;
-        }
-      };
-      // Only fetch if we have valid data
-      if (thread_id && historyData?.some(history => history?.thread_id === thread_id)) {
-        result = await fetchThread(thread_id);
-      } 
-
-      if (result) {
-        setThreadMessageState({ 
-          totalPages: result?.totalPages, 
-          totalEntries: result?.totalEnteries 
+      if (res) {
+        setThreadMessageState({
+          totalPages: res?.totalPages,
+          totalEntries: res?.totalEnteries,
         });
-        setHasMoreThreadData(result?.data?.length >= 40);
+        setHasMoreThreadData((res?.data?.length || 0) >= PAGE_SIZE);
       }
 
       setIsFetchingMore(false);
@@ -122,161 +248,100 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       setLoadingData(false);
     };
 
-    // Debounce the fetchData call
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      fetchData();
-    }, 300);
-
+    run();
     return () => {
-      clearTimeout(timeoutId);
+      cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [threadIdFromURL, filterOption, historyData, errorFromURL, subThreadIdFromURL]);
 
-  }, [params?.thread_id, filterOption,search, params?.subThread_id,params,  selectedVersion]);
-  
+  // Fetch more (pagination)
   const fetchMoreThreadData = useCallback(async () => {
     if (isFetchingMore) return;
     setIsFetchingMore(true);
-    previousScrollHeightRef.current = historyRef?.current?.scrollHeight;
-    const nextPage = threadPage + 1;
-    const result = await dispatch(getThread({ threadId: params.thread_id, bridgeId: params?.id,subThreadId:params?.subThread_id, nextPage, user_feedback: filterOption, versionId: selectedVersion === "all" ? '' : selectedVersion}));
+    previousScrollHeightRef.current = historyRef.current?.scrollHeight || 0;
+
+    const nextPage = (threadPage || 1) + 1;
+    const res = await fetchThread({
+      threadId: threadIdFromURL,
+      subThreadId: subThreadIdFromURL || threadIdFromURL,
+      version: versionFromURL || '',
+      error: errorFromURL || isErrorTrue,
+      page: nextPage,
+    });
+
     setThreadPage(nextPage);
-    setHasMoreThreadData(result?.data?.length >= 40);
-    if (!result || result?.data?.length < 40) {
-      setSearchMessageId(null);
-    }
+    const length = res?.data?.length || 0;
+    setHasMoreThreadData(length >= PAGE_SIZE);
+    if (!res || length < PAGE_SIZE) setSearchMessageId(null);
     setIsFetchingMore(false);
-  }, [filterOption, hasMoreThreadData, isFetchingMore, threadPage, params.thread_id, params.subThread_id]);
+  }, [
+    isFetchingMore,
+    threadPage,
+    fetchThread,
+    threadIdFromURL,
+    subThreadIdFromURL,
+    versionFromURL,
+    errorFromURL,
+    isErrorTrue,
+    setThreadPage,
+    setHasMoreThreadData,
+    setSearchMessageId,
+    setIsFetchingMore,
+  ]);
 
+  // Maintain scroll position when more items prepended in column-reverse mode
   useLayoutEffect(() => {
-    if (isFetchingMore && historyRef?.current && hasMoreThreadData) {
-      const scrollDifference = historyRef?.current?.scrollHeight - previousScrollHeightRef?.current;
-      historyRef.current.scrollTop += scrollDifference;
+    if (isFetchingMore && historyRef.current && hasMoreThreadData) {
+      const diff = (historyRef.current.scrollHeight || 0) - previousScrollHeightRef.current;
+      historyRef.current.scrollTop += diff;
     }
-  }, [thread]);
+    // re-run when thread changes because new messages appended
+  }, [thread, isFetchingMore, hasMoreThreadData]);
 
-  useEffect(() => {
-    if (historyRef?.current && threadPage === 1) {
-      historyRef.current.scrollTop = historyRef?.current?.scrollHeight;
-    }
-  }, [threadPage]);
+  // Show/hide "scroll to bottom" button
+  const onScroll = handleScroll; // stable
 
-  useEffect(() => {
-    if (historyRef?.current && contentRef?.current) {
-      setFlexDirection(contentRef?.current?.clientHeight < historyRef?.current?.clientHeight ? "column" : "column-reverse");
-    }
-  }, [thread]);
-
-  const handleScroll = useCallback(() => {
-    if (!historyRef?.current) return;
-    const { scrollTop, clientHeight } = historyRef?.current;
-    setShowScrollToBottom(scrollTop + clientHeight < clientHeight);
-  }, []);
-
-
+  // Window message listener (with cleanup)
   useEffect(() => {
     const handleEvent = (event) => {
-      let data;
-      if (event.data.type === "FRONT_END_ACTION")
-        data = event?.data?.data
-        if(data)
-        {
-          setPromptToUpdate(data?.prompt || data)
-          openModal(MODAL_TYPE?.HISTORY_PAGE_PROMPT_UPDATE_MODAL)
-        }
-    }
-    window.addEventListener('message', handleEvent);
-  }, [])
-
-  useEffect(() => {
-    if (historyRef?.current) {
-      historyRef?.current?.addEventListener("scroll", handleScroll);
-      handleScroll();
-    }
-
-    return () => {
-      historyRef?.current?.removeEventListener("scroll", handleScroll);
+      if (event?.data?.type !== 'FRONT_END_ACTION') return;
+      const data = event?.data?.data;
+      if (data) {
+        setPromptToUpdate(data?.prompt || data);
+        openModal(MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL);
+      }
     };
-  }, [handleScroll]);
+    window.addEventListener('message', handleEvent);
+    return () => window.removeEventListener('message', handleEvent);
+  }, []);
 
-  const scrollToSearchedMessage = async (messageId) => {
-    if (!messageId) {
-      console.warn("Invalid messageId provided. Aborting scroll.");
-      return;
-    }
+  // Scroll to searched message
+  const scrollToSearchedMessage = useCallback(async (messageId) => {
+    if (!messageId || !historyRef.current) return;
 
-    const container = historyRef?.current;
-    if (!container) {
-      console.warn("No container available for scrolling.");
-      return;
-    }
-    const MAX_ATTEMPTS = threadMessageState?.totalEntries / threadMessageState?.totalPages;
+    const MAX_ATTEMPTS = threadMessageState?.totalPages || 1;
     const DELAY_MS = 100;
 
     const findMessageAndScroll = async (attempt = 1) => {
-      const messageElement = threadRefs?.current?.[messageId];
-
+      const messageElement = threadRefs.current?.[messageId];
       if (messageElement) {
-        messageElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
+        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
-      } else if (attempt < MAX_ATTEMPTS) {
+      }
+      if (attempt < MAX_ATTEMPTS) {
         scrollToTop(historyRef, messageId);
-        await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
+        await new Promise((r) => setTimeout(r, DELAY_MS));
         await findMessageAndScroll(attempt + 1);
-      } else {
-        console.warn(`Message with ID ${messageId} not found after ${MAX_ATTEMPTS} attempts.`);
       }
     };
+
     findMessageAndScroll();
-  };
+  }, [threadMessageState?.totalPages]);
 
   useEffect(() => {
-    if (searchMessageId) {
-      scrollToSearchedMessage(searchMessageId);
-    }
-  }, [searchMessageId]);
-
-  useEffect(() => {
-    if (!showScrollToBottom) {
-      scrollToBottom(historyRef);
-    }
-  }, [thread, showScrollToBottom]);
-
-  const formatDateAndTime = (created_at) => {
-    const date = new Date(created_at);
-    const options = {
-      year: "numeric",
-      month: "numeric",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    };
-    return isNaN(date.getTime()) ? "Invalid Date" : date.toLocaleDateString("en-US", options);
-  };
-
-  const handleSave = useCallback((item) => {
-      if (modalInput?.content?.trim() === "") {
-        alert("Message cannot be empty.");
-        return;
-      }
-      dispatch(updateContentHistory({
-        id: modalInput?.Id,
-        bridge_id: params.id,
-        message: modalInput.content,
-        index: modalInput.index
-      }));
-      setModalInput("");
-      closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
-    }, [modalInput]);
-
-    const handleClose = useCallback(() => {
-        setModalInput("");
-        closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
-      }, []);
+    if (searchMessageId) scrollToSearchedMessage(searchMessageId);
+  }, [searchMessageId, scrollToSearchedMessage]);
 
   return (
     <div className="drawer-content flex flex-col items-center overflow-hidden justify-center">
@@ -284,45 +349,42 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         <div
           id="scrollableDiv"
           ref={historyRef}
+          onScroll={onScroll}
           className="w-full text-start flex flex-col h-screen overflow-y-auto relative"
           style={{
-            height: "90vh",
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: flexDirection,
+            height: '90vh',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection,
           }}
         >
-          {/* Loading skeleton with absolute positioning */}
+          {/* Loading skeleton overlay */}
           {loadingData && (
-            <div className="absolute inset-0 z-10 bg-base-100 backdrop-blur-sm">
+            <div className="absolute inset-0 z-10 bg-base-100/80 backdrop-blur-sm">
               <ChatLoadingSkeleton />
             </div>
           )}
-          
+
           {!loadingData && (!thread || thread.length === 0) ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500 text-lg">No history present</p>
             </div>
           ) : (
             <InfiniteScroll
-              dataLength={thread?.length}
+              dataLength={thread?.length || 0}
               next={fetchMoreThreadData}
-              hasMore={hasMoreThreadData}
-              loader={<p></p>}
+              hasMore={!!hasMoreThreadData}
+              loader={<p />}
               scrollThreshold="250px"
-              inverse={flexDirection === "column-reverse"}
+              inverse={flexDirection === 'column-reverse'}
               scrollableTarget="scrollableDiv"
             >
-              <div
-                ref={contentRef}
-                className="pb-16 px-3 pt-4"
-                style={{ width: "100%" }}
-              >
-                {thread &&
-                  thread?.map((item, index) => (
+              <div ref={contentRef} className="pb-16 px-3 pt-4" style={{ width: '100%' }}>
+                {Array.isArray(thread) &&
+                  thread.map((item, index) => (
                     <ThreadItem
                       key={index}
-                      params={params}
+                      params={{ org_id: orgId, id: bridgeId }}
                       index={index}
                       item={item}
                       threadHandler={threadHandler}
@@ -344,15 +406,31 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         {showScrollToBottom && (
           <button
             onClick={() => scrollToBottom(historyRef)}
-            className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-low"
+            className="fixed bottom-16 right-4 bg-gray-500 text-white p-2 rounded-full shadow-lg z-[5]"
+            aria-label="Scroll to bottom"
           >
             <CircleDownIcon size={24} />
           </button>
         )}
       </div>
-      <AddTestCaseModal testCaseConversation={testCaseConversation} setTestCaseConversation={setTestCaseConversation} />
-      <HistoryPagePromptUpdateModal params={params} promotToUpdate={promotToUpdate} previousPrompt={previousPrompt}/>
-      <EditMessageModal  setModalInput={setModalInput} handleClose={handleClose} handleSave={handleSave} modalInput={modalInput} />
+
+      <AddTestCaseModal
+        testCaseConversation={testCaseConversation}
+        setTestCaseConversation={setTestCaseConversation}
+      />
+
+      <HistoryPagePromptUpdateModal
+        searchParams={Object.fromEntries(searchParamsHook.entries())}
+        promotToUpdate={promotToUpdate}
+        previousPrompt={previousPrompt}
+      />
+
+      <EditMessageModal
+        setModalInput={setModalInput}
+        handleClose={handleClose}
+        handleSave={handleSave}
+        modalInput={modalInput}
+      />
     </div>
   );
 };

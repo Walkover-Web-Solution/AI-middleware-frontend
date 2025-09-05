@@ -5,7 +5,7 @@ import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, use } from 'react';
 import { useDispatch } from "react-redux";
 import MainLayout from "@/components/layoutComponents/MainLayout";
 import { openModal, toggleSidebar } from "@/utils/utility";
@@ -16,10 +16,12 @@ import SearchItems from "@/components/UI/SearchItems";
 export const runtime = 'edge';
 
 const Page = ({ params }) => {
+  const resolvedParams = use(params);
+  
   const dispatch = useDispatch();
   const { integrationData } = useCustomSelector((state) =>
   ({
-    integrationData: state?.integrationReducer?.integrationData?.[params?.org_id] || [],
+    integrationData: state?.integrationReducer?.integrationData?.[resolvedParams?.org_id] || [],
   })
   );
   const [selectedIntegration, setSelectedIntegration] = useState(null);
@@ -27,8 +29,8 @@ const Page = ({ params }) => {
   const [isSliderOpen, setIsSliderOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(getAllIntegrationDataAction(params?.org_id));
-  }, [dispatch, params?.org_id]);
+    dispatch(getAllIntegrationDataAction(resolvedParams?.org_id));
+  }, [dispatch, resolvedParams?.org_id]);
 
   useEffect(() => {
     setFilterIntegration(integrationData);
@@ -104,7 +106,7 @@ const Page = ({ params }) => {
           )}
         </div>
       </div>
-      <IntegrationModal params={params}/>
+      <IntegrationModal params={resolvedParams}/>
       <GtwyIntegrationGuideSlider data={selectedIntegration} handleCloseSlider={toggleGtwyIntegraionSlider}/>
     </MainLayout>
   );

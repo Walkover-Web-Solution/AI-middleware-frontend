@@ -10,7 +10,7 @@ import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { isPending } from '@/store/reducer/bridgeReducer';
 
-const Layout = ({ children }) => {
+const Layout = async ({ children }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const dispatch = useDispatch();

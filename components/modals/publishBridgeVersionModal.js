@@ -13,7 +13,7 @@ import Modal from "../UI/Modal";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from "../protected";
 
-function PublishBridgeVersionModal({ params, agent_name, agent_description, isEmbedUser }) {
+function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_description, isEmbedUser }) {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [isPublicAgent, setIsPublicAgent] = useState(false);
@@ -112,13 +112,13 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
       await dispatch(
         publishBridgeVersionAction({
           bridgeId: params?.id,
-          versionId: params?.version,
+          versionId: searchParams?.version,
           orgId: params?.org_id,
           isPublic: isPublicAgent,
         })
       );
 
-      isEmbedUser && sendDataToParent("published", { name: agent_name, agent_description: agent_description, agent_id: params?.id, agent_version_id: params?.version }, "Agent Published Successfully")
+      isEmbedUser && sendDataToParent("published", { name: agent_name, agent_description: agent_description, agent_id: params?.id, agent_version_id: searchParams?.version }, "Agent Published Successfully")
 
       dispatch(getAllBridgesAction());
       closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);

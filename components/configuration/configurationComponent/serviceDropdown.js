@@ -7,11 +7,11 @@ import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
 
-function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
+function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef }) {
     const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey,shouldPromptShow } = useCustomSelector((state) => {
-        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeData=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id];
-        const service = bridgeData?.[params?.version]?.service;
+        const service = bridgeData?.[searchParams?.version]?.service;
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
         const modelTypeName = versionData?.configuration?.type?.toLowerCase();
@@ -21,8 +21,8 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
             DEFAULT_MODEL: state?.serviceReducer?.default_model,
             bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
             service: service,
-            prompt: bridgeData?.[params?.version]?.configuration?.prompt || "",
-            bridgeApiKey: bridgeData?.[params?.version]?.apikey_object_id?.[
+            prompt: bridgeData?.[searchParams?.version]?.configuration?.prompt || "",
+            bridgeApiKey: bridgeData?.[searchParams?.version]?.apikey_object_id?.[
                 service === 'openai_response' ? 'openai' : service
             ],
             shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt   
@@ -91,16 +91,16 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
         setSelectedService(newService);
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: { service: newService, configuration: { model: defaultModel } }
         }));
-    }, [dispatch, params.id, params.version]);
+    }, [dispatch, params.id, searchParams?.version]);
 
     const handleGetRecommendations = async () => {
         setIsLoadingRecommendations(true);
         try {
         if(bridgeApiKey && promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""){
-            const response = await modelSuggestionApi({ versionId: params?.version });
+            const response = await modelSuggestionApi({ versionId: searchParams?.version });
             if (response?.success) {
                 setModelRecommendations({
                     available: {

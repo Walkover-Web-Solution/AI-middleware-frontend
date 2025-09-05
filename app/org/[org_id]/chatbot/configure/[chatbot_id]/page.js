@@ -9,23 +9,24 @@ import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getChatBotDetailsAction } from "@/store/action/chatBotAction";
 import { PencilIcon } from "@/components/Icons";
-import { useEffect } from "react";
+import { useEffect, use } from "react";
 import { useDispatch } from "react-redux";
 
 export const runtime = 'edge';
 
 function Page({ params }) {
+    const resolvedParams = use(params);
 
     const { ChatbotDetails, bridgeData } = useCustomSelector((state) => ({
-        ChatbotDetails: (state?.ChatBot?.ChatBotMap?.[params?.chatbot_id] || {}),
-        bridgeData: state?.bridgeReducer?.org?.[params?.org_id]
+        ChatbotDetails: (state?.ChatBot?.ChatBotMap?.[resolvedParams?.chatbot_id] || {}),
+        bridgeData: state?.bridgeReducer?.org?.[resolvedParams?.org_id]
     }))
 
 
     const dispatch = useDispatch()
 
     useEffect(() => {
-        dispatch(getChatBotDetailsAction(params?.chatbot_id))
+        dispatch(getChatBotDetailsAction(resolvedParams?.chatbot_id))
     }, [])
 
 
@@ -37,14 +38,14 @@ function Page({ params }) {
                 <PencilIcon size={16} />
                 <input type="text" placeholder="Enter Chatbot Name" defaultValue={ChatbotDetails?.title} className=" bg-transparent grow border-none p-0 outline-none focus:border-none flex justify-center items-center focus:outline-none  font-semibold" />
             </label>
-            <ChatbotCard params={params} />
-            {bridgeData && <ChatbotSlider params={params} />}
+            <ChatbotCard params={resolvedParams} />
+            {bridgeData && <ChatbotSlider params={resolvedParams} />}
         </div>
         <div className="flex  flex-col w-1/2 overflow-auto p-4 gap-4 ">
             <h1 className="text-2xl font-semibold">Chatbot Configuration</h1>
             <div className="flex flex-col gap-4">
-                <PrivateFormSection params={params} />
-                <FormSection params={params} />
+                <PrivateFormSection params={resolvedParams} />
+                <FormSection params={resolvedParams} />
                 <SecondStep />
             </div>
         </div>

@@ -7,10 +7,10 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import OptimiseBaseModal from './OptimiseBaseModal';
 
-function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessages, thread_id}) { 
+function OptimizePromptModal({ savePrompt, setPrompt, params, searchParams, messages, setMessages, thread_id}) { 
   const dispatch = useDispatch();
   const { prompt, optimizePromptHistory } = useCustomSelector((state) => ({
-    prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+    prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
     optimizePromptHistory: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.optimizePromptHistory || [],
   }));
   const [promptHistory, setPromptHistory] = useState(optimizePromptHistory);
@@ -21,12 +21,12 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
     setCurrentIndex(optimizePromptHistory.length-1);
   }, [optimizePromptHistory]);
 
-  const handleOptimizeApi = async (instructionText, params) => {
+  const handleOptimizeApi = async (instructionText, params, searchParams) => {
     const response = await optimizePromptApi({
       query: instructionText,
       thread_id,
       bridge_id: params.id,
-      version_id: params.version,
+      version_id: searchParams?.version,
     });
 
     const result = typeof response === 'string' ? JSON.parse(response) : response?.data ?? response;
@@ -67,6 +67,7 @@ function OptimizePromptModal({ savePrompt, setPrompt, params, messages, setMessa
       onApply={handleApply}
       onClose={handleClose}
       params={params}
+      searchParams={searchParams}
       messages={messages}
       setMessages={setMessages}
       showHistory={true}
