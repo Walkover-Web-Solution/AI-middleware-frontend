@@ -320,7 +320,7 @@ function MakeStyleEdge(props) {
 const edgeTypes = { default: MakeStyleEdge, smoothstep: MakeStyleEdge, step: MakeStyleEdge, fancy: MakeStyleEdge };
 const defaultEdgeOptions = { type: 'default', style: { animated: true } };
 
-/* ========================= Flow ========================= */
+/* ========================= Flow ======================== */
 function Flow({ params, orchestralData, name, description, createdFlow, setIsLoading, isDrafted, discardedData }) {
   const router = useRouter();
   const dispatch = useDispatch();
