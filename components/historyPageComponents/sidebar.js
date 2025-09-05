@@ -82,25 +82,22 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   }, [params.thread_id]);
 
   useEffect(() => {
-    if (subThreads !== undefined) {
-      setLoadingSubThreads(false);
-      
-      // Automatically select the first subthread when subThreads are loaded
-      if (subThreads?.length > 0 && params.thread_id) {
-        const firstSubThreadId = subThreads[0]?.sub_thread_id;
-        if (firstSubThreadId) {
-          const start = searchParams.get('start');
-          const end = searchParams.get('end');
-          router.push(
-            `${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${firstSubThreadId}&start=${start || ''}&end=${end || ''}`,
-            undefined,
-            { shallow: true }
-          );
-        }
+    if (subThreads?.length > 0 && params.thread_id) {
+      const firstSubThreadId = subThreads[0]?.sub_thread_id;
+      if (firstSubThreadId) {
+        const start = searchParams.get('start');
+        const end = searchParams.get('end');
+        router.push(
+          `${pathName}?version=${params.version}&thread_id=${params.thread_id}&subThread_id=${firstSubThreadId}&start=${start || ''}&end=${end || ''}`,
+          undefined,
+          { shallow: true }
+        );
       }
     }
-  }, [subThreads, params.thread_id, params.subThread_id]);
-
+    setTimeout(() => {
+      setLoadingSubThreads(false);
+    }, 1000);
+  }, [subThreads]);
   const debounce = (func, delay) => {
     let timeoutId;
     return (...args) => {
