@@ -14,7 +14,7 @@ const page = () => {
       <MainLayout>
         <PageHeader
           title=" RAG Embed Integration"
-          docLink="https://app.docstar.io/p/features/rag-embed--1?collectionId=inYU67SKiHgW"
+          docLink="https://gtwy.ai/blogs/features/rag-as-embed"
           description="Embedded RAG allows you to seamlessly integrate the full RAG AI interface directly into any product or website."
         />
       </MainLayout>
