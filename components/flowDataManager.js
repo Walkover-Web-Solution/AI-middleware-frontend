@@ -485,6 +485,10 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
     const { type, status, data } = event.data
     if (type === 'gtwy' && status === "published") {      
       let bridge = agents.find((a) => a._id === data.agent_id);
+      let node = nodes.find((n) => n?.id === data.agent_id);
+      if(node){
+        return
+      }
       if (bridge) {
         onChoose(bridge);
         setOpenAgentConfigSidebar(false);
