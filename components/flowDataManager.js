@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState, useRef } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
-import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
+import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import Chat from './configuration/chat';
 import Link from 'next/link';
@@ -829,7 +829,7 @@ export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId }) {
       script.id = scriptId;
       script.src = scriptURl;
       script.setAttribute('skipLoadGtwy', true);
-      script.setAttribute('token', sessionStorage.getItem('proxy_token') || localStorage.getItem('proxy_token'));
+      script.setAttribute('token', sessionStorage.getItem('proxy_token') || getFromCookies('proxy_token'));
       script.setAttribute('org_id', agent?.org_id);
       script.setAttribute('customIframeId', 'gtwyEmbedInterface');
       script.setAttribute('gtwy_user', true);

@@ -1,4 +1,5 @@
 'use client';
+import { getFromCookies, setInCookies } from "@/utils/utility";
 import { useSearchParams } from "next/navigation";
 import { useLayoutEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -11,9 +12,9 @@ const WithPublicAgentAuth = (Children) => {
     const proxy_auth_token = searchParams.get('proxy_auth_token');
 
     async function runEffect() {
-      const publicAgentToken = localStorage.getItem('publicAgentProxyToken');
+      const publicAgentToken = getFromCookies('publicAgentProxyToken');
       const proxyAuthToken = proxy_auth_token;
-      let redirectionUrl = localStorage.getItem("previous_url") || "/publicAgent";
+      let redirectionUrl = getFromCookies("previous_url") || "/publicAgent";
 
       // if (publicAgentToken) {
       //   return;
@@ -21,7 +22,7 @@ const WithPublicAgentAuth = (Children) => {
 
       if (proxyAuthToken) {
         setLoading(true);
-        localStorage.setItem('publicAgentProxyToken', proxyAuthToken);
+        setInCookies('publicAgentProxyToken', proxyAuthToken);
         
         try {
           window.location.href = "/publicAgent";

@@ -1,6 +1,6 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { filterOrganizations, renderedOrganizations } from '@/utils/utility';
+import { filterOrganizations, renderedOrganizations, setInCookies } from '@/utils/utility';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import Protected from '@/components/protected';
@@ -99,7 +99,7 @@ function Page() {
                     orgId: selectedOrg.id,
                     orgName: selectedOrg.name
                 });
-                localStorage.setItem('local_token', token);
+                setInCookies('local_token', token);
             }
 
             await dispatch(setCurrentOrgIdAction(selectedOrg.id));

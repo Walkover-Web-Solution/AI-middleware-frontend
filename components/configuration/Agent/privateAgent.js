@@ -1,4 +1,5 @@
 'use client'
+import { removeCookie } from '@/utils/utility';
 import { Bot, Lock, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -25,8 +26,8 @@ const PrivateAgent = ({ agents, searchTerm, setSearchTerm }) => {
 
                     <button
                         onClick={() => {
-                            localStorage.removeItem('publicAgentProxyToken');
-                            localStorage.removeItem('privateAgentUserId');
+                            removeCookie('publicAgentProxyToken');
+                            removeCookie('privateAgentUserId');
                             window.location.reload();
                         }}
                         className="btn text-red-500 hover:bg-red-50"

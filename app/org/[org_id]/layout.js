@@ -16,7 +16,7 @@ import { updateUserMetaOnboarding } from "@/store/action/orgAction";
 import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { openModal } from "@/utils/utility";
+import { getFromCookies, openModal, setInCookies } from "@/utils/utility";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
@@ -61,7 +61,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
   }, [pathName]);
   useEffect(() => {
     const updateUserMeta = async () => {
-      const reference_id = localStorage.getItem("reference_id");
+      const reference_id = getFromCookies("reference_id");
         let currentUserMeta = currentUser?.meta;
       // If user meta is null, initialize onboarding meta
       if (currentUser?.meta === null) {
@@ -134,11 +134,11 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
     const applyTheme = (themeToApply) => {
       if (typeof window !== 'undefined') {
         document.documentElement.setAttribute('data-theme', themeToApply);
-        localStorage.setItem("theme", themeToApply);
+        setInCookies("theme", themeToApply);
       }
     };
 
-    const savedTheme = localStorage.getItem("theme") || "system";
+    const savedTheme = getFromCookies("theme") || "system";
     const systemTheme = getSystemTheme();
     
     if (savedTheme === "system") {
@@ -151,7 +151,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleSystemThemeChange = (e) => {
       const newSystemTheme = e.matches ? 'dark' : 'light';
-      const currentSavedTheme = localStorage.getItem("theme") || "system";
+      const currentSavedTheme = getFromCookies("theme") || "system";
       
       // Only update if currently using system theme
       if (currentSavedTheme === "system") {
@@ -266,7 +266,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
   useEffect(() => {
     const onFocus = async () => {
       if (isValidOrg) {
-        const orgId = localStorage.getItem("current_org_id");
+        const orgId = getFromCookies("current_org_id");
         if (orgId !== resolvedParams?.org_id) {
           await switchOrg(resolvedParams?.org_id);
         }
