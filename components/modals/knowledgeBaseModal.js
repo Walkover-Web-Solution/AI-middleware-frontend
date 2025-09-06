@@ -219,6 +219,8 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                     className="file-input file-input-bordered file-input-sm w-full max-w-xs"
                     onChange={handleFileChange}
                     disabled={isLoading || selectedKnowledgeBase}
+                    required={!selectedKnowledgeBase}
+
                   />
                 </div>
               )}
