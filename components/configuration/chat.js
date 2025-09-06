@@ -48,6 +48,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
       const newChat = {
         id: conversation.length + 1,
         sender: "user",
+        playground: true,
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",

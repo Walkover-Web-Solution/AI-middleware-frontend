@@ -8,6 +8,7 @@ import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
 import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import { isPending } from '@/store/reducer/bridgeReducer';
 
 const Layout = async ({ children }) => {
   const searchParams = useSearchParams();
@@ -30,8 +31,8 @@ const Layout = async ({ children }) => {
     dispatch(getServiceAction());
   }, [dispatch]);
 
-  const createNewAgent = useCallback((agent_name, orgId) => {
-    const dataToSend = {
+  const createNewAgent = useCallback((agent_name, orgId, agent_purpose) => {
+    const dataToSend = agent_purpose ? {purpose: agent_purpose.trim()} : {
       service: 'openai',
       model: 'gpt-4o',
       name: agent_name.trim(),
@@ -39,7 +40,7 @@ const Layout = async ({ children }) => {
       bridgeType: 'api',
       type: 'chat',
     };
-
+    dispatch(isPending())
     dispatch(
       createBridgeAction({ dataToSend, orgid: orgId }, response => {
         if (response?.data?.bridge) {
@@ -51,7 +52,7 @@ const Layout = async ({ children }) => {
             },
             'Agent created Successfully'
           );
-          router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}`);
+          router.push(`/org/${orgId}/agents/configure/${response.data.bridge._id}?version=${response.data.bridge.versions[0]}`);
         }
         setIsLoading(false);
         setProcessedAgentName(agent_name);
@@ -134,10 +135,13 @@ const Layout = async ({ children }) => {
         }
 
         if (urlParamsObj?.agent_name) {
+          setIsLoading(true)
           setCurrentAgentName(urlParamsObj.agent_name);
         } else if (urlParamsObj?.agent_id) {
+          setIsLoading(true)
           router.push(`/org/${urlParamsObj.org_id}/agents/configure/${urlParamsObj.agent_id}?isEmbedUser=true`);
         } else {
+          setIsLoading(true)
           router.push(`/org/${urlParamsObj.org_id}/agents?isEmbedUser=true`);
         }
       } else {
@@ -159,15 +163,22 @@ const Layout = async ({ children }) => {
 
   useEffect(() => {
     const handleMessage = async (event) => {
+
       if (event.data?.data?.type !== "gtwyInterfaceData") return;
 
       const messageData = event.data.data.data;
       const orgId = sessionStorage.getItem('gtwy_org_id');
       if (messageData?.agent_name) {
+        setIsLoading(true)
         handleAgentNavigation(messageData.agent_name, orgId)
       } else if (messageData?.agent_id && orgId) {
-        setIsLoading(true);
-        await router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+        // setIsLoading(true);
+        router.push(`/org/${orgId}/agents/configure/${messageData.agent_id}`);
+      }
+      else if(messageData?.agent_purpose)
+      {
+        createNewAgent('', orgId, messageData.agent_purpose)
+        setIsLoading(true);  
       }
       if(messageData?.meta && messageData?.agent_id && orgId){
         let bridges = allBridges;
