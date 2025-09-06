@@ -16,7 +16,7 @@ export const metadata = {
 
 export const runtime = 'edge';
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
   return (
     <html lang="en" data-theme="light">
       <Head>

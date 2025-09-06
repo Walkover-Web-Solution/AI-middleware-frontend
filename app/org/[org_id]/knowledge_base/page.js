@@ -9,7 +9,7 @@ import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/acti
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
 import { closeModal, GetFileTypeIcon, openModal } from "@/utils/utility";
 import { EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, use } from 'react';
 import { useDispatch } from "react-redux";
 import DeleteModal from "@/components/UI/DeleteModal";
 import SearchItems from "@/components/UI/SearchItems";
@@ -17,8 +17,9 @@ import SearchItems from "@/components/UI/SearchItems";
 export const runtime = 'edge';
 
 const Page = ({ params }) => {
+  const resolvedParams = use(params);
   const dispatch = useDispatch();
-  const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id]) || [];
+  const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[resolvedParams?.org_id]) || [];
   const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData)
@@ -31,7 +32,7 @@ const Page = ({ params }) => {
         setViewMode('table');
       }
     };
-    dispatch(getAllKnowBaseDataAction(params?.org_id))
+    dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
     updateScreenSize();
     setFilterKnowledgeBase(knowledgeBaseData)
     window.addEventListener('resize', updateScreenSize);
@@ -59,7 +60,7 @@ const Page = ({ params }) => {
 
   const handleDeleteKnowledgebase = (item) => {
     closeModal(MODAL_TYPE.DELETE_MODAL);
-    dispatch(deleteKnowBaseDataAction({ data: { id: item?._id, orgId: params?.org_id } }))
+    dispatch(deleteKnowBaseDataAction({ data: { id: item?._id, orgId: resolvedParams?.org_id } }))
   };
   const EndComponent = ({ row }) => {
     return (
@@ -86,7 +87,7 @@ const Page = ({ params }) => {
     const handleMessage = (e) => {
       if (e.data?.type === 'rag') {
         if (e.data?.status === "create") {
-          dispatch(getAllKnowBaseDataAction(params.org_id));
+          dispatch(getAllKnowBaseDataAction(resolvedParams.org_id));
         }
       }
     }
@@ -94,7 +95,7 @@ const Page = ({ params }) => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [params.org_id]);
+  }, [resolvedParams.org_id]);
 
   return (
     <div className="w-full">
@@ -107,7 +108,7 @@ const Page = ({ params }) => {
               docLink="https://blog.gtwy.ai/features/knowledgebase"
             />
             <div className="flex-shrink-0 mt-4 sm:mt-0">
-              <button className="btn btn-primary" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } }}>+ create knowledge base</button>
+              <button className="btn btn-primary" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } }}>+ Create Knowledge Base</button>
             </div>
           </div>
         </MainLayout>
@@ -184,7 +185,7 @@ const Page = ({ params }) => {
         )}
       </div>
 
-      <KnowledgeBaseModal params={params} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} knowledgeBaseData={knowledgeBaseData} />
+      <KnowledgeBaseModal params={resolvedParams} selectedKnowledgeBase={selectedKnowledgeBase} setSelectedKnowledgeBase={setSelectedKnowledgeBase} knowledgeBaseData={knowledgeBaseData} />
       <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedDataToDelete} title="Delete knowledgeBase " description={`Are you sure you want to delete the KnowledgeBase "${selectedDataToDelete?.actual_name}"? This action cannot be undone.`} />
     </div>
   );

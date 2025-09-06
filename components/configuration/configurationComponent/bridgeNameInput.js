@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-function BridgeNameInput({ params, isEmbedUser }) {
+function BridgeNameInput({ params, searchParams, isEmbedUser }) {
   const dispatch = useDispatch();
   const { bridgeName } = useCustomSelector((state) => ({
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",

@@ -316,6 +316,25 @@ export const AVAILABLE_MODEL_TYPES = {
   EMBEDDING: 'embedding',
   REASONING: 'reasoning',
 };
+// Canonical descriptions for finish_reason values
+export const FINISH_REASON_DESCRIPTIONS = {
+  "completed": "Model completed naturally at a logical stopping point or due to a defined stop sequence.",
+  "truncated": "Response truncated because it exceeded the configured token limit.",
+  "tool_call": "Model stopped to invoke a function or external tool instead of continuing text.",
+  "safety_block": "Generation halted because content violated safety or policy filters.",
+  "no_reason": "No explicit finish reason provided (common for intermediate streaming chunks).",
+  "failure": "Generation failed due to an unexpected error (e.g., transient internal failure).",
+  "stop_sequence": "Model stopped after emitting a user-defined stop sequence.",
+  "timeout": "Processing time exceeded the allowed limit and was terminated.",
+  "end_of_context": "Model finished because the provided input context was fully processed.",
+  "recitation_block": "Generation halted because output closely matched training data to prevent regurgitation.",
+  "other": "Generation stopped for an unspecified or rare internal condition.",
+  "paused": "Operation paused for long-running external processing (e.g., search or tool).",
+  "eos": "Model emitted its end-of-sequence (EOS) token and ended naturally.",
+  "rate_limited": "Request halted due to service rate limits or quota being exceeded.",
+  "server_error": "Terminated due to a backend service error unrelated to the prompt.",
+  "cancelled": "Request was explicitly cancelled by the client or server."
+};
 
 export const MODAL_TYPE = {
   CREATE_VARIABLE: 'CREATE_VARIABLE',
@@ -343,12 +362,12 @@ export const MODAL_TYPE = {
   AGENT_DESCRIPTION_MODAL: "AGENT_DESCRIPTION_MODAL",
   AGENT_VARIABLE_MODAL: "AGENT_VARIABLE_MODAL",
   TUTORIAL_MODAL: "TUTORIAL_MODAL",
-  EDIT_MESSAGE_MODAL:"EDIT_MESSAGE_MODAL",
+  EDIT_MESSAGE_MODAL: "EDIT_MESSAGE_MODAL",
   INTEGRATION_MODAL: "INTEGRATION_MODAL",
   INTEGRATION_GUIDE_MODAL: "INTEGRATION_GUIDE_MODAL",
   AUTH_DATA_MODAL: "AUTH_DATA_MODAL",
-  DELETE_MODAL:"DELETE_MODAL",
-  BRIDGE_TYPE_MODAL:"BRIDGE_TYPE_MODAL",
+  DELETE_MODAL: "DELETE_MODAL",
+  BRIDGE_TYPE_MODAL: "BRIDGE_TYPE_MODAL",
   ADD_NEW_MODEL_MODAL: "ADD_NEW_MODEL_MODAL",
   USAGE_DETAILS_MODAL: "USAGE_DETAILS_MODAL",
   ORCHESTRAL_AGENT_PARAMETER_MODAL: "ORCHESTRAL_AGENT_PARAMETER_MODAL"
@@ -479,7 +498,7 @@ export const ONBOARDING_VIDEOS = {
   Addvariables: "https://app.supademo.com/embed/cm9tlymzp0pmg11m7bp00secd?embed_v=2",
   AdvanceParameter: "https://app.supademo.com/embed/cm9tmzys20q8311m7cnj8f644?embed_v=2",
   PauthKey: "https://app.supademo.com/embed/cm9tnfa010qk311m7nfksikbn?embed_v=2",
-  TestCases:"https://app.supademo.com/embed/cmav1ocfu4thnho3rijvpzlrq?embed_v=2"
+  TestCases: "https://app.supademo.com/embed/cmav1ocfu4thnho3rijvpzlrq?embed_v=2"
 }
 
 export const AGENT_SETUP_GUIDE_STEPS = [
@@ -562,9 +581,9 @@ export const TUTORIALS = [
     icon: BookIcon
   },
   {
-   title:'TestCases Creation',
-   description:'Set up TestCase',
-   videoUrl:"https://app.supademo.com/embed/cmav1ocfu4thnho3rijvpzlrq?embed_v=2",
-   icon: TestTubeDiagonalIcon
+    title: 'TestCases Creation',
+    description: 'Set up TestCase',
+    videoUrl: "https://app.supademo.com/embed/cmav1ocfu4thnho3rijvpzlrq?embed_v=2",
+    icon: TestTubeDiagonalIcon
   }
 ];

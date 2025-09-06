@@ -14,7 +14,6 @@ import LoadingSpinner from '@/components/loadingSpinner';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { switchUser } from '@/config';
 
-const URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const INITIAL_FORM_STATE = {
     bridgeName: '',
     selectedOrg: null,
@@ -28,7 +27,7 @@ const INITIAL_FORM_STATE = {
     template_Id: '',
 };
 
-function Page({ params }) {
+function Page() {
     const dispatch = useDispatch();
     const route = useRouter();
     const searchParams = useSearchParams();
@@ -46,7 +45,7 @@ function Page({ params }) {
 
      useEffect(() => {
         if(!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-            dispatch(getServiceAction({ orgid: params?.orgid }))
+            dispatch(getServiceAction())
         }
     }, [SERVICES]);
 

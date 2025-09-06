@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, use } from 'react';
 import {
   ReactFlow,
   applyNodeChanges,
@@ -978,7 +978,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         params={params}
       />
 
-      <AgentConfigSidebar isOpen={configSidebar.isOpen} onClose={closeConfigSidebar} agent={configSidebar.agent} />
+      <AgentConfigSidebar isOpen={configSidebar.isOpen} onClose={closeConfigSidebar} agent={configSidebar.agent} instanceId="agent-configuration-sidebar"/>
       <IntegrationGuide isOpen={integrationGuide.isOpen} onClose={closeIntegrationGuide} params={params} />
 
       <FunctionParameterModal

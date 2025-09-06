@@ -12,12 +12,12 @@ import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new c
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
+const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
-        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-        serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type || "",
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service || "",
-        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
+        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
+        serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type || "",
+        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service || "",
+        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
     }));
 
     const [keyName, setKeyName] = useState('');
@@ -53,7 +53,7 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
 
     if (newValue !== reduxPrompt.trim()) {
       dispatch(updateBridgeVersionAction({
-        versionId: params.version,
+        versionId: searchParams?.version,
         dataToSend: {
           configuration: {
             prompt: newValue
@@ -61,7 +61,7 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
         }
       }));
     }
-  }, [dispatch, params.version, reduxPrompt]);
+  }, [dispatch, searchParams?.version, reduxPrompt]);
     const getCaretCoordinatesAdjusted = () => {
         if (textareaRef.current) {
             const textarea = textareaRef.current;
@@ -360,12 +360,12 @@ const InputConfigComponent = ({ params , promptTextAreaRef  }) => {
         </div>
       </div>
       <div className='flex mt-2'>
-        <ToneDropdown params={params} />
-        <ResponseStyleDropdown params={params} />
+        <ToneDropdown params={params} searchParams={searchParams} />
+        <ResponseStyleDropdown params={params} searchParams={searchParams} />
       </div>
-      <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} />
-      <OptimizePromptModal savePrompt={savePrompt} setPrompt={setPrompt} params={params} messages={messages} setMessages={setMessages} thread_id={thread_id} />
-      <PromptSummaryModal params={params} />
+      <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} searchParams={searchParams} />
+      <OptimizePromptModal savePrompt={savePrompt} setPrompt={setPrompt} params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} />
+      <PromptSummaryModal params={params} searchParams={searchParams} />
     </div>
   );
 };

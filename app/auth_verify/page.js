@@ -9,7 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import { getClientInfo, switchOrg, verifyAuth } from '@/config';
 import { BuildingIcon } from '@/components/Icons';
 
-const Page = ({ params }) => {
+const Page = () => {
     const [formState, setFormState] = useState({
         searchQuery: '',
         selectedOrg: null,

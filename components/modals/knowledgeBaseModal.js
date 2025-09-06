@@ -7,7 +7,7 @@ import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/sto
 import Modal from '../UI/Modal';
 import { toast } from 'react-toastify';
 
-const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {}, knowledgeBaseData=[] }) => {
+const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {}, knowledgeBaseData=[]}) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSectionType, setSelectedSectionType] = useState('default');

@@ -51,7 +51,7 @@ const ITEM_ICONS = {
   metrics: <BarChart3 size={16} />,
   knowledge_base: <BookOpen size={16} />,
   feedback: <MessageSquareMore size={16} />,
-  RAG_Embed: <Blocks size={16} /> ,
+  RAG_embed: <Blocks size={16} /> ,
   integration: <Blocks size={16} />
 };
 
@@ -59,7 +59,7 @@ const NAV_SECTIONS = [
   { items: ['agents', 'orchestratal_model', 'chatbotConfig','knowledge_base'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
-  { title: 'Developer', items: ['integration', 'RAG_Embed'] },
+  { title: 'Developer', items: ['integration', 'RAG_embed'] },
   { title: 'TEAM & COLLABORATION', items: ['invite'] }
 ];
 
@@ -128,7 +128,7 @@ function MainSlider({ isEmbedUser }) {
       'speak-to-us': 'Speak to Us',
       integration: 'GTWY as Embed',
       settings: 'Settings',
-      rag_as_Embed: 'RAG as Embed',
+      RAG_embed: 'RAG as Embed',
       invite: 'Members'
     };
     return names[key] || key.charAt(0).toUpperCase() + key.slice(1);

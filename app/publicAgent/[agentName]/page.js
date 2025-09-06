@@ -7,16 +7,18 @@ import { AgentChatBot } from '@/components/configuration/Agent/AgentChatbot';
 import { clearAgentsData } from '@/store/reducer/gwtyAgentReducer';
 import { getAllAgentAction, publicAgentLoginAction } from '@/store/action/gttwyAgentAction';
 import { useDispatch } from 'react-redux';
+import { use } from 'react';
 
 export const runtime = 'edge';
 
 const Page = ({ params }) => {
+  const resolvedParams = use(params)
   const router = useRouter();
   const dispatch = useDispatch();
   const gtwyAgent = useCustomSelector((state) => state?.gtwyAgentReducer?.gwtyAgent);
   const { publicAgentData, privateAgentData, privateAgent, publicAgent } = gtwyAgent || {};
   
-  const selectedAgent = publicAgent?.find((agent) => agent.page_config.url_slugname === params.agentName) || privateAgent?.find((agent) => agent.page_config.url_slugname === params.agentName);
+  const selectedAgent = publicAgent?.find((agent) => agent.page_config.url_slugname === resolvedParams.agentName) || privateAgent?.find((agent) => agent.page_config.url_slugname === resolvedParams.agentName);
   const isPublicAgent = selectedAgent?.page_config?.availability === 'public';
 
   const token = useMemo(() => {
@@ -28,11 +30,11 @@ const Page = ({ params }) => {
       dispatch(clearAgentsData())
       dispatch(publicAgentLoginAction()).then(() => {
         dispatch(getAllAgentAction()).then(() => {
-          router.push(`/publicAgent/${params.agentName}`)
+          router.push(`/publicAgent/${resolvedParams.agentName}`)
         })
       })
     }
-  }, [params.agentName, router, dispatch]);
+  }, [resolvedParams.agentName, router, dispatch]);
 
   const onSelectAgent = (agentId) => {
     router.push(`/publicAgent/${agentId}`);
@@ -41,7 +43,7 @@ const Page = ({ params }) => {
   useEffect(() => {
     if(localStorage.getItem('AgentToken')) {
       dispatch(getAllAgentAction()).then(() => {
-        router.push(`/publicAgent/${params.agentName}`)
+        router.push(`/publicAgent/${resolvedParams.agentName}`)
       })
     }
   }, []);
@@ -88,7 +90,7 @@ const Page = ({ params }) => {
         <AgentSidebar
           publicAgents={publicAgent}
           privateAgents={privateAgent}
-          selectedAgentId={params.agentName}
+          selectedAgentId={resolvedParams.agentName}
           onSelectAgent={onSelectAgent}
         />
         <div className='flex-1'>

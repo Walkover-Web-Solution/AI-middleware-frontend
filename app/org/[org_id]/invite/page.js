@@ -9,7 +9,7 @@ import SearchItems from '@/components/UI/SearchItems';
 
 export const runtime = 'edge';
 
-function InvitePage({ params }) {
+function InvitePage() {
   const [email, setEmail] = useState('');
   const [invitedMembers, setInvitedMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);

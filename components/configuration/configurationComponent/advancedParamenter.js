@@ -12,7 +12,7 @@ import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const AdvancedParameters = ({ params }) => {
+const AdvancedParameters = ({ params, searchParams }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState();
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,7 +27,7 @@ const AdvancedParameters = ({ params }) => {
   const dispatch = useDispatch();
 
   const { service, version_function_data, configuration, integrationData, isFirstParameter } = useCustomSelector((state) => {
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
     const user = state.userDetailsReducer.userDetails
     return {
@@ -91,7 +91,7 @@ const AdvancedParameters = ({ params }) => {
       }
     };
     if ((isSlider ? Number(newValue) : e.target.type === 'checkbox' ? newCheckedValue : newValue) !== configuration?.[key]) {
-      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { ...updatedDataToSend } }));
+      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
 
@@ -130,7 +130,7 @@ const AdvancedParameters = ({ params }) => {
       }
     }
     if (e.target.value !== configuration?.[key]) {
-      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: { ...updatedDataToSend } }));
+      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
 
@@ -149,7 +149,7 @@ const AdvancedParameters = ({ params }) => {
       }
     };
     if (value !== configuration?.[key]) {
-      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: updatedDataToSend }));
+      dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
     }
   };
 
@@ -160,8 +160,8 @@ const AdvancedParameters = ({ params }) => {
         [key]: newValue
       }
     };
-    dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params?.version, dataToSend: updatedDataToSend }));
-  }, [dispatch, params?.id, params?.version]);
+    dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
+  }, [dispatch, params?.id, searchParams?.version]);
 
   return (
     <div className="z-very-low mt-4 text-base-content w-full cursor-pointer" tabIndex={0}>
@@ -201,7 +201,9 @@ const AdvancedParameters = ({ params }) => {
                   <div>
                     <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
                       {field === 'slider' && (<li><a onClick={() => setSliderValue("min", key)} className={configuration?.[key] === "min" ? 'bg-base-content text-base-100' : ''}>Min</a></li>)}
-                      <div className="tooltip" data-tip="If you set default, this key will not be send"><li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li></div>
+                      <InfoTooltip tooltipContent="If you set default, this key will not be send">
+                        <li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li>
+                      </InfoTooltip>
                       {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
                     </ul>
                   </div>

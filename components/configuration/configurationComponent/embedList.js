@@ -27,7 +27,7 @@ function getStatusClass(status) {
     }
 };
 
-const EmbedList = ({ params }) => {
+const EmbedList = ({ params, searchParams }) => {
     const [functionId, setFunctionId] = useState(null);
     const [functionData, setfunctionData] = useState({});
     const [toolData, setToolData] = useState({});
@@ -35,7 +35,7 @@ const EmbedList = ({ params }) => {
     const [variablesPath, setVariablesPath] = useState({});
     const dispatch = useDispatch();
     const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path } = useCustomSelector((state) => {
-        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
@@ -67,7 +67,7 @@ const EmbedList = ({ params }) => {
         if (functionId) {
             dispatch(updateBridgeVersionAction({
                 bridgeId: params.id,
-                versionId: params.version,
+                versionId: searchParams?.version,
                 dataToSend: {
                     functionData: {
                         function_id: functionId,
@@ -82,7 +82,7 @@ const EmbedList = ({ params }) => {
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params.id,
-                versionId: params.version,
+                versionId: searchParams?.version,
                 dataToSend: {
                     functionData: {
                         function_id: functionId,
@@ -110,7 +110,7 @@ const EmbedList = ({ params }) => {
             dispatch(
                 updateBridgeVersionAction({
                     bridgeId: params.id,
-                    versionId: params.version,
+                    versionId: searchParams?.version,
                     dataToSend: { variables_path: { [function_name]: variablesPath } },
                 })
             );
@@ -122,7 +122,6 @@ const EmbedList = ({ params }) => {
             <FunctionParameterModal
                 name="Tool"
                 functionId={functionId}
-                params={params}
                 Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL}
                 embedToken={embedToken}
                 handleRemove={handleRemoveFunctionFromBridge}
@@ -148,7 +147,7 @@ const EmbedList = ({ params }) => {
                     </>
                 }
             </div>
-            <EmbedListSuggestionDropdownMenu name={"Function"} params={params} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />
+            <EmbedListSuggestionDropdownMenu name={"Function"} params={params} searchParams={searchParams} onSelect={handleSelectFunction} connectedFunctions={bridge_functions} shouldToolsShow={shouldToolsShow} modelName={model} />
         </div>
     );
 };

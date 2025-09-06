@@ -50,7 +50,7 @@ const Section = ({ title, caption, children }) => (
     </div>
 );
 
-const BatchApiGuide = ({ params }) => {
+const BatchApiGuide = ({ params, searchParams }) => {
     return (
         <div className="min-h-screen gap-4 flex flex-col">
             <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-md p-4">
@@ -63,10 +63,10 @@ const BatchApiGuide = ({ params }) => {
             <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-md p-4">
                 <Section title="Step 2" caption="Use the Batch API" />
                 <div className="mockup-code relative">
-                    <CopyButton data={BatchApi(params.id, params.version)} />
+                    <CopyButton data={BatchApi(params.id, searchParams?.version)} />
                     <pre className="break-words whitespace-pre-wrap ml-4">
                         <code>
-                            {BatchApi(params.id, params.version)}
+                            {BatchApi(params.id, searchParams?.version)}
                         </code>
                     </pre>
                 </div>

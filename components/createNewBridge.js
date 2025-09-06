@@ -12,24 +12,24 @@ import { getServiceAction } from "@/store/action/serviceAction";
 import Protected from "./protected";
 import CreateBridgeCards from "./CreateBridgeCards";
 
-  function CreateNewBridge({ orgid, isEmbedUser }) {
+function CreateNewBridge({ orgid, isEmbedUser }) {
     const [selectedService, setSelectedService] = useState('openai');
-    const [selectedModel, setSelectedModel] = useState("gpt-4o");
-    const [selectedType, setSelectedType] = useState("chat");
-    const [bridgeType, setBridgeType] = useState("api");
-    const [isManualMode, setIsManualMode] = useState(false);
-    const textAreaPurposeRef = useRef();
-    const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState("api");
-    const [validationErrors, setValidationErrors] = useState({
-        bridgeType: "",
+  const [selectedModel, setSelectedModel] = useState("gpt-4o");
+  const [selectedType, setSelectedType] = useState("chat");
+  const [bridgeType, setBridgeType] = useState("api");
+  const [isManualMode, setIsManualMode] = useState(false);
+  const textAreaPurposeRef = useRef();
+  const [selectedBridgeTypeCard, setSelectBridgeTypeCard] = useState("api");
+  const [validationErrors, setValidationErrors] = useState({
+    bridgeType: "",
         purpose: ""
-    });
+  });
     const [globalError, setGlobalError] = useState(""); // New state for global error messages
 
     const { allBridgeList, modelsList, SERVICES, showAgentType } = useCustomSelector((state) => ({
-        SERVICES: state?.serviceReducer?.services,
-        allBridgeList: state.bridgeReducer.org[orgid]?.orgs || [],
-        modelsList: state?.modelReducer?.serviceModels[selectedService],
+      SERVICES: state?.serviceReducer?.services,
+      allBridgeList: state.bridgeReducer.org[orgid]?.orgs || [],
+      modelsList: state?.modelReducer?.serviceModels[selectedService],
         showAgentType: state?.userDetailsReducer?.userDetails?.showAgentTypeOnCreateAgent
     }));
     
@@ -39,130 +39,134 @@ import CreateBridgeCards from "./CreateBridgeCards";
         }
     }, [SERVICES]);
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [isAiLoading, setIsAiLoading] = useState(false);
-    const dispatch = useDispatch();
-    const route = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const dispatch = useDispatch();
+  const route = useRouter();
 
-    useEffect(() => {
-        if (selectedService && !modelsList) {
+  useEffect(() => {
+    return () => {
+      closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
+    };
+  }, []);
+
+
+  useEffect(() => {
+    if (selectedService && !modelsList) {
             dispatch(getModelAction({ service: selectedService }))
-        }
-    }, [selectedService]);
+    }
+  }, [selectedService]);
 
-    
-    const handleBridgeTypeSelection = (type) => {
-        setSelectBridgeTypeCard(type);
+
+  const handleBridgeTypeSelection = (type) => {
+    setSelectBridgeTypeCard(type);
         setValidationErrors(prev => ({ ...prev, bridgeType: "" }));
         setGlobalError(""); // Clear global error when making a new selection
-    };
+  };
 
     // Clear validation error when typing in textarea
-    const handlePurposeInput = () => {
+  const handlePurposeInput = () => {
         setValidationErrors(prev => ({ ...prev, purpose: "" }));
         setGlobalError(""); // Clear global error when typing
-    };
+  };
 
     const createBridgeHandler = (name, slugname) => {
       name = isEmbedUser ? 'untitled' : 'Untitled';
       const matches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.name?.match(/^untitled_agent_(?:\d+)$/)) : allBridgeList?.filter(bridge => bridge?.name?.match(/^Untitled(?:(\d+))?$/));
-      const newCount = matches?.length + 1 || 0;
+    const newCount = matches?.length + 1 || 0;
       name = isEmbedUser ? `untitled_agent_${newCount}` : `Untitled${newCount}`;
       const slugNameMatches = isEmbedUser ? allBridgeList?.filter(bridge => bridge?.slugName?.match(/^untitled_agent_(?:\d+)$/)) : allBridgeList?.filter(bridge => bridge?.slugName?.match(/^Untitled(?:(\d+))?$/));
-      const slugNameCount = slugNameMatches?.length + 1 || 0;
+    const slugNameCount = slugNameMatches?.length + 1 || 0;
       slugname = isEmbedUser ? `untitled_agent_${slugNameCount}` : `Untitled${slugNameCount}`
-      if (!selectedBridgeTypeCard) {
+    if (!selectedBridgeTypeCard) {
         setValidationErrors(prev => ({ ...prev, bridgeType: "Select Agent Type" }));
-        return;
-      }
+      return;
+    }
 
-      if (name.length > 0 && selectedModel && selectedBridgeTypeCard) {
-        setIsLoading(true);
-        const dataToSend = {
+    if (name.length > 0 && selectedModel && selectedBridgeTypeCard) {
+      setIsLoading(true);
+      const dataToSend = {
           "service": selectedService,
           "model": selectedModel,
           "name": name,
           "slugName": slugname || name,
           "bridgeType":isEmbedUser && !showAgentType ? "api" : selectedBridgeTypeCard || bridgeType,
           "type": selectedType,
-        };
+      };
         dispatch(createBridgeAction({ dataToSend: dataToSend, orgid }, (data) => {
           // setShowFileUploadModal(false);
           isEmbedUser && sendDataToParent("drafted", {name: data?.bridge?.name, agent_id: data?.bridge?._id}, "Agent created Successfully")
           route.push(`/org/${orgid}/agents/configure/${data.data.bridge._id}?version=${data.data.bridge.versions[0]}`);
-          closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
           setIsLoading(false);
           cleanState();
         })).catch(() => {
-          setIsLoading(false);
-        });
-      }
-    };
+        setIsLoading(false);
+      });
+    }
+  };
 
-    const cleanState = () => {
-        setSelectedService("openai");
-        setSelectedModel("gpt-4o");
-        setSelectedType("chat");
-        setBridgeType("api");
-        setIsManualMode(false);
-        setValidationErrors({ bridgeType: "", purpose: "" });
+  const cleanState = () => {
+    setSelectedService("openai");
+    setSelectedModel("gpt-4o");
+    setSelectedType("chat");
+    setBridgeType("api");
+    setIsManualMode(false);
+    setValidationErrors({ bridgeType: "", purpose: "" });
         setGlobalError(""); // Clear global error
-        if (textAreaPurposeRef?.current) {
+    if (textAreaPurposeRef?.current) {
             textAreaPurposeRef.current.value = '';
-        }
-        closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)
-    };
+    }
+  };
 
-    const handleCreateBridgeUsingAI = () => {
-        const purpose = textAreaPurposeRef?.current?.value;
-        let hasErrors = false;
+  const handleCreateBridgeUsingAI = () => {
+    const purpose = textAreaPurposeRef?.current?.value;
+    let hasErrors = false;
 
         // Reset validation errors
-        const newValidationErrors = { bridgeType: "", purpose: "" };
+    const newValidationErrors = { bridgeType: "", purpose: "" };
         setGlobalError(""); // Clear any previous global error
 
         // Validate purpose
-        if (!purpose || purpose.trim() === "") {
-            newValidationErrors.purpose = "Please enter a agent purpose";
-            hasErrors = true;
-        }
+    if (!purpose || purpose.trim() === "") {
+      newValidationErrors.purpose = "Please enter a agent purpose";
+      hasErrors = true;
+    }
 
         // Validate bridge type
-        if (!selectedBridgeTypeCard && !isEmbedUser && !showAgentType) {
-            newValidationErrors.bridgeType = "Select Agent Type";
-            hasErrors = true;
-        }
+    if (!selectedBridgeTypeCard && !isEmbedUser && !showAgentType) {
+      newValidationErrors.bridgeType = "Select Agent Type";
+      hasErrors = true;
+    }
 
         // Update validation errors state
-        setValidationErrors(newValidationErrors);
+    setValidationErrors(newValidationErrors);
 
-        if (hasErrors) {
-            return;
-        }
+    if (hasErrors) {
+      return;
+    }
 
-        setIsAiLoading(true);
+    setIsAiLoading(true);
         const dataToSend = { purpose, bridgeType: isEmbedUser && !showAgentType ? "api" : selectedBridgeTypeCard }
-        dispatch(createBridgeWithAiAction({ dataToSend, orgId: orgid }))
-            .then((response) => {
-                const data = response.data;
+    dispatch(createBridgeWithAiAction({ dataToSend, orgId: orgid }))
+      .then((response) => {
+        const data = response.data;
                 isEmbedUser && sendDataToParent("drafted", {name: data?.name, agent_id: data?.bridge?._id}, "Agent created Successfully")
                 route.push(`/org/${orgid}/agents/configure/${data.bridge._id}?version=${data.bridge.versions[0]}`);
-                closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
-                setIsAiLoading(false);
-                cleanState();
-            })
-            .catch((error) => {
-                setIsAiLoading(false);
+        setIsAiLoading(false);
+        cleanState();
+      })
+      .catch((error) => {
+        setIsAiLoading(false);
                 // Instead of toast.error, set the global error state
                 setGlobalError(error?.response?.data?.message || "Error while creating agent");
-            });
+      });
     }
 
 
-    return (
-      <div>
-        {isLoading && <LoadingSpinner />}
-        <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
+  return (
+    <div>
+      {isLoading && <LoadingSpinner />}
+      <dialog id={MODAL_TYPE.CREATE_BRIDGE_MODAL} className="modal">
           <div className={`bg-base-100 px-2 md:px-10 py-4 md:py-4 rounded-lg ${isEmbedUser && !showAgentType ? "min-w-[70%] md:min-w-[70%]" : "max-w-[90%] md:max-w-[80%]"} overflow-auto max-h-[98vh] mx-auto`}>
             <h3 className="font-bold text-xl md:text-xl text-base-content">
               Create Agent
@@ -281,9 +285,9 @@ import CreateBridgeCards from "./CreateBridgeCards";
               </div>
             </div>
           </div>
-        </dialog>
-      </div>
-    );
+      </dialog>
+    </div>
+  );
 }
 
 export default Protected(CreateNewBridge);
