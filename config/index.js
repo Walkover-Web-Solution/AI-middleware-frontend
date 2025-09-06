@@ -728,9 +728,9 @@ export const uploadImage = async (formData) => {
   }
 };
 
-export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, bridge_id, version_id, range, factor }) => {
+export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, bridge_id, version_id, range, factor, start_date, end_date }) => {
   try {
-    const response = await axios.post(`${URL}/metrics`, { apikey_id, service, model, thread_id, bridge_id, version_id, range, factor });
+    const response = await axios.post(`${URL}/metrics`, { apikey_id, service, model, thread_id, bridge_id, version_id, range, factor, start_date, end_date });
     return response.data?.data || [];
   } catch (error) {
     console.error(error);
