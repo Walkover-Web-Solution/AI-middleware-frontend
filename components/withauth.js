@@ -7,6 +7,7 @@ import { userDetails } from "@/store/action/userDetailsAction";
 import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import ErrorPage from "@/app/not-found";
+import { getFromCookies, removeCookie, setInCookies } from "@/utils/utility";
 
 
 const handleUserDetailsAndSwitchOrg = async (url, dispatch) => {
@@ -41,9 +42,9 @@ const WithAuth = (Children) => {
     useLayoutEffect(() => {
 
       const runEffect = async (isEmbedUser) => {
-      const proxyToken = localStorage.getItem('proxy_token');
+      const proxyToken = getFromCookies('proxy_token');
       const proxyAuthToken = proxy_auth_token;
-      let redirectionUrl = localStorage.getItem("previous_url") || "/org";
+      let redirectionUrl = getFromCookies("previous_url") || "/org";
       if(isEmbedUser)
       {
         const proxy_auth_token = sessionStorage.getItem('proxy_token');
@@ -66,7 +67,7 @@ const WithAuth = (Children) => {
 
       if (proxyAuthToken) {
         setLoading(true);
-        localStorage.setItem('proxy_token', proxyAuthToken);
+        setInCookies('proxy_token', proxyAuthToken);
 
         if (process.env.NEXT_PUBLIC_ENV === 'local') {
           const localToken = await loginUser({
@@ -75,14 +76,14 @@ const WithAuth = (Children) => {
             userName: '',
             orgName: ''
           });
-          localStorage.setItem('local_token', localToken.token);
+          setInCookies('local_token', localToken.token);
         }
 
-        if(localStorage.getItem("previous_url")) {
+        if(getFromCookies("previous_url")) {
           await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch);
         }
         router.replace(redirectionUrl);
-        localStorage.removeItem("previous_url");
+        removeCookie("previous_url");
         return;
       }
       else{

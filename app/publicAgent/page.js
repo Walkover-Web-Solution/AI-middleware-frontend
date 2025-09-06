@@ -4,6 +4,7 @@ import PublicAgent from '@/components/configuration/Agent/publicAgent';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { getAllAgentAction, privateAgentLoginAction, publicAgentLoginAction } from '@/store/action/gttwyAgentAction';
 import { clearAgentsData } from '@/store/reducer/gwtyAgentReducer';
+import { getFromCookies } from '@/utils/utility';
 import { Loader2, Sparkles, Zap, Search, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
@@ -30,13 +31,13 @@ const Page = () => {
 
   // Effect hooks
   useEffect(() => {
-    if (localStorage.getItem('publicAgentProxyToken')) {
-      setProxyToken(localStorage.getItem('publicAgentProxyToken'));
+    if (getFromCookies('publicAgentProxyToken')) {
+      setProxyToken(getFromCookies('publicAgentProxyToken'));
     }
   }, [])
 
   useEffect(() => {
-    if(!localStorage.getItem('publicAgentProxyToken') && !localStorage.getItem('AgentToken')){
+    if(!getFromCookies('publicAgentProxyToken') && !getFromCookies('AgentToken')){
        dispatch(clearAgentsData())
         dispatch(publicAgentLoginAction()).then(() => {
           dispatch(getAllAgentAction())
@@ -45,7 +46,7 @@ const Page = () => {
   }, []);
 
   useEffect(() => {
-    if(!localStorage.getItem('publicAgentProxyToken') && localStorage.getItem('AgentToken')){
+    if(!getFromCookies('publicAgentProxyToken') && getFromCookies('AgentToken')){
       const fetchAgents = async () => {
         dispatch(getAllAgentAction())
       };
@@ -57,7 +58,7 @@ const Page = () => {
 
   useEffect(() => {
     const fetchPrivateAgents = async () => {
-      if (localStorage.getItem('publicAgentProxyToken') && localStorage.getItem('AgentToken')) {
+      if (getFromCookies('publicAgentProxyToken') && getFromCookies('AgentToken')) {
         dispatch(privateAgentLoginAction()).then(() => {
           dispatch(getAllAgentAction())
         })

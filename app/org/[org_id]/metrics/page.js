@@ -9,6 +9,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import SearchItems from '@/components/UI/SearchItems';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronDownIcon } from '@/components/Icons';
+import { getFromCookies } from '@/utils/utility';
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 export const runtime = 'edge';
@@ -428,7 +429,7 @@ function Page({ params }) {
   useEffect(() => {
     // Initial theme
     const getInitialTheme = () => {
-      const savedTheme = localStorage.getItem("theme");
+      const savedTheme = getFromCookies("theme");
       return savedTheme
     };
 
@@ -436,7 +437,7 @@ function Page({ params }) {
 
     // Set up listener for theme changes
     const handleStorageChange = () => {
-      const newTheme = localStorage.getItem("theme");
+      const newTheme = getFromCookies("theme");
       if (newTheme === "dark" || newTheme === "light") {
         setCurrentTheme(newTheme);
       } else {

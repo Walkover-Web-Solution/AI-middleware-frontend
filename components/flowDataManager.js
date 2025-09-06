@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
-import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
+import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import Chat from './configuration/chat';
 import Link from 'next/link';

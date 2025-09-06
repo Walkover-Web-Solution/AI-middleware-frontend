@@ -28,7 +28,7 @@ import {
   AgentConfigSidebar,
   IntegrationGuide,
 } from '@/components/flowDataManager';
-import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
+import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import CreateBridgeCards from './CreateBridgeCards';
 import { createNewOrchestralFlowAction, updateOrchestralFlowAction } from '@/store/action/orchestralFlowAction';
@@ -1045,7 +1045,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         nodesConnectable={false}
         fitView
         fitViewOptions={fitViewOptions}
-        colorMode={typeof window !== 'undefined' ? localStorage.getItem('theme') : undefined}
+        colorMode={getFromCookies('theme')}
       >
         <Controls showInteractive={false} className="!bg-white/80 !backdrop-blur-md !border-white/60 !shadow-lg !rounded-xl" />
         <Background variant={BackgroundVariant.Dots} gap={32} size={1.5} color="#e2e8f0" className="opacity-60" />

@@ -8,6 +8,7 @@ import { clearAgentsData } from '@/store/reducer/gwtyAgentReducer';
 import { getAllAgentAction, publicAgentLoginAction } from '@/store/action/gttwyAgentAction';
 import { useDispatch } from 'react-redux';
 import { use } from 'react';
+import { getFromCookies } from '@/utils/utility';
 
 export const runtime = 'edge';
 
@@ -26,7 +27,7 @@ const Page = ({ params }) => {
   }, [isPublicAgent, publicAgentData, privateAgentData]);
 
   useEffect(() => {
-    if (!localStorage.getItem('AgentToken') && !localStorage.getItem('publicAgentUserId')) {
+    if (!getFromCookies('AgentToken') && !getFromCookies('publicAgentUserId')) {
       dispatch(clearAgentsData())
       dispatch(publicAgentLoginAction()).then(() => {
         dispatch(getAllAgentAction()).then(() => {
@@ -41,7 +42,7 @@ const Page = ({ params }) => {
   };
 
   useEffect(() => {
-    if(localStorage.getItem('AgentToken')) {
+    if(getFromCookies('AgentToken')) {
       dispatch(getAllAgentAction()).then(() => {
         router.push(`/publicAgent/${resolvedParams.agentName}`)
       })

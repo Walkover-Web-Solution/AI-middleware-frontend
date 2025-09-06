@@ -5,13 +5,14 @@ import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from 'next/navigation';
+import { setInCookies } from '@/utils/utility';
 
 const LoginPage = ({loading}) => {
   const urlParams = useSearchParams();
   const ref = urlParams.get('ref');
   useEffect(()=>{
     if(ref){
-      localStorage.setItem("reference_id", ref);
+      setInCookies("reference_id", ref);
     }
   },[ref])
   return (
