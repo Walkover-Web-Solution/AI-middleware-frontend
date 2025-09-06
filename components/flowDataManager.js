@@ -3,9 +3,11 @@ import {
   Upload, Save, TestTube, Play, ChevronRight, Loader2, Plus, X, Search, Bot, PlusIcon, Settings, Zap, MessageSquare, Globe,
   File,
   FileSlidersIcon,
-  CircleArrowOutUpRight
+  CircleArrowOutUpRight,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
 import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
@@ -13,6 +15,7 @@ import Chat from './configuration/chat';
 import Link from 'next/link';
 import GenericTable from './table/table';
 import CopyButton from './copyButton/copyButton';
+import CreateNewOrchestralFlowModal from './modals/CreateNewOrchestralFlowModal';
 /* Global stack to make only the topmost handle ESC/overlay */
 const SlideStack = {
   stack: [],
@@ -45,7 +48,7 @@ function SlideOver({
 }) {
   const instanceId = useStableId(instanceIdProp);
   const overlayId = `${instanceId}-overlay`;
-  const panelId   = `${instanceId}-panel`;
+  const panelId = `${instanceId}-panel`;
 
   // Local mount state so we can keep it in DOM during closing animation
   const [mounted, setMounted] = useState(isOpen);
@@ -69,7 +72,7 @@ function SlideOver({
         }, animationMs);
       }
     }
-    return () => {}; // nothing here
+    return () => { }; // nothing here
   }, [isOpen, instanceId, destroyOnClose, animationMs]);
 
   // Cleanup on unmount
@@ -213,6 +216,7 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
       flow_name: metadata.name || 'Untitled Flow',
       flow_description: metadata.description || '',
       bridge_type: metadata.bridge_type || null,
+      data: metadata.autoSaveData
     };
 
     return result;
@@ -226,7 +230,7 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
    Agent Structure -> React Flow {nodes, edges}
 -------------------------------------------------------- */
 export function createNodesFromAgentDoc(doc) {
-  if (!doc || !doc.agents || Object.keys(doc.agents).length === 0) {
+  if (!doc) {
     throw new Error('No agents found in data');
   }
 
@@ -247,7 +251,7 @@ export function createNodesFromAgentDoc(doc) {
     },
   });
 
-  const agents = doc.agents;
+  const agents = doc?.agents;
   const masterAgentKey = doc.master_agent;
 
   const graph = new Map();
@@ -405,10 +409,44 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
   const [q, setQ] = useState('');
   const [description, setDescription] = useState('');
   const [selectAgent, setSelectAgent] = useState({ nameToCreate: "", org_id: params?.org_id });
-  const [isCreateAgent, setIsCreateAgent] = useState(false);
   const [openAgentConfigSidebar, setOpenAgentConfigSidebar] = useState(false);
 
   useEffect(() => { if (isOpen) setQ(''); }, [isOpen]);
+
+  const [creationType, setCreationType] = useState('name'); // 'name' or 'purpose'
+  const [inputValue, setInputValue] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [isCreateDropdownOpen, setIsCreateDropdownOpen] = useState(false);
+
+  const handleCreateAgent = () => {
+    setIsCreating(true);
+    window.GtwyEmbed.sendDataToGtwy({
+      parent_id: 'gtwyParentId',
+      [creationType === 'name' ? 'agent_name' : 'agent_purpose']: inputValue
+    })
+    setOpenAgentConfigSidebar(true);
+    setInputValue('');
+    onClose();
+    setTimeout(() => {
+      window.openGtwy();
+    }, 3000);
+  };
+
+  const handleTypeChange = (type) => {
+    setCreationType(type);
+    setInputValue('');
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (window.GtwyEmbed) {
+        window.GtwyEmbed.sendDataToGtwy({
+          parentId: 'gtwyParentId',
+          agent_id: selectAgent?._id
+        })
+      }
+    }, 100)
+  }, [openAgentConfigSidebar])
 
   const usedAgentIds = useMemo(() => {
     return new Set(
@@ -432,6 +470,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
   const handleSelectAgent = (agent) => {
     setSelectAgent(agent);
     openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL);
+    window.closeGtwy();
   };
 
   const handleAddAgent = () => {
@@ -442,22 +481,57 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
     setSelectAgent({ nameToCreate: "", org_id: params?.org_id });
   };
 
-  useEffect(() => {
-   return () => {
-    setIsCreateAgent(false);
-    setOpenAgentConfigSidebar(false);
-    // setIsOpen(false);
-    onClose();
-    setSelectAgent({ nameToCreate: "", org_id: params?.org_id });
+  const handleEventListener = useCallback((event) => {
+    const { type, status, data } = event.data
+    if (type === 'gtwy' && status === "published") {      
+      let bridge = agents.find((a) => a._id === data.agent_id);
+      let node = nodes.find((n) => n?.id === data.agent_id);
+      if(node){
+        return
+      }
+      if (bridge) {
+        onChoose(bridge);
+        setOpenAgentConfigSidebar(false);
+      } else {
+        const fallbackBridge = {
+          _id: data.agent_id,
+          name: data.name || data.agent_name || 'Published Agent',
+          description: data.description || data.agent_description || '',
+          published_version_id: data.agent_version_id
+        };
+        onChoose(fallbackBridge);
+        setOpenAgentConfigSidebar(false);
+      }
+    }
+  }, [agents, onChoose])
 
-   }
+  useEffect(() => {
+    window.addEventListener('message', handleEventListener)
+    return () => {
+      window.removeEventListener('message', handleEventListener)
+    }
+  }, [handleEventListener])
+
+  useEffect(() => {
+    return () => {
+      setOpenAgentConfigSidebar(false);
+      onClose();
+      setSelectAgent({ nameToCreate: "", org_id: params?.org_id });
+      if(window.closeGtwy) window.closeGtwy();
+    }
   }, []);
 
   const handleOpenAgentConfigSidebar = (agent) => {
-    setIsCreateAgent(true)
-    setSelectAgent(agent);
     setOpenAgentConfigSidebar(true);
     onClose();
+    window.GtwyEmbed.sendDataToGtwy({
+      'agent_id': agent?._id,
+    })
+    setTimeout(() => {
+      window.openGtwy({
+        agent_id: agent?._id,
+      });
+    }, 500)
   };
 
   return (
@@ -467,55 +541,149 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
         onClose={onClose}
         widthClass="w-full sm:w-[460px] md:w-[620px] w-[720px] rounded-lg"
         header={
-          <div className="p-5 border-b border-base-200 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold tracking-wide text-base-content/60">SELECT AGENT</p>
-              <h2 className="text-lg font-semibold text-base-content">{title}</h2>
+          <div className="p-4 border-b border-base-300 bg-gradient-to-r from-primary/5 to-secondary/5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="badge badge-primary badge-sm font-medium mb-2">SELECT AGENT</div>
+                <h2 className="text-xl font-bold text-base-content">{title}</h2>
+              </div>
+              <button onClick={onClose} className="btn btn-circle btn-ghost hover:btn-error" aria-label="Close">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <button onClick={onClose} className="btn btn-ghost btn-sm rounded-full" aria-label="Close">
-              <X className="w-4 h-4" />
-            </button>
           </div>
         }
         bodyClassName="pb-6"
         instanceId="agent-sidebar"
       >
         <div className="p-4">
-          <label className="input input-bordered flex items-center gap-2">
-            <Search className="w-4 h-4 opacity-60" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search agents..."
-              className="grow"
-            />
-          </label>
+          <div className="form-control">
+            <div className="input-group flex items-center gap-2">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search agents..."
+                className="input input-bordered input-primary flex-1 focus:outline-offset-0 w-full"
+              />
+            </div>
+          </div>
         </div>
-        
-          <input
-            className='input input-bordered w-[91%] my-2 ml-[5%]'
-            placeholder='Enter Agent Name'
-            onBlur={(e) => setSelectAgent({ ...selectAgent, nameToCreate: e.target.value })}
-          />
-        <button onClick={()=>{
-          setTimeout(()=>{
-            setIsCreateAgent(true);
-            setOpenAgentConfigSidebar(true);
-            onClose();
-          },100)
-        }}
-          className="btn btn-primary w-[91%] my-2 ml-[5%]">
-          Create New Agent
-        </button>
 
+        <div className="px-4">
+          <div className="dropdown dropdown-bottom w-full">
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn btn-primary w-full shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={() => setIsCreateDropdownOpen(!isCreateDropdownOpen)}
+            >
+              <div className="avatar placeholder mr-2">
+                <div className="bg-primary-content text-primary rounded-full w-6 h-6 flex items-center justify-center">
+                  <span className="text-sm"><PlusIcon size={16} /></span>
+                </div>
+              </div>
+              Create New Agent
+              {isCreateDropdownOpen ? <ChevronUp className="w-4 h-4 ml-auto transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 ml-auto transition-transform duration-200" />}
+            </div>
 
-        <div className="px-2 max-h-[calc(100vh-300px)] overflow-y-auto">
+            {isCreateDropdownOpen && (
+              <div className="dropdown-content z-[1] card card-compact w-full bg-base-100 shadow-xl border border-primary/20 mt-2">
+                <div className="card-body space-y-4">
+                  {/* Creation Type Selector */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium text-sm">Creation Method</span>
+                    </label>
+                    <div className="join w-full">
+                      <button
+                        onClick={() => handleTypeChange('name')}
+                        className={`btn btn-sm join-item flex-1 ${creationType === 'name' ? 'btn-primary' : 'btn-outline btn-primary'
+                          }`}
+                      >
+                        📝 Name
+                      </button>
+                      <button
+                        onClick={() => handleTypeChange('purpose')}
+                        className={`btn btn-sm join-item flex-1 ${creationType === 'purpose' ? 'btn-primary' : 'btn-outline btn-primary'
+                          }`}
+                      >
+                        🎯 Purpose
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Input Field */}
+                  <div className="form-control">
+                    {creationType === 'name' ? (
+                      <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Enter agent name..."
+                        className="input input-bordered input-primary w-full"
+                      />
+                    ) : (
+                      <textarea
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Describe what the agent should do..."
+                        rows={2}
+                        className="textarea textarea-bordered textarea-primary w-full resize-none"
+                      />
+                    )}
+                  </div>
+
+                  {/* Create Button */}
+                  <button
+                    onClick={handleCreateAgent}
+                    disabled={!inputValue.trim() || isCreating}
+                    className={`btn btn-sm w-full ${!inputValue.trim() || isCreating
+                        ? 'btn-disabled'
+                        : 'btn-primary'
+                      }`}
+                  >
+                    {isCreating ? (
+                      <>
+                        <span className="loading loading-spinner loading-xs"></span>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        🚀 Create Agent
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="px-4">
+          <div className="divider">
+            <span className="text-base-content/60 font-medium">Available Agents</span>
+          </div>
+        </div>
+
+        <div className="px-4 max-h-[calc(100vh-200px)] overflow-y-auto">
           {list.length === 0 ? (
-            <div className="px-4 py-2 text-center text-base-content/60 text-sm">
-              {q ? `No agents for "${q}"` : 'No agents available'}
+            <div className="card bg-base-100 shadow-md">
+              <div className="card-body text-center py-12">
+                <div className="avatar placeholder mb-4">
+                  <div className="bg-base-300 text-base-content rounded-full w-16">
+                    <span className="text-2xl">🤖</span>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-base-content/60 mb-2">
+                  {q ? `No agents found for "${q}"` : 'No agents available'}
+                </h3>
+                <p className="text-sm text-base-content/50">
+                  {q ? 'Try adjusting your search terms' : 'Create your first agent to get started'}
+                </p>
+              </div>
             </div>
           ) : (
-            <ul className="space-y-1">
+            <div className="grid gap-3">
               {list.map((agent, idx) => {
                 const hasPublishedVersion = agent.published_version_id;
                 const doesNotHavePausedStatus = agent.bridge_status !== 1;
@@ -529,45 +697,75 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                   return 'Active';
                 };
 
+                const getStatusBadge = () => {
+                  const status = getStatusLabel();
+                  switch (status) {
+                    case 'Active':
+                      return 'badge-success';
+                    case 'Paused':
+                      return 'badge-warning';
+                    case 'Archived':
+                      return 'badge-error';
+                    default:
+                      return 'badge-neutral';
+                  }
+                };
+
                 const statusLabel = getStatusLabel();
 
                 return (
-                  <li key={(agent.bridge_id || agent.__key || `${agent.name}-${idx}`).toString()}
-                    className='flex item-center justify-between group hover:bg-base-200/30 rounded-xl transition-colors gap-4'>
-                    <button
-                      onClick={() => handleSelectAgent(agent)}
-                      disabled={isDisabled}
-                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${isDisabled ? 'opacity-50 cursor-not-allowed bg-base-100' : 'hover:bg-base-200/60 cursor-pointer'
-                        }`}
-                    >
-                      <div className={`p-2 rounded-full ${isDisabled ? 'bg-base-100' : 'bg-primary/10'}`}>
-                        <Bot className={`w-4 h-4 ${isDisabled ? 'text-base-content/50' : 'text-primary'}`} />
-                      </div>
-                      <div className="text-left flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-medium">{agent.name || agent.__key}</span>
-                          {statusLabel && (
-                            <span className={`px-2 py-1 text-xs ${statusLabel === 'Active' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'} rounded-full font-medium`}>
-                              {statusLabel}
-                            </span>
-                          )}
+                  <div key={(agent.bridge_id || agent.__key || `${agent.name}-${idx}`).toString()}
+                    className={`card bg-base-100 shadow-md hover:shadow-lg group hover:bg-base-200/30 transition-all duration-200 ${isDisabled ? 'opacity-60' : 'hover:scale-[1.02]'
+                      }`}>
+                    <div className="card-body p-2">
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleSelectAgent(agent) }}
+                          disabled={isDisabled}
+                          className={`flex items-center gap-3 flex-1 text-left ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer group'
+                            }`}
+                        >
+                          <div className="avatar placeholder">
+                            <div className={`rounded-full w-12 h-12 ${isDisabled ? 'bg-base-300 text-base-content/50' : 'bg-primary/20 text-primary group-hover:bg-primary group-hover:text-primary-content'
+                              } transition-all duration-200`}>
+                              <Bot className="w-6 h-6" />
+                            </div>
+                          </div>
+
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className={`text-sm ${isDisabled ? 'text-base-content/50' : 'text-base-content group-hover:text-primary'
+                                } transition-colors duration-200`}>
+                                {agent.name || agent.__key}
+                              </h3>
+                              <div className={`badge ${getStatusBadge()} badge-sm font-medium`}>
+                                {statusLabel}
+                              </div>
+                            </div>
+                            {agent.description && (
+                              <p className="text-sm text-base-content/60 truncate">
+                                {agent.description}
+                              </p>
+                            )}
+                          </div>
+                        </button>
+
+                        <div className="card-actions">
+                          <div className="tooltip tooltip-left" data-tip="Configure Agent">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleOpenAgentConfigSidebar(agent) }}
+                              className="btn btn-circle btn-primary btn-outline btn-sm opacity-0 group-hover:opacity-100 transition-all duration-200"
+                            >
+                              <CircleArrowOutUpRight size={16} />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </button>
-                    <div className="flex items-center justify-center">
-                      <button
-                        onClick={() => handleOpenAgentConfigSidebar(agent)}
-                        className="btn btn-primary btn-outline btn-sm opacity-0 group-hover:opacity-100 duration-300 transition-transform ease-in-out mr-3 w-0 group-hover:w-auto"
-                      >
-                        <div className="tooltip tooltip-left" data-tip="Configure Agent">
-                          <CircleArrowOutUpRight className='text-base-content' size={16} />
-                        </div>
-                      </button>
                     </div>
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
+            </div>
           )}
         </div>
 
@@ -578,10 +776,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
           isAgentToAgentConnect={false}
         />
       </SlideOver>
-
-      {isCreateAgent && (
-        <AgentConfigSidebar isOpen={openAgentConfigSidebar} onClose={() => setOpenAgentConfigSidebar(false)} agent={selectAgent} instanceId="agent-config-sidebar"/>
-      )}
+      <AgentConfigSidebar isOpen={openAgentConfigSidebar} onClose={() => setOpenAgentConfigSidebar(false)} agent={selectAgent} instanceId="agent-config-sidebar" />
     </>
   );
 }
@@ -601,9 +796,7 @@ export function FlowControlPanel({
   params,
   isVariableModified,
   openIntegrationGuide,
-  closeIntegrationGuide,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [userMessage, setUserMessage] = useState('');
   const [saveData, setSaveData] = useState({
@@ -624,32 +817,23 @@ export function FlowControlPanel({
       createdFlow,
       setIsLoading
     });
-    setIsOpen(false);
+    closeModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL);
   };
 
   const handleDiscard = () => {
     const ok = confirm('Discard all unsaved changes?');
     if (!ok) return;
-
-    // Prefer a parent-provided discard handler if available
     if (typeof onDiscard === 'function') {
       onDiscard();
       return;
     }
 
-    // Fallback: reset local state and hard refresh to ensure full revert
     setIsChatOpen(false);
     setSaveData({
       name: name || '',
       description: description || '',
       status: 'publish',
     });
-    // Force a reload to revert any upstream editor state
-    // window.location.reload();
-  };
-
-  const handleChange = (e) => {
-    setSaveData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleQuickTestKeyDown = (e) => {
@@ -694,22 +878,22 @@ export function FlowControlPanel({
 
         {/* Publish/Update button */}
         <button
-          className="btn btn-primary bg-primary shadow-lg text-base-content"
-          onClick={() => setIsOpen(true)}
+          className="btn btn-primary bg-success shadow-lg text-base-content"
           disabled={!isModified && !isVariableModified}
           title="Publish Flow"
+          onClick={() => openModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL)}
         >
           <span className="text-white">
-            {createdFlow ? <Upload className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+            <Save className="mr-2 h-4 w-4" />
           </span>
           <span className="text-white">
-            {createdFlow ? 'Update Flow' : 'Publish Flow'}
+            Publish Flow
           </span>
         </button>
       </div>
 
       {/* Quick Test Input with highlight ring */}
-      {!isModified && !isChatOpen && (
+      {!isChatOpen && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
           <div className="relative">
             {/* Outer ring */}
@@ -730,57 +914,7 @@ export function FlowControlPanel({
         </div>
       )}
 
-      {/* Save/Publish Modal (DaisyUI Modal) */}
-      {isOpen && (
-        <div className="fixed inset-0 z-[9970] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="card bg-base-100 w-full max-w-md shadow-2xl border border-base-200">
-            <div className="card-body">
-              <h3 className="card-title">
-                {createdFlow ? <Save className="mr-2 h-5 w-5 opacity-70" /> : <Upload className="mr-2 h-5 w-5 opacity-70" />}
-                {createdFlow ? 'Update Agent Flow' : 'Save Agent Flow'}
-              </h3>
-
-              <div className="form-control mt-2">
-                <label className="label">
-                  <span className="label-text">
-                    Flow Name <span className="text-error">*</span>
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={saveData.name}
-                  onChange={handleChange}
-                  placeholder="Enter flow name..."
-                  className="input input-bordered w-full"
-                />
-              </div>
-
-              <div className="form-control mt-2">
-                <label className="label">
-                  <span className="label-text">Description</span>
-                </label>
-                <textarea
-                  name="description"
-                  value={saveData.description}
-                  onChange={handleChange}
-                  rows={3}
-                  placeholder="Enter flow description..."
-                  className="textarea textarea-bordered w-full resize-none"
-                />
-              </div>
-
-              <div className="card-actions justify-end mt-4">
-                <button className="btn btn-ghost" onClick={() => setIsOpen(false)}>Cancel</button>
-                <button className="btn btn-primary" onClick={handlePublish}>
-                  {createdFlow ? <Upload className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
-                  {createdFlow ? 'Update Flow' : 'Publish Flow'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreateNewOrchestralFlowModal handleCreateNewFlow={handlePublish} createdFlow={createdFlow} saveData={saveData} setSaveData={setSaveData} />
 
       {/* Chat SlideOver */}
       <SlideOver
@@ -822,48 +956,20 @@ export function FlowControlPanel({
 -------------------------------------------------------- */
 export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId }) {
   useEffect(() => {
-    if (agent?.org_id && (agent._id || agent.nameToCreate)) {
-      const scriptId = 'gtwy-user-script';
-      const scriptURl = process.env.NEXT_PUBLIC_ENV !== 'PROD' ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js` : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`;
-      const script = document.createElement('script');
-      script.id = scriptId;
-      script.src = scriptURl;
-      script.setAttribute('skipLoadGtwy', true);
-      script.setAttribute('token', sessionStorage.getItem('proxy_token') || getFromCookies('proxy_token'));
-      script.setAttribute('org_id', agent?.org_id);
-      script.setAttribute('customIframeId', 'gtwyEmbedInterface');
-      script.setAttribute('gtwy_user', true);
-      script.setAttribute('parentId', 'gtwy')
-      script.setAttribute('defaultOpen', 'true')
-      agent._id && script.setAttribute('agent_id', agent?._id)
-      agent.nameToCreate && script.setAttribute('agent_name', agent?.nameToCreate)
-      document.head.appendChild(script);
-    }
-    return () => {
-      const script = document.getElementById('gtwy-user-script');
-      if (script) {
-        script.remove();
-        if (!sessionStorage.getItem('embedUser')) {
-          sessionStorage.clear();
-        }
-        sessionStorage.removeItem('orchestralUser');
+    setTimeout(() => {
+      if (window.GtwyEmbed) {
+        window.GtwyEmbed.sendDataToGtwy({
+          parentId: 'gtwyParentId',
+          agent_id: agent?._id
+        })
       }
-    }
-  }, [agent]);
-
+    }, 100)
+  }, [agent])
   useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      if (!sessionStorage.getItem('embedUser')) {
-        sessionStorage.clear();
-      }
-      sessionStorage.removeItem('orchestralUser');
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
-
+      if(window.closeGtwy) window.closeGtwy();
+    }
+  }, [isOpen])
   return (
     <SlideOver
       isOpen={isOpen}
@@ -880,7 +986,7 @@ export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId }) {
       bodyClassName="p-6 space-y-4 pb-20"
       instanceId={instanceId}
     >
-      <div id='gtwy' className='h-full border-none w-full mx-auto flex items-center justify-center'>
+      <div id='gtwyParentId' className='h-full border-none w-full mx-auto flex items-center justify-center'>
         <span className="animate-pulse">Loading...</span>
       </div>
     </SlideOver>
