@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import React from 'react'
 
-async function ErrorPage() {
+function ErrorPage() {
   return (
     <div className="h-screen w-screen bg-gray-50 flex flex-col items-center justify-center">
       <div className="container flex flex-col md:flex-row items-center justify-center px-5 text-gray-700">
