@@ -143,7 +143,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
           <PageHeader
             title="Orchestral Model"
             description="Create and manage your AI Orchestral Model workflows. Build complex agent interactions with our intuitive flow builder."
-            docLink="https://gtwy.ai/blogs/features/orchestral-model?source=single"
+            docLink="https://gtwy.ai/blogs/features/orchestral-model"
             isEmbedUser={isEmbedUser}
           />
           <div className="mb-4">
