@@ -355,7 +355,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       script.id = scriptId;
       script.src = scriptURl;
       script.setAttribute('skipLoadGtwy', true);
-      script.setAttribute('token', sessionStorage.getItem('proxy_token') || localStorage.getItem('proxy_token'));
+      script.setAttribute('token', sessionStorage.getItem('proxy_token') || getFromCookies('proxy_token'));
       script.setAttribute('org_id', params?.org_id);
       script.setAttribute('customIframeId', 'gtwyEmbedInterface');
       script.setAttribute('gtwy_user', true);
