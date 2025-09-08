@@ -7,12 +7,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateOrg from '../createNewOrg';
 import { MODAL_TYPE } from '@/utils/enums';
+import { useDispatch } from 'react-redux';
 
 function OrgSlider() {
     const router = useRouter();
     const pathName = usePathname();
     const path = pathName.split('?')[0].split('/');
     const [searchQuery, setSearchQuery] = useState('');
+    const dispatch = useDispatch()
     const organizations = useCustomSelector((state) => state.userDetailsReducer.organizations);
     const userdetails = useCustomSelector((state) => state?.userDetailsReducer?.userDetails);
 

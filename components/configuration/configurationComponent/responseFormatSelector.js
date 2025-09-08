@@ -7,9 +7,9 @@ import { isValidJson, validateUrl } from '@/utils/utility';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const ResponseFormatSelector = ({ params }) => {
+const ResponseFormatSelector = ({ params, searchParams }) => {
     const { response_format } = useCustomSelector((state) => ({
-        response_format: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.response_format,
+        response_format: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.response_format,
     }));
 
     const [selectedOption, setSelectedOption] = useState(response_format?.type || 'default');
@@ -59,7 +59,7 @@ const ResponseFormatSelector = ({ params }) => {
             }
         };
         // dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend: { ...updatedDataToSend } }));
-        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { ...updatedDataToSend } }));
+        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams.version, dataToSend: { ...updatedDataToSend } }));
     }
 
     const responseOptions = [

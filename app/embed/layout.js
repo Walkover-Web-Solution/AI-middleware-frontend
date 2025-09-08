@@ -6,7 +6,7 @@ import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReduce
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
-import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
+import { generateRandomID, sendDataToParent, setInCookies, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { isPending } from '@/store/reducer/bridgeReducer';
 
@@ -119,7 +119,14 @@ const Layout = ({ children }) => {
 
         if (urlParamsObj.token) {
           dispatch(updateUserDetialsForEmbedUser({ isEmbedUser: true, hideHomeButton: urlParamsObj?.hideHomeButton }));
-          sessionStorage.setItem('proxy_token', urlParamsObj.token);
+          if(!urlParamsObj?.folder_ids){
+            const proxyToken = getFromCookies('proxy_token');
+            if(proxyToken){
+              setInCookies('proxy_token', proxyToken);
+            }
+          }else{
+            sessionStorage.setItem('proxy_token', urlParamsObj.token);
+          }
           sessionStorage.setItem('gtwy_org_id', urlParamsObj?.org_id);
           sessionStorage.setItem('gtwy_folder_id', urlParamsObj?.folder_id);
           urlParamsObj?.folder_id && sessionStorage.setItem('embedUser', true);

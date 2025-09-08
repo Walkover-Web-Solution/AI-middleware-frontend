@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, use } from 'react';
 import { Plus, Bot, Play, Settings, Trash2, Copy, Search, Filter, Activity, Zap, GitBranch, Clock, Calendar, Users } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -17,6 +17,7 @@ import CreateNewOrchestralFlowModal from '@/components/modals/CreateNewOrchestra
 export const runtime = 'edge';
 
 export default function FlowsPage({ params, isEmbedUser }) {
+  const resolvedParams = use(params);
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedDataToDelete, setSelectedDataToDelete] = useState(null);
   const [saveData, setSaveData] = useState({
@@ -29,7 +30,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
 
   // Get orchestral flow data from reducer
   const orchestralFlowData = useCustomSelector((state) =>
-    state.orchestralFlowReducer.orchetralFlowData[params.org_id] || []
+    state.orchestralFlowReducer.orchetralFlowData[resolvedParams.org_id] || []
   );
   const [filterFlows, setFilterFlows] = useState(orchestralFlowData)
 
@@ -81,21 +82,21 @@ export default function FlowsPage({ params, isEmbedUser }) {
 
   const handleCreateNewFlow = () => {
     dispatch(createNewOrchestralFlowAction({
-      org_id: params.org_id,
+      org_id: resolvedParams.org_id,
       flow_name: saveData.name,
       agents: {},
       master_agent: "",
       bridge_type: "api",
       flow_description: saveData.description,
       status: saveData.status
-    }, params.org_id)).then((data) => {
+    }, resolvedParams.org_id)).then((data) => {
       closeModal(MODAL_TYPE.CREATE_ORCHESTRAL_FLOW_MODAL);
       setSaveData({ name: '', description: '', status: 'draft' });
-      router.push(`/org/${params.org_id}/orchestratal_model/${data.data.id}`);
+      router.push(`/org/${resolvedParams.org_id}/orchestratal_model/${data.data.id}`);
     });
   }
   const handleOpenFlow = (flowId) => {
-    router.push(`/org/${params.org_id}/orchestratal_model/${flowId}`);
+    router.push(`/org/${resolvedParams.org_id}/orchestratal_model/${flowId}`);
   };
 
   const getStatusColor = (status) => {
@@ -124,7 +125,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
 
   const handleDeleteFlow = () => {
     closeModal(MODAL_TYPE.DELETE_MODAL);
-    dispatch(deleteOrchetralFlowAction({ data: { orgId: params.org_id, _id: selectedDataToDelete._id } }));
+    dispatch(deleteOrchetralFlowAction({ data: { orgId: resolvedParams.org_id, _id: selectedDataToDelete._id } }));
   };
 
   return (

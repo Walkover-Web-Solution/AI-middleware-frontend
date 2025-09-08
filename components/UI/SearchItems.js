@@ -11,7 +11,7 @@ const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
       (item?._id && item?._id?.toLowerCase()?.includes(searchTerm.toLowerCase().trim()))
     ) || [];
     setFilterItems(filtered);
-  }, [data, searchTerm, setFilterItems]);
+  }, [data]);
   return (
     <div className="flex-1 max-w-md">
       <input

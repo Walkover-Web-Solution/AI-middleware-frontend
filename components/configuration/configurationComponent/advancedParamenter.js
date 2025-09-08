@@ -429,7 +429,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
                         placeholder="Enter valid JSON object here..."
                       />
 
-                      <JsonSchemaModal params={params} messages={messages} setMessages={setMessages} thread_id={thread_id} />
+                      <JsonSchemaModal params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} />
                     </>
                   )}
 
