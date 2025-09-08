@@ -17,13 +17,14 @@ import {
   MessageSquareMoreIcon,
   Blocks,
   User,
+  Workflow,
   FileSliders
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { truncate } from '@/components/historyPageComponents/assistFile';
-import { openModal, toggleSidebar } from '@/utils/utility';
+import { clearCookie, getFromCookies, openModal, toggleSidebar } from '@/utils/utility';
 import OrgSlider from './orgSlider';
 import TutorialModal from '@/components/modals/tutorialModal';
 import DemoModal from '../modals/DemoModal';
@@ -40,6 +41,7 @@ import ThemeToggle from '../UI/ThemeUi';
 const ITEM_ICONS = {
   org: <Building2 size={16} />,
   agents: <Bot size={16} />,
+  orchestratal_model: <Workflow size={16} />,
   chatbotConfig: <FileSliders size={16} />,
   chatbot: <MessageSquare size={16} />,
   pauthkey: <Shield size={16} />,
@@ -49,14 +51,15 @@ const ITEM_ICONS = {
   metrics: <BarChart3 size={16} />,
   knowledge_base: <BookOpen size={16} />,
   feedback: <MessageSquareMore size={16} />,
+  RAG_embed: <Blocks size={16} /> ,
   integration: <Blocks size={16} />
 };
 
 const NAV_SECTIONS = [
-  { items: ['agents', 'chatbotConfig'] },
+  { items: ['agents', 'orchestratal_model', 'chatbotConfig','knowledge_base'] },
   { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
-  { title: 'INTEGRATION', items: ['integration', 'knowledge_base'] },
   { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
+  { title: 'Developer', items: ['integration', 'RAG_embed'] },
   { title: 'TEAM & COLLABORATION', items: ['invite'] }
 ];
 
@@ -66,7 +69,7 @@ const NAV_SECTIONS = [
 
 /** Small horizontal rule visible only when sidebar is collapsed */
 const HRCollapsed = () => (
-  <hr className="my-2 w-6 border-base-300 mx-auto" />
+  <hr className="my-2 w-6 border-base-content/30 mx-auto" />
 );
 
 /* -------------------------------------------------------------------------- */
@@ -117,13 +120,16 @@ function MainSlider({ isEmbedUser }) {
   /** Nice display names for items */
   const displayName = key => {
     const names = {
+      orchestratal_model: 'Orchestral Model',
       knowledge_base: 'Knowledge base',
       chatbotConfig: 'Configure Chatbot',
       feedback: 'Feedback',
       tutorial: 'Tutorial',
       'speak-to-us': 'Speak to Us',
-      integration: 'Integration',
-      settings: 'Settings'
+      integration: 'GTWY as Embed',
+      settings: 'Settings',
+      RAG_embed: 'RAG as Embed',
+      invite: 'Members'
     };
     return names[key] || key.charAt(0).toUpperCase() + key.slice(1);
   };
@@ -132,9 +138,9 @@ function MainSlider({ isEmbedUser }) {
   const handleLogout = useCallback(async () => {
     try {
       await logoutUserFromMsg91({
-        headers: { proxy_auth_token: localStorage.getItem('proxy_token') ?? '' }
+        headers: { proxy_auth_token: getFromCookies('proxy_token') ?? '' }
       });
-      localStorage.clear();
+      clearCookie();
       sessionStorage.clear();
       if(process.env.NEXT_PUBLIC_ENV === 'PROD') {
         router.replace('https://gtwy.ai/');
@@ -208,6 +214,13 @@ function MainSlider({ isEmbedUser }) {
     }
   };
 
+  const betaBadge = () =>{
+    return(
+      <span className="badge badge-success mb-1 text-base-100 text-xs">Beta</span>
+    )
+  }
+
+
   /* ------------------------------------------------------------------------ */
   /*                                  Render                                  */
   /* ------------------------------------------------------------------------ */
@@ -231,14 +244,14 @@ function MainSlider({ isEmbedUser }) {
         />
       )}
 
-      <div className="relative">
+      <div className="relative ">
         {/* ------------------------------------------------------------------ */}
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar left-0 top-0 h-screen bg-base-100 border border-base-300 transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
           style={{ 
-            width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '256px' : '50px'),
+            width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '220px' : '50px'),
             transform: (!isSideBySideMode && pathParts.length > 3) ? (isMobile && !isOpen ? 'translateX(-200px)' : 'translateX(0)') : 'none'
           }}
         >
@@ -330,8 +343,12 @@ function MainSlider({ isEmbedUser }) {
                         >
                           <div className="shrink-0">{ITEM_ICONS[key]}</div>
                           {(isOpen || isMobile) && (
-                            <span className="font-medium text-sm truncate">{displayName(key)}</span>
+                           <div className='flex items-center gap-2 justify-center'>
+                             <span className="font-medium text-sm truncate">{displayName(key)}</span> 
+                             <span>{key === 'orchestratal_model' && betaBadge()}</span>
+                           </div>
                           )}
+                          
                         </button>
                       ))}
                     </div>

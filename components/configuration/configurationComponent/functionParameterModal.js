@@ -17,7 +17,6 @@ import InfoTooltip from "@/components/InfoTooltip";
 function FunctionParameterModal({
   name = "",
   functionId = "",
-  params,
   Model_Name,
   embedToken = "",
   handleRemove = () => { },
@@ -28,7 +27,8 @@ function FunctionParameterModal({
   variables_path = {},
   functionName = "",
   variablesPath = {},
-  setVariablesPath = () => { }
+  setVariablesPath = () => { },
+  isMasterAgent = false
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
@@ -363,6 +363,7 @@ function FunctionParameterModal({
   }, [objectFieldValue]);
 
   const handleVariablePathChange = useCallback((key, value = "") => {
+    name === "orchestralAgent" && setIsModified(true);
     setVariablesPath((prevVariablesPath) => {
       return {
         ...prevVariablesPath,
@@ -393,7 +394,7 @@ function FunctionParameterModal({
       toast.error('Description cannot be empty');
       return;
     }
-    if (name !== "Agent") {
+    if (name !== "Agent" && name !== "orchestralAgent") {
       try {
         const flowResponse = await updateFlowDescription(embedToken, toolData.function_name, toolData?.description);
         if (flowResponse?.metadata?.description) {
@@ -442,9 +443,9 @@ function FunctionParameterModal({
             <button onClick={() => setIsDescriptionEditing(true)} className="btn btn-sm btn-primary">
               <PencilIcon size={16} /> Update Description
             </button>
-            <button onClick={() => handleRemove()} className="btn btn-sm btn-error text-white">
+            {name !== "orchestralAgent" && <button onClick={() => handleRemove()} className="btn btn-sm btn-error text-white">
               <TrashIcon size={16} /> Remove {name}
-            </button>
+            </button>}
           </div>
         </div>
 
@@ -526,7 +527,7 @@ function FunctionParameterModal({
               here
             </a>
           </p>
-          {name==='Agent'&&
+          {name==='Agent' || (name==='orchestralAgent' && isMasterAgent )&&
             <div className="flex items-center justify-center gap-2 text-sm">
               <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
                 <label className="label info">
@@ -540,7 +541,7 @@ function FunctionParameterModal({
                   setToolData({ ...toolData, thread_id: e.target.checked });
                   setIsModified(true);
                 }}
-                checked={toolData?.thread_id}
+                checked={!!toolData?.thread_id}
                 title="Toggle to include thread_id while calling function"
               />
             </div>
@@ -568,7 +569,7 @@ function FunctionParameterModal({
                   <th>Description</th>
                   <th>Enum: comma separated</th>
                   <th>Fill with AI</th>
-                  <th>Value Path: your_path</th>
+                  {!isMasterAgent && <th>Value Path: your_path</th>}
                 </tr>
               </thead>
               <tbody>
@@ -673,7 +674,7 @@ function FunctionParameterModal({
                           }}
                         />
                       </td>
-                      <td>
+                      {(name==='orchestralAgent' && !isMasterAgent) && <td>
                         <input
                           type="text"
                           placeholder="name"
@@ -683,7 +684,7 @@ function FunctionParameterModal({
                             handleVariablePathChange(param.key, e.target.value);
                           }}
                         />
-                      </td>
+                      </td>}
                     </tr>
                   );
                 })}

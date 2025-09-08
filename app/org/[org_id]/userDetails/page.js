@@ -1,4 +1,5 @@
 'use client'
+import { getFromCookies } from "@/utils/utility";
 import { useEffect } from "react";
 
 export const runtime = 'edge';
@@ -11,7 +12,7 @@ const page = () => {
         }
 
         const configuration = {
-            authToken: localStorage.getItem('proxy_token') || "",
+            authToken: getFromCookies('proxy_token') || "",
             success: (data) => {
                 console.log('success response', data);
             },

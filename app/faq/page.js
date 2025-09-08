@@ -1,9 +1,9 @@
 import React from 'react'
 
-const page = ({children}) => {
+const Page = async ({children}) => {
   return (
     <div>{children}</div>
   )
 }
 
-export default page
+export default Page

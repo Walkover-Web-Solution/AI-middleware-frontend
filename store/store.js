@@ -20,6 +20,7 @@ import flowDataReducer from "./reducer/flowDataReducer";
 import integrationReducer from "./reducer/integrationReducer";
 import authReducer from "./reducer/authReducer";
 import gtwyAgentReducer from "./reducer/gwtyAgentReducer";
+import orchestralFlowReducer from "./reducer/orchestralFlowReducer";
 
 const createNoopStorage = () => {
     return {
@@ -56,7 +57,8 @@ const rootReducer = combineReducers({
     gtwyAgentReducer,
     flowDataReducer,
     integrationReducer,
-    authReducer
+    authReducer,
+    orchestralFlowReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

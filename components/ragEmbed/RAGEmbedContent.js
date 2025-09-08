@@ -1,13 +1,10 @@
 import CopyButton from '@/components/copyButton/copyButton';
-import { useCloseSliderOnEsc } from '@/components/historyPageComponents/assistFile';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { generateAccessKeyAction } from '@/store/action/orgAction';
-import {CloseIcon } from '@/components/Icons';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { toggleSidebar } from '@/utils/utility';
 
-function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOpenKnowledgeBaseSlider }) {
+function RAGEmbedContent({ params }) {
     const dispatch = useDispatch();
     const access_key = useCustomSelector((state) =>
         state?.userDetailsReducer?.organizations?.[params.org_id]?.meta?.auth_token || ""
@@ -16,7 +13,6 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
     const [copied, setCopied] = useState({
         accessKey: false,
     });
-    useCloseSliderOnEsc(setOpenKnowledgeBaseSlider);
 
     const handleCopy = async (text, key) => {
         try {
@@ -35,9 +31,9 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
     }
 
     const Section = ({ title, caption, children }) => (
-        <div className="flex items-start flex-col justify-center">
+        <div className="flex items-start flex-col justify-center mb-4">
             <h3 className="text-lg font-semibold">{title}</h3>
-            <p className="text-sm text-gray-600 block">{caption}</p>
+            <p className="text-sm text-base-content block">{caption}</p>
             {children}
         </div>
     );
@@ -49,33 +45,33 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
 }`;
 
         return (
-            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
+            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8 mb-6 rounded-lg">
                 <Section title="Step 1: Connect Knowledge Base" caption="Use the following API configuration and access key." />
                 <div className="mockup-code">
                     <CopyButton data={apiConfig} />
-                        <pre data-prefix=">" className="text-error"><code>org_id=</code><code className="text-warning">{orgId}</code></pre>
-                        <pre data-prefix=">" className="text-error"><code>user_id=</code><code className="text-warning">"unique_user_id"</code></pre>
+                    <pre data-prefix=">" className="text-error"><code>org_id=</code><code className="text-warning">{orgId}</code></pre>
+                    <pre data-prefix=">" className="text-error"><code>user_id=</code><code className="text-warning">"unique_user_id"</code></pre>
                 </div>
                 <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">JWT Access Key</span>
-                </label>
-                {access_key ? (
-                    <div className="mockup-code">
-                        <CopyButton data={access_key} />
-                        <pre data-prefix=">" className="text-error">
-                            <code>Access Key: </code>
-                            <code className="text-warning">{access_key}</code>
-                        </pre> 
-                    </div>
-                ) : (
-                  <button
-                    onClick={handleGenerateAccessKey}
-                    className="btn btn-primary btn-sm w-56"
-                  >
-                    Show Access Key
-                  </button>     
-                       )}
+                    <label className="label">
+                        <span className="label-text font-medium">JWT Access Key</span>
+                    </label>
+                    {access_key ? (
+                        <div className="mockup-code">
+                            <CopyButton data={access_key} />
+                            <pre data-prefix=">" className="text-error">
+                                <code>Access Key: </code>
+                                <code className="text-warning">{access_key}</code>
+                            </pre>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={handleGenerateAccessKey}
+                            className="btn btn-primary btn-sm w-56"
+                        >
+                            Show Access Key
+                        </button>
+                    )}
                 </div>
             </div>
         );
@@ -87,7 +83,7 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
         };
 
         return (
-            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
+            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8 mb-6 rounded-lg">
                 <Section title="Step 2" caption="Add below code in your product." />
                 <div className="mockup-code">
                     <CopyButton data={DataObject.script} />
@@ -100,13 +96,14 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
                     <pre data-prefix=">" className="text-error"><code> defaultOpen=</code><code className="text-warning">"true/false" /* true for open list by default */</code></pre>
                     <pre data-prefix=">" className="text-error"><code>&lt;/script&gt;</code></pre>
                 </div>
-                
+
             </div>
         );
     }
+
     const renderStepThree = () => {
         return (
-            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
+            <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8 mb-6 rounded-lg">
                 <Section title="Step 3" caption="Use this function to show list or add Document modal" />
                 <div className="mockup-code">
                     <pre data-prefix=">" className="text-error" ><code className="text-warning">window.openRag() /* to open add document modal */</code></pre>
@@ -118,34 +115,19 @@ function KnowledgeBaseIntegrationSlider({ params, openKnowledgeBaseSlider, setOp
     }
 
     return (
-         <aside
-            id="knowledgeBase-integration-slider"
-            className="fixed inset-y-0 right-0 border-l-2 border-base-300 bg-base-100 shadow-2xl rounded-md w-full md:w-1/2 lg:w-1/2 
-                     overflow-y-auto bg-gradient-to-br from-base-200 to-base-100 transition-all duration-300 ease-in-out z-medium
-                     translate-x-full"
-            aria-label="Api Keys guide slider"
-        >
-        <div
-           
-        >
-            <button
-                onClick={() => toggleSidebar("knowledgeBase-integration-slider","right")}
-                className="absolute top-4 right-4 p-2 rounded-full hover:text-error transition-colors z-10"
-            >
-                <CloseIcon/>
-            </button>
+        <div className="p-4">
+            <div className="space-y-6">
+                {/* Step 1 */}
+                {renderStepOne({ orgId: params?.org_id, access_key })}
 
-            {/* Step 1 */}
-            {renderStepOne({ orgId: params?.org_id, access_key })}
+                {/* Step 2 */}
+                {renderStepTwo()}
 
-            {/* Step 2 */}
-            {renderStepTwo()}
-
-            {/* Step 3 */}
-            {renderStepThree()}
+                {/* Step 3 */}
+                {renderStepThree()}
+            </div>
         </div>
-        </aside>
     );
 }
 
-export default KnowledgeBaseIntegrationSlider;
+export default RAGEmbedContent;

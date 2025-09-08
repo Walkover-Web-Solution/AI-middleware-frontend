@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-function BridgeVersionDropdown({ params, isEmbedUser }) {
+function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
     const router = useRouter();
     const dispatch = useDispatch();
     const versionDescriptionRef = React?.useRef('');
@@ -17,12 +17,12 @@ function BridgeVersionDropdown({ params, isEmbedUser }) {
         bridgeVersionsArray: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.versions || [],
         publishedVersion: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.published_version_id || [],
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
-        versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.version_description || "",
+        versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.version_description || "",
     }));
 
     useEffect(() => {
         const timer = setInterval(() => {
-            if (typeof SendDataToChatbot !== 'undefined' && params.version) {
+            if (typeof SendDataToChatbot !== 'undefined' && searchParams?.version) {
                 SendDataToChatbot({ "version_id": params.version });
                 clearInterval(timer);
             }
@@ -30,29 +30,29 @@ function BridgeVersionDropdown({ params, isEmbedUser }) {
         return () => {
             clearInterval(timer);
         }
-    }, [params.version])
+    }, [searchParams?.version])
 
     const handleVersionChange = (version) => {
-        if(params.version === version) return;
+        if(searchParams?.version === version) return;
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${version}`);
         dispatch(getBridgeVersionAction({ versionId: version, version_description:versionDescriptionRef }));
     };
 
     useEffect(() => {
-        if ((!params?.version && bridgeVersionsArray.length > 0) || (!params?.version && publishedVersion.length > 0)) {
+        if ((!searchParams?.version && bridgeVersionsArray.length > 0) || (!searchParams?.version && publishedVersion.length > 0)) {
             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${publishedVersion?.length > 0 ? publishedVersion : bridgeVersionsArray[0]}`);
             dispatch(getBridgeVersionAction({ versionId: publishedVersion?.length > 0 ? publishedVersion : bridgeVersionsArray[0], version_description:versionDescriptionRef }));
         }
         else{
-            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}`);
-            dispatch(getBridgeVersionAction({ versionId: params.version, version_description:versionDescriptionRef }));
+            router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}`);
+            dispatch(getBridgeVersionAction({ versionId: searchParams?.version, version_description:versionDescriptionRef }));
         }
-    }, [params?.version, publishedVersion]);
+    }, [publishedVersion, searchParams?.version]);
 
     const handleCreateNewVersion = () => {
         // create new version
         const version_description_input  = versionDescriptionRef?.current?.value;
-         dispatch(createBridgeVersionAction({ parentVersionId: params?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value }, (data) => {
+         dispatch(createBridgeVersionAction({ parentVersionId: searchParams?.version, bridgeId: params.id, version_description: versionDescriptionRef?.current?.value }, (data) => {
             isEmbedUser && sendDataToParent("updated", { name: bridgeName, agent_description: version_description_input , agent_id: params?.id, agent_version_id: data?.version_id }, "Agent Version Created Successfully")
             router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${data.version_id}`);
         }))
@@ -61,9 +61,9 @@ function BridgeVersionDropdown({ params, isEmbedUser }) {
     return (
         <div className='flex items-center gap-2'>
             <div className="dropdown dropdown-bottom dropdown-end mr-2">
-                <div tabIndex={0} role="button" className={`btn ${params.version === publishedVersion ? 'bg-green-100 hover:bg-green-200 text-base-content' : ''}`}>
-                    <span className={`${params.version === publishedVersion ? 'text-black' : 'text-base-content'}`}>V{bridgeVersionsArray.indexOf(params.version) + 1 || 'Select'}</span>
-                    {params.version === publishedVersion &&
+                <div tabIndex={0} role="button" className={`btn ${searchParams?.version === publishedVersion ? 'bg-green-100 hover:bg-green-200 text-base-content' : ''}`}>
+                    <span className={`${searchParams?.version === publishedVersion ? 'text-black' : 'text-base-content'}`}>V{bridgeVersionsArray.indexOf(searchParams?.version) + 1 || 'Select'}</span>
+                    {searchParams?.version === publishedVersion &&
                         <span className="relative inline-flex items-center ml-2">
                             <span className="text-green-600 ml-1">●</span>
                             <span className="animate-ping absolute inline-flex h-5 w-5 rounded-full bg-green-500 opacity-75"></span>
@@ -73,7 +73,7 @@ function BridgeVersionDropdown({ params, isEmbedUser }) {
                 <ul tabIndex={0} className="dropdown-content menu rounded-box z-high w-52 p-2 shadow bg-base-100">
                     {bridgeVersionsArray?.map((version, index) => (
                         <li key={version} onClick={() => handleVersionChange(version)} >
-                            <a className={`flex justify-between ${params.version === version ? 'active' : ''}`}>
+                            <a className={`flex justify-between ${searchParams?.version === version ? 'active' : ''}`}>
                                 Version {index + 1}
                                 {version === publishedVersion && <span className="text-green-600 ml-1">●</span>}
                             </a>
@@ -89,7 +89,7 @@ function BridgeVersionDropdown({ params, isEmbedUser }) {
                     </li>
                 </ul>
             </div>
-            <PublishBridgeVersionModal params={params} agent_name={bridgeName}  agent_description = {versionDescription}/>
+            <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName}  agent_description = {versionDescription}/>
             <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion}/>
         </div>
     );

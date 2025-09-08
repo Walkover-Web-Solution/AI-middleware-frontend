@@ -24,7 +24,7 @@ function getStatusClass(status) {
     }
 };
 
-export default function TriggersList({ params, isEmbedUser }) {
+export default function TriggersList({ params, isEmbedUser}) {
     const dispatch = useDispatch();
     const { triggerEmbedToken, triggerData } = useCustomSelector((state) => ({
         triggerEmbedToken: state?.bridgeReducer?.org?.[params?.org_id]?.triggerEmbedToken,

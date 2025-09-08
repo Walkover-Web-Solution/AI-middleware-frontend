@@ -5,7 +5,7 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 import Modal from '../UI/Modal'
 
-const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, onSave }) => {
+const HistoryPagePromptUpdateModal = ({searchParams, previousPrompt, promotToUpdate, onSave }) => {
   const dispatch  = useDispatch();
 
   const handleClose = () => {
@@ -16,7 +16,7 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
     e.preventDefault()
     const newValue = promotToUpdate?.trim() || "";
     if (newValue !== previousPrompt) {
-        dispatch(updateBridgeVersionAction({ versionId: params.version, dataToSend: { configuration: { prompt: newValue } } }));
+        dispatch(updateBridgeVersionAction({ versionId: searchParams?.version, dataToSend: { configuration: { prompt: newValue } } }));
     }
     handleClose()
   }
@@ -32,7 +32,8 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
             </div>
             <textarea
               className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
-              value={previousPrompt}
+              key={previousPrompt}
+              defaultValue={previousPrompt}
               readOnly
             />
           </div>
@@ -42,7 +43,8 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
             </div>
             <textarea
               className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
-              value={promotToUpdate}
+              key={promotToUpdate}
+              defaultValue={promotToUpdate}
               readOnly
             />
           </div>

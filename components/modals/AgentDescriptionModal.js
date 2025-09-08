@@ -3,7 +3,7 @@ import { closeModal } from '@/utils/utility'
 import React from 'react'
 import Modal from '../UI/Modal'
 
-const AgentDescriptionModal = ({ setDescription, handleSaveAgent, description }) => {
+const AgentDescriptionModal = ({ setDescription, handleSaveAgent, description, isAgentToAgentConnect = true }) => {
     return (
         <Modal MODAL_ID={MODAL_TYPE?.AGENT_DESCRIPTION_MODAL}>
             <div className="modal-box max-w-2xl">
@@ -23,7 +23,7 @@ const AgentDescriptionModal = ({ setDescription, handleSaveAgent, description })
                 </div>
                 <div className="modal-action">
                     <button className="btn" onClick={() => closeModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)}>Cancel</button>
-                    <button className="btn btn-primary" onClick={() => handleSaveAgent()}>Save</button>
+                    <button className="btn btn-primary" onClick={() => handleSaveAgent()}>{isAgentToAgentConnect ? 'Save' : 'Add Agent'}</button>
                 </div>
             </div>
             <form method="dialog" className="modal-backdrop">

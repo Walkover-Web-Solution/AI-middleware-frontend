@@ -12,7 +12,7 @@ import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const ConnectedAgentList = ({ params }) => {
+const ConnectedAgentList = ({ params, searchParams }) => {
     const dispatch = useDispatch();
     const [description, setDescription] = useState("");
     const [selectedBridge, setSelectedBridge] = useState(null);
@@ -22,7 +22,7 @@ const ConnectedAgentList = ({ params }) => {
     const router = useRouter();
     let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
-        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
         const modelTypeName = versionData?.configuration?.type?.toLowerCase();
@@ -44,7 +44,7 @@ const ConnectedAgentList = ({ params }) => {
             }
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
-                versionId: params?.version,
+                versionId: searchParams?.version,
                 dataToSend: {
                     agents: {
                         connected_agents: {
@@ -85,7 +85,7 @@ const ConnectedAgentList = ({ params }) => {
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params?.id,
-                versionId: params?.version,
+                versionId: searchParams?.version,
                 dataToSend: {
                     agents: {
                         connected_agents: {
@@ -110,7 +110,7 @@ const ConnectedAgentList = ({ params }) => {
         try {
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
-                versionId: params?.version,
+                versionId: searchParams?.version,
                 dataToSend: {
                     agents: {
                         connected_agents: {
@@ -130,7 +130,7 @@ const ConnectedAgentList = ({ params }) => {
                 dispatch(
                     updateBridgeVersionAction({
                         bridgeId: params.id,
-                        versionId: params.version,
+                        versionId: searchParams?.version,
                         dataToSend: { variables_path: { [selectedBridge?.bridge_id]: variablesPath } },
                     })
                 );
@@ -213,7 +213,6 @@ const ConnectedAgentList = ({ params }) => {
             <FunctionParameterModal
                 name="Agent"
                 Model_Name={MODAL_TYPE?.AGENT_VARIABLE_MODAL}
-                params={params}
                 function_details={currentVariable}
                 functionName={currentVariable?.name}
                 handleRemove={handleRemoveAgent}

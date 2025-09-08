@@ -14,7 +14,7 @@ import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
 import { ClockIcon, EllipsisIcon, LayoutGridIcon, TableIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import SearchItems from "@/components/UI/SearchItems";
@@ -22,11 +22,12 @@ import SearchItems from "@/components/UI/SearchItems";
 export const runtime = 'edge';
 
 function Home({ params, isEmbedUser }) {
+  const resolvedParams = use(params);
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
   const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation } = useCustomSelector((state) => {
-    const orgData = state.bridgeReducer.org[params.org_id] || {};
+    const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};
     const user = state.userDetailsReducer.userDetails
     return {
       allBridges: (orgData.orgs || []).slice().reverse(),
@@ -136,7 +137,7 @@ function Home({ params, isEmbedUser }) {
   }));
 
   const onClickConfigure = (id, versionId) => {
-    router.push(`/org/${params.org_id}/agents/configure/${id}?version=${versionId}`);
+    router.push(`/org/${resolvedParams.org_id}/agents/configure/${id}?version=${versionId}`);
   };
 
   const renderBridgeCard = (item) => {
@@ -145,9 +146,9 @@ function Home({ params, isEmbedUser }) {
         <div key={item._id} className="flex flex-col items-center w-full" onClick={() => onClickConfigure(item._id, item?.published_version_id || item?.versions?.[0])}>
           
           <div className="flex flex-col h-[200px] gap-2 w-full">
-            <h1 className="flex items-center overflow-hidden gap-2 text-lg leading-5 font-semibold text-base-content mr-2">
-              {getIconOfService(item.service)}
-              {item.name}
+            <h1 className="flex items-center overflow-hidden gap-2 text-lg leading-5 font-semibold text-base-content mr-2" title={item.name}>
+              {getIconOfService(item.service, 24, 24)}
+              {item.name.length > 20 ? item.name.slice(0, 17) + '...' : item.name }
             </h1>
             <p className="text-xs w-full flex items-center gap-2 line-clamp-5">
               {item.slugName && <span>SlugName: {item.slugName.length > 20 ? item.slugName.slice(0, 17) + '...' : item.slugName}</span>}
@@ -196,7 +197,7 @@ function Home({ params, isEmbedUser }) {
         } else {
           toast.success('Agent Archived Successfully');
         }
-        router.push(`/org/${params.org_id}/agents`);
+        router.push(`/org/${resolvedParams.org_id}/agents`);
       });
     } catch (error) {
       console.error('Failed to archive/unarchive agents', error);
@@ -212,7 +213,7 @@ function Home({ params, isEmbedUser }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              router.push(`/org/${params.org_id}/agents/testcase/${row._id}?version=${row?.versionId || null}`);
+              router.push(`/org/${resolvedParams.org_id}/agents/testcase/${row._id}?version=${row?.versionId || null}`);
             }}
           >
             Test Case
@@ -258,7 +259,7 @@ function Home({ params, isEmbedUser }) {
 
         />
       )}
-      <CreateNewBridge orgid={params.org_id}/>
+      <CreateNewBridge orgid={resolvedParams.org_id}/>
       {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col items-start justify-start">
@@ -271,7 +272,7 @@ function Home({ params, isEmbedUser }) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                   <p className="text-lg font-semibold text-base-content">Create Your First Agent</p>
-                  <button className="btn mt-2 btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ create new agent</button>
+                  <button className="btn mt-2 btn-primary" onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
                 </div>
               </div>
             ) : (
@@ -286,7 +287,7 @@ function Home({ params, isEmbedUser }) {
                         isEmbedUser={isEmbedUser}
                       />
                       <div className="flex-shrink-0 mt-4 sm:mt-0">
-                        <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ create new agent</button>
+                        <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
                       </div>
                     </div>
                   </MainLayout>

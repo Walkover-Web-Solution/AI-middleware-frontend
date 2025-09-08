@@ -3,22 +3,23 @@ import { CircleAlertIcon, RocketIcon, SparklesIcon } from '@/components/Icons';
 import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
-const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) => {
-  const { bridgeApiKey, prompt,shouldPromptShow } = useCustomSelector((state) => {
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
-    const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
+const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, searchParams }) => {
+  const { bridgeApiKey, prompt,shouldPromptShow,service } = useCustomSelector((state) => {
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service;
     const modelReducer = state?.modelReducer?.serviceModels;
     const serviceName = versionData?.service;
     const modelTypeName = versionData?.configuration?.type?.toLowerCase();
     const modelName = versionData?.configuration?.model;
     return {
-      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
-      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
-      shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt   
+      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
+      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
+      shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
+      service: service   
    };
   });
 
-  const [isVisible, setIsVisible] = useState(!bridgeApiKey || (prompt === ""&&(shouldPromptShow) ))
+  const [isVisible, setIsVisible] = useState((!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
   const resetBorder = (ref, selector) => {
@@ -59,14 +60,18 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
       resetBorder(apiKeySectionRef, 'select');
     }
     
-    if (hasPrompt && hasApiKey) {
+    // Hide guide if: 
+    // 1. It's AI ML service OR
+    // 2. Default AI ML key is selected OR
+    // 3. Both prompt and API key are provided
+    if ((service === 'ai_ml'&&hasPrompt) || (hasPrompt && hasApiKey)) {
       setIsVisible(false);
       setShowError(false);
       setErrorType('');
     } else {
       setIsVisible(true);
     }
-  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef,shouldPromptShow]);
+  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow,service]);
 
   const handleStart = () => {
     

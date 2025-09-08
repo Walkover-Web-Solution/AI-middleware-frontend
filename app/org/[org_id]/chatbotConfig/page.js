@@ -3,9 +3,10 @@ import FormSection from '@/components/chatbotConfiguration/formSection'
 import MainLayout from '@/components/layoutComponents/MainLayout'
 import PageHeader from '@/components/Pageheader'
 import Protected from '@/components/protected'
-import React from 'react'
+import React, { use } from 'react'
 
 const Page = ({ params }) => {
+  const resolvedParams = use(params);
   return (
     <div className="h-auto">
       <MainLayout>
@@ -18,7 +19,7 @@ const Page = ({ params }) => {
         </div>
         
         <div className="px-2">
-          <FormSection params={params} />
+          <FormSection params={resolvedParams} />
         </div>
       </MainLayout>
     </div>
