@@ -303,21 +303,6 @@ export default function FlowsPage({ params, isEmbedUser }) {
                       <Bot className="w-4 h-4 text-blue-600" />
                       <span className="text-sm text-base-content">{agentCount} agents</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-green-600" />
-                      <span className="text-sm text-base-content">{getRelativeTime(flow.updated_at)}</span>
-                    </div>
-                  </div>
-
-                  {/* Footer Info */}
-                  <div className="border-t border-base-content/30 pt-4 mt-auto">
-                    <div className="flex items-center justify-between text-xs text-base-content">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        <span>Created {formatDate(flow.created_at)}</span>
-                      </div>
-                      <span className="text-base-content">ID: {flow._id.slice(-8)}</span>
-                    </div>
                   </div>
 
                   {/* Hover Actions */}
