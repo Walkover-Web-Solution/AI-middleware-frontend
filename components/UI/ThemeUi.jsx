@@ -2,6 +2,7 @@ import { MoonIcon, SunIcon, MonitorIcon, ChevronDownIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import LoadingSpinner from "../loadingSpinner";
 import { useCustomSelector } from "@/customHooks/customSelector";
+import { getFromCookies, setInCookies } from "@/utils/utility";
 
 export default function ThemeToggle() {
   const [actualTheme, setActualTheme] = useState("light");
@@ -40,9 +41,9 @@ export default function ThemeToggle() {
     }
   };
 
-  // Initialize component state from localStorage
+  // Initialize component state from cookies
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "system";
+    const savedTheme = getFromCookies("theme") || "system";
     const systemTheme = getSystemTheme();
     
     setTheme(savedTheme);
@@ -102,7 +103,7 @@ export default function ThemeToggle() {
     setIsDropdownOpen(false);
 
     setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
+    setInCookies("theme", newTheme);
 
     // Apply the theme
     let themeToApply;

@@ -1,6 +1,6 @@
 "use client";
-import { ChevronDown } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Calendar } from 'lucide-react';
+import { use, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { getMetricsDataApi } from '@/config';
 import { METRICS_FACTOR_OPTIONS, TIME_RANGE_OPTIONS } from '@/utils/enums';
@@ -9,174 +9,338 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import SearchItems from '@/components/UI/SearchItems';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronDownIcon } from '@/components/Icons';
+import { getFromCookies } from '@/utils/utility';
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
+export const runtime = 'edge';
 
-// Function to format dates in different formats depending on the range
-const formatDate = (dateString, rangeType = 'day') => {
-  try {
-    const date = new Date(dateString);
-    // Check if the date is valid
-    if (isNaN(date.getTime())) return dateString;
-
-    // Format based on range type
-    if (rangeType === 'hour') {
-      // For hourly data, show time in HH:MM format
-      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-    } else if (rangeType === 'day') {
-      // For daily data, show DD MMM format
-      return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
-    } else {
-      // For other ranges, show DD MMM format
-      return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
+// Custom Date Range Picker Component
+const DateRangePicker = ({ onDateRangeSelect, isOpen, onClose, initialStartDate, initialEndDate }) => {
+  const [startDate, setStartDate] = useState(initialStartDate || '');
+  const [endDate, setEndDate] = useState(initialEndDate || '');
+  const handleApply = () => {
+    if (startDate && endDate) {
+      onDateRangeSelect(startDate, endDate);
+      onClose();
     }
-  } catch (e) {
-    console.error("Error formatting date:", e);
-    return dateString;
-  }
+  };
+
+  const handleClear = () => {
+    setStartDate('');
+    setEndDate('');
+  };
+  
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-base-100 rounded-lg p-6 shadow-xl w-96">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Select Date Range</h3>
+          <button 
+            onClick={onClose}
+            className="btn btn-sm btn-circle btn-ghost"
+          >
+            ✕
+          </button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Start Date</label>
+            <div className="flex flex-col space-y-2">
+              <input 
+                type="date" 
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="input input-bordered w-full"
+                max={endDate || undefined}
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2">End Date</label>
+            <div className="flex flex-col space-y-2">
+              <input 
+                type="date" 
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="input input-bordered w-full"
+                min={startDate || undefined}
+                max={new Date().toISOString().split('T')[0]}
+              />
+       
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex justify-between mt-6">
+          <button 
+            onClick={handleClear}
+            className="btn btn-ghost"
+          >
+            Clear
+          </button>
+          <div className="space-x-2">
+            <button 
+              onClick={onClose}
+              className="btn btn-ghost"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleApply}
+              className="btn btn-primary"
+              disabled={!startDate || !endDate}
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
-const convertApiData = (apiData, factor = 0, range = 1, allBridges = [], apiKeys = []) => {
-  const factorOptions = ['bridge_id', 'apikey_id', 'model'];
+
+const convertApiData = (
+  apiData,
+  factor = 0,
+  range = 1,
+  allBridges = [],
+  apiKeys = [],
+  customStartDate = null,
+  customEndDate = null
+) => {
+  const factorOptions = ["bridge_id", "apikey_id", "model"];
   const currentFactor = factorOptions[factor];
 
-  // Determine the time range and interval based on the selected range option
-  const now = new Date();
-  let intervalType = 'day';
+  const uniqueEntries = {};
+
+  // Process API data into unique entries
+  apiData.forEach((entry) => {
+    const entryDate = new Date(entry.created_at);
+
+    // Round down to nearest 15 minutes for range < 5
+    if (range < 5) {
+      const minutes =
+        Math.floor(entryDate.getMinutes() / 15) * 15;
+      entryDate.setMinutes(minutes, 0, 0);
+    }
+
+    // Key depends on range
+    const key =
+      range < 5
+        ? entryDate.toISOString().slice(0, 16) // YYYY-MM-DDTHH:mm
+        : entryDate.toISOString().split("T")[0]; // YYYY-MM-DD
+    console.log(entryDate.toTimeString());
+    const entryId = entry[currentFactor];
+    const uniqueKey = `${key}+${
+      currentFactor === "bridge_id"
+        ? entry.bridge_id
+        : currentFactor === "apikey_id"
+        ? entry.apikey_id
+        : currentFactor === "model"
+        ? entry.model
+        : ""
+    }`;
+
+    if (!uniqueEntries[uniqueKey]) {
+      uniqueEntries[uniqueKey] = {
+        date: entryDate,
+        id: entryId,
+        cost: entry.cost_sum || 0,
+        tokens: entry.total_token_count || 0,
+        successCount: entry.success_count || 0,
+      };
+    } else {
+      uniqueEntries[uniqueKey].cost += entry.cost_sum || 0;
+      uniqueEntries[uniqueKey].tokens += entry.total_token_count || 0;
+      uniqueEntries[uniqueKey].successCount += entry.success_count || 0;
+    }
+  });
+
   let timePoints = [];
-  let intervalMs = 24 * 60 * 60 * 1000; // Default to daily intervals
- 
-  // Configure time range and intervals based on selected range
-  switch (range) {
-    case 0: // 1 hour
-      intervalType = 'hour';
-      intervalMs = 15 * 60 * 1000; // 15 minutes intervals
-      timePoints = Array.from({ length: 4 }, (_, i) => new Date(now.getTime() - i * intervalMs)).reverse();
-      break;
-    case 1: // 3 hours
-      intervalType = 'hour';
-      intervalMs = 15 * 60 * 1000; // 15 minutes intervals
-      timePoints = Array.from({ length: 12 }, (_, i) => new Date(now.getTime() - i * intervalMs)).reverse();
-      break;
-    case 2: // 6 hours
-      intervalType = 'hour';
-      intervalMs = 30 * 60 * 1000; // 30 minutes intervals
-      timePoints = Array.from({ length: 12 }, (_, i) => new Date(now.getTime() - i * intervalMs)).reverse();
-      break;
-    case 3: // 12 hours
-      intervalType = 'hour';
-      intervalMs = 60 * 60 * 1000; // 1 hour intervals
-      timePoints = Array.from({ length: 12 }, (_, i) => new Date(now.getTime() - i * intervalMs)).reverse();
-      break;
-    case 4: // 1 day
-      intervalType = 'hour';
-      intervalMs = 2 * 60 * 60 * 1000; // 2 hour intervals
-      timePoints = Array.from({ length: 12 }, (_, i) => new Date(now.getTime() - i * intervalMs)).reverse();
-      break;
-    case 5: // 2 days
-      intervalType = 'day';
-      intervalMs = 4 * 60 * 60 * 1000; // 4 hour intervals
-      timePoints = Array.from({ length: 12 }, (_, i) => new Date(now.getTime() - i * intervalMs)).reverse();
-      break;
-    case 6: // 7 days
-      intervalType = 'day';
-      intervalMs = 24 * 60 * 60 * 1000; // 1 day intervals
-      timePoints = Array.from({ length: 7 }, (_, i) => new Date(now.getTime() - i * intervalMs)).reverse();
-      break;
-    case 7: // 14 days
-      intervalType = 'day';
-      intervalMs = 24 * 60 * 60 * 1000; // 1 day intervals
-      timePoints = Array.from({ length: 14 }, (_, i) => new Date(now.getTime() - i * intervalMs)).reverse();
-      break;
-    case 8: // 30 days
-    default:
-      intervalType = 'day';
-      intervalMs = 24 * 60 * 60 * 1000; // 1 day intervals
-      timePoints = Array.from({ length: 30 }, (_, i) => new Date(now.getTime() - i * intervalMs)).reverse();
-      break;
+  let intervalType = "day";
+  let intervalMs = 24 * 60 * 60 * 1000;
+
+  if (range === 10 && customStartDate && customEndDate) {
+    const startDate = new Date(customStartDate);
+    const endDate = new Date(customEndDate);
+    const diffTime = Math.abs(endDate - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    for (let i = 0; i <= diffDays; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      timePoints.push(new Date(date));
+    }
+
+    intervalType = "day";
+    intervalMs = 24 * 60 * 60 * 1000;
+  } else {
+    const now = new Date();
+    const roundedNow = new Date(now);
+    roundedNow.setMinutes(
+      Math.floor(now.getMinutes() / 15) * 15,
+      0,
+      0
+    );
+
+    switch (range) {
+      case 0: // 1 hour → 15 min
+        intervalType = "hour";
+        intervalMs = 15 * 60 * 1000;
+        timePoints = Array.from({ length: 4 }, (_, i) =>
+          new Date(roundedNow.getTime() - i * intervalMs)
+        ).reverse();
+        break;
+      case 1: // 3 hours → 15 min
+        intervalType = "hour";
+        intervalMs = 15 * 60 * 1000;
+        timePoints = Array.from({ length: 12 }, (_, i) =>
+          new Date(roundedNow.getTime() - i * intervalMs)
+        ).reverse();
+        break;
+      case 2: // 6 hours → 30 min
+        intervalType = "hour";
+        intervalMs = 15 * 60 * 1000;
+        timePoints = Array.from({ length: 24 }, (_, i) =>
+          new Date(roundedNow.getTime() - i * intervalMs)
+        ).reverse();
+        break;
+      case 3: // 12 hours → 1 hour
+        intervalType = "hour";
+        intervalMs = 15 * 60 * 1000;
+        timePoints = Array.from({ length: 48 }, (_, i) =>
+          new Date(roundedNow.getTime() - i * intervalMs)
+        ).reverse();
+        break;
+      case 4: // 1 day → 2 hours
+        intervalType = "hour";
+        intervalMs = 15 * 60 * 1000;
+        timePoints = Array.from({ length: 96 }, (_, i) =>
+          new Date(roundedNow.getTime() - i * intervalMs)
+        ).reverse();
+        break;
+      case 5: // 2 days → 4 hours
+        intervalType = "day";
+        intervalMs = 24 * 60 * 60 * 1000;
+        timePoints = Array.from({ length: 2 }, (_, i) =>
+          new Date(roundedNow.getTime() - i * intervalMs)
+        ).reverse();
+        break;
+      case 6: // 7 days
+        intervalType = "day";
+        intervalMs = 24 * 60 * 60 * 1000;
+        timePoints = Array.from({ length: 7 }, (_, i) =>
+          new Date(roundedNow.getTime() - i * intervalMs)
+        ).reverse();
+        break;
+      case 7: // 14 days
+        intervalType = "day";
+        intervalMs = 24 * 60 * 60 * 1000;
+        timePoints = Array.from({ length: 14 }, (_, i) =>
+          new Date(roundedNow.getTime() - i * intervalMs)
+        ).reverse();
+        break;
+      case 8: // 30 days
+      default:
+        intervalType = "day";
+        intervalMs = 24 * 60 * 60 * 1000;
+        timePoints = Array.from({ length: 30 }, (_, i) =>
+          new Date(roundedNow.getTime() - i * intervalMs)
+        ).reverse();
+        break;
+    }
   }
 
-  // Calculate start time for filtering data
-  const startTime = new Date(now.getTime() - timePoints.length * intervalMs);
-
-  // Initialize groupedByDate with empty data for all timepoints
+  // Initialize grouped data
   const groupedByDate = {};
-  timePoints.forEach(date => {
-    // Format date according to interval type
-    const dateStr = intervalType === 'hour'
-      ? new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date)
-      : new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(date);
+
+  timePoints.forEach((date) => {
+    const dateStr =
+      range < 5
+        ? new Intl.DateTimeFormat("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          }).format(date)
+        : new Intl.DateTimeFormat("en-US", {
+            day: "numeric",
+            month: "short",
+          }).format(date);
 
     groupedByDate[dateStr] = {
       items: [],
       totalCost: 0,
-      rawDate: new Date(date) // Store raw date for sorting
+      rawDate: new Date(date),
     };
   });
 
-  // Process API data
-  apiData.forEach((entry) => {
-    const entryDate = new Date(entry.created_at);
+  // Fill grouped data from uniqueEntries
+  Object.values(uniqueEntries).forEach((entry) => {
+    const dateStr =
+      range < 5
+        ? new Intl.DateTimeFormat("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          }).format(entry.date)
+        : new Intl.DateTimeFormat("en-US", {
+            day: "numeric",
+            month: "short",
+          }).format(entry.date);
 
-    // Skip entries older than our start time
-    if (entryDate >= startTime) {
-      // Find the appropriate time bucket for this entry
-      let targetDate = null;
-
-      for (let i = 0; i < timePoints.length - 1; i++) {
-        if (entryDate >= timePoints[i] && entryDate < timePoints[i + 1]) {
-          targetDate = timePoints[i];
-          break;
-        }
+    if (groupedByDate[dateStr]) {
+      let name = "";
+      if (currentFactor === "bridge_id") {
+        const bridge = allBridges.find((b) => b._id === entry.id);
+        name = bridge ? bridge.name : `Bridge ${entry.id?.substring(0, 6)}`;
+      } else if (currentFactor === "apikey_id") {
+        const apiKey = apiKeys.find((k) => k._id === entry.id);
+        name = apiKey ? apiKey.name : `API Key ${entry.id?.substring(0, 6)}`;
+      } else {
+        name = entry.id || "Unknown Model";
       }
 
-      // If not found in any interval, use the last interval
-      if (!targetDate && entryDate >= timePoints[timePoints.length - 1]) {
-        targetDate = timePoints[timePoints.length - 1];
+      const existingItemIndex = groupedByDate[dateStr].items.findIndex(
+        (item) => item.id === entry.id
+      );
+
+      if (existingItemIndex >= 0) {
+        groupedByDate[dateStr].items[existingItemIndex].cost += entry.cost;
+        groupedByDate[dateStr].items[existingItemIndex].tokens += entry.tokens;
+        groupedByDate[dateStr].items[existingItemIndex].successCount +=
+          entry.successCount;
+      } else {
+        groupedByDate[dateStr].items.push({
+          id: entry.id,
+          name: name,
+          cost: entry.cost,
+          tokens: entry.tokens,
+          successCount: entry.successCount,
+        });
       }
 
-      if (targetDate) {
-        // Format the date string for the bucket
-        const dateStr = intervalType === 'hour'
-          ? new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }).format(targetDate)
-          : new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(targetDate);
-
-        // Resolve names for bridges and API keys
-        let name = '';
-        if (currentFactor === 'bridge_id') {
-          const bridge = allBridges.find(b => b._id === entry.bridge_id);
-          name = bridge ? bridge.name : `Bridge ${entry.bridge_id?.substring(0, 6)}`;
-        } else if (currentFactor === 'apikey_id') {
-          const apiKey = apiKeys.find(k => k._id === entry.apikey_id);
-          name = apiKey ? apiKey.name : `API Key ${entry.apikey_id?.substring(0, 6)}`;
-        } else {
-          name = entry.model || 'Unknown Model';
-        }
-
-        // Add the entry to the appropriate bucket
-        if (groupedByDate[dateStr]) {
-          groupedByDate[dateStr].items.push({
-            id: entry[currentFactor],
-            name: name,
-            cost: entry.cost_sum || 0,
-            tokens: entry.total_token_count || 0,
-            successCount: entry.success_count || 0,
-          });
-
-          groupedByDate[dateStr].totalCost += (entry.cost_sum || 0);
-        }
-      }
+      groupedByDate[dateStr].totalCost += entry.cost;
     }
   });
 
-  // Convert to array format and sort by date
-  return Object.keys(groupedByDate).map(date => ({
-    period: date,
-    date: groupedByDate[date].rawDate,
-    totalCost: groupedByDate[date].totalCost,
-    items: groupedByDate[date].items.length > 0 ? groupedByDate[date].items : []
-  })).sort((a, b) => a.date - b.date);
+  return Object.keys(groupedByDate)
+    .map((date) => ({
+      period: date,
+      date: groupedByDate[date].rawDate,
+      totalCost: groupedByDate[date].totalCost,
+      items:
+        groupedByDate[date].items.length > 0
+          ? groupedByDate[date].items
+          : [],
+    }))
+    .sort((a, b) => a.date - b.date);
 };
+
 
 // New function to aggregate data by factor (API keys, bridges, models)
 const aggregateDataByFactor = (rawData) => {
@@ -188,8 +352,7 @@ const aggregateDataByFactor = (rawData) => {
     // Loop through all items in each period
     period.items.forEach(item => {
       const itemId = item.id;
-      const itemName = item.name;
-
+      const itemName = item.name;   
       // Create entry if it doesn't exist
       if (!aggregated[itemId]) {
         aggregated[itemId] = {
@@ -213,11 +376,15 @@ const aggregateDataByFactor = (rawData) => {
 };
 
 function Page({ params }) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [factor, setFactor] = useState(parseInt(searchParams.get('factor')) || 0);
   const [range, setRange] = useState(parseInt(searchParams.get('range')) || 0);
+  const [customStartDate, setCustomStartDate] = useState(searchParams.get('start_date') || null);
+  const [customEndDate, setCustomEndDate] = useState(searchParams.get('end_date') || null);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [bridge, setBridge] = useState(() => {
     const bridgeId = searchParams.get('bridge_id');
     const bridgeName = searchParams.get('bridge_name');
@@ -226,15 +393,17 @@ function Page({ params }) {
   const [loading, setLoading] = useState(false);
   const [filterBridges, setFilterBridges] = useState([]);
   const [currentTheme, setCurrentTheme] = useState('light');
-  const orgId = params?.org_id;
+  const orgId = resolvedParams?.org_id;
   const [rawData, setRawData] = useState([]);
 
   const FACTOR_OPTIONS = ['Bridges', 'API Keys', 'Models'];
+  const EXTENDED_TIME_RANGE_OPTIONS = [...TIME_RANGE_OPTIONS, 'Custom Range'];
 
   const { allBridges, apikeyData } = useCustomSelector((state) => ({
     allBridges: state.bridgeReducer.org[orgId]?.orgs || [],
     apikeyData: state?.bridgeReducer?.apikeys[orgId] || []
   }));
+
   const updateURLParams = (newParams) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
 
@@ -260,7 +429,7 @@ function Page({ params }) {
   useEffect(() => {
     // Initial theme
     const getInitialTheme = () => {
-      const savedTheme = localStorage.getItem("theme");
+      const savedTheme = getFromCookies("theme");
       return savedTheme
     };
 
@@ -268,7 +437,7 @@ function Page({ params }) {
 
     // Set up listener for theme changes
     const handleStorageChange = () => {
-      const newTheme = localStorage.getItem("theme");
+      const newTheme = getFromCookies("theme");
       if (newTheme === "dark" || newTheme === "light") {
         setCurrentTheme(newTheme);
       } else {
@@ -305,20 +474,38 @@ function Page({ params }) {
 
   const fetchMetricsData = async () => {
     setLoading(true);
-    const response = await getMetricsDataApi({
-      bridge_id: bridge?.bridge_id,
-      range: range + 1,
-      org_id: orgId,
+    
+    // Create request body according to the required format
+    const requestBody = {
+      range: range === 10 ? 10 : range + 1,
       factor: METRICS_FACTOR_OPTIONS[factor],
-    });
-    const data = convertApiData(response, factor, range, allBridges, apikeyData)
+    };
+    
+    // Add bridge_id only if it exists
+    if (bridge?.bridge_id) {
+      requestBody.bridge_id = bridge.bridge_id;
+    }
+    
+    // Add custom date parameters if using custom range
+    if (range === 10 && customStartDate && customEndDate) {
+      requestBody.start_date = customStartDate;
+      requestBody.end_date = customEndDate;
+    }
+    
+    // Add org_id
+    requestBody.org_id = orgId;
+    
+    
+    const response = await getMetricsDataApi(requestBody);
+    
+    const data = convertApiData(response, factor, range, allBridges, apikeyData, customStartDate, customEndDate);
     setRawData(data);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchMetricsData();
-  }, [factor, range, bridge]);
+  }, [factor, range, bridge, customStartDate, customEndDate]);
 
   const handleFactorChange = (index) => {
     setFactor(index);
@@ -326,8 +513,34 @@ function Page({ params }) {
   };
 
   const handleTimeRangeChange = (index) => {
-    setRange(index);
-    updateURLParams({ range: index })
+    if (index === TIME_RANGE_OPTIONS.length) {
+      // Custom range selected
+      setIsDatePickerOpen(true);
+    } else {
+      setRange(index);
+      // Clear custom date params when switching to predefined ranges
+      setCustomStartDate(null);
+      setCustomEndDate(null);
+      updateURLParams({ 
+        range: index,
+        start_date: null,
+        end_date: null
+      });
+    }
+  };
+
+  const handleDateRangeSelect = (startDate, endDate) => {
+    // Store the selected dates in ISO format
+    setCustomStartDate(startDate);
+    setCustomEndDate(endDate);
+    setRange(10); // Set range to 10 for custom
+    
+    // Update URL parameters
+    updateURLParams({
+      range: 10,
+      start_date: startDate,
+      end_date: endDate
+    });
   };
 
   const handleBridgeChange = (bridge_id, bridge_name) => {
@@ -339,6 +552,25 @@ function Page({ params }) {
       bridge_id: bridge_id,
       bridge_name: bridge_name
     });
+  };
+
+  const getDisplayRangeText = () => {
+    if (range === 10 && customStartDate && customEndDate) {
+      // Format dates for display in a more readable format
+      const formatDisplayDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { 
+          year: 'numeric',
+          month: 'short', 
+          day: 'numeric'
+        });
+      };
+      
+      const start = formatDisplayDate(customStartDate);
+      const end = formatDisplayDate(customEndDate);
+      return `${start} - ${end}`;
+    }
+    return TIME_RANGE_OPTIONS[range] || 'Select Range';
   };
 
   const chartData = {
@@ -425,7 +657,6 @@ function Page({ params }) {
                 <ChevronDownIcon className="w-3 h-3 ml-2" />
               </summary>
 
-
               <ul className="menu dropdown-content bg-base-100 rounded-box z-high w-52 p-2 shadow-sm flex-row overflow-y-auto overflow-x-hidden min-w-72 max-w-72 scrollbar-hide max-h-[70vh]">
                 <div className="search-container">
                   <SearchItems setFilterItems={setFilterBridges} data={allBridges} item="Agent" />
@@ -445,22 +676,13 @@ function Page({ params }) {
                   </a>
                 </li>
 
-
                 {filterBridges.map((item, index) => (
                   <li key={index}>
                     <a
                       onClick={(e) => {
-
-                        // Explicitly construct bridge object to ensure proper format
-
-
                         handleBridgeChange(item?._id, item?.name);
-
-                        // Close dropdown after a small delay to ensure state update
-
                         const details = e.currentTarget.closest('details');
                         if (details) details.removeAttribute('open');
-
                       }}
                       className={`w-72 mb-1 dropdown-item ${bridge?.['bridge_id'] === item?._id ? 'active' : ''}`}
                     >
@@ -472,7 +694,7 @@ function Page({ params }) {
             </details>
           </div>
 
-          {/* Right side - Time Range */}
+          {/* Right side - Time Range with Custom Option */}
           <div className='flex items-center gap-2'>
             <span className="font-medium">Time Range:</span>
             <details className="dropdown dropdown-end"
@@ -484,14 +706,14 @@ function Page({ params }) {
               }}
             >
               <summary className="btn btn-sm m-1">
-                {TIME_RANGE_OPTIONS?.[range]}
+                {range === 10 ? getDisplayRangeText() : TIME_RANGE_OPTIONS?.[range]}
                 <ChevronDownIcon className="w-3 h-3 ml-2" />
               </summary>
               <ul tabIndex="0" className="z-high dropdown-content menu p-1 shadow bg-base-100 rounded-box w-52">
                 {TIME_RANGE_OPTIONS.map((item, index) => (
                   <li key={index}>
                     <a
-                      className={`${index === range ? 'active' : ''}`}
+                      className={`${index === range && range !== 10 ? 'active' : ''}`}
                       onClick={(e) => {
                         handleTimeRangeChange(index);
                         const details = e.currentTarget.closest('details');
@@ -502,6 +724,20 @@ function Page({ params }) {
                     </a>
                   </li>
                 ))}
+                {/* Custom Range Option */}
+                <li>
+                  <a
+                    className={`${range === 10 ? 'active' : ''} flex items-center gap-2`}
+                    onClick={(e) => {
+                      handleTimeRangeChange(TIME_RANGE_OPTIONS.length);
+                      const details = e.currentTarget.closest('details');
+                      if (details) details.removeAttribute('open');
+                    }}
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Custom Range
+                  </a>
+                </li>
               </ul>
             </details>
           </div>
@@ -512,21 +748,18 @@ function Page({ params }) {
             {loading && <span className="text-gray-600 ml-2">Loading...</span>}
           </div>
         </div>
+
+       
       </div>
 
-      {/* Cost Overview */}
-      {/* <div className="bg-base-100 shadow-md rounded-lg p-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-3xl font-bold text-base-content">
-              ${totalCost.toFixed(2)}
-            </div>
-            <div className="text-base-content opacity-70">
-              Total Cost - {TIME_RANGE_OPTIONS[range]}
-            </div>
-          </div>
-        </div>
-      </div> */}
+      {/* Date Range Picker Modal */}
+      <DateRangePicker
+        isOpen={isDatePickerOpen}
+        onClose={() => setIsDatePickerOpen(false)}
+        onDateRangeSelect={handleDateRangeSelect}
+        initialStartDate={customStartDate}
+        initialEndDate={customEndDate}
+      />
 
       {/* Charts Section */}
       <div className="bg-base-100 shadow-md rounded-lg p-6 mb-6">

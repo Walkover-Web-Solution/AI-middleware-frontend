@@ -19,7 +19,7 @@
                 skipLoadGtwy: false // New flag to control loadGtwyEmbed behavior
             };
             this.urls = {
-                gtwyUrl: 'https://app.gtwy.ai/embed',
+                gtwyUrl: 'https://embed.gtwy.ai/embed',
                 login: 'https://db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {

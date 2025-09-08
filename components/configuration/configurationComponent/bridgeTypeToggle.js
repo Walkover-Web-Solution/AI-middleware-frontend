@@ -6,12 +6,12 @@ import { useDispatch } from 'react-redux';
 import Protected from '@/components/protected';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const BridgeTypeToggle = ({ params, isEmbedUser }) => {
+const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
     const dispatch = useDispatch();
     const { bridgeType, modelType, service } = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type?.toLowerCase(),
+        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
     }));
 
 
@@ -41,7 +41,7 @@ const BridgeTypeToggle = ({ params, isEmbedUser }) => {
             dataToSend: { bridgeType: 'api' }
         }));
     }
-}, [params.version, service, bridgeType]);
+}, [searchParams?.version, service, bridgeType]);
 
     return (
         <div className='flex flex-col lg:flex-row justify-start w-fit gap-4 bg-base-100 text-base-content mb-4'>

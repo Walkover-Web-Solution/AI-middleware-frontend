@@ -7,7 +7,7 @@ import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { userDetails } from '@/store/action/userDetailsAction';
 import { MODAL_TYPE } from '@/utils/enums';
-import { filterOrganizations, openModal } from '@/utils/utility';
+import { filterOrganizations, getFromCookies, openModal, setInCookies } from '@/utils/utility';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
@@ -27,7 +27,7 @@ function Page() {
       const response = await switchOrg(id);
       if (process.env.NEXT_PUBLIC_ENV === 'local') {
         const localToken = await switchUser({ orgId: id, orgName: name });
-        localStorage.setItem('local_token', localToken.token);
+        setInCookies('local_token', localToken.token);
       }
       route.push(`/org/${id}/agents`);
       dispatch(setCurrentOrgIdAction(id));
@@ -61,7 +61,7 @@ function Page() {
         }
       };
   
-      const savedTheme = localStorage.getItem("theme") || "system";
+      const savedTheme = getFromCookies("theme") || "system";
       const systemTheme = getSystemTheme();
       
       if (savedTheme === "system") {
@@ -74,7 +74,7 @@ function Page() {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleSystemThemeChange = (e) => {
         const newSystemTheme = e.matches ? 'dark' : 'light';
-        const currentSavedTheme = localStorage.getItem("theme") || "system";
+        const currentSavedTheme = getFromCookies("theme") || "system";
         
         // Only update if currently using system theme
         if (currentSavedTheme === "system") {

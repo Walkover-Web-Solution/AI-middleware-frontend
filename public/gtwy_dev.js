@@ -19,8 +19,8 @@
                 skipLoadGtwy: false // New flag to control loadGtwyEmbed behavior
             };
             this.urls = {
-                gtwyUrl: 'http://localhost:3000/embed',
-                login: 'http://localhost:7072/login'
+                gtwyUrl: 'https://dev-embed.gtwy.ai/embed',
+                login: 'https://dev-db.gtwy.ai/gtwyEmbed/login'
             };
             this.state = {
                 bodyLoaded: false,

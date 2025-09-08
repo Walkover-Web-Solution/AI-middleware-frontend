@@ -24,7 +24,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { truncate } from '@/components/historyPageComponents/assistFile';
-import { openModal, toggleSidebar } from '@/utils/utility';
+import { clearCookie, getFromCookies, openModal, toggleSidebar } from '@/utils/utility';
 import OrgSlider from './orgSlider';
 import TutorialModal from '@/components/modals/tutorialModal';
 import DemoModal from '../modals/DemoModal';
@@ -138,9 +138,9 @@ function MainSlider({ isEmbedUser }) {
   const handleLogout = useCallback(async () => {
     try {
       await logoutUserFromMsg91({
-        headers: { proxy_auth_token: localStorage.getItem('proxy_token') ?? '' }
+        headers: { proxy_auth_token: getFromCookies('proxy_token') ?? '' }
       });
-      localStorage.clear();
+      clearCookie();
       sessionStorage.clear();
       if(process.env.NEXT_PUBLIC_ENV === 'PROD') {
         router.replace('https://gtwy.ai/');

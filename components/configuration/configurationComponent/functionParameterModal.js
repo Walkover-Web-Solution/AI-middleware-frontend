@@ -17,7 +17,6 @@ import InfoTooltip from "@/components/InfoTooltip";
 function FunctionParameterModal({
   name = "",
   functionId = "",
-  params,
   Model_Name,
   embedToken = "",
   handleRemove = () => { },

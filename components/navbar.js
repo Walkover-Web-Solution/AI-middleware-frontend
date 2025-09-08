@@ -30,19 +30,17 @@ const Navbar = ({ isEmbedUser }) => {
 
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const versionId = searchParams.get('version');
   const pathParts = pathname.split('?')[0].split('/');
   const orgId = pathParts[2];
   const bridgeId = pathParts[5];
   const dispatch = useDispatch();
-
+  const searchParams = useSearchParams();
   const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType,  isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory} = useCustomSelector(state => ({
     organizations: state.userDetailsReducer.organizations,
     bridgeData: state.bridgeReducer.allBridgesMap[bridgeId],
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
     publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
-    isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[versionId]?.is_drafted ?? false,
+    isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[searchParams?.get('version')]?.is_drafted ?? false,
     bridgeStatus: state.bridgeReducer.allBridgesMap?.[bridgeId]?.bridge_status ?? BRIDGE_STATUS.ACTIVE,
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[bridgeId]?.bridgeType,
     isArchived: state.bridgeReducer.allBridgesMap?.[bridgeId]?.status ?? false,
@@ -136,15 +134,15 @@ const Navbar = ({ isEmbedUser }) => {
 
     try {
       dispatch(updateBridgeVersionReducer({
-        bridges: { ...bridge, _id: versionId, parent_id: bridgeId, is_drafted: false }
+        bridges: { ...bridge, _id: searchParams?.get('version'), parent_id: bridgeId, is_drafted: false }
       }));
-      await dispatch(dicardBridgeVersionAction({ bridgeId, versionId }));
+      await dispatch(dicardBridgeVersionAction({ bridgeId, versionId: searchParams?.get('version') }));
       toast.success('Changes discarded successfully');
     } catch (err) {
       console.error(err);
       toast.error('Failed to discard changes');
     }
-  }, [dispatch, bridge, versionId, bridgeId]);
+  }, [dispatch, bridge, searchParams?.get('version'), bridgeId]);
 
   const handlePublish = useCallback(async () => {
     if (!isDrafted) {
@@ -157,18 +155,25 @@ const Navbar = ({ isEmbedUser }) => {
       console.error(err);
       toast.error('Failed to publish version');
     }
-  }, [dispatch, isDrafted, bridgeId, versionId]);
+  }, [dispatch, isDrafted, bridgeId, searchParams?.get('version')]);
 
   const handleTabChange = useCallback((tabId) => {
     const base = `/org/${orgId}/agents/${tabId}/${bridgeId}`;
-    router.push(base + (versionId ? `?version=${versionId}` : ''));
-  }, [router, orgId, bridgeId, versionId]);
+    const version = searchParams?.get('version');
+    router.push(base + (version ? `?version=${version}` : ''));
+  }, [router, orgId, bridgeId, searchParams]);
 
   const toggleOrgSidebar = useCallback(() => router.push(`/org`), [router]);
-  const toggleBridgeSidebar = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
+  const toggleBridgeSidebar = useCallback(() => {
+    const version = searchParams?.get('version');
+    router.push(`/org/${orgId}/agents${version ? `?version=${version}` : ''}`);
+  }, [router, orgId, searchParams]);
   const toggleConfigHistorySidebar = () => toggleSidebar("default-config-history-slider", "right");
   const toggleIntegrationGuideSlider = () => toggleSidebar("integration-guide-slider", "right");
-  const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router]);
+  const handleHomeClick = useCallback(() => {
+    const version = searchParams?.get('version');
+    router.push(`/org/${orgId}/agents${version ? `?version=${version}` : ''}`);
+  }, [router, orgId, searchParams]);
 
   const breadcrumbItems = useMemo(() => ([
     {
@@ -272,7 +277,7 @@ const Navbar = ({ isEmbedUser }) => {
       )}
     </div>
   );
-
+  console.log(searchParams?.get('version'));
   if (!shouldShowNavbar()) return null;
 
   return (
@@ -465,8 +470,8 @@ const Navbar = ({ isEmbedUser }) => {
       {!isEmbedUser && (
         <>
           <ChatBotSlider />
-          <ConfigHistorySlider versionId={versionId} />
-          <GuideSlider params={{ org_id: orgId, id: bridgeId, version:versionId }} bridgeType={bridgeType}/>
+          <ConfigHistorySlider versionId={searchParams?.get('version')} />
+          <GuideSlider params={{ org_id: orgId, id: bridgeId, version:searchParams?.get('version') }} bridgeType={bridgeType}/>
         </>
       )}
     </div>
