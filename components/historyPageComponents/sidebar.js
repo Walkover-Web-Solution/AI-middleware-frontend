@@ -54,8 +54,10 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       if (!matchExists) {
         const firstSubThreadId = subThreads[0]?.sub_thread_id;
         if (firstSubThreadId) {
+          const thread_id = encodeURIComponent(searchParams?.thread_id?.replace(/&/g, '%26'));
+          const firstSubThreadIdEncoded = encodeURIComponent(subThreads[0]?.sub_thread_id?.replace(/&/g, '%26'));
           router.push(
-            `${pathName}?version=${searchParams?.version}&thread_id=${searchParams?.thread_id}&subThread_id=${firstSubThreadId}`,
+            `${pathName}?version=${searchParams?.version}&thread_id=${thread_id}&subThread_id=${firstSubThreadIdEncoded}`,
             undefined,
             { shallow: true }
           );
@@ -113,8 +115,8 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       );
       if (result?.length) {
         const firstResult = result[0];
-        const threadId = firstResult.thread_id;
-        const subThreadId = firstResult.sub_thread?.[0]?.sub_thread_id || threadId;
+        const threadId = encodeURIComponent(firstResult.thread_id.replace(/&/g, '%26'));
+        const subThreadId = encodeURIComponent(firstResult.sub_thread?.[0]?.sub_thread_id || threadId.replace(/&/g, '%26'));
 
         router.push(
           `${pathName}?version=${searchParams?.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=`,
@@ -149,8 +151,8 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       const result = await dispatch(getHistoryAction(params?.id, null, null, 1, searchRef?.current?.value || ""));
       if (result?.length) {
         const firstResult = result[0];
-        const threadId = firstResult.thread_id;
-        const subThreadId = firstResult.sub_thread?.[0]?.sub_thread_id || threadId;
+        const threadId = encodeURIComponent(firstResult.thread_id.replace(/&/g, '%26'));
+        const subThreadId = encodeURIComponent(firstResult.sub_thread?.[0]?.sub_thread_id || threadId.replace(/&/g, '%26'));
 
         router.push(
           `${pathName}?version=${searchParams?.version}&thread_id=${threadId}&subThread_id=${subThreadId}&start=&end=`,
@@ -196,7 +198,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     setExpandedThreads([threadId]);
     const start = searchParams?.start;
     const end = searchParams?.end;
-    router.push(`${pathName}?version=${searchParams?.version}&thread_id=${threadId ? threadId : searchParams?.thread_id}&subThread_id=${subThreadId}&start=${start}&end=${end}`, undefined, { shallow: true });
+    router.push(`${pathName}?version=${searchParams?.version}&thread_id=${encodeURIComponent(threadId ? threadId : searchParams?.thread_id.replace(/&/g, '%26'))}&subThread_id=${encodeURIComponent(subThreadId.replace(/&/g, '%26'))}&start=${start}&end=${end}`, undefined, { shallow: true });
   };
 
   const handleFilterChange = async user_feedback => {
@@ -372,7 +374,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                     )}
                     <div className="flex flex-col">
                       <li
-                        className={`${searchParams?.thread_id === item?.thread_id
+                        className={`${decodeURIComponent(searchParams?.thread_id) === item?.thread_id
                           ? "text-base-100 bg-primary hover:text-base-100 hover:bg-primary rounded-md"
                           : ""
                           } flex-grow cursor-pointer`}
@@ -386,7 +388,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                             </div>
                           )}
                           {/* Show chevron button only when no search query */}
-                          {!searchQuery && searchParams?.thread_id === item?.thread_id && (
+                          {!searchQuery && decodeURIComponent(searchParams?.thread_id) === item?.thread_id && (
                             <div
                               onClick={(e) => {
                                 e?.stopPropagation();
@@ -403,7 +405,8 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                           )}
                         </a>
                       </li>
-                      {searchParams?.thread_id === item?.thread_id && expandedThreads?.includes(item?.thread_id) && (
+                      {decodeURIComponent(searchParams?.thread_id) === searchParams?.thread_id &&
+                        expandedThreads?.includes(item?.thread_id) && (
                         <>
                           {loadingSubThreads ? (
                             <Skeleton />
@@ -434,7 +437,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                           )}
                         </>
                       )}
-                      {searchParams?.thread_id === item?.thread_id && <div className="space-y-6">
+                      {decodeURIComponent(searchParams?.thread_id) === item?.thread_id && <div className="space-y-6">
                         <div key={item.id} className="rounded-x-lg rounded-b-lg shadow-sm bg-base-100 overflow-hidden">
                           {item?.sub_thread && item.sub_thread?.length > 0 && (
                             <div className="bg-base-100">
@@ -444,7 +447,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
                                     <div key={index} className="ml-4">
                                       <div
                                         onClick={() => handleSelectSubThread(subThread?.sub_thread_id)}
-                                        className={`cursor-pointer p-3 rounded-lg transition-all duration-200 border-2 ${searchParams?.subThread_id === subThread?.sub_thread_id
+                                        className={`cursor-pointer p-3 rounded-lg transition-all duration-200 border-2 ${decodeURIComponent(searchParams?.subThread_id) === subThread?.sub_thread_id
                                           ? 'bg-base-200 border-primary text-base-content'
                                           : 'bg-base-100 border-base-200 hover:bg-base-200 hover:border-base-300 text-base-content'
                                           }`}

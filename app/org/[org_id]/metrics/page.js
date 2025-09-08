@@ -134,7 +134,6 @@ const convertApiData = (
       range < 5
         ? entryDate.toISOString().slice(0, 16) // YYYY-MM-DDTHH:mm
         : entryDate.toISOString().split("T")[0]; // YYYY-MM-DD
-    console.log(entryDate.toTimeString());
     const entryId = entry[currentFactor];
     const uniqueKey = `${key}+${
       currentFactor === "bridge_id"

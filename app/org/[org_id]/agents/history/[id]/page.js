@@ -8,7 +8,6 @@ import { getHistoryAction, userFeedbackCountAction } from "@/store/action/histor
 import { clearThreadData, clearHistoryData, setSelectedVersion } from "@/store/reducer/historyReducer";
 import Protected from "@/components/protected";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
-import { getSingleMessage } from "@/config";
 import { ChatLoadingSkeleton } from "@/components/historyPageComponents/ChatLayoutLoader";
 
 // Lazy load the components to reduce initial render time
@@ -18,7 +17,6 @@ const Sidebar = React.lazy(() => import('@/components/historyPageComponents/side
 export const runtime = "edge";
 function Page({params, searchParams }) {
   const resolvedSearchParams = use(searchParams);
-  console.log(resolvedSearchParams)
   const resolvedParams = use(params);
   const search = useSearchParams();
   const router = useRouter();
@@ -109,7 +107,7 @@ function Page({params, searchParams }) {
       setLoading(false);
     };
     if (!searchRef?.current?.value) fetchInitialData(resolvedParams, resolvedSearchParams);
-  }, [resolvedParams.id, filterOption, resolvedSearchParams.version]);
+  }, [resolvedParams.id, filterOption, resolvedSearchParams.version, selectedVersion]);
 
   const threadHandler = useCallback(
     async (thread_id, item, value) => {
@@ -125,7 +123,8 @@ function Page({params, searchParams }) {
       } else {
         const start = search.get("start");
         const end = search.get("end");
-        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${thread_id}&subThread_id=${thread_id}&start=${start}&end=${end}`, undefined, { shallow: true });
+        const encodedThreadId = encodeURIComponent(thread_id.replace(/&/g, "%26"));
+        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${encodedThreadId}&subThread_id=${encodedThreadId}&_Disease_Advisor[0]=&_Disease_Advisor[1]=&start=${start}&end=${end}`, undefined, { shallow: true });
       }
     },
     [pathName, resolvedParams.id, resolvedSearchParams.version, resolvedSearchParams?.start, resolvedSearchParams?.end]

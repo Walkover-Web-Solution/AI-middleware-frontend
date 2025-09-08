@@ -6,7 +6,7 @@ import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReduce
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
-import { generateRandomID, sendDataToParent, setInCookies, toBoolean } from '@/utils/utility';
+import { generateRandomID, getFromCookies, sendDataToParent, setInCookies, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { isPending } from '@/store/reducer/bridgeReducer';
 
@@ -122,7 +122,7 @@ const Layout = ({ children }) => {
           if(!urlParamsObj?.folder_ids){
             const proxyToken = getFromCookies('proxy_token');
             if(proxyToken){
-              setInCookies('proxy_token', proxyToken);
+              sessionStorage.setItem('proxy_token', proxyToken);
             }
           }else{
             sessionStorage.setItem('proxy_token', urlParamsObj.token);

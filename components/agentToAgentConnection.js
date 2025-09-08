@@ -36,6 +36,7 @@ import { useDispatch } from 'react-redux';
 import FunctionParameterModal from './configuration/configurationComponent/functionParameterModal';
 import { flushSync } from 'react-dom';
 import DeleteModal from './UI/DeleteModal';
+import { createNewOrchestralFlow, updateOrchestralFlow } from '@/config';
 
 /* ========================= Helpers ========================= */
 function hydrateNodes(rawNodes, ctx) {
@@ -447,7 +448,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           const existingData = orchestralData || {};
 
           const saveStructure = {
-            agents: serializeAgentFlow(existingData.nodes, existingData.edges, {
+            agents: nodes.length === 1 ? currentFlowData?.agents : serializeAgentFlow(existingData.nodes, existingData.edges, {
               name: existingData.flow_name || 'Flow',
               description: existingData.flow_description || '',
               bridge_type: existingData.bridge_type,
@@ -462,8 +463,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
             master_agent: currentFlowData.master_agent,
             master_agent_name: name || 'Flow',
           };
-
-          const { updateOrchestralFlow, createNewOrchestralFlow } = await import('@/config');
 
           if (params.orchestralId) {
             await updateOrchestralFlow(saveStructure, params.orchestralId);
@@ -1078,7 +1077,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         onConfirm={confirmDelete}
         item={pendingDelete?.selectedAgent}
         title="Remove Agent"
-        description={`Are you sure you want to remove the ${pendingDelete?.selectedAgent?.name || 'this agent'}? It will also remove its child agents. This action cannot be undone.`}
+        description={`Are you sure you want to remove ${agents.find((agent) => agent._id === pendingDelete?.id)?.name || 'this agent'}? It will also remove its child agents. This action cannot be undone.`}
         key={pendingDelete?.selectedAgent?._id || 'no-agent'}
       />
 
