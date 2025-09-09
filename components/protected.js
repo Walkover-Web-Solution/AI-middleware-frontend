@@ -5,12 +5,13 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { getFromCookies, setInCookies } from "@/utils/utility";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from 'react';
-
 const Protected = (WrappedComponent) => {
   const ProtectedComponent = (props) => {
     const router = useRouter();
-    const isEmbedUser = useCustomSelector((state) => state.userDetailsReducer.userDetails.isEmbedUser);
-
+    const { isEmbedUser, isFocus } = useCustomSelector(state => ({
+      isEmbedUser: state.userDetailsReducer.userDetails.isEmbedUser,
+      isFocus: state.bridgeReducer.isFocus
+    }));
     useEffect(() => {
       if ((typeof window !== 'undefined' && !getFromCookies("proxy_token")) && (!sessionStorage.getItem("proxy_token")) && !isEmbedUser) {
         if (window.location.href !== '/login') {
@@ -20,9 +21,8 @@ const Protected = (WrappedComponent) => {
       }
     }, [router]);
 
-    return <WrappedComponent {...props} isEmbedUser={!!(isEmbedUser && sessionStorage.getItem("proxy_token"))} />;
+    return <WrappedComponent {...props} isEmbedUser={!!(isEmbedUser && sessionStorage.getItem("proxy_token"))} isFocus={isFocus} />;
   };
-
   return ProtectedComponent;
 };
 
