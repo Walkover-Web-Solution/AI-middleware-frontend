@@ -17,7 +17,7 @@ function BridgeNameInput({ params, searchParams, isEmbedUser }) {
   const resizeTextarea = () => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = "auto";
+      textarea.style.height = "25px";
       textarea.style.height = textarea.scrollHeight + "px";
     }
   };
