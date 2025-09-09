@@ -9,20 +9,20 @@ import { toast } from 'react-toastify';
 import { CloseCircleIcon, SendHorizontalIcon, UploadIcon } from '@/components/Icons';
 import { PdfIcon } from '@/icons/pdfIcon';
 
-function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading }) {
+function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading, searchParams }) {
     const [uploading, setUploading] = useState(false);
     const dispatch = useDispatch();
     const [fileInput, setFileInput] = useState(null); // Use state for the file input element
-    const versionId = params?.version;
+    const versionId = searchParams?.version;
     const { bridge, modelType, modelName, variablesKeyValue, prompt, configuration, modelInfo, service } = useCustomSelector((state) => ({
-        bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version],
-        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model?.toLowerCase(),
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
-        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt,
-        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
-        configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
+        bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId],
+        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.model?.toLowerCase(),
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.type?.toLowerCase(),
+        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.prompt,
+        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.variables || [],
+        configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration,
         modelInfo: state?.modelReducer?.serviceModels,
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service?.toLowerCase(),
+        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.service?.toLowerCase(),
     }));
     const dataToSend = {
         configuration: {
@@ -167,6 +167,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 role: response?.role || "assistant",
                 content: content,
                 fallback : response?.fallback ? response?.fallback : response?.fall_back,
+                finish_reason: response?.finish_reason || "no_reason",
                 firstAttemptError: response?.firstAttemptError,
                 image_urls: response?.image_urls || [],
                 model: response?.model
@@ -187,9 +188,27 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 content: Array.isArray(content) ? content.join(", ") : content.toString(),
                 image_urls: assistConversation.image_urls,
                 fallback : assistConversation?.fallback,
+                finish_reason: assistConversation?.finish_reason,
                 firstAttemptError: response?.firstAttemptError,
                 modelName : assistConversation?.model
             };
+
+            // Show alert for non-completed finish_reason
+            // const finishReason = assistConversation?.finish_reason;
+            // if (finishReason && finishReason !== "completed" && finishReason !== "no_reason") {
+            //     const description = FINISH_REASON_DESCRIPTIONS[finishReason] || 
+            //                        FINISH_REASON_DESCRIPTIONS["other"];
+            //     toast.warning(`${finishReason}: ${description}`, {
+            //         position: "bottom-right",
+            //         autoClose: 5000,
+            //         hideProgressBar: false,
+            //         closeOnClick: true,
+            //         pauseOnHover: true,
+            //         draggable: true,
+            //         progress: undefined,
+            //         icon: () => <AlertIcon size={20} className="text-warning" />
+            //     });
+            // }
 
             setMessages(prevMessages => [...prevMessages, newChatAssist]);
         } catch (error) {

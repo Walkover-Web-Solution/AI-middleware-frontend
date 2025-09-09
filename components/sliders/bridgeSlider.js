@@ -48,7 +48,7 @@ function BridgeSlider() {
                                         className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md truncate max-w-full`}
                                         onClick={() => handleNavigation(item._id, item?.published_version_id || item?.versions?.[0])}
                                     >
-                                        {getIconOfService(item.service)}
+                                        {getIconOfService(item.service, 14, 14)}
                                         {item.name}
                                     </a>
                                 </li>
@@ -77,7 +77,7 @@ function BridgeSlider() {
                     style='input input-bor0dered w-full mb-0 ml-0 border border-base-content/50'
                 />
                 <button className="btn" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
-                    + Create new agent
+                    + Create New Agent
                 </button>
                 {filteredBridgesList.length === 0 ? (
                     <div className='max-w-full'>

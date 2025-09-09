@@ -8,10 +8,12 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { MODAL_TYPE } from "@/utils/enums";
 import { openModal } from "@/utils/utility";
 import { BotIcon } from "@/components/Icons";
+import { use } from "react";
 
 function ChatbotPage({ params }) {
+    const resolvedParams = use(params);
     const { allChatBot } = useCustomSelector((state) => ({
-        allChatBot: (state?.ChatBot?.org?.[params?.org_id] || []),
+        allChatBot: (state?.ChatBot?.org?.[resolvedParams?.org_id] || []),
     }));
 
     return <div>
@@ -31,13 +33,13 @@ function ChatbotPage({ params }) {
                 <div className="drawer-content flex  flex-col items-start justify-start">
                     <div className="flex w-full justify-start gap-16 items-start">
                         <div className="w-full">
-                            <ChatBotCardHome params={params} />
+                            <ChatBotCardHome params={resolvedParams} />
                         </div>
                     </div>
                 </div>
             </>
         )}
-        <ChatBotModel orgid={params.org_id} />
+        <ChatBotModel orgid={resolvedParams.org_id} />
 
     </div>;
 

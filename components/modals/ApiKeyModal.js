@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import Modal from '../UI/Modal';
 
-const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id }) => {
+const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id }) => {
     const pathName = usePathname();
     const path = pathName?.split('?')[0].split('/');
     const orgId = path[2] || '';
@@ -51,7 +51,7 @@ const ApiKeyModal = ({ params, isEditing, selectedApiKey, setSelectedApiKey = ()
                 const updated = { ...bridgeApikey_object_id, [service]: response._id };
                 dispatch(updateBridgeVersionAction({
                     bridgeId: params?.id,
-                    versionId: params?.version,
+                    versionId: searchParams?.version,
                     dataToSend: { apikey_object_id: updated }
                 }));
             }

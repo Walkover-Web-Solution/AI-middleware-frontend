@@ -1,4 +1,5 @@
 'use client';
+import { getFromCookies } from '@/utils/utility';
 import { Bot, ChevronLeft, ChevronRight, Globe, User, Lock } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -152,7 +153,7 @@ const AgentSidebar = ({
       <div className="flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto py-4">
           {/* Private Agents */}
-          {privateAgents.length > 0 && localStorage.getItem('publicAgentProxyToken') && (
+          {privateAgents.length > 0 && getFromCookies('publicAgentProxyToken') && (
             <>
               {renderAgentList(privateAgents, 'Private')}
               {publicAgents.length > 0 && !sidebarCollapsed && (

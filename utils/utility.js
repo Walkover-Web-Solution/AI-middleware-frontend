@@ -1,4 +1,5 @@
 import { BuildingIcon, CheckCircleIcon } from "@/components/Icons";
+import AIMLIcon from "@/icons/AIMLIcon";
 import AnthropicIcon from "@/icons/AnthropicIcon";
 import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
@@ -186,6 +187,10 @@ export const getIconOfService = (service, height, width) => {
             return <GeminiIcon height={height} width={width} />;
         case 'open_router':
             return <OpenRouter height={height} width={width} />;
+        case 'gemini':
+            return <GeminiIcon height={height} width={width} />;
+        case 'ai_ml':
+            return <AIMLIcon height={height} width={width} />;
         default:
             return <OpenAiIcon height={height} width={width} />;
     }
@@ -547,4 +552,95 @@ export const sendDataToParent = (status, data, message) => {
   }
 };
 
+function splitFromFirstEqual(str) {
+    // Handle empty string or string without an equal sign gracefully
+    if (!str || str.indexOf('=') === -1) {
+      return [str, ''] // Return the original string as both parts
+    }
+  
+    // Find the index of the first equal sign
+    const index = str.indexOf('=')
+  
+    // Handle cases where the equal sign is at the beginning or end of the string
+    if (index === 0) {
+      return ['', str.slice(1)] // Empty key, value is the rest of the string
+    }
+    if (index === str.length - 1) {
+      return [str.slice(0, -1), ''] // Key is the entire string except the last character (equal sign)
+    }
+  
+    // Split the string into key and value parts
+    const key = str.slice(0, index)
+    const value = str.slice(index + 1)
+  
+    return [key, value]
+  }
+
+function getDomain() {
+    const hostname = window.location.hostname
+    const parts = hostname?.split('.')
+    if (parts.length >= 2) {
+      parts.shift() // Remove the subdomain part
+      return `.${parts.join('.')}`
+    }
+    return hostname
+  }
+  
+  export const getSubdomain = () => {
+    return window.location.hostname
+  }
+  
+  
+  const getEnvPrefix = () => {
+    return process.env.NEXT_PUBLIC_ENV ? `${process.env.NEXT_PUBLIC_ENV}_env_` : '';
+  };
+  
+  const getCookieKey = (key) => {
+    const envPrefix = getEnvPrefix();
+    return `${envPrefix}${key}`;
+  };
+  
+  export const setInCookies = (key, value) => {
+    const domain = getDomain();
+    const date = new Date();
+    date.setTime(date.getTime() + 2 * 24 * 60 * 60 * 1000); // 2 days
+    const expires = `; expires=${date.toUTCString()}`;
+    const fullKey = getCookieKey(key);
+  
+    document.cookie = `${fullKey}=${value || ''}${expires}; domain=${domain}; path=/`;
+  };
+  
+  export const getFromCookies = (key) => {
+    const fullKey = getCookieKey(key);
+    const cookies = document.cookie?.split(';').map((cookie) => cookie.trim());
+  
+    for (let i = 0; i < cookies.length; i++) {
+      const [cookieKey, value] = splitFromFirstEqual(cookies[i]);
+      if (fullKey === cookieKey) {
+        return value;
+      }
+    }
+  
+    return null;
+  };
+  
+  export const removeCookie = (key) => {
+    const domain = getDomain();
+    const fullKey = getCookieKey(key);
+  
+    document.cookie = `${fullKey}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
+  };
+  
+  export const clearCookie = () => {
+    const domain = getDomain();
+    const envPrefix = getEnvPrefix();
+    const cookies = document.cookie?.split(';').map((cookie) => cookie.trim());
+  
+    for (let i = 0; i < cookies.length; i++) {
+      const [key] = splitFromFirstEqual(cookies[i]);
+      if (key.startsWith(envPrefix)) {
+        document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
+      }
+    }
+  };
   

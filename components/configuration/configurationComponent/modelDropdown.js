@@ -94,14 +94,14 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs }) => {
 
 ModelPreview.displayName = 'ModelPreview';
 
-const ModelDropdown = ({ params }) => {
+const ModelDropdown = ({ params, searchParams }) => {
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
     const { model, fineTuneModel, modelType, modelsList, bridgeType } = useCustomSelector((state) => ({
-        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
-        fineTuneModel: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.fine_tune_model?.current_model,
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type,
-        modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service],
+        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
+        fineTuneModel: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.fine_tune_model?.current_model,
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type,
+        modelsList: state?.modelReducer?.serviceModels[state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service],
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     }));
 
@@ -113,7 +113,7 @@ const ModelDropdown = ({ params }) => {
         const selectedFineTunedModel = e.target.value;
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: {
                 configuration: {
                     fine_tune_model: {
@@ -141,7 +141,7 @@ const ModelDropdown = ({ params }) => {
         const selectedModelType = group;
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: { configuration: { model: modelName, type: selectedModelType } }
         }));
         setHoveredModel(null);

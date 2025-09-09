@@ -3,7 +3,7 @@ import { DOCUMENT_SECTIONS } from "@/utils/enums";
 import React, { useEffect, useRef, useState } from "react";
 import Tooltip from "./tooltip";
 
-const ModelDocs = () => {
+const ModelDocs = async () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState(null);
   const searchInputRef = useRef(null);

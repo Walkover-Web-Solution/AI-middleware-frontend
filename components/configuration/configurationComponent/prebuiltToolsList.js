@@ -3,15 +3,15 @@ import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { GetPreBuiltToolTypeIcon, openModal } from '@/utils/utility';
+import { GetPreBuiltToolTypeIcon } from '@/utils/utility';
 import { truncate } from '@/components/historyPageComponents/assistFile';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const PrebuiltToolsList = ({ params }) => {
+const PrebuiltToolsList = ({ params, searchParams }) => {
     const { prebuiltToolsData, toolsVersionData, service } = useCustomSelector((state) => ({
         prebuiltToolsData: state?.bridgeReducer?.prebuiltTools,
-        toolsVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.built_in_tools,
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
+        toolsVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.built_in_tools,
+        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
     }));
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
@@ -22,14 +22,14 @@ const PrebuiltToolsList = ({ params }) => {
 
     const handleAddTool = (item) => {
         dispatch(updateBridgeVersionAction({
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: { built_in_tools_data: { built_in_tools: item?.value, built_in_tools_operation: "1" } }
         }));
     };
 
     const handleDeleteTool = (item) => {
         dispatch(updateBridgeVersionAction({
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: { built_in_tools_data: { built_in_tools: item?.value } }
         }));
     };

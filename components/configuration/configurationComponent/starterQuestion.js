@@ -4,16 +4,16 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const StarterQuestionToggle = ({ params }) => {
+const StarterQuestionToggle = ({ params, searchParams }) => {
     const dispatch = useDispatch();
     const IsstarterQuestionEnable = useCustomSelector((state) => 
-        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.IsstarterQuestionEnable || false
+        state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.IsstarterQuestionEnable || false
     );
     
     const handleToggle = () => {
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: { IsstarterQuestionEnable: !IsstarterQuestionEnable }
         }));
     };

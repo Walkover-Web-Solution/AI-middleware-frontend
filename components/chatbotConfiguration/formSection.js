@@ -450,7 +450,7 @@ export default function FormSection({ params, chatbotId = null }) {
             </div>
 
             {/* Agent Switch Section */}
-            <div className="bg-base-100 rounded-lg shadow p-6">
+            {/* <div className="bg-base-100 rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4 border-b border-base-content/20 pb-2">Agent Configuration</h3>
                 
                 <div className="space-y-4">
@@ -481,7 +481,7 @@ export default function FormSection({ params, chatbotId = null }) {
                         />
                     )}
                 </div>
-            </div>
+            </div> */}
 
             {/* Preview Section */}
             <div className="bg-base-200 rounded-lg shadow-lg border border-base-content/40">

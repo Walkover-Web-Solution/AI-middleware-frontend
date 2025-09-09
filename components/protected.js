@@ -2,6 +2,7 @@
 "use client"
 
 import { useCustomSelector } from "@/customHooks/customSelector";
+import { getFromCookies, setInCookies } from "@/utils/utility";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from 'react';
 
@@ -11,9 +12,9 @@ const Protected = (WrappedComponent) => {
     const isEmbedUser = useCustomSelector((state) => state.userDetailsReducer.userDetails.isEmbedUser);
 
     useEffect(() => {
-      if ((typeof window !== 'undefined' && !localStorage.getItem("proxy_token")) && (!sessionStorage.getItem("proxy_token")) && !isEmbedUser) {
+      if ((typeof window !== 'undefined' && !getFromCookies("proxy_token")) && (!sessionStorage.getItem("proxy_token")) && !isEmbedUser) {
         if (window.location.href !== '/login') {
-          localStorage.setItem("previous_url", window.location.href);
+          setInCookies("previous_url", window.location.href);
         }
         router.replace('/login');
       }

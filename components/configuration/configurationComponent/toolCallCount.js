@@ -5,17 +5,17 @@ import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from '@/uti
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
-function ToolCallCount({ params }) {
+function ToolCallCount({ params, searchParams }) {
     const dispatch = useDispatch();
     const { tool_call_count, modelType, model } = useCustomSelector((state) => ({
-        tool_call_count: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.tool_call_count,
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
-        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
+        tool_call_count: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.tool_call_count,
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type?.toLowerCase(),
+        model: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
     }));
 
     const handleFunctionCountChange = (e) => {
         const new_value = parseInt(e.target.value, 10);
-        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { tool_call_count: new_value } }));
+        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams.version, dataToSend: { tool_call_count: new_value } }));
     }
 
     if (modelType === AVAILABLE_MODEL_TYPES.REASONING && !PROMPT_SUPPORTED_REASIONING_MODELS?.includes(model)) {
@@ -33,7 +33,7 @@ function ToolCallCount({ params }) {
             <input
                 type="number"
                 placeholder="Type here"
-                class="input input-sm input-bordered w-full max-w-xs"
+                className="input input-sm input-bordered w-full max-w-xs"
                 min={1}
                 max={30}
                 key={tool_call_count}

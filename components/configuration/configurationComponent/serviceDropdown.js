@@ -5,28 +5,31 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
-import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
+import Protected from "@/components/protected";
 
-function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
-    const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey,shouldPromptShow } = useCustomSelector((state) => {
-        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef,isEmbedUser }) {
+    const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey,shouldPromptShow, showDefaultApikeys, apiKeyObjectIdData } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const bridgeData=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id];
-        const service = bridgeData?.[params?.version]?.service;
+        const service = bridgeData?.[searchParams?.version]?.service;
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
         const modelTypeName = versionData?.configuration?.type?.toLowerCase();
         const modelName = versionData?.configuration?.model;
+        const apiKeyObjectIdData = state.userDetailsReducer?.userDetails?.apikey_object_id || {}
+        const showDefaultApikeys = state.userDetailsReducer?.userDetails?.addDefaultApiKeys;
         return {
             SERVICES: state?.serviceReducer?.services,
             DEFAULT_MODEL: state?.serviceReducer?.default_model,
             bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
             service: service,
-            prompt: bridgeData?.[params?.version]?.configuration?.prompt || "",
-            bridgeApiKey: bridgeData?.[params?.version]?.apikey_object_id?.[
+            prompt: bridgeData?.[searchParams?.version]?.configuration?.prompt || "",
+            bridgeApiKey: bridgeData?.[searchParams?.version]?.apikey_object_id?.[
                 service === 'openai_response' ? 'openai' : service
             ],
-            shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt   
-
+            shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,   
+            apiKeyObjectIdData,
+            showDefaultApikeys
         };
     });
 
@@ -91,16 +94,16 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
         setSelectedService(newService);
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: { service: newService, configuration: { model: defaultModel } }
         }));
-    }, [dispatch, params.id, params.version]);
+    }, [dispatch, params.id, searchParams?.version]);
 
     const handleGetRecommendations = async () => {
         setIsLoadingRecommendations(true);
         try {
         if(bridgeApiKey && promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""){
-            const response = await modelSuggestionApi({ versionId: params?.version });
+            const response = await modelSuggestionApi({ versionId: searchParams?.version });
             if (response?.success) {
                 setModelRecommendations({
                     available: {
@@ -169,29 +172,48 @@ function ServiceDropdown({ params, apiKeySectionRef, promptTextAreaRef }) {
                         )}
                     </div>
                 )}
-                <div className="flex items-center gap-2">
-                    <select
-                        value={selectedService}
-                        onChange={handleServiceChange}
-                        className="select select-sm border-base-content/20 capitalize w-full max-w-xs"
-                        disabled={isDisabled}
-                    >
-                        <option disabled>Select a Service</option>
-                        {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
-                            <option key={value} value={value}>{displayName}</option>
-                        )) : null}
-                    </select>
-                    {isDisabled && (
-                        <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                            <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
-                            <span className='label-text-alt text-xs leading-tight'>
-                                Batch API is only applicable for OpenAI services.
-                            </span>
-                        </div>
-                    )}
-                </div>
+                {isEmbedUser && showDefaultApikeys ? (
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={selectedService}
+                            onChange={handleServiceChange}
+                            className="select select-sm border-base-content/20 capitalize w-full max-w-xs"
+                        >
+                            <option disabled>Select a Service</option>
+                            {Object.keys(apiKeyObjectIdData).map((key) => {
+                                const service = SERVICES.find((service) => service.value === key);
+                                if (service) {
+                                    return <option key={service.value} value={service.value}>{service.displayName}</option>;
+                                }
+                                return null;
+                            })}
+                        </select>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={selectedService}
+                            onChange={handleServiceChange}
+                            className="select select-sm border-base-content/20 capitalize w-full max-w-xs"
+                            disabled={isDisabled}
+                        >
+                            <option disabled>Select a Service</option>
+                            {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
+                                <option key={value} value={value}>{displayName}</option>
+                            )) : null}
+                        </select>
+                        {isDisabled && (
+                            <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
+                                <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
+                                <span className='label-text-alt text-xs leading-tight'>
+                                    Batch API is only applicable for OpenAI services.
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
 }
-export default ServiceDropdown;
+export default Protected(ServiceDropdown);

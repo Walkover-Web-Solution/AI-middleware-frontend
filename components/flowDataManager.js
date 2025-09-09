@@ -2,20 +2,35 @@
 import {
   Upload, Save, TestTube, Play, ChevronRight, Loader2, Plus, X, Search, Bot, PlusIcon, Settings, Zap, MessageSquare, Globe,
   File,
-  FileSlidersIcon
+  FileSlidersIcon,
+  CircleArrowOutUpRight,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
-import { closeModal, openModal } from '@/utils/utility';
+import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import Chat from './configuration/chat';
 import Link from 'next/link';
 import GenericTable from './table/table';
 import CopyButton from './copyButton/copyButton';
+import CreateNewOrchestralFlowModal from './modals/CreateNewOrchestralFlowModal';
+/* Global stack to make only the topmost handle ESC/overlay */
+const SlideStack = {
+  stack: [],
+  push(id) { this.stack = [...this.stack.filter(x => x !== id), id]; },
+  remove(id) { this.stack = this.stack.filter(x => x !== id); },
+  top() { return this.stack[this.stack.length - 1]; },
+};
 
-/* ---------------------------------------------
-   Shared SlideOver (overlay + slide animation)
----------------------------------------------- */
+function useStableId(provided) {
+  const ref = useRef(
+    provided || `slideover-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  );
+  return ref.current;
+}
+
 function SlideOver({
   isOpen,
   onClose,
@@ -27,30 +42,84 @@ function SlideOver({
   overlayZ = 'z-[99998]',
   panelZ = 'z-[99999]',
   backDropBlur = true,
+  instanceId: instanceIdProp,
+  destroyOnClose = true,
+  animationMs = 300,
 }) {
-  // close on ESC
+  const instanceId = useStableId(instanceIdProp);
+  const overlayId = `${instanceId}-overlay`;
+  const panelId = `${instanceId}-panel`;
+
+  // Local mount state so we can keep it in DOM during closing animation
+  const [mounted, setMounted] = useState(isOpen);
+  const closeTimer = useRef(null);
+
+  // Handle mount/unmount lifecycle
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose?.(); };
+    if (isOpen) {
+      // opening: ensure mounted, register on stack
+      if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; }
+      setMounted(true);
+      SlideStack.push(instanceId);
+    } else {
+      // closing: remove from stack, then unmount after animation
+      SlideStack.remove(instanceId);
+      if (destroyOnClose) {
+        if (closeTimer.current) clearTimeout(closeTimer.current);
+        closeTimer.current = setTimeout(() => {
+          setMounted(false);
+          closeTimer.current = null;
+        }, animationMs);
+      }
+    }
+    return () => { }; // nothing here
+  }, [isOpen, instanceId, destroyOnClose, animationMs]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      SlideStack.remove(instanceId);
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, [instanceId]);
+
+  // ESC only for topmost
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape' && SlideStack.top() === instanceId) {
+        onClose && onClose();
+      }
+    };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [isOpen, onClose, instanceId]);
+
+  const handleOverlayClick = () => {
+    if (SlideStack.top() === instanceId) onClose && onClose();
+  };
+
+  // If we’re closed AND destroyOnClose, unmount entirely
+  if (!mounted && destroyOnClose) return null;
 
   return (
     <>
       {/* Overlay */}
       <div
-        onClick={onClose}
-        className={`fixed inset-0 ${overlayZ} ${backDropBlur ? 'backdrop-blur-sm bg-black/40' : ''}  transition-opacity duration-300
+        id={overlayId}
+        onClick={handleOverlayClick}
+        className={`fixed inset-0 ${overlayZ} ${backDropBlur ? 'backdrop-blur-sm bg-black/40' : ''} transition-opacity duration-300
           ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       />
 
       {/* Panel */}
       <aside
+        id={panelId}
         data-state={isOpen ? 'open' : 'closed'}
         className={`fixed top-0 right-0 h-full ${widthClass} bg-base-100 border border-base-content/50 ${panelZ}
           transform-gpu transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : 'translate-x-full'} ${className}`}
-        style={{ transition: 'transform 300ms ease-in-out' }} // fallback if utilities get purged
+        style={{ transition: `transform ${animationMs}ms ease-in-out` }}
         role="dialog"
         aria-modal="true"
       >
@@ -63,6 +132,11 @@ function SlideOver({
   );
 }
 
+export { SlideOver };
+
+
+
+
 /* -------------------------------------------------------
    Serialization: React Flow -> Agent Structure
 -------------------------------------------------------- */
@@ -71,8 +145,18 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
     const agentNodes = nodes.filter(
       node => node.type === 'agentNode' && node.data?.selectedAgent
     );
-    if (agentNodes.length === 0) throw new Error('No agent nodes found in the flow');
-
+    if (nodes.length === 0) throw new Error('No agent nodes found in the flow');
+    if(nodes.length ==1){
+      return {
+        agents:{},
+        master_agent: {},
+        status: metadata.status || 'draft',
+        flow_name: metadata.name || 'Untitled Flow',
+        flow_description: metadata.description || '',
+        bridge_type: metadata.bridge_type || null,
+        data: metadata.autoSaveData
+      };
+    }
     const childrenMap = new Map();
     const parentsMap = new Map();
     agentNodes.forEach(node => {
@@ -125,7 +209,7 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
         childAgents,
         thread_id: sel.thread_id ? sel.thread_id : false,
         variables_path: sel.variables_path ? sel.variables_path : {},
-        variables: sel.variables ? sel.variables : {},
+        variables: sel.variables ? sel.variables : sel.agent_variables ? transformAgentVariableToToolCallFormat(sel.agent_variables) : {},
         agent_variables: sel.agent_variables ? sel.agent_variables : {},
       };
     });
@@ -142,6 +226,7 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
       flow_name: metadata.name || 'Untitled Flow',
       flow_description: metadata.description || '',
       bridge_type: metadata.bridge_type || null,
+      data: metadata.autoSaveData
     };
 
     return result;
@@ -151,36 +236,11 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
   }
 }
 
-export function validateAgentFlow(serializedFlow) {
-  const errors = [];
-  if (!serializedFlow.agents || Object.keys(serializedFlow.agents).length === 0) {
-    errors.push('No agents found in serialized flow');
-  }
-  if (!serializedFlow.master_agent) {
-    errors.push('No master agent specified');
-  } else if (!serializedFlow.agents[serializedFlow.master_agent]) {
-    errors.push('Master agent not found in agents list');
-  }
-
-  Object.entries(serializedFlow.agents || {}).forEach(([agentKey, agent]) => {
-    if (!agent.name) errors.push(`Agent ${agentKey} missing name`);
-    if (agent.connected_agents) {
-      agent.connected_agents.forEach((connectedAgent, index) => {
-        if (!connectedAgent.bridge_id && !connectedAgent.name) {
-          errors.push(`Agent ${agentKey} has invalid connected agent at index ${index}`);
-        }
-      });
-    }
-  });
-
-  return { isValid: errors.length === 0, errors };
-}
-
 /* -------------------------------------------------------
    Agent Structure -> React Flow {nodes, edges}
 -------------------------------------------------------- */
 export function createNodesFromAgentDoc(doc) {
-  if (!doc || !doc.agents || Object.keys(doc.agents).length === 0) {
+  if (!doc) {
     throw new Error('No agents found in data');
   }
 
@@ -201,12 +261,12 @@ export function createNodesFromAgentDoc(doc) {
     },
   });
 
-  const agents = doc.agents;
+  const agents = doc?.agents;
   const masterAgentKey = doc.master_agent;
 
   const graph = new Map();
   Object.entries(agents).forEach(([id, a]) => {
-    graph.set(id, { name: a.name, description: a.description, children: a.childAgents, variables: a.variables, thread_id:a.thread_id || [] });
+    graph.set(id, { name: a.name, description: a.description, children: a.childAgents, variables: a.variables, thread_id: a.thread_id || [] });
   });
 
   const levels = new Map();
@@ -254,11 +314,10 @@ export function createNodesFromAgentDoc(doc) {
       type: 'agentNode',
       position: { x: 80 + level * HORIZONTAL_SPACING, y },
       data: {
-        selectedAgent: { _id: id, name: a.name, description: a.description },
+        selectedAgent: { _id: id, name: a.name, description: a.description, variables_path: a.variables_path, variables: a.variables },
         isFirstAgent: id === masterAgentKey,
         isLast: (a.childAgents || []).length === 0,
         thread_id: a.thread_id,
-        variables: a.variables,
       },
     });
   });
@@ -286,131 +345,6 @@ export function createNodesFromAgentDoc(doc) {
   });
 
   return { nodes, edges };
-}
-
-/* -------------------------------------------------------
-   Packing Helpers
--------------------------------------------------------- */
-export function packFlow(flow) {
-  return encodeURIComponent(btoa(JSON.stringify(flow)));
-}
-export function unpackFlow(packed) {
-  try { return JSON.parse(atob(decodeURIComponent(packed))); }
-  catch { return null; }
-}
-
-/* -------------------------------------------------------
-   Validation for agent data (extra)
--------------------------------------------------------- */
-export function validateAgentStructure(agentData) {
-  const errors = [];
-  try {
-    if (!agentData || typeof agentData !== 'object') {
-      errors.push('Agent data must be a valid object');
-      return { isValid: false, errors };
-    }
-    if (!agentData.agents || typeof agentData.agents !== 'object') {
-      errors.push('agents field is required and must be an object');
-    }
-    if (!agentData.master_agent || typeof agentData.master_agent !== 'string') {
-      errors.push('master_agent field is required and must be a string');
-    }
-    if (!agentData.status || !['draft', 'publish'].includes(agentData.status)) {
-      errors.push('status field is required and must be either "draft" or "publish"');
-    }
-
-    if (agentData.agents) {
-      const agentKeys = Object.keys(agentData.agents);
-      if (agentKeys.length === 0) errors.push('At least one agent is required');
-
-      if (agentData.master_agent && !agentData.agents[agentData.master_agent]) {
-        errors.push(`Master agent '${agentData.master_agent}' not found in agents`);
-      }
-
-      const checkCircular = (currentKey, visited = new Set()) => {
-        if (visited.has(currentKey)) return true;
-        visited.add(currentKey);
-        const currentAgent = agentData.agents[currentKey];
-        if (currentAgent && currentAgent.childAgents) {
-          return currentAgent.childAgents.some(childKey =>
-            agentData.agents[childKey] && checkCircular(childKey, new Set(visited))
-          );
-        }
-        return false;
-      };
-
-      agentKeys.forEach(key => {
-        const a = agentData.agents[key];
-        if (!a.name || typeof a.name !== 'string') {
-          errors.push(`Agent '${key}' must have a valid name`);
-        }
-        if (a.parentAgents && !Array.isArray(a.parentAgents)) {
-          errors.push(`Agent '${key}' parentAgents must be an array`);
-        }
-        if (a.childAgents && !Array.isArray(a.childAgents)) {
-          errors.push(`Agent '${key}' childAgents must be an array`);
-        }
-        if (checkCircular(key)) {
-          errors.push(`Circular reference detected involving agent '${key}'`);
-        }
-      });
-    }
-  } catch (error) {
-    errors.push(`Validation error: ${error.message}`);
-  }
-
-  return { isValid: errors.length === 0, errors };
-}
-
-/* -------------------------------------------------------
-   Stats for agent flow
--------------------------------------------------------- */
-export function getAgentFlowStats(agentData) {
-  try {
-    if (!agentData.agents) return null;
-
-    const keys = Object.keys(agentData.agents);
-    const totalAgents = keys.length;
-
-    let maxDepth = 0;
-    const visited = new Set();
-
-    const dfs = (key, depth) => {
-      if (visited.has(key)) return;
-      visited.add(key);
-      maxDepth = Math.max(maxDepth, depth);
-      const a = agentData.agents[key];
-      (a?.childAgents || []).forEach(child => {
-        if (agentData.agents[child]) dfs(child, depth + 1);
-      });
-    };
-
-    if (agentData.master_agent && agentData.agents[agentData.master_agent]) {
-      dfs(agentData.master_agent, 0);
-    }
-
-    let totalConnections = 0;
-    keys.forEach(k => {
-      totalConnections += (agentData.agents[k].childAgents || []).length;
-    });
-
-    const leafAgents = keys.filter(k => !(agentData.agents[k].childAgents || []).length);
-    const rootAgents = keys.filter(k => !(agentData.agents[k].parentAgents || []).length);
-
-    return {
-      totalAgents,
-      maxDepth: maxDepth + 1,
-      totalConnections,
-      leafAgents: leafAgents.length,
-      rootAgents: rootAgents.length,
-      masterAgent: agentData.master_agent,
-      status: agentData.status,
-      flowComplexity: Math.round((totalConnections / Math.max(totalAgents - 1, 1)) * 100) / 100
-    };
-  } catch (error) {
-    console.error('Error calculating agent flow stats:', error);
-    return null;
-  }
 }
 
 /* -------------------------------------------------------
@@ -481,12 +415,48 @@ export function shallowEqual(a, b) {
 /* -------------------------------------------------------
    Agent Picker Sidebar (uses SlideOver)
 -------------------------------------------------------- */
-export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }) {
+export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, params }) {
   const [q, setQ] = useState('');
   const [description, setDescription] = useState('');
-  const [selectAgent, setSelectAgent] = useState(null);
+  const [selectAgent, setSelectAgent] = useState({ nameToCreate: "", org_id: params?.org_id });
+  const [openAgentConfigSidebar, setOpenAgentConfigSidebar] = useState(false);
 
   useEffect(() => { if (isOpen) setQ(''); }, [isOpen]);
+
+  const [creationType, setCreationType] = useState('name'); // 'name' or 'purpose'
+  const [inputValue, setInputValue] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [isCreateDropdownOpen, setIsCreateDropdownOpen] = useState(false);
+
+  const handleCreateAgent = () => {
+    setIsCreating(true);
+    window.GtwyEmbed.sendDataToGtwy({
+      parent_id: 'gtwyParentId',
+      [creationType === 'name' ? 'agent_name' : 'agent_purpose']: inputValue
+    })
+    setOpenAgentConfigSidebar(true);
+    setInputValue('');
+    onClose();
+    setTimeout(() => {
+      window.openGtwy();
+    }, 3000);
+  };
+
+  const handleTypeChange = (type) => {
+    setCreationType(type);
+    setInputValue('');
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (window.GtwyEmbed) {
+        window.GtwyEmbed.sendDataToGtwy({
+          parentId: 'gtwyParentId',
+          agent_id: selectAgent?._id
+        })
+      }
+    }, 100)
+  }, [openAgentConfigSidebar])
 
   const usedAgentIds = useMemo(() => {
     return new Set(
@@ -503,16 +473,14 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
         const key = a.bridge_id || a.name;
         const matchesSearch = (a?.name || '').toLowerCase().includes(q.toLowerCase());
         const notUsed = !usedAgentIds.has(key);
-        const hasPublishedVersion = a.published_version_id;
-        const doesNotHavePausedStatus = a.bridge_status !== 1;
-        const doesNotHaveArchivedStatus = a.status !== 0;
-        return matchesSearch && notUsed && hasPublishedVersion && doesNotHavePausedStatus && doesNotHaveArchivedStatus;
+        return matchesSearch && notUsed;
       });
-  }, [agents, q, usedAgentIds,agents,nodes]);
+  }, [agents, q, usedAgentIds, agents, nodes]);
 
   const handleSelectAgent = (agent) => {
     setSelectAgent(agent);
     openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL);
+    window.closeGtwy();
   };
 
   const handleAddAgent = () => {
@@ -520,7 +488,60 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
     onChoose?.(selectAgent);
     closeModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL);
     setDescription('');
-    setSelectAgent(null);
+    setSelectAgent({ nameToCreate: "", org_id: params?.org_id });
+  };
+
+  const handleEventListener = useCallback((event) => {
+    const { type, status, data } = event.data
+    if (type === 'gtwy' && status === "published") {      
+      let bridge = agents.find((a) => a._id === data.agent_id);
+      let node = nodes.find((n) => n?.id === data.agent_id);
+      if(node){
+        return
+      }
+      if (bridge) {
+        onChoose(bridge);
+        setOpenAgentConfigSidebar(false);
+      } else {
+        const fallbackBridge = {
+          _id: data.agent_id,
+          name: data.name || data.agent_name || 'Published Agent',
+          description: data.description || data.agent_description || '',
+          published_version_id: data.agent_version_id
+        };
+        onChoose(fallbackBridge);
+        setOpenAgentConfigSidebar(false);
+      }
+    }
+  }, [agents, onChoose])
+
+  useEffect(() => {
+    window.addEventListener('message', handleEventListener)
+    return () => {
+      window.removeEventListener('message', handleEventListener)
+    }
+  }, [handleEventListener])
+
+  useEffect(() => {
+    return () => {
+      setOpenAgentConfigSidebar(false);
+      onClose();
+      setSelectAgent({ nameToCreate: "", org_id: params?.org_id });
+      if(window.closeGtwy) window.closeGtwy();
+    }
+  }, []);
+
+  const handleOpenAgentConfigSidebar = (agent) => {
+    setOpenAgentConfigSidebar(true);
+    onClose();
+    window.GtwyEmbed.sendDataToGtwy({
+      'agent_id': agent?._id,
+    })
+    setTimeout(() => {
+      window.openGtwy({
+        agent_id: agent?._id,
+      });
+    }, 500)
   };
 
   return (
@@ -528,61 +549,233 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
       <SlideOver
         isOpen={isOpen}
         onClose={onClose}
+        widthClass="w-full sm:w-[460px] md:w-[620px] w-[720px] rounded-lg"
         header={
-          <div className="p-5 border-b border-base-200 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold tracking-wide text-base-content/60">SELECT AGENT</p>
-              <h2 className="text-lg font-semibold text-base-content">{title}</h2>
+          <div className="p-4 border-b border-base-300 bg-gradient-to-r from-primary/5 to-secondary/5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="badge badge-primary badge-sm font-medium mb-2">SELECT AGENT</div>
+                <h2 className="text-xl font-bold text-base-content">{title}</h2>
+              </div>
+              <button onClick={onClose} className="btn btn-circle btn-ghost hover:btn-error" aria-label="Close">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <button onClick={onClose} className="btn btn-ghost btn-sm rounded-full" aria-label="Close">
-              <X className="w-4 h-4" />
-            </button>
           </div>
         }
         bodyClassName="pb-6"
+        instanceId="agent-sidebar"
       >
         <div className="p-4">
-          <label className="input input-bordered flex items-center gap-2">
-            <Search className="w-4 h-4 opacity-60" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search agents..."
-              className="grow"
-            />
-          </label>
+          <div className="form-control">
+            <div className="input-group flex items-center gap-2">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search agents..."
+                className="input input-bordered input-primary flex-1 focus:outline-offset-0 w-full"
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="px-2 max-h-[calc(100vh-200px)] overflow-y-auto">
+        <div className="px-4">
+          <div className="dropdown dropdown-bottom w-full">
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn btn-primary w-full shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={() => setIsCreateDropdownOpen(!isCreateDropdownOpen)}
+            >
+              <div className="avatar placeholder mr-2">
+                <div className="bg-primary-content text-primary rounded-full w-6 h-6 flex items-center justify-center">
+                  <span className="text-sm"><PlusIcon size={16} /></span>
+                </div>
+              </div>
+              Create New Agent
+              {isCreateDropdownOpen ? <ChevronUp className="w-4 h-4 ml-auto transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 ml-auto transition-transform duration-200" />}
+            </div>
+
+            {isCreateDropdownOpen && (
+              <div className="dropdown-content z-[1] card card-compact w-full bg-base-100 shadow-xl border border-primary/20 mt-2">
+                <div className="card-body space-y-4">
+                  {/* Creation Type Selector */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium text-sm">Creation Method</span>
+                    </label>
+                    <div className="join w-full">
+                      <button
+                        onClick={() => handleTypeChange('name')}
+                        className={`btn btn-sm join-item flex-1 ${creationType === 'name' ? 'btn-primary' : 'btn-outline btn-primary'
+                          }`}
+                      >
+                        📝 Name
+                      </button>
+                      <button
+                        onClick={() => handleTypeChange('purpose')}
+                        className={`btn btn-sm join-item flex-1 ${creationType === 'purpose' ? 'btn-primary' : 'btn-outline btn-primary'
+                          }`}
+                      >
+                        🎯 Purpose
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Input Field */}
+                  <div className="form-control">
+                    {creationType === 'name' ? (
+                      <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Enter agent name..."
+                        className="input input-bordered input-primary w-full"
+                      />
+                    ) : (
+                      <textarea
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Describe what the agent should do..."
+                        rows={2}
+                        className="textarea textarea-bordered textarea-primary w-full resize-none"
+                      />
+                    )}
+                  </div>
+
+                  {/* Create Button */}
+                  <button
+                    onClick={handleCreateAgent}
+                    disabled={!inputValue.trim() || isCreating}
+                    className={`btn btn-sm w-full ${!inputValue.trim() || isCreating
+                        ? 'btn-disabled'
+                        : 'btn-primary'
+                      }`}
+                  >
+                    {isCreating ? (
+                      <>
+                        <span className="loading loading-spinner loading-xs"></span>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        🚀 Create Agent
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="px-4">
+          <div className="divider">
+            <span className="text-base-content/60 font-medium">Available Agents</span>
+          </div>
+        </div>
+
+        <div className="px-4 max-h-[calc(100vh-300px)] overflow-y-auto">
           {list.length === 0 ? (
-            <div className="px-4 py-16 text-center text-base-content/60 text-sm">
-              {q ? `No agents for "${q}"` : 'No agents available'}
+            <div className="card bg-base-100 shadow-md">
+              <div className="card-body text-center py-12">
+                <div className="avatar placeholder mb-4">
+                  <div className="bg-base-300 text-base-content rounded-full w-16">
+                    <span className="text-2xl">🤖</span>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold text-base-content/60 mb-2">
+                  {q ? `No agents found for "${q}"` : 'No agents available'}
+                </h3>
+                <p className="text-sm text-base-content/50">
+                  {q ? 'Try adjusting your search terms' : 'Create your first agent to get started'}
+                </p>
+              </div>
             </div>
           ) : (
-            <ul className="space-y-1">
-              {list.map((agent, idx) => (
-                <li key={(agent.bridge_id || agent.__key || `${agent.name}-${idx}`).toString()}>
-                  <button
-                    onClick={() => handleSelectAgent(agent)}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-base-200/60"
-                  >
-                    <div className="bg-primary/10 p-2 rounded-full">
-                      <Bot className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="text-left flex-1">
-                      <div className="font-medium">{agent.name || agent.__key}</div>
-                      <div className="text-xs text-base-content/60">
-                        {Array.isArray(agent.connected_agents) || typeof agent.connected_agents === 'object'
-                          ? `Connected to: ${normalizeConnectedRefs(agent.connected_agents)
-                            .map((c) => (typeof c === 'object' ? c.name : String(c)))
-                            .join(', ')}`
-                          : 'AI Assistant'}
+            <div className="grid gap-3">
+              {list.map((agent, idx) => {
+                const hasPublishedVersion = agent.published_version_id;
+                const doesNotHavePausedStatus = agent.bridge_status !== 1;
+                const doesNotHaveArchivedStatus = agent.status !== 0;
+                const isDisabled = !(hasPublishedVersion && doesNotHavePausedStatus && doesNotHaveArchivedStatus);
+
+                const getStatusLabel = () => {
+                  if (!hasPublishedVersion) return 'Not Published';
+                  if (agent.bridge_status === 1) return 'Paused';
+                  if (agent.status === 0) return 'Archived';
+                  return 'Active';
+                };
+
+                const getStatusBadge = () => {
+                  const status = getStatusLabel();
+                  switch (status) {
+                    case 'Active':
+                      return 'badge-success';
+                    case 'Paused':
+                      return 'badge-warning';
+                    case 'Archived':
+                      return 'badge-error';
+                    default:
+                      return 'badge-neutral';
+                  }
+                };
+
+                const statusLabel = getStatusLabel();
+
+                return (
+                  <div key={(agent.bridge_id || agent.__key || `${agent.name}-${idx}`).toString()}
+                    className={`card bg-base-100 shadow-md hover:shadow-lg group hover:bg-base-200/30 transition-all duration-200 ${isDisabled ? 'opacity-60' : 'hover:scale-[1.02]'
+                      }`}>
+                    <div className="card-body p-2">
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleSelectAgent(agent) }}
+                          disabled={isDisabled}
+                          className={`flex items-center gap-3 flex-1 text-left ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer group'
+                            }`}
+                        >
+                          <div className="avatar placeholder">
+                            <div className={`rounded-full w-12 h-12 ${isDisabled ? 'bg-base-300 text-base-content/50' : 'bg-primary/20 text-primary group-hover:bg-primary group-hover:text-primary-content'
+                              } transition-all duration-200`}>
+                              <Bot className="w-6 h-6" />
+                            </div>
+                          </div>
+
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className={`text-sm ${isDisabled ? 'text-base-content/50' : 'text-base-content group-hover:text-primary'
+                                } transition-colors duration-200`}>
+                                {agent.name || agent.__key}
+                              </h3>
+                              <div className={`badge ${getStatusBadge()} badge-sm font-medium`}>
+                                {statusLabel}
+                              </div>
+                            </div>
+                            {agent.description && (
+                              <p className="text-sm text-base-content/60 truncate">
+                                {agent.description}
+                              </p>
+                            )}
+                          </div>
+                        </button>
+
+                        <div className="card-actions">
+                          <div className="tooltip tooltip-left" data-tip="Configure Agent">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleOpenAgentConfigSidebar(agent) }}
+                              className="btn btn-circle btn-primary btn-outline btn-sm opacity-0 group-hover:opacity-100 transition-all duration-200"
+                            >
+                              <CircleArrowOutUpRight size={16} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </button>
-                </li>
-              ))}
-            </ul>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
 
@@ -593,6 +786,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose }
           isAgentToAgentConnect={false}
         />
       </SlideOver>
+      <AgentConfigSidebar isOpen={openAgentConfigSidebar} onClose={() => setOpenAgentConfigSidebar(false)} agent={selectAgent} instanceId="agent-config-sidebar" />
     </>
   );
 }
@@ -612,9 +806,7 @@ export function FlowControlPanel({
   params,
   isVariableModified,
   openIntegrationGuide,
-  closeIntegrationGuide,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [userMessage, setUserMessage] = useState('');
   const [saveData, setSaveData] = useState({
@@ -635,32 +827,23 @@ export function FlowControlPanel({
       createdFlow,
       setIsLoading
     });
-    setIsOpen(false);
+    closeModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL);
   };
 
   const handleDiscard = () => {
     const ok = confirm('Discard all unsaved changes?');
     if (!ok) return;
-
-    // Prefer a parent-provided discard handler if available
     if (typeof onDiscard === 'function') {
       onDiscard();
       return;
     }
 
-    // Fallback: reset local state and hard refresh to ensure full revert
     setIsChatOpen(false);
     setSaveData({
       name: name || '',
       description: description || '',
       status: 'publish',
     });
-    // Force a reload to revert any upstream editor state
-    // window.location.reload();
-  };
-
-  const handleChange = (e) => {
-    setSaveData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleQuickTestKeyDown = (e) => {
@@ -685,13 +868,13 @@ export function FlowControlPanel({
       <div className="absolute top-4 right-4 flex items-center gap-2">
         {/* Discard button: show only when createdFlow && isModified */}
 
-        <button
-            className="btn btn-outline"
-            onClick={openIntegrationGuide}
-            title="Integration Guide"
-          >
-           <FileSlidersIcon/> Integration Guide
-          </button>
+        {createdFlow && <button
+          className="btn btn-outline"
+          onClick={openIntegrationGuide}
+          title="Integration Guide"
+        >
+          <FileSlidersIcon /> Integration Guide
+        </button>}
 
         {createdFlow && (isModified || isVariableModified) && (
           <button
@@ -705,22 +888,22 @@ export function FlowControlPanel({
 
         {/* Publish/Update button */}
         <button
-          className="btn btn-primary bg-primary shadow-lg text-base-content"
-          onClick={() => setIsOpen(true)}
+          className="btn btn-primary bg-success shadow-lg text-base-content"
           disabled={!isModified && !isVariableModified}
           title="Publish Flow"
+          onClick={() => openModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL)}
         >
           <span className="text-white">
-            {createdFlow ? <Upload className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+            <Save className="mr-2 h-4 w-4" />
           </span>
           <span className="text-white">
-            {createdFlow ? 'Update Flow' : 'Publish Flow'}
+            Publish Flow
           </span>
         </button>
       </div>
 
       {/* Quick Test Input with highlight ring */}
-      {!isModified && !isChatOpen && (
+      {!isChatOpen && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
           <div className="relative">
             {/* Outer ring */}
@@ -741,63 +924,13 @@ export function FlowControlPanel({
         </div>
       )}
 
-      {/* Save/Publish Modal (DaisyUI Modal) */}
-      {isOpen && (
-        <div className="fixed inset-0 z-[9970] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="card bg-base-100 w-full max-w-md shadow-2xl border border-base-200">
-            <div className="card-body">
-              <h3 className="card-title">
-                {createdFlow ? <Save className="mr-2 h-5 w-5 opacity-70" /> : <Upload className="mr-2 h-5 w-5 opacity-70" />}
-                {createdFlow ? 'Update Agent Flow' : 'Save Agent Flow'}
-              </h3>
-
-              <div className="form-control mt-2">
-                <label className="label">
-                  <span className="label-text">
-                    Flow Name <span className="text-error">*</span>
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={saveData.name}
-                  onChange={handleChange}
-                  placeholder="Enter flow name..."
-                  className="input input-bordered w-full"
-                />
-              </div>
-
-              <div className="form-control mt-2">
-                <label className="label">
-                  <span className="label-text">Description</span>
-                </label>
-                <textarea
-                  name="description"
-                  value={saveData.description}
-                  onChange={handleChange}
-                  rows={3}
-                  placeholder="Enter flow description..."
-                  className="textarea textarea-bordered w-full resize-none"
-                />
-              </div>
-
-              <div className="card-actions justify-end mt-4">
-                <button className="btn btn-ghost" onClick={() => setIsOpen(false)}>Cancel</button>
-                <button className="btn btn-primary" onClick={handlePublish}>
-                  {createdFlow ? <Upload className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
-                  {createdFlow ? 'Update Flow' : 'Publish Flow'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreateNewOrchestralFlowModal handleCreateNewFlow={handlePublish} createdFlow={createdFlow} saveData={saveData} setSaveData={setSaveData} />
 
       {/* Chat SlideOver */}
       <SlideOver
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
-        widthClass="w-full sm:w-[460px] md:w-[520px] mt-14 rounded-lg"
+        widthClass="w-full sm:w-[660px] md:w-[620px] w-[720px] mt-6 rounded-lg h-[calc(100vh-120px)]"
         overlayZ="z-[9968]"
         panelZ="z-[9969]"
         backDropBlur={false}
@@ -819,7 +952,7 @@ export function FlowControlPanel({
         }
         bodyClassName="min-h-0"
       >
-        <div className="flex-1 min-h-0 rounded-b-lg">
+        <div className="flex-1 rounded-b-lg">
           <Chat params={params} userMessage={userMessage} isOrchestralModel={true} />
         </div>
       </SlideOver>
@@ -831,14 +964,29 @@ export function FlowControlPanel({
 /* -------------------------------------------------------
    Agent Config Sidebar (uses SlideOver)
 -------------------------------------------------------- */
-export function AgentConfigSidebar({ isOpen, onClose, agent }) {
+export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId }) {
+  useEffect(() => {
+    setTimeout(() => {
+      if (window.GtwyEmbed) {
+        window.GtwyEmbed.sendDataToGtwy({
+          parentId: 'gtwyParentId',
+          agent_id: agent?._id
+        })
+      }
+    }, 100)
+  }, [agent])
+  useEffect(() => {
+    return () => {
+      if(window.closeGtwy) window.closeGtwy();
+    }
+  }, [isOpen])
   return (
     <SlideOver
       isOpen={isOpen}
       onClose={onClose}
-      widthClass="w-[380px] max-w-[80vw]"
+      widthClass="w-[80vw] max-w-[80vw]"
       header={
-        <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
+        <div className="flex items-center justify-between px-6 py-4 border border-base-200">
           <h2 className="text-xl font-semibold">Agent Configuration</h2>
           <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm" aria-label="Close sidebar">
             <X className="w-4 h-4" />
@@ -846,86 +994,10 @@ export function AgentConfigSidebar({ isOpen, onClose, agent }) {
         </div>
       }
       bodyClassName="p-6 space-y-4 pb-20"
+      instanceId={instanceId}
     >
-      {/* Basic Info */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Basic Information</h3>
-          <div className="space-y-2 text-sm">
-            <div><span className="font-medium">ID:</span> {agent?._id}</div>
-            <div><span className="font-medium">Name:</span> {agent?.name}</div>
-            <div><span className="font-medium">Slug:</span> {agent?.slugName}</div>
-            <div><span className="font-medium">Service:</span> {agent?.service}</div>
-            <div><span className="font-medium">Bridge Type:</span> {agent?.bridgeType}</div>
-            <div><span className="font-medium">Status:</span> {agent?.status === 1 ? 'Active' : 'Inactive'}</div>
-            <div><span className="font-medium">Total Tokens:</span> {agent?.total_tokens?.toLocaleString() || 'N/A'}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Configuration */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Configuration</h3>
-          <div className="space-y-2 text-sm">
-            <div><span className="font-medium">Model:</span> {agent?.configuration?.model}</div>
-            <div className="space-y-1">
-              <span className="font-medium">Prompt:</span>
-              <pre className="bg-base-100 p-3 rounded border border-base-300 text-xs whitespace-pre-wrap">
-                {agent?.configuration?.prompt}
-              </pre>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Versions */}
-      {agent?.versions && agent?.versions?.length > 0 && (
-        <div className="card bg-base-200">
-          <div className="card-body">
-            <h3 className="card-title text-sm">Versions</h3>
-            <div className="space-y-2">
-              {agent?.versions?.map((version, index) => (
-                <div key={version} className="text-sm">
-                  <span className="font-medium">Version {index + 1}:</span> {version}
-                  {version === agent.published_version_id && (
-                    <span className="badge badge-success badge-sm ml-2">Published</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Agent Variables */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Agent Variables</h3>
-          {agent?.agent_variables && Object.keys(agent?.agent_variables).length > 0 ? (
-            <div className="space-y-1 text-sm">
-              {Object.entries(agent?.agent_variables).map(([key, value]) => (
-                <div key={key}>
-                  <span className="font-medium">{key}:</span> {JSON.stringify(value)}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-sm opacity-70">No variables configured</div>
-          )}
-        </div>
-      </div>
-
-      {/* Additional Info */}
-      <div className="card bg-base-200">
-        <div className="card-body">
-          <h3 className="card-title text-sm">Additional Information</h3>
-          <div className="space-y-2 text-sm">
-            <div><span className="font-medium">Organization ID:</span> {agent?.org_id}</div>
-            <div><span className="font-medium">Published Version:</span> {agent?.published_version_id}</div>
-            <div><span className="font-medium">Function IDs:</span> {agent?.function_ids || 'None'}</div>
-          </div>
-        </div>
+      <div id='gtwyParentId' className='h-full border-none w-full mx-auto flex items-center justify-center'>
+        <span className="animate-pulse">Loading...</span>
       </div>
     </SlideOver>
   );
@@ -941,15 +1013,15 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
   ]
 
   const orchestratorApi = (p) =>
-    (
-      `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\\n` +
-      `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
-      `--header 'Content-Type: application/json' \\\n` +
-      `--data '{\\n` +
-      `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",\\n` +
-      `    "user": "YOUR_USER_QUESTION"\\n` +
-      `}'`
-    )
+  (
+    `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\\n` +
+    `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
+    `--header 'Content-Type: application/json' \\\n` +
+    `--data '{\\n` +
+    `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",\\n` +
+    `    "user": "YOUR_USER_QUESTION"\\n` +
+    `}'`
+  )
 
   const orchestratorFormat = `
     "success": true,
@@ -984,7 +1056,7 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
       widthClass="w-[780px] max-w-[50vw]"
       header={
         <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
-          <h2 className="text-xl font-semibold">Integration Guide</h2>
+          <h2 className="text-xl font-semibold textbase">Integration Guide</h2>
           <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm" aria-label="Close sidebar">
             <X className="w-4 h-4" />
           </button>
@@ -996,9 +1068,9 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
       <div className="card bg-base-200">
         <div className="card-body space-y-2">
           <Section title="Step 1" caption={
-            <>
-              Create <code className="px-1 py-0.5 rounded bg-base-100 border">pauthkey</code>
-            </>
+            <span className="text-base-content">
+              Create <code className="px-1 py-0.5 rounded bg-base-100">pauthkey</code>
+            </span>
           } />
           <p className="text-sm">
             Follow the on-screen instructions to create a new API key. Ignore if already created.

@@ -6,10 +6,10 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Modal from '../UI/Modal';
 
-function CreateVariableModal({ keyName, setKeyName, params }) {
+function CreateVariableModal({ keyName, setKeyName, params, searchParams }) {
     const dispatch = useDispatch();
     const { variablesKeyValue } = useCustomSelector((state) => ({
-        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
+        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
     }));
 
     const [keyValue, setKeyValue] = useState(keyName);
@@ -29,7 +29,7 @@ function CreateVariableModal({ keyName, setKeyName, params }) {
         if (keyValue && valueValue) {
             let updatedPairs = [...variablesKeyValue, { "key": keyValue, "value": valueValue }];
             // Dispatch the update action to the store
-            dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId: params.version }));
+            dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId: searchParams?.version }));
             // Clear the inputs after creating
             setKeyName('');
             setKeyValue('');
@@ -68,7 +68,6 @@ function CreateVariableModal({ keyName, setKeyName, params }) {
                     <span className="label-text">Value</span>
                 </div>
                 <input
-                    key={keyName}
                     defaultValue={valueValue}
                     type="text"
                     className="input input-bordered input-md w-full mb-2"

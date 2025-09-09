@@ -1,5 +1,5 @@
 import { getSingleMessage } from "@/config";
-import { CircleAlertIcon, BotIcon, ChevronDownIcon, FileClockIcon, ParenthesesIcon, PencilIcon, AddIcon, SquareFunctionIcon, UserIcon, CodeMessageIcon, BotMessageIcon, FileTextIcon } from "@/components/Icons";
+import { CircleAlertIcon, BotIcon, ChevronDownIcon, FileClockIcon, ParenthesesIcon, PencilIcon, AddIcon, SquareFunctionIcon, UserIcon, CodeMessageIcon, BotMessageIcon, FileTextIcon, AlertIcon } from "@/components/Icons";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -8,21 +8,21 @@ import { truncate } from "./assistFile";
 import ToolsDataModal from "./toolsDataModal";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { openModal } from "@/utils/utility";
-import { MODAL_TYPE } from "@/utils/enums";
+import { MODAL_TYPE, FINISH_REASON_DESCRIPTIONS } from "@/utils/enums";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { ExternalLink } from "lucide-react";
 
 // Helper function to normalize image data with enhanced fallback
 const normalizeImageUrls = (imageData) => {
   if (!imageData) return [];
-  
+
   // If it's already an array, return filtered valid images
   if (Array.isArray(imageData)) {
     return imageData.filter(img => {
       if (!img) return false;
       return img.permanent_url;
     });
-  }  
+  }
   return [];
 };
 
@@ -30,7 +30,7 @@ const normalizeImageUrls = (imageData) => {
 const ImageFallback = ({ type = 'large', url = '', error = 'failed_to_load' }) => {
   const isLarge = type === 'large';
   const containerSize = isLarge ? 'w-[180px] h-[180px]' : 'w-16 h-16';
-  
+
   const getErrorMessage = () => {
     switch (error) {
       case 'failed_to_load':
@@ -45,7 +45,7 @@ const ImageFallback = ({ type = 'large', url = '', error = 'failed_to_load' }) =
       <FileTextIcon />
     );
   };
-  
+
   return (
     <div className={`flex items-center justify-center bg-base-200/50 border border-base-300/50 rounded-lg ${containerSize} group hover:bg-base-200/70 transition-colors duration-200`}>
       <div className="text-center p-3">
@@ -98,12 +98,12 @@ const EnhancedImage = ({ src, alt, width, height, className, type = 'large', onE
       />
       {imageState === 'loaded' && type === 'large' && (
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button 
+          <button
             onClick={() => window.open(src, '_blank')}
             className="btn btn-xs btn-circle btn-ghost bg-base-100/80 hover:bg-base-100"
             title="Open in new tab"
           >
-            <ExternalLink size={14} className="text-base-primary"/>
+            <ExternalLink size={14} className="text-base-primary" />
           </button>
         </div>
       )}
@@ -282,15 +282,15 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
   // Render assistant images with enhanced fallback
   const renderAssistantImages = () => {
     const imageUrls = normalizeImageUrls(item?.image_urls || item?.image_url);
-    
+
     if (imageUrls.length === 0) return null;
-    
+
     return (
       <div className="mb-4">
         <div className="flex flex-wrap gap-3">
           {imageUrls.map((attachment, index) => {
             const imageUrl = attachment.permanent_url;
-            
+
             if (!imageUrl) {
               return (
                 <div key={`assistant-img-fallback-${index}`} className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
@@ -298,7 +298,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </div>
               );
             }
-            
+
             return (
               <div key={`assistant-img-${index}`} className="relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[280px]">
                 <EnhancedImage
@@ -351,7 +351,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                         onClick={() => setIsDropupOpen(!isDropupOpen)}
                       /></div>
                   ) : (
-                    <UserIcon size={20} className="text-base-content"/>
+                    <UserIcon size={20} className="text-base-content" />
                   )}
                 </div>
                 {isDropupOpen && item.role === "assistant" && (
@@ -410,10 +410,10 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1 `}
               style={{ overflowWrap: "normal" }}>
               <div className={`${item.role === "assistant" ? "bg-base-200 text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300 relative group`}>
-                
+
                 {/* Render assistant images with enhanced fallback */}
                 {item?.role === "assistant" && renderAssistantImages()}
-                
+
                 {/* Render user attachments with enhanced UI */}
                 {item?.role === "user" && item?.urls?.length > 0 && (
                   <div className="mb-3">
@@ -426,22 +426,22 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                             </div>
                           );
                         }
-                        
+
                         const isPdf = url.endsWith(".pdf");
                         return (
                           <div key={`user-attachment-${index}`} className="pr-4">
                             {isPdf ? (
-                              <a 
-                                href={url} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="flex items-center space-x-2 p-2 bg-base-200 rounded-lg hover:bg-base-300 group"
                               >
                                 <PdfIcon height={20} width={20} />
                                 <span className="text-sm font-medium max-w-[5rem] truncate text-primary">
                                   {truncate(url.split('/').pop() || 'PDF', 20)}
                                 </span>
-                                <ExternalLink className="text-base-conten" size={14}/>
+                                <ExternalLink className="text-base-conten" size={14} />
                               </a>
                             ) : (
                               <EnhancedImage
@@ -486,6 +486,30 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                   </div>
                 )}
 
+                {/* Finish reason alert section */}
+                {item?.role === "assistant" && item?.finish_reason &&
+                  item.finish_reason !== "completed" && item.finish_reason !== "no_reason" && (
+                    <div className="bg-base-200/30 border border-warning/20 rounded-md mb-3">
+                      <div className="flex items-center justify-between px-3 py-2 hover:bg-base-300/30 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <AlertIcon className="w-3.5 h-3.5 text-warning flex-shrink-0" />
+                          <span className="text-xs font-medium text-base-content/80 leading-tight">
+                            {FINISH_REASON_DESCRIPTIONS[item.finish_reason] || FINISH_REASON_DESCRIPTIONS["other"]}
+                          </span>
+                        </div>
+                        <a
+                          href="https://gtwy.ai/blogs/finish-reasons?source=single"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-warning/70 hover:text-warning transition-colors flex-shrink-0 ml-2"
+                          title="More details"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
                 {/* Message content */}
                 <ReactMarkdown components={{
                   code: ({ node, inline, className, children, ...props }) => (
@@ -500,11 +524,11 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 }}>
                   {getMessageToDisplay()}
                 </ReactMarkdown>
-                
+
                 {/* Edit button for assistant messages */}
                 {item?.role === 'assistant' && !item?.fromRTLayer && !item?.image_urls && (
                   <div className="tooltip absolute top-2 right-2 text-sm cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" data-tip="Edit response">
-                    <button 
+                    <button
                       className="btn btn-xs btn-circle btn-ghost hover:btn-primary"
                       onClick={handleEdit}
                     >
@@ -514,7 +538,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                     </button>
                   </div>
                 )}
-                
+
                 {/* Action buttons for assistant messages */}
                 {item?.role === 'assistant' && (
                   <div className="absolute bottom-[-35px] left-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -536,7 +560,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 )}
               </div>
             </div>
-            
+
             {/* User message footer with timestamp and actions */}
             {item?.role === "user" && (
               <div className="flex flex-row-reverse gap-2 m-1 overflow-wrap: anywhere items-center">
@@ -576,7 +600,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             )}
           </div>
-          
+
           {/* History cleared indicator */}
           {(item?.role === "assistant" || item.role === 'user') && item?.is_reset && (
             <div className="flex justify-center items-center my-6">
@@ -585,7 +609,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               </div>
             </div>
           )}
-          
+
           {/* Error message display */}
           {item?.error && (
             <div className="chat chat-start break-all break-words">

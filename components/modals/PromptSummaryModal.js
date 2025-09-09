@@ -8,11 +8,11 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import Modal from '../UI/Modal';
 
-const PromptSummaryModal = ({ params }) => {
+const PromptSummaryModal = ({ params, searchParams }) => {
     const dispatch = useDispatch();
     const { bridge_summary, prompt } = useCustomSelector((state) => ({
         bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
-        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
     }));
     const [summary, setSummary] = useState(bridge_summary || "");
     const [isEditing, setIsEditing] = useState(false);
@@ -22,7 +22,7 @@ const PromptSummaryModal = ({ params }) => {
 
     useEffect(() => {
         setSummary(bridge_summary);
-    }, [bridge_summary, params]);
+    }, [bridge_summary, params, searchParams]);
 
     const handleGenerateSummary = useCallback(async () => {
         if(prompt.trim() === "")
@@ -32,14 +32,14 @@ const PromptSummaryModal = ({ params }) => {
         }
         setIsGeneratingSummary(true);
         try {
-            const result = await dispatch(genrateSummaryAction({ versionId: params?.version }));
+            const result = await dispatch(genrateSummaryAction({ versionId: searchParams?.version }));
             if (result) {
                 setSummary(result);
             }
         } finally {
             setIsGeneratingSummary(false);
         }
-    }, [dispatch, params, prompt]);
+    }, [dispatch, params, prompt, searchParams]);
     const handleClose=()=>{
         closeModal(MODAL_TYPE.PROMPT_SUMMARY); 
         setErrorMessage("");

@@ -8,9 +8,9 @@ import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import InfoTooltip from '@/components/InfoTooltip';
 
-function ActionList({ params }) {
+function ActionList({ params, searchParams }) {
     const { action, bridgeType } = useCustomSelector((state) => ({
-        action: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.actions,
+        action: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.actions,
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
     }));
 
@@ -31,11 +31,11 @@ function ActionList({ params }) {
         dispatch(createOrRemoveActionBridge({
             orgId: params?.org_id,
             bridgeId: params?.id,
-            versionId: params?.version,
+            versionId: searchParams?.version,
             type: "remove",
             dataToSend
         }));
-    }, [dispatch, params]);
+    }, [dispatch, params, searchParams]);
 
     return (
         <div className="form-control">

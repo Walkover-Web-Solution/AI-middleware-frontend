@@ -8,11 +8,11 @@ import { useDispatch } from "react-redux";
 import OptimiseBaseModal from "./OptimiseBaseModal";
 import { toast } from "react-toastify";
 
-function JsonSchemaModal({ params, messages, setMessages, thread_id}) {
+function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_id}) {
   const dispatch = useDispatch();
   const [errorMessage, setErrorMessage] = useState("");
   const { json_schema } = useCustomSelector((state) => ({
-    json_schema: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.response_type?.json_schema,
+    json_schema: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.response_type?.json_schema,
   }));
 
   // Use useMemo to always get the latest formatted JSON schema
@@ -35,7 +35,7 @@ function JsonSchemaModal({ params, messages, setMessages, thread_id}) {
     await dispatch(
       updateBridgeVersionAction({
         bridgeId: params?.id,
-        versionId: params?.version,
+        versionId: searchParams?.version,
         dataToSend: {
           configuration: {
             response_type: {
@@ -76,7 +76,7 @@ function JsonSchemaModal({ params, messages, setMessages, thread_id}) {
       }}
       errorMessage={errorMessage}
       setErrorMessage={setErrorMessage}
-      key={`json_schema_${params?.id}_${params?.version}`}
+      key={`json_schema_${params?.id}_${searchParams?.version}`}
     />
   );
 }

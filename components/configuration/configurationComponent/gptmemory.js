@@ -5,23 +5,23 @@ import { useDispatch } from 'react-redux';
 import { PencilIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const GptMemory = ({ params }) => {
+const   GptMemory = ({ params, searchParams }) => {
     const dispatch = useDispatch();
     const { gpt_memory_context, gpt_memory } = useCustomSelector((state) => ({
-        gpt_memory_context: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.gpt_memory_context || "",
-        gpt_memory: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.gpt_memory || false,
+        gpt_memory_context: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.gpt_memory_context || "",
+        gpt_memory: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.gpt_memory || false,
     }));
 
     const [showInput, setShowInput] = useState(gpt_memory_context?.length > 0);
     const handleCheckboxChange = (e) => {
         const newValue = e.target.checked;
-        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { gpt_memory: newValue } }));
+        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams?.version, dataToSend: { gpt_memory: newValue } }));
     };
 
     const handleUserReferenceChange = (e) => {
         const newValue = e.target.value;
         if (newValue !== gpt_memory_context) {
-            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { gpt_memory_context: newValue } }));
+            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams?.version, dataToSend: { gpt_memory_context: newValue } }));
         }
     };
 
