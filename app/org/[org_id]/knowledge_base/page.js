@@ -39,14 +39,14 @@ const Page = ({ params }) => {
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
-
+ 
   const tableData = filterKnowledgeBase.map(item => ({
     ...item,
     actualName: item?.name,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
-        {GetFileTypeIcon(item?.type, 24, 24)}
-      </div>
+        {GetFileTypeIcon(item?.source?.data?.type, 14, 14)}
+        </div>
       <div className="tooltip" data-tip={item.name}>
         {truncate(item.name, 30)}
       </div>
