@@ -42,6 +42,7 @@ const Page = ({ params }) => {
 
   const tableData = filterKnowledgeBase.map(item => ({
     ...item,
+    actualName: item?.name,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
         {GetFileTypeIcon(item?.type, 24, 24)}
