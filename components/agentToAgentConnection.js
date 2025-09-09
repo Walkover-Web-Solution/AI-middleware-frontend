@@ -266,7 +266,12 @@ function AgentNode({ id, data }) {
             }}
           >
             {isMasterAgent && <span className="text-xs font-bold text-amber-600 mr-1">[MASTER]</span>}
-            {data.selectedAgent ? data.selectedAgent.name : 'Click to select'}
+            <div className="tooltip tooltip-bottom" data-tip={data.selectedAgent?.name ?? 'Click to select'}>
+              {data.selectedAgent?.name?.substring(0, 15) ?? 'Click to select'}
+              {data.selectedAgent?.name?.length > 20 && (
+                <span className="ml-1 text-xs font-light">...</span>
+              )}
+            </div>
             <div className="tooltip tooltip-right" data-tip="Configure Agent">
               <CircleArrowOutUpRight className="text-base-content" size={16} />
             </div>
