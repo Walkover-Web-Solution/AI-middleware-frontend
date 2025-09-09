@@ -24,7 +24,7 @@ const RenderEmbed = ({
         const status = integrationData?.[functionName]?.status;
 
         return (
-          <div key={value?._id} id={value?._id} className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
+          <div key={value?._id} id={value?._id} className={`flex w-[250px] flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 `}>
             <div
               className="p-4 w-full h-full flex flex-col justify-between"
               onClick={() => openViasocket(functionName, {
@@ -47,7 +47,7 @@ const RenderEmbed = ({
                 </p>
               </div>
               <div className="mt-4">
-                <span className={`mr-2 inline-block rounded-full capitalize px-3 bg-base-200 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(status)}`}>
+                <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(status)}`}>
                   {!(value?.description || value?.api_description || value?.short_description) ? "Description Required" : status}
                 </span>
               </div>

@@ -32,18 +32,18 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
             })
             .map((bridge) => {
                 return (
-                    <li key={bridge?.id} onClick={() => bridge?.published_version_id ? handleItemClick(bridge) : null}>
+                    <li key={bridge?._id} onClick={() => bridge?.published_version_id ? handleItemClick(bridge) : null}>
                         <div className={`flex justify-between items-center w-full ${!bridge?.published_version_id ? 'opacity-50' : ''}`}>
                             <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
                                 {bridge?.name || 'Untitled'}
                             </p>
                             <div>
                                 {!bridge?.published_version_id ? (
-                                    <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass("unpublished")}`}>
+                                    <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass("unpublished")}`}>
                                         unpublished
                                     </span>
                                 ) : (
-                                    <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(bridge?.bridge_status === 1 ? "paused" : bridge?.status === 0 ? "archived" : "active")}`}>
+                                    <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(bridge?.bridge_status === 1 ? "paused" : bridge?.status === 0 ? "archived" : "active")}`}>
                                         {bridge?.bridge_status ? (bridge?.bridge_status === 1 && "paused") : (bridge?.status === 0 ? "archived" : "active")}
                                     </span>
                                 )}

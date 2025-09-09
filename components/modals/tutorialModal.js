@@ -70,7 +70,7 @@ const TutorialModal = () => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.TUTORIAL_MODAL}>
       {/* Main Modal */}
-      <div className="relative z-low w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
+      <div className="relative z-low w-full max-w-5xl bg-base-100 rounded-xl shadow-2xl overflow-hidden border border-base-300">
         {/* Header */}
         <div className=" px-8 py-6 ">
           <div className="flex items-center justify-between">
@@ -80,7 +80,7 @@ const TutorialModal = () => {
               </div>
               <div>
                 <h2 className="text-2xl font-semibold">GTWY AI Tutorials</h2>
-                <p className="text-gray-600  text-sm mt-1">Learn how to use our platform effectively</p>
+                <p className="text-base-content  text-sm mt-1">Learn how to use our platform effectively</p>
               </div>
             </div>
           </div>
@@ -100,8 +100,8 @@ const TutorialModal = () => {
                 <div
                   key={index}
                   className={`border rounded-xl transition-all duration-200 transform hover:scale-[1.01] ${isActive
-                      ? 'border-slate-300 shadow-lg bg-slate-50'
-                      : 'border-slate-200 hover:border-slate-300 hover:shadow-md bg-white hover:bg-slate-50'
+                      ? 'border-base-300 shadow-lg bg-base-100'
+                      : 'border-base-300 hover:border-base-300 hover:shadow-md bg-base-100 hover:bg-base-100'
                     }`}
                 >
                   <div
@@ -109,15 +109,15 @@ const TutorialModal = () => {
                   >
                     <div className="flex items-center gap-4">
                       {/* Icon */}
-                      <div className={`p-2.5 bg-slate-100 rounded-lg border border-slate-200 transition-all duration-200 ${isActive ? 'bg-slate-800 border-slate-700' : 'group-hover:bg-slate-200'
+                      <div className={`p-2.5 bg-base-100 rounded-lg border border-base-300 transition-all duration-200 ${isActive ? 'bg-base-300 border-base-200' : 'group-hover:bg-base-200'
                         }`}>
-                        <IconComponent size={20} className={`transition-colors duration-200 ${isActive ? 'text-white' : 'text-slate-700'}`} />
+                        <IconComponent size={20} className={`transition-colors duration-200 ${isActive ? 'text-base-content' : 'text-base-content'}`} />
                       </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-base text-slate-900 mb-1 truncate">{tutorial.title}</h3>
-                        <p className="text-slate-600 text-sm leading-relaxed line-clamp-1">{tutorial.description}</p>
+                        <h3 className="font-semibold text-base text-base-content mb-1 truncate">{tutorial.title}</h3>
+                        <p className="text-base-content text-sm leading-relaxed line-clamp-1">{tutorial.description}</p>
                       </div>
 
                       {/* Action buttons and indicator */}
@@ -128,7 +128,7 @@ const TutorialModal = () => {
                               e.stopPropagation();
                               toggleTutorial(index);
                             }}
-                            className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all duration-200 text-sm font-medium hover:scale-105 shadow-sm hover:shadow-md"
+                            className="flex items-center gap-2 px-4 py-2 bg-base-300 text-base-content rounded-lg hover:bg-base-200 transition-all duration-200 text-sm font-medium hover:scale-105 shadow-sm hover:shadow-md"
                           >
                             <PlayIcon size={20} />
                             Watch
@@ -151,7 +151,7 @@ const TutorialModal = () => {
                   {isActive && (
                     <div
                       ref={(el) => setVideoRef(index, el)}
-                      className="border-t border-slate-200 bg-slate-50 animate-in slide-in-from-top-2 duration-300"
+                      className="border-t border-base-300 bg-base-100 animate-in slide-in-from-top-2 duration-300"
                     >
                       <div className="p-6">
                         <TutorialVideo
@@ -159,13 +159,13 @@ const TutorialModal = () => {
                           title={tutorial.title}
                         />
                         <div className="mt-6 flex justify-between items-center">
-                          <div className="text-sm text-slate-600 flex items-center gap-2">
+                          <div className="text-sm text-base-content flex items-center gap-2">
                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                             You can pause, rewind, or replay the video using the video controls
                           </div>
                           <button
                             onClick={() => setActiveIndex(null)}
-                            className="px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition-all duration-200 text-sm hover:scale-105"
+                            className="px-4 py-2 text-base-content hover:text-base-content hover:bg-base-200 rounded-lg transition-all duration-200 text-sm hover:scale-105"
                           >
                             Close Video
                           </button>
@@ -180,11 +180,11 @@ const TutorialModal = () => {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-slate-200 bg-slate-50 px-8 py-5">
+        <div className="border-t border-base-300 bg-base-100 px-8 py-5">
           <div className="flex justify-between items-center">
             <button
               onClick={internalClose}
-              className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all duration-200 font-medium text-sm hover:scale-105 shadow-sm hover:shadow-md ml-auto"
+              className="px-6 py-2 bg-base-300 text-base-content rounded-lg hover:bg-base-200 transition-all duration-200 font-medium text-sm hover:scale-105 shadow-sm hover:shadow-md ml-auto"
             >
               Close Tutorials
             </button>

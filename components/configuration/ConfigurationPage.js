@@ -14,14 +14,12 @@ import EmbedList from "./configurationComponent/embedList";
 import InputConfigComponent from "./configurationComponent/inputConfigComponent";
 import ModelDropdown from "./configurationComponent/modelDropdown";
 import PreEmbedList from "./configurationComponent/preEmbedList";
-import ResponseFormatSelector from "./configurationComponent/responseFormatSelector";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
-import ToolCallCount from "./configurationComponent/toolCallCount";
-import { AVAILABLE_MODEL_TYPES, PROMPT_SUPPORTED_REASIONING_MODELS } from "@/utils/enums";
+import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
 import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import TriggersList from "./configurationComponent/TriggersList";
@@ -30,26 +28,27 @@ import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import Protected from "../protected";
+import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
 
-const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef }) => {
+const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef, searchParams }) => {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const view = searchParams.get('view') || 'config';
+    const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
 
-    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType } = useCustomSelector((state) => ({
+    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType, showDefaultApikeys} = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.type?.toLowerCase(),
-        reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt,
-        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.model,
+        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type?.toLowerCase(),
+        reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt,
+        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
         showGuide: state.userDetailsReducer.userDetails.showGuide,
         showConfigType: state.userDetailsReducer.userDetails.showConfigType,
+        showDefaultApikeys: state.userDetailsReducer.userDetails.addDefaultApiKeys,
     }));
     useEffect(() => {
         if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
             if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
                 setCurrentView('config');
-                router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=config`);
+                router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams.version}&view=config`);
             }
         }
     }, [bridgeType])
@@ -70,20 +69,20 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     }, [bridgeType, reduxPrompt]);
     const handleNavigation = (target) => {
         setCurrentView(target);
-        router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${params.version}&view=${target}`);
+        router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}&view=${target}`);
     };
 
     const renderNeedHelp = () => {
         return (
             <div className="mb-4 mt-4">
-                <a
+                {!isEmbedUser && <a
                     href="/faq/how-to-use-gtwy-ai"
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
                     Need help? Visit FAQ →
-                </a>
+                </a>}
             </div>
         );
     };
@@ -93,52 +92,52 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             {bridgeType === 'trigger' && !isEmbedUser && <TriggersList params={params} />}
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
                 <>
-                    <PreEmbedList params={params} />
-                    <InputConfigComponent params={params} promptTextAreaRef={promptTextAreaRef} />
+                    <PreEmbedList params={params} searchParams={searchParams}/>
+                    <InputConfigComponent params={params} searchParams={searchParams} promptTextAreaRef={promptTextAreaRef} />
                     {/* <NewInputConfigComponent params={params} /> */}
-                    <EmbedList params={params} />
-                    <hr className="my-0 p-0" />
-                    <ConnectedAgentList params={params} />
-                    <hr className="my-0 p-0" />
-                    <KnowledgebaseList params={params} />
-                    <hr className="my-0 p-0" />
-                    <PrebuiltToolsList params={params} />
+                    <EmbedList params={params} searchParams={searchParams}/>
+                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
+                    <ConnectedAgentList params={params} searchParams={searchParams}/>
+                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
+                    <KnowledgebaseList params={params} searchParams={searchParams}/>
+                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
+                    <PrebuiltToolsList params={params} searchParams={searchParams}/>
                 </>
             )}
 
-            <ServiceDropdown params={params} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} />
-            <ModelDropdown params={params} />
-            <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} />
-            <AdvancedParameters params={params} />
+            <ServiceDropdown params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} />
+            <ModelDropdown params={params} searchParams={searchParams}/>
+            {isEmbedUser && !showDefaultApikeys && <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams}/>}
+            <AdvancedParameters params={params} searchParams={searchParams}/>
+            
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
-                    <AddVariable params={params} />
-                    <GptMemory params={params} />
-                    <ToolCallCount params={params} />
+                    <AddVariable params={params} searchParams={searchParams}/>
+                    <AdvancedConfiguration params={params} searchParams={searchParams} bridgeType={bridgeType} modelType={modelType} />
+                    <GptMemory params={params} searchParams={searchParams} />
                 </>
             )}
-            {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && <ResponseFormatSelector params={params} />}
         </>
     ), [bridgeType, modelType, params, modelName]);
     const renderChatbotConfigView = useMemo(() => () => (
         <>
 
-            <UserRefernceForRichText params={params} />
-            <StarterQuestionToggle params={params} />
-            <ActionList params={params} />
+            <UserRefernceForRichText params={params} searchParams={searchParams}/>
+            <StarterQuestionToggle params={params} searchParams={searchParams}/>
+            <ActionList params={params} searchParams={searchParams}/>
         </>
     ), [bridgeType, modelType, params, modelName]);
 
     const renderGuideView = useMemo(() => () => {
         const guideComponents = {
-            api: <ApiGuide params={params} modelType={modelType} />,
-            batch: <BatchApiGuide params={params} />,
-            chatbot: <ChatbotGuide params={params} />,
+            api: <ApiGuide params={params} searchParams={searchParams} modelType={modelType} />,
+            batch: <BatchApiGuide params={params} searchParams={searchParams} />,
+            chatbot: <ChatbotGuide params={params} searchParams={searchParams} />,
         };
 
         return (
             <div className="flex flex-col w-100 overflow-auto gap-3">
-                {bridgeType === 'chatbot' && <SlugNameInput params={params} />}
+                {bridgeType === 'chatbot' && <SlugNameInput params={params} searchParams={searchParams} />}
                 <h1 className="text-xl font-semibold">
                     {bridgeType === 'api' ? 'API Configuration' :
                         bridgeType === 'batch' ? 'Batch API Configuration' : 'Chatbot Configuration'}
@@ -151,23 +150,23 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     }, [bridgeType, params, modelType]);
 
     return (
-        <div className="flex flex-col gap-3 relative mt-4">
+        <div className="flex flex-col gap-3 relative mt-4 bg-base-100">
             <div>
-                <BridgeNameInput params={params} />
-                <VersionDescriptionInput params={params} />
+                <BridgeNameInput params={params} searchParams={searchParams} />
+                <VersionDescriptionInput params={params} searchParams={searchParams} />
             </div>
-            {((isEmbedUser && showConfigType) || !isEmbedUser) && <BridgeTypeToggle params={params} />}
+            {((isEmbedUser && showConfigType) || !isEmbedUser) && <BridgeTypeToggle params={params} searchParams={searchParams} />}
             {<div className="absolute right-0 top-0">
                 <div className="flex items-center">
-                    <BridgeVersionDropdown params={params} />
+                    <BridgeVersionDropdown params={params} searchParams={searchParams}/>
                     {((isEmbedUser && showConfigType) || !isEmbedUser) && <div className="join group flex">
-                        <button
+                        { bridgeType === 'chatbot' && <button
                             onClick={() => handleNavigation('config')}
                             className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
                             <SettingsIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
-                        </button>
+                        </button>}
                         {bridgeType === 'chatbot' &&
                             <button
                                 onClick={() => handleNavigation('chatbot-config')}
@@ -177,13 +176,13 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                                 <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
                             </button>
                         }
-                        {((isEmbedUser && showGuide) || (!isEmbedUser && bridgeType !== 'trigger')) && <button
+                        {/* {((isEmbedUser && showGuide) || (!isEmbedUser && bridgeType !== 'trigger')) && <button
                             onClick={() => handleNavigation('guide')}
                             className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
                             <FilterSliderIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'guide' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Integration Guide</span>
-                        </button>}
+                        </button>} */}
                     </div>}
                 </div>
             </div>}

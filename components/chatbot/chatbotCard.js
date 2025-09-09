@@ -44,7 +44,7 @@ export default function ChatbotCard({ params }) {
         //                     <div
         //                         key={index}  // Added key for list rendering
         //                         onClick={() => router.push(`/org/${params.org_id}/agents/configure/${data._id}`)}
-        //                         className="w-[300px] flex max-w-xs flex-col items-start bg-white rounded-md border md:flex-row cursor-pointer hover:shadow-lg"
+        //                         className="w-[300px] flex max-w-xs flex-col items-start bg-base-100 rounded-md border md:flex-row cursor-pointer hover:shadow-lg"
         //                     >
 
         //                         <div className="p-4 w-full truncate">

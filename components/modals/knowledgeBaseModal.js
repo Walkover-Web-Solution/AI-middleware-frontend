@@ -7,7 +7,7 @@ import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/sto
 import Modal from '../UI/Modal';
 import { toast } from 'react-toastify';
 
-const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {}, knowledgeBaseData=[] }) => {
+const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {}, knowledgeBaseData=[]}) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSectionType, setSelectedSectionType] = useState('default');
@@ -29,25 +29,31 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
     setIsLoading(true);
     const formData = new FormData(event.target);
     const newName = formData.get("name").trim();
-        if (!newName) {
+    if (!newName) {
       toast.error('Please enter a valid name.');
-      setIsLoading(false)
+      setIsLoading(false);
+      return;
+    }
+    const newDescription = formData.get("description").trim();
+    if (!newDescription) {
+      toast.error('Please enter a valid description.');
+      setIsLoading(false);
       return;
     }
     const isDuplicate = knowledgeBaseData.some(kb => 
       kb.name?.trim().toLowerCase() === newName.toLowerCase()?.trim() && kb._id !== selectedKnowledgeBase?._id
     );
-
+    
     if (isDuplicate) {
       toast.error('Knowledge Base name already exists. Please choose a different name.');
-      setIsLoading(false)
+      setIsLoading(false);
       return;
     }
     // Create payload object
     const payload = {
       orgId: params?.org_id,
-      name: formData.get('name'),
-      description: formData.get('description'),
+      name: newName,
+      description: newDescription,
     };
 
     if (selectedKnowledgeBase?._id) {
@@ -111,7 +117,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.KNOWLEDGE_BASE_MODAL}>
-      <div className="modal-box w-11/12 max-w-3xl border-2">
+      <div className="modal-box w-11/12 max-w-3xl border-2 border-base-300">
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
           <h3 className="font-bold text-xl">{selectedKnowledgeBase ? 'Update' : 'New'} Knowledge Base Configuration</h3>
           <button
@@ -309,7 +315,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
             </button>
             <button
               type="submit"
-              className="btn btn-primary text-white hover:bg-primary-focus"
+              className="btn btn-primary hover:bg-primary-focus"
               disabled={isLoading}
             >
               {isLoading ? (selectedKnowledgeBase ? 'Updating...' : 'Creating...') : (selectedKnowledgeBase ? 'Update' : 'Create') + ' Knowledge Base'}

@@ -1,11 +1,20 @@
 'use client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import LoadingSpinner from "@/components/loadingSpinner";
 import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from 'next/navigation';
+import { setInCookies } from '@/utils/utility';
 
 const LoginPage = ({loading}) => {
+  const urlParams = useSearchParams();
+  const ref = urlParams.get('ref');
+  useEffect(()=>{
+    if(ref){
+      setInCookies("reference_id", ref);
+    }
+  },[ref])
   return (
     <div className="flex flex-col md:flex-row h-screen w-screen justify-between items-center px-4 md:px-8 lg:px-16">
     {/* Left Section */}

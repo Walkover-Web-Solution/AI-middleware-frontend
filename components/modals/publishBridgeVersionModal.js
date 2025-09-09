@@ -13,7 +13,7 @@ import Modal from "../UI/Modal";
 import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from "../protected";
 
-function PublishBridgeVersionModal({ params, agent_name, agent_description, isEmbedUser }) {
+function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_description, isEmbedUser }) {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [isPublicAgent, setIsPublicAgent] = useState(false);
@@ -112,13 +112,13 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
       await dispatch(
         publishBridgeVersionAction({
           bridgeId: params?.id,
-          versionId: params?.version,
+          versionId: searchParams?.version,
           orgId: params?.org_id,
           isPublic: isPublicAgent,
         })
       );
 
-      isEmbedUser && sendDataToParent("published", { name: agent_name, agent_description: agent_description, agent_id: params?.id, agent_version_id: params?.version }, "Agent Published Successfully")
+      isEmbedUser && sendDataToParent("published", { name: agent_name, agent_description: agent_description, agent_id: params?.id, agent_version_id: searchParams?.version }, "Agent Published Successfully")
 
       dispatch(getAllBridgesAction());
       closeModal(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
@@ -134,7 +134,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
-      <div className="modal-box w-11/12 max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+      <div className="modal-box w-11/12 max-w-4xl max-h-[90vh] overflow-y-auto bg-base-100">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold text-base-content">
@@ -167,7 +167,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
         </div>
 
         {/* Public Agent Toggle */}
-        <div className="bg-base-200/30 p-4 rounded-lg mb-6">
+        {/* <div className="bg-base-200/30 p-4 rounded-lg mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Globe className="h-5 w-5 text-primary" />
@@ -189,7 +189,7 @@ function PublishBridgeVersionModal({ params, agent_name, agent_description, isEm
               </label>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Public Agent Configuration Form */}
         {isPublicAgent && (

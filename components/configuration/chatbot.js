@@ -2,16 +2,16 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEffect, useMemo, useRef, useState } from "react";
 import LoadingSpinner from "@/components/loadingSpinner";
 
-const Chatbot = ({ params }) => {
+const Chatbot = ({ params, searchParams }) => {
   const [isLoading, setIsLoading] = useState(true); 
   const { bridgeName, bridgeSlugName, bridgeType, chatbot_token, variablesKeyValue, configuration, modelInfo, service } = useCustomSelector((state) => ({
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name,
     bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     chatbot_token: state?.ChatBot?.chatbot_token || '',
-    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.variables || [],
-    configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration,
-    service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service,
+    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
+    configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration,
+    service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
   }));
 
   // Convert variables array to object
@@ -73,7 +73,7 @@ const Chatbot = ({ params }) => {
 
   // Initialize chatbot when all required data is available
   useEffect(() => {
-    if (!bridgeName || !bridgeSlugName || !bridgeType || !params?.version) {
+    if (!bridgeName || !bridgeSlugName || !bridgeType || !searchParams?.version) {
       return;
     }
 
@@ -87,7 +87,7 @@ const Chatbot = ({ params }) => {
           "fullScreen": true,
           "hideCloseButton": true,
           "hideIcon": true,
-          "version_id": params?.version,
+          "version_id": searchParams?.version,
           "variables": variables || {}
         });
 
@@ -113,7 +113,7 @@ const Chatbot = ({ params }) => {
       {isLoading ? (
         <div
           id="chatbot-loader"
-          className="flex flex-col gap-4 justify-center items-center h-full w-full bg-white text-black"
+          className="flex flex-col gap-4 justify-center items-center h-full w-full bg-base-100 text-base-content"
         >
           <p className="text-lg font-semibold animate-pulse">Loading chatbot...</p>
         </div>

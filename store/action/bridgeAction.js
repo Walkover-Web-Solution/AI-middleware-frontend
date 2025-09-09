@@ -53,7 +53,7 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
 export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => async (dispatch, getState) => {
   try {
     const data = await createBridge(dataToSend)
-    dispatch(createBridgeReducer({ data, orgId: orgId }));
+    dispatch(createBridgeReducer({data, orgId: orgId}));
     return data;
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {

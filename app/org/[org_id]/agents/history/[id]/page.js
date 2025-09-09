@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { use, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCustomSelector } from "@/customHooks/customSelector";
@@ -8,7 +8,6 @@ import { getHistoryAction, userFeedbackCountAction } from "@/store/action/histor
 import { clearThreadData, clearHistoryData, setSelectedVersion } from "@/store/reducer/historyReducer";
 import Protected from "@/components/protected";
 import ChatDetails from "@/components/historyPageComponents/chatDetails";
-import { getSingleMessage } from "@/config";
 import { ChatLoadingSkeleton } from "@/components/historyPageComponents/ChatLayoutLoader";
 
 // Lazy load the components to reduce initial render time
@@ -16,8 +15,9 @@ const ThreadContainer = React.lazy(() => import('@/components/historyPageCompone
 const Sidebar = React.lazy(() => import('@/components/historyPageComponents/sidebar'));
 
 export const runtime = "edge";
-function Page({ searchParams }) {
-  const params = searchParams;
+function Page({params, searchParams }) {
+  const resolvedSearchParams = use(searchParams);
+  const resolvedParams = use(params);
   const search = useSearchParams();
   const router = useRouter();
   const pathName = usePathname();
@@ -28,7 +28,7 @@ function Page({ searchParams }) {
     historyData: state?.historyReducer?.history || [],
     thread: state?.historyReducer?.thread || [],
     selectedVersion: state?.historyReducer?.selectedVersion || 'all',
-    previousPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+    previousPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version]?.configuration?.prompt || "",
   }));
 
   const [isSliderOpen, setIsSliderOpen] = useState(false);
@@ -66,8 +66,8 @@ function Page({ searchParams }) {
   }, []);
 
   useEffect(() => {
-    dispatch(userFeedbackCountAction({ bridge_id: params.id, user_feedback: "all" }));
-  }, [dispatch, params.id]);
+    dispatch(userFeedbackCountAction({ bridge_id: resolvedParams.id, user_feedback: "all" }));
+  }, [dispatch, resolvedParams.id]);
 
   useEffect(() => {
     const handleEvents = (action) => {
@@ -79,35 +79,35 @@ function Page({ searchParams }) {
   }, [closeSliderOnEsc, handleClickOutside]);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const fetchInitialData = async (resolvedParams, resolvedSearchParams) => {
       setLoading(true);
        dispatch(clearThreadData());
-      const startDate = search.get("start");
-      const endDate = search.get("end");
-     const result =  await dispatch(getHistoryAction(params.id, startDate, endDate, 1, null, filterOption, isErrorTrue));
-      if(params?.thread_id) {
-        const threadId = params?.thread_id;
+      const startDate = resolvedSearchParams?.start;
+      const endDate = resolvedSearchParams?.end;
+     const result =  await dispatch(getHistoryAction(resolvedParams.id, startDate, endDate, 1, null, filterOption, isErrorTrue));
+      if(resolvedSearchParams?.thread_id) {
+        const threadId = resolvedSearchParams?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
         if(thread) {
-          router.push(`${pathName}?version=${params.version}&thread_id=${threadId}&subThread_id=${threadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${threadId}&subThread_id=${threadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
         }
       }
-      else if (!params?.thread_id && result?.length > 0) {
+      else if (!resolvedSearchParams?.thread_id && result?.length > 0) {
         const firstThreadId = result[0]?.thread_id;
         if (firstThreadId) {
-          router.push(`${pathName}?version=${params.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
         }
       }
       if(isErrorTrue) {
         const firstThreadId = result[0]?.thread_id;
         if (firstThreadId) {
-          router.push(`${pathName}?version=${params.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=true`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&error=true`, undefined, { shallow: true });
         }
       }
       setLoading(false);
     };
-    if (!searchRef?.current?.value) fetchInitialData();
-  }, [params.id, filterOption]);
+    if (!searchRef?.current?.value) fetchInitialData(resolvedParams, resolvedSearchParams);
+  }, [resolvedParams.id, filterOption, resolvedSearchParams.version, selectedVersion]);
 
   const threadHandler = useCallback(
     async (thread_id, item, value) => {
@@ -123,10 +123,11 @@ function Page({ searchParams }) {
       } else {
         const start = search.get("start");
         const end = search.get("end");
-        router.push(`${pathName}?version=${params.version}&thread_id=${thread_id}&subThread_id=${thread_id}&start=${start}&end=${end}`, undefined, { shallow: true });
+        const encodedThreadId = encodeURIComponent(thread_id.replace(/&/g, "%26"));
+        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${encodedThreadId}&subThread_id=${encodedThreadId}&_Disease_Advisor[0]=&_Disease_Advisor[1]=&start=${start}&end=${end}`, undefined, { shallow: true });
       }
     },
-    [pathName, params.id, params.version, params?.start, params?.end]
+    [pathName, resolvedParams.id, resolvedSearchParams.version, resolvedSearchParams?.start, resolvedSearchParams?.end]
   );
 
   const fetchMoreData = useCallback(async () => {
@@ -134,9 +135,9 @@ function Page({ searchParams }) {
     setPage(nextPage);
     const startDate = search.get("start");
     const endDate = search.get("end");
-    const result = await dispatch(getHistoryAction(params.id, startDate, endDate, nextPage));
+    const result = await dispatch(getHistoryAction(resolvedParams.id, startDate, endDate, nextPage));
     if (result?.length < 40) setHasMore(false);
-  }, [dispatch, page, params.id, search]);
+  }, [dispatch, page, resolvedParams.id, search]);
 
   if (loading || !historyData) return (
     <div>
@@ -151,7 +152,7 @@ function Page({ searchParams }) {
         {loading ? <ChatLoadingSkeleton /> : <div className="drawer-content flex flex-col">
           <React.Suspense>
             <ThreadContainer
-              key={`thread-container-${params.id}-${params.version}`}
+              key={`thread-container-${resolvedParams.id}-${resolvedParams.version}`}
               thread={thread}
               filterOption={filterOption}
               setFilterOption={setFilterOption}
@@ -160,9 +161,9 @@ function Page({ searchParams }) {
               setLoading={setLoading}
               searchMessageId={searchMessageId}
               setSearchMessageId={setSearchMessageId}
-              params={params}
+              params={resolvedParams}
               pathName={pathName}
-              search={search}
+              search={resolvedSearchParams}
               historyData={historyData}
               threadHandler={threadHandler}
               threadPage={threadPage}
@@ -183,8 +184,8 @@ function Page({ searchParams }) {
             fetchMoreData={fetchMoreData}
             hasMore={hasMore}
             loading={loading}
-            params={params}
-            search={search}
+            params={resolvedParams}
+            searchParams={resolvedSearchParams}
             setSearchMessageId={setSearchMessageId}
             setPage={setPage}
             setHasMore={setHasMore}

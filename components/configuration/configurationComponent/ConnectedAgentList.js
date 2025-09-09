@@ -12,7 +12,7 @@ import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const ConnectedAgentList = ({ params }) => {
+const ConnectedAgentList = ({ params, searchParams }) => {
     const dispatch = useDispatch();
     const [description, setDescription] = useState("");
     const [selectedBridge, setSelectedBridge] = useState(null);
@@ -22,7 +22,7 @@ const ConnectedAgentList = ({ params }) => {
     const router = useRouter();
     let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
-        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
         const modelTypeName = versionData?.configuration?.type?.toLowerCase();
@@ -44,7 +44,7 @@ const ConnectedAgentList = ({ params }) => {
             }
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
-                versionId: params?.version,
+                versionId: searchParams?.version,
                 dataToSend: {
                     agents: {
                         connected_agents: {
@@ -77,7 +77,7 @@ const ConnectedAgentList = ({ params }) => {
         setSelectedBridge({ name: name, ...item })
         const {fields, required_params} =(item?.variables && Object.keys(item?.variables)?.length>0) ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
         setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
-        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
+        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params, thread_id: item?.thread_id?item?.thread_id:false })
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
@@ -85,7 +85,7 @@ const ConnectedAgentList = ({ params }) => {
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params?.id,
-                versionId: params?.version,
+                versionId: searchParams?.version,
                 dataToSend: {
                     agents: {
                         connected_agents: {
@@ -110,7 +110,7 @@ const ConnectedAgentList = ({ params }) => {
         try {
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
-                versionId: params?.version,
+                versionId: searchParams?.version,
                 dataToSend: {
                     agents: {
                         connected_agents: {
@@ -118,7 +118,8 @@ const ConnectedAgentList = ({ params }) => {
                                 "description": agentTools?.description ? agentTools?.description : selectedBridge?.description,
                                 "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
                                 "agent_variables": selectedBridge?.agent_variables,
-                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
+                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params },
+                                "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false
                             }
                         },
                         agent_status: "1"
@@ -129,7 +130,7 @@ const ConnectedAgentList = ({ params }) => {
                 dispatch(
                     updateBridgeVersionAction({
                         bridgeId: params.id,
-                        versionId: params.version,
+                        versionId: searchParams?.version,
                         dataToSend: { variables_path: { [selectedBridge?.bridge_id]: variablesPath } },
                     })
                 );
@@ -157,7 +158,7 @@ const ConnectedAgentList = ({ params }) => {
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`flex w-[250px] flex-col items-start rounded-md border md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200`}
+                    className={`flex w-[250px] flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200`}
                 >
                     <div
                         className="p-4 w-full h-full flex flex-col justify-between"
@@ -177,7 +178,7 @@ const ConnectedAgentList = ({ params }) => {
                             </p>
                         </div>
                         <div className="mt-4">
-                            <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content bg-green-100`}>
+                            <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-black bg-green-100`}>
                                 {!item?.description ? "Description Required" : "Active"}
                             </span>
                         </div>
@@ -212,7 +213,6 @@ const ConnectedAgentList = ({ params }) => {
             <FunctionParameterModal
                 name="Agent"
                 Model_Name={MODAL_TYPE?.AGENT_VARIABLE_MODAL}
-                params={params}
                 function_details={currentVariable}
                 functionName={currentVariable?.name}
                 handleRemove={handleRemoveAgent}
