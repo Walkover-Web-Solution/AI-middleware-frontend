@@ -107,7 +107,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
 
             <ServiceDropdown params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} />
             <ModelDropdown params={params} searchParams={searchParams}/>
-            {isEmbedUser && !showDefaultApikeys && <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams}/>}
+            {((isEmbedUser && !showDefaultApikeys) || (!isEmbedUser)) && <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams}/>}
             <AdvancedParameters params={params} searchParams={searchParams}/>
             
             {modelType !== "image" && modelType !== 'embedding' && (
