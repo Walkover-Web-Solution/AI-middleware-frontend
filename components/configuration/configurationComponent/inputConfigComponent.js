@@ -22,6 +22,8 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service || "",
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
     }));
+    const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+
     const [oldContent, setOldContent] = useState(reduxPrompt);
     const [newContent, setNewContent] = useState('');
     const [keyName, setKeyName] = useState('');
@@ -37,6 +39,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
     const [isTextareaFocused, setIsTextareaFocused] = useState(false);
    
     useEffect(() => {
+      console.log(isTextareaFocused);
         dispatch(setIsFocusReducer(isTextareaFocused));
     }, [isTextareaFocused]);
 
@@ -69,6 +72,17 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         };
     }, [hasUnsavedChanges]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      console.log(window.innerWidth,"window.innerWidth")
+      setIsMobileView(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
   const savePrompt = useCallback((newPrompt) => {
     const newValue = (newPrompt || "").trim();
     setShowSuggestions(false);
@@ -279,6 +293,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
     };
 
     const handleTextareaFocus = useCallback(() => {
+    
         setIsTextareaFocused(true);
     }, []);
 
@@ -340,12 +355,12 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
               >
                 Close
               </button>
-              <button
+              {!isMobileView&&<button
                 className={`btn btn-sm`}
                 onClick={handleOpenDiffModal}
               >
                 Diff
-              </button>
+              </button>}
             </div>
            }
           </div>
@@ -429,7 +444,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
       
       {/* PromptHelper component that appears when textarea is focused */}
       <PromptHelper 
-        isVisible={isTextareaFocused}
+        isVisible={isTextareaFocused&&!isMobileView}
         params={params}
         onClose={handleCloseTextAreaFocus}
         savePrompt={savePrompt}

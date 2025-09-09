@@ -2,6 +2,7 @@ import { SendHorizontalIcon } from "@/components/Icons";
 import { BrainCircuit, CheckIcon, CopyIcon, Lightbulb, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
+import CodeBlock from "./codeBlock/codeBlock";
 
 function Canvas({ 
   OptimizePrompt,  
@@ -37,6 +38,25 @@ function Canvas({
     setAppliedMessages(prev => new Set(prev).add(message.id));
   };
 
+  // Helper function to check if content is JSON and format it
+  const formatMessageContent = (content) => {
+    try {
+      // Try to parse as JSON
+      const parsed = JSON.parse(content);
+      // If successful, return formatted JSON with proper indentation
+      return {
+        isJson: true,
+        formatted: JSON.stringify(parsed, null, 2)
+      };
+    } catch (e) {
+      // If not JSON, return original content
+      return {
+        isJson: false,
+        formatted: content
+      };
+    }
+  };
+
   const handleSend = async () => {
     if (!instruction.trim()) {
       setErrorMessage("Please enter an instruction.");
@@ -67,7 +87,7 @@ function Canvas({
       if (result && result.updated !== undefined) {
         contentString = typeof result.updated === 'string' 
           ? result.updated 
-          : JSON.stringify(result.updated);
+          : JSON.stringify(result.updated, null, 2); // Format JSON with indentation
       } else {
         contentString = "No content returned from optimization.";
       }
@@ -125,53 +145,63 @@ function Canvas({
             </div>
           )}
 
-          {messages.map((message, index) => (
-            <div
-              key={message.id || index}
-              ref={index === messages.length - 1 ? messagesEndRef : null}
-              className={`chat group ${message.sender === "user" ? "chat-end" : "chat-start"}`}
-            >
-              {/* Chat Header with Apply Button */}
-              <div className="chat-header flex justify-between w-full items-center mb-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium capitalize">{message.sender}</span>
-                  <time className="text-xs opacity-50">{message.time}</time>
+          {messages.map((message, index) => {
+            const { isJson, formatted } = formatMessageContent(message.content);
+            
+            return (
+              <div
+                key={message.id || index}
+                ref={index === messages.length - 1 ? messagesEndRef : null}
+                className={`chat group ${message.sender === "user" ? "chat-end" : "chat-start"}`}
+              >
+                {/* Chat Header with Apply Button */}
+                <div className="chat-header flex justify-between w-full items-center mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium capitalize">{message.sender}</span>
+                    <time className="text-xs opacity-50">{message.time}</time>
+                  </div>
+                  
+                  {message.sender === "assistant" && message.optimized && (
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      {appliedMessages.has(message.id) ? (
+                        <div className="flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-1 rounded-full">
+                          <CheckIcon size={14}/>
+                          Applied
+                        </div>
+                      ) : (
+                        <button 
+                          className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
+                          onClick={() => handleApply(message)}
+                        >
+                          <CopyIcon size={14}/>
+                          <span className="hidden sm:inline">Apply</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
-                {message.sender === "assistant" && message.optimized && (
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    {appliedMessages.has(message.id) ? (
-                      <div className="flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-1 rounded-full">
-                        <CheckIcon size={14}/>
-                        Applied
-                      </div>
-                    ) : (
-                      <button 
-                        className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
-                        onClick={() => handleApply(message)}
-                      >
-                        <CopyIcon size={14}/>
-                        <span className="hidden sm:inline">Apply</span>
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              {/* Chat Bubble */}
-              <div className="chat-bubble text-sm leading-relaxed max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl break-words">
-                <Markdown 
-                  className="prose prose-sm max-w-none"
-                  components={{
-                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                    code: ({ children }) => <code className="bg-base-200 px-1 py-0.5 rounded text-xs">{children}</code>
-                  }}
-                >
+                {/* Chat Bubble */}
+                <div className="chat-bubble text-sm leading-relaxed max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl break-words">
+                  {isJson ? (
+                    <pre className="whitespace-pre-wrap text-base-content font-mono text-xs bg-base-200 p-3 rounded-lg overflow-x-auto">
+                      <CodeBlock>{formatted}</CodeBlock>
+                    </pre>
+                  ) : (
+                    <Markdown 
+                      className="prose prose-sm max-w-none"
+                      components={{
+                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        code: ({ children }) => <code className="bg-base-200 px-1 py-0.5 rounded text-xs">{children}</code>
+                      }}
+                    >
                   {message.content}
-                </Markdown>
+                    </Markdown>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           
           {/* Loading State */}
           {loading && (

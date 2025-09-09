@@ -34,8 +34,8 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
                                             key={index}
                                             className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-base-content/20 ${line.type === 'deleted' ? 'bg-red-200' :
                                                     line.type === 'modified' ? 'bg-red-100 text-black' :
-                                                        line.type === 'equal' ? 'bg-base-100 text-base-content' :
-                                                            'bg-base-100 opacity-30 text-content'
+                                                        line.type === 'equal' ? 'bg-base-100 text-black' :
+                                                            'bg-base-100 opacity-30 text-black'
                                                 }`}
                                         >
                                             <span className="text-gray-400 mr-3 select-none">{line.lineNumber}</span>
@@ -65,13 +65,13 @@ const ComparisonCheck = ({ oldContent, newContent }) => {
                                     {diffData.map((line, index) => (
                                         <div
                                             key={index}
-                                            className={`px-3 py-1 text-sm font-mono leading-relaxed border-b border-gray-200 ${line.type === 'added' ? 'bg-green-200' :
+                                            className={`px-3 py-1 text-sm text-black font-mono leading-relaxed border-b border-gray-200 ${line.type === 'added' ? 'bg-green-200' :
                                                     line.type === 'modified' ? 'bg-green-100' :
                                                         line.type === 'equal' ? 'bg-white' :
                                                             'bg-gray-100 opacity-30'
                                                 }`}
                                         >
-                                            <span className="text-gray-400 mr-3 select-none">{line.lineNumber}</span>
+                                            <span className="text-black mr-3 select-none">{line.lineNumber}</span>
                                             <span className={line.type === 'added' || line.type === 'modified' ? 'font-semibold' : ''}>
                                                 {line.newLine || (line.type === 'deleted' ? ' ' : '')}
                                             </span>
