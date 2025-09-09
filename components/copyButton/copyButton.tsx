@@ -25,7 +25,7 @@ const CopyButton = ({ data, btnStyle = "text-base-100" }) => {
           Copied!
         </span>
       ) : (
-        <button onClick={copyToClipboardSendData} className={`${btnStyle} flex flex-row items-center gap-2 text-base-content`}>
+        <button onClick={copyToClipboardSendData} className={`${btnStyle} flex flex-row items-center gap-2 text-warning`}>
           <CopyIcon size={14} />
           Copy
         </button>
