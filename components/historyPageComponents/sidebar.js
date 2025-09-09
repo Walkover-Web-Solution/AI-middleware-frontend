@@ -23,7 +23,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   const [selectedThreadIds, setSelectedThreadIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedThreads, setExpandedThreads] = useState([]);
-  const [loadingSubThreads, setLoadingSubThreads] = useState(false);
+  const [loadingSubThreads, setLoadingSubThreads] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   const dispatch = useDispatch();
   const pathName = usePathname();
@@ -74,9 +74,31 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
   };
 
   useEffect(() => {
-    setExpandedThreads([]);
+    if (searchParams?.thread_id) {
+      setExpandedThreads([searchParams?.thread_id]);
+      dispatch(clearSubThreadData());
+      setLoadingSubThreads(true);
+      dispatch(getSubThreadsAction({ thread_id: searchParams?.thread_id, error: isErrorTrue, bridge_id: params.id }));
+    }
   }, [  searchParams?.thread_id]);
 
+  useEffect(() => {
+    if (subThreads?.length > 0 && searchParams?.thread_id) {
+      const firstSubThreadId = subThreads[0]?.sub_thread_id;
+      if (firstSubThreadId) {
+        const start = searchParams?.start;
+        const end = searchParams?.end;
+        router.push(
+          `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${firstSubThreadId}&start=${start || ''}&end=${end || ''}`,
+          undefined,
+          { shallow: true }
+        );
+      }
+    }
+    setTimeout(() => {
+      setLoadingSubThreads(false);
+    }, 1000);
+  }, [subThreads]);
   const debounce = (func, delay) => {
     let timeoutId;
     return (...args) => {
