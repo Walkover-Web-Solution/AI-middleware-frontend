@@ -149,7 +149,7 @@ const Page = ({ params }) => {
                       <EllipsisVerticalIcon size={16} />
                     </div>
                     <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box z-high w-32">
-                      <li><a onClick={() => handleDelete()} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
+                      <li><a onClick={() => handleDeleteKnowledgebase(item)} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
                       <li><a onClick={() => handleUpdateKnowledgeBase(item)} className="hover:bg-base-200">Update</a></li>
                     </ul>
                   </div>
