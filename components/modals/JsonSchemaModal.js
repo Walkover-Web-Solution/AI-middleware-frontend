@@ -82,7 +82,7 @@ function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_i
   return (
     <Modal MODAL_ID={MODAL_TYPE.JSON_SCHEMA}>
       <div className="modal-box  max-w-screen-lg h-[calc(100%-10rem)] w-[calc(100%-20rem)] bg-base-100 overflow-hidden">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-2 pt-3">
         <h3 className="font-bold text-lg">Improve JSON Schema</h3>
           <button
             onClick={handleCloseModal}

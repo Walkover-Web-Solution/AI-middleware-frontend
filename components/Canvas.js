@@ -1,4 +1,4 @@
-import { SendHorizontalIcon } from "@/components/Icons";
+import { SendHorizontalIcon, CopyIcon as CopyIconComponent, CheckIcon as CheckIconComponent } from "@/components/Icons";
 import { BrainCircuit, CheckIcon, CopyIcon, Lightbulb, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
@@ -19,6 +19,7 @@ function Canvas({
   const [instruction, setInstruction] = useState("");
   const [loading, setLoading] = useState(false);
   const [appliedMessages, setAppliedMessages] = useState(new Set());
+  const [copiedMessageId, setCopiedMessageId] = useState(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -55,6 +56,16 @@ function Canvas({
         formatted: content
       };
     }
+  };
+
+  // Handle copy to clipboard
+  const handleCopy = (messageId, content) => {
+    navigator.clipboard.writeText(content || '');
+    setCopiedMessageId(messageId);
+    
+    setTimeout(() => {
+      setCopiedMessageId(null);
+    }, 2000);
   };
 
   const handleSend = async () => {
@@ -114,9 +125,7 @@ function Canvas({
   return (
     <div style={{ width, height }} className="flex flex-col bg-base-100">
       {/* Header with Reset Button */}
-      <div className="flex justify-between items-center pb-1 mb-1">
-      <h4 className="text-sm font-semibold text-base-content flex items-center gap-1 justify-center"><BrainCircuit size={14}/> <span>{label} Optimizer</span></h4>
-      <div className="flex justify-between items-center">
+      <div className="flex  items-center pb-1 mb-1 pl-2" style={{justifyContent:"flex-end"}}>
         {messages.length > 0 && (
           <button 
             className="btn btn-xs  btn-outline btn-error hover:btn-error"
@@ -127,7 +136,6 @@ function Canvas({
           </button>
         )}
         </div>
-      </div>
 
       {/* Chat Container */}
       <div className="flex-1 flex flex-col bg-base-100 border border-base-300 rounded-lg shadow-sm overflow-hidden">
@@ -155,30 +163,13 @@ function Canvas({
                 className={`chat group ${message.sender === "user" ? "chat-end" : "chat-start"}`}
               >
                 {/* Chat Header with Apply Button */}
-                <div className="chat-header flex justify-between w-full items-center mb-1">
+                <div className={`chat-header flex ${message.sender === "user" ? "justify-end" : "justify-between"} w-full items-center mb-1`}>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium capitalize">{message.sender}</span>
                     <time className="text-xs opacity-50">{message.time}</time>
                   </div>
                   
-                  {message.sender === "assistant" && message.optimized && (
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      {appliedMessages.has(message.id) ? (
-                        <div className="flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-1 rounded-full">
-                          <CheckIcon size={14}/>
-                          Applied
-                        </div>
-                      ) : (
-                        <button 
-                          className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
-                          onClick={() => handleApply(message)}
-                        >
-                          <CopyIcon size={14}/>
-                          <span className="hidden sm:inline">Apply</span>
-                        </button>
-                      )}
-                    </div>
-                  )}
+                  
                 </div>
                 
                 {/* Chat Bubble */}
@@ -195,10 +186,51 @@ function Canvas({
                         code: ({ children }) => <code className="bg-base-200 px-1 py-0.5 rounded text-xs">{children}</code>
                       }}
                     >
-                  {message.content}
+                      {message.content}
                     </Markdown>
                   )}
+                  
+                  {/* Action Buttons - Inside chat bubble */}
+                  {message.sender === "assistant" && message.optimized && (
+                    <div className="mt-4 flex justify-start">
+                      <div className="flex items-center gap-2">
+                        {appliedMessages.has(message.id) ? (
+                          <div className="flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-1 rounded-full">
+                            <CheckIconComponent size={14}/>
+                            Applied
+                          </div>
+                        ) : (
+                          <button 
+                            className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
+                            onClick={() => handleApply(message)}
+                          >
+                            <CopyIconComponent size={14}/>
+                            <span className="hidden sm:inline">Apply</span>
+                          </button>
+                        )}
+                        
+                        {copiedMessageId === message.id ? (
+                          <div className="flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-1 rounded-full">
+                            <CheckIconComponent size={14} />
+                            Copied
+                          </div>
+                        ) : (
+                          <button 
+                            className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
+                            onClick={() => handleCopy(message.id, message.optimized)}
+                          >
+                            <CopyIconComponent size={14} />
+                            <span className="hidden sm:inline">Copy</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
+                {message.sender === "assistant" && message.optimized && (
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    </div>
+                  )}
               </div>
             );
           })}
