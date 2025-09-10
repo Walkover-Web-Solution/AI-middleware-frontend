@@ -277,7 +277,6 @@ const Navbar = ({ isEmbedUser }) => {
       )}
     </div>
   );
-  console.log(searchParams?.get('version'));
   if (!shouldShowNavbar()) return null;
 
   return (

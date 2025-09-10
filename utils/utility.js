@@ -1,4 +1,5 @@
-import { BuildingIcon, CheckCircleIcon } from "@/components/Icons";
+import { BuildingIcon, CheckCircleIcon, LinkIcon } from "@/components/Icons";
+import AIMLIcon from "@/icons/AIMLIcon";
 import AnthropicIcon from "@/icons/AnthropicIcon";
 import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
@@ -188,6 +189,8 @@ export const getIconOfService = (service, height, width) => {
             return <OpenRouter height={height} width={width} />;
         case 'gemini':
             return <GeminiIcon height={height} width={width} />;
+        case 'ai_ml':
+            return <AIMLIcon height={height} width={width} />;
         default:
             return <OpenAiIcon height={height} width={width} />;
     }
@@ -306,6 +309,8 @@ export const GetFileTypeIcon = (fileType, height, width) => {
             return <PdfIcon height={height} width={width} />;
         case 'csv':
             return <CsvIcon height={height} width={width} />;
+        case 'url':
+            return <LinkIcon height={height} width={width} />;
         default:
             return <GoogleDocIcon height={height} width={width} />;
     }

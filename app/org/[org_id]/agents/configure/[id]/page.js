@@ -19,8 +19,6 @@ export const runtime = 'edge';
 const Page = ({params, searchParams }) => {
   const resolvedParams = use(params);
   const resolvedSearchParams = use(searchParams);
-  console.log(resolvedParams)
-  console.log(resolvedSearchParams)
   const apiKeySectionRef = useRef(null);
   const promptTextAreaRef = useRef(null);
   const router = useRouter();

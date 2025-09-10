@@ -145,8 +145,18 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
     const agentNodes = nodes.filter(
       node => node.type === 'agentNode' && node.data?.selectedAgent
     );
-    if (agentNodes.length === 0) throw new Error('No agent nodes found in the flow');
-
+    if (nodes.length === 0) throw new Error('No agent nodes found in the flow');
+    if(nodes.length ==1){
+      return {
+        agents:{},
+        master_agent: {},
+        status: metadata.status || 'draft',
+        flow_name: metadata.name || 'Untitled Flow',
+        flow_description: metadata.description || '',
+        bridge_type: metadata.bridge_type || null,
+        data: metadata.autoSaveData
+      };
+    }
     const childrenMap = new Map();
     const parentsMap = new Map();
     agentNodes.forEach(node => {
@@ -665,7 +675,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
           </div>
         </div>
 
-        <div className="px-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+        <div className="px-4 max-h-[calc(100vh-300px)] overflow-y-auto">
           {list.length === 0 ? (
             <div className="card bg-base-100 shadow-md">
               <div className="card-body text-center py-12">
@@ -920,7 +930,7 @@ export function FlowControlPanel({
       <SlideOver
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
-        widthClass="w-full sm:w-[660px] md:w-[620px] w-[720px] mt-14 rounded-lg"
+        widthClass="w-full sm:w-[660px] md:w-[620px] w-[720px] mt-6 rounded-lg h-[calc(100vh-120px)]"
         overlayZ="z-[9968]"
         panelZ="z-[9969]"
         backDropBlur={false}
@@ -942,7 +952,7 @@ export function FlowControlPanel({
         }
         bodyClassName="min-h-0"
       >
-        <div className="flex-1 min-h-0 rounded-b-lg">
+        <div className="flex-1 rounded-b-lg">
           <Chat params={params} userMessage={userMessage} isOrchestralModel={true} />
         </div>
       </SlideOver>

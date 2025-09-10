@@ -7,6 +7,7 @@ import SecondStep from "../chatbotConfiguration/secondStep";
 import PrivateFormSection from "../chatbotConfiguration/firstStep";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { toggleSidebar } from "@/utils/utility";
+import SlugNameInput from "../configuration/configurationComponent/slugNameInput";
 
 function GuideSlider({ params, bridgeType }) {
   const [activeTab, setActiveTab] = useState(bridgeType != "trigger" ? bridgeType : "chatbot");
@@ -28,6 +29,7 @@ function GuideSlider({ params, bridgeType }) {
         return <ApiGuide params={params}/>;
       case "chatbot":
         return  <div className="">
+        <SlugNameInput params={params}/>
         <PrivateFormSection params={params} ChooseChatbot={true}/>
         <SecondStep slugName={slugName}/>
     </div>

@@ -11,7 +11,6 @@ import { MODAL_TYPE } from '@/utils/enums';
 import DeleteModal from '@/components/UI/DeleteModal';
 import MainLayout from '@/components/layoutComponents/MainLayout';
 import PageHeader from '@/components/Pageheader';
-import SearchItems from '@/components/UI/SearchItems';
 import CreateNewOrchestralFlowModal from '@/components/modals/CreateNewOrchestralFlowModal';
 
 export const runtime = 'edge';
@@ -27,6 +26,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
   })
   const dispatch = useDispatch();
   const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Get orchestral flow data from reducer
   const orchestralFlowData = useCustomSelector((state) =>
@@ -128,6 +128,14 @@ export default function FlowsPage({ params, isEmbedUser }) {
     dispatch(deleteOrchetralFlowAction({ data: { orgId: resolvedParams.org_id, _id: selectedDataToDelete._id } }));
   };
 
+  useEffect(() => {
+    statusFilter !== 'all' ? setFilterFlows(orchestralFlowData.filter((flow) => flow.status === statusFilter)) : setFilterFlows(orchestralFlowData)
+  }, [statusFilter]);
+
+  useEffect(() => {
+      const filtered = orchestralFlowData?.filter(item =>(item?.flow_name && item?.flow_name?.toLowerCase()?.includes(searchTerm.toLowerCase().trim()))) || [];
+      setFilterFlows(filtered);
+    }, [orchestralFlowData, searchTerm]);
   return (
     <div className="px-2 pt-4">
       <MainLayout>
@@ -135,7 +143,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
           <PageHeader
             title="Orchestral Model"
             description="Create and manage your AI Orchestral Model workflows. Build complex agent interactions with our intuitive flow builder."
-            // docLink="https://blog.gtwy.ai/features/orchestral-model"
+            docLink="https://gtwy.ai/blogs/features/orchestral-model"
             isEmbedUser={isEmbedUser}
           />
           <div className="mb-4">
@@ -171,7 +179,13 @@ export default function FlowsPage({ params, isEmbedUser }) {
           {/* Search and Filter Bar */}
           <div className="flex gap-4 items-center mb-4">
             <div className="flex-1 relative">
-              <SearchItems data={orchestralFlowData} setFilterItems={setFilterFlows} item="Flows" />
+              <input
+                type="text"
+                placeholder={`Search Flows...`}
+                className={`input input-bor0dered w-[60%] ml-3 mb-3 border border-base-content/50`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
 
             <div className="flex items-center gap-2">
@@ -288,21 +302,6 @@ export default function FlowsPage({ params, isEmbedUser }) {
                     <div className="flex items-center gap-2">
                       <Bot className="w-4 h-4 text-blue-600" />
                       <span className="text-sm text-base-content">{agentCount} agents</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-green-600" />
-                      <span className="text-sm text-base-content">{getRelativeTime(flow.updated_at)}</span>
-                    </div>
-                  </div>
-
-                  {/* Footer Info */}
-                  <div className="border-t border-base-content/30 pt-4 mt-auto">
-                    <div className="flex items-center justify-between text-xs text-base-content">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        <span>Created {formatDate(flow.created_at)}</span>
-                      </div>
-                      <span className="text-base-content">ID: {flow._id.slice(-8)}</span>
                     </div>
                   </div>
 

@@ -101,7 +101,7 @@ const Page = () => {
           <PageHeader
             title="ApiKeys"
             description="Add your model-specific API keys to enable and use different AI models in your chat."
-            docLink="https://app.docstar.io/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
+            docLink="https://techdoc.walkover.in/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
           />
           <div className="flex-shrink-0 mt-4 sm:mt-0 flex gap-2">
             <button 

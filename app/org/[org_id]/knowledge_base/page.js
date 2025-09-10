@@ -39,13 +39,14 @@ const Page = ({ params }) => {
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
-
+ 
   const tableData = filterKnowledgeBase.map(item => ({
     ...item,
+    actualName: item?.name,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
-        {GetFileTypeIcon(item?.type, 24, 24)}
-      </div>
+        {GetFileTypeIcon(item?.source?.data?.type, 14, 14)}
+        </div>
       <div className="tooltip" data-tip={item.name}>
         {truncate(item.name, 30)}
       </div>
@@ -148,7 +149,7 @@ const Page = ({ params }) => {
                       <EllipsisVerticalIcon size={16} />
                     </div>
                     <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box z-high w-32">
-                      <li><a onClick={() => handleDelete()} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
+                      <li><a onClick={() => handleDeleteKnowledgebase(item)} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
                       <li><a onClick={() => handleUpdateKnowledgeBase(item)} className="hover:bg-base-200">Update</a></li>
                     </ul>
                   </div>

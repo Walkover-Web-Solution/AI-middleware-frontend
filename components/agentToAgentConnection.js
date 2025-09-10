@@ -36,6 +36,7 @@ import { useDispatch } from 'react-redux';
 import FunctionParameterModal from './configuration/configurationComponent/functionParameterModal';
 import { flushSync } from 'react-dom';
 import DeleteModal from './UI/DeleteModal';
+import { createNewOrchestralFlow, updateOrchestralFlow } from '@/config';
 
 /* ========================= Helpers ========================= */
 function hydrateNodes(rawNodes, ctx) {
@@ -265,7 +266,12 @@ function AgentNode({ id, data }) {
             }}
           >
             {isMasterAgent && <span className="text-xs font-bold text-amber-600 mr-1">[MASTER]</span>}
-            {data.selectedAgent ? data.selectedAgent.name : 'Click to select'}
+            <div className="tooltip tooltip-bottom" data-tip={data.selectedAgent?.name ?? 'Click to select'}>
+              {data.selectedAgent?.name?.substring(0, 15) ?? 'Click to select'}
+              {data.selectedAgent?.name?.length > 20 && (
+                <span className="ml-1 text-xs font-light">...</span>
+              )}
+            </div>
             <div className="tooltip tooltip-right" data-tip="Configure Agent">
               <CircleArrowOutUpRight className="text-base-content" size={16} />
             </div>
@@ -354,7 +360,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       script.id = scriptId;
       script.src = scriptURl;
       script.setAttribute('skipLoadGtwy', true);
-      script.setAttribute('token', sessionStorage.getItem('proxy_token') || localStorage.getItem('proxy_token'));
+      script.setAttribute('token', sessionStorage.getItem('proxy_token') || getFromCookies('proxy_token'));
       script.setAttribute('org_id', params?.org_id);
       script.setAttribute('customIframeId', 'gtwyEmbedInterface');
       script.setAttribute('gtwy_user', true);
@@ -447,7 +453,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           const existingData = orchestralData || {};
 
           const saveStructure = {
-            agents: serializeAgentFlow(existingData.nodes, existingData.edges, {
+            agents: nodes.length === 1 ? currentFlowData?.agents : serializeAgentFlow(existingData.nodes, existingData.edges, {
               name: existingData.flow_name || 'Flow',
               description: existingData.flow_description || '',
               bridge_type: existingData.bridge_type,
@@ -462,8 +468,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
             master_agent: currentFlowData.master_agent,
             master_agent_name: name || 'Flow',
           };
-
-          const { updateOrchestralFlow, createNewOrchestralFlow } = await import('@/config');
 
           if (params.orchestralId) {
             await updateOrchestralFlow(saveStructure, params.orchestralId);
@@ -1078,7 +1082,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         onConfirm={confirmDelete}
         item={pendingDelete?.selectedAgent}
         title="Remove Agent"
-        description={`Are you sure you want to remove the ${pendingDelete?.selectedAgent?.name || 'this agent'}? It will also remove its child agents. This action cannot be undone.`}
+        description={`Are you sure you want to remove ${agents.find((agent) => agent._id === pendingDelete?.id)?.name || 'this agent'}? It will also remove its child agents. This action cannot be undone.`}
         key={pendingDelete?.selectedAgent?._id || 'no-agent'}
       />
 
