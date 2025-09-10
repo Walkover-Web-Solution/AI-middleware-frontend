@@ -1,12 +1,5 @@
 
-import {
-  Upload, Save, TestTube, Play, ChevronRight, Loader2, Plus, X, Search, Bot, PlusIcon, Settings, Zap, MessageSquare, Globe,
-  File,
-  FileSlidersIcon,
-  CircleArrowOutUpRight,
-  ChevronUp,
-  ChevronDown
-} from 'lucide-react';
+import { Save, TestTube, Bot, PlusIcon, Zap, MessageSquare, Globe, FileSlidersIcon, CircleArrowOutUpRight, ChevronUp, ChevronDown, X, ArrowLeft } from 'lucide-react';
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
 import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
@@ -16,6 +9,7 @@ import Link from 'next/link';
 import GenericTable from './table/table';
 import CopyButton from './copyButton/copyButton';
 import CreateNewOrchestralFlowModal from './modals/CreateNewOrchestralFlowModal';
+import { useRouter } from 'next/navigation';
 /* Global stack to make only the topmost handle ESC/overlay */
 const SlideStack = {
   stack: [],
@@ -146,9 +140,9 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
       node => node.type === 'agentNode' && node.data?.selectedAgent
     );
     if (nodes.length === 0) throw new Error('No agent nodes found in the flow');
-    if(nodes.length ==1){
+    if (nodes.length == 1) {
       return {
-        agents:{},
+        agents: {},
         master_agent: {},
         status: metadata.status || 'draft',
         flow_name: metadata.name || 'Untitled Flow',
@@ -493,10 +487,10 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
 
   const handleEventListener = useCallback((event) => {
     const { type, status, data } = event.data
-    if (type === 'gtwy' && status === "published") {      
+    if (type === 'gtwy' && status === "published") {
       let bridge = agents.find((a) => a._id === data.agent_id);
       let node = nodes.find((n) => n?.id === data.agent_id);
-      if(node){
+      if (node) {
         return
       }
       if (bridge) {
@@ -527,7 +521,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
       setOpenAgentConfigSidebar(false);
       onClose();
       setSelectAgent({ nameToCreate: "", org_id: params?.org_id });
-      if(window.closeGtwy) window.closeGtwy();
+      if (window.closeGtwy) window.closeGtwy();
     }
   }, []);
 
@@ -648,8 +642,8 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                     onClick={handleCreateAgent}
                     disabled={!inputValue.trim() || isCreating}
                     className={`btn btn-sm w-full ${!inputValue.trim() || isCreating
-                        ? 'btn-disabled'
-                        : 'btn-primary'
+                      ? 'btn-disabled'
+                      : 'btn-primary'
                       }`}
                   >
                     {isCreating ? (
@@ -806,9 +800,11 @@ export function FlowControlPanel({
   params,
   isVariableModified,
   openIntegrationGuide,
+  isEmbedUser,
 }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [userMessage, setUserMessage] = useState('');
+  const router = useRouter()
   const [saveData, setSaveData] = useState({
     name: name || '',
     description: description || '',
@@ -864,6 +860,10 @@ export function FlowControlPanel({
 
   return (
     <div className="relative z-[9990]">
+      {/* Back button */}
+      {isEmbedUser && <button className="btn btn-outline absolute top-4 left-4 cursor-pointer tooltip tooltip-right btn-sm" data-tip="Back to flows list" onClick={() => router.push(`/org/${params?.org_id}/orchestratal_model`)}>
+        <ArrowLeft size={16}/>
+      </button>}
       {/* Top-right Controls */}
       <div className="absolute top-4 right-4 flex items-center gap-2">
         {/* Discard button: show only when createdFlow && isModified */}
@@ -977,7 +977,7 @@ export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId }) {
   }, [agent])
   useEffect(() => {
     return () => {
-      if(window.closeGtwy) window.closeGtwy();
+      if (window.closeGtwy) window.closeGtwy();
     }
   }, [isOpen])
   return (

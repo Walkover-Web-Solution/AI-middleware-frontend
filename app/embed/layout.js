@@ -133,6 +133,11 @@ const Layout = ({ children }) => {
             }
           });
         }
+        if(urlParamsObj?.config?.configureGtwyRedirection === 'orchestral_page'){
+          setIsLoading(true);
+          router.push(`/org/${urlParamsObj.org_id}/orchestratal_model`);
+          return;
+        }
 
         if (urlParamsObj?.agent_name) {
           setIsLoading(true)
