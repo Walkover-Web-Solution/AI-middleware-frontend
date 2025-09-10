@@ -89,13 +89,13 @@ function Page({params, searchParams }) {
         const threadId = resolvedSearchParams?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
         if(thread) {
-          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${threadId}&subThread_id=${threadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${threadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
         }
       }
       else if (!resolvedSearchParams?.thread_id && result?.length > 0) {
         const firstThreadId = result[0]?.thread_id;
         if (firstThreadId) {
-          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&subThread_id=${firstThreadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
+          router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${firstThreadId}&start=${startDate}&end=${endDate}`, undefined, { shallow: true });
         }
       }
       if(isErrorTrue) {
@@ -124,7 +124,7 @@ function Page({params, searchParams }) {
         const start = search.get("start");
         const end = search.get("end");
         const encodedThreadId = encodeURIComponent(thread_id.replace(/&/g, "%26"));
-        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${encodedThreadId}&subThread_id=${encodedThreadId}&start=${start}&end=${end}`, undefined, { shallow: true });
+        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${encodedThreadId}&subThread_id=${encodedThreadId}&_Disease_Advisor[0]=&_Disease_Advisor[1]=&start=${start}&end=${end}`, undefined, { shallow: true });
       }
     },
     [pathName, resolvedParams.id, resolvedSearchParams.version, resolvedSearchParams?.start, resolvedSearchParams?.end]
