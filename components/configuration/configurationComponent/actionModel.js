@@ -26,7 +26,7 @@ const useInputHandlers = (descriptionRef, dataRef, selectedAction) => {
     return { clearInputFields, areFieldsFilled };
 };
 
-const ActionModel = ({ params, actionId, setActionId }) => {
+const ActionModel = ({ params, searchParams, actionId, setActionId }) => {
     const descriptionRef = useRef(null);
     const dataRef = useRef(null);
     const dispatch = useDispatch();
@@ -53,7 +53,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
         dispatch(createOrRemoveActionBridge({
             orgId: params?.org_id,
             bridgeId: params?.id,
-            versionId: params?.version,
+            versionId: searchParams?.version,
             type: "add",
             dataToSend: { actionJson, ...(actionId && { actionId }) }
         }));
