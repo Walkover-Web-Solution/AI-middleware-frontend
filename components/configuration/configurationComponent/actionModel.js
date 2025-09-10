@@ -119,7 +119,7 @@ const ActionModel = ({ params, actionId, setActionId }) => {
                             disabled={isCreateButtonDisabled}
                             onClick={handleCreateUpdate}
                         >
-                            {actionId ? "Update" : "Create"}
+                            {actionId?.length ? "Update" : "Create"}
                         </button>
                     </div>
                 </div>
