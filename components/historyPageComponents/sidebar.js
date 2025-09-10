@@ -95,6 +95,15 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
         );
       }
     }
+    else{
+      if(searchParams?.thread_id){
+      router.push(
+        `${pathName}?version=${searchParams.version}&thread_id=${searchParams.thread_id}&subThread_id=${searchParams.thread_id}&start=${searchParams.start||''}&end=${searchParams.end||''}`,
+        undefined,
+        { shallow: true }
+      );
+      }
+    }
     setTimeout(() => {
       setLoadingSubThreads(false);
     }, 1000);
