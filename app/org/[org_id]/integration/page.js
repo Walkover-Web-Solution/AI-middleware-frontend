@@ -37,7 +37,8 @@ const Page = ({ params }) => {
   }, [integrationData]);
 
   const tableData = (filterIntegration || [])?.map((item, index) => ({
-    id: index,
+    id: item._id ,
+    actualName: item?.name,
     name: (
       <div className="flex gap-2">
         <div className="tooltip" data-tip={item.name}>

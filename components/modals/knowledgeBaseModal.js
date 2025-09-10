@@ -105,7 +105,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
-    const validFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/csv'];
+    const validFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'csv'];
 
     if (selectedFile && validFileTypes.includes(selectedFile.type)) {
       setFile(selectedFile);
