@@ -82,7 +82,7 @@ function ActionList({ params, searchParams }) {
                     </div>
                 ))}
             </div>
-            <ActionModel params={params} actionId={selectedKey} setActionId={setSelectedKey} />
+            <ActionModel params={params} searchParams={searchParams} actionId={selectedKey} setActionId={setSelectedKey} />
         </div>
     );
 }
