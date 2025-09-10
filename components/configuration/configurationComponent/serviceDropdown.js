@@ -24,9 +24,7 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
             bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
             service: service,
             prompt: bridgeData?.[searchParams?.version]?.configuration?.prompt || "",
-            bridgeApiKey: bridgeData?.[searchParams?.version]?.apikey_object_id?.[
-                service === 'openai_response' ? 'openai' : service
-            ],
+            bridgeApiKey: bridgeData?.[searchParams?.version]?.apikey_object_id?.[service],
             shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,   
             apiKeyObjectIdData,
             showDefaultApikeys

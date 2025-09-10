@@ -73,9 +73,6 @@ const PrebuiltToolsList = ({ params, searchParams }) => {
         })
     ), [toolsVersionData, prebuiltToolsData]);
 
-    if (service !== 'openai_response') {
-        return null;
-    }
 
     return (
         <div>
