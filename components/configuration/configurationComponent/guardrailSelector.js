@@ -5,49 +5,6 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
-// Guardrail templates with only name and description (without prompts)
-// const GUARDRAILS_TEMPLATES = {
-//     "data_leakage": {
-//         "name": "Data Leakage",
-//         "description": "Whether the output exposes personal identifiable information unexpectedly"
-//     },
-//     "prompt_injection": {
-//         "name": "Prompt Injection",
-//         "description": "Detects and prevents malicious inputs designed to manipulate prompts"
-//     },
-//     "jailbreaking": {
-//         "name": "Jailbreaking",
-//         "description": "Inputs crafted to bypass safety restrictions and generate harmful outputs"
-//     },
-//     "bias": {
-//         "name": "Bias",
-//         "description": "Outputs that contain gender, racial, or political bias"
-//     },
-//     "toxicity": {
-//         "name": "Toxicity",
-//         "description": "Outputs with profanity, harmful language, or hate speech"
-//     },
-//     "privacy": {
-//         "name": "Privacy",
-//         "description": "Prevents inputs from containing sensitive personal information"
-//     },
-//     "hallucination": {
-//         "name": "Hallucination",
-//         "description": "Outputs that contain inaccuracies or fabricated details in responses"
-//     },
-//     "violence": {
-//         "name": "Violence",
-//         "description": "Content promoting or describing violent acts"
-//     },
-//     "illegal_activity": {
-//         "name": "Illegal Activity",
-//         "description": "Content promoting or instructing illegal activities"
-//     },
-//     "misinformation": {
-//         "name": "Misinformation",
-//         "description": "False or misleading information that could cause harm"
-//     }
-// };
 
 const GuardrailSelector = ({ params, searchParams }) => {  
     const { guardrailsData,GUARDRAILS_TEMPLATES } = useCustomSelector(
@@ -183,9 +140,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
         setCustomPrompt(newPromptValue);
         
         // Delay updating the store to avoid too many updates while typing
-        setTimeout(() => {
-            updateGuardrailsInStore(guardrailsEnabled, selectedGuardrails, newPromptValue);
-        }, 300);
+        updateGuardrailsInStore(guardrailsEnabled, selectedGuardrails, newPromptValue);
     };
     
     return (
