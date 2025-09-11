@@ -17,7 +17,6 @@ import InfoTooltip from "@/components/InfoTooltip";
 function FunctionParameterModal({
   name = "",
   functionId = "",
-  params,
   Model_Name,
   embedToken = "",
   handleRemove = () => { },
@@ -528,7 +527,7 @@ function FunctionParameterModal({
               here
             </a>
           </p>
-          {name==='Agent' || (name==='orchestralAgent' && isMasterAgent )&&
+          {(name==='Agent' || (name==='orchestralAgent' && isMasterAgent))&&
             <div className="flex items-center justify-center gap-2 text-sm">
               <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
                 <label className="label info">
@@ -570,7 +569,7 @@ function FunctionParameterModal({
                   <th>Description</th>
                   <th>Enum: comma separated</th>
                   <th>Fill with AI</th>
-                  {!isMasterAgent && <th>Value Path: your_path</th>}
+                  {((name ==='orchestralAgent' &&  !isMasterAgent) || (name !== 'orchestralAgent')) && <th>Value Path: your_path</th>}
                 </tr>
               </thead>
               <tbody>
@@ -675,7 +674,7 @@ function FunctionParameterModal({
                           }}
                         />
                       </td>
-                      {(name==='orchestralAgent' && !isMasterAgent) && <td>
+                      {((name==='orchestralAgent' && !isMasterAgent) || !(name==='orchestralAgent')) && <td>
                         <input
                           type="text"
                           placeholder="name"

@@ -2,6 +2,7 @@
 import { getAllAgentsApi, privateAgentLoginApi, publicAgentLoginApi } from "@/config";
 import { toast } from "react-toastify";
 import { getAllAgentReducer, getPrivateAgentDataReducer, getPublicAgentDataReducer } from "../reducer/gwtyAgentReducer";
+import { getFromCookies } from "@/utils/utility";
 
 export const getAllAgentAction = () => async (dispatch) => {
   try {
@@ -16,11 +17,11 @@ export const getAllAgentAction = () => async (dispatch) => {
 };
 
 export const publicAgentLoginAction = () => async (dispatch) => {
-  const user_id = localStorage.getItem('publicAgentUserId')
+  const user_id = getFromCookies('publicAgentUserId')
   try {
     const response = await publicAgentLoginApi(user_id != "undefined" &&  user_id ? user_id : {});
-    localStorage.setItem('AgentToken', response?.data?.token)
-    localStorage.setItem('publicAgentUserId',response?.data?.user_id)
+    setInCookies('AgentToken', response?.data?.token)
+    setInCookies('publicAgentUserId',response?.data?.user_id)
     if (response) {
         dispatch(getPublicAgentDataReducer({ data: response?.data}))
     }
@@ -31,11 +32,11 @@ export const publicAgentLoginAction = () => async (dispatch) => {
 };
 
 export const privateAgentLoginAction = () => async (dispatch) => {
-  const user_id = localStorage.getItem('privateAgentUserId')
+  const user_id = getFromCookies('privateAgentUserId')
   try {
     const response = await privateAgentLoginApi(user_id != "undefined" &&  user_id ? user_id : {});
-    localStorage.setItem('AgentToken', response?.data?.token)
-    localStorage.setItem('privateAgentUserId',response?.data?.user_id)
+    setInCookies('AgentToken', response?.data?.token)
+    setInCookies('privateAgentUserId',response?.data?.user_id)
     if (response) {
         dispatch(getPrivateAgentDataReducer({ data: response?.data}))
     }

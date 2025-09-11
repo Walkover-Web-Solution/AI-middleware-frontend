@@ -34,11 +34,11 @@ const RESPONSE_STYLES = [
   },
 ];
 
-const ResponseStyleDropdown = ({ params }) => {
+const ResponseStyleDropdown = ({ params, searchParams }) => {
   const { reduxResponseStyle } = useCustomSelector((state) => ({
     reduxResponseStyle:
       state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
-        params?.version
+        searchParams?.version
       ]?.configuration?.responseStyle || null,
   }));
   const dispatch = useDispatch();
@@ -58,7 +58,7 @@ const ResponseStyleDropdown = ({ params }) => {
       if (style) {
         dispatch(
           updateBridgeVersionAction({
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: {
               configuration: {
                 responseStyle: {

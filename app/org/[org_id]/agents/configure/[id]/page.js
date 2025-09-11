@@ -7,7 +7,7 @@ import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, use } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
 import { updateTitle } from "@/utils/utility";
@@ -16,10 +16,11 @@ import { useRouter } from "next/navigation";
 
 export const runtime = 'edge';
 
-const Page = ({ searchParams }) => {
+const Page = ({params, searchParams }) => {
+  const resolvedParams = use(params);
+  const resolvedSearchParams = use(searchParams);
   const apiKeySectionRef = useRef(null);
   const promptTextAreaRef = useRef(null);
-  const params = searchParams;
   const router = useRouter();
   const mountRef = useRef(false);
   const dispatch = useDispatch();
@@ -30,15 +31,17 @@ const Page = ({ searchParams }) => {
   // Ref for the main container to calculate percentage-based width
   const containerRef = useRef(null); 
 
-  const { bridgeType, versionService, bridgeName, allbridges} = useCustomSelector((state) => {
-    const bridgeData = state?.bridgeReducer?.allBridgesMap?.[params?.id];
-    const allbridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs;
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+  const { bridgeType, versionService, bridgeName, allbridges, isFocus} = useCustomSelector((state) => {
+    const bridgeData = state?.bridgeReducer?.allBridgesMap?.[resolvedParams?.id];
+    const allbridges = state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs;
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version];
+    const isFocus = state?.bridgeReducer?.isFocus;
     return {
       bridgeType: bridgeData?.bridgeType,
       versionService: versionData?.service,
       bridgeName: bridgeData?.name,
-      allbridges
+      allbridges,
+      isFocus
     };
   });
   
@@ -72,13 +75,13 @@ const Page = ({ searchParams }) => {
           bridges = data
         }));
       }
-      const agentName = bridges?.find((bridge) => bridge._id === params?.id)
+      const agentName = bridges?.find((bridge) => bridge._id === resolvedParams?.id)
       if (!agentName) {
-        router.push(`/org/${params?.org_id}/agents`);
+        router.push(`/org/${resolvedParams?.org_id}/agents`);
         return
       }
       try {
-        await dispatch(getSingleBridgesAction({ id: params.id, version: params.version }));
+        await dispatch(getSingleBridgesAction({ id: resolvedParams.id, version: resolvedSearchParams.version }));
       } catch (error) {
         console.error("Error in getSingleBridgesAction:", error);
       }
@@ -184,19 +187,11 @@ const Page = ({ searchParams }) => {
     };
   }, [isDesktop]); // Rerun when switching between desktop/mobile
 
-  if (!bridgeType) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
 
   return (
     <div 
       ref={containerRef} // Add ref to the main container
-      className={`w-full h-full max-h-[calc(100vh-4rem)] ${isDesktop ? 'flex flex-row overflow-hidden' : 'overflow-y-auto'}`}
+      className={`w-full h-full ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : ''} ${isDesktop||isFocus ? 'flex flex-row overflow-y-hidden' : 'overflow-y-auto'}`}
     >
       {/* Configuration Panel */}
       <div 
@@ -206,8 +201,8 @@ const Page = ({ searchParams }) => {
         `}
         style={isDesktop ? { width: `${leftWidth}%` } : {}}
       >
-        <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} px-4 py-4`}>
-          <ConfigurationPage apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef}  params={params} />
+        <div className={`${isDesktop && !isFocus? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} px-4 py-4`}>
+          <ConfigurationPage apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef}  params={resolvedParams} searchParams={resolvedSearchParams}/>
         </div>
       </div>
 
@@ -227,19 +222,19 @@ const Page = ({ searchParams }) => {
         style={isDesktop ? { width: `${100 - leftWidth}%` } : {}}
         id="parentChatbot"
       >
-        <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} pb-4`}>
+        <div className={`${isDesktop && !isFocus? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} pb-4`}>
           <div className={`${isDesktop ? 'h-full flex flex-col' : ''}`}>
-            <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} params={params} />
+            <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams}/>
             {!sessionStorage.getItem('orchestralUser') ? <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
               {bridgeType === 'batch' && versionService === 'openai' ? (
-                <WebhookForm params={params} />
+                <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams}/>
               ) : bridgeType === 'chatbot' ? (
-                <Chatbot params={params} key={JSON.stringify(params)} />
+                <Chatbot params={resolvedParams} searchParams={resolvedSearchParams}/>
               ) : (
-                <Chat params={params} />
+                <Chat params={resolvedParams} searchParams={resolvedSearchParams}/>
               )}
             </div> : <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
-                <Chat params={params} />
+                <Chat params={resolvedParams} searchParams={resolvedSearchParams}/>
             </div>}
           </div>
         </div>

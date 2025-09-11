@@ -67,11 +67,11 @@ const TONES = [
   },
 ];
 
-const ToneDropdown = ({ params }) => {
+const ToneDropdown = ({ params, searchParams }) => {
   const { reduxTone } = useCustomSelector((state) => ({
     reduxTone:
       state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[
-        params?.version
+        searchParams?.version
       ]?.configuration?.tone || null,
   }));
   const dispatch = useDispatch();
@@ -91,7 +91,7 @@ const ToneDropdown = ({ params }) => {
       if (tone) {
         dispatch(
           updateBridgeVersionAction({
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: {
               configuration: {
                 tone: {

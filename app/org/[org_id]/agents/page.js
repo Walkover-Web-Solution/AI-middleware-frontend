@@ -14,7 +14,7 @@ import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
 import { ClockIcon, EllipsisIcon, LayoutGridIcon, TableIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import SearchItems from "@/components/UI/SearchItems";
@@ -22,11 +22,12 @@ import SearchItems from "@/components/UI/SearchItems";
 export const runtime = 'edge';
 
 function Home({ params, isEmbedUser }) {
+  const resolvedParams = use(params);
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
   const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation } = useCustomSelector((state) => {
-    const orgData = state.bridgeReducer.org[params.org_id] || {};
+    const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};
     const user = state.userDetailsReducer.userDetails
     return {
       allBridges: (orgData.orgs || []).slice().reverse(),
@@ -136,7 +137,7 @@ function Home({ params, isEmbedUser }) {
   }));
 
   const onClickConfigure = (id, versionId) => {
-    router.push(`/org/${params.org_id}/agents/configure/${id}?version=${versionId}`);
+    router.push(`/org/${resolvedParams.org_id}/agents/configure/${id}?version=${versionId}`);
   };
 
   const renderBridgeCard = (item) => {
@@ -196,7 +197,7 @@ function Home({ params, isEmbedUser }) {
         } else {
           toast.success('Agent Archived Successfully');
         }
-        router.push(`/org/${params.org_id}/agents`);
+        router.push(`/org/${resolvedParams.org_id}/agents`);
       });
     } catch (error) {
       console.error('Failed to archive/unarchive agents', error);
@@ -212,7 +213,7 @@ function Home({ params, isEmbedUser }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              router.push(`/org/${params.org_id}/agents/testcase/${row._id}?version=${row?.versionId || null}`);
+              router.push(`/org/${resolvedParams.org_id}/agents/testcase/${row._id}?version=${row?.versionId || null}`);
             }}
           >
             Test Case
@@ -258,7 +259,7 @@ function Home({ params, isEmbedUser }) {
 
         />
       )}
-      <CreateNewBridge orgid={params.org_id}/>
+      <CreateNewBridge orgid={resolvedParams.org_id}/>
       {!allBridges.length && isLoading && <LoadingSpinner />}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col items-start justify-start">
@@ -271,7 +272,7 @@ function Home({ params, isEmbedUser }) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                   <p className="text-lg font-semibold text-base-content">Create Your First Agent</p>
-                  <button className="btn mt-2 btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
+                  <button className="btn mt-2 btn-primary" onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
                 </div>
               </div>
             ) : (
@@ -282,11 +283,11 @@ function Home({ params, isEmbedUser }) {
                       <PageHeader
                         title="Agents"
                         description="Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."
-                        docLink="https://blog.gtwy.ai/features/bridge"
+                        docLink="https://gtwy.ai/blogs/features/bridge"
                         isEmbedUser={isEmbedUser}
                       />
                       <div className="flex-shrink-0 mt-4 sm:mt-0">
-                        <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
+                        <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
                       </div>
                     </div>
                   </MainLayout>

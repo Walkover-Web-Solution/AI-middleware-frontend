@@ -1,18 +1,20 @@
 import { logoutUserFromMsg91, switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
-import { filterOrganizations, openModal, toggleSidebar } from '@/utils/utility';
+import { clearCookie, filterOrganizations, getFromCookies, openModal, toggleSidebar } from '@/utils/utility';
 import { KeyRoundIcon, LogoutIcon, MailIcon, CloseIcon, SettingsIcon, SettingsAltIcon, BuildingIcon, ChevronDownIcon } from '@/components/Icons';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateOrg from '../createNewOrg';
 import { MODAL_TYPE } from '@/utils/enums';
+import { useDispatch } from 'react-redux';
 
 function OrgSlider() {
     const router = useRouter();
     const pathName = usePathname();
     const path = pathName.split('?')[0].split('/');
     const [searchQuery, setSearchQuery] = useState('');
+    const dispatch = useDispatch()
     const organizations = useCustomSelector((state) => state.userDetailsReducer.organizations);
     const userdetails = useCustomSelector((state) => state?.userDetailsReducer?.userDetails);
 
@@ -22,10 +24,10 @@ function OrgSlider() {
         try {
             await logoutUserFromMsg91({
                 headers: {
-                    proxy_auth_token: localStorage.getItem('proxy_token'),
+                    proxy_auth_token: getFromCookies('proxy_token'),
                 },
             });
-            localStorage.clear();
+            clearCookie();
             sessionStorage.clear();
             router.replace('/');
         } catch (e) {
@@ -41,7 +43,7 @@ function OrgSlider() {
                     orgId: id,
                     orgName: name
                 })
-                localStorage.setItem('local_token', localToken.token);
+                setInCookies('local_token', localToken.token);
             }
             router.push(`/org/${id}/agents`);
             dispatch(setCurrentOrgIdAction(id));

@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useLayoutEffect, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { getFromCookies } from "@/utils/utility";
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -10,7 +11,7 @@ const Header = () => {
   const router = useRouter();
 
   useLayoutEffect(() => {
-    const proxyToken = localStorage.getItem("proxy_token");
+    const proxyToken = getFromCookies("proxy_token");
     if (proxyToken) {
       setIsLoggedIn(true);
     }

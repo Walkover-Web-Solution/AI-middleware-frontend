@@ -50,7 +50,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                 const updated = { ...bridgeApikey_object_id, [service]: response._id };
                 dispatch(updateBridgeVersionAction({
                     bridgeId: params?.id,
-                    versionId: params?.version,
+                    versionId: searchParams?.version,
                     dataToSend: { apikey_object_id: updated }
                 }));
             }

@@ -6,10 +6,10 @@ import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-function VersionDescriptionInput({ params, isEmbedUser }) {
+function VersionDescriptionInput({ params, searchParams, isEmbedUser }) {
     const dispatch = useDispatch();
     const { versionDescription, bridgeName } = useCustomSelector((state) => ({
-        versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.version_description || "",
+        versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.version_description || "",
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
     }));
 
@@ -21,9 +21,9 @@ function VersionDescriptionInput({ params, isEmbedUser }) {
             e.target.value = versionDescription;
             return;
         }
-        dispatch(updateBridgeVersionAction({ versionId: params?.version, dataToSend: { version_description: newValue } }));
-        isEmbedUser && sendDataToParent("updated", {name: bridgeName, agent_description: newValue, agent_id: params?.id, agent_version_id: params?.version }, "Agent Version Description Updated")
-    }, [dispatch, params?.version, versionDescription]);
+        dispatch(updateBridgeVersionAction({ versionId: searchParams?.version, dataToSend: { version_description: newValue } }));
+        isEmbedUser && sendDataToParent("updated", {name: bridgeName, agent_description: newValue, agent_id: params?.id, agent_version_id: searchParams?.version }, "Agent Version Description Updated")
+    }, [dispatch, searchParams?.version, versionDescription]);
 
     const handleKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {

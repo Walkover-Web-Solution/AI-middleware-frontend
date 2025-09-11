@@ -1,6 +1,7 @@
 "use client"
 
 import axios from "@/utils/interceptor";
+import { setInCookies } from "@/utils/utility";
 import { toast } from "react-toastify";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -269,7 +270,7 @@ export const getAllOrg = async () => {
 export const switchOrg = async (company_ref_id) => {
   try {
     const data = await axios.post(`${PROXY_URL}/api/c/switchCompany`, { company_ref_id });
-    localStorage.setItem("current_org_id", company_ref_id);
+    setInCookies("current_org_id", company_ref_id);
     return data;
   } catch (error) {
     console.error(error);
@@ -728,9 +729,9 @@ export const uploadImage = async (formData) => {
   }
 };
 
-export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, bridge_id, version_id, range, factor }) => {
+export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, bridge_id, version_id, range, factor, start_date, end_date }) => {
   try {
-    const response = await axios.post(`${URL}/metrics`, { apikey_id, service, model, thread_id, bridge_id, version_id, range, factor });
+    const response = await axios.post(`${URL}/metrics`, { apikey_id, service, model, thread_id, bridge_id, version_id, range, factor, start_date, end_date });
     return response.data?.data || [];
   } catch (error) {
     console.error(error);
@@ -1081,7 +1082,7 @@ export const getAllIntegrationApi = async () => {
 
 export const updateIntegrationData = async (dataToSend) => {
   try {
-    const response = await axios.put(`${URL}/gtwyEmbed/`, {folder_id : dataToSend?.folder_id,  config: dataToSend?.config})
+    const response = await axios.put(`${URL}/gtwyEmbed/`, {folder_id : dataToSend?.folder_id, ...dataToSend})
     return response
   } catch (error) {
     console.error(error)

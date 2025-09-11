@@ -19,11 +19,11 @@
     "interface-chatbot": "^1.0.14",
     "lodash": "^4.17.21",
     "lodash.clonedeep": "^4.5.0",
-    "lucide-react": "^0.378.0",
-    "next": "14.1.0",
-    "react": "^18",
+    "lucide-react": "^0.542.0",
+    "next": "15.5.2",
+    "react": "^19.1.1",
     "react-apexcharts": "^1.7.0",
-    "react-dom": "^18",
+    "react-dom": "^19.1.1",
     "react-dropzone": "^14.2.3",
     "react-infinite-scroll-component": "^6.1.0",
     "react-markdown": "^9.0.1",
@@ -35,11 +35,11 @@
     "rtlayer-client": "^1.5.5"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.11.3",
+    "@cloudflare/next-on-pages": "^1.13.16",
     "autoprefixer": "^10.0.1",
     "daisyui": "^4.7.0",
     "eslint": "^8",
-    "eslint-config-next": "14.1.0",
+    "eslint-config-next": "^15.5.2",
     "postcss": "^8",
     "tailwindcss": "^3.3.0"
   }

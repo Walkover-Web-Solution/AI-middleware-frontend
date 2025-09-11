@@ -2,24 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { CircleAlertIcon, RocketIcon, SparklesIcon } from '@/components/Icons';
 import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import Protected from './protected';
 
-const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) => {
-  const { bridgeApiKey, prompt,shouldPromptShow,service } = useCustomSelector((state) => {
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
-    const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.service;
+const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isEmbedUser, searchParams }) => {
+  const { bridgeApiKey, prompt,shouldPromptShow,service, showDefaultApikeys } = useCustomSelector((state) => {
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service;
     const modelReducer = state?.modelReducer?.serviceModels;
     const serviceName = versionData?.service;
     const modelTypeName = versionData?.configuration?.type?.toLowerCase();
     const modelName = versionData?.configuration?.model;
+    const showDefaultApikeys = state.userDetailsReducer.userDetails.addDefaultApiKeys;
     return {
-      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
-      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.prompt || "",
+      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.['openai'],
+      prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
       shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
-      service: service   
+      service: service,
+      showDefaultApikeys
    };
   });
 
-  const [isVisible, setIsVisible] = useState((!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
+  const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys)? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
   const resetBorder = (ref, selector) => {
@@ -47,6 +50,11 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
   };
 
   useEffect(() => {
+    if(isEmbedUser && showDefaultApikeys)
+    {
+      setIsVisible(false);
+      return;
+    }
     const hasPrompt =( prompt !== ""||(!shouldPromptShow)||(promptTextAreaRef.current && promptTextAreaRef.current.querySelector('textarea').value.trim()!==""));
     const hasApiKey = !!bridgeApiKey;
      if(!shouldPromptShow){
@@ -71,10 +79,14 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
     } else {
       setIsVisible(true);
     }
-  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow,service]);
+  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef, shouldPromptShow,service, showDefaultApikeys]);
 
   const handleStart = () => {
-    
+    if(isEmbedUser && showDefaultApikeys)
+    {
+      setIsVisible(false);
+      return;
+    }
     if ((shouldPromptShow)&&(promptTextAreaRef.current &&prompt === ""&&promptTextAreaRef.current.querySelector('textarea').value.trim()==="") ){
       setShowError(true);
       setErrorType('prompt');
@@ -196,4 +208,4 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef }) =
   );
 };
 
-export default AgentSetupGuide;
+export default Protected(AgentSetupGuide);

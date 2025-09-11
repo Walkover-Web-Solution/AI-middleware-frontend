@@ -1,4 +1,5 @@
 'use client';
+import { getFromCookies } from '@/utils/utility';
 import { 
   Sparkles, 
   Zap, 
@@ -30,7 +31,7 @@ const Header = ({}) => {
           <div className="flex items-center gap-2 text-secondary font-medium">
             <Sparkles className="w-5 h-5 text-accent" />
             <span className="text-sm">
-              {localStorage.getItem('publicAgentProxyToken') ? 'Welcome back!' : 'Discover AI Agents'}
+              {getFromCookies('publicAgentProxyToken') ? 'Welcome back!' : 'Discover AI Agents'}
             </span>
           </div>
         </div>

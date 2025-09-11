@@ -37,7 +37,6 @@ export const deleteOrchetralFlowAction = ({data}) => async (dispatch) => {
   try {
     const response = await deleteOrchetralFlow(data);
     if (response.data) {
-      toast.success(response.message);
       dispatch(deleteOrchetralFlowReducer({id:data?._id, orgId:data?.orgId}))
     }
   } catch (error) {
