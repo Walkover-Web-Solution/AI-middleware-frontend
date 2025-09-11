@@ -6,7 +6,7 @@ import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReduce
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
-import { generateRandomID, getFromCookies, sendDataToParent, setInCookies, setInCookies, toBoolean } from '@/utils/utility';
+import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 
 const Layout = ({ children }) => {
