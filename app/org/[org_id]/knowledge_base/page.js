@@ -45,7 +45,7 @@ const Page = ({ params }) => {
     actualName: item?.name,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
-        {GetFileTypeIcon(item?.source?.data?.type, 14, 14)}
+        {GetFileTypeIcon(item?.source?.data?.type||item.source?.type, 14, 14)}
         </div>
       <div className="tooltip" data-tip={item.name}>
         {truncate(item.name, 30)}
@@ -154,7 +154,7 @@ const Page = ({ params }) => {
                     </ul>
                   </div>
                   <div className="flex flex-col items-center w-full gap-2">
-                    {GetFileTypeIcon(item?.type, 26, 26)}
+                    {GetFileTypeIcon(item?.source?.data?.type||item.source?.type, 26, 26)}
                     <div className="tooltip" data-tip={item?.name}>
                       <h3 className="text-lg font-medium max-w-[90%] w-full">
                         {truncate(String(item?.name), 10)}
