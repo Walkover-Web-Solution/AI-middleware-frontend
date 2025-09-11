@@ -265,7 +265,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
 
   useEffect(() => {
     const onFocus = async () => {
-      if (isValidOrg) {
+      if (isValidOrg && !isEmbedUser) {
         const orgId = getFromCookies("current_org_id");
         if (orgId !== resolvedParams?.org_id) {
           await switchOrg(resolvedParams?.org_id);
