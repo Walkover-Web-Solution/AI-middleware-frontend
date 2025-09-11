@@ -8,7 +8,6 @@ import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
 import { generateRandomID, getFromCookies, sendDataToParent, setInCookies, setInCookies, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { isPending } from '@/store/reducer/bridgeReducer';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -40,7 +39,6 @@ const Layout = ({ children }) => {
       bridgeType: 'api',
       type: 'chat',
     };
-    dispatch(isPending())
     dispatch(
       createBridgeAction({ dataToSend, orgid: orgId }, response => {
         if (response?.data?.bridge) {
