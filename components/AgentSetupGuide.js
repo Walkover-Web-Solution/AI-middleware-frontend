@@ -4,7 +4,7 @@ import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from './protected';
 
-const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, searchParams }) => {
+const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, searchParams, isEmbedUser}) => {
   const { bridgeApiKey, prompt,shouldPromptShow,service } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service;
