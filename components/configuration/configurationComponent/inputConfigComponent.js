@@ -11,6 +11,9 @@ import ToneDropdown from './toneDropdown';
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
+import PromptHelper from '../../PromptHelper';
+import { setIsFocusReducer } from '@/store/reducer/bridgeReducer';
+import Diff_Modal from '@/components/modals/Diff_Modal';
 
 const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
@@ -19,25 +22,46 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service || "",
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
     }));
+    const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
 
+    const [oldContent, setOldContent] = useState(reduxPrompt);
+    const [newContent, setNewContent] = useState('');
     const [keyName, setKeyName] = useState('');
     const suggestionListRef = useRef(null);
     const textareaRef = useRef(null);
     const [prompt, setPrompt] = useState(reduxPrompt);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
     const [messages, setMessages] = useState([]);
     const thread_id = useMemo(() => generateRandomID(), []);
     const dispatch = useDispatch();
+    const [isTextareaFocused, setIsTextareaFocused] = useState(false);
+   
+    useEffect(() => {
+        dispatch(setIsFocusReducer(isTextareaFocused));
+    }, [isTextareaFocused]);
 
+    useEffect(() => {
+      const timeoutId = setTimeout(() => {
+          const textareaElement = promptTextAreaRef?.current?.querySelector('textarea');
+          if (textareaElement&&isTextareaFocused) {
+              promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
+             
+          }
+      }, 100);
+      return () => clearTimeout(timeoutId);
+  }, [isTextareaFocused]);
     useEffect(() => {
         setPrompt(reduxPrompt);
+        setHasUnsavedChanges(false);
     }, [reduxPrompt]);
-
+    
     useEffect(() => {
         const handleBeforeUnload = (event) => {
-            if (prompt !== reduxPrompt) {
+            if (hasUnsavedChanges) {
                 event.preventDefault();
+                event.returnValue = '';
             }
         };
 
@@ -45,8 +69,18 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [prompt, reduxPrompt]);
+    }, [hasUnsavedChanges]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
   const savePrompt = useCallback((newPrompt) => {
     const newValue = (newPrompt || "").trim();
     setShowSuggestions(false);
@@ -110,6 +144,12 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
     const handlePromptChange = useCallback((e) => {
         const value = e.target.value;
         setPrompt(value);
+        
+        if (value.trim() !== reduxPrompt.trim()) {
+            setHasUnsavedChanges(true);
+        } else {
+            setHasUnsavedChanges(false);
+        }
 
         const cursorPos = e.target.selectionStart;
         const lastChar = value.slice(cursorPos - 1, cursorPos);
@@ -120,7 +160,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         } else {
             setShowSuggestions(false);
         }
-    }, []);
+    }, [reduxPrompt]);
 
     const handleKeyDown = useCallback((e) => {
         if (!suggestionListRef.current) return;
@@ -250,6 +290,30 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         );
     };
 
+    const handleTextareaFocus = useCallback(() => {
+    
+        setIsTextareaFocused(true);
+    }, []);
+
+    const handleCloseTextAreaFocus = useCallback((e) => {
+        setIsTextareaFocused(false);
+        setTimeout(() => {
+            window.closeTechDoc();
+        }, 150);
+    }, []);
+
+    const handleSavePrompt = useCallback(() => {
+        savePrompt(prompt);
+        setOldContent(prompt);
+        setNewContent('');
+        setHasUnsavedChanges(false);
+        handleCloseTextAreaFocus();
+    }, [prompt, savePrompt]);
+
+    const handleOpenDiffModal = () => {
+        openModal(MODAL_TYPE?.DIFF_PROMPT);
+    }
+
     if (service === "google" && serviceType === "chat") return null;
 
     return (
@@ -257,14 +321,14 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         <div className="flex justify-between items-center mb-2">
           <div className="label flex items-center gap-2">
             <span className="label-text capitalize font-medium">Prompt</span>
-            <div className="h-4 w-px bg-gray-300 mx-2"></div>
+            <div className="h-4 w-px bg-base-300 mx-2"></div>
             <div className="flex items-center justify-center">
               <button
                 onClick={() => {
                   openModal(MODAL_TYPE?.PROMPT_SUMMARY);
                 }}
               >
-                <InfoTooltip tooltipContent={"Prompt Summary is a brief description of the agent’s prompt and applies to all versions of the agent, not just one."}>
+                <InfoTooltip tooltipContent={"Prompt Summary is a brief description of the agent's prompt and applies to all versions of the agent, not just one."}>
                 <span className='label-text  capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
                 </InfoTooltip>
               </button>
@@ -272,39 +336,47 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
             </div>
           </div>
           <div className='flex gap-4'>
-             {/* <div
-              className="label cursor-pointer">
-
-            <Link
-              href={`/org/${params.org_id}/agents/testcase/${params.id}?version=${params.version}`}
-              target="_blank"
-              >
-              <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
-                Generate Test Case
-              </span>
-            </Link>
-                </div> */}
-            <div
-              className="label cursor-pointer"
-              onClick={() => openModal(MODAL_TYPE.OPTIMIZE_PROMPT)}
+           {isTextareaFocused&& <div
+              className="label cursor-pointer gap-2"
             >
-              <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
-                Prompt Builder
-              </span>
+              <button
+                className={`btn btn-sm ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
+                onClick={handleSavePrompt}
+                disabled={!hasUnsavedChanges||prompt.trim() === reduxPrompt.trim()}
+              >
+                Save
+              </button>
+              <button
+                className={`btn btn-sm`}
+                disabled={!isTextareaFocused}
+                onClick={handleCloseTextAreaFocus}
+              >
+                Close
+              </button>
+              {!isMobileView&&<button
+                className={`btn btn-sm`}
+                onClick={handleOpenDiffModal}
+              >
+                Diff
+              </button>}
             </div>
+           }
           </div>
         </div>
         <div className="form-control h-full">
           <textarea
             ref={textareaRef}
-            className="textarea border border-base-content/20 w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-low caret-base-content p-2 rounded-b-none"
+            className={`textarea border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none ${
+              isTextareaFocused 
+              ? "h-[calc(100vh-60px)] border-primary shadow-md" 
+              : "min-h-[80px]"
+            } transition-all duration-300 ease-in-out`}
             value={prompt}
             onChange={handlePromptChange}
-            onKeyDown={handleKeyDown}
-            onBlur={(e)=>savePrompt(e.target.value)}
+            onFocus={handleTextareaFocus}
           />
           {showSuggestions && renderSuggestions()}
-          <div className="collapse bg-gradient-to-r bg-base-200 border-t-0 border border-base-300 rounded-t-none">
+          <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none">
             <input type="checkbox" className="min-h-[0.75rem]" />
             <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
               <div className="flex items-center gap-2 ">
@@ -363,9 +435,27 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         <ToneDropdown params={params} searchParams={searchParams} />
         <ResponseStyleDropdown params={params} searchParams={searchParams} />
       </div>
-      <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} searchParams={searchParams} />
-      <OptimizePromptModal savePrompt={savePrompt} setPrompt={setPrompt} params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} />
+      <Diff_Modal oldContent={oldContent} newContent={newContent} />
+      {/* <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} searchParams={searchParams} /> */}
+      {/* <OptimizePromptModal savePrompt={savePrompt} setPrompt={setPrompt} params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} /> */}
       <PromptSummaryModal params={params} searchParams={searchParams} />
+      
+      {/* PromptHelper component that appears when textarea is focused */}
+      <PromptHelper 
+        isVisible={isTextareaFocused&&!isMobileView}
+        params={params}
+        onClose={handleCloseTextAreaFocus}
+        savePrompt={savePrompt}
+        setPrompt={setPrompt}
+        messages={messages}
+        setMessages={setMessages}
+        thread_id={thread_id}
+        prompt={prompt}
+        hasUnsavedChanges={hasUnsavedChanges}
+        setHasUnsavedChanges={setHasUnsavedChanges}
+        setNewContent={setNewContent}
+
+      />
     </div>
   );
 };

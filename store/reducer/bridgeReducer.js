@@ -7,6 +7,7 @@ const initialState = {
   apikeys: {},
   apikeysBackup: {},
   loading: false,
+  isFocus: false,
 };
 
 export const bridgeReducer = createSlice({
@@ -23,7 +24,9 @@ export const bridgeReducer = createSlice({
       const { response } = action.payload;
       state.allBridgesMap[response.bridge_id] = { ...state.allBridgesMap[response.bridge_id], ...response };
     },
-
+    setIsFocusReducer: (state, action) => {
+      state.isFocus = action.payload;
+    },
     // new format
     fetchSingleBridgeReducer: (state, action) => {
       const { bridge } = action.payload;
@@ -327,6 +330,7 @@ export const {
   webhookURLForBatchAPIReducer,
   getPrebuiltToolsReducer, 
   updateAllBridgeReducerAgentVariable,
+  setIsFocusReducer,
   apikeyRollBackReducer,
   backupApiKeysReducer
 } = bridgeReducer.actions;
