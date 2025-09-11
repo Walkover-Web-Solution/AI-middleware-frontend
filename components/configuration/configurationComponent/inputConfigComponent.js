@@ -39,7 +39,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
     const [isTextareaFocused, setIsTextareaFocused] = useState(false);
    
     useEffect(() => {
-      console.log(isTextareaFocused);
         dispatch(setIsFocusReducer(isTextareaFocused));
     }, [isTextareaFocused]);
 
@@ -74,7 +73,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
 
   useEffect(() => {
     const handleResize = () => {
-      console.log(window.innerWidth,"window.innerWidth")
       setIsMobileView(window.innerWidth < 768);
     };
     handleResize();

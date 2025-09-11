@@ -47,7 +47,6 @@ const PromptHelper = ({
       const result = typeof response === 'string' ? JSON.parse(response) : response?.data ?? response;
       
       // Store the optimized prompt
-      console.log(result.updated,"result.updated");
       if (result?.updated) {
         setOptimizedPrompt(result.updated);
         dispatch(optimizePromptReducer({ bridgeId: promptParams.id, prompt: result.updated }));
