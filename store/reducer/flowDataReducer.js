@@ -3,7 +3,8 @@ const { createSlice } = require("@reduxjs/toolkit");
 const initialState={
     flowData:{
         tutorialData:[],
-        apiKeyGuideData:[]
+        apiKeyGuideData:[],
+        guardrailsTemplatesData:[]
     }
 }
 const flowDataReducer=createSlice({
@@ -15,9 +16,12 @@ const flowDataReducer=createSlice({
           },
           getApiKeyGuideData:(state,action)=>{
               state.flowData.apiKeyGuideData=action.payload;
+          },
+          getGuardrailsTemplatesData:(state,action)=>{
+              state.flowData.guardrailsTemplatesData=action.payload;
           }
     }
 });
-export const{ getTutorialData, getApiKeyGuideData} =flowDataReducer.actions;
+export const{ getTutorialData, getApiKeyGuideData, getGuardrailsTemplatesData} =flowDataReducer.actions;
 export default flowDataReducer.reducer;
 
