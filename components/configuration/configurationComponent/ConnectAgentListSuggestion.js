@@ -18,7 +18,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
     const renderBridgeSuggestions = useMemo(() => (
         Object.values(bridges)
             .filter(bridge => {
-                const isActive = bridge?.status === 1&&(bridge?.bridge_status===1||bridge?.bridge_status=== undefined);
+                const isActive = bridge?.status === 1 && (bridge?.bridge_status ? bridge?.bridge_status === 1 : true);
                 const matchesSearch = bridge?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase());
                 const isNotConnected = connect_agents && Object.keys(connect_agents).some(agentName => agentName === bridge?.name);
                 const notSameBridge = bridge?._id !== params?.id
@@ -57,10 +57,10 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
     return (
         <div className="dropdown dropdown-right">
             <div className="flex flex-col  gap-2">
-                {Object.keys(connect_agents).length=== 0 &&(
-                <InfoTooltip tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
-                    <p className=" label-text info">Agents Configuration </p>
-                </InfoTooltip>
+                {Object.keys(connect_agents).length === 0 && (
+                    <InfoTooltip tooltipContent={"To handle different or complex tasks, one agent can use other agents."}>
+                        <p className=" label-text info">Agents Configuration </p>
+                    </InfoTooltip>
                 )}
                 <div className='flex items-center gap-2'>
                     <button tabIndex={0}
