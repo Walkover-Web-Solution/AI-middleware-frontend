@@ -26,7 +26,6 @@ export const getGuardrailsTemplatesAction = () => {
   return async (dispatch) => {
     try {
       const data = await getGuardrailsTemplates();
-      console.log(data.data,"data");
       dispatch(getGuardrailsTemplatesData(data?.data?.SafetyChecksFunction));
     } catch (error) {
       console.error("Failed to fetch tutorial data:", error);
