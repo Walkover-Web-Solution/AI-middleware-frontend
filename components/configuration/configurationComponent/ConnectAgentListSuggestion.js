@@ -18,7 +18,8 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
     const renderBridgeSuggestions = useMemo(() => (
         Object.values(bridges)
             .filter(bridge => {
-                const isActive = bridge?.status === 1 && bridge?.bridge_status === 1;
+                const isActive = bridge?.status === 1&&(bridge?.bridge_status===1||bridge?.bridge_status=== undefined);
+                console.log(bridge?.status,bridge?.bridge_status,bridge?.name)
                 const matchesSearch = bridge?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase());
                 const isNotConnected = connect_agents && Object.keys(connect_agents).some(agentName => agentName === bridge?.name);
                 const notSameBridge = bridge?._id !== params?.id
