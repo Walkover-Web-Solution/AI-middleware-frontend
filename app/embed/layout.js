@@ -6,7 +6,7 @@ import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReduce
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
-import { generateRandomID, getFromCookies, sendDataToParent, setInCookies, toBoolean } from '@/utils/utility';
+import { generateRandomID, getFromCookies, sendDataToParent, setInCookies, setInCookies, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { isPending } from '@/store/reducer/bridgeReducer';
 
@@ -129,7 +129,7 @@ const Layout = ({ children }) => {
         if (urlParamsObj.config) {
           Object.entries(urlParamsObj.config).forEach(([key, value]) => {
             if (value !== undefined) {
-              dispatch(updateUserDetialsForEmbedUser({ [key]: toBoolean(value) }));
+             key === "apikey_object_id" ? dispatch(updateUserDetialsForEmbedUser({ [key]: value })) : dispatch(updateUserDetialsForEmbedUser({ [key]: toBoolean(value)}));
             }
           });
         }
