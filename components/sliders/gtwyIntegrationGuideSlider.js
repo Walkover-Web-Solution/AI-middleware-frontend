@@ -105,6 +105,17 @@ const CONFIG_SCHEMA = [
     defaultValue: false,
     section: "Display Settings",
   },
+  {
+    key: "configureGtwyRedirection",
+    type: 'select',
+    label: "Configure Gtwy Redirection",
+    defaultValue: "agent_list",
+    options: [
+      { value: "agent_list", label: "Agent Page" },
+      { value: "orchestral_page", label: "Orchestral Page" },
+    ],
+    section: "Display Settings",
+  } 
 ];
 
 // ---------------------------------------------

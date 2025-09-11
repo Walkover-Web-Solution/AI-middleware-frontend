@@ -26,7 +26,7 @@ import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataActi
 import { userDetails } from "@/store/action/userDetailsAction";
 import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
-function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
+function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
   const urlParams = useParams()
@@ -39,7 +39,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
   const resolvedParams = use(params);
   const resolvedSearchParams = useSearchParams();
 
-  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES } = useCustomSelector((state) => ({
+  const { embedToken, alertingEmbedToken, versionData, organizations, preTools, currentUser, SERVICES, doctstar_embed_token } = useCustomSelector((state) => ({
     embedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.embed_token,
     alertingEmbedToken: state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.alerting_embed_token,
     versionData: state?.bridgeReducer?.bridgeVersionMapping?.[path[5]]?.[resolvedSearchParams?.get('version')]?.apiCalls || {},
@@ -49,7 +49,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
     currentUser: state.userDetailsReducer.userDetails,
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
   }));
-
   useEffect(() => {
     if (pathName.endsWith("agents") && !isEmbedUser) {
       dispatch(getTutorialDataAction()); 
@@ -231,6 +230,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
   const scriptId = "chatbot-main-script";
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
 
+
   useEffect(() => {
     if (isValidOrg) {
       const updateScript = (token) => {
@@ -267,7 +267,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
 
   useEffect(() => {
     const onFocus = async () => {
-      if (isValidOrg) {
+      if (isValidOrg && !isEmbedUser) {
         const orgId = getFromCookies("current_org_id");
         if (orgId !== resolvedParams?.org_id) {
           await switchOrg(resolvedParams?.org_id);
@@ -300,22 +300,22 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
   //   });
   // }, [resolvedParams.org_id]);
 
-  // const docstarScriptId = "docstar-main-script";
-  // const docstarScriptSrc = "https://app.docstar.io/scriptProd.js";
+  const docstarScriptId = "docstar-main-script";
+  const docstarScriptSrc = "https://techdoc.walkover.in/scriptProd.js";
 
-  // useEffect(() => {
-  //   const existingScript = document.getElementById(docstarScriptId);
-  //   if (existingScript) {
-  //     document.head.removeChild(existingScript);
-  //   }
-  //   if (doctstar_embed_token) {
-  //     const script = document.createElement("script");
-  //     script.setAttribute("embedToken", doctstar_embed_token);
-  //     script.id = docstarScriptId;
-  //     script.src = docstarScriptSrc;
-  //     document.head.appendChild(script);
-  //   }
-  // }, [doctstar_embed_token]);
+  useEffect(() => {
+    const existingScript = document.getElementById(docstarScriptId);
+    if (existingScript) {
+      document.head.removeChild(existingScript);
+    }
+    if (doctstar_embed_token) {
+      const script = document.createElement("script");
+      script.setAttribute("embedToken", doctstar_embed_token);
+      script.id = docstarScriptId;
+      script.src = docstarScriptSrc;
+      document.head.appendChild(script);
+    }
+  }, [doctstar_embed_token]);
 
   useEffect(() => {
     if (isValidOrg) {
@@ -419,12 +419,12 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
           <div className={`flex-1 ${path.length > 4 ? 'ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             {/* Sticky Navbar */}
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              <Navbar resolvedParams={resolvedParams} />
+              {!isFocus && <Navbar resolvedParams={resolvedParams} />}
             </div>
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
-              <main className={`px-2 h-full ${path.length > 4 && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+              <main className={`px-2 h-full ${path.length > 4&& !isFocus && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
             </div>
           </div>
         </div>
@@ -460,7 +460,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
                   <LoadingSpinner />
                 </div>
               ) : (
-                <main className={`px-2 h-full ${path.length > 4 && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
+                <main className={`px-2 h-full ${path.length > 4 && !isFocus && !pathName.includes('orchestratal_model') ? 'max-h-[calc(100vh-4rem)]' : ''} ${!pathName.includes('history') ? 'overflow-y-auto' : 'overflow-y-hidden'}`}>{children}</main>
               )}
             </div>
           </div>

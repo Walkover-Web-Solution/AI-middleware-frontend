@@ -39,7 +39,8 @@ const Page = () => {
 
   const [selectedApiKey, setSelectedApiKey] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
+  const [selectedDataToDelete, setselectedDataToDelete] = useState(null)
+  const selectedService = apikeyData?.find(item => item._id === selectedApiKey?._id)?.service;
   const handleUpdateClick = useCallback((item) => {
     setSelectedApiKey(item);
     setIsEditing(true);
@@ -142,7 +143,7 @@ const Page = () => {
           />
         </div>
       ))}
-      <ApiKeyModal orgId={orgId} isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} />
+      <ApiKeyModal orgId={orgId} isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} selectedService={selectedService} />
       
       <ApiKeyGuideSlider/>
       <DeleteModal onConfirm={deleteApikey} item={selectedDataToDelete} title="Delete API Key" description={`Are you sure you want to delete the API key "${selectedDataToDelete?.name}"? This action cannot be undone.`}
