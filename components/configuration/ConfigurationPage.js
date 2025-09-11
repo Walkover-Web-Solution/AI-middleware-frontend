@@ -35,13 +35,14 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
 
-    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType } = useCustomSelector((state) => ({
+    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType, showDefaultApikeys} = useCustomSelector((state) => ({
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type?.toLowerCase(),
         reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt,
         modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
         showGuide: state.userDetailsReducer.userDetails.showGuide,
         showConfigType: state.userDetailsReducer.userDetails.showConfigType,
+        showDefaultApikeys: state.userDetailsReducer.userDetails.addDefaultApiKeys,
     }));
     useEffect(() => {
         if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
@@ -106,7 +107,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
 
             <ServiceDropdown params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} />
             <ModelDropdown params={params} searchParams={searchParams}/>
-            <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams}/>
+            {((isEmbedUser && !showDefaultApikeys) || (!isEmbedUser)) && <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams}/>}
             <AdvancedParameters params={params} searchParams={searchParams}/>
             
             {modelType !== "image" && modelType !== 'embedding' && (
