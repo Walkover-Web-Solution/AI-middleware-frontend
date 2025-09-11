@@ -1061,6 +1061,15 @@ export const getApiKeyGuide =async ()=>{
     throw new Error(error);
   }
 }
+export const getGuardrailsTemplates=async()=>{
+  try {
+    const response=await axios.get("https://flow.sokt.io/func/scriKh8LMVKV");
+    return response;
+  }
+  catch(error){
+    throw new Error(error);
+  }
+}
 export const createIntegrationApi = async (data) => {
   try {
     const response = await axios.post(`${URL}/gtwyEmbed/`, data);
