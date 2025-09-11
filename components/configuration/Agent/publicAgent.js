@@ -1,5 +1,6 @@
 'use client'
 import LoginButton from '@/components/common/LoginButton';
+import { getFromCookies } from '@/utils/utility';
 import { Bot, Search, ArrowRight, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -23,7 +24,7 @@ const PublicAgent = ({ agents, searchTerm, setSearchTerm}) => {
                     <h2 className="text-xl font-bold text-slate-900 ml-2">Public Agents</h2>
                 </div>
                 <div className="flex items-center justify-between mb-8">
-                {typeof window !== 'undefined' && !localStorage.getItem('publicAgentProxyToken') && (
+                {typeof window !== 'undefined' && !getFromCookies('publicAgentProxyToken') && (
                     <LoginButton className="btn btn-primary btn-sm">
                         Sign In
                     </LoginButton>

@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
-function BridgeNameInput({ params, isEmbedUser }) {
+function BridgeNameInput({ params, searchParams, isEmbedUser }) {
   const dispatch = useDispatch();
   const { bridgeName } = useCustomSelector((state) => ({
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
@@ -17,7 +17,7 @@ function BridgeNameInput({ params, isEmbedUser }) {
   const resizeTextarea = () => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = "auto";
+      textarea.style.height = "25px";
       textarea.style.height = textarea.scrollHeight + "px";
     }
   };

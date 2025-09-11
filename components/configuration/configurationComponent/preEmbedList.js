@@ -9,13 +9,13 @@ import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const PreEmbedList = ({ params }) => {
+const PreEmbedList = ({ params, searchParams }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
     const [preFunctionId, setPreFunctionId] = useState(null);
     const [preFunctionName, setPreFunctionName] = useState(null);
     const [preToolData, setPreToolData] = useState(null);
     const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken } = useCustomSelector((state) => {
-        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
@@ -45,14 +45,14 @@ const PreEmbedList = ({ params }) => {
     const onFunctionSelect = (id) => {
         dispatch(updateApiAction(params.id, {
             pre_tools: [id],
-            version_id: params.version
+            version_id: searchParams?.version
         }))
     }
 
     const removePreFunction = () => {
         dispatch(updateApiAction(params.id, {
             pre_tools: [],
-            version_id: params.version
+            version_id: searchParams?.version
         }))
     }
     const handleSavePreFunctionData = () => {
@@ -73,7 +73,6 @@ const PreEmbedList = ({ params }) => {
             <FunctionParameterModal
                 name="Pre Tool"
                 functionId={preFunctionId}
-                params={params}
                 Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL}
                 embedToken={embedToken}
                 handleRemove={removePreFunction}
@@ -109,6 +108,7 @@ const PreEmbedList = ({ params }) => {
             <div className='flex'>
                 <EmbedListSuggestionDropdownMenu
                     params={params}
+                    searchParams={searchParams}
                     name={"preFunction"}
                     hideCreateFunction={false}
                     onSelect={onFunctionSelect}

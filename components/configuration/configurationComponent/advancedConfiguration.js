@@ -7,7 +7,7 @@ import ResponseFormatSelector from './responseFormatSelector';
 import InfoTooltip from '@/components/InfoTooltip';
 import ToolCallCount from './toolCallCount';
 
-const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
+const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [showApiKeysToggle, setShowApiKeysToggle] = useState(false);
   const [selectedApiKeys, setSelectedApiKeys] = useState({});
@@ -18,7 +18,7 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
   const dispatch = useDispatch();
 
   const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration } = useCustomSelector((state) => {
-    const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version] || {};
+    const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
     const apikeys = state?.bridgeReducer?.apikeys || {};
     const user = state.userDetailsReducer.userDetails;
 
@@ -53,12 +53,12 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
       const updated = { ...prev, [service]: apiKeyId };
       dispatch(updateBridgeVersionAction({
         bridgeId: params?.id,
-        versionId: params?.version,
+        versionId: searchParams?.version,
         dataToSend: { apikey_object_id: updated }
       }));
       return updated;
     });
-  }, [dispatch, params?.id, params?.version]);
+  }, [dispatch, params?.id, searchParams?.version]);
 
   const toggleApiKeys = () => {
     setShowApiKeysToggle(prev => !prev);
@@ -97,7 +97,7 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
       <div className={`w-full gap-4 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'} transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
         {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && (
           <div className="form-control w-full mt-2 border border-base-content/20 rounded-lg p-2">
-            <ResponseFormatSelector params={params} />
+            <ResponseFormatSelector params={params} searchParams={searchParams}/>
           </div>
         )}
         {/* Multiple API Keys Section */}
@@ -111,7 +111,7 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
           <div className="w-full">
             <div className="relative">
               <div
-                className={`flex items-center gap-2 input input-bordered input-sm w-full border-base-content/20 min-h-[2.5rem] cursor-pointer ${showApiKeysToggle ? 'rounded-x-md rounded-b-none rounded-t-md' : 'rounded-md'}`}
+                className={`flex items-center gap-2 input input-sm w-full border-base-content/20 min-h-[2.5rem] cursor-pointer ${showApiKeysToggle ? 'rounded-x-md rounded-b-none rounded-t-md' : 'rounded-md'}`}
                 onClick={toggleApiKeys}
               >
                 <span className="text-base-content">
@@ -164,7 +164,7 @@ const AdvancedConfiguration = ({ params, bridgeType, modelType }) => {
             </div>
           </div>
         </div>
-      <ToolCallCount params={params} />
+      <ToolCallCount params={params} searchParams={searchParams}/>
       </div>
     </div>
   );

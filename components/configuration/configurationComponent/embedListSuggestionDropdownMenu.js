@@ -8,7 +8,7 @@ import { InfoIcon, AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import InfoTooltip from '@/components/InfoTooltip';
 
-function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
+function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
      const [tutorialState, setTutorialState] = useState({
         showTutorial: false,
         showSuggestion: false
@@ -80,7 +80,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 )
             }
             )
-    ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, params.version]);
+    ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, searchParams?.version]);
     return (
         <div className="dropdown dropdown-right">
             <div className="flex items-end gap-2">

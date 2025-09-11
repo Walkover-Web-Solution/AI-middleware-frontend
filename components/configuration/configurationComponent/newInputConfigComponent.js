@@ -39,7 +39,7 @@ const NewInputConfigComponent = ({ params }) => {
                 page_id: params.version,
                 content: prompt,
             });
-            window.openTechDoc();
+            // window.openTechDoc();
         } else {
             console.warn('sendDataToDocstar is not defined yet.');
         }
@@ -47,7 +47,7 @@ const NewInputConfigComponent = ({ params }) => {
     useEffect(() => {
         setTimeout(() => {
             handleScriptLoad();
-        }, 2000);
+        }, 100);
     }, [prompt, params]);
 
     useEffect(() => {

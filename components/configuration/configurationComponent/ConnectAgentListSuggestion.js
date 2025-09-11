@@ -18,7 +18,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
     const renderBridgeSuggestions = useMemo(() => (
         Object.values(bridges)
             .filter(bridge => {
-                const isActive = bridge?.status === 1 || bridge?.bridge_status === 0;
+                const isActive = bridge?.status === 1 && bridge?.bridge_status === 1;
                 const matchesSearch = bridge?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase());
                 const isNotConnected = connect_agents && Object.keys(connect_agents).some(agentName => agentName === bridge?.name);
                 const notSameBridge = bridge?._id !== params?.id
@@ -32,7 +32,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
             })
             .map((bridge) => {
                 return (
-                    <li key={bridge?.id} onClick={() => bridge?.published_version_id ? handleItemClick(bridge) : null}>
+                    <li key={bridge?._id} onClick={() => bridge?.published_version_id ? handleItemClick(bridge) : null}>
                         <div className={`flex justify-between items-center w-full ${!bridge?.published_version_id ? 'opacity-50' : ''}`}>
                             <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
                                 {bridge?.name || 'Untitled'}
@@ -43,8 +43,8 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
                                         unpublished
                                     </span>
                                 ) : (
-                                    <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(bridge?.bridge_status === 1 ? "paused" : bridge?.status === 0 ? "archived" : "active")}`}>
-                                        {bridge?.bridge_status ? (bridge?.bridge_status === 1 && "paused") : (bridge?.status === 0 ? "archived" : "active")}
+                                    <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(bridge?.bridge_status === 0 ? "paused" : bridge?.status === 0 ? "archived" : "active")}`}>
+                                        {bridge?.bridge_status ? (bridge?.bridge_status === 0 && "paused") : (bridge?.status === 0 ? "archived" : "active")}
                                     </span>
                                 )}
                             </div>
