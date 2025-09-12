@@ -48,7 +48,7 @@ const Page = ({params, searchParams }) => {
   // Enhanced responsive detection
   useEffect(() => {
     const handleResize = () => {
-      const desktop = window.innerWidth >= 1024;
+      const desktop = window.innerWidth >= 1080;
       setIsDesktop(desktop);
       if (!desktop) {
         setLeftWidth(50); // Reset on mobile
@@ -191,7 +191,7 @@ const Page = ({params, searchParams }) => {
   return (
     <div 
       ref={containerRef} // Add ref to the main container
-      className={`w-full h-full ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : ''} ${isDesktop||isFocus ? 'flex flex-row overflow-y-hidden' : 'overflow-y-auto'}`}
+      className={`w-full h-full ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : ''} ${isDesktop ? 'flex flex-row overflow-y-hidden' :isFocus ? 'overflow-y-hidden' : 'overflow-y-auto'}`}
     >
       {/* Configuration Panel */}
       <div 
