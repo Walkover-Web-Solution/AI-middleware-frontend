@@ -14,14 +14,13 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     const modelName = versionData?.configuration?.model;
     const showDefaultApikeys = state.userDetailsReducer.userDetails.addDefaultApiKeys;
     return {
-      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.['openai'],
+      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service],
       prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
       shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
       service: service,
       showDefaultApikeys
    };
   });
-
   const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys)? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');
