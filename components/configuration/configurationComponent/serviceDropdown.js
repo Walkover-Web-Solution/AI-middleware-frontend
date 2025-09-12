@@ -1,6 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { InfoIcon, ChevronDownIcon } from "@/components/Icons";
+import { InfoIcon } from "@/components/Icons";
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
@@ -183,7 +183,6 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
                         {selectedService && getIconOfService(selectedService, 20, 20)}
                         <span>{selectedService ? getServiceDisplayName(selectedService) : 'Select a Service'}</span>
                     </div>
-                    <ChevronDownIcon size={16} className={`transition-transform duration-200 ${dropdownOpen ? 'transform rotate-180' : ''}`} />
                 </div>
                 
                 {dropdownOpen && (
