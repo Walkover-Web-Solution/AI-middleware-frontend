@@ -46,7 +46,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbe
       const timeoutId = setTimeout(() => {
           const textareaElement = promptTextAreaRef?.current?.querySelector('textarea');
           if (textareaElement && isPromptHelperOpen) {
-              prompt.current.scrollIntoView({ behavior: 'smooth' });
+              promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
              
           }
       }, 100);
