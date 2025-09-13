@@ -38,22 +38,16 @@ const UserReferenceForRichText = ({ params, searchParams }) => {
     return (
         <div>
             <div className='flex flex-col gap-1 w-fit bg-base-100 text-base-content'>
-                {isRichText && (
-                    <div className="max-w-[30rem] bg-base-200 border border-warning rounded-md px-2 py-1">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1">
-                                <AlertIcon size={12} className="text-warning flex-shrink-0" />
-                                <span className="text-xs text-base-content/80 leading-tight">
-                                When Rich Text is enabled, responses will be returned in Markdown format, overriding the current response format
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                
                 
                 <div className='flex flex-row justify-between items-center w-full'>
                     <div className='flex flex-row items-center justify-center gap-1'>
                         <div className="label">
+                            {isRichText && (
+                                <InfoTooltip tooltipContent={"When Rich Text is enabled, responses will be returned in Markdown format, overriding the current response format."}>
+                                    <AlertIcon size={14} className="text-warning flex-shrink-0 mr-2" />
+                                </InfoTooltip>
+                            )}
                             <InfoTooltip tooltipContent={"Rich text supports buttons, tables, cards, and markdown for displaying structured and interactive content."}>
                                 <span className="font-medium text-nowrap info">Rich Text Supported</span>
                             </InfoTooltip>
