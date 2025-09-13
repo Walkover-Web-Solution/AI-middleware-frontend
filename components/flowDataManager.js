@@ -213,9 +213,7 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
       master_agent:
         masterNode?.id ||
         masterNode?.data?.selectedAgent?.id ||
-        masterNode?.data?.selectedAgent?.bridge_id ||
-        masterNode?.data?.selectedAgent?.name ||
-        Object.keys(agents)[0],
+        masterNode?.data?.selectedAgent?.bridge_id || "",
       status: metadata.status || 'draft',
       flow_name: metadata.name || 'Untitled Flow',
       flow_description: metadata.description || '',

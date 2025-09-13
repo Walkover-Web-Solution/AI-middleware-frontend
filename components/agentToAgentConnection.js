@@ -181,7 +181,7 @@ function AgentNode({ id, data }) {
           </button>
 
           <div
-            className={`relative border-2 rounded-full shadow-xl hover:shadow-2xl p-6 z-20 transition-all duration-300 hover:scale-105 group-hover:shadow-blue-100 cursor-pointer ${isMasterAgent
+            className={`relative border-2 rounded-full shadow-xl hover:shadow-2xl p-6 z-20 transition-all duration-300 group-hover:shadow-blue-100 cursor-pointer ${isMasterAgent
                 ? 'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-400 hover:border-amber-500'
                 : 'bg-gradient-to-br from-white to-slate-50 border-slate-300 hover:border-blue-400'
               }`}
@@ -441,7 +441,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
             status: existingData.status || 'draft',
             data: currentFlowData,
             org_id: params.org_id,
-            master_agent: currentFlowData.master_agent,
+            master_agent: typeof(currentFlowData.master_agent) === 'string' ? currentFlowData.master_agent : "",
             master_agent_name: name || 'Flow',
           };
 
