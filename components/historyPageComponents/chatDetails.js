@@ -92,7 +92,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
         <aside className="flex flex-col h-screen overflow-y-auto">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 tracking-tight">
+              <h2 className="text-2xl font-bold text-base-content tracking-tight">
                 Chat Details
               </h2>
               <button 
@@ -122,7 +122,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                     return (
                       <div 
                         key={key} 
-                        className={`border-b bg-base-100 transition-colors duration-150 ${
+                        className={`border-b border-base-300 bg-base-100 transition-colors duration-150 ${
                           selectedItem?.value === key ? 'ring-2 ring-green-500 ring-opacity-75 shadow-lg rounded-md' : ''
                         }`}
                       >
@@ -151,7 +151,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                               )}
                             </div>
                           ) : (
-                            <span className="text-gray-600 break-words">
+                            <span className="text-base-content break-words">
                               <div dangerouslySetInnerHTML={{ __html: displayValue?.toString() }}></div>
                             </span>
                           )}
@@ -161,7 +161,7 @@ const ChatDetails = ({ selectedItem, setIsSliderOpen, isSliderOpen, params }) =>
                   })}
 
                   <div className="bg-base-200">
-                    <div className="py-2 px-6 text-sm font-semibold text-gray-500">
+                    <div className="py-2 px-6 text-sm font-semibold text-base-content border-b border-base-300">
                       Optional Details
                     </div>
                   </div>

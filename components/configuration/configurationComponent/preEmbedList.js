@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateApiAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
+import { updateApiAction, updateBridgeVersionAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
 import { getStatusClass, openModal } from '@/utils/utility';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -8,14 +8,16 @@ import FunctionParameterModal from './functionParameterModal';
 import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import InfoTooltip from '@/components/InfoTooltip';
+import { isEqual } from 'lodash';
 
-const PreEmbedList = ({ params }) => {
+const PreEmbedList = ({ params, searchParams }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
     const [preFunctionId, setPreFunctionId] = useState(null);
     const [preFunctionName, setPreFunctionName] = useState(null);
     const [preToolData, setPreToolData] = useState(null);
-    const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken } = useCustomSelector((state) => {
-        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+    const [variablesPath, setVariablesPath] = useState({});
+    const { integrationData, function_data, bridge_pre_tools, shouldToolsShow, model, embedToken, variables_path } = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const orgData = state?.bridgeReducer?.org?.[params?.org_id];
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
@@ -30,6 +32,7 @@ const PreEmbedList = ({ params }) => {
             service: serviceName,
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             embedToken: orgData?.embed_token,
+            variables_path: versionData?.variables_path || {},
         };
     });
     const dispatch = useDispatch();
@@ -39,20 +42,21 @@ const PreEmbedList = ({ params }) => {
         setPreFunctionName(function_data?.[functionId]?.function_name || function_data?.[functionId]?.endpoint);
         setPreToolData(function_data?.[functionId]);
         setPreFunctionData(function_data?.[functionId]);
+        setVariablesPath(variables_path[preFunctionName] || {});
         openModal(MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL)
     }
 
     const onFunctionSelect = (id) => {
         dispatch(updateApiAction(params.id, {
             pre_tools: [id],
-            version_id: params.version
+            version_id: searchParams?.version
         }))
     }
 
     const removePreFunction = () => {
         dispatch(updateApiAction(params.id, {
             pre_tools: [],
-            version_id: params.version
+            version_id: searchParams?.version
         }))
     }
     const handleSavePreFunctionData = () => {
@@ -66,6 +70,15 @@ const PreEmbedList = ({ params }) => {
             );
             setPreToolData("");
         }
+        if (!isEqual(variablesPath, variables_path[preFunctionName])) {
+            dispatch(
+                updateBridgeVersionAction({
+                    bridgeId: params.id,
+                    versionId: searchParams?.version,
+                    dataToSend: { variables_path: { [preFunctionName]: variablesPath } },
+                })
+            );
+        }
     };
 
     return (bridge_pre_tools?.length > 0 ?
@@ -73,7 +86,6 @@ const PreEmbedList = ({ params }) => {
             <FunctionParameterModal
                 name="Pre Tool"
                 functionId={preFunctionId}
-                params={params}
                 Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL}
                 embedToken={embedToken}
                 handleRemove={removePreFunction}
@@ -82,6 +94,9 @@ const PreEmbedList = ({ params }) => {
                 setToolData={setPreToolData}
                 function_details={preFunctionData}
                 functionName={preFunctionName}
+                variablesPath={variablesPath}
+                setVariablesPath={setVariablesPath}
+                variables_path={variables_path}
             />
             <div className="form-control inline-block">
                 <div className='flex gap-5 items-center ml-2 '>
@@ -109,6 +124,7 @@ const PreEmbedList = ({ params }) => {
             <div className='flex'>
                 <EmbedListSuggestionDropdownMenu
                     params={params}
+                    searchParams={searchParams}
                     name={"preFunction"}
                     hideCreateFunction={false}
                     onSelect={onFunctionSelect}

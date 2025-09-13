@@ -92,15 +92,10 @@ const AgentCard = ({ agent }) => (
     >
         <div className="flex items-center gap-2 mb-2">
             <BotIcon className="text-primary" />
-            <h4 className="font-semibold text-base-content">{agent.name}</h4>
+            <h4 className="font-semibold text-base-content">{agent.name} <span className="inline text-xs font-mono bg-base-300 p-1 rounded w-fit">{agent.bridgeId}</span></h4>
         </div>
         <div className="grid grid-cols-1 gap-2 text-sm text-base-content/80">
-            <div>
-                <span className="font-medium">Bridge ID:</span>
-                <span className="text-xs font-mono bg-base-300 p-1 rounded ml-1">
-                    {agent.bridgeId}
-                </span>
-            </div>
+            
 
             {agent.versions?.length > 0 && (
                 <div className="flex flex-row gap-2 mt-2">

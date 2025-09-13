@@ -16,10 +16,12 @@ import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import DeleteModal from '@/components/UI/DeleteModal'
 import SearchItems from '@/components/UI/SearchItems'
+import { use } from 'react';
 
 export const runtime = 'edge';
 
 function Page({ params }) {
+  const resolvedParams = use(params);
   const dispatch = useDispatch();
   const { authData, isFirstPauthCreation, } = useCustomSelector((state) => {
     const user = state.userDetailsReducer.userDetails || [];
@@ -114,7 +116,7 @@ const maskAuthKey = (authkey) => {
         <div
           className="tooltip tooltip-primary"
           onClick={() => copyToClipboard(row["originalAuthkey"])}
-          data-tip="copy auth key"
+          data-tip="copy"
         >
           <CopyIcon size={16} />
         </div>
@@ -136,7 +138,7 @@ const maskAuthKey = (authkey) => {
           <OnBoarding
             setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
             video={ONBOARDING_VIDEOS.PauthKey}
-            params={params}
+            params={resolvedParams}
             flagKey="PauthKey"
           />
         )}
@@ -145,10 +147,10 @@ const maskAuthKey = (authkey) => {
             <PageHeader
               title="PauthKey"
               description="A unique key used to validate API requests for sending and receiving messages securely."
-              docLink="https://blog.gtwy.ai/features/pauthkey"
+              docLink="https://gtwy.ai/blogs/features/pauthkey"
             />
             <div className="flex-shrink-0 mt-4 sm:mt-0">
-              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ create new Pauth key</button>
+              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New Pauth Key</button>
             </div>
           </div>
         </MainLayout>

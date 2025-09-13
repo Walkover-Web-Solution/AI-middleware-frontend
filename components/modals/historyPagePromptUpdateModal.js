@@ -5,7 +5,7 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 import Modal from '../UI/Modal'
 
-const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, onSave }) => {
+const HistoryPagePromptUpdateModal = ({searchParams, previousPrompt, promotToUpdate, onSave }) => {
   const dispatch  = useDispatch();
 
   const handleClose = () => {
@@ -16,14 +16,14 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
     e.preventDefault()
     const newValue = promotToUpdate?.trim() || "";
     if (newValue !== previousPrompt) {
-        dispatch(updateBridgeVersionAction({ versionId: params.version, dataToSend: { configuration: { prompt: newValue } } }));
+        dispatch(updateBridgeVersionAction({ versionId: searchParams?.version, dataToSend: { configuration: { prompt: newValue } } }));
     }
     handleClose()
   }
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.HISTORY_PAGE_PROMPT_UPDATE_MODAL}>
-      <div className="modal-box w-11/12 max-w-7xl bg-white">
+      <div className="modal-box w-11/12 max-w-7xl bg-base-100">
         <h3 className="font-bold text-lg mb-4">Update Prompt</h3>
         <div className='flex gap-3 w-full'>
           <div className='w-full'>
@@ -31,8 +31,9 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
               <span className="label-text">Previous Prompt</span>
             </div>
             <textarea
-              className="textarea textarea-bordered border w-full min-h-96 focus:border-primary caret-black p-2"
-              value={previousPrompt}
+              className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
+              key={previousPrompt}
+              defaultValue={previousPrompt}
               readOnly
             />
           </div>
@@ -41,8 +42,9 @@ const HistoryPagePromptUpdateModal = ({params, previousPrompt, promotToUpdate, o
               <span className="label-text">Updated Prompt</span>
             </div>
             <textarea
-              className="textarea textarea-bordered border w-full min-h-96 focus:border-primary caret-black p-2"
-              value={promotToUpdate}
+              className="textarea textarea-bordered border border-base-300 w-full min-h-96 focus:border-primary caret-base-content p-2"
+              key={promotToUpdate}
+              defaultValue={promotToUpdate}
               readOnly
             />
           </div>

@@ -20,14 +20,14 @@ const handleClose=()=>{
       className=" flex items-center justify-center "
     >
       <div 
-        className="w-full max-w-lg bg-white border border-gray-200 rounded-lg  p-6 mx-4 "
+        className="w-full max-w-lg bg-base-100 border border-base-300 rounded-lg  p-6 mx-4 "
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col space-y-2 text-center sm:text-left">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-base-content">
             {title}
           </h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-base-content">
             {description}
           </p>
         </div>
@@ -45,9 +45,9 @@ const handleClose=()=>{
             onClick={()=>{
                 onConfirm(item)
             }}
-            className="btn btn-error text-base-100"
+            className="btn btn-error text-white"
           >
-            <Trash2 className="mr-1 h-4 w-4 text-base-100" />
+            <Trash2 className="mr-1 h-4 w-4 text-white" />
             Delete
           </button>
         </div>

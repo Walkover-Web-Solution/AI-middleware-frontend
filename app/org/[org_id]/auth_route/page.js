@@ -2,7 +2,7 @@
 import MainLayout from '@/components/layoutComponents/MainLayout'
 import PageHeader from '@/components/Pageheader'
 import { useCustomSelector } from '@/customHooks/customSelector'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, use } from 'react'
 import { useDispatch } from 'react-redux'
 import { createAuth, getAuthDataAction } from '@/store/action/authAction'
 import CustomTable from "@/components/customTable/customTable"
@@ -15,12 +15,14 @@ export const runtime = 'edge';
 
 
 const Page = ({params}) => {
+  const resolvedParams = use(params);
+  
   const [name, setName] = useState('')
   const [url, setUrl] = useState('')
   const [urlError, setUrlError] = useState('')
   const dispatch = useDispatch()
   const  {authData}  = useCustomSelector((state) => ({
-    authData: state?.authReducer?.authenticationData?.[params?.org_id] || []
+    authData: state?.authReducer?.authenticationData?.[resolvedParams?.org_id] || []
   }))
 
   const validateUrl = (value) => {
@@ -37,7 +39,7 @@ const Page = ({params}) => {
   }
 
   useEffect(()=>{
-    dispatch(getAuthDataAction(params?.org_id))
+    dispatch(getAuthDataAction(resolvedParams?.org_id))
   },[])
 
   const handleUrlChange = (e) => {
@@ -61,7 +63,7 @@ const Page = ({params}) => {
         name,
         redirection_url : url
     }
-    dispatch(createAuth(dataToSend, params?.org_id))
+    dispatch(createAuth(dataToSend, resolvedParams?.org_id))
   }
 
   const handleRowClick = () =>{
@@ -95,7 +97,7 @@ const Page = ({params}) => {
 
       {(!authData || authData?.length === 0) && (
         <div className="p-6">
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6">
+          <div className="max-w-md mx-auto bg-base-100 rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Add Authentication Route</h2>
             
             <div className="space-y-4">

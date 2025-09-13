@@ -5,23 +5,23 @@ import { useDispatch } from 'react-redux';
 import { PencilIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const GptMemory = ({ params }) => {
+const   GptMemory = ({ params, searchParams }) => {
     const dispatch = useDispatch();
     const { gpt_memory_context, gpt_memory } = useCustomSelector((state) => ({
-        gpt_memory_context: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.gpt_memory_context || "",
-        gpt_memory: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.gpt_memory || false,
+        gpt_memory_context: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.gpt_memory_context || "",
+        gpt_memory: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.gpt_memory || false,
     }));
 
     const [showInput, setShowInput] = useState(gpt_memory_context?.length > 0);
     const handleCheckboxChange = (e) => {
         const newValue = e.target.checked;
-        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { gpt_memory: newValue } }));
+        dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams?.version, dataToSend: { gpt_memory: newValue } }));
     };
 
     const handleUserReferenceChange = (e) => {
         const newValue = e.target.value;
         if (newValue !== gpt_memory_context) {
-            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { gpt_memory_context: newValue } }));
+            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams?.version, dataToSend: { gpt_memory_context: newValue } }));
         }
     };
 
@@ -63,7 +63,7 @@ const GptMemory = ({ params }) => {
                 <div className="mt-3">
                     <textarea
                         placeholder="Provide context for LLM memory (e.g., user preferences, conversation style, key information to remember)"
-                        className=" textarea textarea-bordered border w-full min-h-[10rem] resize-y"
+                        className=" textarea textarea-bordered border border-base-300 w-full min-h-[10rem] resize-y"
                         defaultValue={gpt_memory_context}
                         key={gpt_memory_context}
                         onBlur={handleUserReferenceChange}

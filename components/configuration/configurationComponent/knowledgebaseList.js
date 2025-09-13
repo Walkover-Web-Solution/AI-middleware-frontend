@@ -13,17 +13,17 @@ import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
 import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
 
-const KnowledgebaseList = ({ params }) => {
+const KnowledgebaseList = ({ params, searchParams }) => {
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
         const user = state.userDetailsReducer.userDetails || []
         const modelReducer = state?.modelReducer?.serviceModels;
-        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version];
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const serviceName = versionData?.service;
         const modelTypeName = versionData?.configuration?.type?.toLowerCase();
         const modelName = versionData?.configuration?.model;
         return {
             knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params?.org_id],
-            knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.doc_ids||[],
+            knowbaseVersionData: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.doc_ids || [],
             isFirstKnowledgeBase: user?.meta?.onboarding?.knowledgeBase,
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName
@@ -42,13 +42,13 @@ const KnowledgebaseList = ({ params }) => {
     const handleAddKnowledgebase = (id) => {
         if (knowbaseVersionData?.includes(id)) return; // Check if ID already exists
         dispatch(updateBridgeVersionAction({
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: { doc_ids: [...(knowbaseVersionData || []), id] }
         }));
     };
     const handleDeleteKnowledgebase = (id) => {
         dispatch(updateBridgeVersionAction({
-            versionId: params.version,
+            versionId: searchParams?.version,
             dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== id) }
         }));
     };
@@ -79,12 +79,12 @@ const KnowledgebaseList = ({ params }) => {
         (Array.isArray(knowbaseVersionData) ? knowbaseVersionData : [])?.map((docId) => {
             const item = knowledgeBaseData?.find(kb => kb._id === docId);
             return item ? (
-                <div key={docId} className="flex w-[250px] flex-col items-start rounded-md border cursor-pointer bg-base-100 hover:bg-base-200 relative">
+                <div key={docId} className="flex w-[250px] flex-col items-start rounded-md border border-base-300 cursor-pointer bg-base-100 hover:bg-base-200 relative">
                     <div className="p-4 w-full h-full flex flex-col justify-between">
                         <div>
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    {GetFileTypeIcon(item?.type, 24, 24)}
+                                    {GetFileTypeIcon(item?.source?.data?.type||item.source?.type, 24, 24)}
                                     <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content pr-5">
                                         {item?.name}
                                     </h1>
@@ -174,7 +174,7 @@ const KnowledgebaseList = ({ params }) => {
                                     <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
                                         <div className="flex justify-between items-center w-full">
                                             <div className="flex items-center gap-2">
-                                                {GetFileTypeIcon(item?.type, 16, 16)}
+                                                {GetFileTypeIcon(item?.source?.data?.type||item.source?.type, 16, 16)}
                                                 {item?.name.length > 20 ? (
                                                     <div className="tooltip" data-tip={item?.name}>
                                                         {truncate(item?.name, 20)}
@@ -187,7 +187,7 @@ const KnowledgebaseList = ({ params }) => {
                                     </li>
                                 ))
                             }
-<li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => {if(window.openRag){window.openRag()} else {openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)}}}>
+                            <li className="mt-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } }}>
                                 <div>
                                     <AddIcon size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
                                 </div>
@@ -196,7 +196,7 @@ const KnowledgebaseList = ({ params }) => {
                     </ul>
                 )}
             </div>
-            <KnowledgeBaseModal params={params} />
+            <KnowledgeBaseModal params={params} searchParams={searchParams} />
         </div>
     );
 };

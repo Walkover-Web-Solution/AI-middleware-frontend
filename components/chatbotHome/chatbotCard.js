@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 
 function BridgeBadge({ bridge }) {
   return (
-    <span className="mb-2 mr-2 inline-block rounded-full max-w-full bg-gray-100 px-3 py-1 text-[10px] truncate font-semibold text-gray-900">
+    <span className="mb-2 mr-2 inline-block rounded-full max-w-full bg-base-300 px-3 py-1 text-[10px] truncate font-semibold text-base-content">
       {bridge.name}
     </span>
   );
@@ -15,7 +15,7 @@ function BridgeBadge({ bridge }) {
 
 function ChatBotCard({ item, onFetchDetails }) {
   return (
-    <div onClick={() => onFetchDetails(item._id)} className="flex flex-col items-start gap-7 rounded-md border cursor-pointer hover:shadow-lg">
+    <div onClick={() => onFetchDetails(item._id)} className="flex flex-col items-start gap-7 rounded-md border border-base-300 cursor-pointer hover:shadow-lg">
       <div className="p-4 flex flex-col justify-between w-full items-start">
         <div className="w-full flex items-center gap-2 justify-start">
         <BotIcon/>

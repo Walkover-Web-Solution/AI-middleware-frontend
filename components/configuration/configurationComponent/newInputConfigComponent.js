@@ -39,7 +39,7 @@ const NewInputConfigComponent = ({ params }) => {
                 page_id: params.version,
                 content: prompt,
             });
-            window.openTechDoc();
+            // window.openTechDoc();
         } else {
             console.warn('sendDataToDocstar is not defined yet.');
         }
@@ -47,7 +47,7 @@ const NewInputConfigComponent = ({ params }) => {
     useEffect(() => {
         setTimeout(() => {
             handleScriptLoad();
-        }, 2000);
+        }, 100);
     }, [prompt, params]);
 
     useEffect(() => {
@@ -118,7 +118,7 @@ const NewInputConfigComponent = ({ params }) => {
             <div className="form-control">
                 <div
                     ref={divRef}
-                    className={`relative transition-all duration-300 min-h-[500px] border border-gray-300 rounded-r-lg rounded-l-lg rounded-t-md ${isFullscreen
+                    className={`relative transition-all duration-300 min-h-[500px] border border-base-300 rounded-r-lg rounded-l-lg rounded-t-md ${isFullscreen
                         ? 'fixed inset-0 w-full h-screen z-low'
                         : 'w-full'
                         }`}
@@ -137,7 +137,7 @@ const NewInputConfigComponent = ({ params }) => {
                             {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
                         </button>
 
-                        <span className="absolute -top-8 right-1 scale-0 group-hover:scale-100 bg-gray-800 text-white text-xs px-2 py-1 rounded transition-transform duration-200">
+                        <span className="absolute -top-8 right-1 scale-0 group-hover:scale-100 bg-gray-800 text-base-content text-xs px-2 py-1 rounded transition-transform duration-200">
                             {isFullscreen ? 'Minimize' : 'Maximize'}
                         </span>
                     </div>
@@ -149,7 +149,7 @@ const NewInputConfigComponent = ({ params }) => {
                                 }`}
                             onMouseDown={handleMouseDown}
                         >
-                            <div className="w-8 h-1 bg-gray-400 rounded-full group-hover:bg-gray-600 transition-colors">
+                            <div className="w-8 h-1 bg-base-300 rounded-full group-hover:bg-base-200 transition-colors">
                             </div>
                             {/* Alternative: Use GripHorizontal icon */}
                             {/* <GripHorizontal size={16} className="text-gray-400 group-hover:text-gray-600 transition-colors" /> */}

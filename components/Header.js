@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useLayoutEffect, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { getFromCookies } from "@/utils/utility";
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -10,7 +11,7 @@ const Header = () => {
   const router = useRouter();
 
   useLayoutEffect(() => {
-    const proxyToken = localStorage.getItem("proxy_token");
+    const proxyToken = getFromCookies("proxy_token");
     if (proxyToken) {
       setIsLoggedIn(true);
     }
@@ -32,7 +33,7 @@ const Header = () => {
   const getButtonClass = (path) => {
     const isActive = pathname === path;
     return `relative px-6 py-2 ${isActive
-      ? "text-white after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-white"
+      ? "text-white after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-base-100"
       : "text-white hover:text-white"
       } transition-all duration-300 ease-in-out`;
   };

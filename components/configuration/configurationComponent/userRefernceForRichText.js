@@ -5,11 +5,11 @@ import { useDispatch } from 'react-redux';
 import { PencilIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const UserReferenceForRichText = ({ params }) => {
+const UserReferenceForRichText = ({ params, searchParams }) => {
     const dispatch = useDispatch();
     const { is_rich_text = true, user_reference } = useCustomSelector((state) => ({
-        is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.configuration?.is_rich_text,
-        user_reference: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.user_reference || "",
+        is_rich_text: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.is_rich_text,
+        user_reference: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.user_reference || "",
     }));
     const isRichText = is_rich_text === "" ? true : is_rich_text;
     const [showInput, setShowInput] = useState(user_reference?.trim()?.length > 0);
@@ -21,13 +21,13 @@ const UserReferenceForRichText = ({ params }) => {
                 is_rich_text: newCheckedValue
             }
         };
-        dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: params.version, dataToSend: { ...updatedDataToSend } }));
+        dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     };
 
     const handleUserReferenceChange = (e) => {
         const newValue = e.target.value;
         if (newValue !== user_reference) {
-            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: params.version, dataToSend: { user_reference: newValue } }));
+            dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams?.version, dataToSend: { user_reference: newValue } }));
         }
     };
 
@@ -67,7 +67,7 @@ const UserReferenceForRichText = ({ params }) => {
             <div className="mt-3">
                 <textarea
                     placeholder="Please provide a user reference for the rich text"
-                    className="textarea textarea-bordered border w-full min-h-[10rem] resize-y"
+                    className="textarea textarea-bordered border border-base-300 w-full min-h-[10rem] resize-y"
                     defaultValue={user_reference}
                     key={user_reference}
                     onBlur={handleUserReferenceChange}

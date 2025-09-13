@@ -15,11 +15,11 @@ const PageHeader = ({ title, description, docLink }) => {
     <div className="mb-6">
       <h1 className="text-2xl font-bold mb-1">{title}</h1>
       {description && (
-        <p className="text-base text-gray-700">
+        <p className="text-base text-base-content opacity-80">
           {description}
           <SmartLink 
            href={docLink}>
-            <span className="inline-flex mb-4 ml-2 items-center gap-2 text-sm text-primary hover:text-primary-dark transition-colors font-medium group">
+            <span className="inline-flex mb-4 ml-2 items-center gap-2 text-sm text-blue-500 hover:text-blue-600 transition-colors font-medium group">
               Learn more <ExternalLinkIcon size={16} />
             </span>
           </SmartLink>

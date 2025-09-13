@@ -1,6 +1,6 @@
 "use client"
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { filterOrganizations, renderedOrganizations } from '@/utils/utility';
+import { filterOrganizations, renderedOrganizations, setInCookies } from '@/utils/utility';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import Protected from '@/components/protected';
@@ -14,7 +14,6 @@ import LoadingSpinner from '@/components/loadingSpinner';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { switchUser } from '@/config';
 
-const URL = process.env.NEXT_PUBLIC_PYTHON_SERVER_URL;
 const INITIAL_FORM_STATE = {
     bridgeName: '',
     selectedOrg: null,
@@ -28,7 +27,7 @@ const INITIAL_FORM_STATE = {
     template_Id: '',
 };
 
-function Page({ params }) {
+function Page() {
     const dispatch = useDispatch();
     const route = useRouter();
     const searchParams = useSearchParams();
@@ -46,7 +45,7 @@ function Page({ params }) {
 
      useEffect(() => {
         if(!SERVICES || Object?.entries(SERVICES)?.length === 0) {
-            dispatch(getServiceAction({ orgid: params?.orgid }))
+            dispatch(getServiceAction())
         }
     }, [SERVICES]);
 
@@ -100,7 +99,7 @@ function Page({ params }) {
                     orgId: selectedOrg.id,
                     orgName: selectedOrg.name
                 });
-                localStorage.setItem('local_token', token);
+                setInCookies('local_token', token);
             }
 
             await dispatch(setCurrentOrgIdAction(selectedOrg.id));
@@ -169,7 +168,7 @@ function Page({ params }) {
     return (
         <div className="flex min-h-screen bg-gray-100 p-6 gap-6">
             {/* Organizations List */}
-            <div className="w-96 bg-white rounded-xl shadow-sm p-4 h-[calc(100vh-3rem)]">
+            <div className="w-96 bg-base-100 rounded-xl shadow-sm p-4 h-[calc(100vh-3rem)]">
                 <h2 className="text-lg font-semibold mb-4 text-gray-800">Organizations</h2>
                 <div className="mb-4">
                     <input
@@ -177,7 +176,7 @@ function Page({ params }) {
                         placeholder="Search organizations..."
                         value={formState.searchQuery}
                         onChange={handleChange('searchQuery')}
-                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-base-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                 </div>
                 <div className="space-y-2 max-h-[78vh] overflow-x-hidden overflow-y-auto p-2">
@@ -187,14 +186,14 @@ function Page({ params }) {
             </div>
 
             {/* Creation Form */}
-            <div className="flex-1 bg-white rounded-xl shadow-sm p-8">
+            <div className="flex-1 bg-base-100 rounded-xl shadow-sm p-8">
                 <div className="max-w-2xl mx-auto">
                      <div className="bg-blue-50 p-4 rounded-lg">
                         <h2 className="text-xl font-semibold text-blue-800">Create New Agent</h2>
                         <p className="text-sm text-blue-600 mt-1">Set up a new agent to connect your services</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6 border border-gray-300 rounded p-6">
+                    <form onSubmit={handleSubmit} className="space-y-6 border border-base-300 rounded p-6">
                         <div className="space-y-4">
                             {/* Bridge Type Selection */}
                             <div className="space-y-2">
@@ -233,7 +232,7 @@ function Page({ params }) {
                                         type="text"
                                         value={formState.bridgeName}
                                         onChange={handleChange('bridgeName')}
-                                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-2 border border-base-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                         placeholder="My Awesome Agent"
                                         required
                                     />
@@ -248,7 +247,7 @@ function Page({ params }) {
                                             type="text"
                                             value={formState.slugName}
                                             onChange={handleChange('slugName')}
-                                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-4 py-2 border border-base-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                             placeholder="my-awesome-agent"
                                             required
                                         />
@@ -264,7 +263,7 @@ function Page({ params }) {
                                 <select
                                     value={formState.selectedService}
                                     onChange={handleService}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-4 py-2 border border-base-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 >
                                     {Array.isArray(SERVICES) ? SERVICES?.map(({ value, displayName }) => (
                                         <option key={value} value={value}>{displayName}</option>
@@ -280,7 +279,7 @@ function Page({ params }) {
                                 <select
                                     value={formState.selectedModel}
                                     onChange={handleModelChange}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-4 py-2 border border-base-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                     required
                                 >
                                     <option value="">Select a model</option>
@@ -305,7 +304,7 @@ function Page({ params }) {
                         <button
                             type="submit"
                             disabled={formState.isLoading}
-                            className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full py-3 px-4 bg-blue-600 text-base-100 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {formState.isLoading ? 'Creating...' : 'Create Agent'}
                         </button>
