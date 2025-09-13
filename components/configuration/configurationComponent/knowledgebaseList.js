@@ -84,7 +84,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                         <div>
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    {GetFileTypeIcon(item?.type, 24, 24)}
+                                    {GetFileTypeIcon(item?.source?.data?.type||item.source?.type, 24, 24)}
                                     <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content pr-5">
                                         {item?.name}
                                     </h1>
@@ -174,7 +174,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                                     <li key={item?._id} onClick={() => handleAddKnowledgebase(item?._id)}>
                                         <div className="flex justify-between items-center w-full">
                                             <div className="flex items-center gap-2">
-                                                {GetFileTypeIcon(item?.type, 16, 16)}
+                                                {GetFileTypeIcon(item?.source?.data?.type||item.source?.type, 16, 16)}
                                                 {item?.name.length > 20 ? (
                                                     <div className="tooltip" data-tip={item?.name}>
                                                         {truncate(item?.name, 20)}
@@ -196,7 +196,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     </ul>
                 )}
             </div>
-            <KnowledgeBaseModal params={params} searchParams={searchParams} />
+            <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true}/>
         </div>
     );
 };

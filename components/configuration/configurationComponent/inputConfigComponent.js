@@ -16,7 +16,7 @@ import PromptHelper from '../../PromptHelper';
 import { setIsFocusReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 
-const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
+const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbedUser }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type || "",
@@ -61,22 +61,22 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
     const [messages, setMessages] = useState([]);
     const thread_id = useMemo(() => generateRandomID(), []);
     const dispatch = useDispatch();
-    const [isTextareaFocused, setIsTextareaFocused] = useState(false);
+    const [isPromptHelperOpen, setIsPromptHelperOpen] = useState(false);
    
     useEffect(() => {
-        dispatch(setIsFocusReducer(isTextareaFocused));
-    }, [isTextareaFocused]);
+        dispatch(setIsFocusReducer(isPromptHelperOpen));
+    }, [isPromptHelperOpen, dispatch]);
 
     useEffect(() => {
       const timeoutId = setTimeout(() => {
           const textareaElement = promptTextAreaRef?.current?.querySelector('textarea');
-          if (textareaElement&&isTextareaFocused) {
+          if (textareaElement && isPromptHelperOpen) {
               promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
              
           }
       }, 100);
       return () => clearTimeout(timeoutId);
-  }, [isTextareaFocused]);
+  }, [isPromptHelperOpen, prompt]);
     useEffect(() => {
         setPrompt(reduxPrompt);
         setHasUnsavedChanges(false);
@@ -97,15 +97,25 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
     }, [hasUnsavedChanges]);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(window.innerWidth < 768);
+    const handleResize = () => 
+      {
+      const isSmallScreen = window.innerWidth < 1060;
+      // If screen is transitioning from small to large, reopen techdoc
+      if (!isMobileView && !isSmallScreen && typeof window.openTechDoc === 'function' && isPromptHelperOpen) {
+        window.openTechDoc();
+      } 
+      // If screen is transitioning from large to small, close techdoc
+      else if (isMobileView && isSmallScreen && typeof window.closeTechDoc === 'function') {
+        window.closeTechDoc();
+      }
+      setIsMobileView(isSmallScreen);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [isMobileView]);
   const savePrompt = useCallback((newPrompt) => {
     const newValue = (newPrompt || "").trim();
     setShowSuggestions(false);
@@ -315,17 +325,26 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         );
     };
 
-    const handleTextareaFocus = useCallback(() => {
     
-        setIsTextareaFocused(true);
-    }, []);
 
-    const handleCloseTextAreaFocus = useCallback((e) => {
-        setIsTextareaFocused(false);
-        setTimeout(() => {
+    const togglePromptHelper = useCallback(() => {
+        const newState = !isPromptHelperOpen;
+        setIsPromptHelperOpen(newState);
+        
+        if (!newState && !isMobileView && typeof window.openTechDoc === 'function') {
+
+            window.openTechDoc();
+        } else if (newState && typeof window.closeTechDoc === 'function') {
             window.closeTechDoc();
-        }, 150);
-    }, []);
+        }
+    }, [isPromptHelperOpen, isMobileView]);
+
+    const handleCloseTextAreaFocus = useCallback(() => {
+     if(typeof window.closeTechDoc === 'function'){
+      window.closeTechDoc();
+     }
+      setIsPromptHelperOpen(false);
+    }, [isPromptHelperOpen]);
 
     const handleSavePrompt = useCallback(() => {
         savePrompt(prompt);
@@ -333,7 +352,8 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         setNewContent('');
         setHasUnsavedChanges(false);
         handleCloseTextAreaFocus();
-    }, [prompt, savePrompt]);
+    }, [prompt, savePrompt, handleCloseTextAreaFocus]);
+
 
     const handleOpenDiffModal = () => {
         openModal(MODAL_TYPE?.DIFF_PROMPT);
@@ -360,10 +380,17 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
              
             </div>
           </div>
-          <div className='flex gap-4'>
-           {isTextareaFocused&& <div
-              className="label cursor-pointer gap-2"
+            
+          <div
+             className="label cursor-pointer gap-2"
+           >
+            {!isPromptHelperOpen&&<button
+              className="btn btn-sm btn-primary"
+              onClick={togglePromptHelper}
             >
+              {"Prompt Helper"}
+            </button>}
+
               <button
                 className={`btn btn-sm ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
                 onClick={handleSavePrompt}
@@ -371,9 +398,10 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
               >
                 Save
               </button>
+              {isPromptHelperOpen &&
+              <>
               <button
                 className={`btn btn-sm`}
-                disabled={!isTextareaFocused}
                 onClick={handleCloseTextAreaFocus}
               >
                 Close
@@ -384,21 +412,20 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
               >
                 Diff
               </button>}
+              </>}
+            
             </div>
-           }
-          </div>
         </div>
         <div className="form-control h-full">
           <textarea
             ref={textareaRef}
             className={`textarea border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none ${
-              isTextareaFocused 
+              isPromptHelperOpen 
               ? "h-[calc(100vh-60px)] border-primary shadow-md" 
-              : "min-h-[80px]"
+              : "min-h-96"
             } transition-all duration-300 ease-in-out`}
             value={prompt}
             onChange={handlePromptChange}
-            onFocus={handleTextareaFocus}
           />
           {showSuggestions && renderSuggestions()}
           <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none">
@@ -470,9 +497,9 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
       {/* <OptimizePromptModal savePrompt={savePrompt} setPrompt={setPrompt} params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} /> */}
       <PromptSummaryModal params={params} searchParams={searchParams} />
       
-      {/* PromptHelper component that appears when textarea is focused */}
+      {/* PromptHelper component that appears when button is clicked */}
       <PromptHelper 
-        isVisible={isTextareaFocused&&!isMobileView}
+        isVisible={isPromptHelperOpen && !isMobileView}
         params={params}
         onClose={handleCloseTextAreaFocus}
         savePrompt={savePrompt}
@@ -484,7 +511,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
         hasUnsavedChanges={hasUnsavedChanges}
         setHasUnsavedChanges={setHasUnsavedChanges}
         setNewContent={setNewContent}
-
+        isEmbedUser={isEmbedUser}
       />
     </div>
   );
