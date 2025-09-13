@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import ToneDropdown from './toneDropdown'; 
 import ResponseStyleDropdown from './responseStyleDropdown'; // Import the new component
+import GuardrailSelector from './guardrailSelector'; // Import the new component
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 import PromptHelper from '../../PromptHelper';
@@ -16,13 +17,37 @@ import { setIsFocusReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 
 const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbedUser }) => {
-    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue } = useCustomSelector((state) => ({
+    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type || "",
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service || "",
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
+        bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || ""
     }));
-    const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+    useEffect(() => {
+        if (!bridge.guardrails) {
+            dispatch(updateBridgeVersionAction({
+                versionId: searchParams?.version,
+                dataToSend: {
+                    guardrails:{
+                    is_enabled:false,
+                    guardrails_configuration: {
+                        data_leakage: false,
+                        prompt_injection: false,
+                        jailbreaking: false,
+                        bias: false,
+                        toxicity: false,
+                        privacy: false,
+                        hallucination: false,
+                        violence: false,
+                        illegal_activity: false,
+                        misinformation: false,
+                    },
+                    guardrails_custom_prompt:""
+                }
+            }}))
+        }
+    }, [bridge]);    const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
 
     const [oldContent, setOldContent] = useState(reduxPrompt);
     const [newContent, setNewContent] = useState('');
@@ -458,9 +483,14 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbe
           </div>
         </div>
       </div>
-      <div className='flex mt-2'>
-        <ToneDropdown params={params} searchParams={searchParams} />
-        <ResponseStyleDropdown params={params} searchParams={searchParams} />
+      <div className=' mt-4'>  
+        <GuardrailSelector params={params} searchParams={searchParams} />
+      </div>
+      <div className='flex flex-row gap-2 mt-8'>
+       
+          <ToneDropdown params={params} searchParams={searchParams} />
+          <ResponseStyleDropdown params={params} searchParams={searchParams} />
+        
       </div>
       <Diff_Modal oldContent={oldContent} newContent={newContent} />
       {/* <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} searchParams={searchParams} /> */}
