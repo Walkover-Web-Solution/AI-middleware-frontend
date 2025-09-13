@@ -1,5 +1,5 @@
 
-import { Save, TestTube, Bot, PlusIcon, Zap, MessageSquare, Globe, FileSlidersIcon, CircleArrowOutUpRight, ChevronUp, ChevronDown, X, ArrowLeft } from 'lucide-react';
+import { Save, TestTube, Bot, PlusIcon, Zap, MessageSquare, Globe, FileSlidersIcon, CircleArrowOutUpRight, ChevronUp, ChevronDown, ClipboardX, X, ArrowLeft } from 'lucide-react';
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
 import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
@@ -81,7 +81,7 @@ function SlideOver({
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e) => {
-      if (e.key === 'Escape' && SlideStack.top() === instanceId) {
+      if (e.key === 'Escape') {
         onClose && onClose();
       }
     };
@@ -426,14 +426,14 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
     setIsCreating(true);
     window.GtwyEmbed.sendDataToGtwy({
       parent_id: 'gtwyParentId',
-      [creationType === 'name' ? 'agent_name' : 'agent_purpose']: inputValue
     })
     setOpenAgentConfigSidebar(true);
     setInputValue('');
     onClose();
     setTimeout(() => {
-      window.openGtwy();
+      window.openGtwy({[creationType === 'name' ? 'agent_name' : 'agent_purpose']: inputValue});
     }, 3000);
+    setIsCreating(false);
   };
 
   const handleTypeChange = (type) => {
@@ -583,7 +583,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
             >
               <div className="avatar placeholder mr-2">
                 <div className="bg-primary-content text-primary rounded-full w-6 h-6 flex items-center justify-center">
-                  <span className="text-sm"><PlusIcon size={16} /></span>
+                  <span className="text-sm"><PlusIcon size={18} /></span>
                 </div>
               </div>
               Create New Agent
@@ -760,7 +760,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                               onClick={(e) => { e.stopPropagation(); handleOpenAgentConfigSidebar(agent) }}
                               className="btn btn-circle btn-primary btn-outline btn-sm opacity-0 group-hover:opacity-100 transition-all duration-200"
                             >
-                              <CircleArrowOutUpRight size={16} />
+                              <CircleArrowOutUpRight size={18} />
                             </button>
                           </div>
                         </div>
@@ -873,7 +873,7 @@ export function FlowControlPanel({
           onClick={openIntegrationGuide}
           title="Integration Guide"
         >
-          <FileSlidersIcon /> Integration Guide
+          <FileSlidersIcon size={18}/> Integration Guide
         </button>}
 
         {createdFlow && (isModified || isVariableModified) && (
@@ -882,23 +882,20 @@ export function FlowControlPanel({
             onClick={handleDiscard}
             title="Discard unsaved changes"
           >
-            Discard
+          <ClipboardX size={18}/> Discard
           </button>
         )}
 
         {/* Publish/Update button */}
         <button
-          className="btn btn-primary bg-success shadow-lg text-base-content"
+          className="btn bg-green-200 hover:bg-green-300 shadow-lg text-base-content"
           disabled={!isModified && !isVariableModified}
           title="Publish Flow"
           onClick={() => openModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL)}
         >
-          <span className="text-white">
-            <Save className="mr-2 h-4 w-4" />
-          </span>
-          <span className="text-white">
-            Publish Flow
-          </span>
+          <div className="text-black flex items-center gap-2">
+            <Save size={18}/> <span>Publish Flow</span>
+          </div>
         </button>
       </div>
 
@@ -1058,7 +1055,7 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
         <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
           <h2 className="text-xl font-semibold textbase">Integration Guide</h2>
           <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm" aria-label="Close sidebar">
-            <X className="w-4 h-4" />
+            <X size={18}/>
           </button>
         </div>
       }
