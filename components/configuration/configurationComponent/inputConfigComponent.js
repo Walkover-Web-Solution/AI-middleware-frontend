@@ -46,12 +46,12 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbe
       const timeoutId = setTimeout(() => {
           const textareaElement = promptTextAreaRef?.current?.querySelector('textarea');
           if (textareaElement && isPromptHelperOpen) {
-              promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
+              prompt.current.scrollIntoView({ behavior: 'smooth' });
              
           }
       }, 100);
       return () => clearTimeout(timeoutId);
-  }, [isPromptHelperOpen, promptTextAreaRef]);
+  }, [isPromptHelperOpen, prompt]);
     useEffect(() => {
         setPrompt(reduxPrompt);
         setHasUnsavedChanges(false);
@@ -397,7 +397,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbe
             className={`textarea border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none ${
               isPromptHelperOpen 
               ? "h-[calc(100vh-60px)] border-primary shadow-md" 
-              : "min-h-[250px]"
+              : "min-h-96"
             } transition-all duration-300 ease-in-out`}
             value={prompt}
             onChange={handlePromptChange}
