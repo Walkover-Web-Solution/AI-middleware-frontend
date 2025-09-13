@@ -155,7 +155,7 @@ const PromptHelper = ({
   return (
     <div 
       ref={modalRef} 
-      className="fixed right-0 top-0 w-[48%] bottom-2 bg-base-100 border-l border-base-content/30 h-full rounded-l-md shadow-lg transition-all duration-300 ease-in-out z-30"
+      className="fixed right-0 top-0 w-[49%] bottom-2 bg-base-100 border-l border-base-content/30 h-full rounded-l-md shadow-lg transition-all duration-300 ease-in-out z-30"
       onBlur={handleModalBlur}
       tabIndex={-1}
     >
