@@ -1,11 +1,12 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { InfoIcon } from "@/components/Icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
 import Protected from "@/components/protected";
+import { getIconOfService } from "@/utils/utility";
 
 function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef,isEmbedUser }) {
     const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey,shouldPromptShow, showDefaultApikeys, apiKeyObjectIdData } = useCustomSelector((state) => {
@@ -34,6 +35,8 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
     const [selectedService, setSelectedService] = useState(service);
     const [modelRecommendations, setModelRecommendations] = useState(null);
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
     const dispatch = useDispatch();
 
   const resetBorder = (ref, selector) => {
@@ -86,16 +89,31 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
         }
     }, [SERVICES]);
 
-    const handleServiceChange = useCallback((e) => {
-        const newService = e.target.value;
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleServiceChange = useCallback((serviceValue) => {
+        const newService = serviceValue;
         const defaultModel = DEFAULT_MODEL?.[newService]?.model;
         setSelectedService(newService);
+        setDropdownOpen(false);
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
             versionId: searchParams?.version,
             dataToSend: { service: newService, configuration: { model: defaultModel } }
         }));
-    }, [dispatch, params.id, searchParams?.version]);
+    }, [dispatch, params.id, searchParams?.version, DEFAULT_MODEL]);
 
     const handleGetRecommendations = async () => {
         setIsLoadingRecommendations(true);
@@ -138,6 +156,62 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
 
     const isDisabled = bridgeType === 'batch' && service === 'openai';
 
+    // Get service display name
+    const getServiceDisplayName = (value) => {
+        if (Array.isArray(SERVICES)) {
+            const service = SERVICES.find(s => s.value === value);
+            return service ? service.displayName : value;
+        }
+        return value;
+    };
+
+    const renderCustomDropdown = () => {
+        const availableServices = isEmbedUser && showDefaultApikeys
+            ? Object.keys(apiKeyObjectIdData).map(key => {
+                const service = SERVICES && SERVICES.find((s) => s.value === key);
+                return service ? service : { value: key, displayName: key };
+            }).filter(Boolean)
+            : SERVICES || [];
+
+        return (
+            <div className="relative w-full  max-w-xs" ref={dropdownRef}>
+                <div 
+                    className={`select select-sm border-base-content/20 capitalize w-full flex items-center justify-between px-3 py-2 cursor-pointer ${isDisabled ? 'bg-base-200 cursor-not-allowed' : 'hover:bg-base-200'}`}
+                    onClick={() => !isDisabled && setDropdownOpen(!dropdownOpen)}
+                >
+                    <div className="flex items-center gap-2">
+                        {selectedService && getIconOfService(selectedService, 20, 20)}
+                        <span>{selectedService ? getServiceDisplayName(selectedService) : 'Select a Service'}</span>
+                    </div>
+                </div>
+                
+                {dropdownOpen && (
+                    <div className="absolute mt-1 w-full bg-base-100 border border-base-300 rounded-md shadow-lg z-10">
+                        <div className="py-1">
+                            {Array.isArray(availableServices) && availableServices.map((serviceItem) => {
+                                const value = serviceItem.value;
+                                const displayName = serviceItem.displayName || value;
+                                
+                                return (
+                                    <div 
+                                        key={value} 
+                                        className={`flex items-center px-3 py-2 hover:bg-base-200 cursor-pointer ${selectedService === value ? 'bg-primary/10' : ''}`}
+                                        onClick={() => handleServiceChange(value)}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {getIconOfService(value, 20, 20)}
+                                            <span className="capitalize">{displayName}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className="space-y-4 w-full">
             <div className="form-control">
@@ -170,46 +244,19 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
                         )}
                     </div>
                 )}
-                {isEmbedUser && showDefaultApikeys ? (
-                    <div className="flex items-center gap-2">
-                        <select
-                            value={selectedService}
-                            onChange={handleServiceChange}
-                            className="select select-sm border-base-content/20 capitalize w-full max-w-xs"
-                        >
-                            <option disabled>Select a Service</option>
-                            {Object.keys(apiKeyObjectIdData).map((key) => {
-                                const service = SERVICES.find((service) => service.value === key);
-                                if (service) {
-                                    return <option key={service.value} value={service.value}>{service.displayName}</option>;
-                                }
-                                return null;
-                            })}
-                        </select>
-                    </div>
-                ) : (
-                    <div className="flex items-center gap-2">
-                        <select
-                            value={selectedService}
-                            onChange={handleServiceChange}
-                            className="select select-sm border-base-content/20 capitalize w-full max-w-xs"
-                            disabled={isDisabled}
-                        >
-                            <option disabled>Select a Service</option>
-                            {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
-                                <option key={value} value={value}>{displayName}</option>
-                            )) : null}
-                        </select>
-                        {isDisabled && (
-                            <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                                <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
-                                <span className='label-text-alt text-xs leading-tight'>
-                                    Batch API is only applicable for OpenAI services.
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                )}
+                
+                <div className="flex items-center gap-2">
+                    {renderCustomDropdown()}
+                    
+                    {isDisabled && (
+                        <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
+                            <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
+                            <span className='label-text-alt text-xs leading-tight'>
+                                Batch API is only applicable for OpenAI services.
+                            </span>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
