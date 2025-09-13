@@ -5,6 +5,7 @@ import CsvIcon from "@/icons/CsvIcon";
 import GeminiIcon from "@/icons/GeminiIcon";
 import GoogleDocIcon from "@/icons/GoogleDocIcon";
 import GroqIcon from "@/icons/GroqIcon";
+import MistralIcon from "@/icons/MistralIcon";
 import OpenAiIcon from "@/icons/OpenAiIcon";
 import OpenRouter from "@/icons/OpenRouter";
 import { PdfIcon } from "@/icons/pdfIcon";
@@ -191,6 +192,8 @@ export const getIconOfService = (service, height, width) => {
             return <GeminiIcon height={height} width={width} />;
         case 'ai_ml':
             return <AIMLIcon height={height} width={width} />;
+        case 'mistral':
+            return <MistralIcon height={height} width={width} />;    
         default:
             return <OpenAiIcon height={height} width={width} />;
     }
