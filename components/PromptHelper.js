@@ -22,6 +22,7 @@ const PromptHelper = ({
   hasUnsavedChanges,
   setHasUnsavedChanges,
   setNewContent,
+  isEmbedUser
 }) => {
   const dispatch = useDispatch();
   const [focusedSection, setFocusedSection] = useState(null); // 'notes', 'promptBuilder', or null for 50/50
@@ -82,7 +83,9 @@ const PromptHelper = ({
 
   useEffect(() => {
     setTimeout(() => {
+      if(isVisible){
         handleScriptLoad();
+      }
     }, 100);
   }, [isVisible]);
 
@@ -152,13 +155,15 @@ const PromptHelper = ({
   return (
     <div 
       ref={modalRef} 
-      className="fixed right-0 top-0 w-[48%] bottom-2 bg-base-100 border-l border-base-content/30 h-full rounded-l-md shadow-lg transition-all duration-300 ease-in-out z-50"
+      className="fixed right-0 top-0 w-[48%] bottom-2 bg-base-100 border-l border-base-content/30 h-full rounded-l-md shadow-lg transition-all duration-300 ease-in-out z-30"
       onBlur={handleModalBlur}
       tabIndex={-1}
     >
       {/* Content Area - Split into two sections */}
       <div className="flex flex-col h-full">
+      
         {/* Notes Section */}
+        {isEmbedUser ? null : (
         <div className={`${getNotesHeight()} transition-all duration-300 ease-in-out border-b mt-4`}
          onFocus={() => setFocusedSection('notes')}
          onBlur={() => setFocusedSection(null)}
@@ -178,9 +183,10 @@ const PromptHelper = ({
             </div>   
           </div>
         </div>
-        
+        )}
+       
         {/* Prompt Builder Section */}
-        <div className={`${getPromptBuilderHeight()} transition-all duration-300 ease-in-out`}
+        <div className={`${isEmbedUser ? 'h-full' : getPromptBuilderHeight()} transition-all duration-300 ease-in-out`}
         onFocus={() => setFocusedSection('promptBuilder')}
         onBlur={() => setFocusedSection(null)}
         tabIndex={0}

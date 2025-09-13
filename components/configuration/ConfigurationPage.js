@@ -93,7 +93,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
                 <>
                     <PreEmbedList params={params} searchParams={searchParams}/>
-                    <InputConfigComponent params={params} searchParams={searchParams} promptTextAreaRef={promptTextAreaRef} />
+                    <InputConfigComponent params={params} searchParams={searchParams} promptTextAreaRef={promptTextAreaRef} isEmbedUser={isEmbedUser} />
                     {/* <NewInputConfigComponent params={params} /> */}
                     <EmbedList params={params} searchParams={searchParams}/>
                     <hr className="my-0 p-0 bg-base-200 border-base-300" />

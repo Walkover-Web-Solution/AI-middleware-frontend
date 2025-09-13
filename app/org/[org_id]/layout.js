@@ -448,7 +448,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Navbar */}
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
-              <Navbar params={resolvedParams} searchParams={resolvedSearchParams}/>
+              {!isFocus ? <Navbar params={resolvedParams} searchParams={resolvedSearchParams}/> : null}
             </div>
 
             {/* Scrollable Content */}
