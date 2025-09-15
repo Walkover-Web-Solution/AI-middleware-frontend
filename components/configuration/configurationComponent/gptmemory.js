@@ -2,17 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { useDispatch } from 'react-redux';
-import { PencilIcon } from '@/components/Icons';
+import { PencilIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
 const   GptMemory = ({ params, searchParams }) => {
     const dispatch = useDispatch();
+
     const { gpt_memory_context, gpt_memory } = useCustomSelector((state) => ({
         gpt_memory_context: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.gpt_memory_context || "",
         gpt_memory: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.gpt_memory || false,
     }));
-
+    const [memoryContext, setMemoryContext] = useState(gpt_memory_context);
     const [showInput, setShowInput] = useState(gpt_memory_context?.length > 0);
+
     const handleCheckboxChange = (e) => {
         const newValue = e.target.checked;
         dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams?.version, dataToSend: { gpt_memory: newValue } }));
@@ -24,21 +26,24 @@ const   GptMemory = ({ params, searchParams }) => {
             dispatch(updateBridgeVersionAction({ bridgeId: params.id, versionId: searchParams?.version, dataToSend: { gpt_memory_context: newValue } }));
         }
     };
-
+    const toggleExpansion = () => {
+        setShowInput(!showInput);
+    };
     useEffect(() => {
         setShowInput(gpt_memory_context?.length > 0);
     }, [gpt_memory_context]);
 
     return (
-        <div>
-            <div className='flex  flex-row justify-center items-center w-fit gap-4 bg-base-100 text-base-content'>
-                <div className='flex flex-row items-center justify-center gap-1'>
-                    <div className="label">
-                        <InfoTooltip tooltipContent={"If this feature is enabled, we will pass the stored memory data by default in history/conversations."}>
-                        <span className="font-medium text-nowrap info ">Enable LLM-memory</span>
-                        
+        <div className="bg-base-100 border border-base-300 rounded-md mt-4">
+            {/* Header Section */}
+            <div className="p-2">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <InfoTooltip tooltipContent="If this feature is enabled we will pass the stored memory data by default in history/conversation">
+                        <span className="text-base-content info text-sm ml-1">LLM Memory</span>
                         </InfoTooltip>
                     </div>
+                    
                     <input
                         type="checkbox"
                         checked={gpt_memory}
@@ -46,28 +51,53 @@ const   GptMemory = ({ params, searchParams }) => {
                         className="toggle"
                     />
                 </div>
-                <div className='tooltip tooltip-top flex justify-end' data-tip={"Customize the context you’d like the LLM to remember for future conversations; or else, it’ll store only your basic personal information by default."}>
-                    {(gpt_memory && gpt_memory_context?.length === 0) && (
-                        <button
-                            onClick={() => setShowInput(!showInput)}
-                            className="btn btn-sm gap-1"
-                        >
-                            <PencilIcon size={12} />
-                            customize
-                        </button>
-                    )}
-                </div>
+                
+                {/* Status and Action Row */}
+                {gpt_memory && (
+                    <div className="mt-3 p-3 bg-gradient-to-r from-base-200/40 to-base-300/20 rounded-lg border border-base-300/50">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                                <span className="text-xs font-medium text-base-content/80">
+                                    {gpt_memory_context?.length > 0 
+                                        ? "Custom context active"
+                                        : "Default behavior"
+                                    }
+                                </span>
+                            </div>
+                            
+                            <button
+                                onClick={toggleExpansion}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-base-content bg-base-200 hover:bg-base-300 rounded-lg transition-all duration-200 border border-base-300 hover:shadow-sm"
+                            >
+                                <PencilIcon size={12} />
+                                <span>{showInput ? 'Hide' : 'Edit'}</span>
+                                {showInput ? <ChevronUpIcon size={12} /> : <ChevronDownIcon size={12} />}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
+            {/* Expandable Context Input */}
             {showInput && gpt_memory && (
-                <div className="mt-3">
-                    <textarea
-                        placeholder="Provide context for LLM memory (e.g., user preferences, conversation style, key information to remember)"
-                        className=" textarea textarea-bordered border border-base-300 w-full min-h-[10rem] resize-y"
-                        defaultValue={gpt_memory_context}
-                        key={gpt_memory_context}
-                        onBlur={handleUserReferenceChange}
-                    />
+                <div className="border-t border-base-300 bg-gradient-to-b from-base-200/10 to-base-200/30">
+                    <div className="p-4">
+                        <div className="mb-3">
+                            <label className="text-sm text-base-content mb-1 block">
+                                Memory Context
+                            </label>
+                            <p className="text-xs text-base-content/70 leading-relaxed">
+                                Define what the AI should remember about your preferences and conversation style.
+                            </p>
+                        </div>
+                        <textarea
+                            className="textarea textarea-bordered w-full min-h-[7rem] resize-y bg-base-100 border-base-300 focus:border-base-content/30 focus:outline-none transition-colors text-sm leading-relaxed placeholder:text-base-content/40"
+                           defaultValue={gpt_memory_context}
+                           onBlur={handleUserReferenceChange}
+                           key={gpt_memory_context}
+                        />
+                    </div>
                 </div>
             )}
         </div>
