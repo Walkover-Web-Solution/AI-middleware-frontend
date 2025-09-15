@@ -34,7 +34,7 @@ const   GptMemory = ({ params, searchParams }) => {
     }, [gpt_memory_context]);
 
     return (
-        <div className="bg-base-100 border border-base-300 rounded-md mt-4">
+        <div className="bg-base-100 border border-base-content/20 rounded-md mt-4">
             {/* Header Section */}
             <div className="p-2">
                 <div className="flex items-center justify-between">
