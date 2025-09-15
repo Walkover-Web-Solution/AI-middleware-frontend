@@ -608,8 +608,11 @@ function getDomain() {
     date.setTime(date.getTime() + 2 * 24 * 60 * 60 * 1000); // 2 days
     const expires = `; expires=${date.toUTCString()}`;
     const fullKey = getCookieKey(key);
-  
-    document.cookie = `${fullKey}=${value || ''}${expires}; domain=${domain}; path=/`;
+    
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    const httpOnly = '; HttpOnly';
+    
+    document.cookie = `${fullKey}=${value || ''}${expires}; domain=${domain}; path=/;${secure}${httpOnly}`;
   };
   
   export const getFromCookies = (key) => {
