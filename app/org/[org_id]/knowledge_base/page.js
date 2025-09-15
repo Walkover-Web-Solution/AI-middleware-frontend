@@ -41,7 +41,7 @@ const Page = ({ params }) => {
         {truncate(item.name, 30)}
       </div>
     </div>,
-    description: item?.description,
+    description: <div className="tooltip" data-tip={item.description}>{truncate(item.description, 30)}</div>,
     actual_name: item?.name,
   }));
   const handleUpdateKnowledgeBase = (item) => {

@@ -17,7 +17,7 @@ const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
       <input
         type="text"
         placeholder={`Search ${item}...`}
-        className={`${style?  style:'input input-bor0dered w-full ml-3 mb-3 border border-base-content/50'}`}
+        className={`${style?  style:'input input-bor0dered w-full ml-2 mb-3 border border-base-content/50'}`}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
