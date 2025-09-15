@@ -86,7 +86,7 @@ function BridgeNameInput({ params, searchParams, isEmbedUser }) {
     <div className="flex flex-row items-center">
       <div className="relative w-full">
         <textarea
-          className="font-bold h-auto text-xl outline-none resize-none leading-tight bg-transparent"
+          className="font-bold min-h-[25px] text-xl outline-none resize-none leading-tight bg-transparent"
           style={{
             width: "20ch",
             whiteSpace: "pre-wrap",
