@@ -14,10 +14,10 @@ const GuardrailSelector = ({ params, searchParams }) => {
 
         })
     );
-    const [customPrompt, setCustomPrompt] = useState('');
+    const [customPrompt, setCustomPrompt] = useState(guardrailsData?.guardrails_custom_prompt);
     const [showCustomInput, setShowCustomInput] = useState(false);
     const [selectedGuardrails, setSelectedGuardrails] = useState([]);
-    const [guardrailsEnabled, setGuardrailsEnabled] = useState(false);
+    const [guardrailsEnabled, setGuardrailsEnabled] = useState(guardrailsData?.is_enabled);
     const [showOptions, setShowOptions] = useState(false);
     const dispatch = useDispatch();
 
@@ -37,7 +37,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                 guardrails_configuration[key] = true;
             }
         });
-
+        
         const dataToSend = {
             guardrails: {
                 is_enabled: enabled,
@@ -55,7 +55,6 @@ const GuardrailSelector = ({ params, searchParams }) => {
     useEffect(() => {
         if (guardrailsData) {
             // Set enabled state from is_enabled
-            setGuardrailsEnabled(guardrailsData.is_enabled || false);
             
             // Set selected guardrails from guardrails_configuration
             const selected = Object.entries(guardrailsData.guardrails_configuration)
@@ -100,7 +99,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
             
             setSelectedGuardrails(newSelectedGuardrails);
             // Update store immediately with new values
-            updateGuardrailsInStore(guardrailsEnabled, newSelectedGuardrails, newShowCustomInput ? customPrompt : '');
+            {customPrompt.trim() !== '' && updateGuardrailsInStore(guardrailsEnabled, newSelectedGuardrails, newShowCustomInput ? customPrompt : '');}
         } else {
             // Toggle regular guardrail selection
             let newSelectedGuardrails;
@@ -144,9 +143,9 @@ const GuardrailSelector = ({ params, searchParams }) => {
     };
     
     return (
-        <div className="form-control w-full">
+        <div className="form-control border border-base-content/20 rounded-md w-full">
             {/* Always visible header with toggle */}
-            <div className="label flex items-center justify-between">
+            <div className="label flex items-center ml-2 justify-between">
                 <div className="flex items-center gap-2">
                     <InfoTooltip tooltipContent="Guardrails help ensure that the AI responses adhere to specific guidelines or restrictions.">
                         <span className="label-text capitalize font-medium">Prompt Guards</span>
@@ -157,11 +156,9 @@ const GuardrailSelector = ({ params, searchParams }) => {
                         type="checkbox" 
                         checked={guardrailsEnabled} 
                         onChange={handleToggleGuardrails}
-                        className="hidden"
+                        className="toggle"
                     />
-                    <div className={`w-12 h-6 rounded-full transition-all duration-300 flex items-center px-1 ${guardrailsEnabled ? 'bg-primary justify-end' : 'bg-base-300 justify-start'}`}>
-                        <div className="w-4 h-4 rounded-full bg-white"></div>
-                    </div>
+                    
                 </label>
             </div>
             
@@ -169,7 +166,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
             {guardrailsEnabled && (
                 <>
                     {/* Selected guardrails */}
-                    <div className="mt-2 mb-2">
+                    <div className="mt-2 mb-2 ml-2">
                         <div className="text-sm">
                             {selectedGuardrails.length > 0 ? (
                                 <div className="flex flex-wrap gap-1">
@@ -187,7 +184,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                     </div>
                     
                     {/* Button to show options or close options */}
-                    <div className="mt-2">
+                    <div className="m-2 mb-4">
                         {!showOptions ? (
                             <button
                                 onClick={handleToggleOptions}
@@ -213,7 +210,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                         {/* Predefined Guardrails */}
                                         {Object.entries(GUARDRAILS_TEMPLATES).map(([key, { name, description }]) => (
                                             <div key={key} className="form-control">
-                                                <label className="label cursor-pointer justify-start gap-2">
+                                                <div className="label cursor-pointer justify-start gap-2">
                                                     <input 
                                                         type="checkbox" 
                                                         className="checkbox checkbox-sm" 
@@ -223,23 +220,23 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                                     <InfoTooltip tooltipContent={description}>
                                                     <span className="label-text">{name}</span>
                                                     </InfoTooltip>
-                                                </label>
+                                                </div>
                                             </div>
                                         ))}
                                         
                                         {/* Custom Guardrail */}
                                         <div className="form-control col-span-full">
-                                            <label className="label cursor-pointer justify-start gap-2">
+                                            <div className="label cursor-pointer justify-start gap-2">
                                                 <input 
                                                     type="checkbox" 
                                                     className="checkbox checkbox-sm" 
-                                                    checked={selectedGuardrails.includes("custom")} 
-                                                    onChange={() => handleGuardrailChange("custom")} 
+                                                    checked={showCustomInput || customPrompt.trim() !== ''} 
+                                                    onChange={() => handleGuardrailChange('custom')} 
                                                     />
                                                 <InfoTooltip tooltipContent="Add your own custom guardrail specification">
                                                 <span className="label-text">Custom Guard</span>
                                                 </InfoTooltip>
-                                            </label>
+                                            </div>
                                             
                                             {showCustomInput && (
                                                 <div className="mt-2">
