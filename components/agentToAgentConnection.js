@@ -492,17 +492,16 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
           flushSync(() => {
             setCurrentVariable(base);
             setSelectedAgent(sel);
-            setToolData({ ...base, thread_id: !!sel?.thread_id });
+            setToolData({ ...base, thread_id: sel?.variables?.thread_id || !!sel?.thread_id });
             setVariablesPath({ ...(parentVariablesPath[sel._id] || parentVariablesPath || {}) });
-          });
-
+          })
           openModal(MODAL_TYPE.ORCHESTRAL_AGENT_PARAMETER_MODAL);
           return currentEdges;
         });
         return currentNodes;
       });
     },
-    [agents]
+    [agents, toolData, selectedAgent, variablesPath, currentVariable]
   );
 
   const closeConfigSidebar = useCallback(() => setConfigSidebar({ isOpen: false, nodeId: null, agent: null }), []);

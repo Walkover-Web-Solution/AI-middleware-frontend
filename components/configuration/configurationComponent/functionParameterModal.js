@@ -59,9 +59,10 @@ function FunctionParameterModal({
   useEffect(() => {
     // Only update if function_details actually changed
     if (!isEqual(toolData, function_details)) {
-      setToolData(function_details);
+      const thread_id = function_details?.thread_id ? function_details?.thread_id : toolData?.thread_id;
+      setToolData({ ...function_details, thread_id });
     }
-  }, [function_details, setToolData]); // Add setToolData to dependencies
+  }, [function_details]);
 
   useEffect(() => {
     // Only update if variables_path[functionName] actually changed
@@ -213,11 +214,11 @@ function FunctionParameterModal({
 
   // Reset the modal data to the original function_details
   const resetModalData = useCallback(() => {
-    setToolData(function_details);
+    setToolData(null);
     setObjectFieldValue("");
     setIsTextareaVisible(false);
     setIsDescriptionEditing(false);
-  }, [function_details, setToolData]);
+  }, []);
 
   const handleCloseModal = useCallback(() => {
     resetModalData();
