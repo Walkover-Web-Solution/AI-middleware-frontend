@@ -43,7 +43,9 @@ const AdvancedParameters = ({ params, searchParams }) => {
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
-
+  useEffect(() => {
+    setInputConfiguration(configuration);
+  }, [configuration]);
   // Filter parameters by level
   const getParametersByLevel = (level) => {
     if (!modelInfoData) return [];
@@ -61,7 +63,6 @@ const AdvancedParameters = ({ params, searchParams }) => {
   const level0Parameters = getParametersByLevel(0); // Hidden parameters
   const level1Parameters = getParametersByLevel(1); // Accordion parameters  
   const level2Parameters = getParametersByLevel(2); // Outside accordion parameters
-  console.log("level1Parameters", level1Parameters)
   const handleTutorial = () => {
     setTutorialState(prev => ({
       ...prev,
@@ -93,6 +94,17 @@ const AdvancedParameters = ({ params, searchParams }) => {
     setSelectedOptions(selectedFunctiondata);
   }, [tool_choice_data])
 
+  const debounce = (func, delay) => {
+    let timeoutId;
+    return function (...args) {
+      const context = this;
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(context, args);
+      }, delay);
+    };
+  };
+
   const handleInputChange = (e, key, isSlider = false) => {
     setInputConfiguration((prev) => ({
       ...prev,
@@ -112,6 +124,11 @@ const AdvancedParameters = ({ params, searchParams }) => {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
+
+  const debouncedInputChange = useCallback(
+    debounce(handleInputChange, 500),
+    [configuration, params?.id, params?.version]
+  );
 
   const handleSelectChange = (e, key, defaultValue, Objectvalue = {}, isDeafaultObject = true) => {
     let newValue;
@@ -152,6 +169,11 @@ const AdvancedParameters = ({ params, searchParams }) => {
     }
   };
 
+  const debouncedSelectChange = useCallback(
+    debounce(handleSelectChange, 500),
+    [configuration, params?.id, params?.version]
+  );
+
   const toggleAccordion = () => {
     setIsAccordionOpen((prevState) => !prevState);
   };
@@ -179,7 +201,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
       }
     };
     dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
-  }, [dispatch, params?.id,searchParams?.version]);
+  }, [dispatch, params?.id, searchParams?.version]);
 
   // Helper function to render parameter fields
   const renderParameterField = (key, { field, min = 0, max, step, default: defaultValue, options }) => {
@@ -330,9 +352,9 @@ const AdvancedParameters = ({ params, searchParams }) => {
                   modelInfoData?.[key]?.[configuration?.[key]] :
                   configuration?.[key]
               }
-              onBlur={(e) => handleInputChange(e, key, true)}
-              onInput={(e) => {
+              onChange={(e) => {
                 document.getElementById(`sliderValue-${key}`).innerText = e.target.value;
+                debouncedInputChange(e, key, true);
               }}
               className="range range-accent range-sm h-3 range-extra-small-thumb"
               name={key}
@@ -343,13 +365,13 @@ const AdvancedParameters = ({ params, searchParams }) => {
           <input
             type="text"
             value={inputConfiguration?.[key] === 'default' ? '' : inputConfiguration?.[key] || ''}
-            onChange={(e) =>
+            onChange={(e) => {
               setInputConfiguration((prev) => ({
                 ...prev,
                 [key]: e.target.value,
-              }))
-            }
-            onBlur={(e) => handleInputChange(e, key)}
+              }));
+              debouncedInputChange(e, key);
+            }}
             className="input input-bordered input-sm w-full"
             name={key}
           />
@@ -448,32 +470,32 @@ const AdvancedParameters = ({ params, searchParams }) => {
           ))}
         </div>
       )}
-     {level1Parameters.length>0 && (
-      <div className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
-        handleTutorial()
-        toggleAccordion()
-      }}>
-        <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type." className="cursor-pointer mr-2">
-          <div className="cursor-pointer label-text inline-block ml-1">
-            Advanced Parameters
-          </div>
-        </InfoTooltip>
+      {level1Parameters.length > 0 && (
+        <div className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
+          handleTutorial()
+          toggleAccordion()
+        }}>
+          <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type." className="cursor-pointer mr-2">
+            <div className="cursor-pointer label-text inline-block ml-1">
+              Advanced Parameters
+            </div>
+          </InfoTooltip>
 
-        <span className="cursor-pointer"> {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
-      </div>
-    )}
+          <span className="cursor-pointer"> {isAccordionOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</span>
+        </div>
+      )}
       {tutorialState.showSuggestion && (<TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"AdvanceParameter"} TutorialDetails={"Advanced Parameters"} />)}
       {tutorialState.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
-      {level1Parameters.length>0 && (
-      <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
-        {/* Level 1 Parameters - Inside Accordion */}
-        {level1Parameters.map(([key, paramConfig]) => (
-          renderParameterField(key, paramConfig)
-        ))}
-      </div>
-    )}
+      {level1Parameters.length > 0 && (
+        <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+          {/* Level 1 Parameters - Inside Accordion */}
+          {level1Parameters.map(([key, paramConfig]) => (
+            renderParameterField(key, paramConfig)
+          ))}
+        </div>
+      )}
     </div>
   );
 };
