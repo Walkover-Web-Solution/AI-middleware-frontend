@@ -8,7 +8,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { deleteKnowBaseDataAction, getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { KNOWLEDGE_BASE_COLUMNS, MODAL_TYPE } from "@/utils/enums";
 import { closeModal, GetFileTypeIcon, openModal } from "@/utils/utility";
-import { EllipsisVerticalIcon, LayoutGridIcon, SquarePenIcon, TableIcon, TrashIcon } from "@/components/Icons";
+import { SquarePenIcon, TrashIcon } from "@/components/Icons";
 import React, { useEffect, useState, use } from 'react';
 import { useDispatch } from "react-redux";
 import DeleteModal from "@/components/UI/DeleteModal";
@@ -20,23 +20,13 @@ const Page = ({ params }) => {
   const resolvedParams = use(params);
   const dispatch = useDispatch();
   const knowledgeBaseData = useCustomSelector((state) => state?.knowledgeBaseReducer?.knowledgeBaseData?.[resolvedParams?.org_id]) || [];
-  const [viewMode, setViewMode] = useState(window.innerWidth < 640 ? 'grid' : 'table');
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
-  const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData)
+  const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
+  
   useEffect(() => {
-    const updateScreenSize = () => {
-      if (window.matchMedia('(max-width: 640px)').matches) {
-        setViewMode('grid');
-      } else {
-        setViewMode('table');
-      }
-    };
-    dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
-    updateScreenSize();
-    setFilterKnowledgeBase(knowledgeBaseData)
-    window.addEventListener('resize', updateScreenSize);
-    return () => window.removeEventListener('resize', updateScreenSize);
+    dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id));
+    setFilterKnowledgeBase(knowledgeBaseData);
   }, []);
 
  
@@ -45,13 +35,13 @@ const Page = ({ params }) => {
     actualName: item?.name,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
-        {GetFileTypeIcon(item?.source?.data?.type, 14, 14)}
+        {GetFileTypeIcon(item?.source?.data?.type||item.source?.type, 14, 14)}
         </div>
       <div className="tooltip" data-tip={item.name}>
         {truncate(item.name, 30)}
       </div>
     </div>,
-    description: item?.description,
+    description: <div className="tooltip" data-tip={item.description}>{truncate(item.description, 30)}</div>,
     actual_name: item?.name,
   }));
   const handleUpdateKnowledgeBase = (item) => {
@@ -114,71 +104,20 @@ const Page = ({ params }) => {
           </div>
         </MainLayout>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
-
           <SearchItems data={knowledgeBaseData} setFilterItems={setFilterKnowledgeBase} item="KnowledgeBase" />
-          <div className="flex flex-wrap justify-end items-center gap-2">
-            <div className="join">
-              <button
-                className={`btn join-item ${viewMode === 'grid' ? 'bg-primary text-base-100' : ''}`}
-                onClick={() => setViewMode('grid')}
-              >
-                <LayoutGridIcon size={16} />
-              </button>
-              <button
-                className={`btn join-item ${viewMode === 'table' ? 'bg-primary text-base-100' : ''}`}
-                onClick={() => setViewMode('table')}
-              >
-                <TableIcon size={16} />
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
       <div className="px-4">
         {filterKnowledgeBase.length > 0 ? (
-          viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filterKnowledgeBase.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-base-100 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer relative"
-                >
-                  <div className="dropdown dropdown-right absolute top-2 right-2">
-                    <div tabIndex={0} role="button" className="btn btn-sm btn-ghost btn-circle" onClick={(e) => e.stopPropagation()}>
-                      <EllipsisVerticalIcon size={16} />
-                    </div>
-                    <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box z-high w-32">
-                      <li><a onClick={() => handleDeleteKnowledgebase(item)} className="text-error hover:bg-error hover:text-error-content">Delete</a></li>
-                      <li><a onClick={() => handleUpdateKnowledgeBase(item)} className="hover:bg-base-200">Update</a></li>
-                    </ul>
-                  </div>
-                  <div className="flex flex-col items-center w-full gap-2">
-                    {GetFileTypeIcon(item?.type, 26, 26)}
-                    <div className="tooltip" data-tip={item?.name}>
-                      <h3 className="text-lg font-medium max-w-[90%] w-full">
-                        {truncate(String(item?.name), 10)}
-                      </h3>
-                    </div>
-                    <div className="tooltip" data-tip={item?.description}>
-                      <p className="text-sm text-base-content/70 max-w-[90%] w-full">
-                        {truncate(item?.description, 20)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <CustomTable
-              data={tableData}
-              columnsToShow={KNOWLEDGE_BASE_COLUMNS}
-              sorting
-              sortingColumns={['name']}
-              keysToWrap={['name', 'description']}
-              endComponent={EndComponent}
-            />
-          )
+          <CustomTable
+            data={tableData}
+            columnsToShow={KNOWLEDGE_BASE_COLUMNS}
+            sorting
+            sortingColumns={['name']}
+            keysToWrap={['name', 'description']}
+            endComponent={EndComponent}
+          />
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-500">No knowledge base entries found</p>

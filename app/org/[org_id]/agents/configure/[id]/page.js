@@ -31,22 +31,24 @@ const Page = ({params, searchParams }) => {
   // Ref for the main container to calculate percentage-based width
   const containerRef = useRef(null); 
 
-  const { bridgeType, versionService, bridgeName, allbridges} = useCustomSelector((state) => {
+  const { bridgeType, versionService, bridgeName, allbridges, isFocus} = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[resolvedParams?.id];
     const allbridges = state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs;
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version];
+    const isFocus = state?.bridgeReducer?.isFocus;
     return {
       bridgeType: bridgeData?.bridgeType,
       versionService: versionData?.service,
       bridgeName: bridgeData?.name,
-      allbridges
+      allbridges,
+      isFocus
     };
   });
   
   // Enhanced responsive detection
   useEffect(() => {
     const handleResize = () => {
-      const desktop = window.innerWidth >= 1024;
+      const desktop = window.innerWidth >= 1080;
       setIsDesktop(desktop);
       if (!desktop) {
         setLeftWidth(50); // Reset on mobile
@@ -189,7 +191,7 @@ const Page = ({params, searchParams }) => {
   return (
     <div 
       ref={containerRef} // Add ref to the main container
-      className={`w-full h-full max-h-[calc(100vh-4rem)] ${isDesktop ? 'flex flex-row overflow-hidden' : 'overflow-y-auto'}`}
+      className={`w-full h-full ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : ''} ${isDesktop ? 'flex flex-row overflow-y-hidden' :isFocus ? 'overflow-y-hidden' : 'overflow-y-auto'}`}
     >
       {/* Configuration Panel */}
       <div 
@@ -199,7 +201,7 @@ const Page = ({params, searchParams }) => {
         `}
         style={isDesktop ? { width: `${leftWidth}%` } : {}}
       >
-        <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} px-4 py-4`}>
+        <div className={`${isDesktop && !isFocus? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} px-4 py-4`}>
           <ConfigurationPage apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef}  params={resolvedParams} searchParams={resolvedSearchParams}/>
         </div>
       </div>
@@ -220,7 +222,7 @@ const Page = ({params, searchParams }) => {
         style={isDesktop ? { width: `${100 - leftWidth}%` } : {}}
         id="parentChatbot"
       >
-        <div className={`${isDesktop ? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} pb-4`}>
+        <div className={`${isDesktop && !isFocus? 'flex-1 overflow-y-auto overflow-x-hidden' : ''} pb-4`}>
           <div className={`${isDesktop ? 'h-full flex flex-col' : ''}`}>
             <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams}/>
             {!sessionStorage.getItem('orchestralUser') ? <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>

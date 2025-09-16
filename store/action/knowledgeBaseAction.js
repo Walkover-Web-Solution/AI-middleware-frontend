@@ -15,6 +15,7 @@ export const createKnowledgeBaseEntryAction = (data, orgId) => async (dispatch) 
         data : response?.data,
         _id: response?.data?._id 
       }))
+      return response?.data
     }
   } catch (error) {
     toast.error('something went wrong')

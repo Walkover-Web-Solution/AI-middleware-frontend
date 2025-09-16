@@ -401,7 +401,7 @@
             }
         }
 
-        openGtwy(agent_id = null, meta={}, agent_name=null) {
+        openGtwy(agent_id = null, meta={}, agent_name=null, agent_purpose=null) {
             if (!this.state.isInitialized) {
                 this.initializeGtwyEmbed().then(() => {
                     this.openGtwy(); // Retry after initialization
@@ -419,6 +419,10 @@
             if (agent_name)
             {
                 SendDataToGtwyEmbed({agent_name})
+            }
+            if (agent_purpose)
+            {
+                SendDataToGtwyEmbed({agent_purpose})
             }
 
             const gtwyInterfaceEmbed = document.getElementById('gtwyInterfaceEmbed');
@@ -961,14 +965,14 @@
     }
 
     // New GTWY specific functions - FIXED WITH PROPER INITIALIZATION
-    window.openGtwy = ({agent_id = "", meta={}, agent_name=""} = "") => {
-        gtwyEmbedManager.openGtwy(agent_id, meta, agent_name);
+    window.openGtwy = ({agent_id = "", meta={}, agent_name="", agent_purpose=""} = "") => {
+        gtwyEmbedManager.openGtwy(agent_id, meta, agent_name, agent_purpose);
     };
     window.closeGtwy = () => gtwyEmbedManager.closeGtwy();
 
     window.GtwyEmbed = {
         open: () => {
-            gtwyEmbedManager.openGtwy(agent_id = "", meta={}, agent_name="");
+            gtwyEmbedManager.openGtwy(agent_id = "", meta={}, agent_name="", agent_purpose="");
         },
         close: () => {
             gtwyEmbedManager.closeGtwy();
