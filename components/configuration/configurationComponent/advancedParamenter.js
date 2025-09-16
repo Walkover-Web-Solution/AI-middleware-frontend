@@ -63,7 +63,6 @@ const AdvancedParameters = ({ params, searchParams }) => {
   const level0Parameters = getParametersByLevel(0); // Hidden parameters
   const level1Parameters = getParametersByLevel(1); // Accordion parameters  
   const level2Parameters = getParametersByLevel(2); // Outside accordion parameters
-  console.log("level1Parameters", level1Parameters)
   const handleTutorial = () => {
     setTutorialState(prev => ({
       ...prev,
