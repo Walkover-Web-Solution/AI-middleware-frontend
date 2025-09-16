@@ -1,7 +1,7 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { BotIcon, SettingsIcon, FilterSliderIcon } from "@/components/Icons";
+import { BotIcon, SettingsIcon, FilterSliderIcon, AlertIcon } from "@/components/Icons";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
 import ApiGuide from './configurationComponent/ApiGuide';
 import ActionList from "./configurationComponent/actionList";
@@ -29,21 +29,68 @@ import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import Protected from "../protected";
 import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
+import RecommendedModal from "./configurationComponent/RecommendedModal";
 
 const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef, searchParams }) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
+    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys,shouldToolsShow} = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const service = versionData?.service;
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
+        return {
+            bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
+            modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type?.toLowerCase(),
+            reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt,
+            modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
+            showConfigType: state.userDetailsReducer.userDetails.showConfigType,
+            showDefaultApikeys: state.userDetailsReducer.userDetails.addDefaultApiKeys,
+            shouldToolsShow: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.tools,
+            bridgeApiKey: versionData?.apikey_object_id?.[
+                service === 'openai_response' ? 'openai' : service
+            ],
+            prompt: versionData?.configuration?.prompt || "",
+            shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
+            bridge_functions: versionData?.function_ids || [],
+            connect_agents: versionData?.connected_agents || {},
+            knowbaseVersionData: versionData?.doc_ids || [],
+        };
+    });
+    const [showConnectAgent, setShowConnectAgent] = useState(Object.keys(connect_agents).length === 0);
+    const [showEmbed, setShowEmbed] = useState(bridge_functions.length === 0);
+    const [showKnowledgebase, setShowKnowledgebase] = useState(knowbaseVersionData.length === 0);
+    const resetBorder = (ref, selector) => {
+        if (ref?.current) {
+            const element = ref.current.querySelector(selector);
+            if (element) {
+                element.style.borderColor = "";
+            }
+        }
+    };
+    useEffect(() => {
+        setShowConnectAgent(Object.keys(connect_agents).length === 0);
+        setShowEmbed(bridge_functions.length === 0);
+        setShowKnowledgebase(knowbaseVersionData.length === 0);
+    }, [connect_agents, bridge_functions, knowbaseVersionData]);
+   
 
-    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType, showDefaultApikeys} = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type?.toLowerCase(),
-        reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt,
-        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
-        showGuide: state.userDetailsReducer.userDetails.showGuide,
-        showConfigType: state.userDetailsReducer.userDetails.showConfigType,
-        showDefaultApikeys: state.userDetailsReducer.userDetails.addDefaultApiKeys,
-    }));
+    useEffect(() => {
+        const hasPrompt = prompt !== "";
+        const hasApiKey = !!bridgeApiKey;
+        if (hasPrompt) {
+            resetBorder(promptTextAreaRef, 'textarea');
+        }
+
+        if (hasApiKey) {
+            resetBorder(apiKeySectionRef, 'select');
+        }
+
+    }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef]);
+
     useEffect(() => {
         if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
             if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
@@ -67,6 +114,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
         }, 1000);
         return () => clearTimeout(timeoutId);
     }, [bridgeType, reduxPrompt]);
+
     const handleNavigation = (target) => {
         setCurrentView(target);
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}&view=${target}`);
@@ -94,22 +142,77 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 <>
                     <PreEmbedList params={params} searchParams={searchParams}/>
                     <InputConfigComponent params={params} searchParams={searchParams} promptTextAreaRef={promptTextAreaRef} isEmbedUser={isEmbedUser} />
-                    {/* <NewInputConfigComponent params={params} /> */}
-                    <EmbedList params={params} searchParams={searchParams}/>
-                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                    <ConnectedAgentList params={params} searchParams={searchParams}/>
-                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                    <KnowledgebaseList params={params} searchParams={searchParams}/>
-                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                    <PrebuiltToolsList params={params} searchParams={searchParams}/>
+                        {!shouldToolsShow ? (
+                            <>
+                                <div className="flex flex-row items-center text-base-content ">
+                                    <AlertIcon className="w-4 h-4" />
+                                    <p className="text-sm ml-2">This model does not  support tools</p>
+                                </div>
+                                
+                            </>
+                        ):(<>
+                            <div className="hidden md:block my-0">
+                        <div className="flex flex-col gap-2">
+                            {/* Always rendered lists (only when they have data) */}
+                            {[
+                                { Component: EmbedList, condition: !showEmbed },
+                                { Component: ConnectedAgentList, condition: !showConnectAgent },
+                                { Component: KnowledgebaseList, condition: !showKnowledgebase },
+                            ].map(({ Component, condition }, index) =>
+                                condition ? (
+                                    <div key={index} className="pb-2 border-b border-gray-200 last:border-b-0">
+                                        <Component params={params} shouldToolsShow={shouldToolsShow} searchParams={searchParams} />
+                                    </div>
+                                ) : null
+                            )}
+
+                            {/* Render empty ones side-by-side in a compact grid */}
+                            
+                            <div className="grid grid-cols-3 gap-2">
+                                {[
+                                    { Component: EmbedList, condition: showEmbed },
+                                    { Component: ConnectedAgentList, condition: showConnectAgent },
+                                    { Component: KnowledgebaseList, condition: showKnowledgebase },
+                                ].map(({ Component, condition }, index) =>
+                                    condition ? (
+                                            <Component params={params} shouldToolsShow={shouldToolsShow} searchParams={searchParams} />
+                                    ) : null
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    </>
+                )}
+
+                    <div className="block md:hidden">
+                        <EmbedList params={params} searchParams={searchParams}/>
+                        <hr className="my-4 bg-base-200 border-base-300" />
+                        <ConnectedAgentList params={params} searchParams={searchParams}/>
+                        <hr className="my-4 bg-base-200 border-base-300" />
+                        <KnowledgebaseList params={params} searchParams={searchParams}/>
+                        <hr className="my-4 bg-base-200 border-base-300" />
+                    </div>
+                    {/* <PrebuiltToolsList params={params} searchParams={searchParams}/> */}
                 </>
             )}
-
-            <ServiceDropdown params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} />
-            <ModelDropdown params={params} searchParams={searchParams}/>
-            {((isEmbedUser && !showDefaultApikeys) || (!isEmbedUser)) && <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams}/>}
-            <AdvancedParameters params={params} searchParams={searchParams}/>
-            
+            <RecommendedModal params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} bridgeApiKey={bridgeApiKey} shouldPromptShow={shouldPromptShow}/>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="w-full">
+                                <ModelDropdown params={params} searchParams={searchParams} />
+                            </div>
+                            <div className="w-full">
+                                <ServiceDropdown
+                                    params={params}
+                                    apiKeySectionRef={apiKeySectionRef}
+                                    promptTextAreaRef={promptTextAreaRef}
+                                    searchParams={searchParams}
+                                />
+                            </div>
+                            <div className="w-full">
+                                <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
+                            </div>
+                        </div>
+            <AdvancedParameters params={params} />
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
                     <AddVariable params={params} searchParams={searchParams}/>
@@ -118,10 +221,10 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 </>
             )}
         </>
-    ), [bridgeType, modelType, params, modelName]);
+    ), [bridgeType, modelType, params, modelName, shouldPromptShow, showConnectAgent, showEmbed, showKnowledgebase]);
+
     const renderChatbotConfigView = useMemo(() => () => (
         <>
-
             <UserRefernceForRichText params={params} searchParams={searchParams}/>
             <StarterQuestionToggle params={params} searchParams={searchParams}/>
             <ActionList params={params} searchParams={searchParams}/>
@@ -176,13 +279,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                                 <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
                             </button>
                         }
-                        {/* {((isEmbedUser && showGuide) || (!isEmbedUser && bridgeType !== 'trigger')) && <button
-                            onClick={() => handleNavigation('guide')}
-                            className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
-                        >
-                            <FilterSliderIcon size={16} className="shrink-0" />
-                            <span className={`${currentView === 'guide' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Integration Guide</span>
-                        </button>} */}
                     </div>}
                 </div>
             </div>}

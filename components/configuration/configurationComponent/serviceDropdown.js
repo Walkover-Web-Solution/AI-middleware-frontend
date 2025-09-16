@@ -3,7 +3,6 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { InfoIcon } from "@/components/Icons";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
-import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
 import Protected from "@/components/protected";
 
@@ -32,48 +31,10 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
     });
 
     const [selectedService, setSelectedService] = useState(service);
-    const [modelRecommendations, setModelRecommendations] = useState(null);
-    const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
     const dispatch = useDispatch();
 
-  const resetBorder = (ref, selector) => {
-    if (ref?.current) {
-      const element = ref.current.querySelector(selector);
-      if (element) {
-        element.style.borderColor = "";
-        
-      }
-    }
-  };
+ 
 
-  const setErrorBorder = (ref, selector, scrollToView = false) => {
-    if (ref?.current) {
-      if (scrollToView) {
-        ref.current.scrollIntoView({ behavior: 'smooth'  });
-      }
-      setTimeout(() => {
-        const element = ref.current.querySelector(selector);
-        if (element) {
-          element.focus();
-          element.style.borderColor = "red";
-        }
-      }, 300);
-    }
-  };
-
-  useEffect(() => {
-    const hasPrompt =!shouldPromptShow|| prompt !== ""||(promptTextAreaRef.current&&promptTextAreaRef.current.querySelector('textarea').value.trim()!=="");
-    const hasApiKey = !!bridgeApiKey;
-    
-    if (hasPrompt) {
-      resetBorder(promptTextAreaRef, 'textarea');
-    }
-    
-    if (hasApiKey) {
-      resetBorder(apiKeySectionRef, 'select');
-    }
-    
-  }, [bridgeApiKey, prompt, apiKeySectionRef, promptTextAreaRef]);
     useEffect(() => {
         if (service) {
             setSelectedService(service);
@@ -142,74 +103,31 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
         <div className="space-y-4 w-full">
             <div className="form-control">
                 <div className="gap-2 max-w-xl">
-                    <div className="label max-w-xs flex justify-between items-center gap-10">
-                        <span className="label-text font-medium items-end">LLM Provider</span>
-                     {(shouldPromptShow) && (  <button
-                            className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text hover:opacity-80 transition-opacity"
-                            onClick={handleGetRecommendations}
-                            disabled={isLoadingRecommendations}
-                        >
-                            {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
-                        </button>
-                       )}                      
+                    <div className="label flex justify-between items-center">
+                        <span className="label-text font-medium">LLM Provider</span>
                     </div>
                 </div>
-                {modelRecommendations && (
-                    <div className="mb-2 p-4 bg-base-100 rounded-lg border border-base-content/20 max-w-xs">
-                        {modelRecommendations.error ? (
-                            <p className="text-red-500 text-sm">{modelRecommendations.error}</p>
-                        ) : (
-                            <div className="space-y-2">
-                                <p className="text-base-content">
-                                    <span className="font-medium">Recommended Service:</span> {modelRecommendations?.available?.service}
-                                </p>
-                                <p className="text-base-content">
-                                    <span className="font-medium">Recommended Model:</span> {modelRecommendations?.available?.model}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                )}
-                {isEmbedUser && showDefaultApikeys ? (
-                    <div className="flex items-center gap-2">
-                        <select
-                            value={selectedService}
-                            onChange={handleServiceChange}
-                            className="select select-sm border-base-content/20 capitalize w-full max-w-xs"
-                        >
-                            <option disabled>Select a Service</option>
-                            {Object.keys(apiKeyObjectIdData).map((key) => {
-                                const service = SERVICES.find((service) => service.value === key);
-                                if (service) {
-                                    return <option key={service.value} value={service.value}>{service.displayName}</option>;
-                                }
-                                return null;
-                            })}
-                        </select>
-                    </div>
-                ) : (
-                    <div className="flex items-center gap-2">
-                        <select
-                            value={selectedService}
-                            onChange={handleServiceChange}
-                            className="select select-sm border-base-content/20 capitalize w-full max-w-xs"
-                            disabled={isDisabled}
-                        >
-                            <option disabled>Select a Service</option>
-                            {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
-                                <option key={value} value={value}>{displayName}</option>
-                            )) : null}
-                        </select>
-                        {isDisabled && (
-                            <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                                <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
-                                <span className='label-text-alt text-xs leading-tight'>
-                                    Batch API is only applicable for OpenAI services.
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                )}
+                <div className="flex items-center gap-2">
+                    <select
+                        value={selectedService}
+                        onChange={handleServiceChange}
+                        className="select select-sm select-bordered capitalize w-full max-w-xs"
+                        disabled={isDisabled}
+                    >
+                        <option disabled>Select a Service</option>
+                        {Array.isArray(SERVICES) ? SERVICES.map(({ value, displayName }) => (
+                            <option key={value} value={value}>{displayName}</option>
+                        )) : null}
+                    </select>
+                    {isDisabled && (
+                        <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
+                            <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
+                            <span className='label-text-alt text-xs leading-tight'>
+                                Batch API is only applicable for OpenAI services.
+                            </span>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
