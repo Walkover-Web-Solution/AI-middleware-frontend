@@ -33,9 +33,9 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   }));
 
   const toggleComparison = () => setShowComparison(prev => !prev); 
-  const filterDataByKeys = (data, keysToExtract) => {
+  const filterDataByKeys = (data = [], keysToExtract = []) => {
     const filteredItem = {};
-    keysToExtract.forEach(key => {
+    keysToExtract?.forEach(key => {
       if ((key in data)) {
         filteredItem[key] = data[key];
       }
@@ -94,7 +94,6 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
 
   // Extract important configuration changes to show at the top level
   const extractedConfigChanges = useMemo(() => {
-    debugger
     const extracted = {};
     
 
@@ -133,7 +132,6 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   
   // Get a count of changes by category
   const changesSummary = useMemo(() => {
-    debugger
     const summary = {};
 
     // Add main category changes
