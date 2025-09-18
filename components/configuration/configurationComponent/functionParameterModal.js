@@ -48,7 +48,6 @@ function FunctionParameterModal({
   // Selected Agent Version (for display only)
   useEffect(() => {
     const currentVersion=versionData?.connected_agents[selectedBridge?.name]?.version_id||""
-    console.log(currentVersion,"hello")
     setSelectedVersion(currentVersion);
   }, [selectedBridge,versionData]);
   // Memoize properties to prevent unnecessary re-renders
