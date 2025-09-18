@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Modal from "@/components/UI/Modal";
 import InfoTooltip from "@/components/InfoTooltip";
+import { useCustomSelector } from "@/customHooks/customSelector";
 
 function FunctionParameterModal({
   name = "",
@@ -28,15 +29,31 @@ function FunctionParameterModal({
   functionName = "",
   variablesPath = {},
   setVariablesPath = () => { },
-  isMasterAgent = false
+  isMasterAgent = false,
+  selectedVersion = "",
+  setSelectedVersion = () => { },
+  params = {},
+  searchParams = {},
+  selectedBridge={}
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const dispatch = useDispatch();
+  const {versions, versionData} = useCustomSelector(state => ({
+    versions: state?.bridgeReducer?.allBridgesMap?.[functionId]?.versions,
+    versionData :state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]
 
+  }));
+
+  // Selected Agent Version (for display only)
+  useEffect(() => {
+    const currentVersion=versionData?.connected_agents[selectedBridge?.name]?.version_id||""
+    console.log(currentVersion,"hello")
+    setSelectedVersion(currentVersion);
+  }, [selectedBridge,versionData]);
   // Memoize properties to prevent unnecessary re-renders
   const properties = useMemo(() => function_details?.fields || {}, [function_details?.fields]);
-
+  
   // Memoize isDataAvailable calculation
   const isDataAvailable = useMemo(() =>
     Object.keys(properties).length > 0,
@@ -449,7 +466,7 @@ function FunctionParameterModal({
             </button>}
           </div>
         </div>
-
+       
         {/* Description Editor Section */}
         {isDescriptionEditing && (
           <div className="mb-4 p-4 border border-base-300 rounded-lg bg-base-100">
@@ -529,12 +546,14 @@ function FunctionParameterModal({
             </a>
           </p>
           {(name==='Agent' || (name==='orchestralAgent' && isMasterAgent))&&
-            <div className="flex items-center justify-center gap-2 text-sm">
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <div className="flex items-center ml-10 gap-2">
               <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
                 <label className="label info">
                   Agent’s Thread ID
                 </label>
               </InfoTooltip>
+              
               <input
                 type="checkbox"
                 className="toggle"
@@ -545,7 +564,31 @@ function FunctionParameterModal({
                 checked={!!toolData?.thread_id}
                 title="Toggle to include thread_id while calling function"
               />
+              </div>
+            
+               {/* Versions Dropdown (show only if available) */}
+        {Array.isArray(versions) && versions.length > 0 && (
+          <div className=" flex flex-row ml-5">
+            <div className="form-control flex flex-row w-full max-w-xs">
+              <label className="label">
+                <span className="label-text text-sm">Agent Version</span>
+              </label>
+              <select
+                className="select select-sm select-bordered"
+                value={selectedVersion}
+                onChange={(e) => setSelectedVersion(e.target.value)}
+              >
+                {versions.map((v, idx) => (
+                  <option key={v} value={v}>
+                    Version {idx + 1}
+                  </option>
+                ))}
+              </select>
             </div>
+          </div>
+        )}
+            </div>
+            
           }
           {isTextareaVisible && (
             <p
