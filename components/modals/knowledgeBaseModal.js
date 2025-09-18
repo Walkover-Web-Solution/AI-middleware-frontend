@@ -6,8 +6,9 @@ import { closeModal, openModal, RequiredItem } from '@/utils/utility';
 import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/store/action/knowledgeBaseAction';
 import Modal from '../UI/Modal';
 import { toast } from 'react-toastify';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 
-const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {}, knowledgeBaseData=[]}) => {
+const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => { }, knowledgeBaseData = [], knowbaseVersionData = [], searchParams, addToVersion = false }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSectionType, setSelectedSectionType] = useState('default');
@@ -40,10 +41,10 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
       setIsLoading(false);
       return;
     }
-    const isDuplicate = knowledgeBaseData.some(kb => 
+    const isDuplicate = knowledgeBaseData.some(kb =>
       kb.name?.trim().toLowerCase() === newName.toLowerCase()?.trim() && kb._id !== selectedKnowledgeBase?._id
     );
-    
+
     if (isDuplicate) {
       toast.error('Knowledge Base name already exists. Please choose a different name.');
       setIsLoading(false);
@@ -86,7 +87,20 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
     }
 
     try {
-      selectedKnowledgeBase ? await dispatch(updateKnowledgeBaseAction({ data: { data: payload, id: selectedKnowledgeBase?._id } }, params?.org_id)) : await dispatch(createKnowledgeBaseEntryAction(payloadFormData, params?.org_id));
+      if (selectedKnowledgeBase) {
+        await dispatch(updateKnowledgeBaseAction({ data: { data: payload, id: selectedKnowledgeBase?._id } }, params?.org_id))
+      }
+      else {
+        const data = await dispatch(createKnowledgeBaseEntryAction(payloadFormData, params?.org_id));
+
+        {
+          addToVersion &&
+          dispatch(updateBridgeVersionAction({
+            versionId: searchParams?.version,
+            dataToSend: { doc_ids: [...(knowbaseVersionData || []), data._id] }
+          }));
+        }
+      }
       closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
       event.target.reset();
       resetModal();
