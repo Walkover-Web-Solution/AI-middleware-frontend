@@ -75,7 +75,7 @@ export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, g
     const result = await createBridgeVersionApi(dataToSend);
     if (result?.success) {
       onSuccess(result);
-      dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId, version_description: data?.version_description }));
+      dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId, version_description: data?.version_description, orgId: data?.orgId }));
       toast.success('New version created successfully');
     }
   } catch (error) {
