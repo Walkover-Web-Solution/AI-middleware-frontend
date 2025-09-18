@@ -19,8 +19,8 @@ const StarterQuestionToggle = ({ params, searchParams }) => {
     };
 
     return (
-        <div className="flex items-center gap-2">
-            <div className="label cursor-pointer">
+        <div className="flex items-center justify-between border border-base-content/20 rounded-md gap-2">
+            <div className="label cursor-pointer ml-1">
                 <InfoTooltip tooltipContent={"Toggle to enable/disable starter questions"}>
                 <span className="font-medium mr-2 info">Starter Question</span>
                 </InfoTooltip>
@@ -29,7 +29,7 @@ const StarterQuestionToggle = ({ params, searchParams }) => {
                 type="checkbox"
                 checked={IsstarterQuestionEnable}
                 onChange={handleToggle}
-                className="toggle"
+                className="toggle mr-2"
                 defaultValue={IsstarterQuestionEnable ? "true" : "false"}
             />
         </div>
