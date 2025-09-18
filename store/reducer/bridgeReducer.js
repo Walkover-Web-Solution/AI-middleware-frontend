@@ -71,7 +71,7 @@ export const bridgeReducer = createSlice({
       state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.bridge);
     },
     createBridgeVersionReducer: (state, action) => {
-      const { newVersionId, parentVersionId, bridgeId, version_description } = action.payload;
+      const { newVersionId, parentVersionId, bridgeId, version_description, orgId } = action.payload;
       if (!state.bridgeVersionMapping[bridgeId]) {
         state.bridgeVersionMapping[bridgeId] = {};
       }
@@ -81,6 +81,8 @@ export const bridgeReducer = createSlice({
         version_description
       };
       state.allBridgesMap[bridgeId].versions.push(newVersionId);
+      const bridgeIndex = state.org[orgId].orgs.findIndex(org => org._id === bridgeId);
+      state.org[orgId].orgs[bridgeIndex].versions.push(newVersionId);
     },
     updateBridgeReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
@@ -99,10 +101,10 @@ export const bridgeReducer = createSlice({
           const index = allData.findIndex(bridge => bridge._id === _id);
           if (index !== -1) {
             // Update the specific bridge object within the array immutably
-            state.org[bridges.org_id].orgs[index] = {
-              ...state.org[bridges.org_id].orgs[index],
-              ...bridges
-            };
+          state.org[bridges.org_id].orgs[index] = {
+            ...state.org[bridges.org_id].orgs[index],
+            ...bridges
+          };
           }
         }
       }

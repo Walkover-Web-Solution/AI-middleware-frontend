@@ -17,7 +17,7 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
         if (!apiKey?._id) return [];
         
         // Get version IDs associated with this API key
-        const currentApiKey = apikeyData.find(item => item._id === apiKey._id);
+        const currentApiKey = apikeyData?.find(item => item._id === apiKey._id);
         const connectedVersionIds = currentApiKey?.version_ids || [];
         
         if (!connectedVersionIds.length) return [];
@@ -28,7 +28,7 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
         // Transform bridges to connected agents
         return Object.values(bridges)
             .map(bridge => {
-                const matchingVersions = bridge.versions
+                const matchingVersions = bridge?.versions
                     .map((versionId, index) => 
                         versionIdSet.has(versionId) 
                             ? { id: versionId, versionIndex: index } 
@@ -38,8 +38,8 @@ const ConnectedAgentsModal = ({ apiKey, orgId }) => {
 
                 return matchingVersions.length > 0
                     ? {
-                        name: bridge.name,
-                        bridgeId: bridge._id,
+                        name: bridge?.name,
+                        bridgeId: bridge?._id,
                         versions: matchingVersions
                     }
                     : null;
