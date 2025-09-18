@@ -194,7 +194,7 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
                 {!isDisabled && dropdownOpen && (
                     <ul 
                         tabIndex={0} 
-                        className="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-1 shadow border border-base-300"
+                        className="dropdown-content menu bg-base-100 rounded-box w-full p-1 shadow border border-base-300"
                     >
                         {Array.isArray(availableServices) && availableServices.map((serviceItem) => {
                             const value = serviceItem.value;
@@ -252,7 +252,7 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
                     </div>
                 )}
 
-                <div className="flex items-center gap-2 z-high">
+                <div className="flex items-center gap-2 z-medium">
                     {renderDaisyUIDropdown()}
 
                     {isDisabled && (
