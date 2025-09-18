@@ -65,9 +65,11 @@ const Layout = ({ children }) => {
 
   const navigateToExistingAgent = useCallback((agent, orgId) => {
     const version = agent?.published_version_id || agent?.versions?.[0];
-    router.push(
-      `/org/${orgId}/agents/configure/${agent._id}?version=${version}`
-    );
+    if(agent?._id && orgId && version){
+      router.push(
+        `/org/${orgId}/agents/configure/${agent._id}?version=${version}`
+      );
+    }
     setIsLoading(false);
     setProcessedAgentName(agent.name);
   }, [router]);

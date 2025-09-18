@@ -825,8 +825,6 @@ export function FlowControlPanel({
   };
 
   const handleDiscard = () => {
-    const ok = confirm('Discard all unsaved changes?');
-    if (!ok) return;
     if (typeof onDiscard === 'function') {
       onDiscard();
       return;
