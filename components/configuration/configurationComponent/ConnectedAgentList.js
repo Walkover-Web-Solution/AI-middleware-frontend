@@ -19,6 +19,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     const [currentVariable, setCurrentVariable] = useState(null);
     const [agentTools, setAgentTools] = useState(null);
     const [variablesPath, setVariablesPath] = useState({});
+    const [selectedVersion, setSelectedVersion] = useState(null);
     const router = useRouter();
     let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
@@ -35,7 +36,6 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             variables_path: versionData?.variables_path || {},
         };
     });
-
     const handleSaveAgent = () => {
         try {
             if (!description && !selectedBridge?.description) {
@@ -119,7 +119,8 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
                                 "agent_variables": selectedBridge?.agent_variables,
                                 "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params },
-                                "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false
+                                "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false,
+                                "version_id":selectedVersion
                             }
                         },
                         agent_status: "1"
@@ -223,6 +224,11 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 variablesPath={variablesPath}
                 setVariablesPath={setVariablesPath}
                 variables_path={variables_path}
+                setSelectedVersion={setSelectedVersion}
+                selectedVersion={selectedVersion}
+                params={params}
+                searchParams={searchParams}
+                selectedBridge={selectedBridge}
             />
         </div>
     );
