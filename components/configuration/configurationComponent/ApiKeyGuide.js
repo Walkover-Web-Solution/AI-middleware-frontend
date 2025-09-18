@@ -9,7 +9,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 const Section = ({ title, caption, children }) => (
   <div className="flex items-start flex-col justify-center mb-6">
     <h3 className="text-lg font-semibold mb-2">{title}</h3>
-    <p className="text-sm text-gray-600 block mb-4">{caption}</p>
+    <p className="text-sm text-base-content block mb-4">{caption}</p>
     {children}
   </div>
 );
@@ -27,7 +27,7 @@ const StepCard = ({ stepNumber, title, children }) => (
 );
 
 const CodeBlock = ({ children }) => (
-  <div className="bg-gray-900 rounded-lg p-4 mt-3 mb-3 font-mono text-sm overflow-x-auto">
+  <div className="bg-base-200 rounded-lg p-4 mt-3 mb-3 font-mono text-sm overflow-x-auto">
     <div className="flex items-center">
       <span className="text-green-400 mr-2">$</span>
       <code className="text-yellow-300">{children}</code>
@@ -72,7 +72,7 @@ useEffect(() => {
     const provider = API_PROVIDERS.find(p => p.key === selectedModel);
     if (!provider) return null;
     return (
-      <div className="flex w-full flex-col gap-4 bg-white shadow p-8">
+      <div className="flex w-full flex-col gap-4 bg-base-100 shadow p-8">
         <Section title={provider.title} caption={provider.caption}>
           {provider.steps.map((step, index) => (
             <StepCard key={index} stepNumber={index + 1} title={step.title}>
@@ -84,7 +84,7 @@ useEffect(() => {
                 if (shouldShowKeyFormat) {
                   return (
                     <div key={pIndex}>
-                      <p className="text-sm text-gray-700 mb-3">{paragraph}</p>
+                      <p className="text-sm text-base-content mb-3">{paragraph}</p>
                       <CodeBlock>{provider.keyFormat}</CodeBlock>
                     </div>
                   );
@@ -95,7 +95,7 @@ useEffect(() => {
                   const urlText = provider.url.replace('https://', '');
                   const parts = paragraph.split(urlText);
                   return (
-                    <p key={pIndex} className="text-sm text-gray-700 mb-3">
+                    <p key={pIndex} className="text-sm text-base-content mb-3">
                       {parts[0]}
                       <Link href={provider.url}>{urlText}</Link>
                       {parts[1]}
@@ -105,7 +105,7 @@ useEffect(() => {
 
                 // Regular paragraph
                 return (
-                  <p key={pIndex} className="text-sm text-gray-700 mb-2">
+                  <p key={pIndex} className="text-sm text-base-content mb-2">
                     {paragraph}
                   </p>
                 );

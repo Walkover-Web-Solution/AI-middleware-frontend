@@ -36,7 +36,7 @@ export default function PrivateFormSection({ params, ChooseChatbot, setChatBotId
         }
     };
     return (
-        <div className="flex flex-col gap-4 bg-white rounded-lg shadow p-4">
+        <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow p-4">
             <div>
                 <h3 className="text-lg font-semibold">Step 1</h3>
                 <p className="text-sm text-gray-600">Generate a JWT token</p>
@@ -105,12 +105,16 @@ function ChatbotDropdown({ params, setChatBotId }) {
         setSelectedChatbot(chatbot);
         setChatBotId(chatbot);
     };
-    return (<div className="dropdown dropdown-end">
+    return (
+        <>
+            {/* <div className="dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn m-1">{selectedChatbot ? selectedChatbot.title : 'Select a chatbot'}</div>
         <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
             {chatbots.map((chatbot, index) => (
                 <li key={index} onClick={() => handleSelectChatbot(chatbot)}><a>{chatbot.title}</a></li>
             ))}
         </ul>
-    </div>)
+    </div> */}
+        </>
+    )
 }

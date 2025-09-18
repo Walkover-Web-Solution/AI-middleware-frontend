@@ -8,9 +8,9 @@ import { openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import InfoTooltip from '@/components/InfoTooltip';
 
-function ActionList({ params }) {
+function ActionList({ params, searchParams }) {
     const { action, bridgeType } = useCustomSelector((state) => ({
-        action: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[params?.version]?.actions,
+        action: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.actions,
         bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType
     }));
 
@@ -31,11 +31,11 @@ function ActionList({ params }) {
         dispatch(createOrRemoveActionBridge({
             orgId: params?.org_id,
             bridgeId: params?.id,
-            versionId: params?.version,
+            versionId: searchParams?.version,
             type: "remove",
             dataToSend
         }));
-    }, [dispatch, params]);
+    }, [dispatch, params, searchParams]);
 
     return (
         <div className="form-control">
@@ -48,7 +48,7 @@ function ActionList({ params }) {
                 {action && Object.entries(action).sort().map(([key, value]) => (
                     <div
                         key={key}
-                        className="flex w-[250px] mb-4 flex-col items-start rounded-md border hover:bg-base-200 md:flex-row cursor-pointer"
+                        className="flex w-[250px] mb-4 flex-col items-start rounded-md border border-base-300 hover:bg-base-200 md:flex-row cursor-pointer"
                         onClick={() => {
                             setSelectedKey(key);
                             openModal(MODAL_TYPE.ACTION_MODAL)
@@ -82,7 +82,7 @@ function ActionList({ params }) {
                     </div>
                 ))}
             </div>
-            <ActionModel params={params} actionId={selectedKey} setActionId={setSelectedKey} />
+            <ActionModel params={params} searchParams={searchParams} actionId={selectedKey} setActionId={setSelectedKey} />
         </div>
     );
 }

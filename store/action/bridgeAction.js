@@ -53,7 +53,7 @@ export const createBridgeAction = (dataToSend, onSuccess) => async (dispatch, ge
 export const createBridgeWithAiAction = ({ dataToSend, orgId }, onSuccess) => async (dispatch, getState) => {
   try {
     const data = await createBridge(dataToSend)
-    dispatch(createBridgeReducer({ data, orgId: orgId }));
+    dispatch(createBridgeReducer({data, orgId: orgId}));
     return data;
   } catch (error) {
     if (error?.response?.data?.message?.includes("duplicate key")) {
@@ -75,7 +75,7 @@ export const createBridgeVersionAction = (data, onSuccess) => async (dispatch, g
     const result = await createBridgeVersionApi(dataToSend);
     if (result?.success) {
       onSuccess(result);
-      dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId, version_description: data?.version_description }));
+      dispatch(createBridgeVersionReducer({ newVersionId: result?.version_id, parentVersionId: data?.parentVersionId, bridgeId: data?.bridgeId, version_description: data?.version_description, orgId: data?.orgId }));
       toast.success('New version created successfully');
     }
   } catch (error) {

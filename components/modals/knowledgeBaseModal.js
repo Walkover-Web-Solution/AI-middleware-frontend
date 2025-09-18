@@ -6,8 +6,9 @@ import { closeModal, openModal, RequiredItem } from '@/utils/utility';
 import { createKnowledgeBaseEntryAction, updateKnowledgeBaseAction } from '@/store/action/knowledgeBaseAction';
 import Modal from '../UI/Modal';
 import { toast } from 'react-toastify';
+import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 
-const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => {}, knowledgeBaseData=[] }) => {
+const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedKnowledgeBase = () => { }, knowledgeBaseData = [], knowbaseVersionData = [], searchParams, addToVersion = false }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSectionType, setSelectedSectionType] = useState('default');
@@ -29,25 +30,31 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
     setIsLoading(true);
     const formData = new FormData(event.target);
     const newName = formData.get("name").trim();
-        if (!newName) {
+    if (!newName) {
       toast.error('Please enter a valid name.');
-      setIsLoading(false)
+      setIsLoading(false);
       return;
     }
-    const isDuplicate = knowledgeBaseData.some(kb => 
+    const newDescription = formData.get("description").trim();
+    if (!newDescription) {
+      toast.error('Please enter a valid description.');
+      setIsLoading(false);
+      return;
+    }
+    const isDuplicate = knowledgeBaseData.some(kb =>
       kb.name?.trim().toLowerCase() === newName.toLowerCase()?.trim() && kb._id !== selectedKnowledgeBase?._id
     );
 
     if (isDuplicate) {
       toast.error('Knowledge Base name already exists. Please choose a different name.');
-      setIsLoading(false)
+      setIsLoading(false);
       return;
     }
     // Create payload object
     const payload = {
       orgId: params?.org_id,
-      name: formData.get('name'),
-      description: formData.get('description'),
+      name: newName,
+      description: newDescription,
     };
 
     if (selectedKnowledgeBase?._id) {
@@ -80,7 +87,20 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
     }
 
     try {
-      selectedKnowledgeBase ? await dispatch(updateKnowledgeBaseAction({ data: { data: payload, id: selectedKnowledgeBase?._id } }, params?.org_id)) : await dispatch(createKnowledgeBaseEntryAction(payloadFormData, params?.org_id));
+      if (selectedKnowledgeBase) {
+        await dispatch(updateKnowledgeBaseAction({ data: { data: payload, id: selectedKnowledgeBase?._id } }, params?.org_id))
+      }
+      else {
+        const data = await dispatch(createKnowledgeBaseEntryAction(payloadFormData, params?.org_id));
+
+        {
+          addToVersion &&
+          dispatch(updateBridgeVersionAction({
+            versionId: searchParams?.version,
+            dataToSend: { doc_ids: [...(knowbaseVersionData || []), data._id] }
+          }));
+        }
+      }
       closeModal(MODAL_TYPE.KNOWLEDGE_BASE_MODAL);
       event.target.reset();
       resetModal();
@@ -99,7 +119,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
-    const validFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/csv'];
+    const validFileTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'csv'];
 
     if (selectedFile && validFileTypes.includes(selectedFile.type)) {
       setFile(selectedFile);
@@ -111,7 +131,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.KNOWLEDGE_BASE_MODAL}>
-      <div className="modal-box w-11/12 max-w-3xl border-2">
+      <div className="modal-box w-11/12 max-w-3xl border-2 border-base-300">
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
           <h3 className="font-bold text-xl">{selectedKnowledgeBase ? 'Update' : 'New'} Knowledge Base Configuration</h3>
           <button
@@ -309,7 +329,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
             </button>
             <button
               type="submit"
-              className="btn btn-primary text-white hover:bg-primary-focus"
+              className="btn btn-primary hover:bg-primary-focus"
               disabled={isLoading}
             >
               {isLoading ? (selectedKnowledgeBase ? 'Updating...' : 'Creating...') : (selectedKnowledgeBase ? 'Update' : 'Create') + ' Knowledge Base'}

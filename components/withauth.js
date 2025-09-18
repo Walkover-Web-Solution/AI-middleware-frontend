@@ -1,10 +1,13 @@
 "use client";
 import { loginUser } from "@/config";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { switchOrg } from "@/config";
 import { userDetails } from "@/store/action/userDetailsAction";
 import { useDispatch } from "react-redux";
+import { useCustomSelector } from "@/customHooks/customSelector";
+import ErrorPage from "@/app/not-found";
+import { getFromCookies, removeCookie, setInCookies } from "@/utils/utility";
 
 
 const handleUserDetailsAndSwitchOrg = async (url, dispatch) => {
@@ -27,18 +30,36 @@ const WithAuth = (Children) => {
     const router = useRouter();
     const dispatch = useDispatch();
     const pathName = usePathname();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const searchParams = useSearchParams();
     const proxy_auth_token = searchParams.get('proxy_auth_token');
     // This effect is called only once when the component is mounted
     // It checks if the user has already logged in or not
     // If the user has logged in, it will redirect the user to the bridges page
     // If the user has not logged in, it will redirect the user to the login page
-    async function runEffect() {
 
-      const proxyToken = localStorage.getItem('proxy_token');
+    const isEmbedUser = useCustomSelector((state) => state.userDetailsReducer.userDetails.isEmbedUser);
+    useLayoutEffect(() => {
+
+      const runEffect = async (isEmbedUser) => {
+      const proxyToken = getFromCookies('proxy_token');
       const proxyAuthToken = proxy_auth_token;
-      let redirectionUrl = localStorage.getItem("previous_url") || "/org";
+      let redirectionUrl = getFromCookies("previous_url") || "/org";
+      if(isEmbedUser)
+      {
+        const proxy_auth_token = sessionStorage.getItem('proxy_token');
+        const org_id = sessionStorage.getItem('gtwy_org_id');
+        if(proxy_auth_token && org_id)
+        {
+          router.replace(`/org/${org_id}/agents`);
+          return
+        }
+        else{
+          setLoading(false);
+          <ErrorPage/>
+          return
+        }
+      }
       if (proxyToken && !pathName.includes('publicAgent')) {
         router.replace("/org");
         return;
@@ -46,7 +67,7 @@ const WithAuth = (Children) => {
 
       if (proxyAuthToken) {
         setLoading(true);
-        localStorage.setItem('proxy_token', proxyAuthToken);
+        setInCookies('proxy_token', proxyAuthToken);
 
         if (process.env.NEXT_PUBLIC_ENV === 'local') {
           const localToken = await loginUser({
@@ -55,15 +76,18 @@ const WithAuth = (Children) => {
             userName: '',
             orgName: ''
           });
-          localStorage.setItem('local_token', localToken.token);
+          setInCookies('local_token', localToken.token);
         }
 
-        if(localStorage.getItem("previous_url")) {
+        if(getFromCookies("previous_url")) {
           await handleUserDetailsAndSwitchOrg(redirectionUrl, dispatch);
         }
         router.replace(redirectionUrl);
-        localStorage.removeItem("previous_url");
+        removeCookie("previous_url");
         return;
+      }
+      else{
+        setLoading(false);
       }
 
       const configuration = {
@@ -94,12 +118,11 @@ const WithAuth = (Children) => {
       document.body.appendChild(script); // Add the script to the page
     }
 
-    useLayoutEffect(() => {
-      runEffect();
-    }, []);
+      runEffect(isEmbedUser);
+    }, [isEmbedUser, pathName, proxy_auth_token]);
 
-    return <Children {...props} loading={loading}/>;
-  }
+    return <Children {...props} loading={loading} />;
+  };
 };
 
 export default WithAuth;

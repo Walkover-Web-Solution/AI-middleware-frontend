@@ -5,7 +5,9 @@ const initialState = {
   bridgeVersionMapping: {},
   org: {},
   apikeys: {},
+  apikeysBackup: {},
   loading: false,
+  isFocus: false,
 };
 
 export const bridgeReducer = createSlice({
@@ -22,7 +24,9 @@ export const bridgeReducer = createSlice({
       const { response } = action.payload;
       state.allBridgesMap[response.bridge_id] = { ...state.allBridgesMap[response.bridge_id], ...response };
     },
-
+    setIsFocusReducer: (state, action) => {
+      state.isFocus = action.payload;
+    },
     // new format
     fetchSingleBridgeReducer: (state, action) => {
       const { bridge } = action.payload;
@@ -67,7 +71,7 @@ export const bridgeReducer = createSlice({
       state.org[action.payload.orgId]?.orgs?.push(action.payload.data.data.bridge);
     },
     createBridgeVersionReducer: (state, action) => {
-      const { newVersionId, parentVersionId, bridgeId, version_description } = action.payload;
+      const { newVersionId, parentVersionId, bridgeId, version_description, orgId } = action.payload;
       if (!state.bridgeVersionMapping[bridgeId]) {
         state.bridgeVersionMapping[bridgeId] = {};
       }
@@ -77,6 +81,8 @@ export const bridgeReducer = createSlice({
         version_description
       };
       state.allBridgesMap[bridgeId].versions.push(newVersionId);
+      const bridgeIndex = state.org[orgId].orgs.findIndex(org => org._id === bridgeId);
+      state.org[orgId].orgs[bridgeIndex].versions.push(newVersionId);
     },
     updateBridgeReducer: (state, action) => {
       const { bridges, functionData } = action.payload;
@@ -95,10 +101,10 @@ export const bridgeReducer = createSlice({
           const index = allData.findIndex(bridge => bridge._id === _id);
           if (index !== -1) {
             // Update the specific bridge object within the array immutably
-            state.org[bridges.org_id].orgs[index] = {
-              ...state.org[bridges.org_id].orgs[index],
-              ...bridges
-            };
+          state.org[bridges.org_id].orgs[index] = {
+            ...state.org[bridges.org_id].orgs[index],
+            ...bridges
+          };
           }
         }
       }
@@ -225,17 +231,52 @@ export const bridgeReducer = createSlice({
         state.apikeys[org_id] = [data];
       }
     },
+    
+    // Create a backup of the API keys before any updates
+    backupApiKeysReducer: (state, action) => {
+      const { org_id } = action.payload;
+      
+      // Make sure apikeysBackup exists
+      if (!state.apikeysBackup) {
+        state.apikeysBackup = {};
+      }
+      
+      // Only make a backup if the keys exist
+      if (state.apikeys && state.apikeys[org_id]) {
+        // Use deep cloning to avoid reference issues
+        state.apikeysBackup[org_id] = state.apikeys[org_id];
+      } else {
+        state.apikeysBackup[org_id] = [];
+      }
+    },
+    
+    // Restore from backup when an API call fails
+    apikeyRollBackReducer: (state, action) => { 
+      const { org_id } = action.payload;
+      
+      // Only restore if we have a backup
+      if (state.apikeysBackup && state.apikeysBackup[org_id]) {
+        // Restore the backup
+        state.apikeys[org_id] = [...state.apikeysBackup[org_id]];
+      }
+    },
+    
+    // Update an API key (optimistically or with server data)
     apikeyUpdateReducer: (state, action) => {
       const { org_id, id, data, name, comment } = action.payload;
-      if (state.apikeys[org_id]) {
+      
+      if (state.apikeys && state.apikeys[org_id]) {
         const index = state.apikeys[org_id].findIndex(apikey => apikey._id === id);
         if (index !== -1) {
-          state.apikeys[org_id][index].name = name || state.apikeys[org_id][index].name;
-          state.apikeys[org_id][index].apikey = data || state.apikeys[org_id][index].apikey;
-          state.apikeys[org_id][index].comment = comment || state.apikeys[org_id][index].comment;
+          // Update the target with new values
+          const target = state.apikeys[org_id][index];
+          if (name !== undefined) target.name = name;
+          if (data !== undefined) target.apikey = data;
+          if (comment !== undefined) target.comment = comment;
         }
       }
     },
+    
     apikeyDeleteReducer: (state, action) => {
       const { org_id, name } = action.payload;
       if (state.apikeys[org_id]) {
@@ -290,7 +331,10 @@ export const {
   removeFunctionDataReducer,
   webhookURLForBatchAPIReducer,
   getPrebuiltToolsReducer, 
-  updateAllBridgeReducerAgentVariable
+  updateAllBridgeReducerAgentVariable,
+  setIsFocusReducer,
+  apikeyRollBackReducer,
+  backupApiKeysReducer
 } = bridgeReducer.actions;
 
 export default bridgeReducer.reducer;

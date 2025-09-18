@@ -1,123 +1,208 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { CloseIcon, CopyIcon, CheckCircleIcon } from "@/components/Icons";
+import React, { useState, useEffect, useMemo } from "react";
+import { CloseIcon } from "@/components/Icons";
 import { Save } from "lucide-react";
-import { generateGtwyAccessTokenAction } from '@/store/action/orgAction';
-import { useDispatch } from 'react-redux';
-import { useCustomSelector } from '@/customHooks/customSelector';
+import { generateGtwyAccessTokenAction } from "@/store/action/orgAction";
+import { useDispatch } from "react-redux";
+import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateIntegrationDataAction } from "@/store/action/integrationAction";
 import GenericTable from "../table/table";
+import CopyButton from "../copyButton/copyButton";
 
 // Configuration Schema - easily extensible
+// ---------------------------------------------
 const CONFIG_SCHEMA = [
   {
-    key: 'hideHomeButton',
-    type: 'toggle',
-    label: 'Hide Home Button',
-    description: 'Removes the home navigation button',
+    key: "hideHomeButton",
+    type: "toggle",
+    label: "Hide Home Button",
+    description: "Removes the home navigation button",
     defaultValue: false,
-    section: 'Interface Options'
+    section: "Interface Options",
   },
   {
-    key: 'showGuide',
-    type: 'toggle',
-    label: 'Show Guide',
-    description: 'Display helpful user guides',
+    key: "showGuide",
+    type: "toggle",
+    label: "Show Guide",
+    description: "Display helpful user guides",
     defaultValue: false,
-    section: 'Interface Options'
+    section: "Interface Options",
   },
   {
-    key: 'showAgentTypeOnCreateAgent',
-    type: 'toggle',
-    label: 'Show Agent Type on Create Agent',
-    description: 'Display agent type on create agent',
+    key: "showAgentTypeOnCreateAgent",
+    type: "toggle",
+    label: "Show Agent Type on Create Agent",
+    description: "Display agent type on create agent",
     defaultValue: true,
-    section: 'Interface Options'
+    section: "Interface Options",
   },
   {
-    key: 'showHistory',
-    type: 'toggle',
-    label: 'Show History',
-    description: 'Display conversation history',
+    key: "showHistory",
+    type: "toggle",
+    label: "Show History",
+    description: "Display conversation history",
     defaultValue: false,
-    section: 'Interface Options'
+    section: "Interface Options",
   },
   {
-    key: 'showConfigType',
-    type: 'toggle',
-    label: 'Show Config Type',
-    description: 'Show configuration type indicators',
+    key: "showConfigType",
+    type: "toggle",
+    label: "Show Config Type",
+    description: "Show configuration type indicators",
     defaultValue: false,
-    section: 'Interface Options'
+    section: "Interface Options",
   },
   {
-    key: 'slide',
-    type: 'select',
-    label: 'Slide Position',
-    description: 'Choose where GTWY appears on screen',
-    defaultValue: 'right',
+    key: "slide",
+    type: "select",
+    label: "Slide Position",
+    description: "Choose where GTWY appears on screen",
+    defaultValue: "right",
     options: [
-      { value: 'left', label: 'Left' },
-      { value: 'right', label: 'Right' },
-      { value: 'full', label: 'Full' }
+      { value: "left", label: "Left" },
+      { value: "right", label: "Right" },
+      { value: "full", label: "Full" },
     ],
-    section: 'Display Settings'
+    section: "Display Settings",
   },
   {
-    key: 'defaultOpen',
-    type: 'toggle',
-    label: 'Default Open',
-    description: 'Open GTWY automatically on page load',
+    key: "defaultOpen",
+    type: "toggle",
+    label: "Default Open",
+    description: "Open GTWY automatically on page load",
     defaultValue: false,
-    section: 'Display Settings'
+    section: "Display Settings",
   },
   {
-    key: 'hideFullScreenButton',
-    type: 'toggle',
-    label: 'Hide Full Screen',
-    description: 'Remove the full screen toggle button',
+    key: "hideFullScreenButton",
+    type: "toggle",
+    label: "Hide Full Screen",
+    description: "Remove the full screen toggle button",
     defaultValue: false,
-    section: 'Display Settings'
+    section: "Display Settings",
   },
   {
-    key: 'hideCloseButton',
-    type: 'toggle',
-    label: 'Hide Close Button',
-    description: 'Remove the close button',
+    key: "hideCloseButton",
+    type: "toggle",
+    label: "Hide Close Button",
+    description: "Remove the close button",
     defaultValue: false,
-    section: 'Display Settings'
+    section: "Display Settings",
   },
   {
-    key: 'hideHeader',
-    type: 'toggle',
-    label: 'Hide Header',
-    description: 'Hide the header section completely',
+    key: "hideHeader",
+    type: "toggle",
+    label: "Hide Header",
+    description: "Hide the header section completely",
     defaultValue: false,
-    section: 'Display Settings'
+    section: "Display Settings",
   },
+  {
+    key: "addDefaultApiKeys",
+    type: "toggle",
+    label: "Add Default ApiKeys",
+    description: "Add default api keys",
+    defaultValue: false,
+    section: "Display Settings",
+  },
+  {
+    key: "configureGtwyRedirection",
+    type: 'select',
+    label: "Configure Gtwy Redirection",
+    defaultValue: "agent_list",
+    options: [
+      { value: "agent_list", label: "Agent Page" },
+      { value: "orchestral_page", label: "Orchestral Page" },
+    ],
+    section: "Display Settings",
+  } 
 ];
 
+// ---------------------------------------------
+// API Keys Input Component
+// ---------------------------------------------
+const ApiKeysInput = ({ configuration, onChange, orgId }) => {
+  const SERVICES = useCustomSelector((state) => state?.serviceReducer?.services);
+
+  const { apikeydata } = useCustomSelector((state) => {
+    const apikeys = state?.bridgeReducer?.apikeys?.[orgId] || [];
+    return { apikeydata: apikeys };
+  });
+
+  const handleApiKeyChange = (serviceKey, value) => {
+    const currentApiKeys = configuration?.apikey_object_id || {};
+    onChange("apikey_object_id", {
+      ...currentApiKeys,
+      [serviceKey]: value,
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="text-sm font-medium text-base-content mb-3">
+        Configure API Keys for Services
+      </div>
+
+      {Array.isArray(SERVICES)
+        ? SERVICES.map(({ value: serviceKey, displayName }) => {
+          // Get currently selected API key ID for this service
+          const selectedId = configuration?.apikey_object_id?.[serviceKey] || "";
+
+          // Filter API keys for this specific service
+          const serviceApiKeys = (apikeydata || []).filter(
+            (apiKey) => apiKey?.service === serviceKey
+          );
+
+          return (
+            <div key={serviceKey} className="flex items-center gap-3">
+              <div className="w-32 text-sm font-medium text-base-content">
+                {displayName}:
+              </div>
+
+              <select
+                className="select select-bordered select-primary w-full select-sm"
+                value={selectedId}
+                onChange={(e) => handleApiKeyChange(serviceKey, e.target.value)}
+              >
+                <option value="" disabled>Select API key</option>
+                {serviceApiKeys.map((apiKey) => (
+                  <option key={apiKey._id} value={apiKey._id}>
+                    {apiKey.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        })
+        : null}
+    </div>
+  );
+};
+
+
+// ---------------------------------------------
 // Generic Input Component
+// ---------------------------------------------
 const ConfigInput = ({ config, value, onChange }) => {
   const { key, type, label, description, options } = config;
 
   const renderInput = () => {
     switch (type) {
-      case 'toggle':
+      case "toggle":
         return (
-          <input 
-            type="checkbox" 
-            className="toggle toggle-primary toggle-sm" 
+          <input
+            type="checkbox"
+            className="toggle toggle-primary toggle-sm"
             checked={value || false}
             onChange={(e) => onChange(key, e.target.checked)}
           />
         );
-      
-      case 'select':
+
+      case "select":
         return (
-          <select 
-            className="select select-bordered select-primary w-full select-sm" 
-            value={value || config.defaultValue}
+          <select
+            className="select select-bordered select-primary w-full select-sm"
+            value={value ?? config.defaultValue}
             onChange={(e) => onChange(key, e.target.value)}
           >
             {options?.map((option) => (
@@ -134,22 +219,21 @@ const ConfigInput = ({ config, value, onChange }) => {
 
   return (
     <div className="form-control bg-base-200 rounded p-2">
-      <label className={`label ${type === 'toggle' ? 'cursor-pointer' : ''} py-1`}>
+      <label
+        className={`label ${type === "toggle" ? "cursor-pointer" : ""} py-1`}
+      >
         <span className="label-text text-sm">{label}</span>
-        {type === 'toggle' && renderInput()}
+        {type === "toggle" && renderInput()}
       </label>
-      {type !== 'toggle' && (
-        <div className="mt-1">
-          {renderInput()}
-        </div>
-      )}
+      {type !== "toggle" && <div className="mt-1">{renderInput()}</div>}
       <p className="text-xs text-base-content/70 mt-1 pl-2">{description}</p>
     </div>
   );
 };
 
 // Configuration Section Component
-const ConfigSection = ({ title, configs, configuration, onChange }) => {
+// ---------------------------------------------
+const ConfigSection = ({ title, configs, configuration, onChange, orgId }) => {
   return (
     <div className="space-y-2">
       <h5 className="text-sm font-semibold text-primary border-b border-base-300 pb-1">
@@ -165,55 +249,82 @@ const ConfigSection = ({ title, configs, configuration, onChange }) => {
           />
         ))}
       </div>
+
+      {/* Show API Keys input section when addDefaultApiKeys is enabled */}
+      {title === "Display Settings" && configuration.addDefaultApiKeys && (
+        <div className="mt-4 p-4 bg-base-200 rounded-lg border border-base-300">
+          <ApiKeysInput
+            configuration={configuration}
+            onChange={onChange}
+            orgId={orgId}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
+
 function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   const dispatch = useDispatch();
-  const [copied, setCopied] = useState({ 
-    accessKey: false, 
-    jwtToken: false, 
-    script: false, 
-    functions: false, 
-    interfaceData: false, 
-    eventListener: false 
+  const [copied, setCopied] = useState({
+    accessKey: false,
+    jwtToken: false,
+    script: false,
+    functions: false,
+    interfaceData: false,
+    eventListener: false,
+    metaUpdate: false,
+    getDataUsingUserId: false,
   });
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
-  // Get config from Redux store
-  const config = useCustomSelector((state) => 
-    state?.integrationReducer?.integrationData?.[data?.org_id]?.find((f)=> f.folder_id === data?.folder_id)?.config
+
+  // Get config and root-level data from Redux store
+  const integrationData = useCustomSelector((state) =>
+    state?.integrationReducer?.integrationData?.[data?.org_id]?.find(
+      (f) => f.folder_id === data?.folder_id
+    )
   );
-  
+
+  const config = integrationData?.config;
+  const rootApiKeys = integrationData?.apikey_object_id;
+
   // Generate initial config from schema
   const generateInitialConfig = () => {
     const initialConfig = {};
-    CONFIG_SCHEMA.forEach(item => {
+    CONFIG_SCHEMA.forEach((item) => {
       initialConfig[item.key] = item.defaultValue;
     });
     return initialConfig;
   };
-  
+
   // Initialize configuration state
   const [configuration, setConfiguration] = useState(() => {
-    const defaultConfig = generateInitialConfig();
-    // Merge default config with existing config from Redux
-    return config ? { ...defaultConfig, ...config } : defaultConfig;
+    const defaults = generateInitialConfig();
+    const merged = config ? { ...defaults, ...config } : defaults;
+
+    // Use root-level apikey_object_id if available, otherwise empty object
+    const apiKeyIds = integrationData?.apikey_object_id || {};
+
+    return { ...merged, apikey_object_id: apiKeyIds };
   });
+
+  useEffect(() => {
+    setConfiguration(() => {
+      const defaults = generateInitialConfig();
+      const merged = config ? { ...defaults, ...config } : defaults;
   
+      // Use root-level apikey_object_id if available, otherwise empty object
+      const apiKeyIds = integrationData?.apikey_object_id || {};
+  
+      return { ...merged, apikey_object_id: apiKeyIds };
+    })
+  }, [integrationData]);
+
   const gtwyAccessToken = useCustomSelector((state) =>
     state?.userDetailsReducer?.organizations?.[data?.org_id]?.meta?.gtwyAccessToken || ""
   );
-
-  // Update configuration when config from Redux changes
-  useEffect(() => {
-    if (config) {
-      const defaultConfig = generateInitialConfig();
-      setConfiguration(prevConfig => ({ ...defaultConfig, ...config }));
-    }
-  }, [config]);
 
   useEffect(() => {
     if (data) {
@@ -249,12 +360,30 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   const handleConfigurationSave = async () => {
     setIsSaving(true);
     try {
+      const {
+        apikey_object_id, // move to root
+        ...restConfig
+      } = configuration;
+      const cleanedConfig = { ...restConfig }; // strictly visual/config flags
+
       const dataToSend = {
         folder_id: data?.folder_id,
         orgId: data?.org_id,
-        config: configuration
+        config: cleanedConfig.config ? cleanedConfig.config : cleanedConfig, // no api keys inside config
+      };
+
+      // Only include apikey_object_id if addDefaultApiKeys is true
+      if (configuration.addDefaultApiKeys) {
+        dataToSend.apikey_object_id = apikey_object_id || {};
       }
+      if(dataToSend.apikey_object_id && Object.keys(dataToSend.apikey_object_id).length === 0){
+        delete dataToSend.apikey_object_id;
+        dataToSend.config.addDefaultApiKeys = false;
+      }
+      // If addDefaultApiKeys is false, don't send apikey_object_id at all (will be removed from backend)
+
       await dispatch(updateIntegrationDataAction(data?.org_id, dataToSend));
+      
     } catch (error) {
       console.error('Failed to save configuration:', error);
     } finally {
@@ -263,38 +392,45 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   };
 
   const handleConfigChange = (key, value) => {
-    setConfiguration(prev => ({
+    setConfiguration((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
-  // Check if configuration has changed from the initial Redux config
+  // Check if configuration has changed from the initial Redux config + root apikey_object_id
   const isConfigChanged = () => {
-    const defaultConfig = generateInitialConfig();
-    const originalConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
-    return JSON.stringify(configuration) !== JSON.stringify(originalConfig);
+    const defaults = generateInitialConfig();
+    const baseline = config ? { ...defaults, ...config } : defaults;
+
+    const baselineApiKeyIds = data?.apikey_object_id
+      ? { ...data.apikey_object_id }
+      : config?.apiKeys
+        ? { ...config.apiKeys }
+        : {};
+
+    const normalizedCurrent = {
+      ...configuration,
+      // normalize undefined objects
+      apikey_object_id: configuration.apikey_object_id || {},
+    };
+
+    const normalizedBaseline = {
+      ...baseline,
+      apikey_object_id: baselineApiKeyIds,
+    };
+
+    return JSON.stringify(normalizedCurrent) !== JSON.stringify(normalizedBaseline);
   };
 
   // Group configs by section
-  const groupedConfigs = CONFIG_SCHEMA.reduce((groups, config) => {
-    const section = config.section || 'General';
-    if (!groups[section]) {
-      groups[section] = [];
-    }
-    groups[section].push(config);
+  const groupedConfigs = CONFIG_SCHEMA.reduce((groups, cfg) => {
+    const section = cfg.section || "General";
+    if (!groups[section]) groups[section] = [];
+    groups[section].push(cfg);
     return groups;
   }, {});
 
-  const CopyButton = ({ data, onCopy, copied: isCopied }) => (
-    <button
-      onClick={onCopy}
-      className={`btn btn-sm btn-ghost absolute top-2 right-2 text-base-100 ${isCopied ? 'btn-success' : ''}`}
-    >
-      {isCopied ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
-      {isCopied ? 'Copied!' : 'Copy'}
-    </button>
-  );
 
   const jwtPayload = `{
   "org_id": "${data?.org_id}",
@@ -303,63 +439,66 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
 }`;
 
   const integrationScript = `<script
-    id="gtwy-main-script"
-    embedToken="Your embed token"
-    src="https://app.gtwy.ai/gtwy.js"
-    parentId="${configuration.parentId || 'Your_parent_id'}"
-    agent_id= 'Your_agent_id'
-    agent_name= 'Your_agent_name'
-   ></script>`;
+  id="gtwy-main-script"
+  embedToken="Your embed token"
+  src="https://app.gtwy.ai/gtwy.js"
+  parentId="${configuration.parentId || "Your_parent_id"}"
+  agent_id="Your_agent_id"
+  agent_name="Your_agent_name"
+></script>`;
 
   const helperFunctions = `window.openGtwy() //To open GTWY;
 window.closeGtwy() //To Close GTWY;
 window.openGtwy({"agent_id":"your gtwy agentid"}); // Open GTWY with specific agent
 window.openGtwy({"agent_name":"your gtwy agent name"}); // Create agent with specific name`;
 
-
   const interfaceData = `// Configure UI elements
 window.GtwyEmbed.sendDataToGtwy({
-    agent_name: "New Agent",  // Create bridge with agent name
-    agent_id: "your_agent_id" // Redirect to specific agent
+  agent_name: "New Agent",  // Create bridge with agent name
+  agent_id: "your_agent_id" // Redirect to specific agent
 });`;
 
   const eventListenerScript = `<script>
 window.addEventListener('message', (event) => {
-    if (event.data.type === 'gtwy') {
-        console.log('Received gtwy event:', event.data);
-    }
+  if (event.data.type === 'gtwy') {
+    console.log('Received gtwy event:', event.data);
+  }
 });
 </script>`;
 
-const metaUpdateScript = `
+  const metaUpdateScript = `
 window.openGtwy({
-    "agent_id": "your_agent_id",
-    "meta": {
-      "meta_data": "your_meta_data"
-    }
+  "agent_id": "your_agent_id",
+  "meta": {
+    "meta_data": "your_meta_data"
+  }
 });
 `;
 
-const getDataUsingUserId = () => {
-  return `curl --location '${process.env.NEXT_PUBLIC_SERVER_URL}/gtwyEmbed/getAgents' \
---header 'Authorization: \'your_embed_token\'''`
-}
+  const getDataUsingUserId = () => {
+    return `curl --location '\${process.env.NEXT_PUBLIC_SERVER_URL}/gtwyEmbed/getAgents' \\
+--header 'Authorization: 'your_embed_token''`;
+  };
 
-const tableData = [
-  ['parentId', 'To open GTWY in a specific container'],
-   ['agent_id', 'To open agent in a specific agent'],
-   ['agent_name', 'To create an agent with a specific name, or redirect if the agent already exists.']
-]
-const tableHeaders = ['Key', 'Description'];
+  const tableData = [
+    ["parentId", "To open GTWY in a specific container"],
+    ["agent_id", "To open agent in a specific agent"],
+    [
+      "agent_name",
+      "To create an agent with a specific name, or redirect if the agent already exists.",
+    ],
+  ];
+  const tableHeaders = ["Key", "Description"];
 
   return (
     <aside
       id="gtwy-integration-slider"
-      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-[60%] lg:w-[70%] xl:w-[80%] 2xl:w-[70%] opacity-100 h-screen bg-base-200 transition-all overflow-auto duration-300 border-l ${isOpen ? '' : 'translate-x-full'}`}
+      className={`sidebar-container fixed z-very-high flex flex-col top-0 right-0 p-4 w-full md:w-[60%] lg:w-[70%] xl:w-[80%] 2xl:w-[70%] opacity-100 h-screen bg-base-200 transition-all overflow-auto duration-300  ${isOpen ? "" : "translate-x-full"
+        }`}
       aria-label="Integration Guide Slider"
     >
       <div className="flex flex-col w-full gap-4">
-        <div className="flex justify-between items-center border-b pb-4">
+        <div className="flex justify-between items-center border-b border-base-300 pb-4">
           <h3 className="font-bold text-lg">Integration Setup</h3>
           <CloseIcon
             className="cursor-pointer hover:text-error transition-colors"
@@ -384,10 +523,12 @@ const tableHeaders = ['Key', 'Description'];
                         configs={configs}
                         configuration={configuration}
                         onChange={handleConfigChange}
+                        orgId={data?.org_id}
                       />
-                      {sectionName !== Object.keys(groupedConfigs)[Object.keys(groupedConfigs).length - 1] && (
-                        <div className="divider my-2"></div>
-                      )}
+                      {sectionName !==
+                        Object.keys(groupedConfigs)[
+                        Object.keys(groupedConfigs).length - 1
+                        ] && <div className="divider my-2"></div>}
                     </div>
                   ))}
 
@@ -409,7 +550,7 @@ const tableHeaders = ['Key', 'Description'];
           {/* Right Column - Generated Scripts */}
           <div className="space-y-6 overflow-y-auto h-[calc(100vh-100px)] scrollbar-hide mb-4">
             {/* Script Integration */}
-            <div className="card bg-base-100 border">
+            <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
                 <h4 className="card-title text-base">Step 1: Connect Integration</h4>
                 <div className="space-y-6">
@@ -487,7 +628,7 @@ const tableHeaders = ['Key', 'Description'];
             </div>
 
 
-            <div className="card bg-base-100 border">
+            <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
                 <h4 className="card-title text-base">Step 2: Add Script</h4>
                 <div className="form-control">
@@ -517,7 +658,7 @@ const tableHeaders = ['Key', 'Description'];
             </div>
 
             {/* Interface Configuration */}
-            <div className="card bg-base-100 border">
+            <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
                 <h4 className="card-title text-base">Configure Interface</h4>
                 <div className="form-control">
@@ -542,7 +683,7 @@ const tableHeaders = ['Key', 'Description'];
             </div>
 
             {/* Helper Functions */}
-            <div className="card bg-base-100 border">
+            <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
                 <h4 className="card-title text-base">Step 3: Integration Functions</h4>
                 <div className="form-control">
@@ -566,7 +707,7 @@ const tableHeaders = ['Key', 'Description'];
               </div>
             </div>
 
-            <div className="card bg-base-100 border mt-4">
+            <div className="card bg-base-100 border mt-4 border-base-300">
                 <div className="card-body">
                   <h4 className="card-title text-base">Add Meta Data</h4>
                   <div className="form-control">
@@ -587,7 +728,7 @@ const tableHeaders = ['Key', 'Description'];
                 </div>
               </div>
 
-              <div className="card bg-base-100 border mt-4">
+              <div className="card bg-base-100  mt-4">
                 <div className="card-body">
                   <h4 className="card-title text-base">Get Agent Data Using User ID</h4>
                   <div className="form-control">
@@ -612,7 +753,7 @@ const tableHeaders = ['Key', 'Description'];
               </div>
 
             {/* Event Listener */}
-            <div className="card bg-base-100 border">
+            <div className="card bg-base-100 border border-base-300">
               <div className="card-body">
                 <h4 className="card-title text-base">Add Event Listener</h4>
                 <div className="form-control">

@@ -5,23 +5,19 @@ import { usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useState } from 'react';
 import CreateNewBridge from '../createNewBridge';
 import { MODAL_TYPE } from '@/utils/enums';
+import SearchItems from '../UI/SearchItems';
 
 function BridgeSlider() {
     const router = useRouter();
     const pathName = usePathname();
     const path = pathName.split('?')[0].split('/')
-    const [bridgeSearchQuery, setBridgeSearchQuery] = useState('');
 
     const bridgesList = useCustomSelector((state) => state.bridgeReducer.org[path[2]]?.orgs) || [];
 
-    const handleBridgeSearchChange = (e) => {
-        setBridgeSearchQuery(e.target.value);
-    };
-
-    const filteredBridgesList = filterBridges(bridgesList,bridgeSearchQuery);
-
-    const filteredArchivedBridges = filteredBridgesList.filter((item) => item.status === 0);
-    const filteredUnArchivedBridges = filteredBridgesList.filter((item) => item.status === 1 || item.status === undefined);
+  
+   const [filteredBridgesList, setFilteredBridgesList] = useState(bridgesList);
+    const filteredArchivedBridges = filteredBridgesList?.filter((item) => item.status === 0);
+    const filteredUnArchivedBridges = filteredBridgesList?.filter((item) => item.status === 1 || item.status === undefined);
 
     const handleNavigation = (id, versionId) => {
         router.push(`/org/${path[2]}/agents/configure/${id}?version=${versionId}`);
@@ -52,7 +48,7 @@ function BridgeSlider() {
                                         className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md truncate max-w-full`}
                                         onClick={() => handleNavigation(item._id, item?.published_version_id || item?.versions?.[0])}
                                     >
-                                        {getIconOfService(item.service)}
+                                        {getIconOfService(item.service, 14, 14)}
                                         {item.name}
                                     </a>
                                 </li>
@@ -74,15 +70,14 @@ function BridgeSlider() {
                     <p className='text-xl font-semibold'> Agents </p>
                     <CloseIcon className="block md:hidden" onClick={handlCloseBridgeSlider} />
                 </div>
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    value={bridgeSearchQuery}
-                    onChange={handleBridgeSearchChange}
-                    className="border border-gray-300 rounded p-2 w-full"
+               <SearchItems
+                    data={bridgesList}
+                    setFilterItems={setFilteredBridgesList}
+                    item='agents'
+                    style='input input-bor0dered w-full mb-0 ml-0 border border-base-content/50'
                 />
-                <button className="bg-white border-0 rounded-md box-border text-gray-900 font-sans text-sm font-semibold  p-3 text-center  cursor-pointer hover:bg-gray-50" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
-                    + Create new agent
+                <button className="btn" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
+                    + Create New Agent
                 </button>
                 {filteredBridgesList.length === 0 ? (
                     <div className='max-w-full'>

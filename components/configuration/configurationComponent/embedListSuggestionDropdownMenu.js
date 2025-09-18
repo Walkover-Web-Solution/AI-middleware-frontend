@@ -8,7 +8,7 @@ import { InfoIcon, AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
 import InfoTooltip from '@/components/InfoTooltip';
 
-function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
+function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
      const [tutorialState, setTutorialState] = useState({
         showTutorial: false,
         showSuggestion: false
@@ -71,7 +71,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                                 {title}
                             </p>
                             <div>
-                                <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(status)}`}>
+                                <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(status)}`}>
                                     {value?.description?.trim() === "" ? "Ongoing" : status}
                                 </span>
                             </div>
@@ -80,7 +80,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                 )
             }
             )
-    ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, params.version]);
+    ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, searchParams?.version]);
     return (
         <div className="dropdown dropdown-right">
             <div className="flex items-end gap-2">
@@ -154,7 +154,7 @@ function EmbedListSuggestionDropdownMenu({ params, name, hideCreateFunction = fa
                         ) : (
                             <li className="text-center mt-2">No tools found</li>
                         )}
-                        {!hideCreateFunction && <li className="mt-2 border-t w-full sticky bottom-0 bg-white py-2" onClick={() => openViasocket(undefined,
+                        {!hideCreateFunction && <li className="mt-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => openViasocket(undefined,
                             {
                                 embedToken,
                                 meta: {

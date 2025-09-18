@@ -1,7 +1,7 @@
 "use client";
 import { getInvitedUsers, inviteUser, removeUsersFromOrg } from '@/config';
 import Protected from '@/components/protected';
-import { useEffect, useState} from 'react';
+import { useCallback, useEffect, useState, useMemo} from 'react';
 import { toast } from 'react-toastify';
 import { TrashIcon, UserCircleIcon } from '@/components/Icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -16,7 +16,6 @@ function InvitePage({ params }) {
   const userEmailData = useCustomSelector((state) => state?.userDetailsReducer?.userDetails?.email)
   const [email, setEmail] = useState('');
   const [invitedMembers, setInvitedMembers] = useState([]);
-  const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
@@ -24,12 +23,42 @@ function InvitePage({ params }) {
   const [totalMembers, setTotalMembers] = useState(0);
   const [memberToDelete, setMemberToDelete] = useState();
   const ITEMS_PER_PAGE = 20;
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Create debounced function using useMemo to prevent recreation on every render
+  const debouncedSearch = useMemo(() => {
+    const debounce = (func, delay) => {
+      let timeoutId;
+      return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func(...args), delay);
+      };
+    };
+
+    return debounce((query) => {
+      // Fetch members with the new search query
+      fetchInvitedMembers(1, true, query);
+    }, 500);
+  }, []);
 
   useEffect(() => {
     fetchInvitedMembers(1, true);
   }, []);
 
-  const fetchInvitedMembers = async (pageNum = 1, reset = false) => {
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    // Reset pagination state immediately
+    setPage(1);
+    setHasMore(true);
+    
+    // Call debounced search
+    debouncedSearch(value);
+  };
+
+  const fetchInvitedMembers = async (pageNum = 1, reset = false, searchTerm = searchQuery) => {
     if (isLoading) {
       return;
     }
@@ -38,9 +67,9 @@ function InvitePage({ params }) {
     try {
       const response = await getInvitedUsers({
         page: pageNum,
-        limit: ITEMS_PER_PAGE
+        limit: ITEMS_PER_PAGE,
+        search: searchTerm
       });
-
       if (response.status === 200 && response.data) {
         const newMembers = response.data.data.data;
         if (reset) {
@@ -74,13 +103,6 @@ function InvitePage({ params }) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-
-  const filteredMembers = !query
-    ? invitedMembers
-    : invitedMembers.filter(member =>
-      member.email.toLowerCase().includes(query.toLowerCase()) ||
-      member.name.toLowerCase().includes(query.toLowerCase())
-    );
 
   const isEmailAlreadyInvited = (email) => {
     return invitedMembers.some(member => member.email === email);
@@ -126,7 +148,6 @@ function InvitePage({ params }) {
   };
 
   const loadMoreMembers = () => {
-    if (!query) { // Only load more if not searching
       const nextPage = page + 1;
       fetchInvitedMembers(nextPage, false);
     }
@@ -184,9 +205,9 @@ function InvitePage({ params }) {
           </h2>
           <input
             type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
             placeholder="Search members..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
             className="input input-bordered w-96"
           />
         </div>
@@ -194,9 +215,9 @@ function InvitePage({ params }) {
         {/* Members List - Scrollable Container */}
         <div id="scrollableDiv" className="h-[65vh] overflow-y-auto">
           <InfiniteScroll
-            dataLength={filteredMembers.length}
+            dataLength={invitedMembers.length}
             next={loadMoreMembers}
-            hasMore={hasMore && !query}
+            hasMore={hasMore}
             loader={
               <div className="text-center py-4">
                 <span className="loading loading-spinner loading-md"></span>
@@ -206,8 +227,8 @@ function InvitePage({ params }) {
             scrollableTarget="scrollableDiv"
           >
             <div className="space-y-3 p-4">
-              {filteredMembers.length > 0 ? (
-                filteredMembers.map((member, index) => (
+              {invitedMembers.length > 0 ? (
+                invitedMembers.map((member, index) => (
                   <div
                     key={member.id || `member-${index}`}
                     className="flex items-center justify-between p-2 border border-base-200 rounded-box hover:bg-base-200"
@@ -232,7 +253,7 @@ function InvitePage({ params }) {
               ) : (
                 <div className="text-center py-8">
                   <UserCircleIcon size={48} className="text-base-content/30 mx-auto mb-4" />
-                  {invitedMembers.length === 0 ? (
+                  {invitedMembers.length === 0 && searchQuery===''? (
                     <>
                       <h3 className="text-lg font-medium mb-2">No members yet</h3>
                       <p className="text-base-content/70">Invite your first team member to get started</p>

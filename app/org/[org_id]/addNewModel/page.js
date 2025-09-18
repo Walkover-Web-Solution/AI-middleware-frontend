@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal, openModal } from '@/utils/utility';
 import AddNewModelModal from '@/components/modals/AddNewModal';
@@ -16,6 +16,7 @@ import DeleteModal from '@/components/UI/DeleteModal';
 export const runtime = 'edge';
 
 const Page = ({params}) => {
+    const resolvedParams = use(params);
     const dispatch = useDispatch()
     const [usageDetailsData, setUsageDetailsData] = useState();
     const [selectedDataToDelete, setselectedDataToDelete] = useState();
@@ -118,7 +119,7 @@ const Page = ({params}) => {
                     endComponent={EndComponent}
                 />
                 <AddNewModelModal />
-                <ModelUsageDetailsModal usageDetailsData={usageDetailsData} params={params}/>
+                <ModelUsageDetailsModal usageDetailsData={usageDetailsData} params={resolvedParams}/>
                 <DeleteModal onConfirm={handleDeleteModel} item={selectedDataToDelete} description={`Are you sure you want to delete the Model "${selectedDataToDelete?.model}"? This action cannot be undone.`} title='Delete Model' />
             </div>
         </MainLayout>

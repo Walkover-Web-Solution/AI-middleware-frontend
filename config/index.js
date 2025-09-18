@@ -1,6 +1,7 @@
 "use client"
 
 import axios from "@/utils/interceptor";
+import { setInCookies } from "@/utils/utility";
 import { toast } from "react-toastify";
 
 const URL = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -170,13 +171,13 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
 };
 
 
-export const dryRun = async ({ localDataToSend, bridge_id }) => {
+export const dryRun = async ({ localDataToSend, bridge_id, orchestrator_id}) => {
   try {
     let dryRun
     const modelType = localDataToSend.configuration.type
-    if (modelType !== 'completion' && modelType !== 'embedding') dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
-    if (modelType === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id}`, localDataToSend)
-    if (modelType === "embedding") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id}`, localDataToSend)
+    if (modelType !== 'completion' && modelType !== 'embedding') dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id? bridge_id:orchestrator_id}`, localDataToSend)
+    if (modelType === "completion") dryRun = await axios.post(`${URL}/api/v1/model/playground/completion/${bridge_id? bridge_id:orchestrator_id}`, localDataToSend)
+    if (modelType === "embedding") dryRun = await axios.post(`${PYTHON_URL}/api/v2/model/playground/chat/completion/${bridge_id? bridge_id:orchestrator_id}`, localDataToSend)
     if (modelType !== 'completion' && modelType !== 'embedding') {
       return dryRun.data;
     }
@@ -269,7 +270,7 @@ export const getAllOrg = async () => {
 export const switchOrg = async (company_ref_id) => {
   try {
     const data = await axios.post(`${PROXY_URL}/api/c/switchCompany`, { company_ref_id });
-    localStorage.setItem("current_org_id", company_ref_id);
+    setInCookies("current_org_id", company_ref_id);
     return data;
   } catch (error) {
     console.error(error);
@@ -287,9 +288,9 @@ export const inviteUser = async (email) => {
   }
 }
 
-export const getInvitedUsers = async ({page, limit}) => {
+export const getInvitedUsers = async ({page, limit, search}) => {
   try {
-    const data = await axios.get(`${PROXY_URL}/api/c/getUsers`, {
+    const data = await axios.get(`${PROXY_URL}/api/c/getUsers?search=${search}`, {
       params: {
         pageNo:page,
         itemsPerPage:limit
@@ -655,7 +656,15 @@ export const updateFunctionApi = async ({ function_id, dataToSend }) => {
     throw new Error(error);
   }
 };
-
+export const storeMarketingRefUser = async (data) => {
+  try {
+    const response = await axios.post("https://flow.sokt.io/func/scribmgUXqSE", data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
 export const archiveBridgeApi = async (bridge_id, newStatus) => {
   try {
     const response = await axios.put(`${URL}/api/v1/config/bridge-status/${bridge_id}`, { status: newStatus });
@@ -731,9 +740,9 @@ export const uploadImage = async (formData) => {
   }
 };
 
-export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, bridge_id, version_id, range, factor }) => {
+export const getMetricsDataApi = async ({ apikey_id, service, model, thread_id, bridge_id, version_id, range, factor, start_date, end_date }) => {
   try {
-    const response = await axios.post(`${URL}/metrics`, { apikey_id, service, model, thread_id, bridge_id, version_id, range, factor });
+    const response = await axios.post(`${URL}/metrics`, { apikey_id, service, model, thread_id, bridge_id, version_id, range, factor, start_date, end_date });
     return response.data?.data || [];
   } catch (error) {
     console.error(error);
@@ -777,7 +786,7 @@ export const updateOrganizationData = async (orgId, orgDetails) => {
         'reference-id': NEXT_PUBLIC_REFERENCEID
       }
     });
-    return response.data;
+    return response?.data;
   } catch (error) {
 
     toast.error('Error updating organization:', error);
@@ -1063,6 +1072,15 @@ export const getApiKeyGuide =async ()=>{
     throw new Error(error);
   }
 }
+export const getGuardrailsTemplates=async()=>{
+  try {
+    const response=await axios.get("https://flow.sokt.io/func/scriKh8LMVKV");
+    return response;
+  }
+  catch(error){
+    throw new Error(error);
+  }
+}
 export const createIntegrationApi = async (data) => {
   try {
     const response = await axios.post(`${URL}/gtwyEmbed/`, data);
@@ -1084,7 +1102,7 @@ export const getAllIntegrationApi = async () => {
 
 export const updateIntegrationData = async (dataToSend) => {
   try {
-    const response = await axios.put(`${URL}/gtwyEmbed/`, {folder_id : dataToSend?.folder_id,  config: dataToSend?.config})
+    const response = await axios.put(`${URL}/gtwyEmbed/`, {folder_id : dataToSend?.folder_id, ...dataToSend})
     return response
   } catch (error) {
     console.error(error)
@@ -1143,6 +1161,45 @@ export const getClientInfo = async (client_id)=>{
   }
 }
 
+export const createNewOrchestralFlow = async (data) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/orchestrator/`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const getAllOrchestralFlows = async () => {
+  try {
+    const response = await axios.get(`${PYTHON_URL}/orchestrator/all`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const updateOrchestralFlow = async (data, orchestratorId) => {
+  try {
+    const response = await axios.put(`${PYTHON_URL}/orchestrator/${orchestratorId}`, data);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export const deleteOrchetralFlow = async (data) => {
+  try {
+    const response = await axios.delete(`${PYTHON_URL}/orchestrator/${data?._id}`);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 export const addNewModel = async(newModelObj) =>{
   try {
     const response = await axios.post(`${URL}/modelConfiguration/user`, newModelObj)

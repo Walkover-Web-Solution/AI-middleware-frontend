@@ -2,7 +2,7 @@
 import { JSONFORMATDATA } from '@/utils/enums';
 import React from 'react';
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata() {
     return {
         title: "Modal Parameters | GTWY AI",
         description: "Comprehensive guide to JSON format structure for function calling in AI integrations with GTWY AI middleware platform",
@@ -12,7 +12,7 @@ export async function generateMetadata({ params }) {
     }
 }
 
-const JsonFomatDocGuide = async () => {
+const JsonFormatDoc = async () => {
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
             <div className="">
@@ -29,7 +29,7 @@ const JsonFomatDocGuide = async () => {
                 {/* JSON Examples Section */}
                 <div className="space-y-8">
                     {JSONFORMATDATA.map(({ title, json }) => (
-                        <div key={title} className="bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md">
+                        <div key={title} className="bg-base-100 rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md">
                             <div className="px-6 py-4 border-b border-gray-100">
                                 <h3 className="text-lg font-medium text-gray-900">{title}</h3>
                             </div>
@@ -46,4 +46,4 @@ const JsonFomatDocGuide = async () => {
     );
 };
 
-export default JsonFomatDocGuide;
+export default JsonFormatDoc;

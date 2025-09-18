@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { useDispatch } from 'react-redux';
@@ -12,6 +12,7 @@ import { ONBOARDING_VIDEOS } from '@/utils/enums';
 export const runtime = 'edge';
 
 function TestCases({ params }) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const dispatch = useDispatch();
   const [isloading, setIsLoading] = useState(false);
@@ -23,9 +24,9 @@ function TestCases({ params }) {
   const bridgeVersion = searchParams.get('version');
   const [selectedVersion, setSelectedVersion] = useState(searchParams.get('versionId') || '');
 
-  const allBridges = useCustomSelector((state) => state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []).slice().reverse();
+  const allBridges = useCustomSelector((state) => state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || []).slice().reverse();
   const { testCases,isFirstTestcase } = useCustomSelector((state) => ({
-    testCases: state?.testCasesReducer?.testCases?.[params?.id] || {},
+    testCases: state?.testCasesReducer?.testCases?.[resolvedParams?.id] || {},
      isFirstTestcase: state?.userDetailsReducer?.userDetails?.meta?.onboarding?.TestCasesSetup || "",
   }));
   const [tutorialState, setTutorialState] = useState({
@@ -33,11 +34,11 @@ function TestCases({ params }) {
     showSuggestion: isFirstTestcase
   });
   const versions = useMemo(() => {
-    return allBridges.find((bridge) => bridge?._id === params?.id)?.versions || [];
-  }, [allBridges, params?.id]);
+    return allBridges.find((bridge) => bridge?._id === resolvedParams?.id)?.versions || [];
+  }, [allBridges, resolvedParams?.id]);
 
   useEffect(() => {
-    dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id }));
+    dispatch(getAllTestCasesOfBridgeAction({ bridgeId: resolvedParams?.id }));
   }, [])
 
   useEffect(() => {
@@ -48,8 +49,8 @@ function TestCases({ params }) {
 
   const handleRunTestCase = (versionId) => {
     setIsLoading(true);
-    dispatch(runTestCaseAction({ versionId, bridgeId: params?.id }))
-      .then(() => { dispatch(getAllTestCasesOfBridgeAction({ bridgeId: params?.id })); setIsLoading(false); setSelectedVersion(versionId) });
+    dispatch(runTestCaseAction({ versionId, bridgeId: resolvedParams?.id }))
+      .then(() => { dispatch(getAllTestCasesOfBridgeAction({ bridgeId: resolvedParams?.id })); setIsLoading(false); setSelectedVersion(versionId) });
     router.push(`?version=${bridgeVersion}&versionId=${versionId}`);
   }
 
@@ -82,18 +83,18 @@ function TestCases({ params }) {
         ? { tool_calls: JSON.parse(editExpectedOutput) }
         : { response: editExpectedOutput }
     };
-    dispatch?.(updateTestCaseAction({ bridge_id: params?.id, dataToUpdate: updatedTestCase }))
+    dispatch?.(updateTestCaseAction({ bridge_id: resolvedParams?.id, dataToUpdate: updatedTestCase }))
     setEditingIndex(null);
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm">
+    <div className="p-6 bg-base-100 rounded-lg shadow-sm">
       <div className="">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Test Cases</h1>
-            <p className="text-gray-700 text-sm leading-relaxed ">
+          <h1 className="text-2xl font-semibold text-base-content mb-2">Test Cases</h1>
+            <p className="text-base-content text-sm leading-relaxed ">
               Test cases are used to compare outputs from different versions with varying prompts and models. You can create test cases from chat history and choose a comparison type - Exact, AI, or Cosine to measure accuracy.
             </p>
-            <a href="https://blog.gtwy.ai/features/testcases?source=single"
+            <a href="https://gtwy.ai/blogs/features/testcases"
               className="inline-flex mb-4 items-center gap-2 text-sm text-primary hover:text-primary-dark transition-colors font-medium group"
               target="_blank"
               rel="noopener noreferrer">
@@ -111,26 +112,26 @@ function TestCases({ params }) {
           <div className="overflow-x-auto">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
-              <thead className="bg-gray-50">
+              <thead className="bg-base-100">
                 <tr>
-                  <th className="w-8 p-3 text-left text-sm font-medium text-gray-700 border-b">#</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">User Input</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">Expected Output</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">Model Answer</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-700 border-b">Matching Type</th>
+                  <th className="w-8 p-3 text-left text-sm font-medium text-base-content border-b border-base-300">#</th>
+                  <th className="p-3 text-left text-sm font-medium text-base-content border-b border-base-300">User Input</th>
+                  <th className="p-3 text-left text-sm font-medium text-base-content border-b border-base-300">Expected Output</th>
+                  <th className="p-3 text-left text-sm font-medium text-base-content border-b border-base-300">Model Answer</th>
+                  <th className="p-3 text-left text-sm font-medium text-base-content border-b border-base-300">Matching Type</th>
                   {versions.map((version, index) => (
                     <th key={index} className={`p-3 text-left text-sm font-medium text-gray-700 border-b ${version === selectedVersion ? 'relative after:absolute after:left-0 after:bottom-[-2px] after:w-full after:h-[2px] after:bg-green-500 after:rounded-full' : ''}`}>
                       <div className="flex items-center gap-2">
                         <div className="tooltip tooltip-left" data-tip="Run Test Case">
                           <button
-                            className="btn btn-xs btn-circle bg-white border border-gray-200 hover:bg-primary hover:border-primary hover:text-white disabled:bg-gray-100 disabled:border-gray-200 disabled:text-gray-400"
+                            className="btn btn-xs btn-circle bg-base-100 border border-base-300 hover:bg-primary hover:border-primary hover:text-base-content disabled:bg-base-100 disabled:border-base-300 disabled:text-base-content"
                             onClick={() => handleRunTestCase(version)}
-                            disabled={!params?.id || isloading}
+                            disabled={!resolvedParams?.id || isloading}
                           >
                             <PlayIcon size={12} />
                           </button>
                         </div>
-                        <span className={`font-medium text-gray-800 `}>
+                        <span className={`font-medium text-base-content `}>
                           {`V${index + 1}`}
                         </span>
                       </div>
@@ -138,7 +139,7 @@ function TestCases({ params }) {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 w-full">
+              <tbody className="divide-y divide-base-300 w-full">
                 {Array.isArray(testCases) ? testCases.map((testCase, index) => {
                   const lastUserMessage = testCase?.conversation
                     ?.filter(message => message?.role === 'user')
@@ -156,12 +157,12 @@ function TestCases({ params }) {
                   return (
                     <React.Fragment key={index}>
                       <tr
-                        className="hover:bg-gray-50 cursor-pointer transition-colors"
+                        className="hover:bg-base-100 cursor-pointer transition-colors"
                         onClick={() => toggleRow(index)}
                       >
-                        <td className="p-2 font-medium text-gray-900">
+                        <td className="p-2 font-medium text-base-content">
                           <div className="flex items-center">
-                            <span className="mr-2 text-gray-500">
+                            <span className="mr-2 text-base-content">
                               {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
                             </span>
                             <span>{index + 1}</span>
@@ -189,39 +190,39 @@ function TestCases({ params }) {
                       </tr>
                       {isExpanded && (
                         <tr>
-                          <td colSpan={versions.length + 5} className="p-4 bg-gray-50">
+                          <td colSpan={versions.length + 5} className="p-4 bg-base-100">
                             <div className="space-y-4">
                               <div>
-                                <h3 className="text-sm font-medium text-gray-700 mb-1">User Input</h3>
+                                <h3 className="text-sm font-medium text-base-content mb-1">User Input</h3>
                                 {editingIndex === index ? (
                                   <textarea
                                     value={editUserInput}
                                     onChange={(e) => setEditUserInput(e.target.value)}
-                                    className="w-full p-3 bg-white min-h-20 rounded-md shadow-sm text-sm text-gray-600"
+                                    className="textarea textarea-bordered w-full bg-base-100 min-h-20"
                                   />
                                 ) : (
-                                  <div className="p-3 bg-white rounded-md shadow-sm text-sm text-gray-600 overflow-auto max-h-40">
+                                  <div className="p-3 bg-base-100 rounded-md shadow-sm text-sm text-base-content overflow-auto max-h-40">
                                     {lastUserMessage}
                                   </div>
                                 )}
                               </div>
                               <div>
-                                <h3 className="text-sm font-medium text-gray-700 mb-1">Expected Output</h3>
+                                <h3 className="text-sm font-medium text-base-content mb-1">Expected Output</h3>
                                 {editingIndex === index ? (
                                   <textarea
                                     value={editExpectedOutput}
                                     onChange={(e) => setEditExpectedOutput(e.target.value)}
-                                    className="w-full p-3 min-h-20 bg-white rounded-md shadow-sm text-sm text-gray-600"
+                                    className="textarea textarea-bordered w-full bg-base-100 min-h-20"
                                   />
                                 ) : (
-                                  <div className="p-3 bg-white rounded-md shadow-sm text-sm text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
+                                  <div className="p-3 bg-base-100 rounded-md shadow-sm text-sm text-base-content whitespace-pre-wrap overflow-auto max-h-40">
                                     {expectedOutput}
                                   </div>
                                 )}
                               </div>
                               <div>
-                                <h3 className="text-sm font-medium text-gray-700 mb-1">Model Answer</h3>
-                                <div className="p-3 bg-white rounded-md shadow-sm text-sm text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
+                                <h3 className="text-sm font-medium text-base-content mb-1">Model Answer</h3>
+                                <div className="p-3 bg-base-100 rounded-md shadow-sm text-sm text-base-content whitespace-pre-wrap overflow-auto max-h-40">
                                   {model_output || 'N/A'}
                                 </div>
                               </div>
@@ -242,7 +243,7 @@ function TestCases({ params }) {
                                         e.stopPropagation();
                                         setEditingIndex(null);
                                       }}
-                                      className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 text-sm flex items-center gap-1.5 transition-colors"
+                                      className="px-3 py-1.5 bg-base-100 text-base-content rounded-lg hover:bg-base-100 text-sm flex items-center gap-1.5 transition-colors"
                                     >
                                       Cancel
                                     </button>
@@ -261,7 +262,7 @@ function TestCases({ params }) {
                                 <button
                                   onClick={(e) => {
                                     e?.stopPropagation();
-                                    dispatch?.(deleteTestCaseAction({ testCaseId: testCase?._id, bridgeId: params?.id }));
+                                    dispatch?.(deleteTestCaseAction({ testCaseId: testCase?._id, bridgeId: resolvedParams?.id }));
                                   }}
                                   className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-sm flex items-center gap-1.5 transition-colors"
                                 >
@@ -270,7 +271,7 @@ function TestCases({ params }) {
                               </div>
 
                               <div>
-                                <h3 className="text-sm font-medium text-gray-700 mb-1">Version Scores</h3>
+                                <h3 className="text-sm font-medium text-base-content mb-1">Version Scores</h3>
                                 <div className="flex flex-wrap gap-2">
                                   {versions?.map((version, versionIndex) => {
                                     const versionArray = testCase?.version_history?.[version];
@@ -280,7 +281,7 @@ function TestCases({ params }) {
                                     return (
                                       <div
                                         key={versionIndex}
-                                        className="flex flex-col gap-2 px-3 py-2 bg-white rounded-lg text-sm text-gray-700 border border-gray-200"
+                                        className="flex flex-col gap-2 px-3 py-2 bg-base-100 rounded-lg text-sm text-base-content border border-base-300"
                                       >
                                         <div className="flex items-center gap-2">
                                           <span>V{versionIndex + 1}:</span>
@@ -290,8 +291,8 @@ function TestCases({ params }) {
                                             {progressValue}%
                                           </div>
                                         </div>
-                                        <div className="text-xs text-gray-500">
-                                          Last run: {lastRun ? new Date(lastRun)?.toLocaleString() : '-'}
+                                        <div className="text-xs text-base-content">
+                                          Last run: {lastRun ? new Date(lastRun).toLocaleString() : '-'}
                                         </div>
                                       </div>
                                     );

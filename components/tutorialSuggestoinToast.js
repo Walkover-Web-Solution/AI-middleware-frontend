@@ -13,7 +13,6 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
 
   // Memoize current user selection to prevent unnecessary re-renders
   const currentUser = useCustomSelector(state => state.userDetailsReducer?.userDetails);
-
   // Memoize tutorial lookup
   const currentTutorial = useMemo(() => 
     TUTORIALS.find(tutorial => tutorial.title === TutorialDetails),
@@ -25,7 +24,6 @@ const TutorialSuggestionToast = ({ setTutorialState, flagKey, TutorialDetails })
     ((TIMER_DURATION - timeLeft) / TIMER_DURATION) * 100,
     [timeLeft]
   );
-
   // Memoized handler for updating user meta
   const updateUserMeta = useCallback(async () => {
     if (!currentUser?.id) return;
