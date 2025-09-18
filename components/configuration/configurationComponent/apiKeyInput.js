@@ -9,13 +9,12 @@ import { useDispatch } from 'react-redux';
 const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
     const dispatch = useDispatch();
 
-    const { bridge, bridge_apiKey, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
+    const { bridge, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
         const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
         const apikeys = state?.bridgeReducer?.apikeys || {};
 
         return {
             bridge: bridgeMap,
-            bridge_apiKey: bridgeMap?.apikey,
             apikeydata: apikeys[params?.org_id] || [], // Ensure apikeydata is an array
             bridgeApikey_object_id: bridgeMap?.apikey_object_id,
             currentService: bridgeMap?.service === 'openai_response' ? 'openai' : bridgeMap?.service,
@@ -36,10 +35,10 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
         } 
         else if (selectedApiKeyId !== 'AI_ML_DEFAULT_KEY') {
             const service = bridge?.service === 'openai_response' ? 'openai' : bridge?.service;
-            const updated = { [service]: selectedApiKeyId };
+            const updated = {...bridgeApikey_object_id, [service]: selectedApiKeyId };
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { apikey_object_id: updated } }));
         }
-    }, [dispatch, params.id, searchParams?.version, bridge?.service]);
+    }, [params.id, searchParams?.version, bridge?.service, bridgeApikey_object_id]);
 
     // Determine the currently selected value
     const selectedValue = useMemo(() => {
@@ -47,8 +46,8 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
             ? bridgeApikey_object_id?.[bridge?.service === 'openai_response' ? 'openai' : bridge?.service]
             : bridgeApikey_object_id;
         const currentApiKey = apikeydata.find(apiKey => apiKey?._id === serviceApiKeyId);
-        return currentService === 'ai_ml' && !bridgeApikey_object_id?.['ai_ml'] ? 'AI_ML_DEFAULT_KEY' : currentApiKey ? currentApiKey._id : bridge_apiKey || '';
-    }, [apikeydata, bridge_apiKey, bridgeApikey_object_id, bridge?.service]);
+        return currentService === 'ai_ml' && !bridgeApikey_object_id?.['ai_ml'] ? 'AI_ML_DEFAULT_KEY' : currentApiKey?._id;
+    }, [apikeydata, bridgeApikey_object_id, bridge?.service]);
 
     const truncateText = (text, maxLength) => {
         return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
@@ -66,18 +65,9 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
                         className="select select-sm w-full border-base-content/20"
                         onChange={handleDropdownChange}
                         maxLength="10"
-                        value={selectedValue}
+                        value={selectedValue ? selectedValue : ''}
                     >
                         <option value="" disabled>Select API key</option>
-
-                        {/* Display bridge_apiKey if it is not in the filtered API keys */}
-                        {!bridgeApikey_object_id && bridge_apiKey && !apikeydata.some(apiKey => apiKey?._id === bridge_apiKey) && (
-                            <option
-                                maxLength="10"
-                                value={bridge_apiKey}>
-                                {truncateText(bridge_apiKey, maxChar)}
-                            </option>
-                        )}
                         {
                             bridge.service === 'ai_ml' && (
                                 <option
