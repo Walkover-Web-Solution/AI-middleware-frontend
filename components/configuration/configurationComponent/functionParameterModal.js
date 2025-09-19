@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Modal from "@/components/UI/Modal";
 import InfoTooltip from "@/components/InfoTooltip";
+import { useCustomSelector } from "@/customHooks/customSelector";
 
 function FunctionParameterModal({
   name = "",
@@ -28,11 +29,15 @@ function FunctionParameterModal({
   functionName = "",
   variablesPath = {},
   setVariablesPath = () => { },
-  isMasterAgent = false
+  isMasterAgent = false,
+  params = {},
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const dispatch = useDispatch();
+  const { versions } = useCustomSelector(state => ({
+    versions: state?.bridgeReducer.org[params?.org_id]?.orgs?.find((item) => item._id === functionId)?.versions || [],
+  }));
 
   // Memoize properties to prevent unnecessary re-renders
   const properties = useMemo(() => function_details?.fields || {}, [function_details?.fields]);
@@ -59,9 +64,11 @@ function FunctionParameterModal({
   useEffect(() => {
     // Only update if function_details actually changed
     if (!isEqual(toolData, function_details)) {
-      setToolData(function_details);
+      const thread_id = function_details?.thread_id ? function_details?.thread_id : toolData?.thread_id;
+      const version_id = function_details?.version_id ? function_details?.version_id : toolData?.version_id;
+      setToolData({ ...function_details, thread_id, version_id });
     }
-  }, [function_details, setToolData]); // Add setToolData to dependencies
+  }, [function_details]);
 
   useEffect(() => {
     // Only update if variables_path[functionName] actually changed
@@ -213,11 +220,11 @@ function FunctionParameterModal({
 
   // Reset the modal data to the original function_details
   const resetModalData = useCallback(() => {
-    setToolData(function_details);
+    setToolData(null);
     setObjectFieldValue("");
     setIsTextareaVisible(false);
     setIsDescriptionEditing(false);
-  }, [function_details, setToolData]);
+  }, []);
 
   const handleCloseModal = useCallback(() => {
     resetModalData();
@@ -527,24 +534,55 @@ function FunctionParameterModal({
               here
             </a>
           </p>
-          {(name==='Agent' || (name==='orchestralAgent' && isMasterAgent))&&
-            <div className="flex items-center justify-center gap-2 text-sm">
-              <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
-                <label className="label info">
-                  Agent’s Thread ID
-                </label>
-              </InfoTooltip>
-              <input
-                type="checkbox"
-                className="toggle"
-                onChange={(e) => {
-                  setToolData({ ...toolData, thread_id: e.target.checked });
-                  setIsModified(true);
-                }}
-                checked={!!toolData?.thread_id}
-                title="Toggle to include thread_id while calling function"
-              />
+          {(name === 'Agent' || (name === 'orchestralAgent' && isMasterAgent)) &&
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <div className="flex items-center ml-10 gap-2">
+                <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
+                  <label className="label info">
+                    Agent’s Thread ID
+                  </label>
+                </InfoTooltip>
+
+                <input
+                  type="checkbox"
+                  className="toggle"
+                  onChange={(e) => {
+                    setToolData({ ...toolData, thread_id: e.target.checked });
+                    setIsModified(true);
+                  }}
+                  checked={!!toolData?.thread_id}
+                  title="Toggle to include thread_id while calling function"
+                />
+              </div>
+
+              {/* Versions Dropdown (show only if available) */}
+              {Array.isArray(versions) && versions.length > 0 && (
+                <div className=" flex flex-row ml-5">
+                  <div className="form-control flex gap-1 flex-row w-full max-w-xs">
+                    <label className="label">
+                      <InfoTooltip tooltipContent="Select the version of the agent you want to use.">
+                        <span className="label-text info ">Agent's Version</span>
+                      </InfoTooltip>
+                    </label>
+                    <select
+                      className="select  select-xs mt-1 select-bordered"
+                      value={toolData?.version_id || ''}
+                      onChange={(e) => {
+                        setToolData({ ...toolData, version_id: e.target.value });
+                        setIsModified(true);
+                      }}
+                    >
+                      {versions.map((v, idx) => (
+                        <option key={v} value={v}>
+                          Version {idx + 1}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
+
           }
           {isTextareaVisible && (
             <p
@@ -569,7 +607,7 @@ function FunctionParameterModal({
                   <th>Description</th>
                   <th>Enum: comma separated</th>
                   <th>Fill with AI</th>
-                  {((name ==='orchestralAgent' &&  !isMasterAgent) || (name !== 'orchestralAgent')) && <th>Value Path: your_path</th>}
+                  {((name === 'orchestralAgent' && !isMasterAgent) || (name !== 'orchestralAgent')) && <th>Value Path: your_path</th>}
                 </tr>
               </thead>
               <tbody>
@@ -657,7 +695,7 @@ function FunctionParameterModal({
                           }
                         />
                       </td>
-                     <td>
+                      <td>
                         <input
                           type="checkbox"
                           className="checkbox"
@@ -674,7 +712,7 @@ function FunctionParameterModal({
                           }}
                         />
                       </td>
-                      {((name==='orchestralAgent' && !isMasterAgent) || !(name==='orchestralAgent')) && <td>
+                      {((name === 'orchestralAgent' && !isMasterAgent) || !(name === 'orchestralAgent')) && <td>
                         <input
                           type="text"
                           placeholder="name"
