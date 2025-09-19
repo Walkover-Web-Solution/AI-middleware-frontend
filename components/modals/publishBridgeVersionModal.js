@@ -65,7 +65,8 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       agent = {
         ...agent,
         name: agentList?.find(a => a._id === agent?.parent_id)?.name || agent.name,
-        haveToPublish: agent.is_drafted
+        haveToPublish: agent.is_drafted,
+        isVersionData: true
       };
     }
     
@@ -106,30 +107,6 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     const nestedResults = await Promise.all(nestedPromises);
     return result.concat(nestedResults.flat());
   }, [dispatch]);
-
-  const connectionVersionMap = useMemo(() => {
-    if (!params?.id || !agentList.length) return {};
-    
-    const map = {};
-    const traverse = (agentId) => {
-      const agent = agentList.find(a => a._id === agentId);
-      if (!agent) return;
-      
-      const connected = agent.connected_agents || {};
-      for (const [_name, info] of Object.entries(connected)) {
-        const childId = info.bridge_id;
-        if (childId) {
-          if (info.version_id) {
-            map[childId] = info.version_id;
-          }
-          traverse(childId);
-        }
-      }
-    };
-    
-    traverse(params.id);
-    return map;
-  }, [params?.id, agentList]);
 
   useEffect(() => {
     const fetchConnectedAgents = async () => {
@@ -309,14 +286,34 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     setShowComparison(prev => !prev);
   }, []);
 
-  const hasVersionToPublish = useCallback((agentId) => {
-    return Boolean(connectionVersionMap[agentId]);
-  }, [connectionVersionMap]);
-
-  const getVersionIndexToPublish = useCallback((agentId) => {
-    const versionIndex = agentList?.filter(oneAgent => oneAgent.versions.includes(agentId))[0]?.versions.findIndex(version => version === agentId);
-    return versionIndex !== -1 ? versionIndex + 1 : 'N/A';
-  }, [agentList]);
+  const getVersionIndexToPublish = useCallback((agentId, isPublishedVersion = false) => {
+    // For agents that need to be published (version data)
+    if (!isPublishedVersion) {
+      const versionIndex = agentList?.filter(oneAgent => oneAgent.versions.includes(agentId))[0]?.versions.findIndex(version => version === agentId);
+      return versionIndex !== -1 ? versionIndex + 1 : 'N/A';
+    } 
+    // For getting published version index
+    else {
+      const agent = allConnectedAgents.find(a => a._id === agentId);
+      if (agent?.haveToPublish) {
+        // For agents that need publishing, find the published version from agentList
+        const parentAgent = agentList?.filter(oneAgent => oneAgent.versions.includes(agentId))[0];
+        const publishedVersionId = parentAgent?.published_version_id;
+        const versionIndex = parentAgent?.versions?.findIndex(version => version === publishedVersionId);
+        return versionIndex !== -1 ? versionIndex + 1 : 'None';
+      } else {
+        // For regular agents, use their own published_version_id
+        const versionIndex = agent?.versions?.findIndex(version => version === agent.published_version_id);
+        if (versionIndex !== -1 && versionIndex !== undefined) {
+          return versionIndex + 1;
+        }
+        // Fallback to checking in agentList
+        const parentAgent = agentList.find(oneAgent => oneAgent._id === agentId);
+        const parentVersionIndex = parentAgent?.versions?.findIndex(version => version === parentAgent.published_version_id);
+        return parentVersionIndex !== -1 && parentVersionIndex !== undefined ? parentVersionIndex + 1 : 'None';
+      }
+    }
+  }, [agentList, allConnectedAgents]);
 
   const handlePublishBridge = useCallback(async () => {
     setIsLoading(true);
@@ -584,16 +581,16 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                                 <div className="flex items-center justify-between text-xs">
                                   <div className="flex items-center gap-4">
                                     <span className="text-base-content/70">
-                                      Published Version: Version {agent.haveToPublish ?agentList?.filter(oneAgent => oneAgent.versions.includes(agent._id))[0]?.versions.map((version, index) => version === agentList?.filter(oneAgent => oneAgent.versions.includes(agent._id))[0]?.published_version_id ? index+1 : null) : agent?.versions?.map((version, index) => version === agent.published_version_id ? index+1 : null) || 'None'}
+                                      Published Version: Version {getVersionIndexToPublish(agent._id, agent?.haveToPublish)}
                                     </span>
                                     <span className="text-base-content/70">
-                                      Total Versions: {agent.haveToPublish ? agentList?.filter(oneAgent => oneAgent.versions.includes(agent._id))[0]?.versions?.length : agent.versions?.length}
+                                      Total Versions: {agent?.isVersionData ? agentList?.filter(oneAgent => oneAgent.versions.includes(agent._id))[0]?.versions?.length : agent.versions?.length || 0}
                                     </span>
                                   </div>
                                   {agent?.haveToPublish && (
                                     <div className="flex items-center gap-1 text-warning">
                                       <AlertTriangle className="w-3 h-3" />
-                                      Version {getVersionIndexToPublish(agent._id)} will be Published
+                                      Version {getVersionIndexToPublish(agent._id, agent?.haveToPublish)} will be Published
                                     </div>
                                   )}
                                 </div>
