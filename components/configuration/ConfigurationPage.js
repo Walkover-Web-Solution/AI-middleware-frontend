@@ -29,21 +29,38 @@ import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import Protected from "../protected";
 import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
+import RecommendedModal from "./configurationComponent/RecommendedModal";
 
 const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef, searchParams }) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
 
-    const { bridgeType, modelType, reduxPrompt, modelName, showGuide, showConfigType, showDefaultApikeys} = useCustomSelector((state) => ({
-        bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
-        modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type?.toLowerCase(),
-        reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt,
-        modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
-        showGuide: state.userDetailsReducer.userDetails.showGuide,
-        showConfigType: state.userDetailsReducer.userDetails.showConfigType,
-        showDefaultApikeys: state.userDetailsReducer.userDetails.addDefaultApiKeys,
-    }));
+    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys,shouldToolsShow} = useCustomSelector((state) => {
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const service = versionData?.service;
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
+        return {
+            bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType?.trim()?.toLowerCase() || 'api',
+            modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type?.toLowerCase(),
+            reduxPrompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt,
+            modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.model,
+            showConfigType: state.userDetailsReducer.userDetails.showConfigType,
+            showDefaultApikeys: state.userDetailsReducer.userDetails.addDefaultApiKeys,
+            shouldToolsShow: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.tools,
+            bridgeApiKey: versionData?.apikey_object_id?.[
+                service === 'openai_response' ? 'openai' : service
+            ],
+            prompt: versionData?.configuration?.prompt || "",
+            shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
+            bridge_functions: versionData?.function_ids || [],
+            connect_agents: versionData?.connected_agents || {},
+            knowbaseVersionData: versionData?.doc_ids || [],
+        };
+    });
     useEffect(() => {
         if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
             if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
@@ -104,12 +121,24 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     <PrebuiltToolsList params={params} searchParams={searchParams}/>
                 </>
             )}
-
-            <ServiceDropdown params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} />
-            <ModelDropdown params={params} searchParams={searchParams}/>
-            {((isEmbedUser && !showDefaultApikeys) || (!isEmbedUser)) && <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams}/>}
+            <RecommendedModal params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} bridgeApiKey={bridgeApiKey} shouldPromptShow={shouldPromptShow}/>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="w-full">
+                                <ModelDropdown params={params} searchParams={searchParams} />
+                            </div>
+                            <div className="w-full">
+                                <ServiceDropdown
+                                    params={params}
+                                    apiKeySectionRef={apiKeySectionRef}
+                                    promptTextAreaRef={promptTextAreaRef}
+                                    searchParams={searchParams}
+                                />
+                            </div>
+                            <div className="w-full">
+                                <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
+                            </div>
+                        </div>
             <AdvancedParameters params={params} searchParams={searchParams}/>
-            
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
                     <AddVariable params={params} searchParams={searchParams}/>
