@@ -65,9 +65,11 @@ const Layout = ({ children }) => {
 
   const navigateToExistingAgent = useCallback((agent, orgId) => {
     const version = agent?.published_version_id || agent?.versions?.[0];
-    router.push(
-      `/org/${orgId}/agents/configure/${agent._id}?version=${version}`
-    );
+    if(agent?._id && orgId && version){
+      router.push(
+        `/org/${orgId}/agents/configure/${agent._id}?version=${version}`
+      );
+    }
     setIsLoading(false);
     setProcessedAgentName(agent.name);
   }, [router]);
@@ -93,7 +95,7 @@ const Layout = ({ children }) => {
 
     try {
        let bridges = allBridges;
-       allBridges.length === 0 && await dispatch(getAllBridgesAction((data)=>{
+       allBridges?.length === 0 && await dispatch(getAllBridgesAction((data)=>{
         bridges = data
        }));
 
@@ -187,7 +189,7 @@ const Layout = ({ children }) => {
       }
       if(messageData?.meta && messageData?.agent_id && orgId){
         let bridges = allBridges;
-       allBridges.length === 0 && await dispatch(getAllBridgesAction((data)=>{
+       allBridges?.length === 0 && await dispatch(getAllBridgesAction((data)=>{
         bridges = data
        }));
        const bridge = bridges.find((bridge) => bridge._id === messageData.agent_id)

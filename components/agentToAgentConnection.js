@@ -383,13 +383,10 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     (nodeId) => {
       const node = nodes.find((n) => n.id === nodeId);
       const agent = agents.find((a) => a._id === (node?.data?.selectedAgent?._id || nodeId));
-      if (typeof window !== 'undefined' && window.GtwyEmbed) {
-        window.GtwyEmbed.sendDataToGtwy({ agent_id: agent?._id });
-        setTimeout(() => {
-          window.openGtwy?.({ agent_id: selectedAgent?._id });
-        }, 2000);
-      }
       setConfigSidebar({ isOpen: true, nodeId, agent });
+      setTimeout(() => {
+        window.openGtwy({ agent_id: agent?._id });
+      }, 1000);
     },
     [nodes, agents, selectedAgent]
   );
@@ -701,7 +698,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         },
       ]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agents, selectedBridgeType]);
 
   /* Keep node data fresh */
@@ -715,7 +711,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         return { ...node, data: nextData };
       })
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agents, selectedBridgeType, masterAgent]);
 
   /* Mark last nodes by edges */
@@ -1063,7 +1058,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
       />
 
       <FunctionParameterModal
-        key={selectedAgent?._id || 'no-agent'}
+        key={selectedAgent?._id}
         name="orchestralAgent"
         Model_Name={MODAL_TYPE.ORCHESTRAL_AGENT_PARAMETER_MODAL}
         function_details={currentVariable || {}}

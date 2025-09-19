@@ -825,8 +825,6 @@ export function FlowControlPanel({
   };
 
   const handleDiscard = () => {
-    const ok = confirm('Discard all unsaved changes?');
-    if (!ok) return;
     if (typeof onDiscard === 'function') {
       onDiscard();
       return;
@@ -866,7 +864,7 @@ export function FlowControlPanel({
       <div className="absolute top-4 right-4 flex items-center gap-2">
         {/* Discard button: show only when createdFlow && isModified */}
 
-        {createdFlow && <button
+        {createdFlow && !isEmbedUser && <button
           className="btn btn-outline"
           onClick={openIntegrationGuide}
           title="Integration Guide"

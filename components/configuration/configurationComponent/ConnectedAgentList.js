@@ -34,7 +34,6 @@ const ConnectedAgentList = ({ params, searchParams, shouldToolsShow }) => {
             variables_path: versionData?.variables_path || {},
         };
     });
-
     const handleSaveAgent = () => {
         try {
             if (!description && !selectedBridge?.description) {
@@ -76,7 +75,7 @@ const ConnectedAgentList = ({ params, searchParams, shouldToolsShow }) => {
         setSelectedBridge({ name: name, ...item })
         const {fields, required_params} =(item?.variables && Object.keys(item?.variables)?.length>0) ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
         setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
-        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params, thread_id: item?.thread_id?item?.thread_id:false })
+        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params, thread_id: item?.thread_id?item?.thread_id:false, version_id: item?.version_id || '' })
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
@@ -118,7 +117,8 @@ const ConnectedAgentList = ({ params, searchParams, shouldToolsShow }) => {
                                 "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
                                 "agent_variables": selectedBridge?.agent_variables,
                                 "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params },
-                                "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false
+                                "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false,
+                                "version_id":agentTools?.version_id ? agentTools?.version_id : ""
                             }
                         },
                         agent_status: "1"
@@ -243,6 +243,8 @@ const ConnectedAgentList = ({ params, searchParams, shouldToolsShow }) => {
                 variablesPath={variablesPath}
                 setVariablesPath={setVariablesPath}
                 variables_path={variables_path}
+                params={params}
+                searchParams={searchParams}
             />
         </div>
     );

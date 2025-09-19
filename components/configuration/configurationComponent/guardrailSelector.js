@@ -9,8 +9,8 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 const GuardrailSelector = ({ params, searchParams }) => {  
     const { guardrailsData,GUARDRAILS_TEMPLATES } = useCustomSelector(
         (state) => ({
-            guardrailsData: state.bridgeReducer.bridgeVersionMapping[params?.id]?.[searchParams?.version]?.guardrails,
-            GUARDRAILS_TEMPLATES: state.flowDataReducer.flowData.guardrailsTemplatesData
+            guardrailsData: state.bridgeReducer?.bridgeVersionMapping[params?.id]?.[searchParams?.version]?.guardrails,
+            GUARDRAILS_TEMPLATES: state.flowDataReducer?.flowData?.guardrailsTemplatesData
 
         })
     );
@@ -27,12 +27,12 @@ const GuardrailSelector = ({ params, searchParams }) => {
         const guardrails_configuration = {};
         
         // Set all guardrail options to false by default
-        Object.keys(GUARDRAILS_TEMPLATES).forEach(key => {
+        Object.keys(GUARDRAILS_TEMPLATES)?.forEach(key => {
             guardrails_configuration[key] = false;
         });
         
         // Set selected guardrails to true
-        selected.forEach(key => {
+        selected?.forEach(key => {
             if (key !== 'custom' && guardrails_configuration.hasOwnProperty(key)) {
                 guardrails_configuration[key] = true;
             }
@@ -42,7 +42,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
             guardrails: {
                 is_enabled: enabled,
                 guardrails_configuration,
-                guardrails_custom_prompt: selected.includes('custom') ? customPromptValue : ''
+                guardrails_custom_prompt: selected?.includes('custom') ? customPromptValue : ''
             }
         };
 
@@ -57,20 +57,20 @@ const GuardrailSelector = ({ params, searchParams }) => {
             // Set enabled state from is_enabled
             
             // Set selected guardrails from guardrails_configuration
-            const selected = Object.entries(guardrailsData.guardrails_configuration)
+            const selected = Object.entries(guardrailsData?.guardrails_configuration)
                 .filter(([_, isEnabled]) => isEnabled)
                 .map(([key]) => key);
             setSelectedGuardrails(selected);
             
             // Set custom prompt if available
-            if (guardrailsData.guardrails_custom_prompt) {
+            if (guardrailsData?.guardrails_custom_prompt) {
                 setCustomPrompt(guardrailsData.guardrails_custom_prompt);
                 
                 // Show custom input if we have a custom prompt
-                if (guardrailsData.guardrails_custom_prompt.trim() !== '') {
+                if (guardrailsData?.guardrails_custom_prompt?.trim() !== '') {
                     setShowCustomInput(true);
                     // Add custom to selected if not already there
-                    if (!selected.includes('custom')) {
+                    if (!selected?.includes('custom')) {
                         setSelectedGuardrails(prev => [...prev, 'custom']);
                     }
                 }
@@ -87,12 +87,12 @@ const GuardrailSelector = ({ params, searchParams }) => {
             let newSelectedGuardrails;
             if (newShowCustomInput) {
                 // Add custom to selected guardrails if not already there
-                newSelectedGuardrails = selectedGuardrails.includes("custom") 
+                newSelectedGuardrails = selectedGuardrails?.includes("custom") 
                     ? selectedGuardrails 
                     : [...selectedGuardrails, "custom"];
             } else {
                 // Remove custom from selected guardrails
-                newSelectedGuardrails = selectedGuardrails.filter(key => key !== "custom");
+                newSelectedGuardrails = selectedGuardrails?.filter(key => key !== "custom");
                 // Clear custom prompt when removing custom
                 setCustomPrompt('');
             }
@@ -103,8 +103,8 @@ const GuardrailSelector = ({ params, searchParams }) => {
         } else {
             // Toggle regular guardrail selection
             let newSelectedGuardrails;
-            if (selectedGuardrails.includes(guardrailKey)) {
-                newSelectedGuardrails = selectedGuardrails.filter(key => key !== guardrailKey);
+            if (selectedGuardrails?.includes(guardrailKey)) {
+                newSelectedGuardrails = selectedGuardrails?.filter(key => key !== guardrailKey);
             } else {
                 newSelectedGuardrails = [...selectedGuardrails, guardrailKey];
             }
