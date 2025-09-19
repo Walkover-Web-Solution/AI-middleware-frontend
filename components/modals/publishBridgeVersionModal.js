@@ -565,6 +565,12 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                                 
                                 {agent?.haveToPublish && (
                                   <div className="flex items-center gap-2">
+                                    {agent?.haveToPublish && isSelected && (
+                                    <div className="flex items-center gap-1 text-warning text-sm">
+                                      <AlertTriangle className="w-3 h-3" />
+                                      Version {getVersionIndexToPublish(agent._id, agent?.haveToPublish)} will be Published | 
+                                    </div>
+                                  )}
                                     <span className="text-xs text-base-content/70">Include in publish</span>
                                     <input
                                       type="checkbox"
@@ -575,25 +581,6 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                                     />
                                   </div>
                                 )}
-                              </div>
-                              
-                              <div className="mt-3 pt-3 border-t border-base-300">
-                                <div className="flex items-center justify-between text-xs">
-                                  <div className="flex items-center gap-4">
-                                    <span className="text-base-content/70">
-                                      Published Version: Version {getVersionIndexToPublish(agent._id, agent?.haveToPublish)}
-                                    </span>
-                                    <span className="text-base-content/70">
-                                      Total Versions: {agent?.isVersionData ? agentList?.filter(oneAgent => oneAgent.versions.includes(agent._id))[0]?.versions?.length : agent.versions?.length || 0}
-                                    </span>
-                                  </div>
-                                  {agent?.haveToPublish && (
-                                    <div className="flex items-center gap-1 text-warning">
-                                      <AlertTriangle className="w-3 h-3" />
-                                      Version {getVersionIndexToPublish(agent._id, agent?.haveToPublish)} will be Published
-                                    </div>
-                                  )}
-                                </div>
                               </div>
                             </div>
                           </div>
