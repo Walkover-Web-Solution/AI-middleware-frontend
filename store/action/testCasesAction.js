@@ -40,14 +40,14 @@ export const deleteTestCaseAction = ({ testCaseId, bridgeId }) => async (dispatc
     }
 }
 
-export const runTestCaseAction = ({ versionId, bridgeId }) => async (dispatch) => {
+export const runTestCaseAction = ({ versionId, bridgeId, testcase_id =null }) => async (dispatch) => {
     try {
-        const response = await runTestCaseApi({ versionId });
+        const response = await runTestCaseApi({ versionId, testcase_id });
         if (response?.success) {
             // dispatch(runTestCaseReducer({ data: response?.response, bridgeId, versionId }));
             toast.success("Test case run successfully");
         }
-        return;
+        return response;
     } catch (error) {
         console.error(error);
     }
