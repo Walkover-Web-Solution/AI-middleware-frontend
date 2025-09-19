@@ -3,7 +3,7 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { CircleAlertIcon, SettingsIcon } from '@/components/Icons';
+import { AddIcon, CircleAlertIcon, SettingsIcon } from '@/components/Icons';
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
@@ -12,7 +12,7 @@ import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const ConnectedAgentList = ({ params, searchParams }) => {
+const ConnectedAgentList = ({ params, searchParams, shouldToolsShow }) => {
     const dispatch = useDispatch();
     const [description, setDescription] = useState("");
     const [selectedBridge, setSelectedBridge] = useState(null);
@@ -20,7 +20,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     const [agentTools, setAgentTools] = useState(null);
     const [variablesPath, setVariablesPath] = useState({});
     const router = useRouter();
-    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
+    let { connect_agents, model, bridgeData, variables_path } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -30,7 +30,6 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         return {
             bridgeData: bridges,
             connect_agents: versionData?.connected_agents || {},
-            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName,
             variables_path: versionData?.variables_path || {},
         };
@@ -195,18 +194,39 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
     return (
         <div>
-            <div className="label flex-col items-start mb-2">
+            <div className="label flex-col items-start mb-0">
                 {shouldToolsShow && Object.keys(connect_agents).length > 0 && (
                     <>
-                        <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
-                            <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
-                        </InfoTooltip>
+                        <div className="flex items-center gap-2 dropdown dropdown-bottom-end">
+                            <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                                <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
+                            </InfoTooltip>
+                            
+                            <div>
+                                <button
+                                    tabIndex={0}
+                                    className="flex  items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-28 mb-2"
+                                >
+                                    <AddIcon className="w-4 h-4" />
+                                    Add 
+                                </button>
+                            </div>
+                                <ConnectedAgentListSuggestion 
+                                    params={params} 
+                                    handleSelectAgents={handleSelectAgents} 
+                                    connect_agents={connect_agents} 
+                                    shouldToolsShow={shouldToolsShow} 
+                                    modelName={model} 
+                                    bridges={bridgeData} 
+                                />
+                        </div>
+
                         <div className="flex flex-wrap gap-4">
                             {renderEmbed}
                         </div>
                     </>
                 )}
-        
+              
             </div>
             <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} bridges={bridgeData} />
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />

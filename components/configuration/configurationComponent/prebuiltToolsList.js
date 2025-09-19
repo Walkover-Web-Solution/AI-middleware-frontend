@@ -80,14 +80,13 @@ const PrebuiltToolsList = ({ params, searchParams }) => {
                 <div className="flex flex-wrap gap-4 mb-4">
                     {renderTools}
                 </div>
-                <InfoTooltip tooltipContent={"This tool lets the AI fetch real-time info from the internet. It's useful for current events, fact-checking, and time-sensitive questions."}>
-                        <p className=" mb-2 label-text info">Configure Prebuilt Tool</p>
-                       
-                 </InfoTooltip>
                 <div className="dropdown dropdown-right">
+                <InfoTooltip tooltipContent={"This tool lets the AI fetch real-time info from the internet. It's useful for current events, fact-checking, and time-sensitive questions."}>
+                       
                     <button tabIndex={0} className="btn btn-outline btn-sm mt-0">
                         <AddIcon size={16} />Add Prebuilt Tool
                     </button>
+                 </InfoTooltip>
                     <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                         <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Tools</li>

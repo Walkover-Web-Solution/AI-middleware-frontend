@@ -3,7 +3,6 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { InfoIcon } from "@/components/Icons";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
-import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
 import Protected from "@/components/protected";
 import { getIconOfService } from "@/utils/utility";
