@@ -224,33 +224,10 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
                 <div className="gap-2 max-w-xl">
                     <div className="label max-w-xs flex justify-between items-center gap-10">
                         <span className="label-text font-medium items-end">LLM Provider</span>
-                        {(shouldPromptShow) && (
-                            <button
-                                className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text hover:opacity-80 transition-opacity"
-                                onClick={handleGetRecommendations}
-                                disabled={isLoadingRecommendations}
-                            >
-                                {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
-                            </button>
-                        )}
+                       
                     </div>
                 </div>
-                {modelRecommendations && (
-                    <div className="mb-2 p-4 bg-base-100 rounded-lg border border-base-content/20 max-w-xs">
-                        {modelRecommendations.error ? (
-                            <p className="text-red-500 text-sm">{modelRecommendations.error}</p>
-                        ) : (
-                            <div className="space-y-2">
-                                <p className="text-base-content">
-                                    <span className="font-medium">Recommended Service:</span> {modelRecommendations?.available?.service}
-                                </p>
-                                <p className="text-base-content">
-                                    <span className="font-medium">Recommended Model:</span> {modelRecommendations?.available?.model}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                )}
+                
 
                 <div className="flex items-center gap-2 z-medium">
                     {renderDaisyUIDropdown()}

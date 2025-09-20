@@ -43,9 +43,7 @@ function Page() {
 
   useEffect(() => {
     dispatch(userDetails());
-    setTimeout(() => {
-      dispatch(getServiceAction())
-    }, 1000);
+    dispatch(getServiceAction())
   }, []);
 
    // Theme initialization with full system theme support

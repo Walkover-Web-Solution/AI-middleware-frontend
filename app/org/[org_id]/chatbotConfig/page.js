@@ -14,7 +14,7 @@ const Page = ({ params }) => {
           <PageHeader
             title="Chatbot Configuration"
             description="Customize your chatbot's appearance, behavior, and agent switching capabilities."
-            docLink="https://blog.gtwy.ai/features/-embed-chatbot?source=single"
+            docLink="https://gtwy.ai/blogs/features/-embed-chatbot"
           />
         </div>
         

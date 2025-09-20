@@ -34,3 +34,44 @@ export function getDefaultValues(additionalParams, bridgeParams) {
 }
 
 export const parameterTypes = ['string', 'number', 'boolean','object','array'];
+
+export const KEYS_TO_COMPARE = [
+    "configuration",
+    "service",
+    "org_id",
+    "status",
+    "apikey_object_id",
+    "gpt_memory",
+    "function_ids",
+    "tool_call_count",
+    "version_description",
+    "IsstarterQuestionEnable",
+    "actions",
+    "apikey",
+    "connected_agents",
+    "user_reference",
+    "doc_ids",
+    "guardrails",
+    'gpt_memory_context'
+  ]
+
+export const DIFFERNCE_DATA_DISPLAY_NAME = (key) => {
+      switch (key) {
+        case 'configuration': return 'Advanced Parameters';
+        case 'function_ids': return 'Tools';
+        case 'service': return 'Service Provider';
+        case 'apikey_object_id': return 'API Key';
+        case 'doc_ids': return 'Knowledge Base';
+        case 'connected_agents': return 'Connected Agents';
+        case 'model': return 'Model';
+        case 'prompt': return 'Prompt';
+        case 'guardrails': return 'Guardrails';
+        case 'gpt_memory_context': return 'GPT Memory Context';
+        case 'gpt_memory': return 'GPT Memory';
+        case 'IsstarterQuestionEnable': return 'Starter Question';
+        case 'user_reference': return 'Rich Text context';
+        case 'is_rich_text': return 'Rich Text';
+        case 'actions': return 'Actions';
+        default: return key;
+      }
+    };

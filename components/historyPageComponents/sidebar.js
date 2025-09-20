@@ -94,7 +94,6 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
           { shallow: true }
         );
       }
-
     }
     else{
       if(searchParams?.thread_id){
@@ -104,7 +103,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
         { shallow: true }
       );
       }
-    }  
+    }
     setTimeout(() => {
       setLoadingSubThreads(false);
     }, 1000);

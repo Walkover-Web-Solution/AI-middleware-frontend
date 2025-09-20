@@ -1,4 +1,4 @@
-import { BuildingIcon, CheckCircleIcon } from "@/components/Icons";
+import { BuildingIcon, CheckCircleIcon, LinkIcon } from "@/components/Icons";
 import AIMLIcon from "@/icons/AIMLIcon";
 import AnthropicIcon from "@/icons/AnthropicIcon";
 import CsvIcon from "@/icons/CsvIcon";
@@ -312,6 +312,8 @@ export const GetFileTypeIcon = (fileType, height, width) => {
             return <PdfIcon height={height} width={width} />;
         case 'csv':
             return <CsvIcon height={height} width={width} />;
+        case 'url':
+            return <LinkIcon height={height} width={width} />;
         default:
             return <GoogleDocIcon height={height} width={width} />;
     }
@@ -609,8 +611,9 @@ function getDomain() {
     date.setTime(date.getTime() + 2 * 24 * 60 * 60 * 1000); // 2 days
     const expires = `; expires=${date.toUTCString()}`;
     const fullKey = getCookieKey(key);
-  
-    document.cookie = `${fullKey}=${value || ''}${expires}; domain=${domain}; path=/`;
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    
+    document.cookie = `${fullKey}=${value || ''}${expires}; domain=${domain}; path=/;${secure}`;
   };
   
   export const getFromCookies = (key) => {

@@ -124,7 +124,7 @@ function Page({params, searchParams }) {
         const start = search.get("start");
         const end = search.get("end");
         const encodedThreadId = encodeURIComponent(thread_id.replace(/&/g, "%26"));
-        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${encodedThreadId}&subThread_id=${encodedThreadId}&_Disease_Advisor[0]=&_Disease_Advisor[1]=&start=${start}&end=${end}`, undefined, { shallow: true });
+        router.push(`${pathName}?version=${resolvedSearchParams.version}&thread_id=${encodedThreadId}&subThread_id=${encodedThreadId}&start=${start}&end=${end}`, undefined, { shallow: true });
       }
     },
     [pathName, resolvedParams.id, resolvedSearchParams.version, resolvedSearchParams?.start, resolvedSearchParams?.end]

@@ -4,7 +4,7 @@ import { AGENT_SETUP_GUIDE_STEPS, AVAILABLE_MODEL_TYPES } from '@/utils/enums';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from './protected';
 
-const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, searchParams, isEmbedUser}) => {
+const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isEmbedUser, searchParams }) => {
   const { bridgeApiKey, prompt,shouldPromptShow,service, showDefaultApikeys } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const service = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service;
@@ -14,14 +14,13 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, sea
     const modelName = versionData?.configuration?.model;
     const showDefaultApikeys = state.userDetailsReducer.userDetails.addDefaultApiKeys;
     return {
-      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service === 'openai_response' ? 'openai' : service],
+      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service],
       prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
       shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
       service: service,
       showDefaultApikeys
    };
   });
-
   const [isVisible, setIsVisible] = useState((isEmbedUser && showDefaultApikeys)? false :(!bridgeApiKey || (prompt === "" && shouldPromptShow)) && (service !== 'ai_ml'||prompt===""))
   const [showError, setShowError] = useState(false);
   const [errorType, setErrorType] = useState('');

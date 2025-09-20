@@ -327,7 +327,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
           </div>}
 
           {/* Empty State */}
-          {filterFlows.length === 0 && (
+          {(filterFlows.length === 0 && !orchestralFlowData.length === 0) && (
             <div className="text-center py-12">
               <div className="w-24 h-24 bg-base-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-12 h-12 text-base-content" />

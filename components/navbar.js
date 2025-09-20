@@ -9,8 +9,6 @@ import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal, toggleSidebar } from '@/utils/utility';
 import { toast } from 'react-toastify';
-import OrgSlider from './sliders/orgSlider';
-import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import ConfigHistorySlider from './sliders/configHistorySlider';
 import Protected from './protected';
@@ -164,16 +162,10 @@ const Navbar = ({ isEmbedUser }) => {
   }, [router, orgId, bridgeId, searchParams]);
 
   const toggleOrgSidebar = useCallback(() => router.push(`/org`), [router]);
-  const toggleBridgeSidebar = useCallback(() => {
-    const version = searchParams?.get('version');
-    router.push(`/org/${orgId}/agents${version ? `?version=${version}` : ''}`);
-  }, [router, orgId, searchParams]);
+  const toggleBridgeSidebar = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
   const toggleConfigHistorySidebar = () => toggleSidebar("default-config-history-slider", "right");
   const toggleIntegrationGuideSlider = () => toggleSidebar("integration-guide-slider", "right");
-  const handleHomeClick = useCallback(() => {
-    const version = searchParams?.get('version');
-    router.push(`/org/${orgId}/agents${version ? `?version=${version}` : ''}`);
-  }, [router, orgId, searchParams]);
+  const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router]);
 
   const breadcrumbItems = useMemo(() => ([
     {

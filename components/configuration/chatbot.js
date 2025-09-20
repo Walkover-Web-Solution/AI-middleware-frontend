@@ -92,7 +92,7 @@ const Chatbot = ({ params, searchParams }) => {
         });
 
         setTimeout(() => {
-          if (bridgeType === 'chatbot') {
+          if (bridgeType === 'chatbot' && !sessionStorage.getItem('orchestralUser')) {
             if (window.openChatbot()) {
               setIsLoading(false);
             }

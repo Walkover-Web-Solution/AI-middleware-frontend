@@ -92,7 +92,8 @@ import {
   Database,
   Shield,
   ExternalLink,
-  Upload
+  Upload,
+  Link
 } from 'lucide-react';
 
 /**
@@ -783,3 +784,6 @@ export const ShieldIcon = (props) => <Shield {...props} />;
 export const ExternalLinkIcon=(props)=> <ExternalLink  {...props} />
 
 export const UploadIcon = (props) => <Upload {...props} />;
+
+export const LinkIcon = (props) => <Link {...props} />;
+

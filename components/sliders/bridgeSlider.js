@@ -48,7 +48,7 @@ function BridgeSlider() {
                                         className={`  ${item._id == path[5] ? "active" : `${item.id}`} py-2 px-2 rounded-md truncate max-w-full`}
                                         onClick={() => handleNavigation(item._id, item?.published_version_id || item?.versions?.[0])}
                                     >
-                                        {getIconOfService(item.service)}
+                                        {getIconOfService(item.service, 14, 14)}
                                         {item.name}
                                     </a>
                                 </li>

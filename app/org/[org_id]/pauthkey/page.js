@@ -116,7 +116,7 @@ const maskAuthKey = (authkey) => {
         <div
           className="tooltip tooltip-primary"
           onClick={() => copyToClipboard(row["originalAuthkey"])}
-          data-tip="copy auth key"
+          data-tip="copy"
         >
           <CopyIcon size={16} />
         </div>
@@ -147,7 +147,7 @@ const maskAuthKey = (authkey) => {
             <PageHeader
               title="PauthKey"
               description="A unique key used to validate API requests for sending and receiving messages securely."
-              docLink="https://blog.gtwy.ai/features/pauthkey"
+              docLink="https://gtwy.ai/blogs/features/pauthkey"
             />
             <div className="flex-shrink-0 mt-4 sm:mt-0">
               <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New Pauth Key</button>
