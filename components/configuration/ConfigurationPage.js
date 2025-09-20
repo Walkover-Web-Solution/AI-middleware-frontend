@@ -1,5 +1,5 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { BotIcon, SettingsIcon, FilterSliderIcon } from "@/components/Icons";
+import { BotIcon, SettingsIcon, FilterSliderIcon, AlertIcon } from "@/components/Icons";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
@@ -36,7 +36,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
 
-    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys,shouldToolsShow} = useCustomSelector((state) => {
+    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const service = versionData?.service;
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -109,39 +109,48 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             {bridgeType === 'trigger' && !isEmbedUser && <TriggersList params={params} />}
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
                 <>
-                    <PreEmbedList params={params} searchParams={searchParams}/>
+                    <PreEmbedList params={params} searchParams={searchParams} />
                     <InputConfigComponent params={params} searchParams={searchParams} promptTextAreaRef={promptTextAreaRef} isEmbedUser={isEmbedUser} />
                     {/* <NewInputConfigComponent params={params} /> */}
-                    <EmbedList params={params} searchParams={searchParams}/>
-                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                    <ConnectedAgentList params={params} searchParams={searchParams}/>
-                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                    <KnowledgebaseList params={params} searchParams={searchParams}/>
-                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                    <PrebuiltToolsList params={params} searchParams={searchParams}/>
+                    {shouldToolsShow ? (
+                        <>
+                            <EmbedList params={params} searchParams={searchParams} />
+                            <hr className="my-0 p-0 bg-base-200 border-base-300" />
+                            <ConnectedAgentList params={params} searchParams={searchParams} />
+                            <hr className="my-0 p-0 bg-base-200 border-base-300" />
+                            <KnowledgebaseList params={params} searchParams={searchParams} />
+                            <hr className="my-0 p-0 bg-base-200 border-base-300" />
+                        </>
+                    ) : (
+                        <div className="flex items-center gap-2 mt-3 mb-3">
+                          <AlertIcon size={18} className="text-warning" /> 
+                           <h2 className="text-center">This model does not support tools</h2>
+                        </div>
+                    )}
+                    <PrebuiltToolsList params={params} searchParams={searchParams} />
                 </>
             )}
-            <RecommendedModal params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} bridgeApiKey={bridgeApiKey} shouldPromptShow={shouldPromptShow}/>
+            <RecommendedModal params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} bridgeApiKey={bridgeApiKey} shouldPromptShow={shouldPromptShow} />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="w-full">
-                                <ModelDropdown params={params} searchParams={searchParams} />
-                            </div>
-                            <div className="w-full">
-                                <ServiceDropdown
-                                    params={params}
-                                    apiKeySectionRef={apiKeySectionRef}
-                                    promptTextAreaRef={promptTextAreaRef}
-                                    searchParams={searchParams}
-                                />
-                            </div>
-                            <div className="w-full">
-                                <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
-                            </div>
-                        </div>
-            <AdvancedParameters params={params} searchParams={searchParams}/>
+                <div className="w-full md:order-2">
+                    <ServiceDropdown
+                        params={params}
+                        apiKeySectionRef={apiKeySectionRef}
+                        promptTextAreaRef={promptTextAreaRef}
+                        searchParams={searchParams}
+                    />
+                </div>
+                <div className="w-full md:order-1">
+                    <ModelDropdown params={params} searchParams={searchParams} />
+                </div>
+                <div className="w-full md:order-3">
+                    <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
+                </div>
+            </div>
+            <AdvancedParameters params={params} searchParams={searchParams} />
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
-                    <AddVariable params={params} searchParams={searchParams}/>
+                    <AddVariable params={params} searchParams={searchParams} />
                     <AdvancedConfiguration params={params} searchParams={searchParams} bridgeType={bridgeType} modelType={modelType} />
                     <GptMemory params={params} searchParams={searchParams} />
                 </>
@@ -151,9 +160,9 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const renderChatbotConfigView = useMemo(() => () => (
         <>
 
-            <UserRefernceForRichText params={params} searchParams={searchParams}/>
-            <StarterQuestionToggle params={params} searchParams={searchParams}/>
-            <ActionList params={params} searchParams={searchParams}/>
+            <UserRefernceForRichText params={params} searchParams={searchParams} />
+            <StarterQuestionToggle params={params} searchParams={searchParams} />
+            <ActionList params={params} searchParams={searchParams} />
         </>
     ), [bridgeType, modelType, params, modelName]);
 
@@ -187,9 +196,9 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             {((isEmbedUser && showConfigType) || !isEmbedUser) && <BridgeTypeToggle params={params} searchParams={searchParams} />}
             {<div className="absolute right-0 top-0">
                 <div className="flex items-center">
-                    <BridgeVersionDropdown params={params} searchParams={searchParams}/>
+                    <BridgeVersionDropdown params={params} searchParams={searchParams} />
                     {((isEmbedUser && showConfigType) || !isEmbedUser) && <div className="join group flex">
-                        { bridgeType === 'chatbot' && <button
+                        {bridgeType === 'chatbot' && <button
                             onClick={() => handleNavigation('config')}
                             className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
