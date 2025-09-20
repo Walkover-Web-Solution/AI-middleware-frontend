@@ -395,9 +395,11 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-low-medium min-w-[100vw] min-h-[100vh] overflow-auto py-4 bg-base-100">
-        <div className="bg-base-100 rounded-lg shadow-2xl max-w-6xl w-[90vw] h-auto overflow-auto relative flex flex-col p-10">
-          <div className="flex items-center justify-between">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-low-medium overflow-auto h-auto bg-base-100">
+        <div 
+          className="bg-base-100 mb-auto mt-auto rounded-lg shadow-2xl max-w-6xl w-[90vw] my-8 flex flex-col p-6 md:p-10 transition-all duration-300 ease-in-out animate-fadeIn"
+        >
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Publish Bridge Version</h2>
             <div className="flex gap-2">
               <button
@@ -569,6 +571,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                                     <div className="flex items-center gap-1 text-warning text-sm">
                                       <AlertTriangle className="w-3 h-3" />
                                       Version {getVersionIndexToPublish(agent._id, agent?.haveToPublish)} will be Published | 
+
                                     </div>
                                   )}
                                     <span className="text-xs text-base-content/70">Include in publish</span>
