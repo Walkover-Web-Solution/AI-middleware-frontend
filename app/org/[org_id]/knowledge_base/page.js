@@ -90,9 +90,9 @@ const Page = ({ params }) => {
 
   return (
     <div className="w-full">
-      <div className="px-4 pt-4">
+      <div className="px-2 pt-4">
         <MainLayout>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between w-full mb-4 gap-2">
             <PageHeader
               title="Knowledge Base"
               description="A knowledge base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."
