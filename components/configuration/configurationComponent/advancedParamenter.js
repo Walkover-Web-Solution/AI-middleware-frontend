@@ -92,7 +92,6 @@ const AdvancedParameters = ({ params, searchParams }) => {
           id: value?._id
         }))
       : [];
-      debugger
       const selectedAgentData = connected_agents && typeof connected_agents === 'object'
         ? Object.entries(connected_agents)
           .filter(([name, item]) => {
