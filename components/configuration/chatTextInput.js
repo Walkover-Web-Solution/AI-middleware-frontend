@@ -153,6 +153,19 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     bridge_id: params?.id
                 });
             }
+            if(Object.entries(responseData?.response?.data?.tools_data)?.length>0)
+            {
+                const toolData = {
+                id: conversation.length + 3,
+                sender: "tools_call",
+                time: new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                }),
+                tools_call_data: responseData.response?.data?.tools_data
+                }
+                setMessages(prevMessages => [...prevMessages, toolData]);
+            }
             if (!responseData || !responseData.success) {
                 if (modelType !== 'completion' && modelType !== 'embedding') {
                     inputRef.current.value = data.content;
@@ -180,7 +193,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             }
             const newChatAssist = {
                 id: conversation.length + 2,
-                sender: "Assist",
+                sender: "assistant",
                 time: new Date().toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
