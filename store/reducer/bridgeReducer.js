@@ -119,6 +119,22 @@ export const bridgeReducer = createSlice({
           state.org[bridges.org_id].functionData[functionData.function_id].bridge_ids = existingBridgeIds.filter(id => id !== _id);
         }
       }
+
+      if(bridges?.connected_agent_details)
+      {
+        const allData = state.org[bridges.org_id]?.orgs;
+        if (allData) {
+          // Find the index of the bridge to update
+          const index = allData.findIndex(bridge => bridge._id === _id);
+          if (index !== -1) {
+            // Update the specific bridge object within the array immutably
+          state.org[bridges.org_id].orgs[index] = {
+            ...state.org[bridges.org_id].orgs[index],
+            ...bridges
+          };
+          }
+        }
+      }
       state.loading = false;
     },
     updateBridgeVersionReducer: (state, action) => {
