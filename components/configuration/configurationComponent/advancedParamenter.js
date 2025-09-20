@@ -26,7 +26,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
   const thread_id = useMemo(() => generateRandomID(), []);
   const dispatch = useDispatch();
 
-  const { service, version_function_data, configuration, integrationData, isFirstParameter } = useCustomSelector((state) => {
+  const { service, version_function_data, configuration, integrationData, isFirstParameter, connected_agents } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
     const user = state.userDetailsReducer.userDetails
@@ -35,7 +35,8 @@ const AdvancedParameters = ({ params, searchParams }) => {
       integrationData,
       service: versionData?.service,
       configuration: versionData?.configuration,
-      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter
+      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter,
+      connected_agents: versionData?.connected_agents
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);
@@ -91,8 +92,20 @@ const AdvancedParameters = ({ params, searchParams }) => {
           id: value?._id
         }))
       : [];
-    setSelectedOptions(selectedFunctiondata);
-  }, [tool_choice_data])
+      const selectedAgentData = connected_agents && typeof connected_agents === 'object'
+        ? Object.entries(connected_agents)
+          .filter(([name, item]) => {
+            const toolChoice = typeof tool_choice_data === 'string' ? tool_choice_data : '';
+            return toolChoice === item.bridge_id;
+          })
+          .map(([name, item]) => ({
+            name,
+            id: item.bridge_id
+          }))
+        : [];
+      setSelectedOptions(selectedAgentData?.length > 0 ? selectedAgentData : selectedFunctiondata);
+    
+  }, [tool_choice_data]);
 
   const debounce = (func, delay) => {
     let timeoutId;
@@ -202,7 +215,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
     };
     dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
   }, [dispatch, params?.id, searchParams?.version]);
-
+  
   // Helper function to render parameter fields
   const renderParameterField = (key, { field, min = 0, max, step, default: defaultValue, options }) => {
     const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
@@ -332,7 +345,42 @@ const AdvancedParameters = ({ params, searchParams }) => {
                         );
                       })
                   )}
-
+                  {connected_agents && typeof connected_agents === 'object' && (
+                    <>
+                      <div className="px-2 pt-2 pb-1 text-xs font-semibold text-base-content/70">Agents</div>
+                      {Object.entries(connected_agents)
+                        .filter(([name, item]) => {
+                          const label = name || item?.description || '';
+                          return label?.toLowerCase()?.includes(searchQuery?.toLowerCase());
+                        })
+                        .sort(([aName], [bName]) => (aName || '').localeCompare(bName || ''))
+                        .map(([name, item]) => {
+                          const title = name || 'Untitled';
+                          const isSelected = selectedOptions?.some(opt => opt?.id === item?.bridge_id);
+                          return (
+                            <div
+                              key={item?.bridge_id}
+                              className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
+                              onClick={() => {
+                                setSelectedOptions(isSelected ? [] : [{ name, id: item?.bridge_id }]);
+                                handleDropdownChange(isSelected ? null : item?.bridge_id, key);
+                                setShowDropdown(false);
+                              }}
+                            >
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  name="agent-select"
+                                  checked={isSelected}
+                                  className="radio radio-sm"
+                                />
+                                <span>{title}</span>
+                              </label>
+                            </div>
+                          );
+                        })}
+                    </>
+                  )}
                 </div>
               )}
             </div>
