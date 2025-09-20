@@ -1010,9 +1010,9 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
     `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\\n` +
     `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
     `--header 'Content-Type: application/json' \\\n` +
-    `--data '{\\n` +
-    `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",\\n` +
-    `    "user": "YOUR_USER_QUESTION"\\n` +
+    `--data '{` +
+    `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",` +
+    `    "user": "YOUR_USER_QUESTION"` +
     `}'`
   )
 

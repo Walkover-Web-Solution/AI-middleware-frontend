@@ -441,7 +441,9 @@ function GtwyIntegrationGuideSlider({ data, handleCloseSlider }) {
   const integrationScript = `<script
   id="gtwy-main-script"
   embedToken="Your embed token"
-  src="https://app.gtwy.ai/gtwy.js"
+  src=${process.env.NEXT_PUBLIC_ENV !== 'PROD'
+      ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js`
+      : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`}
   parentId="${configuration.parentId || "Your_parent_id"}"
   agent_id="Your_agent_id"
   agent_name="Your_agent_name"
@@ -476,8 +478,8 @@ window.openGtwy({
 `;
 
   const getDataUsingUserId = () => {
-    return `curl --location '\${process.env.NEXT_PUBLIC_SERVER_URL}/gtwyEmbed/getAgents' \\
---header 'Authorization: 'your_embed_token''`;
+    return `curl --location ${process.env.NEXT_PUBLIC_SERVER_URL}/gtwyEmbed/getAgents \\
+-H 'Authorization: your_embed_token'`;
   };
 
   const tableData = [
@@ -640,7 +642,9 @@ window.openGtwy({
                       <pre data-prefix=">"><code className="text-error">&lt;script</code></pre>
                       <pre data-prefix=">"><code className="text-error">  id=</code><code className="text-warning">"gtwy-main-script"</code></pre>
                       <pre data-prefix=">"><code className="text-error">  embedToken=</code><code className="text-warning">"Your embed token"</code></pre>
-                      <pre data-prefix=">"><code className="text-error">  src=</code><code className="text-warning">"https://app.gtwy.ai/gtwy.js"</code></pre>
+                      <pre data-prefix=">"><code className="text-error">  src=</code><code className="text-warning">{process.env.NEXT_PUBLIC_ENV !== 'PROD'
+                        ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy_dev.js`
+                        : `${process.env.NEXT_PUBLIC_FRONTEND_URL}/gtwy.js`}</code></pre>
                       <pre data-prefix=">"><code className="text-error">  parentId=</code><code className="text-warning">"{'Your_parent_id'}"</code></pre>
                       <pre data-prefix=">"><code className="text-error">  agent_id=</code><code className="text-warning">"{'Your_agent_id'}"</code></pre>
                       <pre data-prefix=">"><code className="text-error">  agent_name=</code><code className="text-warning">"{'Your_agent_name'}"</code></pre>
