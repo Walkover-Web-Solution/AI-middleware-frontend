@@ -108,13 +108,13 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center justify-center absolute right-1 top-1">
+                    <div className="flex items-center justify-center absolute right-1 top-4">
                         <button
                             onClick={(e) => { e.stopPropagation(); handleDeleteKnowledgebase(item?._id); }}
-                            className="btn bg-transparent shadow-none border-none outline-none hover:bg-red-100 pr-1"
+                            className=" bg-transparent shadow-none border-none outline-none pr-1"
                             title="Remove"
                         >
-                            <TrashIcon size={16} />
+                            <TrashIcon size={16} className=" hover:text-error" />
                         </button>
                     </div>
                 </div>

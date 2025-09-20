@@ -79,15 +79,15 @@ const EmbedList = ({ params, searchParams }) => {
         }
     };
 
-    const handleRemoveFunctionFromBridge = () => {
+    const handleRemoveFunctionFromBridge = (id,name) => {
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params.id,
                 versionId: searchParams?.version,
                 dataToSend: {
                     functionData: {
-                        function_id: functionId,
-                        function_name: function_name,
+                        function_id: id,
+                        function_name: name,
                     },
                 },
             })
@@ -125,7 +125,6 @@ const EmbedList = ({ params, searchParams }) => {
                 functionId={functionId}
                 Model_Name={MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL}
                 embedToken={embedToken}
-                handleRemove={handleRemoveFunctionFromBridge}
                 handleSave={handleSaveFunctionData}
                 toolData={toolData}
                 setToolData={setToolData}
@@ -164,7 +163,7 @@ const EmbedList = ({ params, searchParams }) => {
 
                         {bridgeFunctions.length > 0 && (
                             <div className="flex flex-col gap-2 w-full">
-                                <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" />
+                                <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" handleRemoveEmbed={handleRemoveFunctionFromBridge} />
                             </div>
                         )}
                     </>

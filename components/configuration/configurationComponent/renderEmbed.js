@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { CircleAlertIcon, SettingsIcon } from '@/components/Icons';
+import { CircleAlertIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 
 const RenderEmbed = ({
   bridgeFunctions,
@@ -8,6 +8,7 @@ const RenderEmbed = ({
   handleOpenModal,
   embedToken,
   params,
+  handleRemoveEmbed,
 }) => {
   const renderEmbed = useMemo(() => {
     return bridgeFunctions?.slice()
@@ -65,7 +66,10 @@ const RenderEmbed = ({
                   className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1"
                   onClick={() => handleOpenModal(value?._id)}
                 >
-                  <SettingsIcon size={18} />
+                  <SettingsIcon size={16} />
+                </button>
+                <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleRemoveEmbed(value?._id,value?.function_name)}>
+                  <TrashIcon size={16} className="hover:text-error" />
                 </button>
               </div>
           </div>

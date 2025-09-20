@@ -97,7 +97,6 @@ const PreEmbedList = ({ params, searchParams }) => {
                     functionId={preFunctionId}
                     Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL}
                     embedToken={embedToken}
-                    handleRemove={removePreFunction}
                     handleSave={handleSavePreFunctionData}
                     toolData={preToolData}
                     setToolData={setPreToolData}
@@ -140,6 +139,7 @@ const PreEmbedList = ({ params, searchParams }) => {
                             embedToken={embedToken}
                             params={params}
                             name="preFunction"
+                            handleRemoveEmbed={removePreFunction}
                         />
                     </div>
 

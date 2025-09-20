@@ -3,7 +3,7 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AddIcon, CircleAlertIcon, SettingsIcon } from '@/components/Icons';
+import { AddIcon, CircleAlertIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
@@ -80,7 +80,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
-    const handleRemoveAgent = () => {
+    const handleRemoveAgent = (name,item) => {
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params?.id,
@@ -88,10 +88,10 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 dataToSend: {
                     agents: {
                         connected_agents: {
-                            [selectedBridge?.name]: {
-                                "description": selectedBridge?.description,
-                                "bridge_id": selectedBridge?.bridge_id,
-                                "agent_variables": selectedBridge?.agent_variables,
+                            [name]: {
+                                "description": item?.description,
+                                "bridge_id": item?.bridge_id,
+                                "agent_variables": item?.agent_variables,
                                 "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
                             }
                         }
@@ -188,7 +188,10 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                     </div>
                     <div className="flex items-center justify-center absolute right-1 top-1">
                         <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleOpenAgentVariable(name, item)}>
-                            <SettingsIcon size={18} />
+                            <SettingsIcon size={16} />
+                        </button>
+                        <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleRemoveAgent(name,item)}>
+                            <TrashIcon size={16} className="hover:text-error" />
                         </button>
                     </div>
                 </div>

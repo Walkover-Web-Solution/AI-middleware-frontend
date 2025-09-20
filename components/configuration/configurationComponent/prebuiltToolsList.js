@@ -72,10 +72,10 @@ const PrebuiltToolsList = ({ params, searchParams }) => {
                     <div className="flex items-center justify-center absolute right-1 top-1">
                         <button
                             onClick={(e) => { e.stopPropagation(); handleDeleteTool(item); }}
-                            className="btn bg-transparent shadow-none border-none outline-none hover:bg-red-100 pr-1"
+                            className="  shadow-none border-none outline-none pr-1 mt-3"
                             title="Remove"
                         >
-                            <TrashIcon size={16} />
+                            <TrashIcon size={16} className=" hover:text-error" />
                         </button>
                     </div>
                 </div>
@@ -97,7 +97,7 @@ const PrebuiltToolsList = ({ params, searchParams }) => {
                         <AddIcon className="w-2 h-2" />
                         <span className="text-xs font-medium">Add</span>
                     </button>
-                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high mt-36 px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high mt-48 px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
                         <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Tools</li>
                             <input
