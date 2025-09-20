@@ -384,37 +384,30 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbe
           <div
              className="label cursor-pointer gap-2"
            >
-            {!isPromptHelperOpen&&<button
-              className="btn btn-sm btn-primary"
-              onClick={togglePromptHelper}
-            >
-              {"Prompt Helper"}
-            </button>}
-
-              <button
-                className={`btn btn-sm ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
-                onClick={handleSavePrompt}
-                disabled={!hasUnsavedChanges||prompt.trim() === reduxPrompt.trim()}
-              >
-                Save
-              </button>
-              {isPromptHelperOpen &&
-              <>
-              <button
-                className={`btn btn-sm`}
-                onClick={handleCloseTextAreaFocus}
-              >
-                Close
-              </button>
-              {!isMobileView&&<button
-                className={`btn btn-sm`}
-                onClick={handleOpenDiffModal}
-              >
-                Diff
-              </button>}
-              </>}
-            
-            </div>
+               <button
+                 className={`btn btn-sm ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
+                 onClick={handleSavePrompt}
+                 disabled={!hasUnsavedChanges||prompt.trim() === reduxPrompt.trim()}
+               >
+                 Save
+               </button>
+               {isPromptHelperOpen &&
+               <>
+               <button
+                 className={`btn btn-sm`}
+                 onClick={handleCloseTextAreaFocus}
+               >
+                 Close
+               </button>
+               {!isMobileView&&<button
+                 className={`btn btn-sm`}
+                 onClick={handleOpenDiffModal}
+               >
+                 Diff
+               </button>}
+               </>}
+             
+             </div>
         </div>
         <div className="form-control h-full">
           <textarea
@@ -426,6 +419,14 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbe
             } transition-all duration-300 ease-in-out`}
             value={prompt}
             onChange={handlePromptChange}
+            onFocus={() => {
+              if (!isPromptHelperOpen) {
+                setIsPromptHelperOpen(true);
+                if (typeof window.closeTechDoc === 'function') {
+                  window.closeTechDoc();
+                }
+              }
+            }}
           />
           {showSuggestions && renderSuggestions()}
           <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none">

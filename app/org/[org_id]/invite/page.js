@@ -151,7 +151,7 @@ function InvitePage({ params }) {
       const nextPage = page + 1;
       fetchInvitedMembers(nextPage, false);
     }
-  };
+  
 
   const deleteUser = async (member) => {
     try {
@@ -273,6 +273,6 @@ function InvitePage({ params }) {
       <DeleteModal onConfirm={deleteUser} item={memberToDelete} description={`Are you sure you want to remove the "${memberToDelete?.name}" from your organization.`} title='Remove User From Organization' />
     </div>
   );
-}
+};
 
 export default Protected(InvitePage);

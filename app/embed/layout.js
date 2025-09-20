@@ -95,7 +95,7 @@ const Layout = ({ children }) => {
 
     try {
        let bridges = allBridges;
-       allBridges.length === 0 && await dispatch(getAllBridgesAction((data)=>{
+       allBridges?.length === 0 && await dispatch(getAllBridgesAction((data)=>{
         bridges = data
        }));
 
@@ -189,7 +189,7 @@ const Layout = ({ children }) => {
       }
       if(messageData?.meta && messageData?.agent_id && orgId){
         let bridges = allBridges;
-       allBridges.length === 0 && await dispatch(getAllBridgesAction((data)=>{
+       allBridges?.length === 0 && await dispatch(getAllBridgesAction((data)=>{
         bridges = data
        }));
        const bridge = bridges.find((bridge) => bridge._id === messageData.agent_id)

@@ -33,7 +33,7 @@ const Page = ({params, searchParams }) => {
 
   const { bridgeType, versionService, bridgeName, allbridges, isFocus} = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[resolvedParams?.id];
-    const allbridges = state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs;
+    const allbridges = state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || [];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version];
     const isFocus = state?.bridgeReducer?.isFocus;
     return {
@@ -70,7 +70,7 @@ const Page = ({params, searchParams }) => {
   useEffect(() => {
     (async () => {
       let bridges = allbridges;
-      if(allbridges.length === 0){
+      if(allbridges?.length === 0){
         await dispatch(getAllBridgesAction((data)=>{
           bridges = data
         }));
