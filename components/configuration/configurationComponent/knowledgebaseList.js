@@ -196,7 +196,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     </ul>
                 )}
             </div>
-            <KnowledgeBaseModal params={params} searchParams={searchParams} />
+            <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true}/>
         </div>
     );
 };
