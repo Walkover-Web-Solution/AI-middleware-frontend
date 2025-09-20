@@ -1070,7 +1070,6 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         setVariablesPath={setVariablesPath || (() => { })}
         variables_path={{ [selectedAgent?.name || '']: variablesPath || [] }}
         handleSave={handleSaveAgentParameters || (() => { })}
-        handleRemove={() => { }}
         isMasterAgent={selectedAgent?.isMasterAgent}
       />
     </div>

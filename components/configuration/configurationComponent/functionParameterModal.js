@@ -1,8 +1,6 @@
 import { optimizeJsonApi, updateFlowDescription } from "@/config";
 import { parameterTypes } from "@/jsonFiles/bridgeParameter";
 import {
-  updateApiAction,
-  updateBridgeVersionAction,
   updateFuntionApiAction,
 } from "@/store/action/bridgeAction";
 import { closeModal, flattenParameters } from "@/utils/utility";
@@ -20,7 +18,6 @@ function FunctionParameterModal({
   functionId = "",
   Model_Name,
   embedToken = "",
-  handleRemove = () => { },
   handleSave = () => { },
   toolData = {},
   setToolData = () => { },
@@ -438,12 +435,12 @@ function FunctionParameterModal({
 
   return (
     <Modal MODAL_ID={Model_Name}>
-      <div className="modal-box w-11/12 max-w-6xl overflow-x-hidden">
+      <div className="modal-box w-11/12 max-w-6xl overflow-x-hidden text-sm">
         <div className="flex flex-row justify-between mb-3">
           <span className="flex flex-row items-center gap-4">
-            <h3 className="font-bold text-lg">Configure fields</h3>
+            <h3 className="font-bold text-base">Configure fields</h3>
             <div className="flex flex-row gap-1">
-              <InfoIcon size={16} />
+              <InfoIcon size={14} />
               <span className="label-text-alt">
                 Function used in {(function_details?.bridge_ids || [])?.length}{" "}
                 bridges, changes may affect all bridges.
@@ -451,96 +448,9 @@ function FunctionParameterModal({
             </div>
           </span>
           <div className="flex gap-2">
-            <button onClick={() => setIsDescriptionEditing(true)} className="btn btn-sm btn-primary">
-              <PencilIcon size={16} /> Update Description
-            </button>
-            {name !== "orchestralAgent" && <button onClick={() => handleRemove()} className="btn btn-sm btn-error text-white">
-              <TrashIcon size={16} /> Remove {name}
-            </button>}
-          </div>
-        </div>
-
-        {/* Description Editor Section */}
-        {isDescriptionEditing && (
-          <div className="mb-4 p-4 border border-base-300 rounded-lg bg-base-100">
-            <div className="flex justify-between items-center mb-2">
-              <h4 className="font-semibold">Update Function Description</h4>
-              <button
-                onClick={() => { setIsDescriptionEditing(false); setToolData({ ...toolData, description: function_details?.description }) }}
-                className="btn btn-sm btn-ghost"
-              >
-                <CloseIcon size={16} />
-              </button>
-            </div>
-            <textarea
-              className="textarea textarea-bordered w-full min-h-24 resize-y"
-              placeholder="Enter function description..."
-              value={toolData?.description}
-              onChange={(e) => setToolData({ ...toolData, description: e.target.value })}
-            />
-          </div>
-        )}
-
-        <div className="flex justify-between items-center">
-          {isDataAvailable && (
-            <div className="flex items-center text-sm gap-3 mb-4">
-              <p>Raw JSON format</p>
-              <input
-                type="checkbox"
-                className="toggle"
-                checked={isTextareaVisible}
-                onChange={handleToggleChange}
-                title="Toggle to edit object parameter"
-              />
-              {isTextareaVisible && (
-                <div className="flex items-center gap-2">
-                  <p>Copy tool call format: </p>
-                  <CopyIcon
-                    size={16}
-                    onClick={copyToolCallFormat}
-                    className="cursor-pointer"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-          <div>
-            {toolData?.old_fields && isTextareaVisible && (
-              <div className="flex items-center text-sm gap-3">
-                <p>Check for old data</p>
-                <input
-                  type="checkbox"
-                  className="toggle"
-                  checked={isOldFieldViewTrue}
-                  onChange={() => {
-                    setIsOldFieldViewTrue((prev) => !prev);
-                  }}
-                  title="Toggle to edit object parameter"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex justify-between pl-1">
-          <p
-            colSpan="3"
-            className="flex items-center gap-1 whitespace-nowrap text-xs mb-2"
-          >
-            <InfoIcon size={16} /> You can change the data in raw json format.
-            For more info click{" "}
-            <a
-              href="/faq/jsonformatdoc"
-              target="_blank"
-              rel="noopener noreferrer"
-              className=" link link-primary underline cursor-pointer"
-            >
-              here
-            </a>
-          </p>
           {(name === 'Agent' || (name === 'orchestralAgent' && isMasterAgent)) &&
-            <div className="flex items-center justify-between gap-2 text-sm">
-              <div className="flex items-center ml-10 gap-2">
+            <div className="flex items-center justify-between gap-1 mr-24 text-xs">
+              <div className="flex items-center ml-5 gap-2">
                 <InfoTooltip className="info" tooltipContent="Enable to save the conversation using the same thread_id of the agent it is connected with.">
                   <label className="label info">
                     Agent’s Thread ID
@@ -549,7 +459,7 @@ function FunctionParameterModal({
 
                 <input
                   type="checkbox"
-                  className="toggle"
+                  className="toggle toggle-sm"
                   onChange={(e) => {
                     setToolData({ ...toolData, thread_id: e.target.checked });
                     setIsModified(true);
@@ -561,7 +471,7 @@ function FunctionParameterModal({
 
               {/* Versions Dropdown (show only if available) */}
               {Array.isArray(versions) && versions.length > 0 && (
-                <div className=" flex flex-row ml-5">
+                <div className=" flex flex-row ml-2">
                   <div className="form-control flex gap-1 flex-row w-full max-w-xs">
                     <label className="label">
                       <InfoTooltip tooltipContent="Select the version of the agent you want to use.">
@@ -569,7 +479,7 @@ function FunctionParameterModal({
                       </InfoTooltip>
                     </label>
                     <select
-                      className="select  select-xs mt-1 select-bordered"
+                      className="select select-xs mt-1 select-bordered "
                       value={toolData?.version_id || ''}
                       onChange={(e) => {
                         setToolData({ ...toolData, version_id: e.target.value });
@@ -588,6 +498,93 @@ function FunctionParameterModal({
             </div>
 
           }
+            <button onClick={() => setIsDescriptionEditing(true)} className="btn btn-xs btn-primary mt-1">
+              <PencilIcon size={14} /> Description
+            </button>
+
+            
+          </div>
+        </div>
+
+        {/* Description Editor Section */}
+        {isDescriptionEditing && (
+          <div className="mb-4 p-4 border border-base-300 rounded-lg bg-base-100">
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="font-semibold">Update Function Description</h4>
+              <button
+                onClick={() => { setIsDescriptionEditing(false); setToolData({ ...toolData, description: function_details?.description }) }}
+                className="btn btn-xs btn-ghost"
+              >
+                <CloseIcon size={14} />
+              </button>
+            </div>
+            <textarea
+              className="textarea textarea-bordered w-full min-h-24 resize-y"
+              placeholder="Enter function description..."
+              value={toolData?.description}
+              onChange={(e) => setToolData({ ...toolData, description: e.target.value })}
+            />
+          </div>
+        )}
+
+        <div className="flex justify-between items-center">
+          {isDataAvailable && (
+            <div className="flex items-center text-sm gap-3 mb-4">
+              <p>Raw JSON format</p>
+              <input
+                type="checkbox"
+                className="toggle toggle-sm"
+                checked={isTextareaVisible}
+                onChange={handleToggleChange}
+                title="Toggle to edit object parameter"
+              />
+              {isTextareaVisible && (
+                <div className="flex items-center gap-2">
+                  <p>Copy tool call format: </p>
+                  <CopyIcon
+                    size={14}
+                    onClick={copyToolCallFormat}
+                    className="cursor-pointer"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          <div>
+            {toolData?.old_fields && isTextareaVisible && (
+              <div className="flex items-center text-sm gap-3">
+                <p>Check for old data</p>
+                <input
+                  type="checkbox"
+                  className="toggle toggle-sm"
+                  checked={isOldFieldViewTrue}
+                  onChange={() => {
+                    setIsOldFieldViewTrue((prev) => !prev);
+                  }}
+                  title="Toggle to edit object parameter"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-between pl-1">
+          <p
+            colSpan="3"
+            className="flex items-center gap-1 whitespace-nowrap text-xs mb-2"
+          >
+            <InfoIcon size={14} /> You can change the data in raw json format.
+            For more info click{" "}
+            <a
+              href="/faq/jsonformatdoc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className=" link link-primary underline cursor-pointer"
+            >
+              here
+            </a>
+          </p>
+          
           {isTextareaVisible && (
             <p
               className="cursor-pointer label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text"
@@ -601,7 +598,7 @@ function FunctionParameterModal({
           <p>No Parameters used in the function</p>
         ) : !isTextareaVisible ? (
           <div className="overflow-x-auto border border-base-300 rounded-md">
-            <table className="table">
+            <table className="table table-sm">
               <thead>
                 <tr>
                   <th></th>
@@ -649,7 +646,7 @@ function FunctionParameterModal({
                       <td>
                         <input
                           type="checkbox"
-                          className="checkbox"
+                          className="checkbox checkbox-sm"
                           checked={(() => {
                             const keyParts = param.key.split(".");
                             if (keyParts.length === 1) {
@@ -702,7 +699,7 @@ function FunctionParameterModal({
                       <td>
                         <input
                           type="checkbox"
-                          className="checkbox"
+                          className="checkbox checkbox-sm"
                           checked={!(param.key in variablesPath)}
                           disabled={name === "Pre Tool"}
                           onChange={() => {
@@ -758,11 +755,11 @@ function FunctionParameterModal({
         )}
         <div className="modal-action">
           <form method="dialog" className="flex flex-row gap-2">
-            <button className="btn" onClick={handleCloseModal}>
+            <button className="btn btn-sm" onClick={handleCloseModal}>
               Close
             </button>
             <button
-              className="btn btn-primary"
+              className="btn btn-sm btn-primary"
               onClick={handleSaveData}
               disabled={!isModified || isLoading}
             >

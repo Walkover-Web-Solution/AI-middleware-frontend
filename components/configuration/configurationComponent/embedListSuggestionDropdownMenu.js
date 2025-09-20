@@ -9,10 +9,10 @@ import React, { useMemo, useState } from 'react';
 import InfoTooltip from '@/components/InfoTooltip';
 
 function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
-     const [tutorialState, setTutorialState] = useState({
+    const [tutorialState, setTutorialState] = useState({
         showTutorial: false,
         showSuggestion: false
-      });
+    });
     const { integrationData, function_data, embedToken, isFirstFunction } = useCustomSelector((state) => {
         const orgId = Number(params?.org_id);
         const orgData = state?.bridgeReducer?.org?.[orgId] || {};
@@ -65,7 +65,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                 const title = integrationData?.[functionName]?.title || 'Untitled';
 
                 return (
-                   <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
+                    <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
                         <div className="flex justify-between items-center w-full">
                             <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
                                 {title}
@@ -82,56 +82,8 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
             )
     ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, searchParams?.version]);
     return (
-        <div className="dropdown dropdown-right">
-            <div className="flex items-end gap-2">
-                {name === "preFunction" ? (
-                    <div className=" flex flex-col items-start gap-2">
-                        <InfoTooltip  tooltipContent={"A pre-tools prepares data before passing it to the main tools for the GPT call"}>
-                        <p className="text-base font-semibold info">Pre Tool Configuration</p>
-                       
-                        </InfoTooltip>
-
-                        {/* Plus Icon Button */}
-                        <button
-                           tabIndex={0}
-                           className="btn btn-outline btn-sm"                  
-                        >
-                                <AddIcon size={16} />
-                               {"Connect Pre Tool"}
-                        </button>
-                    </div>
-                ) : (
-                    <div className="flex flex-col items-start gap-2">
-                        {connectedFunctions.length === 0 && (
-                            <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent={"Tool calling lets LLMs use external tools to get real-time data and perform complex tasks."} >
-                                <p className=" label-text info">Tool Configuration</p>
-
-                            </InfoTooltip>
-                        )}
-
-                        <div className='flex flex-wrap items-center gap-2 w-full lg:mr-0 mr-5'>
-                            <button
-                                tabIndex={0}
-                                disabled={!shouldToolsShow}
-                                onClick={() => handleTutorial()}
-                                className="btn btn-outline btn-sm "
-                            >
-                                <AddIcon size={16} />
-                                <span className="truncate">Connect Tool</span>
-                            </button>
-                        </div>
-                    </div>
-                )}
-                {
-                    !shouldToolsShow && name !== "preFunction"&&
-                    <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                        <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
-                        <span className='label-text-alt text-xs leading-tight'>
-                            {`The ${modelName} does not support ${name?.toLowerCase()?.includes('pre function') ? 'pre functions' : 'functions'} calling`}
-                        </span>
-                    </div>
-                }
-            </div>
+        <div className="dropdown dropdown-left mt-8">
+            
             {tutorialState?.showSuggestion && (
                 <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"FunctionCreation"} TutorialDetails={"Tool Configuration"}/>
             )}
