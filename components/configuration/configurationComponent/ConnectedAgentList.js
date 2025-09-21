@@ -192,10 +192,10 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                         </div>
                     </div>
                     <div className="flex items-center justify-center absolute right-1 top-1">
-                        <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleOpenAgentVariable(name, item)}>
+                        <button className="btn bg-transparent hover:bg-transparent shadow-none border-none outline-none pr-1" onClick={() => handleOpenAgentVariable(name, item)}>
                             <SettingsIcon size={16} />
                         </button>
-                        <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleRemoveAgent(name,item)}>
+                        <button className="btn bg-transparent hover:bg-transparent shadow-none border-none outline-none pr-1" onClick={() => handleRemoveAgent(name,item)}>
                             <TrashIcon size={16} className="hover:text-error" />
                         </button>
                     </div>

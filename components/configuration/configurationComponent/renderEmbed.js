@@ -63,12 +63,12 @@ const RenderEmbed = ({
                 </div>
               <div className="flex items-center justify-center absolute right-1 top-1">
                 <button
-                  className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1"
+                  className="btn bg-transparent hover:bg-transparent shadow-none border-none outline-none pr-1"
                   onClick={() => handleOpenModal(value?._id)}
                 >
                   <SettingsIcon size={16} />
                 </button>
-                <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleRemoveEmbed(value?._id,value?.function_name)}>
+                <button className=" btn bg-transparent hover:bg-transparent shadow-none border-none outline-none pr-1" onClick={() => handleRemoveEmbed(value?._id,value?.function_name)}>
                   <TrashIcon size={16} className="hover:text-error" />
                 </button>
               </div>

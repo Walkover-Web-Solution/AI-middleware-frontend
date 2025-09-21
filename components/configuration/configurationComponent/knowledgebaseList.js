@@ -147,7 +147,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
                 )}
                 {!tutorialState?.showTutorial && (
-                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content mt-12 z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto overflow-x-hidden pb-1">
+                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content mt-12 z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto overflow-x-hidden pb-0">
                         <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
                             <input
@@ -179,7 +179,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                                     </li>
                                 ))
                             }
-                            <li className="mt-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } ; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
+                            <li className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } ; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
                                 <div>
                                     <AddIcon size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
                                 </div>
