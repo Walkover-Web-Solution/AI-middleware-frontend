@@ -26,7 +26,10 @@ const IntegrationModal = ({ params }) => {
             "defaultOpen": true,
             "hideFullScreenButton": false,
             "hideCloseButton": false,
-            "hideHeader": false
+            "hideHeader": false,
+            "showPromptGuard": false,
+            "showAdvancedParameters": false,
+            "showAdvancedConfigurations": false
         }
     }))
     closeModal(MODAL_TYPE.INTEGRATION_MODAL);

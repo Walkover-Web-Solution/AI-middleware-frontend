@@ -36,7 +36,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
 
-    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow } = useCustomSelector((state) => {
+    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, showPromptGuard, showAdvancedParameters, showAdvancedConfigurations } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const service = versionData?.service;
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -59,6 +59,9 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             bridge_functions: versionData?.function_ids || [],
             connect_agents: versionData?.connected_agents || {},
             knowbaseVersionData: versionData?.doc_ids || [],
+            showPromptGuard: state.userDetailsReducer.userDetails.showPromptGuard,
+            showAdvancedParameters: state.userDetailsReducer.userDetails.showAdvancedParameters,
+            showAdvancedConfigurations: state.userDetailsReducer.userDetails.showAdvancedConfigurations
         };
     });
     useEffect(() => {
@@ -110,7 +113,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
                 <>
                     <PreEmbedList params={params} searchParams={searchParams} />
-                    <InputConfigComponent params={params} searchParams={searchParams} promptTextAreaRef={promptTextAreaRef} isEmbedUser={isEmbedUser} />
+                    <InputConfigComponent params={params} searchParams={searchParams} promptTextAreaRef={promptTextAreaRef} isEmbedUser={isEmbedUser} showPromptGuard={showPromptGuard} />
                     {/* <NewInputConfigComponent params={params} /> */}
                     {shouldToolsShow ? (
                         <>
@@ -147,11 +150,19 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
                 </div>
             </div>
-            <AdvancedParameters params={params} searchParams={searchParams} />
+            {(isEmbedUser && showAdvancedParameters) || (!isEmbedUser && (
+                <>
+                <AdvancedParameters params={params} searchParams={searchParams} />
+                </>
+            ))}
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
                     <AddVariable params={params} searchParams={searchParams} />
-                    <AdvancedConfiguration params={params} searchParams={searchParams} bridgeType={bridgeType} modelType={modelType} />
+                    {(isEmbedUser && showAdvancedConfigurations) || (!isEmbedUser && (
+                        <>
+                        <AdvancedConfiguration params={params} searchParams={searchParams} bridgeType={bridgeType} modelType={modelType} />
+                        </>
+                    ))}
                     <GptMemory params={params} searchParams={searchParams} />
                 </>
             )}
