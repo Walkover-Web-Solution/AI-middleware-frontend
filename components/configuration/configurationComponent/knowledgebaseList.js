@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
+import { CircleAlertIcon, AddIcon, EllipsisVerticalIcon, TrashIcon } from '@/components/Icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
@@ -108,14 +108,17 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center justify-center absolute right-1 top-4">
-                        <button
-                            onClick={(e) => { e.stopPropagation(); handleDeleteKnowledgebase(item?._id); }}
-                            className=" bg-transparent shadow-none border-none outline-none pr-1"
-                            title="Remove"
-                        >
-                            <TrashIcon size={16} className=" hover:text-error" />
-                        </button>
+                    <div className="dropdown dropdown-end z-medium absolute right-1 top-1">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
+                            <EllipsisVerticalIcon size={16} />
+                        </div>
+                        <ul tabIndex={0} className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-44 border border-base-300">
+                            <li>
+                                <a onClick={(e) => { e.stopPropagation(); handleDeleteKnowledgebase(item?._id); }} className="text-sm text-error">
+                                    
+                                <TrashIcon size={16} />Remove</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             ) : null;
@@ -147,7 +150,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                     <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.knowledgeBase} flagKey={"knowledgeBase"} />
                 )}
                 {!tutorialState?.showTutorial && (
-                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content mt-12 z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto overflow-x-hidden pb-1">
+                    <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content mt-12 z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto overflow-x-hidden pb-0">
                         <div className='flex flex-col gap-2 w-full'>
                             <li className="text-sm font-semibold disabled">Suggested Knowledgebases</li>
                             <input
@@ -179,7 +182,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                                     </li>
                                 ))
                             }
-                            <li className="mt-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } ; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
+                            <li className="py-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100" onClick={() => { if (window.openRag) { window.openRag() } else { openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL) } ; if (typeof document !== 'undefined') { document.activeElement?.blur?.(); } }}>
                                 <div>
                                     <AddIcon size={16} /><p className='font-semibold'>Add new Knowledgebase</p>
                                 </div>

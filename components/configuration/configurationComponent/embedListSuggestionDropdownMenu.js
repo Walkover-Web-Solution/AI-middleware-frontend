@@ -91,7 +91,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                 <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.FunctionCreation}  flagKey={"FunctionCreation"} />
             )}
             {!tutorialState?.showTutorial && (
-                <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-1">
+                <ul tabIndex={0} className="menu menu-dropdown-toggle dropdown-content z-high px-4 shadow bg-base-100 rounded-box w-72 max-h-96 overflow-y-auto pb-0">
                     <div className='flex flex-col gap-2 w-full'>
                         <li className="text-sm font-semibold disabled">Suggested Tools</li>
                         <input
@@ -106,7 +106,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                         ) : (
                             <li className="text-center mt-2">No tools found</li>
                         )}
-                        {!hideCreateFunction && <li className="mt-2 border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => openViasocket(undefined,
+                        {!hideCreateFunction && <li className="border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => openViasocket(undefined,
                             {
                                 embedToken,
                                 meta: {

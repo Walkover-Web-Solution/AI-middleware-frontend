@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { CircleAlertIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
+import { CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 
 const RenderEmbed = ({
   bridgeFunctions,
@@ -60,18 +60,26 @@ const RenderEmbed = ({
                   {value?.description || value?.api_description || value?.short_description || 'A description is required for proper functionality.'}
                 </p>
               </div>
-                </div>
-              <div className="flex items-center justify-center absolute right-1 top-1">
-                <button
-                  className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1"
-                  onClick={() => handleOpenModal(value?._id)}
-                >
-                  <SettingsIcon size={16} />
-                </button>
-                <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleRemoveEmbed(value?._id,value?.function_name)}>
-                  <TrashIcon size={16} className="hover:text-error" />
-                </button>
+            </div>
+            <div className="dropdown dropdown-end z-medium absolute right-1 top-1">
+              <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
+                <EllipsisVerticalIcon size={16} />
               </div>
+              <ul tabIndex={0} className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-40 border border-base-300">
+                <li>
+                  <a onClick={() => handleOpenModal(value?._id)} className="text-sm">
+                    <SettingsIcon size={16} />
+                    Config
+                  </a>
+                </li>
+                <li>
+                  <a onClick={() => handleRemoveEmbed(value?._id, value?.function_name)} className="text-sm text-error">
+                    <TrashIcon size={16} />
+                    Remove
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         );
       });
