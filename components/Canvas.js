@@ -1,5 +1,5 @@
 import { SendHorizontalIcon, CopyIcon as CopyIconComponent, CheckIcon as CheckIconComponent } from "@/components/Icons";
-import { BrainCircuit, CheckIcon, CopyIcon, Lightbulb, RotateCcw } from "lucide-react";
+import { BrainCircuit, CheckIcon, CopyIcon, Lightbulb, MousePointerClick, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import CodeBlock from "./codeBlock/codeBlock";
@@ -129,7 +129,7 @@ function Canvas({
         {messages.length > 0 && (
           <button 
             className="btn btn-xs  btn-outline btn-error hover:btn-error"
-            onClick={handleResetChat}
+            onMouseDown={handleResetChat}
           >
             <RotateCcw size={14}/>
             Reset Chat
@@ -204,7 +204,7 @@ function Canvas({
                             className="btn btn-xs btn-primary gap-1 hover:btn-primary-focus transition-all duration-200 shadow-sm" 
                             onClick={() => handleApply(message)}
                           >
-                            <CopyIconComponent size={14}/>
+                            <MousePointerClick size={14}/>
                             <span className="hidden sm:inline">Apply</span>
                           </button>
                         )}
