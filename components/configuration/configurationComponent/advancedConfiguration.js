@@ -6,6 +6,7 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import ResponseFormatSelector from './responseFormatSelector';
 import InfoTooltip from '@/components/InfoTooltip';
 import ToolCallCount from './toolCallCount';
+import { getIconOfService } from '@/utils/utility';
 
 const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -17,17 +18,23 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
   });
   const dispatch = useDispatch();
 
-  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration } = useCustomSelector((state) => {
+  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration, serviceModels, currentService, fallbackModel } = useCustomSelector((state) => {
     const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
     const apikeys = state?.bridgeReducer?.apikeys || {};
     const user = state.userDetailsReducer.userDetails;
-
+    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const service = versionData?.service;
+    const model = versionData?.model;
     return {
       bridge: bridgeMap,
       apikeydata: apikeys[params?.org_id] || [],
       bridgeApikey_object_id: bridgeMap?.apikey_object_id,
       SERVICES: state?.serviceReducer?.services,
-      isFirstConfiguration: user?.meta?.onboarding?.AdvancedConfiguration
+      isFirstConfiguration: user?.meta?.onboarding?.AdvancedConfiguration,
+      serviceModels: state?.modelReducer?.serviceModels || {},
+      currentService: service,
+      fallbackModel: versionData?.fallback_model,
+      currentModel: model
     };
   });
 
@@ -65,12 +72,74 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
   };
 
   const truncateText = (text, maxLength) => {
-    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+    return text?.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   };
 
   const toggleAccordion = () => {
     setIsAccordionOpen((prevState) => !prevState);
   };
+
+  // Fallback model + service state and handlers
+  const [fallbackService, setFallbackService] = useState(fallbackModel?.service || null);
+  const [fallbackModelName, setFallbackModelName] = useState(fallbackModel?.model || null);
+  const [isFallbackEnabled, setIsFallbackEnabled] = useState(fallbackModel?.is_enable||false);
+
+  const handleFallbackServiceChange = useCallback((service) => {
+    setFallbackService(service);
+    setFallbackModelName(null);
+    // Persist immediately using explicit values (avoid stale state)
+    dispatch(updateBridgeVersionAction({
+      bridgeId: params.id,
+      versionId: searchParams?.version,
+      dataToSend: {
+        fall_back: {
+          ...(fallbackModel || {}),
+          is_enable: !!isFallbackEnabled,
+          service: service || null,
+          model: fallbackModelName || null,
+        },
+      },
+    }));
+  }, [dispatch, params.id, searchParams?.version, fallbackModel, isFallbackEnabled, fallbackModelName]);
+
+  const handleFallbackModelChange = useCallback((group, model) => {
+    setFallbackModelName(model);
+    const enableNext = true;
+    if (!isFallbackEnabled) setIsFallbackEnabled(true);
+    // Persist immediately using explicit values
+    dispatch(updateBridgeVersionAction({
+      bridgeId: params.id,
+      versionId: searchParams?.version,
+      dataToSend: {
+        fall_back: {
+          ...(fallbackModel || {}),
+          is_enable: enableNext,
+          service: fallbackService || null,
+          model: model || null,
+        },
+      },
+    }));
+  }, [dispatch, params.id, searchParams?.version, fallbackModel, isFallbackEnabled, fallbackService, fallbackModelName]);
+
+  const handleFallbackModelToggle = useCallback(() => {
+    const next = !isFallbackEnabled;
+    setIsFallbackEnabled(next);
+    // Use `next` directly to avoid stale state in dispatch
+    dispatch(updateBridgeVersionAction({
+      bridgeId: params.id,
+      versionId: searchParams?.version,
+      dataToSend: {
+        fall_back: {
+          ...(fallbackModel || {}),
+          is_enable: next,
+          service: fallbackService || null,
+          model: next ? (fallbackModelName || null) : null,
+        },
+      },
+    }));
+  }, [dispatch, params.id, searchParams?.version, isFallbackEnabled, fallbackModel, fallbackService, fallbackModelName]);
+
+  const computedModelsList = serviceModels?.[fallbackService] || {};
 
   return (
     <div className="z-very-low text-base-content w-full cursor-pointer mt-2" tabIndex={0}>
@@ -163,6 +232,100 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
               )}
             </div>
           </div>
+        </div>
+
+        <div className="form-control w-full">
+          <div className="label">
+            <InfoTooltip tooltipContent="Enable and configure a fallback model and service to retry when the primary fails.">
+              <span className="label-text info">Fallback Model</span>
+            </InfoTooltip>
+            <input
+              type="checkbox"
+              className="toggle toggle-primary toggle-sm"
+              checked={isFallbackEnabled}
+              onChange={handleFallbackModelToggle}
+            />
+          </div>
+
+          {isFallbackEnabled && (
+            <div className="w-full">
+              {/* Fallback Service Dropdown (styled like ServiceDropdown) */}
+              <div className="dropdown w-full mb-2">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-sm border-base-content/20 bg-base-100 capitalize w-full justify-between"
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    {fallbackService && getIconOfService(fallbackService, 16, 16)}
+                    <span className="truncate">
+                      {fallbackService ? (SERVICES?.find(s => s.value === fallbackService)?.displayName || fallbackService) : 'Select a Service'}
+                    </span>
+                  </div>
+                  <ChevronDownIcon size={16} />
+                </div>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu bg-base-100 rounded-box w-full p-1 shadow border border-base-300 max-h-80 overflow-y-auto"
+                >
+                  {Array.isArray(SERVICES) && SERVICES.map((svc) => (
+                    <li key={svc.value}>
+                      <a className={`flex items-center gap-2 ${fallbackService === svc.value ? 'active' : ''}`}
+                         onClick={() => handleFallbackServiceChange(svc.value)}>
+                        {getIconOfService(svc.value, 16, 16)}
+                        <span className="capitalize">{svc.displayName || svc.value}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Fallback Model Dropdown (styled like ModelDropdown) */}
+              <div className="dropdown w-full">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
+                >
+                  <span className="truncate">{fallbackModelName ? truncateText(fallbackModelName, 30) : 'Select a Model'}</span>
+                  <ChevronDownIcon size={16} />
+                </div>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content z-high p-2 shadow bg-base-100 rounded-lg mt-1 max-h-[500px] w-[260px] overflow-y-auto border border-base-300"
+                >
+                  {Object.entries(computedModelsList || {}).map(([group, options]) => {
+                    const isInvalidGroup =
+                      group === 'models' ||
+                      (bridgeType === 'chatbot' && group === 'embedding') ||
+                      (bridgeType === 'batch' && (group === 'image' || group === 'embedding'));
+                    if (isInvalidGroup) return null;
+                    return (
+                      <li key={group} className="px-2 py-1 cursor-pointer">
+                        <span className="text-sm text-base-content">{group}</span>
+                        <ul>
+                          {Object.keys(options || {}).map((option) => {
+                            const modelName = options?.[option]?.configuration?.model?.default || option;
+                            const selected = fallbackModelName === modelName || fallbackModelName === option;
+                            return (
+                              <li key={`${group}-${option}`}
+                                  className={`hover:bg-base-200 rounded-md py-1 ${selected ? 'bg-base-200' : ''}`}
+                                  onClick={() => handleFallbackModelChange(group, modelName)}>
+                                {selected && <span className="flex-shrink-0 ml-2">✓</span>}
+                                <span className={`truncate flex-1 pl-2 ${!selected ? 'ml-4' : ''}`}>
+                                  {truncateText(modelName || option, 30)}
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       <ToolCallCount params={params} searchParams={searchParams}/>
       </div>
