@@ -1,5 +1,5 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { CircleAlertIcon, AddIcon, TrashIcon } from '@/components/Icons';
+import { CircleAlertIcon, AddIcon, EllipsisVerticalIcon, TrashIcon } from '@/components/Icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
@@ -108,14 +108,17 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center justify-center absolute right-1 top-4">
-                        <button
-                            onClick={(e) => { e.stopPropagation(); handleDeleteKnowledgebase(item?._id); }}
-                            className=" bg-transparent shadow-none border-none outline-none pr-1"
-                            title="Remove"
-                        >
-                            <TrashIcon size={16} className=" hover:text-error" />
-                        </button>
+                    <div className="dropdown dropdown-end z-medium absolute right-1 top-1">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
+                            <EllipsisVerticalIcon size={16} />
+                        </div>
+                        <ul tabIndex={0} className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-44 border border-base-300">
+                            <li>
+                                <a onClick={(e) => { e.stopPropagation(); handleDeleteKnowledgebase(item?._id); }} className="text-sm text-error">
+                                    
+                                <TrashIcon size={16} />Remove</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             ) : null;

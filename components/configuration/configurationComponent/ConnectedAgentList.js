@@ -3,7 +3,7 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { AddIcon, CircleAlertIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
+import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
@@ -191,13 +191,24 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center justify-center absolute right-1 top-1">
-                        <button className="btn bg-transparent hover:bg-transparent shadow-none border-none outline-none pr-1" onClick={() => handleOpenAgentVariable(name, item)}>
-                            <SettingsIcon size={16} />
-                        </button>
-                        <button className="btn bg-transparent hover:bg-transparent shadow-none border-none outline-none pr-1" onClick={() => handleRemoveAgent(name,item)}>
-                            <TrashIcon size={16} className="hover:text-error" />
-                        </button>
+                    <div className="dropdown dropdown-end z-medium absolute right-1 top-1">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
+                            <EllipsisVerticalIcon size={16} />
+                        </div>
+                        <ul tabIndex={0} className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-40 border border-base-300">
+                            <li>
+                                <a onClick={() => handleOpenAgentVariable(name, item)} className="text-sm">
+                                    <SettingsIcon size={16} />
+                                    Config
+                                </a>
+                            </li>
+                            <li>
+                                <a onClick={() => handleRemoveAgent(name, item)} className="text-sm text-error">
+                                    <TrashIcon size={16} />
+                                    Remove
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             );
