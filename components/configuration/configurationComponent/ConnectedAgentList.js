@@ -41,6 +41,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 toast?.error("Description Required")
                 return;
             }
+            const bridgeItem = bridgeData?.find((bridge) => { if (bridge?._id === selectedBridge?.bridge_id) { return bridge } });
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
                 versionId: searchParams?.version,
@@ -52,6 +53,15 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                             }
                         },
                         agent_status: "1"
+                    }
+                }
+            }))
+            dispatch(updateBridgeAction({
+                bridgeId: selectedBridge?._id || selectedBridge?.bridge_id,
+                dataToSend: {
+                    connected_agent_details: {
+                        ...bridgeItem.connected_agent_details,
+                        description: description
                     }
                 }
             }))
@@ -73,9 +83,10 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         const bridgeItem = bridgeData?.find((bridge) => { if (bridge?._id === item?.bridge_id) { return bridge } });
         setSelectedBridge({ name: name, ...item });
         const agent_variables = bridgeItem?.connected_agent_details?.agent_variables || {};
+        const description = bridgeItem?.connected_agent_details?.description || "";
         const { fields, required_params } = agent_variables;
-        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params });
-        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params, thread_id: item?.thread_id || false, version_id: item?.version_id || '' });
+        setCurrentVariable({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params });
+        setAgentTools({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params, thread_id: item?.thread_id || false, version_id: item?.version_id || '' });
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools]);
 
@@ -127,7 +138,8 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                         agent_variables : {
                             fields: agentTools?.fields,
                             required_params: agentTools?.required_params
-                        }
+                        },
+                        description: agentTools?.description
                     }
                 }
             }))
