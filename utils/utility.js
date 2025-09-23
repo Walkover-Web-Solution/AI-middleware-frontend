@@ -650,3 +650,40 @@ function getDomain() {
     }
   };
   
+/**
+ * Mark that the current tab is initiating an agent update
+ * Call this BEFORE making your API call
+ */
+export function markUpdateInitiatedByCurrentTab(agentId) {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    sessionStorage.setItem('initiated_update_' + agentId, 'true');
+    sessionStorage.setItem('last_initiated_update', JSON.stringify({
+      agentId: String(agentId),
+      timestamp: Date.now()
+    }));
+  } catch (error) {
+    console.error('Error marking update initiation:', error);
+  }
+}
+
+/**
+ * Check if the current tab initiated a specific agent update
+ */
+export function didCurrentTabInitiateUpdate(agentId) {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    const initiated = sessionStorage.getItem('initiated_update_' + agentId);
+    if (initiated === 'true') {
+      sessionStorage.removeItem('initiated_update_' + agentId);
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking update initiation:', error);
+    return false;
+  }
+}
