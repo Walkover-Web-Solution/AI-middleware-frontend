@@ -16,7 +16,7 @@ import PromptHelper from '../../PromptHelper';
 import { setIsFocusReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 
-const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbedUser, showPromptGuard }) => {
+const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbedUser, hidePromptGuard }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type || "",
@@ -485,7 +485,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , isEmbe
         </div>
       </div>
       <div className=' mt-4'> 
-        {((isEmbedUser && showPromptGuard) || !isEmbedUser) && <GuardrailSelector params={params} searchParams={searchParams} />}
+        {((isEmbedUser && !hidePromptGuard) || !isEmbedUser) && <GuardrailSelector params={params} searchParams={searchParams} />}
       </div>
       <div className='flex flex-row gap-2 mt-8'>
        
