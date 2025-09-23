@@ -13,7 +13,7 @@ import GuardrailSelector from './guardrailSelector'; // Import the new component
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
+const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , hidePromptGuard, isEmbedUser }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type || "",
@@ -384,8 +384,8 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef  }) => {
           </div>
         </div>
       </div>
-      <div className=' mt-4'>  
-        <GuardrailSelector params={params} searchParams={searchParams} />
+      <div className=' mt-4'> 
+        {((isEmbedUser && !hidePromptGuard) || !isEmbedUser) && <GuardrailSelector params={params} searchParams={searchParams} />}
       </div>
       <div className='flex flex-row gap-2 mt-8'>
        
