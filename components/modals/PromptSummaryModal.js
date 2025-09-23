@@ -54,6 +54,7 @@ const PromptSummaryModal = ({ params, searchParams }) => {
                 toast.success('Summary updated successfully');
             }
         });
+        closeModal(MODAL_TYPE.PROMPT_SUMMARY);
         setIsEditing(false);
     }, [dispatch, params.id, summary]);
 

@@ -8,7 +8,7 @@ import {
   updateBridgeAction,
 } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { closeModal, sendDataToParent } from "@/utils/utility";
+import { closeModal, openModal, sendDataToParent } from "@/utils/utility";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 import Modal from "../UI/Modal";
@@ -16,6 +16,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from "../protected";
 import PublishVersionDataComparisonView from "../comparison/PublishVersionDataComparisonView";
 import { DIFFERNCE_DATA_DISPLAY_NAME, KEYS_TO_COMPARE } from "@/jsonFiles/bridgeParameter";
+import PromptSummaryModal from "./PromptSummaryModal";
 
 function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_description, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -27,11 +28,12 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   const [allConnectedAgents, setAllConnectedAgents] = useState([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
 
-  const { bridge, versionData, bridgeData, agentList } = useCustomSelector((state) => ({
+  const { bridge, versionData, bridgeData, agentList, bridge_summary } = useCustomSelector((state) => ({
     bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
     versionData: state.bridgeReducer.bridgeVersionMapping?.[params?.id]?.[searchParams?.version],
     bridgeData: state.bridgeReducer.allBridgesMap?.[params?.id],
-    agentList: state.bridgeReducer.org[params.org_id]?.orgs || []
+    agentList: state.bridgeReducer.org[params.org_id]?.orgs || [],
+    bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
   }));
 
   // Memoized form data initialization
@@ -320,6 +322,13 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     setError(null);
 
     try {
+      // Require a summary before publishing
+      if (!bridge_summary || (typeof bridge_summary === 'string' && bridge_summary.trim().length === 0)) {
+        openModal(MODAL_TYPE.PROMPT_SUMMARY);
+        setIsLoading(false);
+        return;
+      }
+
       if (isPublicAgent) {
         if (!formData.url_slugname.trim()) {
           toast.error("Slug Name is required.");
@@ -391,7 +400,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     } finally {
       setIsLoading(false);
     }
-  }, [dispatch, params, searchParams, isPublicAgent, formData, agent_name, agent_description, isEmbedUser, selectedAgentsToPublish]);
+  }, [dispatch, params, searchParams, isPublicAgent, formData, agent_name, agent_description, isEmbedUser, selectedAgentsToPublish, bridge_summary]);
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
@@ -418,6 +427,25 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
               </button>
             </div>
           </div>
+
+          {/* Summary required alert */}
+          {(!bridge_summary || (typeof bridge_summary === 'string' && bridge_summary.trim().length === 0)) && (
+            <div className="alert alert-warning bg-warning border border-warning/30 mb-4">
+              <div className="flex items-start gap-3 w-full">
+                <AlertTriangle className="h-5 w-5 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-medium">Summary required</h4>
+                  <p className="text-sm opacity-80">You need to add a prompt summary for this agent before publishing. This helps users understand what the agent does.</p>
+                </div>
+                <button
+                  className="btn btn-sm bg-base-200 btn-outline"
+                  onClick={() => openModal(MODAL_TYPE.PROMPT_SUMMARY)}
+                >
+                  Generate Prompt Summary
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Warning Section */}
           {!showComparison && (
@@ -795,6 +823,9 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       </div>
 
       <div className="modal-backdrop" onClick={handleCloseModal}></div>
+
+      {/* Prompt Summary Modal (mounted so we can open it on-demand) */}
+      <PromptSummaryModal params={params} searchParams={searchParams} />
     </Modal>
   );
 }
