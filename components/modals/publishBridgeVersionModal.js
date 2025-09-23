@@ -515,7 +515,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                     </h4>
                     
                     {/* Select All option */}
-                    {allConnectedAgents.filter(agent => agent._id !== params?.id && agent?.haveToPublish).length > 0 && (
+                    {allConnectedAgents.filter(agent => agent._id !== params?.id && agent?.haveToPublish).length > 1 && (
                       <button 
                         onClick={toggleSelectAllAgents}
                         className="btn btn-sm btn-outline flex gap-1"
