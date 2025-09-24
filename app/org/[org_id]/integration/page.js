@@ -3,7 +3,6 @@ import CustomTable from "@/components/customTable/customTable";
 import { truncate } from "@/components/historyPageComponents/assistFile";
 import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import React, { useCallback, useEffect, useMemo, useState, use } from 'react';
 import { useDispatch } from "react-redux";
@@ -27,10 +26,6 @@ const Page = ({ params }) => {
   const [selectedIntegration, setSelectedIntegration] = useState(null);
   const [filterIntegration, setFilterIntegration] = useState(integrationData);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
-
-  useEffect(() => {
-    dispatch(getAllIntegrationDataAction(resolvedParams?.org_id));
-  }, [dispatch, resolvedParams?.org_id]);
 
   useEffect(() => {
     setFilterIntegration(integrationData);
