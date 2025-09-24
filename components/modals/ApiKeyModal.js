@@ -25,7 +25,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
         const formData = new FormData(event.target);
         const data = {
             name: formData.get('name').trim().replace(/\s+/g, ''),
-            service: service || formData.get('service'),
+            service: service === 'openai_completion' ? 'openai' : service || formData.get('service'),
             apikey: formData.get('apikey'),
             comment: formData.get('comment'),
             _id: selectedApiKey ? selectedApiKey._id : null

@@ -14,7 +14,7 @@ const AgentSetupGuide = ({ params = {}, apiKeySectionRef, promptTextAreaRef, isE
     const modelName = versionData?.configuration?.model;
     const showDefaultApikeys = state.userDetailsReducer.userDetails.addDefaultApiKeys;
     return {
-      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service],
+      bridgeApiKey: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.apikey_object_id?.[service === 'openai_completion' ? 'openai' : service],
       prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
       shouldPromptShow:  modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
       service: service,

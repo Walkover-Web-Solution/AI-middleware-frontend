@@ -17,14 +17,14 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
             bridge: bridgeMap,
             apikeydata: apikeys[params?.org_id] || [], // Ensure apikeydata is an array
             bridgeApikey_object_id: bridgeMap?.apikey_object_id,
-            currentService: bridgeMap?.service,
+            currentService: bridgeMap?.service === 'openai_completion' ? 'openai' : bridgeMap?.service,
         };
     });
 
     // Memoize filtered API keys
     const filteredApiKeys = useMemo(() => {
         return apikeydata.filter(apiKey =>
-            apiKey?.service === bridge?.service
+            apiKey?.service === (bridge?.service === 'openai_completion' ? 'openai' : bridge?.service)
         );
     }, [apikeydata, bridge?.service]);
 
@@ -34,7 +34,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
             openModal(MODAL_TYPE.API_KEY_MODAL);
         } 
         else if (selectedApiKeyId !== 'AI_ML_DEFAULT_KEY') {
-            const service = bridge?.service;
+            const service = bridge?.service === 'openai_completion' ? 'openai' : bridge?.service;
             const updated = {...bridgeApikey_object_id, [service]: selectedApiKeyId };
             dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { apikey_object_id: updated } }));
         }
@@ -43,7 +43,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
     // Determine the currently selected value
     const selectedValue = useMemo(() => {
         const serviceApiKeyId = typeof bridgeApikey_object_id === 'object'
-            ? bridgeApikey_object_id?.[bridge?.service]
+            ? bridgeApikey_object_id?.[bridge?.service === 'openai_completion' ? 'openai' : bridge?.service]
             : bridgeApikey_object_id;
         const currentApiKey = apikeydata.find(apiKey => apiKey?._id === serviceApiKeyId);
         return currentService === 'ai_ml' && !bridgeApikey_object_id?.['ai_ml'] ? 'AI_ML_DEFAULT_KEY' : currentApiKey?._id;
