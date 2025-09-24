@@ -5,6 +5,7 @@ import { Provider } from "react-redux";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PersistGate } from "redux-persist/integration/react";
+import CommandPalette from "@/components/command/CommandPalette";
 
 export const metadata = {
   title: "Login | Student",
@@ -26,6 +27,8 @@ const Wrapper = ({ children }) => {
           <div className="w-screen">
             {/* All the child components */}
             {children}
+            {/* Global Command Palette */}
+            <CommandPalette />
             {/* Notification toast container */}
             <ToastContainer position="bottom-left" />
           </div>
