@@ -23,12 +23,6 @@ const Page = ({ params }) => {
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
-  
-  useEffect(() => {
-    dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id));
-    setFilterKnowledgeBase(knowledgeBaseData);
-  }, []);
-
  
   const tableData = filterKnowledgeBase.map(item => ({
     ...item,

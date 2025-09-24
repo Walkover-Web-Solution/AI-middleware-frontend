@@ -4,7 +4,7 @@ import MainLayout from "@/components/layoutComponents/MainLayout";
 import ApiKeyModal from '@/components/modals/ApiKeyModal';
 import PageHeader from "@/components/Pageheader";
 import { useCustomSelector } from '@/customHooks/customSelector';
-import { deleteApikeyAction, getAllApikeyAction } from '@/store/action/apiKeyAction';
+import { deleteApikeyAction} from '@/store/action/apiKeyAction';
 import { API_KEY_COLUMNS, MODAL_TYPE } from '@/utils/enums';
 import { closeModal, getIconOfService, openModal, toggleSidebar } from '@/utils/utility';
 import { BookIcon, InfoIcon, SquarePenIcon, TrashIcon } from '@/components/Icons';
@@ -27,12 +27,6 @@ const Page = () => {
     apikeyData: state?.bridgeReducer?.apikeys[orgId] || []
   }));
   const [filterApiKeys, setFilterApiKeys] = useState(apikeyData);
-
-  useEffect(() => {
-    if (orgId) {
-      dispatch(getAllApikeyAction(orgId));
-    }
-  }, [dispatch, orgId]);
 
   useEffect(() => {
     setFilterApiKeys(apikeyData);
