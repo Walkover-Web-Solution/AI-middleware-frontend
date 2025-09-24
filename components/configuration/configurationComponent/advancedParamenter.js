@@ -181,12 +181,6 @@ const AdvancedParameters = ({ params, searchParams }) => {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
-
-  const debouncedSelectChange = useCallback(
-    debounce(handleSelectChange, 500),
-    [configuration, params?.id, params?.version]
-  );
-
   const toggleAccordion = () => {
     setIsAccordionOpen((prevState) => !prevState);
   };
@@ -232,21 +226,28 @@ const AdvancedParameters = ({ params, searchParams }) => {
                 <span className="label-text capitalize info">{name || key}</span>
               </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
             </div>
-            <div>
-              <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
-                {field === 'slider' && (<li><a onClick={() => setSliderValue("min", key)} className={configuration?.[key] === "min" ? 'bg-base-content text-base-100' : ''}>Min</a></li>)}
-                <InfoTooltip tooltipContent="If you set default, this key will not be send">
-                  <li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li>
-                </InfoTooltip>
-                {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
-              </ul>
+            <div className="ml-auto flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="toggle toggle-sm"
+                checked={configuration?.[key] !== 'default'}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  if (!checked) {
+                    setSliderValue("default", key)
+                  } else {
+                    const fallback = modelInfoData?.[key]?.default ?? inputConfiguration?.[key] ?? configuration?.[key] ?? null;
+                    setSliderValue(fallback, key)
+                  }
+                }}
+              />
             </div>
           </div>
-          {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
-          {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
+          {((field === 'slider') && configuration?.[key] !== 'default' && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
+          {field === 'slider' && configuration?.[key] !== 'default' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
             modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
         </label>
-        {field === 'dropdown' && (
+        {field === 'dropdown' && configuration?.[key] !== 'default' && (
           <div className="w-full">
             <div className="relative">
               <div
@@ -387,8 +388,9 @@ const AdvancedParameters = ({ params, searchParams }) => {
           </div>
         )}
 
-        {field === 'slider' && (
-          <div>
+        {field === 'slider' && configuration?.[key] !== 'default' && (
+          <div className="flex items-center gap-2">
+            <button type="button" className="btn btn-xs" onClick={() => setSliderValue('min', key)}>Min</button>
             <input
               type="range"
               min={min || 0}
@@ -407,9 +409,10 @@ const AdvancedParameters = ({ params, searchParams }) => {
               className="range range-accent range-sm h-3 range-extra-small-thumb"
               name={key}
             />
+            <button type="button" className="btn btn-xs" onClick={() => setSliderValue('max', key)}>Max</button>
           </div>
         )}
-        {field === 'text' && (
+        {field === 'text' && configuration?.[key] !== 'default' && (
           <input
             type="text"
             value={inputConfiguration?.[key] === 'default' ? '' : inputConfiguration?.[key] || ''}
@@ -424,7 +427,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
             name={key}
           />
         )}
-        {field === 'number' && (
+        {field === 'number' && configuration?.[key] !== 'default' && (
           <input
             type="number"
             min={min}
@@ -442,7 +445,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
             name={key}
           />
         )}
-        {field === 'boolean' && (
+        {field === 'boolean' && configuration?.[key] !== 'default' && (
           <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
             <input
               name={key}
@@ -453,7 +456,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
             />
           </label>
         )}
-        {field === 'select' && (
+        {field === 'select' && configuration?.[key] !== 'default' && (
           <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
             <select
               value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
