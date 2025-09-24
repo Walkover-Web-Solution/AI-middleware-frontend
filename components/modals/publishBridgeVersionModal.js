@@ -462,27 +462,20 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                     <span>No differences found between the versions.</span>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="flex items-center gap-2">
                     {/* Extracted config changes */}
-                    {Object.keys(extractedConfigChanges).length > 0 && (
-                      <div className="mb-2">
-                        <div className="flex flex-wrap gap-4">
-                          {Object.keys(extractedConfigChanges).map(key => (
-                            <div key={key} className="card bg-base-100">
-                              <div className="card-body p-3">
-                                <div className="flex justify-between items-center">
-                                  <h5 className="card-title text-sm">{DIFFERNCE_DATA_DISPLAY_NAME(key)}</h5>
+                      <div className="flex flex-wrap gap-1">
+                        {Object.keys(extractedConfigChanges).length > 0 && (
+                            Object.keys(extractedConfigChanges).map(key => (
+                              <div key={key} className="card bg-base-100">
+                                <div className="card-body p-3">
+                                  <div className="flex justify-between items-center">
+                                    <h5 className="card-title text-sm">{DIFFERNCE_DATA_DISPLAY_NAME(key)}</h5>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Other category changes */}
-                    <div className="mb-2">
-                      <div className="flex flex-wrap gap-4">
+                            ))
+                        )}
                         {Object.keys(changesSummary)
                           .filter(key => !Object.keys(extractedConfigChanges).includes(key))
                           .map(key => (
@@ -493,9 +486,10 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                                 </div>
                               </div>
                             </div>
-                          ))}
+                          ))
+                        }
                       </div>
-                    </div>
+                    
                   </div>
                 )}
               </div>

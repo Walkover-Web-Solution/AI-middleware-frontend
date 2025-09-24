@@ -103,8 +103,12 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
       return <span className="text-gray-400 italic">No Data Added</span>;
     }
     
-    if (key.split('.')[0] === 'apikey_object_id') {
-      if (typeof value === 'object') {
+    // Get the root key for special handling
+    const rootKey = key.split('.')[0];
+    
+    // Handle API keys
+    if (rootKey === 'apikey_object_id') {
+      if (typeof value === 'object' && value !== null) {
         return Object.entries(value).map(([service, id]) => {
           const apiKey = apikeyData?.find(item => item._id === id);
           return <div key={service}>{service}: {apiKey?.name || id}</div>;
@@ -113,7 +117,8 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
       return apikeyData?.find(item => item._id === value)?.name || value;
     }
     
-    if (key.split('.')[0] === 'function_ids') {
+    // Handle function IDs
+    if (rootKey === 'function_ids') {
       if (Array.isArray(value) && value.length > 0) {
         const functionItems = Object.values(functionData || {}).filter(item => value.includes(item?._id));
         if (functionItems.length > 0) {
@@ -123,7 +128,8 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
       return JSON.stringify(value);
     }
     
-    if (key.split('.')[0] === 'doc_ids') {
+    // Handle document IDs
+    if (rootKey === 'doc_ids') {
       if (Array.isArray(value) && value.length > 0) {
         const kbItems = knowledgeBaseData?.filter(item => value.includes(item?._id));
         if (kbItems?.length > 0) {
@@ -133,18 +139,50 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
       return JSON.stringify(value);
     }
     
-    if (typeof value === 'object') {
+    // Handle objects and arrays with improved display
+    if (typeof value === 'object' && value !== null) {
       try {
-        return <pre className="text-xs whitespace-pre-wrap break-all max-h-40 overflow-auto">{JSON.stringify(value, null, 2)}</pre>;
+        // Handle arrays
+        if (Array.isArray(value)) {
+          return (
+            <div className="nested-array">
+              {value.map((item, index) => (
+                <div key={index} className="nested-array-item mb-2">
+                  <div className="text-xs text-gray-500 mb-1">Item {index + 1}:</div>
+                  <div className="pl-2 border-l-2 border-gray-300">
+                    {formatValue(item, `${key}[${index}]`)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        }
+        
+        // Handle nested objects
+        return (
+          <div className="nested-object">
+            {Object.entries(value).map(([nestedKey, nestedValue]) => (
+              <div key={nestedKey} className="nested-object-item mb-2">
+                <div className="text-xs text-gray-500 mb-1">{DIFFERNCE_DATA_DISPLAY_NAME(nestedKey)}:</div>
+                <div className="pl-2 border-l-2 border-gray-300">
+                  {formatValue(nestedValue, `${key}.${nestedKey}`)}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
       } catch (e) {
-        return <span className="text-red-500">[Complex Object]</span>;
+        // Fallback to JSON string if there's an error in the recursive rendering
+        return <pre className="text-xs whitespace-pre-wrap break-all max-h-40 overflow-auto">{JSON.stringify(value, null, 2)}</pre>;
       }
     }
     
+    // Handle boolean values
     if (typeof value === 'boolean') {
       return value ? <span className="text-green-500">true</span> : <span className="text-red-500">false</span>;
     }
     
+    // Handle all other primitive values
     return String(value);
   }
 
