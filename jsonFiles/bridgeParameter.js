@@ -39,7 +39,6 @@ export const KEYS_TO_COMPARE = [
     "configuration",
     "service",
     "org_id",
-    "status",
     "apikey_object_id",
     "gpt_memory",
     "function_ids",
