@@ -109,6 +109,18 @@ const ModelDropdown = ({ params, searchParams }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [modelSpecs, setModelSpecs] = useState();
 
+    // Close when other dropdowns open
+    useEffect(() => {
+        const handler = (e) => {
+            const source = e?.detail?.type;
+            if (source && source !== 'model') {
+                setIsDropdownOpen(false);
+            }
+        };
+        window.addEventListener('open-dropdown', handler);
+        return () => window.removeEventListener('open-dropdown', handler);
+    }, []);
+
     const handleFinetuneModelChange = (e) => {
         const selectedFineTunedModel = e.target.value;
         dispatch(updateBridgeVersionAction({
@@ -164,7 +176,12 @@ const ModelDropdown = ({ params, searchParams }) => {
     }, [handleClickOutside, isDropdownOpen]);
 
     const toggleDropdown = () => {
-        setIsDropdownOpen(prev => !prev);
+        const next = !isDropdownOpen;
+        if (next) {
+            // announce opening to close other dropdowns
+            window.dispatchEvent(new CustomEvent('open-dropdown', { detail: { type: 'model' } }));
+        }
+        setIsDropdownOpen(next);
     };
 
     return (
@@ -180,13 +197,13 @@ const ModelDropdown = ({ params, searchParams }) => {
                         className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
                         onClick={toggleDropdown}
                     >
-                        {model?.length > 30 ? `${model.substring(0, 30)}...` : model|| "Select a Model"}
+                        {model?.length > 20 ? `${model.substring(0, 20)}...` : model|| "Select a Model"}
                         {isDropdownOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                     </div>
                     {isDropdownOpen && (
                         <ul
                             tabIndex={0}
-                            className="dropdown-content dropdown-left z-low p-2 shadow bg-base-100 rounded-lg  mt-1 max-h-[500px] w-[260px] overflow-y-auto border border-base-300"
+                            className="dropdown-content dropdown-left z-high p-2 shadow bg-base-100 rounded-lg mt-1 max-h-[500px] w-[260px] overflow-y-auto border border-base-300"
                             onMouseLeave={() => setHoveredModel(null)}
                         >
                             {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
