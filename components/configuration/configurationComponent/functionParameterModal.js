@@ -481,7 +481,7 @@ function FunctionParameterModal({
     // Determine next child name in this scope: new1, new2, ...
     const scope = parentField.parameter || {};
     const existing = Object.keys(scope).filter(k => /^new\d+$/.test(k));
-    let i = 1; // children start at 1
+    let i = 0; // children start at 1
     while (existing.includes(`new${i}`)) i += 1;
     const childName = `new${i}`;
 
@@ -626,11 +626,11 @@ function FunctionParameterModal({
 
     if (childEntries.length === 0) {
       return (
-        <div className="flex flex-col items-center gap-3 p-4 bg-base-50 rounded-lg border border-base-200">
+        <div className="flex flex-col items-center gap-3 p-2 bg-base-50 rounded-lg border border-base-200">
           <div className="text-xs text-base-content/70">No child properties</div>
           <button
             onClick={() => handleAddChildField(parentKey)}
-            className="btn btn-xs btn-primary"
+            className="btn btn-xs"
             title="Add nested field"
           >
             <PlusIcon size={12} /> Add Child Property
@@ -640,11 +640,11 @@ function FunctionParameterModal({
     }
 
     return (
-      <div className="bg-base-50 rounded-lg border border-base-200 p-3">
-        <div className="flex justify-between items-center mb-3">
+      <div className="bg-base-50 rounded-lg border border-base-200 p-2">
+        <div className="flex items-center mb-2">
           <button
             onClick={() => handleAddChildField(parentKey)}
-            className="btn btn-xs btn-primary"
+            className="btn btn-xs"
             title="Add nested field"
           >
             <PlusIcon size={12} /> Add Child
@@ -695,7 +695,7 @@ function FunctionParameterModal({
                   {/* Type */}
                   <div className="col-span-2">
                     <select
-                      className="select select-xs select-bordered w-full"
+                      className="select select-xs select-bordered w-fit"
                       value={cType}
                       onChange={(e) => handleTypeChange(fullKey, e.target.value)}
                     >
@@ -1058,13 +1058,14 @@ function FunctionParameterModal({
           <p>No Parameters used in the function</p>
         ) : !isTextareaVisible ? (
           <div className="overflow-x-auto border border-base-300 rounded-md">
-            <div className="flex justify-between items-center p-3 border-b">
+            <div className="flex justify-between items-center p-2 border-b">
               <h4 className="font-semibold">Parameters</h4>
               <button
                 onClick={() => handleAddField()}
-                className="btn btn-sm btn-primary"
+                className="btn btn-xs  "
               >
-                Add Field
+                <PlusIcon size={14} />
+                Add Fields
               </button>
             </div>
             
