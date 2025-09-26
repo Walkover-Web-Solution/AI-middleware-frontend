@@ -9,15 +9,17 @@ import Protected from "@/components/protected";
 import TutorialSuggestionToast from "@/components/tutorialSuggestoinToast";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
-import { archiveBridgeAction } from "@/store/action/bridgeAction";
+import { archiveBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
-import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
-import { ClockIcon, EllipsisIcon } from "@/components/Icons";
+import { filterBridges, getIconOfService, openModal, closeModal } from "@/utils/utility";
+import { ClockIcon, EllipsisIcon, RefreshIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import SearchItems from "@/components/UI/SearchItems";
+import ApiKeyLimitModal from "@/components/modals/ApiKeyLimitModal";
+import { ArchiveIcon, ClockFading, ScaleIcon } from "lucide-react";
 
 export const runtime = 'edge';
 
@@ -41,6 +43,7 @@ function Home({ params, isEmbedUser }) {
     showTutorial: false,
     showSuggestion: isFirstBridgeCreation
   });
+  const [selectedBridgeForLimit, setSelectedBridgeForLimit] = useState(null);
 
   useEffect(() => {
     setFilterBridges(allBridges)
@@ -84,7 +87,8 @@ function Home({ params, isEmbedUser }) {
     bridge_status: item.bridge_status,
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens ? item?.total_tokens : 0,
-    averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h"
+    averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
+    bridge_quota: item?.bridge_quota
   }));
 
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
@@ -121,7 +125,8 @@ function Home({ params, isEmbedUser }) {
     bridge_status: item.bridge_status,
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
-    averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>
+    averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
+    bridge_quota: item?.bridge_quota
   }));
 
   const onClickConfigure = (id, versionId) => {
@@ -142,10 +147,33 @@ function Home({ params, isEmbedUser }) {
       console.error('Failed to archive/unarchive agents', error);
     }
   }
+  
+  const handleSetBridgeApiKeyLimit = (item) => {
+    setSelectedBridgeForLimit(item);
+    openModal(MODAL_TYPE.API_KEY_LIMIT_MODAL);
+  };
+
+  const handleUpdateBridgeApiKeyLimit = async  (bridge, limit) => {
+    closeModal(MODAL_TYPE?.API_KEY_LIMIT_MODAL);
+    const dataToSend = {
+      'bridge_quota': {
+        limit: limit || 1,
+        used: bridge?.used || 0
+      }
+    }
+    const res = await dispatch(updateBridgeAction({ bridgeId: bridge._id, dataToSend }));
+    if (res?.success) toast.success('Agent Usage Limit Updated Successfully');
+  };
+
+  const resetUsage = async (bridge) => {
+    const dataToSend = { 'bridge_quota': { limit: bridge.bridge_quota.limit, used: 0 } }
+    const res = await dispatch(updateBridgeAction({ bridgeId: bridge._id, dataToSend }));
+    if (res?.success) toast.success('Agent Usage Reset Successfully');
+  }
 
   const EndComponent = ({ row }) => {
     return (
-      <div className="flex items-center mr-4">
+      <div className="flex items-center mr-4 text-sm">
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           {!isEmbedUser && <button
             className="btn btn-outline btn-ghost btn-sm"
@@ -160,12 +188,22 @@ function Home({ params, isEmbedUser }) {
         </div>
         <div className="dropdown dropdown-left bg-transparent">
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
-          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-low w-52 p-2 shadow">
+          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-very-high w-52 p-2 shadow">
             <li><a onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
-            }}>{(row?.status === 0) ? 'Un-archive Agent' : 'Archive Agent'}</a></li>
+            }}><ArchiveIcon className="mr-2" size={16} />{(row?.status === 0) ? 'Un-archive Agent' : 'Archive Agent'}</a></li>
+            <li><a onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSetBridgeApiKeyLimit(row);
+            }}><ClockFading className="mr-2" size={16} />Set Agent Usage Limit</a></li>
+            <li><a onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              resetUsage(row);
+            }}><RefreshIcon className="mr-2" size={16} />Reset Usage</a></li>
           </ul>
         </div>
       </div>
@@ -275,6 +313,7 @@ function Home({ params, isEmbedUser }) {
           </div>
         </div>
       </div>
+      <ApiKeyLimitModal data={selectedBridgeForLimit} onConfirm={handleUpdateBridgeApiKeyLimit} />
     </div>
   );
 }

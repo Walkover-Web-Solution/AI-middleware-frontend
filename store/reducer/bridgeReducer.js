@@ -94,7 +94,7 @@ export const bridgeReducer = createSlice({
         configuration: { ...configuration }
       };
        
-      if (extraData?.bridgeType) {
+       if (extraData?.bridgeType || extraData?.bridge_quota) {
         const allData = state.org[bridges.org_id]?.orgs;
         if (allData) {
           // Find the index of the bridge to update
@@ -278,7 +278,7 @@ export const bridgeReducer = createSlice({
     
     // Update an API key (optimistically or with server data)
     apikeyUpdateReducer: (state, action) => {
-      const { org_id, id, data, name, comment } = action.payload;
+      const { org_id, id, data, name, comment, apikey_quota } = action.payload;
       
       if (state.apikeys && state.apikeys[org_id]) {
         const index = state.apikeys[org_id].findIndex(apikey => apikey._id === id);
@@ -288,6 +288,7 @@ export const bridgeReducer = createSlice({
           if (name !== undefined) target.name = name;
           if (data !== undefined) target.apikey = data;
           if (comment !== undefined) target.comment = comment;
+          if (apikey_quota !== undefined) target.apikey_quota = apikey_quota;
         }
       }
     },
