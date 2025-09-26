@@ -24,33 +24,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
         bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || ""
     }));
-
-    useEffect(() => {
-        if (!bridge.guardrails) {
-            dispatch(updateBridgeVersionAction({
-                versionId: searchParams?.version,
-                dataToSend: {
-                    guardrails: {
-                        is_enabled: false,
-                        guardrails_configuration: {
-                            data_leakage: false,
-                            prompt_injection: false,
-                            jailbreaking: false,
-                            bias: false,
-                            toxicity: false,
-                            privacy: false,
-                            hallucination: false,
-                            violence: false,
-                            illegal_activity: false,
-                            misinformation: false,
-                        },
-                        guardrails_custom_prompt: ""
-                    }
-                }
-            }))
-        }
-    }, [bridge]);
-
+    
     const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
     const [oldContent, setOldContent] = useState(reduxPrompt);
     const [newContent, setNewContent] = useState('');
