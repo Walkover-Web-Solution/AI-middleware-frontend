@@ -1059,7 +1059,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
 
       <FunctionParameterModal
         key={selectedAgent?._id}
-        name="orchestralAgent"
+        name="Orchestral Agent"
         Model_Name={MODAL_TYPE.ORCHESTRAL_AGENT_PARAMETER_MODAL}
         function_details={currentVariable || {}}
         functionName={selectedAgent?.name || ''}
@@ -1071,6 +1071,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         variables_path={{ [selectedAgent?.name || '']: variablesPath || [] }}
         handleSave={handleSaveAgentParameters || (() => { })}
         isMasterAgent={selectedAgent?.isMasterAgent}
+        tool_name={selectedAgent?.name || ''}
       />
     </div>
   );
