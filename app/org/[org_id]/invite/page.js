@@ -159,7 +159,7 @@ function InvitePage({ params }) {
         if(response)
         {
           setInvitedMembers([]);
-          fetchInvitedMembers();
+          fetchInvitedMembers(1,true);
         }
     } catch (error) {
       toast.error('An error occurred while deleting member.');
