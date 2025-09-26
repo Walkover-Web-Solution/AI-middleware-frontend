@@ -150,7 +150,7 @@ export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextP
   }
 }
 
-export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback, isErrorTrue) => {
+export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback, isErrorTrue, versionId) => {
   try {
 
     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`, {
@@ -161,7 +161,8 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
         endTime: end,
         keyword_search: keyword,
         user_feedback: user_feedback,
-        error: isErrorTrue
+        error: isErrorTrue,
+        version_id: versionId
       }
     });
     return getSingleThreadData.data;
@@ -712,12 +713,13 @@ export const userFeedbackCount = async ({ bridge_id, user_feedback }) => {
   }
 }
 
-export const getSubThreadIds = async ({ thread_id, error, bridge_id }) => {
+export const getSubThreadIds = async ({ thread_id, error, bridge_id, version_id }) => {
   try {
     const response = await axios.get(`${URL}/api/v1/config/history/sub-thread/${thread_id}`, {
       params: {
         error,
-        bridge_id
+        bridge_id,
+        version_id
       }
     });
     return response.data;
