@@ -150,7 +150,7 @@ const CustomTable = ({
                         sortedData.map((row, index) => (
                             <div 
                                 key={row.id || row?._id || index}
-                                className="bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all"
+                                className="bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all relative z-40"
                                 onClick={() => handleRowClick(
                                     keysToExtractOnRowClick.reduce((acc, key) => {
                                         acc[key] = row[key];
@@ -195,7 +195,7 @@ const CustomTable = ({
                                 
                                 {/* Card Actions */}
                                 {endComponent && (
-                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3">
+                                    <div className="mt-4 flex justify-end border-t border-base-200 pt-3 relative z-50">
                                         {endComponent({row: row})}
                                     </div>
                                 )}
@@ -216,8 +216,8 @@ const CustomTable = ({
         const tableClass = viewportWidth < 1024 ? "table-compact" : "";
         
         return (
-            <div className="overflow-x-auto">
-                <table className={`table ${tableClass} min-w-full bg-base-100 shadow-md rounded-lg overflow-visible`}>
+            <div className="overflow-visible relative z-50">
+                <table className={`table ${tableClass} min-w-full bg-base-100 shadow-md rounded-lg overflow-visible relative z-50`}>
                     <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                         <tr className="hover">
                             {showRowSelection &&
@@ -262,7 +262,7 @@ const CustomTable = ({
                             sortedData?.map((row, index) => (
                                 <tr 
                                     key={row.id || row?._id || index} 
-                                    className="border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer group overflow-visible"
+                                    className="border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer group relative z-40"
                                     onClick={() =>
                                         handleRowClick(
                                             keysToExtractOnRowClick.reduce((acc, key) => {
@@ -293,8 +293,8 @@ const CustomTable = ({
                                         </td>
                                     ))}
                                     {endComponent && (
-                                        <td className="overflow-visible">
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity overflow-visible relative">
+                                        <td className="relative">
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity relative z-50">
                                                 {endComponent({row: row})}
                                             </div>
                                         </td>
