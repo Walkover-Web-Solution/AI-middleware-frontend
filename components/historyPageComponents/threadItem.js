@@ -408,7 +408,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
             </div>
 
             <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1 `}
-              style={{ overflowWrap: "normal" }}>
+              style={{ whiteSpace: "normal", overflowWrap: "break-word", wordBreak: "break-word" }}>
               <div className={`${item.role === "assistant" ? "bg-base-200 text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300 relative group`}>
 
                 {/* Render assistant images with enhanced fallback */}

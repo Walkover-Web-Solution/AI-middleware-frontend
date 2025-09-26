@@ -5,7 +5,7 @@ import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import { generateRandomID, openModal } from '@/utils/utility';
 import { ChevronDownIcon, ChevronUpIcon, InfoIcon } from '@/components/Icons';
 import JsonSchemaModal from "@/components/modals/JsonSchemaModal";
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
@@ -23,6 +23,8 @@ const AdvancedParameters = ({ params, searchParams }) => {
     showSuggestion: false
   });
   const [messages, setMessages] = useState([]);
+  const [jsonSchemaError, setJsonSchemaError] = useState('');
+  const jsonSchemaTextareaRef = useRef(null);
   const thread_id = useMemo(() => generateRandomID(), []);
   const dispatch = useDispatch();
 
@@ -44,9 +46,59 @@ const AdvancedParameters = ({ params, searchParams }) => {
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
+
   useEffect(() => {
     setInputConfiguration(configuration);
   }, [configuration]);
+
+  // Focus on textarea when JSON Schema is selected
+  useEffect(() => {
+    if (configuration?.response_type?.type === "json_schema" && jsonSchemaTextareaRef.current) {
+      // Small delay to ensure the textarea is rendered
+      setTimeout(() => {
+        jsonSchemaTextareaRef.current?.focus();
+      }, 100);
+    }
+  }, [configuration?.response_type?.type]);
+
+  // Validate JSON Schema
+  const validateJsonSchema = (value, isOnBlur = false) => {
+    if (!value || value.trim() === '') {
+      if (isOnBlur) {
+        setJsonSchemaError('JSON Schema cannot be empty');
+        return false;
+      }
+      // Allow empty value during initial render/selection
+      setJsonSchemaError('');
+      return true;
+    }
+
+    // Allow {} as a valid starting point, but show error only on blur if it's still empty
+    if (value.trim() === '{}') {
+      if (isOnBlur) {
+        setJsonSchemaError('Please provide a valid JSON Schema structure');
+        return false;
+      }
+      // Clear error for initial {} value
+      setJsonSchemaError('');
+      return true;
+    }
+
+    try {
+      const parsed = JSON.parse(value);
+      // Check if it's an empty object only on blur
+      if (Object.keys(parsed).length === 0 && isOnBlur) {
+        setJsonSchemaError('Please provide a valid JSON Schema structure');
+        return false;
+      }
+      setJsonSchemaError('');
+      return true;
+    } catch (error) {
+      setJsonSchemaError('Invalid JSON format');
+      return false;
+    }
+  };
+
   // Filter parameters by level
   const getParametersByLevel = (level) => {
     if (!modelInfoData) return [];
@@ -145,6 +197,13 @@ const AdvancedParameters = ({ params, searchParams }) => {
 
   const handleSelectChange = (e, key, defaultValue, Objectvalue = {}, isDeafaultObject = true) => {
     let newValue;
+    
+    // Don't validate JSON Schema on initial selection, only on blur
+    if (key === 'response_type' && e.target.value === 'json_schema') {
+      // Clear any existing error when selecting JSON Schema
+      setJsonSchemaError('');
+    }
+
     try {
       if (Objectvalue && !JSON.parse(Objectvalue)) {
         toast.error("Invalid JSON provided");
@@ -181,6 +240,20 @@ const AdvancedParameters = ({ params, searchParams }) => {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
+
+  const handleJsonSchemaBlur = (e, key, defaultValue) => {
+    const value = e.target.value;
+    
+    // Validate the JSON Schema on blur with stricter validation
+    if (!validateJsonSchema(value, true)) {
+      // Don't make API call if validation fails
+      return;
+    }
+    
+    // If validation passes, proceed with the API call
+    handleSelectChange({ target: { value: "json_schema" } }, key, defaultValue, value);
+  };
+
   const toggleAccordion = () => {
     setIsAccordionOpen((prevState) => !prevState);
   };
@@ -219,7 +292,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
     let error = false;
     return (
       <div key={key} className="form-control w-full">
-        <label className="label">
+        <div className="label">
           <div className='flex gap-2'>
             <div className='flex flex-row gap-2 items-center'>
               {description ? <InfoTooltip tooltipContent={description}>
@@ -246,7 +319,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
           {((field === 'slider') && configuration?.[key] !== 'default' && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
           {field === 'slider' && configuration?.[key] !== 'default' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
             modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
-        </label>
+        </div>
         {field === 'dropdown' && configuration?.[key] !== 'default' && (
           <div className="w-full">
             <div className="relative">
@@ -287,7 +360,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
                         setShowDropdown(false);
                       }}
                     >
-                      <label className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <input
                           type="radio"
                           name="function-select"
@@ -302,7 +375,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
                               ? "Model can generate a response or call a function."
                               : "One or more specific functions must be called"}
                         </span>
-                      </label>
+                      </div>
                     </div>
                   ))}
                   {version_function_data && typeof version_function_data === 'object' && (
@@ -333,7 +406,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
                               setShowDropdown(false);
                             }}
                           >
-                            <label className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                               <input
                                 type="radio"
                                 name="function-select"
@@ -341,7 +414,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
                                 className="radio radio-sm"
                               />
                               <span>{title}</span>
-                            </label>
+                            </div>
                           </div>
                         );
                       })
@@ -368,7 +441,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
                                 setShowDropdown(false);
                               }}
                             >
-                              <label className="flex items-center gap-2">
+                              <div className="flex items-center gap-2">
                                 <input
                                   type="radio"
                                   name="agent-select"
@@ -376,7 +449,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
                                   className="radio radio-sm"
                                 />
                                 <span>{title}</span>
-                              </label>
+                              </div>
                             </div>
                           );
                         })}
@@ -446,7 +519,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
           />
         )}
         {field === 'boolean' && configuration?.[key] !== 'default' && (
-          <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
+          <div className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
             <input
               name={key}
               type="checkbox"
@@ -454,13 +527,13 @@ const AdvancedParameters = ({ params, searchParams }) => {
               checked={inputConfiguration?.[key] === "default" ? false : inputConfiguration?.[key]}
               onChange={(e) => handleInputChange(e, key)}
             />
-          </label>
+          </div>
         )}
         {field === 'select' && configuration?.[key] !== 'default' && (
-          <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
+          <div className='items-center justify-start gap-4 bg-base-100 text-base-content'>
             <select
               value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
-              onChange={(e) => handleSelectChange(e, key, defaultValue, '{}', isDeafaultObject)}
+              onChange={(e) => handleSelectChange(e, key, defaultValue, '{}' ,isDeafaultObject)}
               className="select select-sm max-w-xs select-bordered capitalize"
             >
               <option value='default' disabled> Select {key} mode </option>
@@ -469,12 +542,15 @@ const AdvancedParameters = ({ params, searchParams }) => {
               ))}
             </select>
 
-            {configuration?.[key]?.type === "json_schema" && (
+{(configuration?.[key]?.type === "json_schema" || configuration?.[key]?.[defaultValue?.key] === "json_schema") && (
               <>
                 <div className="flex justify-end mb-2 mt-5">
                   <span
                     className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Opening JSON Schema Modal'); // Debug log
                       openModal(MODAL_TYPE.JSON_SCHEMA);
                     }}
                   >
@@ -482,8 +558,16 @@ const AdvancedParameters = ({ params, searchParams }) => {
                   </span>
                 </div>
 
+                {/* Error message */}
+                {jsonSchemaError && (
+                  <div className=" h-12 w-full bg-error mb-2">
+                    <span>{jsonSchemaError}</span>
+                  </div>
+                )}
+
                 {/* Textarea */}
                 <textarea
+                  ref={jsonSchemaTextareaRef}
                   key={`${key}-${configuration?.[key]}-${objectFieldValue}-${configuration}`}
                   type="input"
                   defaultValue={
@@ -494,10 +578,14 @@ const AdvancedParameters = ({ params, searchParams }) => {
                       4
                     )
                   }
-                  className="textarea border border-base-content/20 w-full min-h-96 resize-y"
-                  onBlur={(e) =>
-                    handleSelectChange({ target: { value: "json_schema" } }, "response_type", { key: "type" }, e.target.value)
-                  }
+                  className={`textarea border w-full min-h-96 resize-y ${jsonSchemaError ? 'border-error' : 'border-base-content/20'}`}
+                  onBlur={(e) => handleJsonSchemaBlur(e, "response_type", { key: "type" })}
+                  onChange={(e) => {
+                    // Clear error when user starts typing
+                    if (jsonSchemaError) {
+                      setJsonSchemaError('');
+                    }
+                  }}
                   placeholder="Enter valid JSON object here..."
                 />
 
@@ -505,7 +593,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
               </>
             )}
 
-          </label>
+          </div>
         )}
       </div>
     );
