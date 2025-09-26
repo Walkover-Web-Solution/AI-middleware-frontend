@@ -107,7 +107,6 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                         />
                         <label className='label-text mb-1'>Timezone *</label>
                         
-                        {/* SOLUTION 1: Using static space reservation */}
                         <div className={`transition-all duration-300 ${showTimezoneDropdown ? 'mb-64' : 'mb-4'}`}>
                             <div className="relative">
                                 <div 
