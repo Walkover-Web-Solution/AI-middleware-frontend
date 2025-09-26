@@ -326,7 +326,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         window.removeEventListener("message", handleMessage);
       };
     }
-  }, [isValidOrg, resolvedParams.id, versionData, searchParams?.version, path]);
+  }, [isValidOrg, resolvedParams.id, versionData, resolvedSearchParams.get('version'), path]);
 
   async function handleMessage(e) {
     if (e.data?.metadata?.type !== 'tool') return;
@@ -345,7 +345,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           if (selectedVersionData) {
             await dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
-              versionId: version_id,
+              versionId: resolvedSearchParams?.get('version'),
               dataToSend: {
                 functionData: {
                   function_id: selectedVersionData._id,
@@ -373,13 +373,13 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
               e?.data?.metadata?.createFrom && e.data.metadata.createFrom === "preFunction" ? (
                 dispatch(updateApiAction(path[5], {
                   pre_tools: [data?._id],
-                  version_id: version_id
+                  version_id: resolvedSearchParams?.get('version')
                 }))
               )
                 : (
                   dispatch(updateBridgeVersionAction({
                     bridgeId: path[5],
-                    versionId: version_id,
+                    versionId: resolvedSearchParams?.get('version'),
                     dataToSend: {
                       functionData: {
                         function_id: data?._id,
