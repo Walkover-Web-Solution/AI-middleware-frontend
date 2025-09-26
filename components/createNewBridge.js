@@ -52,18 +52,16 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
 
   // Generate unique names
   const generateUniqueName = useCallback((isSlugName = false) => {
-    const baseName = isEmbedUser ? 'untitled_agent' : 'Untitled';
-    const pattern = isEmbedUser 
-      ? /^untitled_agent_(?:\d+)$/
-      : /^Untitled(?:(\d+))?$/;
+    const baseName = 'untitled_agent';
+    const pattern = /^untitled_agent_(?:\d+)$/;
     
     const existingNames = allBridgeList
       ?.filter(bridge => (isSlugName ? bridge?.slugName : bridge?.name)?.match(pattern))
       ?.length || 0;
     
     const newCount = existingNames + 1;
-    return isEmbedUser ? `${baseName}_${newCount}` : `${baseName}${newCount}`;
-  }, [allBridgeList, isEmbedUser]);
+    return `${baseName}_${newCount}`;
+  }, [allBridgeList]);
 
   // State update helper
   const updateState = useCallback((updates) => {
