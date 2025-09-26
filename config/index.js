@@ -162,7 +162,7 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
         keyword_search: keyword,
         user_feedback: user_feedback,
         error: isErrorTrue,
-        version_id: versionId
+        version_id: (versionId === 'all'|| versionId === 'undefined') ? null : versionId
       }
     });
     return getSingleThreadData.data;
@@ -719,7 +719,7 @@ export const getSubThreadIds = async ({ thread_id, error, bridge_id, version_id 
       params: {
         error,
         bridge_id,
-        version_id
+        version_id: (version_id === "all" || version_id === "undefined") ? null : version_id 
       }
     });
     return response.data;
