@@ -74,13 +74,18 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
     const handleOpenAgentVariable = useCallback((name, item) => {
         setSelectedBridge({ name: name, ...item })
-        const {fields, required_params} =(item?.variables && Object.keys(item?.variables)?.length>0) ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
-        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
-        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params, thread_id: item?.thread_id?item?.thread_id:false, version_id: item?.version_id || '' })
+        const { fields, required_params } = (item?.variables && Object.keys(item?.variables)?.length > 0) ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
+        const threadId = item?.thread_id ? item?.thread_id : false;
+        const versionId = item?.version_id || '';
+        // Ensure function_details (currentVariable) and toolData (agentTools) have the same shape
+        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields, required_params, thread_id: threadId, version_id: versionId })
+        setAgentTools({ name: item?.bridge_id, description: item?.description, fields, required_params, thread_id: threadId, version_id: versionId })
+        // Initialize variablesPath for this agent to avoid false diffs in modal
+        setVariablesPath(variables_path[item?.bridge_id] || {})
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
-    const handleRemoveAgent = (name,item) => {
+    const handleRemoveAgent = (name, item) => {
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params?.id,
@@ -119,7 +124,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 "agent_variables": selectedBridge?.agent_variables,
                                 "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params },
                                 "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false,
-                                "version_id":agentTools?.version_id ? agentTools?.version_id : ""
+                                "version_id": agentTools?.version_id ? agentTools?.version_id : ""
                             }
                         },
                         agent_status: "1"
@@ -174,7 +179,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 
                                 <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
                                     <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
-                                        <span>{name?.length > 24 ? `${name.slice(0, 24)}...` : name}</span>
+                                        <span>{bridgeData?.find(bridge => bridge._id === item.bridge_id)?.name?.length > 24 ? `${bridgeData?.find(bridge => bridge._id === item.bridge_id)?.name.slice(0, 24)}...` : bridgeData?.find(bridge => bridge._id === item.bridge_id)?.name}</span>
                                         <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!item?.description ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
                                     {!item?.description ? "Description Required" : "Active"}
                                     
@@ -191,11 +196,11 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                             </div>
                         </div>
                     </div>
-                    <div className="dropdown dropdown-end z-medium absolute right-1 top-1">
+                    <div className="dropdown dropdown-end absolute right-1 top-1">
                         <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
                             <EllipsisVerticalIcon size={16} />
                         </div>
-                        <ul tabIndex={0} className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-40 border border-base-300">
+                        <ul tabIndex={0} className="dropdown-content z-medium menu p-1 shadow bg-base-100 rounded-box w-40 border border-base-300">
                             <li>
                                 <a onClick={() => handleOpenAgentVariable(name, item)} className="text-sm">
                                     <SettingsIcon size={16} />
@@ -247,6 +252,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                
             </div>
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
+
             <FunctionParameterModal
                 name="Agent"
                 Model_Name={MODAL_TYPE?.AGENT_VARIABLE_MODAL}
@@ -262,6 +268,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 variables_path={variables_path}
                 params={params}
                 searchParams={searchParams}
+                tool_name={bridgeData?.find(bridge => bridge._id === selectedBridge?.bridge_id)?.name}
             />
         </div>
     );
