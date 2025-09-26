@@ -13,16 +13,18 @@ const RenderEmbed = ({
   const renderEmbed = useMemo(() => {
     return bridgeFunctions?.slice()
       .sort((a, b) => {
-        const aTitle = integrationData[a?.endpoint]?.title || integrationData[a?.function_name]?.title;
-        const bTitle = integrationData[b?.endpoint]?.title || integrationData[b?.function_name]?.title;
+        const aFnName = a?.function_name || a?.endpoint;
+        const bFnName = b?.function_name || b?.endpoint;
+        const aTitle = a?.title || integrationData?.[aFnName]?.title;
+        const bTitle = b?.title || integrationData?.[bFnName]?.title;
         if (!aTitle) return 1;
         if (!bTitle) return -1;
         return aTitle?.localeCompare(bTitle);
       })
       .map((value) => {
         const functionName = value?.function_name || value?.endpoint;
-        const title = integrationData?.[functionName]?.title;
-        const status = integrationData?.[functionName]?.status;
+        const title = value?.title || integrationData?.[functionName]?.title;
+        const status = value?.status || integrationData?.[functionName]?.status;
 
         return (
           <div
@@ -61,11 +63,11 @@ const RenderEmbed = ({
                 </p>
               </div>
             </div>
-            <div className="dropdown dropdown-end z-medium absolute right-1 top-1">
+            <div className="dropdown dropdown-end absolute right-1 top-1">
               <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
                 <EllipsisVerticalIcon size={16} />
               </div>
-              <ul tabIndex={0} className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-40 border border-base-300">
+              <ul tabIndex={0} className="dropdown-content z-medium menu p-1 shadow bg-base-100 rounded-box w-40 border border-base-300">
                 <li>
                   <a onClick={() => handleOpenModal(value?._id)} className="text-sm">
                     <SettingsIcon size={16} />

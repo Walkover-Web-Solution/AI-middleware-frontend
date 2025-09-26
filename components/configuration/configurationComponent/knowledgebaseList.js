@@ -108,11 +108,11 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                             </p>
                         </div>
                     </div>
-                    <div className="dropdown dropdown-end z-medium absolute right-1 top-1">
+                    <div className="dropdown dropdown-end absolute right-1 top-1">
                         <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
                             <EllipsisVerticalIcon size={16} />
                         </div>
-                        <ul tabIndex={0} className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-44 border border-base-300">
+                        <ul tabIndex={0} className="dropdown-content z-medium menu p-1 shadow bg-base-100 rounded-box w-44 border border-base-300">
                             <li>
                                 <a onClick={(e) => { e.stopPropagation(); handleDeleteKnowledgebase(item?._id); }} className="text-sm text-error">
                                     

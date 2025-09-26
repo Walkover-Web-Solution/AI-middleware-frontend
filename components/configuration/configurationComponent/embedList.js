@@ -53,12 +53,14 @@ const EmbedList = ({ params, searchParams }) => {
             variables_path: versionData?.variables_path || {},
         };
     });
-
     const handleOpenModal = (functionId) => {
         setFunctionId(functionId);
-        setfunctionData(function_data?.[functionId]);
-        setFunctionName(function_data?.[functionId]?.function_name || function_data?.[functionId]?.endpoint);
-        setVariablesPath(variables_path[function_name] || {});
+        const fn = function_data?.[functionId];
+        setfunctionData(fn);
+        setToolData(fn);
+        const fnName = fn?.function_name || fn?.endpoint;
+        setFunctionName(fnName);
+        setVariablesPath(variables_path[fnName] || {});
         openModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL)
 
     }
@@ -105,7 +107,7 @@ const EmbedList = ({ params, searchParams }) => {
                     dataToSend: dataToSend,
                 })
             );
-            setToolData("");
+            // Do not clear toolData; let Redux update propagate the latest value
         }
         if (!isEqual(variablesPath, variables_path[function_name])) {
             dispatch(

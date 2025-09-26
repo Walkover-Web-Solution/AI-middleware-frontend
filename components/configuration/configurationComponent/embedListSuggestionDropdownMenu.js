@@ -46,40 +46,42 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
             // .filter(value => !bridge_pre_tools?.includes(value?._id))
             // .filter(value => !(connectedFunctions || [])?.includes(value?._id))
             .filter(value => {
-                const title = integrationData?.[value?.endpoint]?.title || integrationData?.[value?.function_name]?.title;
-                return title !== undefined && title?.toLowerCase()?.includes(searchQuery.toLowerCase()) &&
-                    !(connectedFunctions || [])?.includes(value?._id);
+                const fnName = value?.function_name || value?.endpoint;
+                const title = value?.title || integrationData?.[fnName]?.title;
+                 return title !== undefined && title?.toLowerCase()?.includes(searchQuery.toLowerCase()) &&
+                     !(connectedFunctions || [])?.includes(value?._id);
             })
             .slice() // Create a copy of the array to avoid mutating the original
             .sort((a, b) => {
-                const aTitle = integrationData[a?.endpoint]?.title || integrationData[a?.function_name]?.title;
-                const bTitle = integrationData[b?.endpoint]?.title || integrationData[b?.function_name]?.title;
-                if (!aTitle) return 1;
-                if (!bTitle) return -1;
+                const aFnName = a?.function_name || a?.endpoint;
+                const bFnName = b?.function_name || b?.endpoint;
+                const aTitle = a?.title || integrationData?.[aFnName]?.title;
+                const bTitle = b?.title || integrationData?.[bFnName]?.title;
+                 if (!aTitle) return 1;
+                 if (!bTitle) return -1;
 
-                return aTitle?.localeCompare(bTitle); // Sort alphabetically based on title
+                 return aTitle?.localeCompare(bTitle); // Sort alphabetically based on title
             })
             .map((value) => {
                 const functionName = value?.function_name || value?.endpoint;
-                const status = integrationData?.[functionName]?.status;
-                const title = integrationData?.[functionName]?.title || 'Untitled';
-
-                return (
-                    <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
-                        <div className="flex justify-between items-center w-full">
-                            <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
-                                {title}
-                            </p>
-                            <div>
-                                <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(status)}`}>
-                                    {value?.description?.trim() === "" ? "Ongoing" : status}
-                                </span>
-                            </div>
-                        </div>
-                    </li>
-                )
-            }
-            )
+                const status = value?.status || integrationData?.[functionName]?.status;
+                const title = value?.title || integrationData?.[functionName]?.title || 'Untitled';
+                 return (
+                     <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
+                         <div className="flex justify-between items-center w-full">
+                             <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
+                                 {title}
+                             </p>
+                             <div>
+                                 <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(status)}`}>
+                                     {value?.description?.trim() === "" ? "Ongoing" : status===1 ? "Active" : status}
+                                 </span>
+                             </div>
+                         </div>
+                     </li>
+                 )
+             }
+             )
     ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, searchParams?.version]);
     return (
         <div className="dropdown dropdown-left mt-8">
