@@ -69,14 +69,6 @@ const CONFIG_SCHEMA = [
     section: "Interface Options",
   },
   {
-    key: "hidePromptGuard",
-    type: "toggle",
-    label: "Hide Prompt Guard",
-    description: "Display prompt guard",
-    defaultValue: false,
-    section: "Interface Options",
-  },
-  {
     key: "slide",
     type: "select",
     label: "Slide Position",

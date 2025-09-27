@@ -9,7 +9,6 @@ import { useDispatch } from 'react-redux';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import ToneDropdown from './toneDropdown';
 import ResponseStyleDropdown from './responseStyleDropdown';
-import GuardrailSelector from './guardrailSelector';
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 import PromptHelper from '../../PromptHelper';
@@ -497,10 +496,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div className='mt-4'>
-                {((isEmbedUser && !hidePromptGuard) || !isEmbedUser) && <GuardrailSelector params={params} searchParams={searchParams} />}
             </div>
 
             <div className='flex flex-row gap-2 mt-8'>
