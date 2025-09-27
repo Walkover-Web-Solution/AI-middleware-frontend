@@ -122,7 +122,7 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                                 </div>
                                 
                                 {showTimezoneDropdown && (
-                                    <div className="absolute z-10 w-full bg-base-100  rounded-lg shadow-lg max-h-60 overflow-y-auto mt-1">
+                                    <div className="absolute z-10 w-full bg-base-100  rounded-lg max-h-60 overflow-y-auto mt-1">
                                         <div className="sticky top-0 bg-base-100 p-2 z-20">
                                             <div className="flex items-center">
                                                 <input
