@@ -310,9 +310,9 @@ function MainSlider({ isEmbedUser }) {
         {isMobile && !isMobileVisible && (
           <button 
             onClick={handleMobileMenuToggle}
-            className="fixed top-4 left-4 w-10 h-10 bg-base-100 border border-base-300 rounded-lg flex items-center justify-center hover:bg-base-200 transition-colors z-50 shadow-md"
+            className="fixed top-3 left-2 w-8 h-8 bg-base-100 border border-base-300 rounded-lg flex items-center justify-center hover:bg-base-200 transition-colors z-50 shadow-md"
           >
-            <AlignJustify size={20} />
+            <AlignJustify size={12} />
           </button>
         )}
         
@@ -320,7 +320,7 @@ function MainSlider({ isEmbedUser }) {
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 transition-all duration-200 ease-in-out my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 transition-all duration-200 ease-in-out my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
           style={{ 
             width: isMobile ? (isMobileVisible ? '56px' : '0px') : (isOpen ? '220px' : '50px'),
             transform: (!isSideBySideMode && pathParts.length > 3) ? (isMobile && !isMobileVisible ? 'translateX(-100%)' : 'translateX(0)') : 'none',
