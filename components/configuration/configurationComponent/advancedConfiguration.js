@@ -6,6 +6,7 @@ import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import ResponseFormatSelector from './responseFormatSelector';
 import InfoTooltip from '@/components/InfoTooltip';
 import ToolCallCount from './toolCallCount';
+import GuardrailSelector from './guardrailSelector';
 
 const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -74,6 +75,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
 
   return (
     <div className="z-very-low text-base-content w-full cursor-pointer mt-2" tabIndex={0}>
+
       <div
         className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
         onClick={() => {
@@ -94,7 +96,12 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
         </span>
       </div>
 
+      
+
       <div className={`w-full gap-4 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'} transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+      <div className=' mt-4'> 
+      <GuardrailSelector params={params} searchParams={searchParams} />
+      </div>
         {bridgeType === 'api' && modelType !== 'image' && modelType !== 'embedding' && (
           <div className="form-control w-full mt-2 border border-base-content/20 rounded-lg p-2">
             <ResponseFormatSelector params={params} searchParams={searchParams}/>
