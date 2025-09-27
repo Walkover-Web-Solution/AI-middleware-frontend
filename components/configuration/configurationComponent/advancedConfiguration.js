@@ -183,7 +183,14 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
           {isFallbackEnabled && (
             <div className="w-full">
               {/* Fallback Service Dropdown (styled like ServiceDropdown) */}
-              <details className="dropdown dropdown-end w-full mb-2">
+              <details className="dropdown dropdown-end w-full mb-2"
+              onToggle={(e) => {
+                if (e.currentTarget.open) {
+                  // close model dropdown if service is opened
+                  const modelDropdown = document.getElementById("model-dropdown");
+                  if (modelDropdown) modelDropdown.removeAttribute("open");
+                }
+              }}>
                 <summary
                   tabIndex={0}
                   role="button"
@@ -218,7 +225,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
               </details>
 
               {/* Fallback Model Dropdown (styled like ModelDropdown) */}
-              <details className="dropdown w-full">
+              <details id="model-dropdown" className="dropdown w-full">
                 <summary
                   tabIndex={0}
                   role="button"
