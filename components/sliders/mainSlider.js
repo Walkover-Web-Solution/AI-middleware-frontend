@@ -18,8 +18,10 @@ import {
   Blocks,
   User,
   Workflow,
-  FileSliders
+  FileSliders,
+  AlignJustify
 } from 'lucide-react';
+
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logoutUserFromMsg91 } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
@@ -103,6 +105,31 @@ function MainSlider({ isEmbedUser }) {
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
   const [isMobile, setIsMobile] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isMobileVisible, setIsMobileVisible] = useState(false); // New state for mobile visibility
+
+  // Effect to detect mobile screen size
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768); // Set mobile breakpoint at 768px
+    };
+
+    // Initialize on mount
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Effect to hide sidebar by default on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setIsOpen(false);
+      setIsMobileVisible(false);
+    }
+  }, [isMobile]);
 
   // Effect to handle sidebar state when path changes
   useEffect(() => {
@@ -111,7 +138,13 @@ function MainSlider({ isEmbedUser }) {
     } else if (pathParts.length > 4) {
       setIsOpen(false); // Automatically close when pathParts length > 4
     }
-  }, [isSideBySideMode, pathParts.length]);
+    
+    // Hide on mobile by default when path changes
+    if (isMobile) {
+      setIsOpen(false);
+      setIsMobileVisible(false);
+    }
+  }, [isSideBySideMode, pathParts.length, isMobile]);
 
   /* ------------------------------------------------------------------------ */
   /*                                 Helpers                                  */
@@ -173,45 +206,71 @@ function MainSlider({ isEmbedUser }) {
   /** Close sidebar on outside click when in sub-routes */
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (pathParts.length > 4 && isOpen) {
+      if (pathParts.length > 4 && (isOpen || isMobileVisible)) {
         const sidebar = document.querySelector('.sidebar'); // Assuming sidebar has this class
         if (sidebar && !sidebar.contains(e.target)) {
-          setIsOpen(false);
+          if (isMobile) {
+            setIsMobileVisible(false);
+          } else {
+            setIsOpen(false);
+          }
         }
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, pathParts.length]);
+  }, [isOpen, isMobileVisible, pathParts.length, isMobile]);
 
   /** Hover handlers – active only when collapsed (desktop) */
   const onItemEnter = (key, e) => {
-    if (isOpen || isMobile) return;
+    if ((isOpen && !isMobile) || (isMobile && !isMobileVisible)) return;
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltipPos({ top: rect.top + rect.height / 2, left: rect.right + 8 });
     setHovered(key);
   };
-  const onItemLeave = () => !isOpen && !isMobile && setHovered(null);
+  
+  const onItemLeave = () => {
+    if ((!isOpen && !isMobile) || (isMobile && isMobileVisible)) {
+      setHovered(null);
+    }
+  };
 
   // Hide tooltip the moment sidebar expands
   useEffect(() => {
-    if (isOpen) setHovered(null);
-  }, [isOpen]);
+    if (isOpen && !isMobile) setHovered(null);
+  }, [isOpen, isMobile]);
 
   // Close on backdrop click (mobile)
   const handleBackdropClick = () => {
-    if (isMobile && isOpen) setIsOpen(false);
+    if (isMobile && isMobileVisible) {
+      setIsMobileVisible(false);
+    }
   };
 
-  // Settings toggler
+  // Settings toggler - modified for mobile
   const handleSettingsClick = () => {
-    if (!isOpen) {
-      setIsOpen(true);
-      setIsSettingsOpen(true);
+    if (isMobile) {
+      if (!isMobileVisible) {
+        setIsMobileVisible(true);
+        setIsSettingsOpen(true);
+      } else {
+        setIsSettingsOpen(prev => !prev);
+      }
     } else {
-      setIsSettingsOpen(prev => !prev);
+      if (!isOpen) {
+        setIsOpen(true);
+        setIsSettingsOpen(true);
+      } else {
+        setIsSettingsOpen(prev => !prev);
+      }
     }
+  };
+
+  // Mobile menu toggle handler
+  const handleMobileMenuToggle = () => {
+    setIsMobileVisible(prev => !prev);
+    setHovered(null);
   };
 
   const betaBadge = () =>{
@@ -219,7 +278,6 @@ function MainSlider({ isEmbedUser }) {
       <span className="badge badge-success mb-1 text-base-100 text-xs">Beta</span>
     )
   }
-
 
   /* ------------------------------------------------------------------------ */
   /*                                  Render                                  */
@@ -232,30 +290,55 @@ function MainSlider({ isEmbedUser }) {
   
   // Determine positioning based on mode
   const sidebarPositioning = isSideBySideMode ? 'relative' : 'fixed';
-  const sidebarZIndex = isMobile ? 'z-50' : 'z-30';
+  const sidebarZIndex = (isMobile || isMobileVisible) ? 'z-50' : 'z-30';
+
+  // Determine if sidebar should show content (expanded view)
+  const showSidebarContent = isMobile ? false : isOpen; // Mobile always shows collapsed view
 
   return (
     <>
       {/* Mobile backdrop */}
-      {isMobile && isOpen && (
+      {isMobile && isMobileVisible && (
         <div
           className="fixed inset-0 bg-black/50 lg:hidden z-40 sidebar"
           onClick={handleBackdropClick}
         />
       )}
 
-      <div className="relative ">
+      <div className="relative">
+        {/* Mobile menu toggle button - shown only on mobile when sidebar is closed */}
+        {isMobile && !isMobileVisible && (
+          <button 
+            onClick={handleMobileMenuToggle}
+            className="fixed top-3 left-2 w-8 h-8 bg-base-100 border border-base-300 rounded-lg flex items-center justify-center hover:bg-base-200 transition-colors z-50 shadow-md"
+          >
+            <AlignJustify size={12} />
+          </button>
+        )}
+        
         {/* ------------------------------------------------------------------ */}
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 transition-all duration-300 my-3 mx-3 shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 transition-all duration-200 ease-in-out my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
           style={{ 
-            width: isMobile ? (isOpen ? '320px' : '56px') : (isOpen ? '220px' : '50px'),
-            transform: (!isSideBySideMode && pathParts.length > 3) ? (isMobile && !isOpen ? 'translateX(-200px)' : 'translateX(0)') : 'none'
+            width: isMobile ? (isMobileVisible ? '56px' : '0px') : (isOpen ? '220px' : '50px'),
+            transform: (!isSideBySideMode && pathParts.length > 3) ? (isMobile && !isMobileVisible ? 'translateX(-100%)' : 'translateX(0)') : 'none',
+            opacity: (isMobile && !isMobileVisible) ? '0' : '1',
+            visibility: (isMobile && !isMobileVisible) ? 'hidden' : 'visible'
           }}
         >
-          {/* Toggle button - always show chevron button */}
+          {/* Mobile close button - positioned at the top-right corner */}
+          {isMobile && isMobileVisible && (
+            <button
+              onClick={() => setIsMobileVisible(false)}
+              className="absolute -right-3 top-3 w-7 h-7 bg-base-100 border border-base-300 rounded-full flex items-center justify-center hover:bg-base-200 transition-colors z-10 shadow-sm"
+            >
+              <ChevronLeft size={14} />
+            </button>
+          )}
+
+          {/* Toggle button - only show for desktop */}
           {!isMobile && (
             <button
               onClick={handleToggle}
@@ -264,27 +347,7 @@ function MainSlider({ isEmbedUser }) {
               {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
             </button>
           )}
-
-          {/* Mobile close */}
-          {isMobile && isOpen && (
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute right-4 top-2 w-8 h-8 bg-base-200 rounded-full flex items-center justify-center hover:bg-base-300 transition-colors z-10"
-            >
-              <ChevronLeft size={16} />
-            </button>
-          )}
-
-          {/* Mobile hamburger when closed */}
-          {isMobile && !isOpen && (
-            <button
-              onClick={() => setIsOpen(true)}
-              className="absolute right-2 top-2 w-8 h-8 bg-base-200 rounded-full flex items-center justify-center hover:bg-base-300 transition-colors z-10"
-            >
-              <ChevronRight size={16} />
-            </button>
-          )}
-
+          
           {/* -------------------------- NAVIGATION -------------------------- */}
           <div className="flex flex-col h-full">
             {/* Header section */}
@@ -294,14 +357,14 @@ function MainSlider({ isEmbedUser }) {
                 <button
                   onClick={() => {
                     pathParts.length > 4 ? toggleSidebar('default-org-sidebar') : router.push('/org');
-                    if (isMobile) setIsOpen(false);
+                    if (isMobile) setIsMobileVisible(false);
                   }}
                   onMouseEnter={e => onItemEnter('org', e)}
                   onMouseLeave={onItemLeave}
                   className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-colors"
                 >
                   <Building2 size={20} className="shrink-0" />
-                  {(isOpen || isMobile) && (
+                  {showSidebarContent && (
                     <div className="flex-1 text-left overflow-hidden">
                       <div className="font-semibold text-sm truncate">{truncate(orgName, 20)}</div>
                       <div className="text-xs text-base-content/60">Organization</div>
@@ -316,7 +379,7 @@ function MainSlider({ isEmbedUser }) {
               <div className="space-y-6">
                 {NAV_SECTIONS.map(({ title, items }, idx) => (
                   <div key={idx} className="space-y-1">
-                    {(isOpen || isMobile) && title && (
+                    {showSidebarContent && title && (
                       <h3 className="mb-3 text-xs font-semibold text-base-content/50 uppercase tracking-wider px-2">
                         {title}
                       </h3>
@@ -331,7 +394,7 @@ function MainSlider({ isEmbedUser }) {
                             }else{
                               router.push(`/org/${orgId}/${key}`);
                             }
-                            if (isMobile) setIsOpen(false);
+                            if (isMobile) setIsMobileVisible(false);
                           }}
                           onMouseEnter={e => onItemEnter(key, e)}
                           onMouseLeave={onItemLeave}
@@ -339,20 +402,19 @@ function MainSlider({ isEmbedUser }) {
                             activeKey === key 
                               ? 'bg-primary text-primary-content shadow-sm' 
                               : 'hover:bg-base-200 text-base-content'
-                          } ${!isOpen && !isMobile ? 'justify-center' : ''}`}
+                          } ${!showSidebarContent ? 'justify-center' : ''}`}
                         >
                           <div className="shrink-0">{ITEM_ICONS[key]}</div>
-                          {(isOpen || isMobile) && (
+                          {showSidebarContent && (
                            <div className='flex items-center gap-2 justify-center'>
                              <span className="font-medium text-sm truncate">{displayName(key)}</span> 
                              <span>{key === 'orchestratal_model' && betaBadge()}</span>
                            </div>
                           )}
-                          
                         </button>
                       ))}
                     </div>
-                    {!isOpen && !isMobile && idx !== NAV_SECTIONS.length - 1 && <HRCollapsed />}
+                    {!showSidebarContent && idx !== NAV_SECTIONS.length - 1 && <HRCollapsed />}
                   </div>
                 ))}
               </div>
@@ -364,27 +426,27 @@ function MainSlider({ isEmbedUser }) {
                 <button
                   onClick={() => {
                     openModal(MODAL_TYPE.TUTORIAL_MODAL);
-                    if (isMobile) setIsOpen(false);
+                    if (isMobile) setIsMobileVisible(false);
                   }}
                   onMouseEnter={e => onItemEnter('tutorial', e)}
                   onMouseLeave={onItemLeave}
-                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!isOpen && !isMobile ? 'justify-center' : ''}`}
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
                   <MonitorPlayIcon size={16} className="shrink-0" />
-                  {(isOpen || isMobile) && <span className="font-medium text-sm truncate">Tutorial</span>}
+                  {showSidebarContent && <span className="font-medium text-sm truncate">Tutorial</span>}
                 </button>
 
                 <button
                   onClick={() => {
                     openModal(MODAL_TYPE.DEMO_MODAL);
-                    if (isMobile) setIsOpen(false);
+                    if (isMobile) setIsMobileVisible(false);
                   }}
                   onMouseEnter={e => onItemEnter('speak-to-us', e)}
                   onMouseLeave={onItemLeave}
-                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!isOpen && !isMobile ? 'justify-center' : ''}`}
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
                 >
                   <MessageCircleMoreIcon size={16} className="shrink-0" />
-                  {(isOpen || isMobile) && <span className="font-medium text-sm truncate">Speak to Us</span>}
+                  {showSidebarContent && <span className="font-medium text-sm truncate">Speak to Us</span>}
                 </button>
 
                 <a
@@ -393,11 +455,11 @@ function MainSlider({ isEmbedUser }) {
                   rel="noopener noreferrer"
                   onMouseEnter={e => onItemEnter('feedback', e)}
                   onMouseLeave={onItemLeave}
-                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!isOpen && !isMobile ? 'justify-center' : ''}`}
-                  onClick={() => isMobile && setIsOpen(false)}
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
+                  onClick={() => isMobile && setIsMobileVisible(false)}
                 >
                   <MessageSquareMoreIcon size={16} className="shrink-0" />
-                  {(isOpen || isMobile) && <span className="font-medium text-sm truncate">Feedback</span>}
+                  {showSidebarContent && <span className="font-medium text-sm truncate">Feedback</span>}
                 </a>
               </div>
             </div>
@@ -408,12 +470,12 @@ function MainSlider({ isEmbedUser }) {
                 onClick={handleSettingsClick}
                 onMouseEnter={e => onItemEnter('settings', e)}
                 onMouseLeave={onItemLeave}
-                className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!isOpen && !isMobile ? 'justify-center' : ''}`}
+                className={`w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors ${!showSidebarContent ? 'justify-center' : ''}`}
               >
                 <div className="shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                   <User size={16} className="text-primary-content" />
                 </div>
-                {(isOpen || isMobile) && (
+                {showSidebarContent && (
                   <div className="flex-1 text-left overflow-hidden">
                     <div className="font-medium text-sm truncate">
                       {userdetails?.email?.split('@')[0] || 'User'}
@@ -421,12 +483,12 @@ function MainSlider({ isEmbedUser }) {
                     <div className="text-xs text-base-content/60">Settings</div>
                   </div>
                 )}
-                {(isOpen || isMobile) && (
+                {showSidebarContent && (
                   <ChevronDown size={16} className={`shrink-0 transition-transform ${isSettingsOpen ? 'rotate-180' : ''}`} />
                 )}
               </button>
 
-              {(isOpen || isMobile) && isSettingsOpen && (
+              {showSidebarContent && isSettingsOpen && (
                 <div className="mt-2 space-y-1 bg-base-200 rounded-lg p-2">
                   <div className="flex items-center gap-3 p-2 text-sm text-base-content/70">
                     <Mail size={14} className="shrink-0" />
@@ -436,7 +498,7 @@ function MainSlider({ isEmbedUser }) {
                   <button
                     onClick={() => {
                       router.push(`/org/${orgId}/userDetails`);
-                      if (isMobile) setIsOpen(false);
+                      if (isMobile) setIsMobileVisible(false);
                     }}
                     className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
                   >
@@ -447,7 +509,7 @@ function MainSlider({ isEmbedUser }) {
                   <button
                     onClick={() => {
                       router.push(`/org/${orgId}/workspaceSetting`);
-                      if (isMobile) setIsOpen(false);
+                      if (isMobile) setIsMobileVisible(false);
                     }}
                     className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
                   >
@@ -490,7 +552,7 @@ function MainSlider({ isEmbedUser }) {
 
               {/* GTWY Label */}
               <div className="mt-2 text-center">
-                {isOpen || isMobile ? (
+                {showSidebarContent ? (
                   <span className="text-sm text-base-content/70">GTWY.AI</span>
                 ) : (
                   <span className="text-xs text-base-content/50">GTWY</span>
@@ -512,7 +574,7 @@ function MainSlider({ isEmbedUser }) {
         {/* ------------------------------------------------------------------ */}
         {/*                              TOOL‑TIP                              */}
         {/* ------------------------------------------------------------------ */}
-        {hovered && !isOpen && !isMobile && (
+        {hovered && !showSidebarContent && (isMobileVisible || (!isMobile && !isOpen)) && (
           <div
             className="fixed bg-base-300 text-base-content py-2 px-3 rounded-lg shadow-lg whitespace-nowrap border border-base-300 pointer-events-none z-50"
             style={{ top: tooltipPos.top - 20, left: tooltipPos.left }}
