@@ -202,8 +202,12 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         // Only trigger suggestions for relevant characters
         if (lastChar === '{' || lastTwoChars === '{{') {
             triggerSuggestions(true, cursorPos);
-        } else if (showSuggestions && lastChar !== '{' && !value.slice(0, cursorPos).match(/\{\{[^}]*$/)) {
-            triggerSuggestions(false);
+        } else if (showSuggestions) {
+            // Close suggestions when user starts typing any character (except when still in variable pattern)
+            const isInVariablePattern = value.slice(0, cursorPos).match(/\{\{[^}]*$/);
+            if (!isInVariablePattern || (lastChar !== '{' && lastChar !== '}')) {
+                triggerSuggestions(false);
+            }
         }
     }, [reduxPrompt, showSuggestions, triggerSuggestions]);
 
