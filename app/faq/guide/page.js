@@ -1,9 +1,9 @@
 "use client";
 import { DOCUMENT_SECTIONS } from "@/utils/enums";
 import React, { useEffect, useRef, useState } from "react";
-import Tooltip from "./tooltip";
+import InfoTooltip from "@/components/InfoTooltip";
 
-const ModelDocs = async () => {
+const ModelDocs = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState(null);
   const searchInputRef = useRef(null);
@@ -65,7 +65,7 @@ const ModelDocs = async () => {
           <nav className="space-y-2">
             {filteredSections.map((section) => (
               <div key={section.id} className="group">
-                <Tooltip text={section?.description}>
+                <InfoTooltip tooltipContent={section?.description}>
                   <a
                     href={`#${section.id}`}
                     className={`flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors ${activeSection === section.id ? 'font-medium text-blue-600' : ''
@@ -75,7 +75,7 @@ const ModelDocs = async () => {
                     <span className="w-1.5 h-1.5 bg-gray-300 rounded-full group-hover:bg-blue-600 transition-colors"></span>
                     <span>{section.title}</span>
                   </a>
-                </Tooltip>
+                </InfoTooltip>
               </div>
             ))}
           </nav>
