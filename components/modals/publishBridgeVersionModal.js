@@ -27,6 +27,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   const [selectedAgentsToPublish, setSelectedAgentsToPublish] = useState(new Set());
   const [allConnectedAgents, setAllConnectedAgents] = useState([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
+  const [autoGenerateSummary, setAutoGenerateSummary] = useState(false);
 
   const { bridge, versionData, bridgeData, agentList, bridge_summary } = useCustomSelector((state) => ({
     bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
@@ -439,7 +440,10 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                 </div>
                 <button
                   className="btn btn-sm bg-base-200 btn-outline"
-                  onClick={() => openModal(MODAL_TYPE.PROMPT_SUMMARY)}
+                  onClick={() => {
+                    setAutoGenerateSummary(true);
+                    openModal(MODAL_TYPE.PROMPT_SUMMARY);
+                  }}
                 >
                   Generate Prompt Summary
                 </button>
@@ -819,7 +823,12 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       <div className="modal-backdrop" onClick={handleCloseModal}></div>
 
       {/* Prompt Summary Modal (mounted so we can open it on-demand) */}
-      <PromptSummaryModal params={params} searchParams={searchParams} />
+      <PromptSummaryModal 
+        params={params} 
+        searchParams={searchParams} 
+        autoGenerateSummary={autoGenerateSummary}
+        setAutoGenerateSummary={setAutoGenerateSummary}
+      />
     </Modal>
   );
 }
