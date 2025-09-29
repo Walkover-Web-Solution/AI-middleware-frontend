@@ -293,7 +293,7 @@ const Navbar = ({ isEmbedUser }) => {
                 <span className="hidden sm:inline">Home</span>
               </button>
               }
-            {!isEmbedUser &&  <nav className="flex items-center gap-1 min-w-0 flex-1" aria-label="Breadcrumb">
+            {!isEmbedUser &&  <nav className="flex items-center ml-6 lg:ml-0 md:ml-0 xl:ml-0 gap-1 min-w-0 flex-1" aria-label="Breadcrumb">
                 {breadcrumbItems.map((item, idx) => (
                   <React.Fragment key={idx}>
                     {idx > 0 && (
