@@ -135,7 +135,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             )}
             <RecommendedModal params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} bridgeApiKey={bridgeApiKey} shouldPromptShow={shouldPromptShow} />
             <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 items-start">
-                <div className="w-full min-w-0 md:order-2">
+                <div className="w-full min-w-0 md:order-1">
                     <ServiceDropdown
                         params={params}
                         apiKeySectionRef={apiKeySectionRef}
@@ -143,7 +143,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                         searchParams={searchParams}
                     />
                 </div>
-                <div className="w-full min-w-0 md:order-1">
+                <div className="w-full min-w-0 md:order-2">
                     <ModelDropdown params={params} searchParams={searchParams} />
                 </div>
                 <div className="w-full min-w-0 md:order-3">
