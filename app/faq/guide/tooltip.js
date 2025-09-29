@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Tooltip = async ({ text, children }) => {
+const Tooltip = ({ text, children }) => {
   return (
     <div className="relative group">
       {children}
