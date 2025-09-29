@@ -20,7 +20,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     const [agentTools, setAgentTools] = useState(null);
     const [variablesPath, setVariablesPath] = useState({});
     const router = useRouter();
-    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path } = useCustomSelector((state) => {
+    let { connect_agents, shouldToolsShow, model, bridgeData, variables_path, bridges } = useCustomSelector((state) => {
         const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -33,11 +33,14 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
             model: modelName,
             variables_path: versionData?.variables_path || {},
+            bridges: state?.bridgeReducer?.allBridgesMap
+
         };
     });
-    const handleSaveAgent = () => {
+    const handleSaveAgent = (overrideBridge = null) => {
         try {
-            if (!description && !selectedBridge?.description) {
+            const sb = overrideBridge || selectedBridge;
+            if (((!description && !sb?.description) && !bridges?.[sb?._id]?.bridge_summary)) {
                 toast?.error("Description Required")
                 return;
             }
@@ -47,10 +50,10 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 dataToSend: {
                     agents: {
                         connected_agents: {
-                            [selectedBridge?.name]: {
-                                "description": description ? description : selectedBridge?.description,
-                                "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
-                                "agent_variables": selectedBridge?.agent_variables,
+                            [sb?.name]: {
+                                "description": description ? description : sb?.description ? sb?.description : bridges?.[sb?._id]?.bridge_summary,
+                                "bridge_id": sb?._id || sb?.bridge_id,
+                                "agent_variables": sb?.agent_variables,
                                 "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
                             }
                         },
@@ -69,7 +72,14 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     }
     const handleSelectAgents = (bridge) => {
         setSelectedBridge(bridge)
-        openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
+        if (!bridges?.[bridge?._id]?.bridge_summary) {
+            // Ask for description first, do not save yet
+            openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
+            return;
+        }
+        // If summary already exists, proceed to save immediately using the fresh bridge reference
+        handleSaveAgent(bridge)
+        
     }
 
     const handleOpenAgentVariable = useCallback((name, item) => {
