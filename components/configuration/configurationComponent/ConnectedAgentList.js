@@ -3,7 +3,7 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { CircleAlertIcon, SettingsIcon } from '@/components/Icons';
+import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
@@ -81,7 +81,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
-    const handleRemoveAgent = () => {
+    const handleRemoveAgent = (name,item) => {
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params?.id,
@@ -89,10 +89,10 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 dataToSend: {
                     agents: {
                         connected_agents: {
-                            [selectedBridge?.name]: {
-                                "description": selectedBridge?.description,
-                                "bridge_id": selectedBridge?.bridge_id,
-                                "agent_variables": selectedBridge?.agent_variables,
+                            [name]: {
+                                "description": item?.description,
+                                "bridge_id": item?.bridge_id,
+                                "agent_variables": item?.agent_variables,
                                 "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
                             }
                         }
@@ -159,35 +159,52 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`flex w-[250px] flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200`}
+                    className={`flex w-full mt-2 flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
                 >
                     <div
-                        className="p-4 w-full h-full flex flex-col justify-between"
+                        className="p-2 w-full h-full flex flex-col justify-between"
                         onClick={() => handleAgentClicked(item)}
                     >
                         <div>
-                            <div className="flex justify-between items-center">
-                                <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content flex items-center gap-2">
-                                    <div className="tooltip" data-tip={name?.length > 10 ? name : ""}>
-                                        <span>{name?.length > 10 ? `${name.slice(0, 15)}...` : name}</span>
+                            <div className="flex items-center gap-2">
+                                
+                                <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
+                                    <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
+                                        <span>{name?.length > 24 ? `${name.slice(0, 24)}...` : name}</span>
+                                        <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!item?.description ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
+                                    {!item?.description ? "Description Required" : "Active"}
+                                    
+                                </span>
                                     </div>
-                                </h1>
+                                </span>
                                 {item?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
                             </div>
-                            <p className="mt-3 text-xs sm:text-sm line-clamp-3">
-                                {item?.description || "A description is required for proper functionality."}
-                            </p>
-                        </div>
-                        <div className="mt-4">
-                            <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-black bg-green-100`}>
-                                {!item?.description ? "Description Required" : "Active"}
-                            </span>
+                            <div className="w-full flex justify-between flex-row">
+                                <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
+                                    {item?.description || "A description is required for proper functionality."}
+                                </p>
+                                
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-center justify-center absolute right-1 top-1">
-                        <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleOpenAgentVariable(name, item)}>
-                            <SettingsIcon size={18} />
-                        </button>
+                    <div className="dropdown dropdown-end z-medium absolute right-1 top-1">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
+                            <EllipsisVerticalIcon size={16} />
+                        </div>
+                        <ul tabIndex={0} className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-40 border border-base-300">
+                            <li>
+                                <a onClick={() => handleOpenAgentVariable(name, item)} className="text-sm">
+                                    <SettingsIcon size={16} />
+                                    Config
+                                </a>
+                            </li>
+                            <li>
+                                <a onClick={() => handleRemoveAgent(name, item)} className="text-sm text-error">
+                                    <TrashIcon size={16} />
+                                    Remove
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             );
@@ -196,20 +213,35 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
     return (
         <div>
-            <div className="label flex-col items-start mb-2">
-                {shouldToolsShow && Object.keys(connect_agents).length > 0 && (
+            <div className="label p-0 flex-col items-start mb-0">
+             
                     <>
-                        <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
-                            <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
-                        </InfoTooltip>
-                        <div className="flex flex-wrap gap-4">
+                        <div className="dropdown dropdown-bottom-start w-full flex items-center">
+                            <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                                <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
+                            </InfoTooltip>
+                            <button
+                                tabIndex={0}
+                                className="ml-auto flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
+                            >
+                                <AddIcon className="w-2 h-2" />
+                                <span className="text-xs">Add</span>
+                            </button>
+                            <ConnectedAgentListSuggestion 
+                                params={params} 
+                                handleSelectAgents={handleSelectAgents} 
+                                connect_agents={connect_agents} 
+                                shouldToolsShow={shouldToolsShow} 
+                                modelName={model} 
+                                bridges={bridgeData} 
+                            />
+                        </div>
+                        <div className="w-full ">
                             {renderEmbed}
                         </div>
                     </>
-                )}
-        
+               
             </div>
-            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} bridges={bridgeData} />
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
             <FunctionParameterModal
                 name="Agent"

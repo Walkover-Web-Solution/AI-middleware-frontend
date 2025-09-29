@@ -9,7 +9,7 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs }) => {
     if (!hoveredModel || !modelSpecs) return null;
 
     return (
-        <div className="max-w-[500px] bg-base-100 border border-base-content/20 rounded-lg shadow-lg p-6 mt-8 top-0 absolute left-[320px] transition-transform duration-300 ease-in-out z-low-medium transform hover:scale-105">
+        <div className="max-w-[400px] w-[250px] bg-base-100 border border-base-content/20 rounded-lg shadow-lg p-6 mt-8 top-10 absolute left-[260px] transition-transform duration-300 ease-in-out z-low-medium transform hover:scale-105">
             <div className="space-y-4">
                 <div className="border-b border-base-300 pb-3">
                     <h3 className="text-xl font-bold text-base-content">{hoveredModel}</h3>
@@ -109,6 +109,18 @@ const ModelDropdown = ({ params, searchParams }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [modelSpecs, setModelSpecs] = useState();
 
+    // Close when other dropdowns open
+    useEffect(() => {
+        const handler = (e) => {
+            const source = e?.detail?.type;
+            if (source && source !== 'model') {
+                setIsDropdownOpen(false);
+            }
+        };
+        window.addEventListener('open-dropdown', handler);
+        return () => window.removeEventListener('open-dropdown', handler);
+    }, []);
+
     const handleFinetuneModelChange = (e) => {
         const selectedFineTunedModel = e.target.value;
         dispatch(updateBridgeVersionAction({
@@ -164,12 +176,17 @@ const ModelDropdown = ({ params, searchParams }) => {
     }, [handleClickOutside, isDropdownOpen]);
 
     const toggleDropdown = () => {
-        setIsDropdownOpen(prev => !prev);
+        const next = !isDropdownOpen;
+        if (next) {
+            // announce opening to close other dropdowns
+            window.dispatchEvent(new CustomEvent('open-dropdown', { detail: { type: 'model' } }));
+        }
+        setIsDropdownOpen(next);
     };
 
     return (
-        <div className="flex items-start gap-4 relative">
-            <div className="w-full max-w-xs z-low">
+        <div className="flex flex-col items-start gap-4 relative">
+            <div className="w-full max-w-xs">
                 <div className="label">
                     <span className="label-text text-base-content">LLM Model</span>
                 </div>
@@ -180,13 +197,13 @@ const ModelDropdown = ({ params, searchParams }) => {
                         className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
                         onClick={toggleDropdown}
                     >
-                        {model?.length > 30 ? `${model.substring(0, 30)}...` : model|| "Select a Model"}
+                        {model?.length > 20 ? `${model.substring(0, 20)}...` : model|| "Select a Model"}
                         {isDropdownOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                     </div>
                     {isDropdownOpen && (
                         <ul
                             tabIndex={0}
-                            className="dropdown-content dropdown-left z-low p-2 shadow bg-base-100 rounded-lg w-full mt-1 max-h-[500px] overflow-y-auto border border-base-300"
+                            className="dropdown-content dropdown-left z-high p-2 shadow bg-base-100 rounded-lg mt-1 max-h-[500px] w-[260px] overflow-y-auto border border-base-300"
                             onMouseLeave={() => setHoveredModel(null)}
                         >
                             {Object.entries(modelsList || {}).map(([group, options], groupIndex) => {
