@@ -205,7 +205,10 @@ export function getStatusClass(status) {
             return 'bg-yellow-100';
         case 'paused':
             return 'bg-red-100';
+        case '1':
+            return 'bg-green-100';
         case 'active':
+            return 'bg-green-100';
         case 'published':
             return 'bg-green-100';
         case 'rejected':
