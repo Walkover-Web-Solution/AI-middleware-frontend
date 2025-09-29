@@ -32,7 +32,7 @@ function FunctionParameterModal({
   tool_name = "",
 
 }) {
-  const [toolName, setToolName] = useState(name==="Agent" ? tool_name : toolData?.title || toolData?.endpoint_name );
+  const [toolName, setToolName] = useState((name==="Agent"||name==="orchestralAgent") ? tool_name : toolData?.title || toolData?.endpoint_name);
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const dispatch = useDispatch();
@@ -251,7 +251,7 @@ function FunctionParameterModal({
     handleSave()
     resetModalData()
     closeModal(Model_Name)
-  }, [toolData?.description, function_details?.description, toolName, tool_name, Model_Name]);
+  }, [toolData?.description, function_details?.description, toolName, tool_name, Model_Name,toolData]);
 
   // Reset the modal data to the original function_details
   const resetModalData = useCallback(() => {
@@ -467,10 +467,11 @@ function FunctionParameterModal({
   return (
     <Modal MODAL_ID={Model_Name}>
       <div className="modal-box w-11/12 max-w-6xl overflow-x-hidden text-sm">
-      <div className="flex flex-row justify-between">
-        <div className="flex flex-col mb-2">
+      <div className="flex flex-row justify-between">  
+          <div className="flex flex-col mb-2">
           <span className="text-lg font-bold mb-1 flex items-center">
             {name} Name :
+            {name === "Orchestral Agent" ? tool_name : 
             <textarea
           className="font-bold min-h-[25px] ml-1 pl-1 text-xl outline-none resize-none leading-tight bg-transparent"
           style={{
@@ -483,6 +484,7 @@ function FunctionParameterModal({
               value={toolName}
               onChange={(e) => { setToolName(e.target.value); setIsModified(true); }}
             />
+            }
           </span>
           
         </div>
