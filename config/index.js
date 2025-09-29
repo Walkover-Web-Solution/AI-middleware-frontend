@@ -317,7 +317,7 @@ export const getMetricsData = async (org_id, startDate, endDate) => {
     return error;
   }
 }
-export const updateFlowDescription = async (embed_token, functionId, description) => {
+export const updateFlow = async (embed_token, functionId, description,title) => {
   try {
     const response = await fetch(`https://flow-api.viasocket.com/projects/updateflowembed/${functionId}`, {
       method: "PUT",
@@ -326,9 +326,12 @@ export const updateFlowDescription = async (embed_token, functionId, description
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "description": description
+        "description": description,
+        "title": title,
+        "endpoint_name": title
       })
     });
+
     
     const data = await response.json();
     return data.data;
