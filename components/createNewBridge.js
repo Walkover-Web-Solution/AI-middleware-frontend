@@ -51,17 +51,10 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
   );
 
   // Generate unique names
-  const generateUniqueName = useCallback((isSlugName = false) => {
-    const baseName = 'untitled_agent';
-    const pattern = /^untitled_agent_(?:\d+)$/;
-    
-    const existingNames = allBridgeList
-      ?.filter(bridge => (isSlugName ? bridge?.slugName : bridge?.name)?.match(pattern))
-      ?.length || 0;
-    
-    const newCount = existingNames + 1;
-    return `${baseName}_${newCount}`;
-  }, [allBridgeList]);
+  const generateUniqueName = useCallback(() => {
+    const baseName = 'untitled_agent_';
+    return `${baseName}`;
+  }, []);
 
   // State update helper
   const updateState = useCallback((updates) => {
@@ -127,7 +120,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
     }
 
     const name = generateUniqueName();
-    const slugname = generateUniqueName(true);
+    const slugname = generateUniqueName();
 
     if (name.length > 0 && state.selectedModel && state.selectedBridgeTypeCard) {
       updateState({ isLoading: true });
