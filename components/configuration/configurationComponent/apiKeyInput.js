@@ -56,9 +56,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
 
     return (
         <div className="relative form-control max-w-xs text-base-content" ref={apiKeySectionRef}>
-            <div className="label">
-                <span className="label-text font-medium">Service's API Key</span>
-            </div>
+            
             <div className=''>
                 <div className='relative'>
                     <select

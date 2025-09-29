@@ -19,7 +19,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
         versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.version_description || "",
     }));
-
+    console.log("publishedVersion", publishedVersion);
     useEffect(() => {
         const timer = setInterval(() => {
             if (typeof SendDataToChatbot !== 'undefined' && searchParams?.version) {
@@ -79,14 +79,17 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
                             </a>
                         </li>
                     ))}
-                    <li>
-                        <button
-                            className="btn mt-3 w-full text-left"
-                            onClick={()=>openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
-                        >
-                            Create New Version <span className='ml-1'>&rarr;</span>
-                        </button>
-                    </li>
+                    {/* Only show Create New Version button if first version is published */}
+                    {publishedVersion?.length > 0 ? (
+                        <li>
+                            <button
+                                className="btn mt-3 w-full text-left"
+                                onClick={()=>openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
+                            >
+                                Create New Version <span className='ml-1'>&rarr;</span>
+                            </button>
+                        </li>
+                    ) : null}
                 </ul>
             </div>
             <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName}  agent_description = {versionDescription}/>

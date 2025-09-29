@@ -44,9 +44,11 @@ const AdvancedParameters = ({ params, searchParams }) => {
   const { modelInfoData } = useCustomSelector((state) => ({
     modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
   }));
+  
   useEffect(() => {
     setInputConfiguration(configuration);
   }, [configuration]);
+  
   // Filter parameters by level
   const getParametersByLevel = (level) => {
     if (!modelInfoData) return [];
@@ -64,11 +66,49 @@ const AdvancedParameters = ({ params, searchParams }) => {
   const level0Parameters = getParametersByLevel(0); // Hidden parameters
   const level1Parameters = getParametersByLevel(1); // Accordion parameters  
   const level2Parameters = getParametersByLevel(2); // Outside accordion parameters
+
+  // Generate preview text for accordion parameters
+  const getParametersPreview = useMemo(() => {
+    if (level1Parameters.length === 0) return '';
+    
+    // Define priority order for important parameters (these will show first)
+    const priorityParams = ['temperature', 'max_tokens', 'top_p', 'frequency_penalty', 'presence_penalty', 'tool_choice', 'parallel_tool_calls', 'logprobs'];
+    
+    // Sort parameters by priority, then alphabetically
+    const sortedParams = level1Parameters.sort(([keyA], [keyB]) => {
+      const priorityA = priorityParams.indexOf(keyA);
+      const priorityB = priorityParams.indexOf(keyB);
+      
+      // If both are priority params, sort by priority order
+      if (priorityA !== -1 && priorityB !== -1) {
+        return priorityA - priorityB;
+      }
+      // If only A is priority, A comes first
+      if (priorityA !== -1) return -1;
+      // If only B is priority, B comes first
+      if (priorityB !== -1) return 1;
+      // Neither are priority, sort alphabetically
+      return keyA.localeCompare(keyB);
+    });
+    
+    // Get readable names for parameters
+    const paramNames = sortedParams.slice(0, 4).map(([key]) => {
+      const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
+      // Capitalize first letter and make it more readable
+      return name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' ');
+    });
+    
+    // Create preview text
+    const preview = paramNames.join(', ');
+    const hasMore = level1Parameters.length > 4;
+    
+    return ` (${preview}${hasMore ? '...' : ''})`;
+  }, [level1Parameters]);
+
   const handleTutorial = () => {
     setTutorialState(prev => ({
       ...prev,
       showSuggestion: isFirstParameter
-
     }))
   };
 
@@ -530,7 +570,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
         }}>
           <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type." className="cursor-pointer mr-2">
             <div className="cursor-pointer label-text inline-block ml-1">
-              Advanced Parameters
+              LLM Advanced Parameters{getParametersPreview}
             </div>
           </InfoTooltip>
 

@@ -150,6 +150,11 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
                 </div>
             </div>
+            {modelType !== "image" && modelType !== 'embedding' && (
+                <>
+                    <AddVariable params={params} searchParams={searchParams} />
+                </>
+            )}
             {((isEmbedUser && !hideAdvancedParameters) || !isEmbedUser )&& (
                 <>
                 <AdvancedParameters params={params} searchParams={searchParams} />
@@ -157,7 +162,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             )}
             {modelType !== "image" && modelType !== 'embedding' && (
                 <>
-                    <AddVariable params={params} searchParams={searchParams} />
                     {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
                         <>
                         <AdvancedConfiguration params={params} searchParams={searchParams} bridgeType={bridgeType} modelType={modelType} />

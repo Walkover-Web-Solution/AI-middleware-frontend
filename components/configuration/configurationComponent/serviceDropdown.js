@@ -239,20 +239,15 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
     return (
         <div className="space-y-4 w-full">
             <div className="form-control">
-                <div className="gap-2 flex items-center max-w-xl">
-                    <div className="label gap-2">
+                
+                
 
-                        {isDisabled && (
+                <div className="flex items-center gap-2 z-auto">
+                {isDisabled && (
                             <InfoTooltip tooltipContent="Batch API is only applicable for OpenAI">
                               <AlertIcon size={16} className="text-warning" />
                             </InfoTooltip>
                         )}
-                        <span className="label-text font-medium items-end">LLM Provider</span>
-                        </div>   
-                </div>
-                
-
-                <div className="flex items-center gap-2 z-auto">
                     {renderDaisyUIDropdown()}
 
                     

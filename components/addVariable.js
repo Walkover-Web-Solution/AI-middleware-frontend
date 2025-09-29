@@ -237,9 +237,9 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   }, [isAccordionOpen, keyValuePairs, isFormData]);
 
   return (
-    <div className="text-base-content mb-2" tabIndex={0}>
+    <div className="text-base-content " tabIndex={0}>
       <div
-        className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
+        className={`info mt-4 p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
         onClick={() => {
           handleTutorial();
           toggleAccordion();
