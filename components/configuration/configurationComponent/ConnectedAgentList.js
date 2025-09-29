@@ -72,7 +72,6 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     }
     const handleSelectAgents = (bridge) => {
         setSelectedBridge(bridge)
-        //  console.log(bridge,"hello")
         if (!bridges?.[bridge?._id]?.bridge_summary) {
             // Ask for description first, do not save yet
             openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
