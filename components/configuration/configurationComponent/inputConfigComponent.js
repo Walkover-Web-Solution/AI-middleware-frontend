@@ -1,5 +1,3 @@
-import CreateVariableModal from '@/components/modals/createVariableModal';
-import OptimizePromptModal from '@/components/modals/optimizePromptModal';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
@@ -25,7 +23,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || ""
     }));
     
-    const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+    const [isMobileView, setIsMobileView] = useState(window.innerWidth < 640);
     const [oldContent, setOldContent] = useState(reduxPrompt);
     const [newContent, setNewContent] = useState('');
     const [keyName, setKeyName] = useState('');
@@ -82,7 +80,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
 
     useEffect(() => {
         const handleResize = () => {
-            const isSmallScreen = window.innerWidth < 1060;
+            const isSmallScreen = window.innerWidth < 710; // Changed to 640 to match initial state
             if (!isMobileView && !isSmallScreen && typeof window.openTechDoc === 'function' && isPromptHelperOpen) {
                 window.openTechDoc();
             } else if (isMobileView && isSmallScreen && typeof window.closeTechDoc === 'function') {
@@ -206,7 +204,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             // Close suggestions when user starts typing any character (except when still in variable pattern)
             const isInVariablePattern = value.slice(0, cursorPos).match(/\{\{[^}]*$/);
             if (!isInVariablePattern || (lastChar !== '{' && lastChar !== '}')) {
-                triggerSuggestions(false);
+            triggerSuggestions(false);
             }
         }
     }, [reduxPrompt, showSuggestions, triggerSuggestions]);
@@ -411,10 +409,10 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                 </div>
 
                 <div
-                    className="label cursor-pointer gap-2"
+                    className="label cursor-pointer gap-1 sm:gap-2"
                 >
                     <button
-                        className={`btn btn-sm ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
+                        className={`btn text-xs sm:text-sm btn-sm ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
                         onClick={handleSavePrompt}
                         disabled={!hasUnsavedChanges || prompt.trim() === reduxPrompt.trim()}
                     >
@@ -422,18 +420,18 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                     </button>
                     {isPromptHelperOpen &&
                         <>
-                            <button
-                                className={`btn btn-sm`}
-                                onClick={handleCloseTextAreaFocus}
-                            >
-                                Close
-                            </button>
                             {!isMobileView && <button
-                                className={`btn btn-sm`}
+                                className={`btn text-xs sm:text-sm btn-sm`}
                                 onClick={handleOpenDiffModal}
                             >
                                 Diff
                             </button>}
+                            <button
+                                className={`btn text-xs sm:text-sm btn-sm btn-error`}
+                                onClick={handleCloseTextAreaFocus}
+                            >
+                                Close
+                            </button>
                         </>}
 
                 </div>
@@ -441,15 +439,15 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             <div className="form-control h-full">
                 <textarea
                     ref={textareaRef}
-                    className={`textarea border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none ${isPromptHelperOpen
+                    className={`textarea border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none transition-none !duration-0 ${isPromptHelperOpen
                             ? "h-[calc(100vh-60px)] border-primary shadow-md"
                             : "min-h-96"
-                        } transition-all duration-300 ease-in-out`}
-                    value={prompt}
+                    }`}
+                      value={prompt}
                     onChange={handlePromptChange}
                     onFocus={() => {
                         if (!isPromptHelperOpen) {
-                            setIsPromptHelperOpen(true);
+                                setIsPromptHelperOpen(true);
                             if (typeof window.closeTechDoc === 'function') {
                                 window.closeTechDoc();
                             }

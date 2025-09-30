@@ -164,15 +164,15 @@ const PromptHelper = ({
       
         {/* Notes Section */}
         {isEmbedUser ? null : (
-        <div className={`${getNotesHeight()} transition-all duration-300 ease-in-out border-b mt-4`}
+        <div className={`${getNotesHeight()} transition-all duration-300 ease-in-out border-b mt-3`}
          onFocus={() => setFocusedSection('notes')}
          onBlur={() => setFocusedSection(null)}
          tabIndex={0}
        >
-          <div className="p-3 border-b bg-base-100">
+          <div className=" pb-6 pl-4 border-b bg-base-100">
             <div className="flex items-center gap-2">
               <BookIcon size={14} />
-              <span className="text-sm font-sm">Notes</span>
+              <span className="text-md font-semibold">Notes</span>
             </div>
           </div>
           <div className="p-3 h-[calc(100%-30px)]" 
