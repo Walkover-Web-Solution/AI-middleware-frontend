@@ -48,11 +48,8 @@ const Page = ({params, searchParams }) => {
   // Enhanced responsive detection
   useEffect(() => {
     const handleResize = () => {
-      const desktop = window.innerWidth >= 1080;
+      const desktop = window.innerWidth >= 710;
       setIsDesktop(desktop);
-      if (!desktop) {
-        setLeftWidth(50); // Reset on mobile
-      }
     };
 
     handleResize();
