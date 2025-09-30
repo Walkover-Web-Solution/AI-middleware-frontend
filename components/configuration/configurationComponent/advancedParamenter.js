@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
+import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 
 const AdvancedParameters = ({ params, searchParams }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -23,27 +24,43 @@ const AdvancedParameters = ({ params, searchParams }) => {
     showSuggestion: false
   });
   const [messages, setMessages] = useState([]);
-  const thread_id = useMemo(() => generateRandomID(), []);
   const dispatch = useDispatch();
 
-  const { service, version_function_data, configuration, integrationData, isFirstParameter, connected_agents } = useCustomSelector((state) => {
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
-    const user = state.userDetailsReducer.userDetails
+  const {service,version_function_data,configuration,integrationData,isFirstParameter,connected_agents,modelInfoData,bridge } = useCustomSelector((state) => {
+    const versionData =state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const integrationData =state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
+    const user = state.userDetailsReducer.userDetails;
+    const bridge=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const service = versionData?.service;
+    const configuration = versionData?.configuration;
+    const type = configuration?.type;
+    const model = configuration?.model;
+    const modelInfoData =state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters;
     return {
       version_function_data: versionData?.apiCalls,
       integrationData,
-      service: versionData?.service,
-      configuration: versionData?.configuration,
+      service,
+      configuration,
       isFirstParameter: user?.meta?.onboarding?.AdvanceParameter,
-      connected_agents: versionData?.connected_agents
+      connected_agents: versionData?.connected_agents,
+      modelInfoData,
+      bridge
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);
   const { tool_choice: tool_choice_data, type, model } = configuration || {};
-  const { modelInfoData } = useCustomSelector((state) => ({
-    modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
-  }));
+  const initialThreadId = bridge?.thread_id || generateRandomID();
+  const [thread_id, setThreadId] = useState(initialThreadId);
+
+    useEffect(() => {
+          if (!bridge?.thread_id && initialThreadId) {
+              dispatch(setThreadIdForVersionReducer({
+                  bridgeId: params?.id,
+                  versionId: searchParams?.version,
+                  thread_id: initialThreadId,
+              }));
+          }
+      }, []);
   useEffect(() => {
     setInputConfiguration(configuration);
   }, [configuration]);
@@ -503,7 +520,18 @@ const AdvancedParameters = ({ params, searchParams }) => {
                   placeholder="Enter valid JSON object here..."
                 />
 
-                <JsonSchemaModal params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} />
+                <JsonSchemaModal params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} 
+                
+                           onResetThreadId={() => {
+                                    const newId = generateRandomID();
+                                    setThreadId(newId);
+                                    dispatch(setThreadIdForVersionReducer({
+                                        bridgeId: params?.id,
+                                        versionId: searchParams?.version,
+                                        thread_id: newId,
+                                    }));
+                                }} 
+                                />
               </>
             )}
 

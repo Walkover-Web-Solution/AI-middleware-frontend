@@ -17,6 +17,7 @@ const PromptHelper = ({
   messages,
   setMessages,
   thread_id,
+  onResetThreadId,
   autoCloseOnBlur,
   prompt,
   hasUnsavedChanges,
@@ -207,6 +208,7 @@ const PromptHelper = ({
                   width="100%"
                   height="100%"
                   handleApplyOptimizedPrompt={handleApplyOptimizedPrompt}
+                  onResetThreadId={onResetThreadId}
                 />
               </div>
               
