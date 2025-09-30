@@ -2,9 +2,9 @@
 import MainLayout from '@/components/layoutComponents/MainLayout'
 import PageHeader from '@/components/Pageheader'
 import { useCustomSelector } from '@/customHooks/customSelector'
-import React, { useEffect, useState, use } from 'react'
+import React, { useState, use } from 'react'
 import { useDispatch } from 'react-redux'
-import { createAuth, getAuthDataAction } from '@/store/action/authAction'
+import { createAuth } from '@/store/action/authAction'
 import CustomTable from "@/components/customTable/customTable"
 import { openModal } from '@/utils/utility'
 import { AUTH_COLUMNS, MODAL_TYPE } from '@/utils/enums'
@@ -12,11 +12,8 @@ import AuthDataModal from '@/components/modals/AuthDataModal'
 
 export const runtime = 'edge';
 
-
-
 const Page = ({params}) => {
   const resolvedParams = use(params);
-  
   const [name, setName] = useState('')
   const [url, setUrl] = useState('')
   const [urlError, setUrlError] = useState('')
@@ -37,10 +34,6 @@ const Page = ({params}) => {
       return false
     }
   }
-
-  useEffect(()=>{
-    dispatch(getAuthDataAction(resolvedParams?.org_id))
-  },[])
 
   const handleUrlChange = (e) => {
     const value = e.target.value

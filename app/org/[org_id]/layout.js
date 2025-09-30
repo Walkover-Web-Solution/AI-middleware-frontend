@@ -26,6 +26,8 @@ import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataActi
 import { userDetails } from "@/store/action/userDetailsAction";
 import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
+import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
+import { getAuthDataAction } from "@/store/action/authAction";
 function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
@@ -216,15 +218,15 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
     }
   }, [isValidOrg]);
 
-  useEffect(() => {
-    dispatch(getAllOrchestralFlowAction(resolvedParams.org_id));
-  }, [resolvedParams.org_id]);
 
   useEffect(() => {
     if (isValidOrg && resolvedParams?.org_id) {
       dispatch(getAllApikeyAction(resolvedParams?.org_id));
       dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
       dispatch(getPrebuiltToolsAction())
+      dispatch(getAllOrchestralFlowAction(resolvedParams.org_id));
+      dispatch(getAuthDataAction(resolvedParams?.org_id))
+      dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
     }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
