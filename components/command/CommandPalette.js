@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
+import Protected from "../protected";
 
 function getOrgIdFromPath(pathname) {
   const parts = (pathname || "").split("/").filter(Boolean);
@@ -11,7 +12,7 @@ function getOrgIdFromPath(pathname) {
   return null;
 }
 
-const CommandPalette = () => {
+const CommandPalette = ({isEmbedUser}) => {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -130,11 +131,11 @@ const CommandPalette = () => {
 
   useEffect(() => {
     const handler = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && !isEmbedUser)) {
         e.preventDefault();
         openPalette();
       }
-      if (e.shiftKey && e.key === "?") {
+      if (e.shiftKey && e.key === "?" && !isEmbedUser) {
         e.preventDefault();
         openPalette();
       }
@@ -162,7 +163,7 @@ const CommandPalette = () => {
         router.push(`/org/${orgId}/knowledge_base`);
         break;
       case "functions":
-        router.push(`/org/${orgId}/agents/configure`);
+        router.push(`/org/${orgId}/agents`);
         break;
       case "integrations":
         router.push(`/org/${orgId}/integration`);
@@ -327,4 +328,4 @@ const CommandPalette = () => {
   );
 };
 
-export default CommandPalette;
+export default Protected(CommandPalette);
