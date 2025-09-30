@@ -8,6 +8,7 @@ import LoadingSpinner from './loadingSpinner';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import timezoneData from '@/utils/timezoneData';
+import { ChevronDown } from 'lucide-react';
 
 const CreateOrg = ({ handleSwitchOrg }) => {
     const [orgDetails, setOrgDetails] = useState({ name: '', about: '', timezone: 'Asia/Kolkata' });
@@ -110,7 +111,7 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                         <div className={`transition-all duration-300 ${showTimezoneDropdown ? 'mb-64' : 'mb-4'}`}>
                             <div className="relative">
                                 <div 
-                                    className="relative w-full cursor-pointer input-bordered border p-2 rounded-lg flex items-center justify-between" 
+                                    className={`relative w-full cursor-pointer ${showTimezoneDropdown ? 'border-t border-x border-base-content/30 rounded-t-lg rounded-x-lg' : 'border border-base-content/10 rounded-lg'} p-2  flex items-center justify-between`}
                                     onClick={() => setShowTimezoneDropdown(!showTimezoneDropdown)}
                                 >
                                     <span>
@@ -118,17 +119,17 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                                             `${orgDetails.timezone} (${timezoneData.find(tz => tz.identifier === orgDetails.timezone)?.offSet})` : 
                                             "Select a timezone"}
                                     </span>
-                                    <span className={`transition-transform duration-200 ${showTimezoneDropdown ? 'rotate-180' : ''}`}>▼</span>
+                                    <span className={`transition-transform duration-200 ${showTimezoneDropdown ? 'rotate-180' : ''}`}><ChevronDown size={16}/></span>
                                 </div>
                                 
                                 {showTimezoneDropdown && (
-                                    <div className="absolute z-10 w-full bg-base-100  rounded-lg max-h-60 overflow-y-auto mt-1">
+                                    <div className={`absolute min-h-[250px] z-10 w-full bg-base-100 max-h-60 overflow-y-auto ${showTimezoneDropdown ? 'border-x border-b border-base-content/30 rounded-lg rounded-t-none rounded-x-lg' : ''}`}>
                                         <div className="sticky top-0 bg-base-100 p-2 z-20">
                                             <div className="flex items-center">
                                                 <input
                                                     type="text"
                                                     placeholder="Search timezone..."
-                                                    className="input input-bordered border flex-grow py-2 px-3 text-sm input-md"
+                                                    className="input outline-none input-sm flex-grow py-2 px-3 text-sm"
                                                     value={timezoneSearch}
                                                     onChange={(e) => setTimezoneSearch(e.target.value)}
                                                     onClick={(e) => e.stopPropagation()}
@@ -137,7 +138,7 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                                             </div>
                                         </div>
                                         {filteredTimezones.length === 0 ? (
-                                            <div className="p-2 text-center text-gray-500">No timezones found</div>
+                                            <div className="p-2 mx-auto w-full text-center text-base-content/30">No timezones found</div>
                                         ) : (
                                             filteredTimezones.map((timezone) => (
                                                 <div 
