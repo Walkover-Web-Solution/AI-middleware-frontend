@@ -64,7 +64,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             service: service
         };
     });
-    console.log("bridgeApiKey", bridgeApiKey);
     useEffect(() => {
         if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
             if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
@@ -177,27 +176,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
         </>
     ), [bridgeType, modelType, params, modelName]);
 
-    const renderGuideView = useMemo(() => () => {
-        const guideComponents = {
-            api: <ApiGuide params={params} searchParams={searchParams} modelType={modelType} />,
-            batch: <BatchApiGuide params={params} searchParams={searchParams} />,
-            chatbot: <ChatbotGuide params={params} searchParams={searchParams} />,
-        };
-
-        return (
-            <div className="flex flex-col w-100 overflow-auto gap-3">
-                {bridgeType === 'chatbot' && <SlugNameInput params={params} searchParams={searchParams} />}
-                <h1 className="text-xl font-semibold">
-                    {bridgeType === 'api' ? 'API Configuration' :
-                        bridgeType === 'batch' ? 'Batch API Configuration' : 'Chatbot Configuration'}
-                </h1>
-                <div className="flex flex-col gap-4">
-                    {guideComponents[bridgeType]}
-                </div>
-            </div>
-        );
-    }, [bridgeType, params, modelType]);
-
     return (
         <div className="flex flex-col gap-3 relative mt-4 bg-base-100">
             <div>
@@ -235,7 +213,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     </div>}
                 </div>
             </div>}
-            {currentView === 'chatbot-config' && bridgeType === 'chatbot' ? renderChatbotConfigView() : currentView === 'guide' && currentView !== 'trigger' ? renderGuideView() : renderSetupView()}
+            {currentView === 'chatbot-config' && bridgeType === 'chatbot' ? renderChatbotConfigView() : renderSetupView()}
             {renderNeedHelp()}
         </div>
     );
