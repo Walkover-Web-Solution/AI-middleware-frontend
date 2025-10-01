@@ -33,7 +33,7 @@ function FunctionParameterModal({
   tool_name = "",
 
 }) {
-  const [toolName, setToolName] = useState((name==="Agent"||name==="orchestralAgent") ? tool_name : toolData?.title || toolData?.endpoint_name);
+  const [toolName, setToolName] = useState((name === "Agent" || name === "orchestralAgent") ? tool_name : toolData?.title || toolData?.endpoint_name);
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const dispatch = useDispatch();
@@ -42,7 +42,7 @@ function FunctionParameterModal({
   }));
   useEffect(() => {
     setToolName(name === "Agent" ? tool_name : toolData?.title || toolData?.endpoint_name);
-  }, [toolData,tool_name]);
+  }, [toolData, tool_name]);
   // Memoize properties to prevent unnecessary re-renders
   const properties = useMemo(() => function_details?.fields || {}, [function_details?.fields]);
 
@@ -74,7 +74,7 @@ function FunctionParameterModal({
     }
   }, [function_details]);
   useEffect(() => {
-    setToolName(name==="Agent"?tool_name : toolData?.title || toolData?.endpoint_name);
+    setToolName(name === "Agent" ? tool_name : toolData?.title || toolData?.endpoint_name);
   }, [tool_name]);
   useEffect(() => {
     // Only update if variables_path[functionName] actually changed
@@ -242,17 +242,17 @@ function FunctionParameterModal({
   }, [toolName, tool_name, dispatch, functionId]);
 
   const handleSaveData = useCallback(() => {
-    if (toolData?.description?.trim() != function_details?.description?.trim()||(((name === "Tool")||(name==="Pre Tool")) && toolData?.title?.trim() !== toolName?.trim())) {
+    if (toolData?.description?.trim() != function_details?.description?.trim() || (((name === "Tool") || (name === "Pre Tool")) && toolData?.title?.trim() !== toolName?.trim())) {
       handleUpdateFlow()
     }
 
-    if((name=== "Agent" && tool_name.trim() !== toolName.trim())){
+    if ((name === "Agent" && tool_name.trim() !== toolName.trim())) {
       handleToolNameChange()
     }
     handleSave()
     resetModalData()
     closeModal(Model_Name)
-  }, [toolData?.description, function_details?.description, toolName, tool_name, Model_Name,toolData,variablesPath]);
+  }, [toolData?.description, function_details?.description, toolName, tool_name, Model_Name, toolData, variablesPath]);
 
   // Reset the modal data to the original function_details
   const resetModalData = useCallback(() => {
@@ -439,7 +439,7 @@ function FunctionParameterModal({
       toast.error('Description cannot be empty');
       return;
     }
-    if(toolName.trim() === ""){
+    if (toolName.trim() === "") {
       toast.error("Agent name cannot be empty");
       return;
     }
@@ -450,7 +450,7 @@ function FunctionParameterModal({
           const { _id, description, ...dataToSend } = toolData;
           await dispatch(updateFuntionApiAction({
             function_id: functionId,
-            dataToSend: { ...dataToSend, description: flowResponse?.metadata?.description , title: flowResponse?.title , endpoint_name: flowResponse?.title }
+            dataToSend: { ...dataToSend, description: flowResponse?.metadata?.description, title: flowResponse?.title, endpoint_name: flowResponse?.title }
           }));
           setToolData(prev => ({ ...prev, description: flowResponse.metadata.description, title: flowResponse.title, endpoint_name: flowResponse.title }));
           toast.success('Description updated successfully');
@@ -468,41 +468,47 @@ function FunctionParameterModal({
   return (
     <Modal MODAL_ID={Model_Name}>
       <div className="modal-box w-11/12 max-w-6xl overflow-x-hidden text-sm">
-      <div className="flex flex-row justify-between">  
+        <div className="flex flex-row justify-between">
           <div className="flex flex-col mb-2">
-          <span className="text-lg font-bold mb-1 flex items-center">
-            {name} Name :
-            {name === "Orchestral Agent" ? tool_name : 
-            <textarea
-          className="font-bold min-h-[25px] ml-1 pl-1 text-xl outline-none resize-none leading-tight bg-transparent"
-          style={{
-            width: "30ch",
-            whiteSpace: "pre-wrap",
-            overflowWrap: "break-word",
-          }}
-              rows={1}
-              maxLength={30}
-              value={toolName}
-              onChange={(e) => { setToolName(e.target.value); setIsModified(true); }}
-            />
-            }
-          </span>
-          
-        </div>
-        <button onClick={() => setIsDescriptionEditing(true)} className="btn btn-xs btn-primary mt-1">
-              <PencilIcon size={14} /> Description
-            </button>
+            <span className="text-lg font-bold mb-1 flex items-center whitespace-nowrap">
+              {name} Name :
+              {name === "Orchestral Agent" ? (
+                tool_name
+              ) : (
+                <textarea
+                  className="font-bold min-h-[25px] ml-1 pl-1 text-xl outline-none resize-none leading-tight bg-transparent align-middle"
+                  style={{
+                    width: "50ch",
+                    whiteSpace: "nowrap",   
+                    overflow: "hidden",     
+                  }}
+                  rows={1}
+                  maxLength={30}
+                  value={toolName}
+                  onChange={(e) => {
+                    setToolName(e.target.value);
+                    setIsModified(true);
+                  }}
+                />
+              )}
+            </span>
+
+
+          </div>
+          <button onClick={() => setIsDescriptionEditing(true)} className="btn btn-xs btn-primary mt-1">
+            <PencilIcon size={14} /> Description
+          </button>
         </div>
         <div className="flex flex-row  mb-2">
           <span className="flex flex-row items-center gap-2">
             {(name === 'Tool' || name === 'Pre Tool') &&
-            <div className="flex flex-row gap-1">
-              <InfoIcon size={14} />
-              <span className="label-text-alt">
-                Function used in {(function_details?.bridge_ids || [])?.length}{" "}
-                bridges, changes may affect all bridges.
-              </span>
-            </div>
+              <div className="flex flex-row gap-1">
+                <InfoIcon size={14} />
+                <span className="label-text-alt">
+                  Function used in {(function_details?.bridge_ids || [])?.length}{" "}
+                  bridges, changes may affect all bridges.
+                </span>
+              </div>
             }
           </span>
           <div className="flex gap-2">
@@ -555,7 +561,7 @@ function FunctionParameterModal({
               </div>
 
             }
-           
+
 
 
           </div>
