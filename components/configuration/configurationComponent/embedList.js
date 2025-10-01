@@ -155,7 +155,6 @@ const EmbedList = ({ params, searchParams }) => {
       .map(id => byId.get(id))
       .filter(Boolean);
   }, [prebuiltToolsData, toolsVersionData]);
-  console.log("selectedPrebuiltTools", prebuiltToolsData);
   return (bridge_functions &&
     <div>
       <FunctionParameterModal
@@ -201,8 +200,8 @@ const EmbedList = ({ params, searchParams }) => {
                 toolsVersionData={toolsVersionData}
               />
             </div>
-
-            {bridgeFunctions.length > 0 && (
+             <div className="flex flex-col gap-2 w-full">
+             {bridgeFunctions.length > 0 && (
               <div className="flex flex-col gap-2 w-full">
                 <RenderEmbed bridgeFunctions={bridgeFunctions} integrationData={integrationData} getStatusClass={getStatusClass} handleOpenModal={handleOpenModal} embedToken={embedToken} params={params} name="function" handleRemoveEmbed={handleRemoveFunctionFromBridge} />
               </div>
@@ -210,13 +209,13 @@ const EmbedList = ({ params, searchParams }) => {
 
             {/* Render selected Prebuilt Tools below functions */}
             {selectedPrebuiltTools.length > 0 && (
-              <div className="flex flex-col gap-2 w-full mt-2">
+              <div className="flex flex-col gap-2 w-full">
                 {selectedPrebuiltTools.map((item) => {
                   const missingDesc = !item?.description;
                   return (
                     <div
                       key={item?.value}
-                      className={`flex w-full mt-2 flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${missingDesc ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
+                      className={`flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${missingDesc ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
                     >
                       <div className="p-2 w-full h-full flex flex-col justify-between">
                         <div>
@@ -237,7 +236,7 @@ const EmbedList = ({ params, searchParams }) => {
                           </p>
                         </div>
                       </div>
-                      <div className="dropdown dropdown-end z-high absolute right-1 top-1">
+                      <div className="dropdown dropdown-end z-low absolute right-1 top-1">
                         <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
                           <EllipsisVerticalIcon size={16} />
                         </div>
@@ -255,6 +254,7 @@ const EmbedList = ({ params, searchParams }) => {
                 })}
               </div>
             )}
+            </div>
           </>
         )}
       </div>
