@@ -251,7 +251,7 @@ function FunctionParameterModal({
     handleSave()
     resetModalData()
     closeModal(Model_Name)
-  }, [toolData?.description, function_details?.description, toolName, tool_name, Model_Name,toolData]);
+  }, [toolData?.description, function_details?.description, toolName, tool_name, Model_Name,toolData,variablesPath]);
 
   // Reset the modal data to the original function_details
   const resetModalData = useCallback(() => {
