@@ -156,6 +156,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   className="input input-bordered input-md focus:ring-1 ring-primary/40"
                   placeholder="Enter knowledge base name"
                   required
+                  maxLength={50}
                   disabled={isLoading}
                   key={selectedKnowledgeBase?._id}
                   defaultValue={selectedKnowledgeBase?.actual_name || ''}

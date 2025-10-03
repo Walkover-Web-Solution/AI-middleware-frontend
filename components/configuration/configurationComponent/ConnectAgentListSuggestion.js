@@ -34,8 +34,8 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
                 return (
                     <li key={bridge?._id} onClick={() => bridge?.published_version_id ? handleItemClick(bridge) : null}>
                         <div className={`flex justify-between items-center w-full ${!bridge?.published_version_id ? 'opacity-50' : ''}`}>
-                            <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
-                                {bridge?.name || 'Untitled'}
+                            <p className="overflow-hidden text-ellipsis whitespace-pre-wrap" title={bridge?.name?.length > 20 ? bridge?.name : ""}>
+                                {bridge?.name?.length > 20 ? `${bridge?.name.slice(0, 20)}...` : bridge?.name || 'Untitled'}
                             </p>
                             <div>
                                 {!bridge?.published_version_id ? (

@@ -95,7 +95,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                                 {GetFileTypeIcon(item?.source?.data?.type || item.source?.type, 16, 16)}
                                 <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
                                     <div className="tooltip" data-tip={item?.name?.length > 24 ? item?.name : ''}>
-                                        <span>{item?.name?.length > 24 ? `${item?.name.slice(0, 24)}...` : item?.name}</span>
+                                        <span>{item?.name?.length > 50 ? `${item?.name.slice(0, 50)}...` : item?.name}</span>
                                         <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!item?.description ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
                                             {!item?.description ? 'Description Required' : 'Active'}
                                         </span>
