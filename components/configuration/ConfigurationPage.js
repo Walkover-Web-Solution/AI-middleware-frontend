@@ -18,7 +18,6 @@ import ServiceDropdown from "./configurationComponent/serviceDropdown";
 import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 import GptMemory from "./configurationComponent/gptmemory";
-import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
 import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
 import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
@@ -202,7 +201,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
         <div className="flex flex-col gap-3 relative mt-4 bg-base-100">
             <div>
                 <BridgeNameInput params={params} searchParams={searchParams} />
-                <VersionDescriptionInput params={params} searchParams={searchParams} />
             </div>
             {((isEmbedUser && showConfigType) || !isEmbedUser) && <BridgeTypeToggle params={params} searchParams={searchParams} />}
             {<div className="absolute right-0 top-0">
