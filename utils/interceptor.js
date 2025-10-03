@@ -12,8 +12,10 @@ axios.interceptors.request.use(
         else{
             let token = sessionStorage.getItem("proxy_token") ? sessionStorage.getItem("proxy_token") : getFromCookies("proxy_token");
             config.headers['proxy_auth_token'] = token;
-            if (process.env.NEXT_PUBLIC_ENV === 'local')
-                config.headers['Authorization'] = getFromCookies("local_token");
+            const localToken = getFromCookies("local_token");
+            if (localToken) {
+                config.headers['Authorization'] = localToken;
+            }
         }
         return config;
     },
