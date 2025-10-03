@@ -1,3 +1,4 @@
+import InfoTooltip from '@/components/InfoTooltip';
 import PublishBridgeVersionModal from '@/components/modals/publishBridgeVersionModal';
 import VersionDescriptionModal from '@/components/modals/versionDescriptionModal';
 import Protected from '@/components/protected';
@@ -73,10 +74,12 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
                 <ul tabIndex={0} className="dropdown-content menu rounded-box z-high w-52 p-2 shadow bg-base-100">
                     {bridgeVersionsArray?.map((version, index) => (
                         <li key={version} onClick={() => handleVersionChange(version)} >
-                            <a className={`flex justify-between ${searchParams?.version === version ? 'active' : ''}`}>
-                                Version {index + 1}
-                                {version === publishedVersion && <span className="text-green-600 ml-1">●</span>}
-                            </a>
+                            <InfoTooltip tooltipContent={versionDescription}>
+                                <a className={`flex justify-between ${searchParams?.version === version ? 'active' : ''}`}>
+                                    Version {index + 1}
+                                    {version === publishedVersion && <span className="text-green-600 ml-1">●</span>}
+                                </a>
+                            </InfoTooltip>
                         </li>
                     ))}
                     <li>
