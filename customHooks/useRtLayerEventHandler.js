@@ -47,12 +47,12 @@ function useRtLayerEventHandler() {
           window.location.reload();
         };
         return (
-          <div className="mt-2 flex justify-end">
+          <div className="mt-2 flex justify-center">
             <button
               onClick={handleRefresh}
               className="btn btn-primary btn-sm"
             >
-              <RefreshIcon />
+              <RefreshIcon size={16}/>
               Refresh Page
             </button>
           </div>
