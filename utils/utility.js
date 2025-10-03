@@ -678,10 +678,22 @@ export function didCurrentTabInitiateUpdate(agentId) {
   if (typeof window === 'undefined') return false;
   
   try {
-    const initiated = sessionStorage.getItem('initiated_update_' + agentId);
-    if (initiated === 'true') {
-      sessionStorage.removeItem('initiated_update_' + agentId);
+    const lastInitiated = sessionStorage.getItem('last_initiated_update');
+    if (!lastInitiated) return false;
+    
+    const { agentId: lastAgentId, timestamp } = JSON.parse(lastInitiated);
+    const now = Date.now();
+    const timeWindow = 5000; // 5 seconds window for multiple events
+    
+    // Check if this agent was recently updated by current tab and within time window
+    if (String(lastAgentId) === String(agentId) && (now - timestamp) < timeWindow) {
       return true;
+    }
+    
+    // Clean up expired entries
+    if ((now - timestamp) >= timeWindow) {
+      sessionStorage.removeItem('last_initiated_update');
+      sessionStorage.removeItem('initiated_update_' + lastAgentId);
     }
     
     return false;
