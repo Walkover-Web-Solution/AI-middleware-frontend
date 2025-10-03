@@ -25,7 +25,8 @@ export const updateApikeyAction = (dataToSend) => async (dispatch) => {
     id: dataToSend.apikey_object_id, 
     name: dataToSend.name, 
     data: dataToSend.apikey, 
-    comment: dataToSend.comment 
+    comment: dataToSend.comment,
+    apikey_quota: dataToSend.apikey_quota 
   }));
   
   try {
@@ -37,7 +38,8 @@ export const updateApikeyAction = (dataToSend) => async (dispatch) => {
         id: dataToSend.apikey_object_id, 
         name: dataToSend.name, 
         data: response.data.apikey, 
-        comment: dataToSend.comment 
+        comment: dataToSend.comment,
+        apikey_quota: dataToSend.apikey_quota 
       }));
     }
     else{
