@@ -220,7 +220,7 @@ export const createApiAction = (org_id, dataFromEmbed) => async (dispatch) => {
 
 export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) => {
   try {
-    markUpdateInitiatedByCurrentTab(version_id?.version_id);
+    markUpdateInitiatedByCurrentTab(dataFromEmbed?.version_id);
     const data = await updateapi(bridge_id, dataFromEmbed);
     // dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
     dispatch(updateBridgeVersionReducer({ bridges: data?.data?.bridge }));
