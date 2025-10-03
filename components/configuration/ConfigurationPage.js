@@ -146,9 +146,11 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 <div className="w-full min-w-0 md:order-1">
                     <ModelDropdown params={params} searchParams={searchParams} />
                 </div>
-                <div className="w-full min-w-0 md:order-3">
-                    <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
-                </div>
+                {((!showDefaultApikeys && isEmbedUser )||!isEmbedUser) && (
+                    <div className="w-full min-w-0 md:order-3">
+                        <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
+                    </div>
+                )}
             </div>
             <AdvancedParameters params={params} searchParams={searchParams} />
             {modelType !== "image" && modelType !== 'embedding' && (
