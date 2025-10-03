@@ -46,7 +46,7 @@ const RenderEmbed = ({
                 <div className="flex items-center gap-2">
                   <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
                     <div className="tooltip" data-tip={title?.length > 24 ? title : ""}>
-                      <span>{title?.length > 24 ? `${title.slice(0, 24)}...` : title}</span>
+                      <span>{ title}</span>
                       <span
                         className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!(value?.description || value?.api_description || value?.short_description)
                           ? 'bg-red-100 text-red-700 border-red-200'
