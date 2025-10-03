@@ -209,8 +209,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     }, [reduxPrompt, showSuggestions, triggerSuggestions]);
 
     const handleKeyDown = useCallback((e) => {
-        // Disable Tab key when suggestions are showing
-        if ( e.key === 'Tab' && isPromptHelperOpen) {
+        if (e.key === 'Tab' && isPromptHelperOpen) {
             e.preventDefault();
             return;
         }
@@ -234,7 +233,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         } else if (e.key === 'Escape') {
             setShowSuggestions(false);
         }
-    }, [activeSuggestionIndex, showSuggestions]);
+    }, [activeSuggestionIndex, showSuggestions,isPromptHelperOpen]);
 
     const handleSuggestionClick = useCallback((suggestion) => {
         const textarea = textareaRef.current;
