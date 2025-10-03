@@ -209,6 +209,12 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     }, [reduxPrompt, showSuggestions, triggerSuggestions]);
 
     const handleKeyDown = useCallback((e) => {
+        // Disable Tab key when suggestions are showing
+        if ( e.key === 'Tab' && isPromptHelperOpen) {
+            e.preventDefault();
+            return;
+        }
+
         if (!showSuggestions || !suggestionListRef.current) return;
 
         const suggestionItems = suggestionListRef.current.querySelectorAll('.list-item');
@@ -335,9 +341,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                         >
                             <a className='flex flex-col items-start'>
                                 <span>+ Add New variable</span>
-                                {variablesKeyValue?.length === activeSuggestionIndex &&
-                                    <p className='text-xs'>Press Tab after writing key name</p>
-                                }
                             </a>
                         </li>
                     </div>
@@ -388,7 +391,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     if (service === "google" && serviceType === "chat") return null;
 
     return (
-        <div ref={promptTextAreaRef}>
+        <div ref={promptTextAreaRef} onKeyDown={handleKeyDown}>
             <div className="flex justify-between items-center mb-2">
                 <div className="label flex items-center gap-2">
                     <span className="label-text capitalize font-medium">Prompt</span>
