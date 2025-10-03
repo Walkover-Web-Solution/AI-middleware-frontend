@@ -209,8 +209,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     }, [reduxPrompt, showSuggestions, triggerSuggestions]);
 
     const handleKeyDown = useCallback((e) => {
-        // Disable Tab key when suggestions are showing
-        if ( e.key === 'Tab' && isPromptHelperOpen) {
+        if (e.key === 'Tab') {
             e.preventDefault();
             return;
         }
