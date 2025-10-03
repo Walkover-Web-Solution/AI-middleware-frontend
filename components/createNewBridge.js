@@ -229,13 +229,14 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
               {state.globalError}
             </div>
           )}
-
+          {((isEmbedUser &&showAgentType)||!isEmbedUser) &&
           <CreateBridgeCards
             selectedBridgeTypeCard={state.selectedBridgeTypeCard}
             handleBridgeTypeSelection={handleBridgeTypeSelection}
             validationErrors={state.validationErrors}
             isEmbedUser={isEmbedUser}
           />
+          }
 
           {/* Agent Purpose Section */}
           <div className="mt-4 md:mt-4">
