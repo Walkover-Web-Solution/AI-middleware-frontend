@@ -54,7 +54,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
 
     useEffect(() => {
           if (!bridge?.thread_id && initialThreadId) {
-              dispatch(setThreadIdForVersionReducer({
+            setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
                   bridgeId: params?.id,
                   versionId: searchParams?.version,
                   thread_id: initialThreadId,
@@ -525,7 +525,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
                            onResetThreadId={() => {
                                     const newId = generateRandomID();
                                     setThreadId(newId);
-                                    dispatch(setThreadIdForVersionReducer({
+                                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
                                         bridgeId: params?.id,
                                         versionId: searchParams?.version,
                                         thread_id: newId,

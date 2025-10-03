@@ -55,7 +55,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     // Ensure thread_id exists in Redux for this bridge/version on mount
     useEffect(() => {
         if (!bridge?.thread_id && initialThreadId) {
-            dispatch(setThreadIdForVersionReducer({
+            setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
                 bridgeId: params?.id,
                 versionId: searchParams?.version,
                 thread_id: initialThreadId,
@@ -540,7 +540,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                 onResetThreadId={() => {
                     const newId = generateRandomID();
                     setThreadId(newId);
-                    dispatch(setThreadIdForVersionReducer({
+                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
                         bridgeId: params?.id,
                         versionId: searchParams?.version,
                         thread_id: newId,

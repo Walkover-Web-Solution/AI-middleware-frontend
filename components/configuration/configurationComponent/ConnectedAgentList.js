@@ -21,7 +21,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     const [variablesPath, setVariablesPath] = useState({});
     const router = useRouter();
     let { connect_agents, shouldToolsShow, model, bridgeData, variables_path, bridges } = useCustomSelector((state) => {
-        const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || {}
+        const bridges = state?.bridgeReducer?.org?.[params?.org_id]?.orgs || []
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const modelReducer = state?.modelReducer?.serviceModels;
         const serviceName = versionData?.service;
