@@ -11,14 +11,13 @@ const ModelPreview = memo(({ hoveredModel, modelSpecs, dropdownRef }) => {
     // Calculate position relative to dropdown with viewport constraints
     const dropdownRect = dropdownRef.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
-    const previewHeight = Math.min(500, viewportHeight - 100); // Max 500px or viewport - 100px
     
     const previewStyle = {
         position: 'fixed',
-        top: Math.max(20, Math.min(dropdownRect.top, viewportHeight - previewHeight - 20)),
-        left: dropdownRect.left - 270, // Position to the left of dropdown
+        top: Math.max(20, dropdownRect?.top-100),
+        left: dropdownRect?.left - 270, // Position to the left of dropdown
         zIndex: 99999,
-        maxHeight: `${previewHeight}px`,
+        maxHeight: `${viewportHeight}px`,
         overflowY: 'auto'
     };
 
