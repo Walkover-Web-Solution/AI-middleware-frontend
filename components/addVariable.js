@@ -11,6 +11,7 @@ import { ONBOARDING_VIDEOS } from "@/utils/enums";
 import TutorialSuggestionToast from "./tutorialSuggestoinToast";
 import InfoTooltip from "./InfoTooltip";
 import Protected from "./protected";
+import { parameterTypes } from "@/jsonFiles/bridgeParameter";
 
 const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   const versionId = searchParams?.version;
@@ -29,6 +30,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Accordion state
   const [height, setHeight] = useState(0); // Dynamic height state
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const dispatch = useDispatch();
   const accordionContentRef = useRef(null); // Ref for the accordion content
   const isOpeningRef = useRef(false); // To track if the accordion is opening
@@ -40,7 +42,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   };
 
 
-  const updateVersionVariable = (updatedPairs) => {
+const updateVersionVariable = (updatedPairs) => {
     const filteredPairs = updatedPairs ? updatedPairs?.filter(pair =>
       prompt?.includes(`{{${pair?.key}}}`)
     )?.map(pair => ({
@@ -75,7 +77,8 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
       ...newVariables.map(variable => ({
         key: variable,
         value: '',
-        required: true
+        required: true,
+        type: 'string'
       }))
     ];
 
@@ -106,15 +109,17 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
 
   // Function to handle adding a new key-value pair
   const handleAddKeyValuePair = () => {
-    const newPair = { key: "", value: "", required: true };
+    const newPair = { key: "", value: "", required: true, type: 'string' };
     const isValid = areAllPairsValid(keyValuePairs);
     if (isValid) {
       setError(false);
+      setErrorMessage('');
       const updatedPairs = [...keyValuePairs, newPair];
       setKeyValuePairs(updatedPairs);
       dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
     } else {
       setError(true);
+      setErrorMessage('Please fill out all existing key-value pairs before adding a new one.');
     }
   };
 
@@ -127,35 +132,115 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
     // Reset error if after removal all remaining pairs are valid
     if (areAllPairsValid(updatedPairs)) {
       setError(false);
+      setErrorMessage('');
     }
   };
 
-  // Function to handle changes in key or value inputs
-  const handleKeyValueChange = (index, field, value) => {
+  // Helper: validate value against selected type and set specific error message
+  const isValueValidForType = (type, value) => {
+    if (value === undefined || value === null) return false;
+    const trimmed = String(value).trim();
+    switch (type) {
+      case 'number':
+        const isValidNumber = /^-?\d+(?:\.\d+)?$/.test(trimmed);
+        if (!isValidNumber) {
+          setErrorMessage(`Invalid number format. Please enter a valid number (e.g., 123, -45.67, 0.5)`);
+        }
+        return isValidNumber;
+      case 'boolean':
+        const isValidBoolean = ['true', 'false'].includes(trimmed.toLowerCase());
+        if (!isValidBoolean) {
+          setErrorMessage(`Invalid boolean format. Please enter 'true' or 'false'`);
+        }
+        return isValidBoolean;
+      case 'object':
+        try {
+          const parsed = JSON.parse(trimmed);
+          const isValidObject = typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
+          if (!isValidObject) {
+            setErrorMessage(`Invalid object format. Please enter a valid JSON object (e.g., {"key": "value"})`);
+          }
+          return isValidObject;
+        } catch (e) {
+          setErrorMessage(`Invalid JSON object format. Please enter a valid JSON object (e.g., {"key": "value"})`);
+          return false;
+        }
+      case 'array':
+        try {
+          const parsed = JSON.parse(trimmed);
+          const isValidArray = Array.isArray(parsed);
+          if (!isValidArray) {
+            setErrorMessage(`Invalid array format. Please enter a valid JSON array (e.g., ["item1", "item2"])`);
+          }
+          return isValidArray;
+        } catch (e) {
+          setErrorMessage(`Invalid JSON array format. Please enter a valid JSON array (e.g., ["item1", "item2"])`);
+          return false;
+        }
+      case 'string':
+      default:
+        return true;
+    }
+  };
+
+  const handleKeyValueChange = (index, field, value, saveInRedux = false) => {
     const updatedPairs = [...keyValuePairs];
     updatedPairs[index] = { ...updatedPairs[index], [field]: value };
     setKeyValuePairs(updatedPairs);
-
-    // Dispatch update if the current pair is valid
-    if (updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
+    
+    if (saveInRedux && updatedPairs[index].key.trim() && updatedPairs[index].value.trim()) {
+      // If changing value, validate against type before saving
+      if (field === 'value') {
+        const selectedType = updatedPairs[index]?.type || 'string';
+        const isValidTypeValue = isValueValidForType(selectedType, value);
+        if (!isValidTypeValue) {
+          setError(true);
+          return;
+        }
+      }
       dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
     }
 
+    if (saveInRedux) {
+      setError(false);
+      setErrorMessage('');
+    }
+  };
+
+
+  const handleTypeChange = (index, newType, saveInRedux = false) => {
+    const updatedPairs = [...keyValuePairs];
+    updatedPairs[index] = { ...updatedPairs[index], type: newType };
+    setKeyValuePairs(updatedPairs);
+    const currentValue = updatedPairs[index]?.value;
+    if (currentValue && currentValue.trim()) {
+      const isValidTypeValue = isValueValidForType(newType, currentValue);
+      if (!isValidTypeValue) {
+        setError(true);
+        return;
+      }
+    }
     setError(false);
+    setErrorMessage('');
+    dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
   };
 
   // Function to handle checkbox toggle
-  const handleCheckKeyValuePair = (index) => {
+  const handleCheckKeyValuePair = (index,saveInRedux = false) => {
     setError(false); // Reset error when a checkbox is toggled
+    setErrorMessage(''); // Reset error message when a checkbox is toggled
     const updatedPairs = [...keyValuePairs];
     updatedPairs[index] = {
       ...updatedPairs[index],
       required: !updatedPairs[index].required,
     };
     setKeyValuePairs(updatedPairs);
+    
+    if(saveInRedux){
     dispatch(updateVariables({ data: updatedPairs, bridgeId: params.id, versionId }));
     sendDataToParent("updated", { name: bridgeName, agent_id: params?.id, agent_version_id: versionId, variables: updatedPairs}, "Agent Version Updated")
     updateVersionVariable(updatedPairs)
+    }
   };
 
   // Function to format key-value pairs for the textarea
@@ -205,11 +290,14 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
       updateVersionVariable();
       if (areAllPairsValid(pairs)) {
         setError(false);
+        setErrorMessage('');
       } else {
         setError(true);
+        setErrorMessage('Please fill out all key-value pairs completely.');
       }
     } else {
       setError(true);
+      setErrorMessage('Please enter valid key-value pairs in the format: key: value');
     }
   };
 
@@ -320,7 +408,8 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
                       <InfoIcon className="w-4 h-4 text-base-content/70" />
                     </button>
                   </InfoTooltip>
-                  <div className="grid grid-cols-2 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
+                  <div className="grid grid-cols-3 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
+                    <span className="text-sm font-medium text-base-content/80">Type</span>
                     <span className="text-sm font-medium text-base-content/80">Key</span>
                     <span className="text-sm font-medium text-base-content/80">Value</span>
                   </div>
@@ -332,7 +421,27 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
                       className="checkbox checkbox-sm w-20"
                       checked={pair.required}
                       onChange={() => handleCheckKeyValuePair(index)}
+                      onBlur={(e) =>
+                        handleCheckKeyValuePair(index, true)
+                      }
                     />
+                      <select
+                      className="input input-bordered border-base-300 input-sm w-full"
+                      value={pair.type || ''}
+                      onChange={(e) =>
+                        handleTypeChange(index, e.target.value)
+                      }
+                    >
+                      <option value="" disabled>
+                        Select parameter type
+                      </option>
+                      {parameterTypes &&
+                        parameterTypes.map((type, index) => (
+                          type !== "boolean" && <option key={index} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                    </select>
                     <input
                       type="text"
                       className="input input-bordered border-base-300 input-sm w-full"
@@ -340,6 +449,9 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
                       value={pair?.key || ""}
                       onChange={(e) =>
                         handleKeyValueChange(index, "key", e.target.value)
+                      }
+                      onBlur={(e) =>
+                        handleKeyValueChange(index, "key", e.target.value, true)
                       }
                     />
                     <input
@@ -350,7 +462,9 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
                       onChange={(e) =>
                         handleKeyValueChange(index, "value", e.target.value)
                       }
-                      onBlur={() => updateVersionVariable()}
+                      onBlur={(e) =>
+                        handleKeyValueChange(index, "value", e.target.value, true)
+                      }
                     />
                     <button
                       className="text-red-500 hover:text-red-700 ml-2"
@@ -361,12 +475,12 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
                     </button>
                   </div>
                 ))}
-                {error === true && (
+                {error && (
                   <p className="text-red-400 text-sm">
-                    Please fill out all existing key-value pairs before adding a new one.
+                    {errorMessage || 'Please fill out all existing key-value pairs before adding a new one.'}
                   </p>
                 )}
-                {variablesKeyValue.length === 0 && (
+                {!variablesKeyValue.length && (
                   <p className="text-center text-lg font-semibold w-full">No Variables Found</p>
                 )}
                 <button
