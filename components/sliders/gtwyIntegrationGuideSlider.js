@@ -61,6 +61,14 @@ const CONFIG_SCHEMA = [
     section: "Interface Options",
   },
   {
+    key:"hideCreateManuallyButton",
+    type: "toggle",
+    label: "Hide Create Agent Manually Button",
+    description: "Display create agent manually button",
+    defaultValue: false,
+    section: "Interface Options",
+  },
+  {
     key: "hideAdvancedConfigurations",
     type: "toggle",
     label: "Hide Advanced Configurations",
@@ -69,10 +77,10 @@ const CONFIG_SCHEMA = [
     section: "Interface Options",
   },
   {
-    key: "hidePromptGuard",
+    key:"hidePreTool",
     type: "toggle",
-    label: "Hide Prompt Guard",
-    description: "Display prompt guard",
+    label: "Hide Pre Tool",
+    description: "Display pre tool",
     defaultValue: false,
     section: "Interface Options",
   },

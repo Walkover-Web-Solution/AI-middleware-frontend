@@ -14,6 +14,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from "../protected";
 import PublishVersionDataComparisonView from "../comparison/PublishVersionDataComparisonView";
 import { DIFFERNCE_DATA_DISPLAY_NAME, KEYS_TO_COMPARE } from "@/jsonFiles/bridgeParameter";
+import PromptSummaryModal from "./PromptSummaryModal";
 
 function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_description, isEmbedUser }) {
 
@@ -279,6 +280,28 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
               </button>
             </div>
           </div>
+
+          {/* Summary required alert */}
+          {(!bridge_summary || (typeof bridge_summary === 'string' && bridge_summary.trim().length === 0)) && (
+            <div className="alert alert-warning w-full flex justify-between bg-warning border border-warning/30 mb-4">
+              <div className="flex items-start gap-3 w-full">
+                <AlertTriangle className="h-5 w-5 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-medium">Summary required</h4>
+                  <p className="text-sm opacity-80">You need to add a prompt summary for this agent before publishing.</p>
+                </div>
+                <button
+                  className="btn btn-sm bg-base-200 flex justify-end btn-outline"
+                  onClick={() => {
+                    setAutoGenerateSummary(true);
+                    openModal(MODAL_TYPE.PROMPT_SUMMARY_PUBLISH);
+                  }}
+                >
+                  Generate Prompt Summary
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Warning Section */}
           {!showComparison && <div className="alert bg-base/70 mb-6">
@@ -554,6 +577,15 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       </div>
 
       <div className="modal-backdrop" onClick={handleCloseModal}></div>
+
+      {/* Prompt Summary Modal (mounted so we can open it on-demand) */}
+      <PromptSummaryModal 
+        modalType={MODAL_TYPE.PROMPT_SUMMARY_PUBLISH}
+        params={params} 
+        searchParams={searchParams} 
+        autoGenerateSummary={autoGenerateSummary}
+        setAutoGenerateSummary={setAutoGenerateSummary}
+      />
     </Modal>
   );
 }

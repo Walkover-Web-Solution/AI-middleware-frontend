@@ -1,5 +1,5 @@
-import { getApiKeyGuide, getGuardrailsTemplates, getTutorial } from "@/config";
-import { getApiKeyGuideData, getGuardrailsTemplatesData, getTutorialData } from "../reducer/flowDataReducer";
+import { getApiKeyGuide, getDescriptions, getGuardrailsTemplates, getTutorial } from "@/config";
+import { getApiKeyGuideData, getDescriptionsData, getGuardrailsTemplatesData, getTutorialData } from "../reducer/flowDataReducer";
 
 export const getTutorialDataAction = () => {
   return async (dispatch) => {
@@ -27,6 +27,17 @@ export const getGuardrailsTemplatesAction = () => {
     try {
       const data = await getGuardrailsTemplates();
       dispatch(getGuardrailsTemplatesData(data?.data?.SafetyChecksFunction));
+    } catch (error) {
+      console.error("Failed to fetch tutorial data:", error);
+    }
+  };
+};
+export const getDescriptionsAction = () => {
+  return async (dispatch) => {
+    try {
+      const data = await getDescriptions();
+      console.log(data,"data");
+      dispatch(getDescriptionsData(data.data));
     } catch (error) {
       console.error("Failed to fetch tutorial data:", error);
     }

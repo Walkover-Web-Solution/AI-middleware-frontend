@@ -22,7 +22,7 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction } from "@/store/action/flowDataAction";
+import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
 import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
@@ -55,6 +55,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
       dispatch(getTutorialDataAction()); 
       dispatch(getGuardrailsTemplatesAction());
       dispatch(userDetails());
+      dispatch(getDescriptionsAction());
     }
     if (pathName.endsWith("apikeys")&& !isEmbedUser) {
       dispatch(getApiKeyGuideAction()); 
@@ -416,8 +417,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser }) {
           </div>
 
           {/* Main Content Area */}
-          <div className={`flex-1 ${path.length > 4 ? 'ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
-            {/* Sticky Navbar */}
+          <div className={`flex-1 ${path.length > 4 ? 'ml-0  md:ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
               <Navbar resolvedParams={resolvedParams} />
             </div>
