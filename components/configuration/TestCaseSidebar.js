@@ -179,10 +179,12 @@ const TestCaseSidebar = ({ params, resolvedParams }) => {
 
                 {/* Test Preview */}
                 <div className="text-xs mb-2">
-                  <p className="truncate">
-                    <span className="font-medium">Expected:</span> {testCase.expected?.response || 'No input'}
+                  <p className="">
+                    <span className="font-bold">Expected:</span> {testCase.expected?.response || 'No input'}
                   </p>
-                  <p className="font-medium">Model Response: {testCase?.version_history?.[resolvedParams.version]?.[testCase?.version_history?.[resolvedParams.version].length - 1]?.model_output}</p>
+                  <p className="mt-1">
+                    <span className="font-bold">Model Response:</span> {testCase?.version_history?.[resolvedParams.version]?.[testCase?.version_history?.[resolvedParams.version].length - 1]?.model_output}
+                  </p>
                 </div>
 
                 {/* Expanded Details */}
@@ -285,7 +287,7 @@ const TestCaseSidebar = ({ params, resolvedParams }) => {
               <Clock className="w-4 h-4 mr-2 animate-spin" />
               <span>Running {runningTests.size}/{testCaseArray.length} Tests...</span>
             </div>
-          ) : 'Run All Test Batches'}
+          ) : 'Run All Test Cases'}
         </button>
       </div>
     </div>
