@@ -200,6 +200,16 @@ export const bridgeReducer = createSlice({
         state.allBridgesMap[bridgeId].variables = data;
       }
     },
+    setThreadIdForVersionReducer: (state, action) => {
+      const { bridgeId, versionId, thread_id } = action.payload;
+      if (!state.bridgeVersionMapping[bridgeId]) {
+        state.bridgeVersionMapping[bridgeId] = {};
+      }
+      if (!state.bridgeVersionMapping[bridgeId][versionId]) {
+        state.bridgeVersionMapping[bridgeId][versionId] = {};
+      }
+      state.bridgeVersionMapping[bridgeId][versionId].thread_id = thread_id;
+    },
     publishBrigeVersionReducer: (state, action) => {
       const { bridgeId = null, versionId = null, orgId = null } = action.payload;
       const publishedVersionData = state.bridgeVersionMapping[bridgeId][versionId];
@@ -347,6 +357,7 @@ export const {
   webhookURLForBatchAPIReducer,
   getPrebuiltToolsReducer, 
   updateAllBridgeReducerAgentVariable,
+  setThreadIdForVersionReducer,
   setIsFocusReducer,
   apikeyRollBackReducer,
   backupApiKeysReducer

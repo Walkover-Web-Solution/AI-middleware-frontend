@@ -10,7 +10,7 @@ import ResponseStyleDropdown from './responseStyleDropdown';
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 import PromptHelper from '../../PromptHelper';
-import { setIsFocusReducer } from '@/store/reducer/bridgeReducer';
+import { setIsFocusReducer, setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 
 const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbedUser, hidePromptGuard }) => {
@@ -41,12 +41,25 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     // Debounce timer ref
     const debounceTimerRef = useRef(null);
 
-    const thread_id = useMemo(() => generateRandomID(), []);
+    const initialThreadId = bridge?.thread_id || generateRandomID();
+    const [thread_id, setThreadId] = useState(initialThreadId);
     const dispatch = useDispatch();
 
     useEffect(() => {
         dispatch(setIsFocusReducer(isPromptHelperOpen));
     }, [isPromptHelperOpen, dispatch]);
+
+    // Ensure thread_id exists in Redux for this bridge/version on mount
+    useEffect(() => {
+        if (!bridge?.thread_id && initialThreadId) {
+            setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                bridgeId: params?.id,
+                versionId: searchParams?.version,
+                thread_id: initialThreadId,
+            }));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -519,6 +532,15 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                 messages={messages}
                 setMessages={setMessages}
                 thread_id={thread_id}
+                onResetThreadId={() => {
+                    const newId = generateRandomID();
+                    setThreadId(newId);
+                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                        bridgeId: params?.id,
+                        versionId: searchParams?.version,
+                        thread_id: newId,
+                    }));
+                }}
                 prompt={prompt}
                 hasUnsavedChanges={hasUnsavedChanges}
                 setHasUnsavedChanges={setHasUnsavedChanges}

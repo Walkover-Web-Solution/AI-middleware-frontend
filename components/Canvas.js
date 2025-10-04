@@ -11,7 +11,8 @@ function Canvas({
   messages, 
   setMessages, 
   handleApplyOptimizedPrompt = () => {} ,
-  label = "prompt"
+  label = "prompt",
+  onResetThreadId = () => {}
 }) {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -20,6 +21,7 @@ function Canvas({
   const [loading, setLoading] = useState(false);
   const [appliedMessages, setAppliedMessages] = useState(new Set());
   const [copiedMessageId, setCopiedMessageId] = useState(null);
+  
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -32,6 +34,8 @@ function Canvas({
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
+    // Notify parent to reset thread id used by backend session
+    onResetThreadId();
   };
 
   const handleApply = (message) => {
