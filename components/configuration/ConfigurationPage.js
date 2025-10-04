@@ -29,7 +29,7 @@ import Protected from "../protected";
 import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
 import RecommendedModal from "./configurationComponent/RecommendedModal";
 
-const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef, searchParams, hidePreTool }) => {
+const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef, searchParams }) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
