@@ -181,8 +181,8 @@ export default function FlowsPage({ params, isEmbedUser }) {
             <div className="flex-1 relative">
               <input
                 type="text"
-                placeholder={`Search Flows...`}
-                className={`input input-bor0dered w-[60%] ml-3 mb-3 border border-base-content/50`}
+                placeholder={`Search Flows by Name`}
+                className={`input input-bor0dered w-[60%]  mb-3 border border-base-content/50`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

@@ -29,12 +29,12 @@ import Protected from "../protected";
 import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
 import RecommendedModal from "./configurationComponent/RecommendedModal";
 
-const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef, searchParams }) => {
+const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef, searchParams, hidePreTool }) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
-
-    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, hidePromptGuard, hideAdvancedParameters, hideAdvancedConfigurations, service } = useCustomSelector((state) => {
+    
+    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, hideAdvancedParameters, hideAdvancedConfigurations, service } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const service = versionData?.service;
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -57,10 +57,10 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             bridge_functions: versionData?.function_ids || [],
             connect_agents: versionData?.connected_agents || {},
             knowbaseVersionData: versionData?.doc_ids || [],
-            hidePromptGuard: state.userDetailsReducer.userDetails.hidePromptGuard,
             hideAdvancedParameters: state.userDetailsReducer.userDetails.hideAdvancedParameters,
             hideAdvancedConfigurations: state.userDetailsReducer.userDetails.hideAdvancedConfigurations,
-            service: service
+            service: service,
+            hidePreTool: state.userDetailsReducer.userDetails.hidePreTool,
         };
     });
     useEffect(() => {
@@ -145,13 +145,14 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     // Helper function to render non-image model components
     const renderNonImageComponents = () => (
         <>
+        {(!hidePreTool &&isEmbedUser) || !isEmbedUser &&(
             <PreEmbedList params={params} searchParams={searchParams} />
+        )}
             <InputConfigComponent 
                 params={params} 
                 searchParams={searchParams} 
                 promptTextAreaRef={promptTextAreaRef} 
                 isEmbedUser={isEmbedUser} 
-                hidePromptGuard={hidePromptGuard} 
             />
             {shouldToolsShow ? (
                 <>

@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import Modal from '../UI/Modal';
 
-const PromptSummaryModal = ({ params, searchParams, autoGenerateSummary = false, setAutoGenerateSummary=()=>{} }) => {
+const PromptSummaryModal = ({ modalType, params, searchParams, autoGenerateSummary = false, setAutoGenerateSummary=()=>{} }) => {
     const dispatch = useDispatch();
     const { bridge_summary, prompt } = useCustomSelector((state) => ({
         bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
@@ -50,7 +50,7 @@ const PromptSummaryModal = ({ params, searchParams, autoGenerateSummary = false,
         }
     }, [dispatch, params, prompt, searchParams]);
     const handleClose=()=>{
-        closeModal(MODAL_TYPE.PROMPT_SUMMARY); 
+        closeModal(modalType); 
         setErrorMessage("");
         setSummary(bridge_summary)
     }
@@ -63,7 +63,7 @@ const PromptSummaryModal = ({ params, searchParams, autoGenerateSummary = false,
                 toast.success('Summary updated successfully');
             }
         });
-        closeModal(MODAL_TYPE.PROMPT_SUMMARY);
+        closeModal(modalType);
         setIsEditing(false);
     }, [dispatch, params.id, summary]);
 
@@ -98,21 +98,21 @@ const PromptSummaryModal = ({ params, searchParams, autoGenerateSummary = false,
     );
 
     return (
-        <Modal MODAL_ID={MODAL_TYPE.PROMPT_SUMMARY}>
+        <Modal MODAL_ID={modalType}>
             <div className="modal-box w-11/12 max-w-5xl">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-lg">Prompt Summary</h3>
+                    {!autoGenerateSummary && (
                     <button
                         className={`btn btn-ghost btn-sm ${isGeneratingSummary ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={handleGenerateSummary}
                         disabled={isGeneratingSummary}
                     >   
-                    {!autoGenerateSummary && (
                         <span className="capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                             {isGeneratingSummary ? 'Generating Summary...' : 'Generate New Summary'}
                         </span>
-                    )}
                     </button>
+                    )}
                 </div>
                 {errorMessage && <span className="text-red-500">{errorMessage}</span>}
                 <div className="space-y-2">
@@ -121,7 +121,7 @@ const PromptSummaryModal = ({ params, searchParams, autoGenerateSummary = false,
                     ) : summary ? (
                         renderSummaryViewer()
                     ) : (
-                        autoGenerateSummary ? (
+                        autoGenerateSummary && prompt.trim() !== "" ? (
                             <div className="bg-base-200 p-4 rounded-lg">
                                 <p className="text-base-content text-center">generating summary...</p>
                             </div>

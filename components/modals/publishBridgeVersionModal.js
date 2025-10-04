@@ -431,18 +431,18 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
 
           {/* Summary required alert */}
           {(!bridge_summary || (typeof bridge_summary === 'string' && bridge_summary.trim().length === 0)) && (
-            <div className="alert alert-warning bg-warning border border-warning/30 mb-4">
+            <div className="alert alert-warning w-full flex justify-between bg-warning border border-warning/30 mb-4">
               <div className="flex items-start gap-3 w-full">
                 <AlertTriangle className="h-5 w-5 mt-0.5" />
                 <div className="flex-1">
                   <h4 className="font-medium">Summary required</h4>
-                  <p className="text-sm opacity-80">You need to add a prompt summary for this agent before publishing. This helps users understand what the agent does.</p>
+                  <p className="text-sm opacity-80">You need to add a prompt summary for this agent before publishing.</p>
                 </div>
                 <button
-                  className="btn btn-sm bg-base-200 btn-outline"
+                  className="btn btn-sm bg-base-200 flex justify-end btn-outline"
                   onClick={() => {
                     setAutoGenerateSummary(true);
-                    openModal(MODAL_TYPE.PROMPT_SUMMARY);
+                    openModal(MODAL_TYPE.PROMPT_SUMMARY_PUBLISH);
                   }}
                 >
                   Generate Prompt Summary
@@ -824,6 +824,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
 
       {/* Prompt Summary Modal (mounted so we can open it on-demand) */}
       <PromptSummaryModal 
+        modalType={MODAL_TYPE.PROMPT_SUMMARY_PUBLISH}
         params={params} 
         searchParams={searchParams} 
         autoGenerateSummary={autoGenerateSummary}
