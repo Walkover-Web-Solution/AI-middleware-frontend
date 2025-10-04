@@ -19,7 +19,7 @@ const PageHeader = ({ title, description, docLink }) => {
           {description}
           <SmartLink 
            href={docLink}>
-            <span className="inline-flex mb-4 ml-2 items-center gap-2 text-sm text-blue-500 hover:text-blue-600 transition-colors font-medium group">
+            <span className="inline-flex mb-4 ml-1 items-center gap-2 text-sm text-blue-500 hover:text-blue-600 transition-colors font-medium group">
               Learn more <ExternalLinkIcon size={16} />
             </span>
           </SmartLink>

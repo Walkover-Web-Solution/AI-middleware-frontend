@@ -13,7 +13,7 @@ import PromptHelper from '../../PromptHelper';
 import { setIsFocusReducer, setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 
-const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbedUser, hidePromptGuard }) => {
+const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbedUser }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type || "",
@@ -426,7 +426,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                     className="label cursor-pointer gap-1 sm:gap-2"
                 >
                     <button
-                        className={`btn text-xs sm:text-sm btn-sm ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
+                        className={`btn btn-sm ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
                         onClick={handleSavePrompt}
                         disabled={!hasUnsavedChanges || prompt.trim() === reduxPrompt.trim()}
                     >
@@ -461,7 +461,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                     onChange={handlePromptChange}
                     onFocus={() => {
                         if (!isPromptHelperOpen) {
-                                setIsPromptHelperOpen(true);
+                                    setIsPromptHelperOpen(true);
                             if (typeof window.closeTechDoc === 'function') {
                                 window.closeTechDoc();
                             }
@@ -521,7 +521,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             </div>
 
             <Diff_Modal oldContent={oldContent} newContent={newContent} />
-            <PromptSummaryModal params={params} searchParams={searchParams} />
+            <PromptSummaryModal modalType={MODAL_TYPE.PROMPT_SUMMARY} params={params} searchParams={searchParams} />
 
             <PromptHelper
                 isVisible={isPromptHelperOpen && !isMobileView}

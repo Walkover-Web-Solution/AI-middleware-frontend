@@ -1077,6 +1077,15 @@ export const getApiKeyGuide =async ()=>{
     throw new Error(error);
   }
 }
+export const getDescriptions =async()=>{
+   try{
+    const response=await axios.get("https://flow.sokt.io/func/scriPqFeiEKa")
+    return response;
+   }
+   catch(error){
+    throw new Error(error);
+   }
+}
 export const getGuardrailsTemplates=async()=>{
   try {
     const response=await axios.get("https://flow.sokt.io/func/scriKh8LMVKV");

@@ -18,6 +18,7 @@ import { use, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import SearchItems from "@/components/UI/SearchItems";
+import AgentEmptyState from "@/components/AgentEmptyState";
 
 export const runtime = 'edge';
 
@@ -26,7 +27,7 @@ function Home({ params, isEmbedUser }) {
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation } = useCustomSelector((state) => {
+  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};
     const user = state.userDetailsReducer.userDetails
     return {
@@ -34,6 +35,7 @@ function Home({ params, isEmbedUser }) {
       averageResponseTime: orgData.average_response_time || [],
       isLoading: state.bridgeReducer.loading,
       isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
+      descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
     };
   });
   const [filterBridges,setFilterBridges]=useState(allBridges);
@@ -53,7 +55,7 @@ function Home({ params, isEmbedUser }) {
   const UnArchivedBridges = filteredUnArchivedBridges?.filter((item) => item.status === 1 || item.status === undefined).map((item) => ({
     _id: item._id,
     model: item.configuration?.model || "",
-    name: <div className="flex gap-3">
+    name: <div className="flex gap-3 items-center">
       <div className="flex gap-2 items-center">
         {getIconOfService(item.service, 30, 30)}
       </div>
@@ -68,11 +70,7 @@ function Home({ params, isEmbedUser }) {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="opacity-60 text-xs" title={item.slugName}>
-              {item?.slugName || ""}
-            </p>
-          </div>
+          
         </div>
       </div>
     </div>,
@@ -205,15 +203,7 @@ function Home({ params, isEmbedUser }) {
         <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
           <div className="w-full">
             {allBridges.length === 0 ? (
-              <div className="text-center w-full h-screen flex justify-center items-center py-10">
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className="w-16 h-16 text-primary">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <p className="text-lg font-semibold text-base-content">Create Your First Agent</p>
-                  <button className="btn mt-2 btn-primary" onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
-                </div>
-              </div>
+              <AgentEmptyState />
             ) : (
               <div className="flex flex-col lg:mx-0">
                 <div className="px-2 pt-4">
@@ -221,21 +211,22 @@ function Home({ params, isEmbedUser }) {
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
                       <PageHeader
                         title="Agents"
-                        description="Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."
+                        description={descriptions?.Agents || "Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."}
                         docLink="https://gtwy.ai/blogs/features/bridge"
                         isEmbedUser={isEmbedUser}
                       />
-                      <div className="flex-shrink-0 mt-4 sm:mt-0">
-                        <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
-                      </div>
+                      
                     </div>
                   </MainLayout>
                   
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
+                  <div className="flex flex-row gap-4 justify-between ">
                     <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
+                    <div className="mr-2">
+                        <button className="btn btn-primary " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
+                      </div>
                   </div>
                 </div>
-
+                
                 <CustomTable 
                   data={UnArchivedBridges} 
                   columnsToShow={['name', 'model', 'totalTokens', 'averageResponseTime']} 

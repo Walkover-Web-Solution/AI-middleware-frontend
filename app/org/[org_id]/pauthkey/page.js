@@ -23,11 +23,12 @@ export const runtime = 'edge';
 function Page({ params }) {
   const resolvedParams = use(params);
   const dispatch = useDispatch();
-  const { authData, isFirstPauthCreation, } = useCustomSelector((state) => {
+  const { authData, isFirstPauthCreation, descriptions } = useCustomSelector((state) => {
     const user = state.userDetailsReducer.userDetails || [];
     return {
       authData: state?.authDataReducer?.authData || [],
       isFirstPauthCreation: user?.meta?.onboarding?.PauthKey,
+      descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
     };
   });
   const [filterPauthKeys, setFilterPauthKeys] = useState(authData);
@@ -142,20 +143,25 @@ const maskAuthKey = (authkey) => {
             flagKey="PauthKey"
           />
         )}
+        <div className="px-2">
         <MainLayout>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-2 pt-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full pt-4">
             <PageHeader
               title="PauthKey"
-              description="A unique key used to validate API requests for sending and receiving messages securely."
+              description={descriptions?.['Pauthkey'] || "A unique key used to validate API requests for sending and receiving messages securely."}
               docLink="https://gtwy.ai/blogs/features/pauthkey"
             />
-            <div className="flex-shrink-0 mt-4 sm:mt-0">
-              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New Pauth Key</button>
-            </div>
+           
           </div>
         </MainLayout>
-        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="Pauth keys"/>
+        <div className="flex flex-row gap-4 justify-between ">
 
+        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="PauthKey"/>
+        <div className="flex-shrink-0 mr-2">
+              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New PauthKey</button>
+            </div>
+            </div>
+         </div>
         {isCreating ? (
           <div className="flex justify-center items-center h-64">
             <LoadingSpinner />
@@ -184,7 +190,7 @@ const maskAuthKey = (authkey) => {
         className="modal modal-bottom sm:modal-middle"
       >
         <div className="modal-box">
-          <h3 className="font-bold text-lg mb-2">Create New Auth</h3>
+          <h3 className="font-bold text-lg mb-2">Create New PauthKey</h3>
           <label className="input input-bordered flex items-center gap-2">
             Name{RequiredItem()} :
             <input

@@ -30,99 +30,99 @@ function getStatusClass(status) {
 };
 
 const EmbedList = ({ params, searchParams }) => {
-  const [functionId, setFunctionId] = useState(null);
-  const [functionData, setfunctionData] = useState({});
-  const [toolData, setToolData] = useState({});
-  const [function_name, setFunctionName] = useState("");
-  const [variablesPath, setVariablesPath] = useState({});
-  const dispatch = useDispatch();
+    const [functionId, setFunctionId] = useState(null);
+    const [functionData, setfunctionData] = useState({});
+    const [toolData, setToolData] = useState({});
+    const [function_name, setFunctionName] = useState("");
+    const [variablesPath, setVariablesPath] = useState({});
+    const dispatch = useDispatch();
   const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData } = useCustomSelector((state) => {
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const orgData = state?.bridgeReducer?.org?.[params?.org_id];
-    const modelReducer = state?.modelReducer?.serviceModels;
-    const serviceName = versionData?.service;
-    const modelTypeName = versionData?.configuration?.type?.toLowerCase();
-    const modelName = versionData?.configuration?.model;
-    return {
-      integrationData: orgData?.integrationData || {},
-      function_data: orgData?.functionData || {},
-      bridge_functions: versionData?.function_ids || [],
-      modelType: modelTypeName,
-      model: modelName,
-      shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
-      embedToken: orgData?.embed_token,
-      variables_path: versionData?.variables_path || {},
+        const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+        const orgData = state?.bridgeReducer?.org?.[params?.org_id];
+        const modelReducer = state?.modelReducer?.serviceModels;
+        const serviceName = versionData?.service;
+        const modelTypeName = versionData?.configuration?.type?.toLowerCase();
+        const modelName = versionData?.configuration?.model;
+        return {
+            integrationData: orgData?.integrationData || {},
+            function_data: orgData?.functionData || {},
+            bridge_functions: versionData?.function_ids || [],
+            modelType: modelTypeName,
+            model: modelName,
+            shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
+            embedToken: orgData?.embed_token,
+            variables_path: versionData?.variables_path || {},
       prebuiltToolsData: state?.bridgeReducer?.prebuiltTools,
       toolsVersionData: versionData?.built_in_tools,
-    };
-  });
-
-  const handleOpenModal = (functionId) => {
-    setFunctionId(functionId);
-    const fn = function_data?.[functionId];
-    setfunctionData(fn);
-    setToolData(fn);
-    const fnName = fn?.function_name || fn?.endpoint;
-    setFunctionName(fnName);
-    setVariablesPath(variables_path[fnName] || {});
-    openModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL)
-
-}
-
-  const bridgeFunctions = useMemo(() => bridge_functions.map((id) => function_data?.[id]), [bridge_functions, function_data]);
-  const handleSelectFunction = (functionId) => {
-    if (functionId) {
-      dispatch(updateBridgeVersionAction({
-        bridgeId: params.id,
-        versionId: searchParams?.version,
-        dataToSend: {
-          functionData: {
-            function_id: functionId,
-            function_operation: "1"
-          }
-        }
-      }))
-    }
-  };
-
-  const handleRemoveFunctionFromBridge = (id,name) => {
-    dispatch(
-      updateBridgeVersionAction({
-        bridgeId: params.id,
-        versionId: searchParams?.version,
-        dataToSend: {
-          functionData: {
-            function_id: id,
-            function_name: name,
-          },
-        },
-      })
-    ).then(() => {
-      closeModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL);
+        };
     });
-  };
 
-  const handleSaveFunctionData = () => {
-    if (!isEqual(toolData, functionData)) {
-      const { _id, ...dataToSend } = toolData;
-      dispatch(
-        updateFuntionApiAction({
-          function_id: functionId,
-          dataToSend: dataToSend,
-        })
-      );
+    const handleOpenModal = (functionId) => {
+        setFunctionId(functionId);
+        const fn = function_data?.[functionId];
+        setfunctionData(fn);
+        setToolData(fn);
+        const fnName = fn?.function_name || fn?.endpoint;
+        setFunctionName(fnName);
+        setVariablesPath(variables_path[fnName] || {});
+        openModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL)
+
+    }
+
+    const bridgeFunctions = useMemo(() => bridge_functions.map((id) => function_data?.[id]), [bridge_functions, function_data]);
+    const handleSelectFunction = (functionId) => {
+        if (functionId) {
+            dispatch(updateBridgeVersionAction({
+                bridgeId: params.id,
+                versionId: searchParams?.version,
+                dataToSend: {
+                    functionData: {
+                        function_id: functionId,
+                        function_operation: "1"
+                    }
+                }
+            }))
+        }
+    };
+
+    const handleRemoveFunctionFromBridge = (id,name) => {
+        dispatch(
+            updateBridgeVersionAction({
+                bridgeId: params.id,
+                versionId: searchParams?.version,
+                dataToSend: {
+                    functionData: {
+                        function_id: id,
+                        function_name: name,
+                    },
+                },
+            })
+        ).then(() => {
+            closeModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL);
+        });
+    };
+
+    const handleSaveFunctionData = () => {
+        if (!isEqual(toolData, functionData)) {
+            const { _id, ...dataToSend } = toolData;
+            dispatch(
+                updateFuntionApiAction({
+                    function_id: functionId,
+                    dataToSend: dataToSend,
+                })
+            );
       setToolData("");
-    }
-    if (!isEqual(variablesPath, variables_path[function_name])) {
-      dispatch(
-        updateBridgeVersionAction({
-          bridgeId: params.id,
-          versionId: searchParams?.version,
-          dataToSend: { variables_path: { [function_name]: variablesPath } },
-        })
-      );
-    }
-  };
+        }
+        if (!isEqual(variablesPath, variables_path[function_name])) {
+            dispatch(
+                updateBridgeVersionAction({
+                    bridgeId: params.id,
+                    versionId: searchParams?.version,
+                    dataToSend: { variables_path: { [function_name]: variablesPath } },
+                })
+            );
+        }
+    };
 
   // Handle adding a prebuilt tool into built_in_tools from the Tools dropdown
   const handleAddPrebuiltTool = (item) => {
@@ -174,18 +174,34 @@ const EmbedList = ({ params, searchParams }) => {
       <div className="label flex-col items-start  w-full p-0">
         {shouldToolsShow && (
           <>
-            <div className="dropdown dropdown-bottom w-full flex items-center">
-              <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
+            <div className="dropdown dropdown-right w-full flex items-center">
+                            {bridgeFunctions?.length>0?(
+                                <>
+                  <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
                 <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
               </InfoTooltip>
               <button
                 tabIndex={0}
-                className="ml-auto flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
+                className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
                 disabled={!shouldToolsShow}
               >
                 <AddIcon className="w-2 h-2" />
                 <span className="text-xs font-medium">Add</span>
               </button>
+                            </>
+                            ):(
+                                <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
+                            
+                        
+                                <button
+                                    tabIndex={0}
+                                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
+                                >
+                                    <AddIcon className="w-2 h-2" />
+                                    <p className="label-text text-sm whitespace-nowrap">Tool</p>
+                                </button>
+                                </InfoTooltip>
+                            )}
               <EmbedListSuggestionDropdownMenu
                 name={"Function"}
                 params={params}
@@ -215,7 +231,7 @@ const EmbedList = ({ params, searchParams }) => {
                   return (
                     <div
                       key={item?.value}
-                      className={`flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${missingDesc ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
+                      className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${missingDesc ? 'border-red-600' : ''} hover:bg-base-200 transition-colors duration-200`}
                     >
                       <div className="p-2 w-full h-full flex flex-col justify-between">
                         <div>
@@ -236,19 +252,20 @@ const EmbedList = ({ params, searchParams }) => {
                           </p>
                         </div>
                       </div>
-                      <div className="dropdown dropdown-end z-low absolute right-1 top-1">
-                        <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
-                          <EllipsisVerticalIcon size={16} />
-                        </div>
-                        <ul tabIndex={0} className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-44 border border-base-300">
-                          <li>
-                            <a onClick={(e) => { e.stopPropagation(); handleDeletePrebuiltTool(item); }} className="text-sm text-error">
-                              <TrashIcon size={16} />
-                              Remove
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
+                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+                                  
+                                   <button
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       handleDeletePrebuiltTool(item)
+                                     }}
+                                     className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
+                                     title="Remove"
+                                   >
+                                     <TrashIcon size={16} />
+                                   </button>
+                                 </div>
+                     
                     </div>
                   );
                 })}

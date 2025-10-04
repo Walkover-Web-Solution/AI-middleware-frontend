@@ -398,9 +398,10 @@ function Page({ params }) {
   const FACTOR_OPTIONS = ['Bridges', 'API Keys', 'Models'];
   const EXTENDED_TIME_RANGE_OPTIONS = [...TIME_RANGE_OPTIONS, 'Custom Range'];
 
-  const { allBridges, apikeyData } = useCustomSelector((state) => ({
+  const { allBridges, apikeyData, descriptions } = useCustomSelector((state) => ({
     allBridges: state.bridgeReducer.org[orgId]?.orgs || [],
-    apikeyData: state?.bridgeReducer?.apikeys[orgId] || []
+    apikeyData: state?.bridgeReducer?.apikeys[orgId] || [],
+    descriptions: state.flowDataReducer?.flowData?.descriptionsData?.descriptions||{},
   }));
 
   const updateURLParams = (newParams) => {
@@ -581,13 +582,13 @@ function Page({ params }) {
   };
 
   const totalCost = rawData.reduce((sum, item) => sum + item.totalCost, 0);
-
+  
   return (
     <div className="p-10 min-h-screen">
       {/* Page Header */}
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-base-content">Metrics Dashboard</h1>
-        <p className="text-base-content">Monitor your application's key metrics at a glance.</p>
+        <p className="text-base-content">{descriptions?.['Metrics'] || "Monitor your application's key metrics at a glance."}</p>
       </header>
 
       {/* Filters Card */}
