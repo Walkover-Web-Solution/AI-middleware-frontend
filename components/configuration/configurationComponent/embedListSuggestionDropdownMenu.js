@@ -6,9 +6,10 @@ import { getStatusClass } from '@/utils/utility';
 import { current } from '@reduxjs/toolkit';
 import { InfoIcon, AddIcon } from '@/components/Icons';
 import React, { useMemo, useState } from 'react';
-import InfoTooltip from '@/components/InfoTooltip';
+import { GetPreBuiltToolTypeIcon } from '@/utils/utility';
+import { truncate } from '@/components/historyPageComponents/assistFile';
 
-function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, connectedFunctions = [], shouldToolsShow, modelName }) {
+function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreateFunction = false, onSelect = () => { }, onSelectPrebuiltTool = () => {}, connectedFunctions = [], shouldToolsShow, modelName,prebuiltToolsData,toolsVersionData }) {
     const [tutorialState, setTutorialState] = useState({
         showTutorial: false,
         showSuggestion: false
@@ -23,7 +24,6 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
             function_data: orgData.functionData,
             embedToken: orgData.embed_token,
             isFirstFunction: currentUser?.meta?.onboarding?.FunctionCreation,
-            
         };
     });
     const handleTutorial = () => {
@@ -40,6 +40,9 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
 
     const handleItemClick = (id) => {
         onSelect(id); // Assuming onSelect is a function you've defined elsewhere
+    };
+    const handlePrebuiltToolClick = (tool) => {
+        onSelectPrebuiltTool(tool);
     };
     const renderEmbedSuggestions = useMemo(() => (
         function_data && (Object.values(function_data))
@@ -85,6 +88,13 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
              }
              )
     ), [integrationData, function_data, searchQuery, getStatusClass, connectedFunctions, searchParams?.version]);
+
+    const availablePrebuiltTools = useMemo(() => {
+        const list = Array.isArray(prebuiltToolsData) ? prebuiltToolsData : [];
+        const selected = new Set(Array.isArray(toolsVersionData) ? toolsVersionData : []);
+        return list.filter((t) => !selected.has(t.value) && (t?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase() || '')));
+    }, [prebuiltToolsData, toolsVersionData, searchQuery]);
+
     return (
         <div className="dropdown dropdown-left mt-8">
             
@@ -109,6 +119,28 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                             renderEmbedSuggestions
                         ) : (
                             <li className="text-center mt-2">No tools found</li>
+                        )}
+                        {/* Prebuilt Tools Section */}
+                        <li className="text-sm font-semibold disabled mt-2">Prebuilt Tools</li>
+                        {availablePrebuiltTools.length > 0 ? (
+                            availablePrebuiltTools.map((item) => (
+                                <li key={item?._id} onClick={() => handlePrebuiltToolClick(item)}>
+                                    <div className="flex justify-between items-center w-full">
+                                        <div className="flex items-center gap-2">
+                                            {GetPreBuiltToolTypeIcon(item?.value, 16, 16)}
+                                            {item?.name?.length > 20 ? (
+                                                <div className="tooltip" data-tip={item?.name}>
+                                                    {truncate(item?.name, 20)}
+                                                </div>
+                                            ) : (
+                                                truncate(item?.name, 20)
+                                            )}
+                                        </div>
+                                    </div>
+                                </li>
+                            ))
+                        ) : (
+                            <li className="text-center mt-2">No prebuilt tools</li>
                         )}
                         {!hideCreateFunction && <li className="border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => openViasocket(undefined,
                             {
