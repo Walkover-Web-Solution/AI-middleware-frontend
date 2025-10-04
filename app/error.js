@@ -11,13 +11,16 @@ export default function Error({ error, reset }) {
       try {
         localStorage.removeItem("persist:root");
       } catch (_) {}
-      router.replace("/login");
     }
-  }, [isProd, router]);
+  }, [isProd]);
 
-  if (isProd) {
-    return null;
-  }
+  const handleTryAgain = () => {
+    window.location.reload();
+  };
+
+  const handleGoHome = () => {
+    router.replace(isProd ? "/login" : "/org");
+  };
 
   return (
     <html>
@@ -45,8 +48,8 @@ export default function Error({ error, reset }) {
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button className="btn btn-primary" onClick={() => reset?.()}>Try again</button>
-                  <button className="btn" onClick={() => router.replace("/")}>Go Home</button>
+                  <button className="btn btn-primary" onClick={handleTryAgain}>Try again</button>
+                  <button className="btn" onClick={handleGoHome}>Go Home</button>
                 </div>
               </div>
             </div>
