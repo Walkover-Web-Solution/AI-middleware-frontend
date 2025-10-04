@@ -40,6 +40,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
   }, [messages]);
 
   const handleResetChat = () => {
+    setTestCaseId(null);
     setMessages([]);
     setConversation([]);
   }
