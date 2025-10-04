@@ -11,6 +11,7 @@ import OpenRouter from "@/icons/OpenRouter";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { WebSearchIcon } from "@/icons/webSearchIcon";
 import { cloneDeep } from "lodash";
+import { Image } from "lucide-react";
 
 export const updatedData = (obj1, obj2 = {}, type) => {
     // Deep clone obj1 to avoid mutating the original object
@@ -323,6 +324,8 @@ export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
     switch (preBuiltTools) {
         case 'web_search':
             return <WebSearchIcon height={height} width={width} />;
+        case 'image_generation':
+            return <Image size={12} />;
         default:
             return null;
     }
