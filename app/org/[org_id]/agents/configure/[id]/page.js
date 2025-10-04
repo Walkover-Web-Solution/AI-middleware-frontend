@@ -3,7 +3,6 @@
 import ConfigurationPage from "@/components/configuration/ConfigurationPage";
 import Chat from "@/components/configuration/chat";
 import Chatbot from "@/components/configuration/chatbot";
-import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";

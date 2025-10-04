@@ -702,3 +702,21 @@ export function didCurrentTabInitiateUpdate(agentId) {
     return false;
   }
 }
+  export const createConversationForTestCase = (conversationData) => {
+    let conversation = [];
+    let expected_response = null;
+    
+    const conversationMessages = conversationData.slice(0, conversationData.length - 1);
+
+    conversation = conversationMessages.map(message => ({
+      role: message.sender === "assistant" ? "assistant" : "user",
+      content: message.content
+    }));
+    
+    const lastMessage = conversationData[conversationData.length - 1];
+    expected_response = {
+      response: lastMessage.content
+    };
+    
+    return { conversation, expected: expected_response };
+  }
