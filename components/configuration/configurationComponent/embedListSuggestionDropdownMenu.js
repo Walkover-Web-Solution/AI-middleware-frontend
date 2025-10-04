@@ -69,9 +69,11 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                  return (
                      <li key={value?._id} onClick={() => handleItemClick(value?._id)}>
                          <div className="flex justify-between items-center w-full">
+                            <div  title={title?.length > 20 ? title : ""}>
                              <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
-                                 {title}
+                                 {title?.length > 20 ? `${title.slice(0, 20)}...` : title}
                              </p>
+                             </div>
                              <div>
                                  <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(status)}`}>
                                      {value?.description?.trim() === "" ? "Ongoing" : status===1 ? "Active" : status}
