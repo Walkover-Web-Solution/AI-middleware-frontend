@@ -3,12 +3,14 @@ import { Trash2 } from 'lucide-react';
 import Modal from './Modal';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
+import { ClipboardXIcon } from '../Icons';
 
 const DeleteModal = ({   
   onConfirm = () => {}, 
   item,
   title = "Are you sure?",
-  description = "This action cannot be undone. This will permanently delete selected file."
+  description = "This action cannot be undone. This will permanently delete selected file.",
+  buttonTitle = "Delete"
 }) => {
 const handleClose=()=>{
     closeModal(MODAL_TYPE.DELETE_MODAL);
@@ -47,8 +49,8 @@ const handleClose=()=>{
             }}
             className="btn btn-error text-white"
           >
-            <Trash2 className="mr-1 h-4 w-4 text-white" />
-            Delete
+            {buttonTitle ? <ClipboardXIcon size={14} className='text-white'/> :  <Trash2 className="mr-1 h-4 w-4 text-white" />}
+            {buttonTitle}
           </button>
         </div>
       </div>

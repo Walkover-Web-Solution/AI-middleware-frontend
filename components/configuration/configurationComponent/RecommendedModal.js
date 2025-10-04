@@ -2,9 +2,7 @@ import { modelSuggestionApi } from '@/config';
 import React, { useState, useCallback } from 'react'
 import { useDispatch } from 'react-redux';
 
-const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service }) => {
-    const dispatch = useDispatch();
-    console.log("bridge232", bridgeApiKey);
+const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service, deafultApiKeys }) => {
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
     const [modelRecommendations, setModelRecommendations] = useState(null);
     const setErrorBorder = (ref, selector, scrollToView = false) => {
@@ -26,7 +24,7 @@ const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, br
 
         try {
             const currentPrompt = promptTextAreaRef.current?.querySelector('textarea')?.value?.trim() || "";
-            if ((bridgeApiKey && currentPrompt !== "") || service === "ai_ml") {
+            if (((bridgeApiKey || deafultApiKeys) && currentPrompt !== "") || service === "ai_ml") {
                 const response = await modelSuggestionApi({ versionId: searchParams?.version });
                 if (response?.success) {
                     setModelRecommendations({
