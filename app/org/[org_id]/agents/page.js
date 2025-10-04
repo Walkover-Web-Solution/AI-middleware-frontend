@@ -203,7 +203,7 @@ function Home({ params, isEmbedUser }) {
         <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
           <div className="w-full">
             {allBridges.length === 0 ? (
-              <AgentEmptyState />
+              <AgentEmptyState orgid={resolvedParams.org_id} isEmbedUser={isEmbedUser}/>
             ) : (
               <div className="flex flex-col lg:mx-0">
                 <div className="px-2 pt-4">

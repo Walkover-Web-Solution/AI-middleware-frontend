@@ -153,7 +153,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 searchParams={searchParams} 
                 promptTextAreaRef={promptTextAreaRef} 
                 isEmbedUser={isEmbedUser} 
-                hidePromptGuard={hidePromptGuard} 
             />
             {shouldToolsShow ? (
                 <>

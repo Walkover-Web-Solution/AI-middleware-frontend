@@ -3,8 +3,9 @@ import { openModal } from "@/utils/utility";
 import { MessageCircleIcon, MessageSquareIcon, PlugIcon, SettingsIcon } from "./Icons";
 import { PlusIcon, Zap } from "lucide-react";
 import PageHeader from "./Pageheader";
+import CreateNewBridge from "./createNewBridge";
 
-const AgentEmptyState = () => {
+const AgentEmptyState =   ({orgid,isEmbedUser}) => {
   return (
     <div className=" mt-8 px-4">
       <div className=" mx-2 ">
@@ -53,8 +54,7 @@ const AgentEmptyState = () => {
 
         {/* Features Section */}
       
-
-       
+        <CreateNewBridge orgid={orgid} isEmbedUser={isEmbedUser} />       
       </div>
     </div>
   );
