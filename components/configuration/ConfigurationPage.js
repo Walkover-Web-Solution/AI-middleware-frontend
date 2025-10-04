@@ -145,7 +145,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     // Helper function to render non-image model components
     const renderNonImageComponents = () => (
         <>
-        {(!hidePreTool &&isEmbedUser) || !isEmbedUser &&(
+        {((!hidePreTool &&isEmbedUser) || !isEmbedUser) &&(
             <PreEmbedList params={params} searchParams={searchParams} />
         )}
             <InputConfigComponent 
