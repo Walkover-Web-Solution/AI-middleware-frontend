@@ -5,6 +5,9 @@ import { useDispatch } from "react-redux";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import WebSocketClient from 'rtlayer-client';
+import { toast } from 'react-toastify';
+import { didCurrentTabInitiateUpdate } from '@/utils/utility';
+import { RefreshIcon } from "@/components/Icons";
 
 function useRtLayerEventHandler() {
     const [client, setClient] = useState(null);
@@ -28,46 +31,95 @@ function useRtLayerEventHandler() {
             return { bridgeId: null, orgId: null };
         }
     }, [pathName]);
-    
-    // Memoize channel ID to prevent unnecessary recalculations
-    const channelId = useMemo(() => {
-        if (!bridgeId || !orgId) return null;
-        return (orgId + bridgeId).replace(/ /g, "_");
-    }, [bridgeId, orgId]);
-    
-    // History data processor function
-    const processHistoryData = useCallback((message) => {
-        try {
-            // If message is a string, parse it first
-            const parsedData = typeof message === 'string' ? JSON.parse(message) : message;
-            
-            // Extract response data with better error handling
-            const { response } = parsedData;
-            
-            if (!response) {
-                console.error("No response found in data");
-                return { success: false, error: "No response found" };
-            }
-            
-            const { Thread, Messages } = response;
-            
-            // Validate required data
-            if (!Thread) {
-                console.error("Missing Thread or Message data");
-            }
-            if(!Messages)
-            {
-                console.error("Missing Message")
-            }
-            Object.keys(Messages).forEach(key => {
-                Messages[key].fromRTLayer = true;
-            });
+
+  // Memoize channel ID to prevent unnecessary recalculations
+  const channelId = useMemo(() => {
+    if (!bridgeId || !orgId) return null;
+    return (orgId + bridgeId).replace(/ /g, "_");
+  }, [bridgeId, orgId]);
+
+  // Helper function to show toast notification
+  const showAgentUpdatedToast = useCallback(() => {
+    if (!toast.isActive('agent-updated')) {
+      const RefreshButton = () => {
+        const handleRefresh = () => {
+          toast.dismiss('agent-updated');
+          window.location.reload();
+        };
+        return (
+          <div className="mt-2 flex justify-center">
+            <button
+              onClick={handleRefresh}
+              className="btn btn-primary btn-sm"
+            >
+              <RefreshIcon size={16}/>
+              Refresh Page
+            </button>
+          </div>
+        );
+      };
+      toast.info(
+        <div className="">
+          <div className="">
+            Agent has been updated. Please refresh to see changes.
+          </div>
+          <RefreshButton />
+        </div>,
+        {
+          position: 'top-right',
+          autoClose: false,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          toastId: 'agent-updated',
+          style: { border: '1px solid #ccc' },
+
+        }
+      );
+    }
+  }, []);
+
+  // ---------- History data processor (socket messages) ----------
+  const processHistoryData = useCallback((message) => {
+    try {
+      const parsedData = typeof message === 'string' ? JSON.parse(message) : message;
+      const { response } = parsedData;
+      if (!response) {
+        console.error("No response found in data");
+        return { success: false, error: "No response found" };
+      }
+
+      const { Thread, Messages, type } = response;
+      if (type === 'agent_updated') {
+        const agentId = response.version_id || response.bridge_id;
+        const currentTabInitiated = didCurrentTabInitiateUpdate(String(agentId));
+        if (currentTabInitiated) {
+          return;
+        } else {
+          const isConfigPage = typeof pathName === 'string' && pathName.includes('/configure/');
+          if (isConfigPage) {
+            showAgentUpdatedToast();
+          }
+        }
+        return;
+      }
+
+          if (!Thread) {
+        console.error("Missing Thread or Message data");
+          }
+          if (!Messages) {
+        console.error("Missing Message")
+          }
+          Object.keys(Messages).forEach(key => {
+            Messages[key].fromRTLayer = true;
+          });
           // Clean the data to reduce serialization overhead
-            const cleanThread = {
-                thread_id: Thread.thread_id,
-                sub_thread_id: Thread.sub_thread_id,
-                bridge_id: Thread.bridge_id
-            };
+          const cleanThread = {
+            thread_id: Thread.thread_id,
+            sub_thread_id: Thread.sub_thread_id,
+            bridge_id: Thread.bridge_id
+          };
 
             // Dispatch actions to Redux store
             dispatch(addThreadUsingRtLayer({ Thread: cleanThread }));
