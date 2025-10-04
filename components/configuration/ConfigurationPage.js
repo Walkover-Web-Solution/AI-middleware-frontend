@@ -34,7 +34,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
     
-    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, hideAdvancedParameters, hideAdvancedConfigurations, service } = useCustomSelector((state) => {
+    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, hideAdvancedParameters, hideAdvancedConfigurations, service ,hidePreTool } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const service = versionData?.service;
         const modelReducer = state?.modelReducer?.serviceModels;
