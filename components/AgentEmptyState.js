@@ -21,7 +21,7 @@ const AgentEmptyState =   ({orgid,isEmbedUser}) => {
           {/* Right Side - Create Agent Button */}
           <div className="flex-shrink-0">
             <div className="text-center ">
-              <button className="btn btn-primary btn-md" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL); toggleSidebar('default-agent-sidebar');}}>
+              <button className="btn btn-primary btn-md" onClick={() =>{ openModal(MODAL_TYPE.CREATE_BRIDGE_MODAL)}}>
                                   + Create New Agent
                               </button>
              
