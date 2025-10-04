@@ -24,7 +24,6 @@ import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import TriggersList from "./configurationComponent/TriggersList";
 import AddVariable from "../addVariable";
-import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import Protected from "../protected";
@@ -35,8 +34,8 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const router = useRouter();
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
-
-    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, hidePromptGuard, hideAdvancedParameters, hideAdvancedConfigurations } = useCustomSelector((state) => {
+    
+    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, hidePromptGuard, hideAdvancedParameters, hideAdvancedConfigurations, service } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const service = versionData?.service;
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -61,7 +60,8 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             knowbaseVersionData: versionData?.doc_ids || [],
             hidePromptGuard: state.userDetailsReducer.userDetails.hidePromptGuard,
             hideAdvancedParameters: state.userDetailsReducer.userDetails.hideAdvancedParameters,
-            hideAdvancedConfigurations: state.userDetailsReducer.userDetails.hideAdvancedConfigurations
+            hideAdvancedConfigurations: state.userDetailsReducer.userDetails.hideAdvancedConfigurations,
+            service: service
         };
     });
     useEffect(() => {
@@ -130,42 +130,41 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                            <h2 className="text-center">This model does not support tools</h2>
                         </div>
                     )}
-                    <PrebuiltToolsList params={params} searchParams={searchParams} />
-                </>
-            )}
-            <RecommendedModal params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} bridgeApiKey={bridgeApiKey} shouldPromptShow={shouldPromptShow} />
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 items-start">
-                <div className="w-full min-w-0 md:order-1">
-                    <ServiceDropdown
-                        params={params}
-                        apiKeySectionRef={apiKeySectionRef}
-                        promptTextAreaRef={promptTextAreaRef}
-                        searchParams={searchParams}
-                    />
-                </div>
-                <div className="w-full min-w-0 md:order-2">
-                    <ModelDropdown params={params} searchParams={searchParams} />
-                </div>
-                {((!showDefaultApikeys && isEmbedUser )||!isEmbedUser) && (
+                    <RecommendedModal params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} bridgeApiKey={bridgeApiKey} shouldPromptShow={shouldPromptShow} service={service} />
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 items-start">
+                        <div className="w-full min-w-0 md:order-1">
+                            <ServiceDropdown
+                                params={params}
+                                apiKeySectionRef={apiKeySectionRef}
+                                promptTextAreaRef={promptTextAreaRef}
+                                searchParams={searchParams}
+                            />
+                        </div>
+                        <div className="w-full min-w-0 md:order-2">
+                            <ModelDropdown params={params} searchParams={searchParams} />
+                        </div>
+                        {((!showDefaultApikeys && isEmbedUser )||!isEmbedUser) && (
                     <div className="w-full min-w-0 md:order-3">
-                        <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
-                    </div>
-                )}
+                                <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
+                            </div>
+                        )}
             </div>
-            <AdvancedParameters params={params} searchParams={searchParams} />
-            {modelType !== "image" && modelType !== 'embedding' && (
-                <>
-                    <AddVariable params={params} searchParams={searchParams}/>
+                    <AdvancedParameters params={params} searchParams={searchParams} />
+                    {modelType !== "image" && modelType !== 'embedding' && (
+                        <>
+                            <AddVariable params={params} searchParams={searchParams}/>
                     {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
                         <>
-                        <AdvancedConfiguration params={params} searchParams={searchParams} bridgeType={bridgeType} modelType={modelType} />
+                                <AdvancedConfiguration params={params} searchParams={searchParams} bridgeType={bridgeType} modelType={modelType} />
                         </>
                     )}
-                    <GptMemory params={params} searchParams={searchParams} />
+                            <GptMemory params={params} searchParams={searchParams} />
+                        </>
+                    )}
                 </>
             )}
         </>
-    ), [bridgeType, modelType, params, modelName]);
+    ), [bridgeType, modelType, params, modelName, bridgeApiKey]);
     const renderChatbotConfigView = useMemo(() => () => (
         <>
 
