@@ -117,6 +117,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 bridgeApiKey={bridgeApiKey} 
                 shouldPromptShow={shouldPromptShow} 
                 service={service} 
+                deafultApiKeys={showDefaultApikeys}
             />
             <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 items-start">
                 <div className="w-full min-w-0 md:order-1">

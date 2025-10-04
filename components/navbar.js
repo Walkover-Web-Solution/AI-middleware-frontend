@@ -7,7 +7,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeAction, dicardBridgeVersionAction, publishBridgeVersionAction, archiveBridgeAction } from '@/store/action/bridgeAction';
 import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
-import { openModal, toggleSidebar } from '@/utils/utility';
+import { closeModal, openModal, toggleSidebar } from '@/utils/utility';
 import { toast } from 'react-toastify';
 import OrgSlider from './sliders/orgSlider';
 import BridgeSlider from './sliders/bridgeSlider';
@@ -16,6 +16,7 @@ import ConfigHistorySlider from './sliders/configHistorySlider';
 import Protected from './protected';
 import GuideSlider from './sliders/IntegrationGuideSlider';
 import { FilterSliderIcon } from './Icons';
+import DeleteModal from './UI/DeleteModal';
 
 const BRIDGE_STATUS = {
   ACTIVE: 1,
@@ -130,8 +131,6 @@ const Navbar = ({ isEmbedUser }) => {
   }, [dispatch, bridgeId, bridgeStatus]);
 
   const handleDiscardChanges = useCallback(async () => {
-    if (!window.confirm('Are you sure you want to discard all changes? This action cannot be undone.')) return;
-
     try {
       dispatch(updateBridgeVersionReducer({
         bridges: { ...bridge, _id: searchParams?.get('version'), parent_id: bridgeId, is_drafted: false }
@@ -141,6 +140,9 @@ const Navbar = ({ isEmbedUser }) => {
     } catch (err) {
       console.error(err);
       toast.error('Failed to discard changes');
+    }
+    finally{
+      closeModal(MODAL_TYPE.DELETE_MODAL);
     }
   }, [dispatch, bridge, searchParams?.get('version'), bridgeId]);
 
@@ -343,7 +345,7 @@ const Navbar = ({ isEmbedUser }) => {
               {isDrafted && activeTab === 'configure' && (
                 <button
                   className="btn btn-sm bg-red-200 hover:bg-red-300 gap-2 text-base-content"
-                  onClick={handleDiscardChanges}
+                  onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
                   disabled={isUpdatingBridge || isPublishing}
                 >
                   <ClipboardX size={14} className='text-black'/>
@@ -372,7 +374,7 @@ const Navbar = ({ isEmbedUser }) => {
                   {isDrafted && (
                     <button
                       className="btn btn-sm flex gap-2 bg-red-200 hover:bg-red-300 text-base-content"
-                      onClick={handleDiscardChanges}
+                      onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
                       disabled={isUpdatingBridge || isPublishing}
                       title="Discard changes"
                     >
@@ -444,7 +446,7 @@ const Navbar = ({ isEmbedUser }) => {
             {isDrafted && (
               <button
                 className="btn btn-sm btn-sm-outline bg-red-200 hover:bg-red-300 flex-1 gap-2"
-                onClick={handleDiscardChanges}
+                onClick={() => openModal(MODAL_TYPE.DELETE_MODAL)}
                 disabled={isUpdatingBridge || isPublishing}
               >
                 <ClipboardX size={14} className='text-black' />
@@ -473,6 +475,7 @@ const Navbar = ({ isEmbedUser }) => {
           <GuideSlider params={{ org_id: orgId, id: bridgeId, version:searchParams?.get('version') }} bridgeType={bridgeType}/>
         </>
       )}
+      <DeleteModal onConfirm={handleDiscardChanges} title="Discard Changes" description={`Are you sure you want to discard the changes? This action cannot be undone.`} buttonTitle="Discard"/>
     </div>
   );
 };
