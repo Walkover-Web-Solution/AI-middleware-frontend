@@ -287,6 +287,7 @@ const CustomTable = ({
                                     }
                                     {visibleColumns?.map((column) => (
                                         <td
+                                            className={`${column=="totalTokens"?"pl-12":"pl-8"}`}
                                             key={column}
                                         >
                                             {getDisplayValue(row, column)}
@@ -294,7 +295,7 @@ const CustomTable = ({
                                     ))}
                                     {endComponent && (
                                         <td>
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex justify-end">
                                                 {endComponent({row: row})}
                                             </div>
                                         </td>
