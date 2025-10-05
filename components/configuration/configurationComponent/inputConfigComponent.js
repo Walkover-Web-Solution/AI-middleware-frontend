@@ -226,6 +226,13 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             e.preventDefault();
             return;
         }
+        if(e.key === 'Escape' && isPromptHelperOpen){
+
+            e.preventDefault();
+            setIsPromptHelperOpen(false);
+            textareaRef.current.blur();
+            return;
+        }
 
         if (!showSuggestions || !suggestionListRef.current) return;
 
