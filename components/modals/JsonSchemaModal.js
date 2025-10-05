@@ -7,6 +7,9 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import OptimiseBaseModal from "./OptimiseBaseModal";
 import { toast } from "react-toastify";
+import Canvas from "../Canvas";
+import Modal from "../UI/Modal";
+import { closeModal } from "@/utils/utility";
 
 function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_id}) {
   const dispatch = useDispatch();
@@ -32,20 +35,33 @@ function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_i
   };
 
   const handleApply = async (schemaToApply) => {
-    await dispatch(
-      updateBridgeVersionAction({
-        bridgeId: params?.id,
-        versionId: searchParams?.version,
-        dataToSend: {
-          configuration: {
-            response_type: {
-              type: "json_schema",
-              json_schema: JSON.parse(schemaToApply),
+    try {
+      // Ensure we're parsing only if it's a string and not already an object
+      const parsedSchema = typeof schemaToApply === 'string' 
+        ? JSON.parse(schemaToApply) 
+        : schemaToApply;
+        
+      await dispatch(
+        updateBridgeVersionAction({
+          bridgeId: params?.id,
+          versionId: searchParams?.version,
+          dataToSend: {
+            configuration: {
+              response_type: {
+                type: "json_schema",
+                json_schema: parsedSchema,
+              },
             },
           },
-        },
-      })
-    );
+        })
+      );
+      // Close the modal after applying changes
+      handleCloseModal();
+    } catch (error) {
+      toast.error("Invalid JSON Schema");
+      setErrorMessage("Invalid JSON Schema");
+      console.error("JSON parse error:", error);
+    }
   };
 
   const validateJsonSchema = (schema) => {
@@ -59,25 +75,34 @@ function JsonSchemaModal({ params, searchParams, messages, setMessages, thread_i
     }
   };
 
+  const handleCloseModal = () => {
+    closeModal(MODAL_TYPE.JSON_SCHEMA);
+  };
+
   return (
-    <OptimiseBaseModal
-      modalType={MODAL_TYPE.JSON_SCHEMA}
-      title="Improve Json Schema"
-      contentLabel="Schema"
-      content={jsonSchemaRequirements}
-      optimizeApi={handleOptimizeApi}
-      onApply={handleApply}
-      params={params}
-      messages={messages}
-      setMessages={setMessages}
-      additionalValidation={validateJsonSchema}
-      textareaProps={{
-        onBlur: (e) => validateJsonSchema(e.target.value)
-      }}
-      errorMessage={errorMessage}
-      setErrorMessage={setErrorMessage}
-      key={`json_schema_${params?.id}_${searchParams?.version}`}
-    />
+    <Modal MODAL_ID={MODAL_TYPE.JSON_SCHEMA}>
+      <div className="modal-box  max-w-screen-lg h-[calc(100%-10rem)] w-[calc(100%-20rem)] bg-base-100 overflow-hidden">
+        <div className="flex justify-between items-center mb-4">
+        <h3 className="font-bold text-lg">Improve JSON Schema</h3>
+          <button
+            onClick={handleCloseModal}
+            className="btn"
+            type="button"
+          >
+            Close
+          </button>
+        </div>
+        <Canvas
+          OptimizePrompt={handleOptimizeApi}
+          messages={messages}
+          setMessages={setMessages}
+          handleApplyOptimizedPrompt={handleApply}
+          label="Schema"
+          width="100%"
+          height="92%"
+        />
+      </div>
+    </Modal>
   );
 }
 

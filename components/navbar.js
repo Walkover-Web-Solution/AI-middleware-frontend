@@ -10,8 +10,6 @@ import { updateBridgeVersionReducer } from '@/store/reducer/bridgeReducer';
 import { MODAL_TYPE } from '@/utils/enums';
 import { openModal, toggleSidebar } from '@/utils/utility';
 import { toast } from 'react-toastify';
-import OrgSlider from './sliders/orgSlider';
-import BridgeSlider from './sliders/bridgeSlider';
 import ChatBotSlider from './sliders/chatBotSlider';
 import ConfigHistorySlider from './sliders/configHistorySlider';
 import Protected from './protected';
