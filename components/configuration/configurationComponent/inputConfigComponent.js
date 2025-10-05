@@ -13,7 +13,7 @@ import GuardrailSelector from './guardrailSelector'; // Import the new component
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , hidePromptGuard, isEmbedUser }) => {
+const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbedUser }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type || "",
@@ -278,24 +278,24 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , hidePr
     if (service === "google" && serviceType === "chat") return null;
 
     return (
-      <div ref={promptTextAreaRef}>
-        <div className="flex justify-between items-center mb-2">
-          <div className="label flex items-center gap-2">
-            <span className="label-text capitalize font-medium">Prompt</span>
+        <div ref={promptTextAreaRef}>
+            <div className="flex justify-between items-center mb-2">
+                <div className="label flex items-center gap-2">
+                    <span className="label-text capitalize font-medium">Prompt</span>
             <div className="h-4 w-px bg-gray-300 mx-2"></div>
-            <div className="flex items-center justify-center">
-              <button
-                onClick={() => {
-                  openModal(MODAL_TYPE?.PROMPT_SUMMARY);
-                }}
-              >
+                    <div className="flex items-center justify-center">
+                        <button
+                            onClick={() => {
+                                openModal(MODAL_TYPE?.PROMPT_SUMMARY);
+                            }}
+                        >
                 <InfoTooltip tooltipContent={"Prompt Summary is a brief description of the agent’s prompt and applies to all versions of the agent, not just one."}>
-                <span className='label-text  capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
-                </InfoTooltip>
-              </button>
-             
-            </div>
-          </div>
+                                <span className='label-text  capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
+                            </InfoTooltip>
+                        </button>
+
+                    </div>
+                </div>
           <div className='flex gap-4'>
              {/* <div
               className="label cursor-pointer">
@@ -312,45 +312,45 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , hidePr
             <div
               className="label cursor-pointer"
               onClick={() => openModal(MODAL_TYPE.OPTIMIZE_PROMPT)}
-            >
+                            >
               <span className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text">
                 Prompt Builder
               </span>
             </div>
-          </div>
-        </div>
-        <div className="form-control h-full">
-          <textarea
-            ref={textareaRef}
+                </div>
+            </div>
+            <div className="form-control h-full">
+                <textarea
+                    ref={textareaRef}
             className="textarea border border-base-content/20 w-full min-h-96 resize-y focus:border-primary relative bg-transparent z-low caret-base-content p-2 rounded-b-none"
-            value={prompt}
-            onChange={handlePromptChange}
+                      value={prompt}
+                    onChange={handlePromptChange}
             onKeyDown={handleKeyDown}
             onBlur={(e)=>savePrompt(e.target.value)}
-          />
-          {showSuggestions && renderSuggestions()}
+                />
+                {showSuggestions && renderSuggestions()}
           <div className="collapse bg-gradient-to-r bg-base-200 border-t-0 border border-base-300 rounded-t-none">
-            <input type="checkbox" className="min-h-[0.75rem]" />
-            <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
-              <div className="flex items-center gap-2 ">
-                <span className="text-nowrap">Default Variables</span>
-                <p role="alert" className="label-text-alt alert p-2 bg-base-200">
-                  <InfoIcon size={16} className="" />
-                  Use these variables in prompt to get their functionality
-                </p>
-              </div>
-              <div className="ml-auto">
-                <ChevronDownIcon className="collapse-arrow" size={12} />
-              </div>
-            </div>
-            <div className="collapse-content">
-              <div className="text-xs">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-1">
-                    <span className="inline-block w-1 h-1 bg-black rounded-full"></span>
-                  <span>&#123;&#123;current_time_and_date&#125;&#125;</span>
-                  <span className="ml-2">- To access the current date and time</span>
-                </div>
+                    <input type="checkbox" className="min-h-[0.75rem]" />
+                    <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
+                        <div className="flex items-center gap-2 ">
+                            <span className="text-nowrap">Default Variables</span>
+                            <p role="alert" className="label-text-alt alert p-2 bg-base-200">
+                                <InfoIcon size={16} className="" />
+                                Use these variables in prompt to get their functionality
+                            </p>
+                        </div>
+                        <div className="ml-auto">
+                            <ChevronDownIcon className="collapse-arrow" size={12} />
+                        </div>
+                    </div>
+                    <div className="collapse-content">
+                        <div className="text-xs">
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-1 h-1 bg-black rounded-full"></span>
+                                    <span>&#123;&#123;current_time_and_date&#125;&#125;</span>
+                                    <span className="ml-2">- To access the current date and time</span>
+                                </div>
 
                 {/* Uncomment if needed later
                       <div className="flex items-center gap-1">
@@ -372,32 +372,30 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef , hidePr
                   <span>- Access the timezone using a timezone identifier</span>
                 </div>
 
-                  <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1">
 
-                    <span>
-                      Use custom variables like <code>&#123;&#123;your_custom_variable&#125;&#125;</code>, created from the <strong>Add Variable</strong> section, to insert dynamic values.
-                    </span>
+                                    <span>
+                                        Use custom variables like <code>&#123;&#123;your_custom_variable&#125;&#125;</code>, created from the <strong>Add Variable</strong> section, to insert dynamic values.
+                                    </span>
 
-                  </div>
-              </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <div className=' mt-4'> 
-        {((isEmbedUser && !hidePromptGuard) || !isEmbedUser) && <GuardrailSelector params={params} searchParams={searchParams} />}
-      </div>
-      <div className='flex flex-row gap-2 mt-8'>
+     
+            <div className='flex flex-row gap-2 mt-8'>
        
-          <ToneDropdown params={params} searchParams={searchParams} />
-          <ResponseStyleDropdown params={params} searchParams={searchParams} />
+                <ToneDropdown params={params} searchParams={searchParams} />
+                <ResponseStyleDropdown params={params} searchParams={searchParams} />
         
       </div>
       <CreateVariableModal keyName={keyName} setKeyName={setKeyName} params={params} searchParams={searchParams} />
       <OptimizePromptModal savePrompt={savePrompt} setPrompt={setPrompt} params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} />
       <PromptSummaryModal params={params} searchParams={searchParams} />
-    </div>
-  );
+        </div>
+    );
 };
 
 export default InputConfigComponent;

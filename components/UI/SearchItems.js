@@ -16,8 +16,14 @@ const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
     <div className="flex-1 max-w-md">
       <input
         type="text"
-        placeholder={`Search ${item}...`}
-        className={`${style?  style:'input input-bor0dered w-full ml-2 mb-3 border border-base-content/50'}`}
+        aria-label={`Search ${item} by Name, SlugName, Service, or ID`}
+        placeholder={
+          item === 'Agents' ? 'Search Agents by Name, SlugName, Service or Id' :
+          item === 'Apikeys' ? 'Search Apikeys by Name, Id or Service' :
+          `Search ${item} by Name`
+        }
+        className={`${style ? style : 'input  w-full ml-2 mb-1 border border-base-content/50'}`}
+        
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
