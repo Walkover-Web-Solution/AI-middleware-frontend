@@ -74,7 +74,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         setSelectedBridge(bridge)
         if (!bridges?.[bridge?._id]?.bridge_summary) {
             // Ask for description first, do not save yet
-            openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
+        openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
             return;
         }
         // If summary already exists, proceed to save immediately using the fresh bridge reference
@@ -166,9 +166,9 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             if (isCmdOrCtrlClicked) {
                 window.open(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`, "_blank");
             } else {
-                router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
-            }
+            router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
         }
+    }
     }
 
 
@@ -187,7 +187,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                         <div>
                             <div className="flex items-center gap-2">
                                 
-                                <span className="flex-1 min-w-0 text-[13px] text-sm font-bold truncate">
+                                <span className="flex-1 min-w-0  text-[9px]  md:text-[12px] lg:text-[13px] font-bold truncate">
                                     <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
                                         <span>{ bridgeData?.find(bridge => bridge._id === item.bridge_id)?.name}</span>
                                         <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!item?.description ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>

@@ -1,3 +1,4 @@
+
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
 import React, { useMemo, useState } from 'react';
@@ -175,7 +176,7 @@ const EmbedList = ({ params, searchParams }) => {
         {shouldToolsShow && (
           <>
             <div className="dropdown dropdown-right w-full flex items-center">
-                            {bridgeFunctions?.length>0?(
+                            {(bridgeFunctions?.length>0 || selectedPrebuiltTools.length > 0)?(
                                 <>
                   <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
                 <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>

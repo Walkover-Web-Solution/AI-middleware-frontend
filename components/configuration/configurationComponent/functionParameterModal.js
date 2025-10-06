@@ -28,7 +28,6 @@ function FunctionParameterModal({
   variablesPath = {},
   setVariablesPath = () => { },
   isMasterAgent = false,
-
   params = {},
   tool_name = "",
 
@@ -38,7 +37,7 @@ function FunctionParameterModal({
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const dispatch = useDispatch();
   const { versions } = useCustomSelector(state => ({
-    versions: state?.bridgeReducer.org[params?.org_id]?.orgs.find((item) => item._id === functionId)?.versions || [],
+    versions: state?.bridgeReducer.org[params?.org_id]?.orgs?.find((item) => item._id === functionId)?.versions || [],
   }));
   useEffect(() => {
     setToolName(name === "Agent" ? tool_name : toolData?.title || toolData?.endpoint_name);
@@ -483,7 +482,7 @@ function FunctionParameterModal({
                     overflow: "hidden",     
                   }}
                   rows={1}
-                  maxLength={30}
+                  maxLength={50}
                   value={toolName}
                   onChange={(e) => {
                     setToolName(e.target.value);
