@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import { CloseCircleIcon, SendHorizontalIcon, UploadIcon } from '@/components/Icons';
 import { PdfIcon } from '@/icons/pdfIcon';
 
-function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading, searchParams }) {
+function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading, searchParams, setTestCaseId, testCaseId, selectedStrategy}) {
     const [uploading, setUploading] = useState(false);
     const dispatch = useDispatch();
     const [fileInput, setFileInput] = useState(null); // Use state for the file input element
@@ -48,6 +48,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
           isFileSupported: validationConfig.files,
         };
       }, [modelInfo, service, configuration?.type, configuration?.model]);
+
     useEffect(() => {
         setLocalDataToSend(dataToSend);
     }, [bridge]);
@@ -82,6 +83,10 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 return;
             }
         }
+        let testcase_data = {
+            matching_type: selectedStrategy,
+        }
+        testCaseId ? testcase_data.testcase_id = testCaseId : testcase_data = null
         setErrorMessage("");
         if (modelType !== "completion") inputRef.current.value = "";
         setLoading(true);
@@ -112,6 +117,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 responseData = await dryRun({
                     localDataToSend: {
                         version_id: versionId,
+                        testcase_data,
                         configuration: {
                             conversation: conversation,
                             type: modelType
@@ -132,6 +138,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 responseData = await dryRun({
                     localDataToSend: {
                         version_id: versionId,
+                        testcase_data,
                         configuration: {
                             conversation: conversation,
                             type: modelType
@@ -141,10 +148,14 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     bridge_id: params?.id
                 });
             } else if (modelType !== "image") {
+                if(testCaseId){
+                    testcase_data.testcase_id = testCaseId;
+                }
                 responseData = await dryRun({
                     localDataToSend: {
                         ...localDataToSend,
                         version_id: versionId,
+                        testcase_data,
                         configuration: {
                             ...localDataToSend.configuration
                         },
@@ -153,6 +164,19 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     bridge_id: params?.id
                 });
             }
+            // if(Object.entries(responseData?.response?.data?.tools_data)?.length>0)
+            // {
+            //     const toolData = {
+            //     id: conversation.length + 3,
+            //     sender: "tools_call",
+            //     time: new Date().toLocaleTimeString([], {
+            //         hour: "2-digit",
+            //         minute: "2-digit",
+            //     }),
+            //     tools_call_data: responseData.response?.data?.tools_data
+            //     }
+            //     setMessages(prevMessages => [...prevMessages, toolData]);
+            // }
             if (!responseData || !responseData.success) {
                 if (modelType !== 'completion' && modelType !== 'embedding') {
                     inputRef.current.value = data.content;
@@ -162,6 +186,9 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 return;
             }
             response = modelType === 'embedding' ? responseData.data?.response.data.embedding : responseData.response?.data;
+            if(responseData?.response?.testcase_id){
+                setTestCaseId(responseData?.response?.testcase_id);
+            }
             const content = modelType === 'embedding' ? response : response?.content || "";
             const assistConversation = {
                 role: response?.role || "assistant",
@@ -180,7 +207,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             }
             const newChatAssist = {
                 id: conversation.length + 2,
-                sender: "Assist",
+                sender: "assistant",
                 time: new Date().toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -235,7 +262,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 }
             }
         },
-        [loading, uploading, conversation, prompt, isOrchestralModel]
+        [loading, uploading, conversation, prompt, isOrchestralModel, selectedStrategy, inputRef, testCaseId]
     );
     const handleFileChange = async (e) => {
         const files = Array.from(e.target.files);

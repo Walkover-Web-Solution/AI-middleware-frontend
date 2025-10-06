@@ -80,8 +80,11 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
 
     for (let i = index; i >= 0; i--) {
       if (thread[i].role === 'user') {
-        conversation.push(...(thread[i]?.AiConfig?.messages || []));
+        conversation.push(...(thread[i]?.AiConfig?.input || []));
         AiConfigForVariable = thread[i]?.AiConfig ? thread[i]?.AiConfig : {};
+        if (thread[i + 1].role === 'tools_call') {
+          conversation.push(thread[i + 1])
+        }
         if (thread[i].id === item.id) break;
       }
     }
