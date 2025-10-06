@@ -2,8 +2,7 @@ import { modelSuggestionApi } from '@/config';
 import React, { useState, useCallback } from 'react'
 import { useDispatch } from 'react-redux';
 
-const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow }) => {
-    const dispatch = useDispatch();
+const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, bridgeApiKey, params, shouldPromptShow, service, deafultApiKeys }) => {
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
     const [modelRecommendations, setModelRecommendations] = useState(null);
     const setErrorBorder = (ref, selector, scrollToView = false) => {
@@ -25,8 +24,7 @@ const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, br
 
         try {
             const currentPrompt = promptTextAreaRef.current?.querySelector('textarea')?.value?.trim() || "";
-
-            if (bridgeApiKey && currentPrompt !== "") {
+            if (((bridgeApiKey || deafultApiKeys) && currentPrompt !== "") || service === "ai_ml") {
                 const response = await modelSuggestionApi({ versionId: searchParams?.version });
                 if (response?.success) {
                     setModelRecommendations({
@@ -72,15 +70,15 @@ const RecommendedModal = ({apiKeySectionRef, promptTextAreaRef, searchParams, br
                                 </button>
 
                                 {modelRecommendations && (
-                                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 w-full mb-2">
+                                    <div className="p-4 bg-base-100 rounded-lg border border-base-300 w-full mb-2">
                                         {modelRecommendations.error ? (
                                             <p className="text-red-500 text-sm">{modelRecommendations.error}</p>
                                         ) : (
                                             <div className="space-y-2">
-                                                <p className="text-gray-700">
+                                                <p className="text-base-content">
                                                     <span className="font-medium">Recommended Provider:</span> {modelRecommendations?.available?.service}
                                                 </p>
-                                                <p className="text-gray-700">
+                                                <p className="text-base-content">
                                                     <span className="font-medium">Recommended Model:</span> {modelRecommendations?.available?.model}
                                                 </p>
                                             </div>

@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
+import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 
 const AdvancedParameters = ({ params, searchParams }) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -23,26 +24,43 @@ const AdvancedParameters = ({ params, searchParams }) => {
     showSuggestion: false
   });
   const [messages, setMessages] = useState([]);
-  const thread_id = useMemo(() => generateRandomID(), []);
   const dispatch = useDispatch();
 
-  const { service, version_function_data, configuration, integrationData, isFirstParameter } = useCustomSelector((state) => {
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
-    const user = state.userDetailsReducer.userDetails
+  const {service,version_function_data,configuration,integrationData,isFirstParameter,connected_agents,modelInfoData,bridge } = useCustomSelector((state) => {
+    const versionData =state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const integrationData =state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
+    const user = state.userDetailsReducer.userDetails;
+    const bridge=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const service = versionData?.service;
+    const configuration = versionData?.configuration;
+    const type = configuration?.type;
+    const model = configuration?.model;
+    const modelInfoData =state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters;
     return {
       version_function_data: versionData?.apiCalls,
       integrationData,
-      service: versionData?.service,
-      configuration: versionData?.configuration,
-      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter
+      service,
+      configuration,
+      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter,
+      connected_agents: versionData?.connected_agents,
+      modelInfoData,
+      bridge
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);
   const { tool_choice: tool_choice_data, type, model } = configuration || {};
-  const { modelInfoData } = useCustomSelector((state) => ({
-    modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
-  }));
+  const initialThreadId = bridge?.thread_id || generateRandomID();
+  const [thread_id, setThreadId] = useState(initialThreadId);
+
+    useEffect(() => {
+          if (!bridge?.thread_id && initialThreadId) {
+            setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                  bridgeId: params?.id,
+                  versionId: searchParams?.version,
+                  thread_id: initialThreadId,
+              }));
+          }
+      }, []);
   useEffect(() => {
     setInputConfiguration(configuration);
   }, [configuration]);
@@ -91,8 +109,20 @@ const AdvancedParameters = ({ params, searchParams }) => {
           id: value?._id
         }))
       : [];
-    setSelectedOptions(selectedFunctiondata);
-  }, [tool_choice_data])
+      const selectedAgentData = connected_agents && typeof connected_agents === 'object'
+        ? Object.entries(connected_agents)
+          .filter(([name, item]) => {
+            const toolChoice = typeof tool_choice_data === 'string' ? tool_choice_data : '';
+            return toolChoice === item.bridge_id;
+          })
+          .map(([name, item]) => ({
+            name,
+            id: item.bridge_id
+          }))
+        : [];
+      setSelectedOptions(selectedAgentData?.length > 0 ? selectedAgentData : selectedFunctiondata);
+    
+  }, [tool_choice_data]);
 
   const debounce = (func, delay) => {
     let timeoutId;
@@ -168,12 +198,6 @@ const AdvancedParameters = ({ params, searchParams }) => {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
-
-  const debouncedSelectChange = useCallback(
-    debounce(handleSelectChange, 500),
-    [configuration, params?.id, params?.version]
-  );
-
   const toggleAccordion = () => {
     setIsAccordionOpen((prevState) => !prevState);
   };
@@ -202,7 +226,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
     };
     dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
   }, [dispatch, params?.id, searchParams?.version]);
-
+  
   // Helper function to render parameter fields
   const renderParameterField = (key, { field, min = 0, max, step, default: defaultValue, options }) => {
     const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
@@ -211,29 +235,38 @@ const AdvancedParameters = ({ params, searchParams }) => {
     const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
     let error = false;
     return (
-      <div key={key} className="form-control w-full">
-        <label className="label">
+      <div key={key} className=" w-full">
+        <div className="label cursor-default">
           <div className='flex gap-2'>
+          <div className="ml-auto flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-sm cursor-pointer"
+                title={configuration?.[key] === 'default' ? 'Set to custom value' : 'Set to default'}
+                checked={configuration?.[key] !== 'default'}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  if (!checked) {
+                    setSliderValue("default", key)
+                  } else {
+                    const fallback = modelInfoData?.[key]?.default ?? inputConfiguration?.[key] ?? configuration?.[key] ?? null;
+                    setSliderValue(fallback, key)
+                  }
+                }}
+              />
+            </div>
             <div className='flex flex-row gap-2 items-center'>
               {description ? <InfoTooltip tooltipContent={description}>
                 <span className="label-text capitalize info">{name || key}</span>
               </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
             </div>
-            <div>
-              <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
-                {field === 'slider' && (<li><a onClick={() => setSliderValue("min", key)} className={configuration?.[key] === "min" ? 'bg-base-content text-base-100' : ''}>Min</a></li>)}
-                <InfoTooltip tooltipContent="If you set default, this key will not be send">
-                  <li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li>
-                </InfoTooltip>
-                {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
-              </ul>
-            </div>
+            
           </div>
-          {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
-          {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
+          {((field === 'slider') && configuration?.[key] !== 'default' && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
+          {field === 'slider' && configuration?.[key] !== 'default' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
             modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
-        </label>
-        {field === 'dropdown' && (
+        </div>
+        {field === 'dropdown' && configuration?.[key] !== 'default' && (
           <div className="w-full">
             <div className="relative">
               <div
@@ -332,15 +365,51 @@ const AdvancedParameters = ({ params, searchParams }) => {
                         );
                       })
                   )}
-
+                  {connected_agents && typeof connected_agents === 'object' && (
+                    <>
+                      <div className="px-2 pt-2 pb-1 text-xs font-semibold text-base-content/70">Agents</div>
+                      {Object.entries(connected_agents)
+                        .filter(([name, item]) => {
+                          const label = name || item?.description || '';
+                          return label?.toLowerCase()?.includes(searchQuery?.toLowerCase());
+                        })
+                        .sort(([aName], [bName]) => (aName || '').localeCompare(bName || ''))
+                        .map(([name, item]) => {
+                          const title = name || 'Untitled';
+                          const isSelected = selectedOptions?.some(opt => opt?.id === item?.bridge_id);
+                          return (
+                            <div
+                              key={item?.bridge_id}
+                              className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
+                              onClick={() => {
+                                setSelectedOptions(isSelected ? [] : [{ name, id: item?.bridge_id }]);
+                                handleDropdownChange(isSelected ? null : item?.bridge_id, key);
+                                setShowDropdown(false);
+                              }}
+                            >
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  name="agent-select"
+                                  checked={isSelected}
+                                  className="radio radio-sm"
+                                />
+                                <span>{title}</span>
+                              </label>
+                            </div>
+                          );
+                        })}
+                    </>
+                  )}
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {field === 'slider' && (
-          <div>
+        {field === 'slider' && configuration?.[key] !== 'default' && (
+          <div className="flex items-center gap-2">
+            <button type="button" className="btn btn-xs" onClick={() => setSliderValue('min', key)}>Min</button>
             <input
               type="range"
               min={min || 0}
@@ -359,9 +428,10 @@ const AdvancedParameters = ({ params, searchParams }) => {
               className="range range-accent range-sm h-3 range-extra-small-thumb"
               name={key}
             />
+            <button type="button" className="btn btn-xs" onClick={() => setSliderValue('max', key)}>Max</button>
           </div>
         )}
-        {field === 'text' && (
+        {field === 'text' && configuration?.[key] !== 'default' && (
           <input
             type="text"
             value={inputConfiguration?.[key] === 'default' ? '' : inputConfiguration?.[key] || ''}
@@ -376,7 +446,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
             name={key}
           />
         )}
-        {field === 'number' && (
+        {field === 'number' && configuration?.[key] !== 'default' && (
           <input
             type="number"
             min={min}
@@ -394,7 +464,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
             name={key}
           />
         )}
-        {field === 'boolean' && (
+        {field === 'boolean' && configuration?.[key] !== 'default' && (
           <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
             <input
               name={key}
@@ -405,7 +475,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
             />
           </label>
         )}
-        {field === 'select' && (
+        {field === 'select' && configuration?.[key] !== 'default' && (
           <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
             <select
               value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
@@ -450,7 +520,18 @@ const AdvancedParameters = ({ params, searchParams }) => {
                   placeholder="Enter valid JSON object here..."
                 />
 
-                <JsonSchemaModal params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} />
+                <JsonSchemaModal params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} 
+                
+                           onResetThreadId={() => {
+                                    const newId = generateRandomID();
+                                    setThreadId(newId);
+                                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                                        bridgeId: params?.id,
+                                        versionId: searchParams?.version,
+                                        thread_id: newId,
+                                    }));
+                                }} 
+                                />
               </>
             )}
 
@@ -464,7 +545,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
     <div className="z-very-low mt-4 text-base-content w-full cursor-pointer" tabIndex={0}>
       {/* Level 2 Parameters - Displayed Outside Accordion */}
       {level2Parameters.length > 0 && (
-        <div className="w-full gap-3 flex flex-col px-3 py-2 border border-base-content/20 rounded-lg mb-4">
+        <div className="w-full gap-3 flex flex-col px-3 py-2 border border-base-content/20 rounded-lg mb-4 cursor-default">
           {level2Parameters.map(([key, paramConfig]) => (
             renderParameterField(key, paramConfig)
           ))}
@@ -489,7 +570,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
       {level1Parameters.length > 0 && (
-        <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+        <div className={`w-full gap-3 cursor-default flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
           {/* Level 1 Parameters - Inside Accordion */}
           {level1Parameters.map(([key, paramConfig]) => (
             renderParameterField(key, paramConfig)

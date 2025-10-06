@@ -93,7 +93,7 @@ export const bridgeReducer = createSlice({
         ...extraData,
         configuration: { ...configuration }
       };
-
+       
       if (extraData?.bridgeType) {
         const allData = state.org[bridges.org_id]?.orgs;
         if (allData) {
@@ -135,6 +135,21 @@ export const bridgeReducer = createSlice({
           }
         }
       }
+      if(bridges?.name)
+        {
+          const allData = state.org[bridges.org_id]?.orgs;
+          if (allData) {
+            // Find the index of the bridge to update
+            const index = allData.findIndex(bridge => bridge._id === _id);
+            if (index !== -1) {
+              // Update the specific bridge object within the array immutably
+            state.org[bridges.org_id].orgs[index] = {
+              ...state.org[bridges.org_id].orgs[index],
+              ...bridges
+            };
+            }
+          }
+        }
       state.loading = false;
     },
     updateBridgeVersionReducer: (state, action) => {
@@ -200,6 +215,16 @@ export const bridgeReducer = createSlice({
       } else {
         state.allBridgesMap[bridgeId].variables = data;
       }
+    },
+    setThreadIdForVersionReducer: (state, action) => {
+      const { bridgeId, versionId, thread_id } = action.payload;
+      if (!state.bridgeVersionMapping[bridgeId]) {
+        state.bridgeVersionMapping[bridgeId] = {};
+      }
+      if (!state.bridgeVersionMapping[bridgeId][versionId]) {
+        state.bridgeVersionMapping[bridgeId][versionId] = {};
+      }
+      state.bridgeVersionMapping[bridgeId][versionId].thread_id = thread_id;
     },
     publishBrigeVersionReducer: (state, action) => {
       const { bridgeId = null, versionId = null, orgId = null } = action.payload;
@@ -348,6 +373,7 @@ export const {
   webhookURLForBatchAPIReducer,
   getPrebuiltToolsReducer, 
   updateAllBridgeReducerAgentVariable,
+  setThreadIdForVersionReducer,
   setIsFocusReducer,
   apikeyRollBackReducer,
   backupApiKeysReducer

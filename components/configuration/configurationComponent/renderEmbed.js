@@ -13,22 +13,24 @@ const RenderEmbed = ({
   const renderEmbed = useMemo(() => {
     return bridgeFunctions?.slice()
       .sort((a, b) => {
-        const aTitle = integrationData[a?.endpoint]?.title || integrationData[a?.function_name]?.title;
-        const bTitle = integrationData[b?.endpoint]?.title || integrationData[b?.function_name]?.title;
+        const aFnName = a?.function_name || a?.endpoint;
+        const bFnName = b?.function_name || b?.endpoint;
+        const aTitle = a?.title || integrationData?.[aFnName]?.title;
+        const bTitle = b?.title || integrationData?.[bFnName]?.title;
         if (!aTitle) return 1;
         if (!bTitle) return -1;
         return aTitle?.localeCompare(bTitle);
       })
       .map((value) => {
         const functionName = value?.function_name || value?.endpoint;
-        const title = integrationData?.[functionName]?.title;
-        const status = integrationData?.[functionName]?.status;
+        const title = value?.title || integrationData?.[functionName]?.title;
+        const status = value?.status || integrationData?.[functionName]?.status;
 
         return (
           <div
             key={value?._id}
             id={value?._id}
-            className={`flex w-full  flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
+            className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${value?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
           >
             <div
               className="p-2 w-full h-full flex flex-col justify-between"
@@ -42,9 +44,9 @@ const RenderEmbed = ({
             >
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="flex-1 min-w-0 text-[13px] sm:text-sm font-semibold text-base-content truncate">
+                  <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
                     <div className="tooltip" data-tip={title?.length > 24 ? title : ""}>
-                      <span>{title?.length > 24 ? `${title.slice(0, 24)}...` : title}</span>
+                      <span>{ title}</span>
                       <span
                         className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!(value?.description || value?.api_description || value?.short_description)
                           ? 'bg-red-100 text-red-700 border-red-200'
@@ -61,29 +63,34 @@ const RenderEmbed = ({
                 </p>
               </div>
             </div>
-            <div className="dropdown dropdown-end z-medium absolute right-1 top-1">
-              <div tabIndex={0} role="button" className="btn btn-ghost btn-xs">
-                <EllipsisVerticalIcon size={16} />
-              </div>
-              <ul tabIndex={0} className="dropdown-content menu p-1 shadow bg-base-100 rounded-box w-40 border border-base-300">
-                <li>
-                  <a onClick={() => handleOpenModal(value?._id)} className="text-sm">
-                    <SettingsIcon size={16} />
-                    Config
-                  </a>
-                </li>
-                <li>
-                  <a onClick={() => handleRemoveEmbed(value?._id, value?.function_name)} className="text-sm text-error">
-                    <TrashIcon size={16} />
-                    Remove
-                  </a>
-                </li>
-              </ul>
+            
+            {/* Action buttons that appear on hover */}
+            <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenModal(value?._id);
+                }}
+                className="btn btn-ghost btn-xs p-1 hover:bg-base-300"
+                title="Config"
+              >
+                <SettingsIcon size={16} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveEmbed(value?._id, value?.function_name);
+                }}
+                className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
+                title="Remove"
+              >
+                <TrashIcon size={16} />
+              </button>
             </div>
           </div>
         );
       });
-  }, [bridgeFunctions, integrationData, getStatusClass, handleOpenModal, embedToken, params]);
+  }, [bridgeFunctions, integrationData, getStatusClass, handleOpenModal, embedToken, params, handleRemoveEmbed]);
 
   return <>{renderEmbed}</>;
 };

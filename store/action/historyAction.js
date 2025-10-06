@@ -1,9 +1,9 @@
 import { getHistory, getSingleThreadData, getSubThreadIds, updateHistoryMessage, userFeedbackCount } from "@/config";
 import { fetchAllHistoryReducer, fetchSubThreadReducer, fetchThreadReducer, updateHistoryMessageReducer, userFeedbackCountReducer } from "../reducer/historyReducer";
 
-export const getHistoryAction = (id, start, end, page = 1, keyword = '',user_feedback, isErrorTrue) => async (dispatch) => {
+export const getHistoryAction = (id, start, end, page = 1, keyword = '',user_feedback, isErrorTrue, selectedVersion) => async (dispatch) => {
   try {
-    const data = await getHistory(id, page, start, end, keyword,user_feedback, isErrorTrue );
+    const data = await getHistory(id, page, start, end, keyword,user_feedback, isErrorTrue, selectedVersion );
     if (data && data.data) {
       dispatch(fetchAllHistoryReducer({ data: data.data, page }));
       return data.data; // Return the data for further checks
@@ -41,9 +41,9 @@ export const userFeedbackCountAction = ({bridge_id,user_feedback}) => async(disp
   }
 }
 
-export const getSubThreadsAction = ({thread_id, error, bridge_id}) => async (dispatch) =>{
+export const getSubThreadsAction = ({thread_id, error, bridge_id, version_id}) => async (dispatch) =>{
   try {
-    const data = await getSubThreadIds({thread_id, error, bridge_id});
+    const data = await getSubThreadIds({thread_id, error, bridge_id, version_id});
     dispatch(fetchSubThreadReducer({data:data.threads}))
 
   } catch (error) {

@@ -4,15 +4,15 @@ import React, { useMemo, useState } from 'react';
 import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
 
-function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [], shouldToolsShow, modelName, bridges }) {
+function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, connect_agents = [], bridges, bridgeData }) {
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
         setSearchQuery(e?.target?.value || "");
     };
 
-    const handleItemClick = (bridge) => {
-        handleSelectAgents(bridge);
+    const handleItemClick = (bridge, bridgeData) => {
+        handleSelectAgents(bridge, bridgeData);
     };
 
     const renderBridgeSuggestions = useMemo(() => (
@@ -32,10 +32,10 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
             })
             .map((bridge) => {
                 return (
-                    <li key={bridge?._id} onClick={() => bridge?.published_version_id ? handleItemClick(bridge) : null}>
+                    <li key={bridge?._id} onClick={() => bridge?.published_version_id ? handleItemClick(bridge, bridgeData) : null}>
                         <div className={`flex justify-between items-center w-full ${!bridge?.published_version_id ? 'opacity-50' : ''}`}>
-                            <p className="overflow-hidden text-ellipsis whitespace-pre-wrap">
-                                {bridge?.name || 'Untitled'}
+                            <p className="overflow-hidden text-ellipsis whitespace-pre-wrap" title={bridge?.name?.length > 20 ? bridge?.name : ""}>
+                                {bridge?.name?.length > 20 ? `${bridge?.name.slice(0, 20)}...` : bridge?.name || 'Untitled'}
                             </p>
                             <div>
                                 {!bridge?.published_version_id ? (
@@ -52,7 +52,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
                     </li>
                 )
             })
-    ), [bridges, searchQuery, connect_agents]);
+    ), [bridges, searchQuery, connect_agents, bridgeData]);
 
     return (
         <div className="dropdown dropdown-left mt-8">

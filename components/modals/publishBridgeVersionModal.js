@@ -8,7 +8,7 @@ import {
   updateBridgeAction,
 } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { closeModal, sendDataToParent } from "@/utils/utility";
+import { closeModal, openModal, sendDataToParent } from "@/utils/utility";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 import Modal from "../UI/Modal";
@@ -16,6 +16,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from "../protected";
 import PublishVersionDataComparisonView from "../comparison/PublishVersionDataComparisonView";
 import { DIFFERNCE_DATA_DISPLAY_NAME, KEYS_TO_COMPARE } from "@/jsonFiles/bridgeParameter";
+import PromptSummaryModal from "./PromptSummaryModal";
 
 function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_description, isEmbedUser }) {
   const dispatch = useDispatch();
@@ -26,12 +27,14 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
   const [selectedAgentsToPublish, setSelectedAgentsToPublish] = useState(new Set());
   const [allConnectedAgents, setAllConnectedAgents] = useState([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
+  const [autoGenerateSummary, setAutoGenerateSummary] = useState(false);
 
-  const { bridge, versionData, bridgeData, agentList } = useCustomSelector((state) => ({
+  const { bridge, versionData, bridgeData, agentList, bridge_summary } = useCustomSelector((state) => ({
     bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
     versionData: state.bridgeReducer.bridgeVersionMapping?.[params?.id]?.[searchParams?.version],
     bridgeData: state.bridgeReducer.allBridgesMap?.[params?.id],
-    agentList: state.bridgeReducer.org[params.org_id]?.orgs || []
+    agentList: state.bridgeReducer.org[params.org_id]?.orgs || [],
+    bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
   }));
 
   // Memoized form data initialization
@@ -320,6 +323,13 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     setError(null);
 
     try {
+      // Require a summary before publishing
+      if (!bridge_summary || (typeof bridge_summary === 'string' && bridge_summary.trim().length === 0)) {
+        openModal(MODAL_TYPE.PROMPT_SUMMARY);
+        setIsLoading(false);
+        return;
+      }
+
       if (isPublicAgent) {
         if (!formData.url_slugname.trim()) {
           toast.error("Slug Name is required.");
@@ -391,7 +401,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     } finally {
       setIsLoading(false);
     }
-  }, [dispatch, params, searchParams, isPublicAgent, formData, agent_name, agent_description, isEmbedUser, selectedAgentsToPublish]);
+  }, [dispatch, params, searchParams, isPublicAgent, formData, agent_name, agent_description, isEmbedUser, selectedAgentsToPublish, bridge_summary]);
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
@@ -418,6 +428,28 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
               </button>
             </div>
           </div>
+
+          {/* Summary required alert */}
+          {(!bridge_summary || (typeof bridge_summary === 'string' && bridge_summary.trim().length === 0)) && (
+            <div className="alert alert-warning w-full flex justify-between bg-warning border border-warning/30 mb-4">
+              <div className="flex items-start gap-3 w-full">
+                <AlertTriangle className="h-5 w-5 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-medium">Summary required</h4>
+                  <p className="text-sm opacity-80">You need to add a prompt summary for this agent before publishing.</p>
+                </div>
+                <button
+                  className="btn btn-sm bg-base-200 flex justify-end btn-outline"
+                  onClick={() => {
+                    setAutoGenerateSummary(true);
+                    openModal(MODAL_TYPE.PROMPT_SUMMARY_PUBLISH);
+                  }}
+                >
+                  Generate Prompt Summary
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Warning Section */}
           {!showComparison && (
@@ -462,27 +494,20 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                     <span>No differences found between the versions.</span>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="flex items-center gap-2">
                     {/* Extracted config changes */}
-                    {Object.keys(extractedConfigChanges).length > 0 && (
-                      <div className="mb-2">
-                        <div className="flex flex-wrap gap-4">
-                          {Object.keys(extractedConfigChanges).map(key => (
-                            <div key={key} className="card bg-base-100">
-                              <div className="card-body p-3">
-                                <div className="flex justify-between items-center">
-                                  <h5 className="card-title text-sm">{DIFFERNCE_DATA_DISPLAY_NAME(key)}</h5>
+                      <div className="flex flex-wrap gap-1">
+                        {Object.keys(extractedConfigChanges).length > 0 && (
+                            Object.keys(extractedConfigChanges).map(key => (
+                              <div key={key} className="card bg-base-100">
+                                <div className="card-body p-3">
+                                  <div className="flex justify-between items-center">
+                                    <h5 className="card-title text-sm">{DIFFERNCE_DATA_DISPLAY_NAME(key)}</h5>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Other category changes */}
-                    <div className="mb-2">
-                      <div className="flex flex-wrap gap-4">
+                            ))
+                        )}
                         {Object.keys(changesSummary)
                           .filter(key => !Object.keys(extractedConfigChanges).includes(key))
                           .map(key => (
@@ -493,9 +518,10 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                                 </div>
                               </div>
                             </div>
-                          ))}
+                          ))
+                        }
                       </div>
-                    </div>
+                    
                   </div>
                 )}
               </div>
@@ -517,7 +543,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                     </h4>
                     
                     {/* Select All option */}
-                    {allConnectedAgents.filter(agent => agent._id !== params?.id && agent?.haveToPublish).length > 0 && (
+                    {allConnectedAgents.filter(agent => agent._id !== params?.id && agent?.haveToPublish).length > 1 && (
                       <button 
                         onClick={toggleSelectAllAgents}
                         className="btn btn-sm btn-outline flex gap-1"
@@ -795,6 +821,15 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       </div>
 
       <div className="modal-backdrop" onClick={handleCloseModal}></div>
+
+      {/* Prompt Summary Modal (mounted so we can open it on-demand) */}
+      <PromptSummaryModal 
+        modalType={MODAL_TYPE.PROMPT_SUMMARY_PUBLISH}
+        params={params} 
+        searchParams={searchParams} 
+        autoGenerateSummary={autoGenerateSummary}
+        setAutoGenerateSummary={setAutoGenerateSummary}
+      />
     </Modal>
   );
 }

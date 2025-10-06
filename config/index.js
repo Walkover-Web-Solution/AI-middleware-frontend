@@ -150,7 +150,7 @@ export const getSingleThreadData = async (threadId, bridgeId, subThreadId, nextP
   }
 }
 
-export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback, isErrorTrue) => {
+export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', user_feedback, isErrorTrue, versionId) => {
   try {
 
     const getSingleThreadData = await axios.get(`${URL}/api/v1/config/history/${bridgeId}`, {
@@ -161,7 +161,8 @@ export const getHistory = async (bridgeId, page = 1, start, end, keyword = '', u
         endTime: end,
         keyword_search: keyword,
         user_feedback: user_feedback,
-        error: isErrorTrue
+        error: isErrorTrue,
+        version_id: (versionId === 'all'|| versionId === 'undefined') ? null : versionId
       }
     });
     return getSingleThreadData.data;
@@ -303,6 +304,17 @@ export const getInvitedUsers = async ({page, limit, search}) => {
   }
 }
 
+export const removeUsersFromOrg = async (user_id) =>{
+  try{
+    const response = await axios.delete(`${URL}/user/deleteUser`, {
+      data:{user_id}});
+    return response.data;
+  }catch(error){
+    console.error(error);
+    return error;
+  }
+}
+
 export const getMetricsData = async (org_id, startDate, endDate) => {
   try {
     const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`, {
@@ -317,7 +329,7 @@ export const getMetricsData = async (org_id, startDate, endDate) => {
     return error;
   }
 }
-export const updateFlowDescription = async (embed_token, functionId, description) => {
+export const updateFlow = async (embed_token, functionId, description,title) => {
   try {
     const response = await fetch(`https://flow-api.viasocket.com/projects/updateflowembed/${functionId}`, {
       method: "PUT",
@@ -326,9 +338,12 @@ export const updateFlowDescription = async (embed_token, functionId, description
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "description": description
+        "description": description,
+        "title": title,
+        "endpoint_name": title
       })
     });
+
     
     const data = await response.json();
     return data.data;
@@ -698,12 +713,13 @@ export const userFeedbackCount = async ({ bridge_id, user_feedback }) => {
   }
 }
 
-export const getSubThreadIds = async ({ thread_id, error, bridge_id }) => {
+export const getSubThreadIds = async ({ thread_id, error, bridge_id, version_id }) => {
   try {
     const response = await axios.get(`${URL}/api/v1/config/history/sub-thread/${thread_id}`, {
       params: {
         error,
-        bridge_id
+        bridge_id,
+        version_id: (version_id === "all" || version_id === "undefined") ? null : version_id 
       }
     });
     return response.data;
@@ -931,9 +947,9 @@ export const createTestCaseApi = async ({ bridgeId, data }) => {
   }
 }
 
-export const runTestCaseApi = async ({ versionId }) => {
+export const runTestCaseApi = async ({ versionId, testcase_id, testCaseData, bridgeId }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/api/v2/model/testcases/${versionId}`, { "version_id": versionId });
+    const response = await axios.post(`${PYTHON_URL}/api/v2/model/testcases`, { "version_id": versionId, "testcases": true, "testcase_id": testcase_id, "testcase_data": testCaseData, "bridge_id": bridgeId });
     return response.data;
   } catch (error) {
     toast.error(error?.response?.data?.detail?.error ? error?.response?.data?.detail?.error : "Error while running the testcases")
@@ -1060,6 +1076,15 @@ export const getApiKeyGuide =async ()=>{
   catch(error){
     throw new Error(error);
   }
+}
+export const getDescriptions =async()=>{
+   try{
+    const response=await axios.get("https://flow.sokt.io/func/scriPqFeiEKa")
+    return response;
+   }
+   catch(error){
+    throw new Error(error);
+   }
 }
 export const getGuardrailsTemplates=async()=>{
   try {

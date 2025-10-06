@@ -31,7 +31,7 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage}) => {
     newSearchParams.set('start', startingDate);
     newSearchParams.set('end', endingDate);
     const thread_id = searchParams.get('thread_id');
-    await dispatch(getHistoryAction(params.id, startingDate, endingDate, 1));
+    await dispatch(getHistoryAction(params.id, startingDate, endingDate, 1, null, null, false, selectedVersion));
     setHasMore(true);
     setPage(1);
     const queryString = newSearchParams.toString();
@@ -49,7 +49,7 @@ const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage}) => {
     newSearchParams.delete('end');
     newSearchParams.delete('thread_id');
     const thread_id = searchParams.get('thread_id');
-    await dispatch(getHistoryAction(params.id, null, null, 1));
+    await dispatch(getHistoryAction(params.id, null, null, 1, null, filterOption, isErrorTrue, selectedVersion));
     const queryString = newSearchParams.toString();
     window.history.replaceState(null, '', `?${queryString}`);
     setHasMore(true);

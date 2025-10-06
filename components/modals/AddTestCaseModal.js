@@ -27,28 +27,36 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
     });
     // Ensure testCaseConversation is not undefined or null
     const initialTestCases = testCaseConversation && testCaseConversation.length > 0 ? testCaseConversation.map((message) => {
-        if (message.role === "user") {
+        if (message.role === "user" || message.sender === "user") {
             return {
-                role: message.role,
+                role: message.role || message.sender,
                 content: message.content?.[0]?.text || message?.content
             };
-        } else if (message.role === "assistant" && message.content) {
+        } else if ((message.role === "assistant" || message.sender === "assistant") && message.content) {
             return {
-                role: message.role,
+                role: message.role || message.sender,
                 content: message.content?.[0]?.text || message?.content
             };
-        } else if (message.role === "tools_call") {
+        } else if (message.role === "tools_call" || message.sender === "tools_call") {
+            const toolCallData = message.tools_call_data;
+          
+            const tools = [];
+          
+            if (toolCallData && typeof toolCallData === 'object') {
+              for (const [toolName, toolDetails] of Object.entries(toolCallData)) {
+                tools.push({
+                  name: toolName,
+                  id: mongoIdsOfTools[toolDetails?.id],
+                  arguments: toolDetails?.args,
+                });
+              }
+            }
+          
             return {
-                role: message?.role,
-                tools: message.tools_call_data?.map((toolData) => (
-                    Object.values(toolData || {}).map((item) => ({
-                        name: item?.name,
-                        id: mongoIdsOfTools[item?.id],
-                        arguments: item?.args
-                    }))
-                )).flat()
+              role: message?.role || message?.sender,
+              tools,
             };
-        }
+          }
         return null;
     }).filter(Boolean) : [];
 
@@ -120,9 +128,9 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
                         {finalTestCases?.map((message, index) => (
                             <div key={index} className="space-y-2">
                                 <div className="text-xs font-medium uppercase text-base-content tracking-wide">
-                                    {message.role.replace('_', ' ')}
+                                    {message?.role?.replace('_', ' ') || message?.sender?.replace('_', ' ')}
                                 </div>
-                                {message.role === "tools_call" ? (
+                                {(message.role === "tools_call" || message.sender === "tools_call") ? (
                                     <div className="space-y-3">
                                         {message.tools?.map((item, idx) => (
                                             <div key={idx} className="flex gap-3 items-start group relative bg-base-100 rounded-lg p-3 shadow-sm">

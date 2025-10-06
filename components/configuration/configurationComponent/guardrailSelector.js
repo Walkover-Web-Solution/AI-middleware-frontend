@@ -9,12 +9,11 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 const GuardrailSelector = ({ params, searchParams }) => {  
     const { guardrailsData,GUARDRAILS_TEMPLATES } = useCustomSelector(
         (state) => ({
-            guardrailsData: state.bridgeReducer?.bridgeVersionMapping[params?.id]?.[searchParams?.version]?.guardrails,
-            GUARDRAILS_TEMPLATES: state.flowDataReducer?.flowData?.guardrailsTemplatesData
-
+            guardrailsData: state.bridgeReducer?.bridgeVersionMapping[params?.id]?.[searchParams?.version]?.guardrails || {},
+            GUARDRAILS_TEMPLATES: state.flowDataReducer?.flowData?.guardrailsTemplatesData || {}
         })
     );
-    const [customPrompt, setCustomPrompt] = useState(guardrailsData?.guardrails_custom_prompt);
+    const [customPrompt, setCustomPrompt] = useState(guardrailsData?.guardrails_custom_prompt || "");
     const [showCustomInput, setShowCustomInput] = useState(false);
     const [selectedGuardrails, setSelectedGuardrails] = useState([]);
     const [guardrailsEnabled, setGuardrailsEnabled] = useState(guardrailsData?.is_enabled);
@@ -57,7 +56,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
             // Set enabled state from is_enabled
             
             // Set selected guardrails from guardrails_configuration
-            const selected = Object.entries(guardrailsData?.guardrails_configuration)
+            const selected = Object.entries(guardrailsData?.guardrails_configuration || {})
                 .filter(([_, isEnabled]) => isEnabled)
                 .map(([key]) => key);
             setSelectedGuardrails(selected);
@@ -208,7 +207,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-2">
                                         {/* Predefined Guardrails */}
-                                        {Object.entries(GUARDRAILS_TEMPLATES).map(([key, { name, description }]) => (
+                                        {Object.entries(GUARDRAILS_TEMPLATES || {}).map(([key, { name, description }]) => (
                                             <div key={key} className="form-control">
                                                 <div className="label cursor-pointer justify-start gap-2">
                                                     <input 

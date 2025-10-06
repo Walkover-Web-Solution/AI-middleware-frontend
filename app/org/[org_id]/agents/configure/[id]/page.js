@@ -3,7 +3,6 @@
 import ConfigurationPage from "@/components/configuration/ConfigurationPage";
 import Chat from "@/components/configuration/chat";
 import Chatbot from "@/components/configuration/chatbot";
-import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
@@ -48,11 +47,8 @@ const Page = ({params, searchParams }) => {
   // Enhanced responsive detection
   useEffect(() => {
     const handleResize = () => {
-      const desktop = window.innerWidth >= 1080;
+      const desktop = window.innerWidth >= 710;
       setIsDesktop(desktop);
-      if (!desktop) {
-        setLeftWidth(50); // Reset on mobile
-      }
     };
 
     handleResize();

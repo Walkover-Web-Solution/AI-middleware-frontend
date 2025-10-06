@@ -2,8 +2,7 @@ import { useCustomSelector } from "@/customHooks/customSelector";
 import { BotIcon, SettingsIcon, FilterSliderIcon, AlertIcon } from "@/components/Icons";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import ChatbotGuide from "../chatbotConfiguration/chatbotGuide";
-import ApiGuide from './configurationComponent/ApiGuide';
+
 import ActionList from "./configurationComponent/actionList";
 import AdvancedParameters from "./configurationComponent/advancedParamenter";
 import ApiKeyInput from "./configurationComponent/apiKeyInput";
@@ -24,7 +23,6 @@ import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import TriggersList from "./configurationComponent/TriggersList";
 import AddVariable from "../addVariable";
-import PrebuiltToolsList from "./configurationComponent/prebuiltToolsList";
 import ConnectedAgentList from "./configurationComponent/ConnectedAgentList";
 import StarterQuestionToggle from "./configurationComponent/starterQuestion";
 import Protected from "../protected";
@@ -35,8 +33,8 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
     const router = useRouter();
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
-
-    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow } = useCustomSelector((state) => {
+    
+    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, hideAdvancedParameters, hideAdvancedConfigurations, service ,hidePreTool } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const service = versionData?.service;
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -59,6 +57,10 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             bridge_functions: versionData?.function_ids || [],
             connect_agents: versionData?.connected_agents || {},
             knowbaseVersionData: versionData?.doc_ids || [],
+            hideAdvancedParameters: state.userDetailsReducer.userDetails.hideAdvancedParameters,
+            hideAdvancedConfigurations: state.userDetailsReducer.userDetails.hideAdvancedConfigurations,
+            service: service,
+            hidePreTool: state.userDetailsReducer.userDetails.hidePreTool,
         };
     });
     useEffect(() => {
@@ -104,35 +106,21 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
         );
     };
 
-    const renderSetupView = useMemo(() => () => (
+    // Helper function to render common components (ServiceDropdown, ModelDropdown, ApiKeyInput, AdvancedParameters, RecommendedModal)
+    const renderCommonComponents = () => (
         <>
-            {bridgeType === 'trigger' && !isEmbedUser && <TriggersList params={params} />}
-            {(modelType !== AVAILABLE_MODEL_TYPES.IMAGE && modelType !== AVAILABLE_MODEL_TYPES.EMBEDDING) && (
-                <>
-                    <PreEmbedList params={params} searchParams={searchParams} />
-                    <InputConfigComponent params={params} searchParams={searchParams} promptTextAreaRef={promptTextAreaRef} isEmbedUser={isEmbedUser} />
-                    {/* <NewInputConfigComponent params={params} /> */}
-                    {shouldToolsShow ? (
-                        <>
-                            <EmbedList params={params} searchParams={searchParams} />
-                            <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                            <ConnectedAgentList params={params} searchParams={searchParams} />
-                            <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                            <KnowledgebaseList params={params} searchParams={searchParams} />
-                            <hr className="my-0 p-0 bg-base-200 border-base-300" />
-                        </>
-                    ) : (
-                        <div className="flex items-center gap-2 mt-3 mb-3">
-                          <AlertIcon size={18} className="text-warning" /> 
-                           <h2 className="text-center">This model does not support tools</h2>
-                        </div>
-                    )}
-                    <PrebuiltToolsList params={params} searchParams={searchParams} />
-                </>
-            )}
-            <RecommendedModal params={params} searchParams={searchParams} apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} bridgeApiKey={bridgeApiKey} shouldPromptShow={shouldPromptShow} />
+            <RecommendedModal 
+                params={params} 
+                searchParams={searchParams} 
+                apiKeySectionRef={apiKeySectionRef} 
+                promptTextAreaRef={promptTextAreaRef} 
+                bridgeApiKey={bridgeApiKey} 
+                shouldPromptShow={shouldPromptShow} 
+                service={service} 
+                deafultApiKeys={showDefaultApikeys}
+            />
             <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 items-start">
-                <div className="w-full min-w-0 md:order-2">
+                <div className="w-full min-w-0 md:order-1">
                     <ServiceDropdown
                         params={params}
                         apiKeySectionRef={apiKeySectionRef}
@@ -140,52 +128,80 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                         searchParams={searchParams}
                     />
                 </div>
-                <div className="w-full min-w-0 md:order-1">
+                <div className="w-full min-w-0 md:order-2">
                     <ModelDropdown params={params} searchParams={searchParams} />
                 </div>
-                <div className="w-full min-w-0 md:order-3">
-                    <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
-                </div>
+                {((!showDefaultApikeys && isEmbedUser) || !isEmbedUser) && (
+                    <div className="w-full min-w-0 md:order-3">
+                        <ApiKeyInput apiKeySectionRef={apiKeySectionRef} params={params} searchParams={searchParams} />
+                    </div>
+                )}
             </div>
-            <AdvancedParameters params={params} searchParams={searchParams} />
-            {modelType !== "image" && modelType !== 'embedding' && (
-                <>
-                    <AddVariable params={params} searchParams={searchParams} />
-                    <AdvancedConfiguration params={params} searchParams={searchParams} bridgeType={bridgeType} modelType={modelType} />
-                    <GptMemory params={params} searchParams={searchParams} />
-                </>
+            {((isEmbedUser && !hideAdvancedParameters) || !isEmbedUser) && (
+                <AdvancedParameters params={params} searchParams={searchParams} />
             )}
         </>
-    ), [bridgeType, modelType, params, modelName]);
+    );
+
+    // Helper function to render non-image model components
+    const renderNonImageComponents = () => (
+        <>
+        {((!hidePreTool &&isEmbedUser) || !isEmbedUser) &&(
+            <PreEmbedList params={params} searchParams={searchParams} />
+        )}
+            <InputConfigComponent 
+                params={params} 
+                searchParams={searchParams} 
+                promptTextAreaRef={promptTextAreaRef} 
+                isEmbedUser={isEmbedUser} 
+            />
+            {shouldToolsShow ? (
+                <>
+                    <EmbedList params={params} searchParams={searchParams} />
+                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
+                    <ConnectedAgentList params={params} searchParams={searchParams} />
+                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
+                    <KnowledgebaseList params={params} searchParams={searchParams} />
+                    <hr className="my-0 p-0 bg-base-200 border-base-300" />
+                </>
+            ) : (
+                <div className="flex items-center gap-2 mt-3 mb-3">
+                    <AlertIcon size={18} className="text-warning" />
+                    <h2 className="text-center">This model does not support tools</h2>
+                </div>
+            )}
+            {renderCommonComponents()}
+            <AddVariable params={params} searchParams={searchParams} />
+            {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
+                <AdvancedConfiguration 
+                    params={params} 
+                    searchParams={searchParams} 
+                    bridgeType={bridgeType} 
+                    modelType={modelType} 
+                />
+            )}
+            <GptMemory params={params} searchParams={searchParams} />
+        </>
+    );
+
+    const renderSetupView = useMemo(() => () => (
+        <>
+            {bridgeType === 'trigger' && !isEmbedUser && <TriggersList params={params} />}
+            {modelType === "image" ? (
+                renderCommonComponents()
+            ) : (
+                renderNonImageComponents()
+            )}
+        </>
+    ), [bridgeType, modelType, params, modelName, bridgeApiKey]);
+
     const renderChatbotConfigView = useMemo(() => () => (
         <>
-
             <UserRefernceForRichText params={params} searchParams={searchParams} />
             <StarterQuestionToggle params={params} searchParams={searchParams} />
             <ActionList params={params} searchParams={searchParams} />
         </>
     ), [bridgeType, modelType, params, modelName]);
-
-    const renderGuideView = useMemo(() => () => {
-        const guideComponents = {
-            api: <ApiGuide params={params} searchParams={searchParams} modelType={modelType} />,
-            batch: <BatchApiGuide params={params} searchParams={searchParams} />,
-            chatbot: <ChatbotGuide params={params} searchParams={searchParams} />,
-        };
-
-        return (
-            <div className="flex flex-col w-100 overflow-auto gap-3">
-                {bridgeType === 'chatbot' && <SlugNameInput params={params} searchParams={searchParams} />}
-                <h1 className="text-xl font-semibold">
-                    {bridgeType === 'api' ? 'API Configuration' :
-                        bridgeType === 'batch' ? 'Batch API Configuration' : 'Chatbot Configuration'}
-                </h1>
-                <div className="flex flex-col gap-4">
-                    {guideComponents[bridgeType]}
-                </div>
-            </div>
-        );
-    }, [bridgeType, params, modelType]);
 
     return (
         <div className="flex flex-col gap-3 relative mt-4 bg-base-100">
@@ -224,7 +240,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     </div>}
                 </div>
             </div>}
-            {currentView === 'chatbot-config' && bridgeType === 'chatbot' ? renderChatbotConfigView() : currentView === 'guide' && currentView !== 'trigger' ? renderGuideView() : renderSetupView()}
+            {currentView === 'chatbot-config' && bridgeType === 'chatbot' ? renderChatbotConfigView() : renderSetupView()}
             {renderNeedHelp()}
         </div>
     );

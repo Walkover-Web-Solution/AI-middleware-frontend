@@ -22,10 +22,12 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import { useDispatch } from "react-redux";
 import useRtLayerEventHandler from "@/customHooks/useRtLayerEventHandler";
-import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction } from "@/store/action/flowDataAction";
+import { getApiKeyGuideAction, getGuardrailsTemplatesAction, getTutorialDataAction, getDescriptionsAction } from "@/store/action/flowDataAction";
 import { userDetails } from "@/store/action/userDetailsAction";
 import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction";
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
+import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
+import { getAuthDataAction } from "@/store/action/authAction";
 function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
@@ -54,6 +56,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getTutorialDataAction()); 
       dispatch(getGuardrailsTemplatesAction());
       dispatch(userDetails());
+      dispatch(getDescriptionsAction());
     }
     if (pathName.endsWith("apikeys")&& !isEmbedUser) {
       dispatch(getApiKeyGuideAction()); 
@@ -215,15 +218,15 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     }
   }, [isValidOrg]);
 
-  useEffect(() => {
-    dispatch(getAllOrchestralFlowAction(resolvedParams.org_id));
-  }, [resolvedParams.org_id]);
 
   useEffect(() => {
     if (isValidOrg && resolvedParams?.org_id) {
       dispatch(getAllApikeyAction(resolvedParams?.org_id));
       dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
       dispatch(getPrebuiltToolsAction())
+      dispatch(getAllOrchestralFlowAction(resolvedParams.org_id));
+      dispatch(getAuthDataAction(resolvedParams?.org_id))
+      dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
     }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
@@ -324,7 +327,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         window.removeEventListener("message", handleMessage);
       };
     }
-  }, [isValidOrg, resolvedParams.id, versionData, searchParams?.version, path]);
+  }, [isValidOrg, resolvedParams.id, versionData, resolvedSearchParams.get('version'), path]);
 
   async function handleMessage(e) {
     if (e.data?.metadata?.type !== 'tool') return;
@@ -343,7 +346,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           if (selectedVersionData) {
             await dispatch(updateBridgeVersionAction({
               bridgeId: path[5],
-              versionId: version_id,
+              versionId: resolvedSearchParams?.get('version'),
               dataToSend: {
                 functionData: {
                   function_id: selectedVersionData._id,
@@ -371,13 +374,13 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
               e?.data?.metadata?.createFrom && e.data.metadata.createFrom === "preFunction" ? (
                 dispatch(updateApiAction(path[5], {
                   pre_tools: [data?._id],
-                  version_id: version_id
+                  version_id: resolvedSearchParams?.get('version')
                 }))
               )
                 : (
                   dispatch(updateBridgeVersionAction({
                     bridgeId: path[5],
-                    versionId: version_id,
+                    versionId: resolvedSearchParams?.get('version'),
                     dataToSend: {
                       functionData: {
                         function_id: data?._id,
@@ -416,8 +419,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
           </div>
 
           {/* Main Content Area */}
-          <div className={`flex-1 ${path.length > 4 ? 'ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
-            {/* Sticky Navbar */}
+          <div className={`flex-1 ${path.length > 4 ? 'ml-0  md:ml-12 lg:ml-12' : ''} flex flex-col overflow-hidden z-medium`}>
             <div className="sticky top-0 z-medium bg-base-100 border-b border-base-300 ml-2">
               {!isFocus && <Navbar resolvedParams={resolvedParams} />}
             </div>
