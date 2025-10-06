@@ -44,7 +44,7 @@ const RenderEmbed = ({
             >
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="flex-1 min-w-0 text-[13px] text-sm font-bold truncate">
+                  <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
                     <div className="tooltip" data-tip={title?.length > 24 ? title : ""}>
                       <span>{ title}</span>
                       <span

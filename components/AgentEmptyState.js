@@ -4,8 +4,14 @@ import { MessageCircleIcon, MessageSquareIcon, PlugIcon, SettingsIcon } from "./
 import { PlusIcon, Zap } from "lucide-react";
 import PageHeader from "./Pageheader";
 import CreateNewBridge from "./createNewBridge";
+import { useCustomSelector } from "@/customHooks/customSelector";
 
 const AgentEmptyState =   ({orgid,isEmbedUser}) => {
+  const {tutorialData}=useCustomSelector((state)=>({
+      tutorialData:state.flowDataReducer?.flowData?.tutorialData || []
+    }))
+    const agentCreationTutorial = tutorialData?.find(item => item.title === 'Agent Creation');
+    const agentCreationvideoUrl = agentCreationTutorial?.videoUrl || '';
   return (
     <div className=" mt-8 px-4">
       <div className=" mx-2 ">
@@ -30,7 +36,7 @@ const AgentEmptyState =   ({orgid,isEmbedUser}) => {
         </div>
 
         {/* Video Section */}
-        <div className="">
+        <div className="flex justify-center">
           <div className=" rounded-2xl p-6 border border-base-300/50">
             <div className="text-center mb-3">
              
@@ -38,12 +44,11 @@ const AgentEmptyState =   ({orgid,isEmbedUser}) => {
                 Watch How to Create Your First Agent
               </h2>
             </div>
-            <div className=" h-[70vh] rounded-xl overflow-hidden">
+            <div className=" h-[70vh] w-[80vw] rounded-xl flex justify-center items-center overflow-hidden">
               <iframe
-                
-                src="https://app.supademo.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"
-                width="100%"
-                height="100%"
+                src={agentCreationvideoUrl||"https://app.supademo.com/embed/cm9shc2ek0gt6dtm7tmez2orj?embed_v=2"}
+                height={"100%"}    
+                width={"70%"}
                 style={{ border: 'none'}}
                 allowFullScreen
                 title="How to Create an Agent"
