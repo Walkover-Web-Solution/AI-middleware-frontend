@@ -70,12 +70,16 @@ const EmbedList = ({ params, searchParams }) => {
     openModal(MODAL_TYPE.TOOL_FUNCTION_PARAMETER_MODAL)
 
   }
+  const [selectedPrebuiltTool, setSelectedPrebuiltTool] = useState(null);
   const handleOpenDeleteModal = (functionId, functionName) => {
     setFunctionId(functionId);
     setFunctionName(functionName);
     openModal(MODAL_TYPE.DELETE_TOOL_MODAL);
   };
-
+  const handleOpenDeletePrebuiltModal = (item) => {
+    setSelectedPrebuiltTool(item);
+    openModal(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
+  };
   const bridgeFunctions = useMemo(() => bridge_functions.map((id) => function_data?.[id]), [bridge_functions, function_data]);
   const handleSelectFunction = (functionId) => {
     if (functionId) {
@@ -147,12 +151,13 @@ const EmbedList = ({ params, searchParams }) => {
   };
 
   // Handle removing a prebuilt tool from built_in_tools
-  const handleDeletePrebuiltTool = (item) => {
+  const handleDeletePrebuiltTool = (name,item) => {
     if (!item?.value) return;
     dispatch(updateBridgeVersionAction({
       versionId: searchParams?.version,
       dataToSend: { built_in_tools_data: { built_in_tools: item?.value } }
     }));
+    closeModal(MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL);
   };
 
   // Compute selected prebuilt tools (to render cards)
@@ -169,9 +174,18 @@ const EmbedList = ({ params, searchParams }) => {
         item={functionId}
         name={function_name}
         title="Are you sure?"
-        description={"This action Remove the selected Tool from the bridge."}
+        description={"This action Remove the selected Tool from the Agent."}
         buttonTitle="Remove Tool"
-        modalType={`${MODAL_TYPE.DELETE_TOOL_MODAL}`}
+        modalType={MODAL_TYPE.DELETE_TOOL_MODAL}
+      />
+      <DeleteModal
+        onConfirm={handleDeletePrebuiltTool}
+        item={selectedPrebuiltTool}
+        name={"Prebuilt Tool"}
+        title="Are you sure?"
+        description={"This action Remove the selected Prebuilt Tool from the Agent."}
+        buttonTitle="Remove Prebuilt Tool"
+        modalType={MODAL_TYPE.DELETE_PREBUILT_TOOL_MODAL}
       />
       <FunctionParameterModal
         name="Tool"
@@ -273,7 +287,7 @@ const EmbedList = ({ params, searchParams }) => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDeletePrebuiltTool(item)
+                              handleOpenDeletePrebuiltModal(item)
                             }}
                             className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"

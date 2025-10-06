@@ -219,7 +219,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             <div className="flex flex-col gap-2 w-full ">
             {renderKnowledgebase}
             </div>
-            <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the bridge." buttonTitle="Remove" modalType={MODAL_TYPE?.KNOWLEDGE_BASE_MODAL} />
+            <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.KNOWLEDGE_BASE_MODAL} />
             <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true} />
         </div>
     );

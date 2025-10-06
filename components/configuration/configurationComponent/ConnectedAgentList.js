@@ -291,7 +291,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 item={selectedBridge}
                 name={bridgeData?.find(bridge => bridge._id === selectedBridge?.bridge_id)?.name}
                 title="Are you sure?"
-                description={"This action Remove the selected Agent from the bridge."}
+                description={"This action Remove the selected Agent from the Agent."}
                 buttonTitle="Remove Agent"
                 modalType={`${MODAL_TYPE.DELETE_AGENT_MODAL}`}
             />

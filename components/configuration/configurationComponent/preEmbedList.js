@@ -116,7 +116,7 @@ const PreEmbedList = ({ params, searchParams }) => {
                     item={preFunctionId}
                     name={preFunctionName}
                     title="Are you sure?"
-                    description={"This action Remove the selected Pre Tool from the bridge."}
+                    description={"This action Remove the selected Pre Tool from the Agent."}
                     buttonTitle="Remove Pre Tool"
                     modalType={`${MODAL_TYPE.DELETE_PRE_TOOL_MODAL}`}
                 />
