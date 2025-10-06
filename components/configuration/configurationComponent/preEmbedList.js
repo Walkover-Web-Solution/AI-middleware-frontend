@@ -111,17 +111,20 @@ const PreEmbedList = ({ params, searchParams }) => {
                     <div className="dropdown dropdown-right w-full flex items-center">
                         {bridge_pre_tools.length > 0 ? (
                             <div className="flex items-center gap-1 flex-row mb-2">
-                         <p className="label-text font-medium whitespace-nowrap">Pre Tool</p>
-                         <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-4">
-                            <AddIcon className="w-2 h-2" />
-                            <span className="text-xs font-medium">{bridge_pre_tools.length > 0 ? "change" : "Add"}</span>
-                         </button>
-                         </div>
+                                <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
+
+                                    <p className="label-text info font-medium whitespace-nowrap">Pre Tool</p>
+                                </InfoTooltip>
+                                <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-4">
+                                    <AddIcon className="w-2 h-2" />
+                                    <span className="text-xs font-medium">{bridge_pre_tools.length > 0 ? "change" : "Add"}</span>
+                                </button>
+                            </div>
                         ) : (
                             <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
-                            
-                        
-                            <button
+
+
+                                <button
                                 tabIndex={0}
                                 className=" flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
                             >

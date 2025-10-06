@@ -9,15 +9,15 @@ import InfoTooltip from "@/components/InfoTooltip";
 function getStatusClass(status) {
     switch (status?.toString().trim().toLowerCase()) {
         case 'drafted':
-            return 'bg-yellow-100';
+            return ' text-yellow-700 bg-yellow-100';
         case 'paused':
         case 'deleted':
-            return 'bg-red-100';
+            return 'text-red-700 bg-red-100';
         case 'active':
         case 'published':
-            return 'bg-green-100';
+            return 'text-green-700 bg-green-100';
         case 'rejected':
-            return 'bg-gray-100';
+            return 'text-gray-700 bg-gray-100';
         // Add more cases as needed
         default:
             return 'bg-gray-100';
@@ -100,42 +100,51 @@ export default function TriggersList({ params, isEmbedUser}) {
     return (
         <div className="w-full">
             <div className="flex items-start flex-col gap-2">
-                <div className='flex gap-5  items-start just'>
-                    <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
-                        <p className="label-text font-medium whitespace-nowrap info">Trigger Configuration</p>
-                    </InfoTooltip>
+                <div className='flex gap-5 ml-1  items-start just'>
+                    {triggers?.length > 0 ? (
+                        <div className="flex items-center gap-1 flex-row mb-2">
+                            <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
+                            <p className="label-text info font-medium  whitespace-nowrap">Trigger</p>
+                            </InfoTooltip>
+                            <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-4" onClick={() => { openTrigger() }}>
+                                <AddIcon className="w-2 h-2" />
+                                <span className="text-xs font-medium">Add</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <InfoTooltip tooltipContent="A trigger is an event or condition that initiates an automated process or workflow.">
+                            <button tabIndex={0} className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2" onClick={() => { openTrigger() }}>
+                                <AddIcon size={16} />Trigger
+                            </button>
+                        </InfoTooltip>
+                    )}
                 </div>
-                <button tabIndex={0} className="btn btn-outline btn-sm mb-2" onClick={() => { openTrigger() }}>
-                <AddIcon size={16} />Connect Trigger
-                </button>
+                
                 </div>
             <div className="flex flex-wrap gap-4">
-                {triggers?.length ? (triggers?.map(trigger => {
+                {triggers?.length ? (triggers?.filter(trigger => trigger?.status !== 'deleted')?.length ? (triggers?.filter(trigger => trigger?.status !== 'deleted')?.map(trigger => {
                     return (
                         <div key={trigger?.id} onClick={() => { openTrigger(trigger?.id) }}
-                            className="flex w-[250px] flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative hover:bg-base-200">
-                            <div className="p-2 w-full h-full flex flex-col justify-between">
-                                <div>
-                                    <div className="flex justify-between items-center">
-                                        <h1 className="text-base sm:text-md font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full text-base-content">
-                                            {trigger?.title}
-                                        </h1>
-                                    </div>
+                            className="group flex h-full p-2 w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative hover:bg-base-200 transition-colors duration-200">
+                            <div className="flex items-center gap-2">
+                                <div className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
+                                <div className="tooltip" data-tip={trigger?.title?.length > 24 ? trigger?.title : ""}>
+                                {trigger?.title}
+                                </div>
                                     {/* <p className="mt-3 text-xs sm:text-sm line-clamp-3">
                                         {trigger?.description || "No description provided."}
                                         </p> */}
                                 </div>
                                 <div className="mt-2">
-                                    <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-base-content ${getStatusClass(trigger?.status)}`}>
+                                <span className={`shrink-0 inline-block rounded-full mb-2 capitalize px-2 py-0 text-[10px]  font-medium  ${getStatusClass(trigger?.status)}`}>
                                         {trigger?.status || "Draft"}
                                     </span>
                                 </div>
                             </div>
                         </div>
                     )
-                })) : null}
+                })) : null) : null}
             </div>
-            <div className="divider my-1"></div>
         </div>
     )
 }
