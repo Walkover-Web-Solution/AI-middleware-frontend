@@ -121,7 +121,7 @@ const Page = () => {
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder="Search organizations..."
+                            placeholder="Search organizations by Name"
                             value={formState.searchQuery}
                             onChange={handleChange('searchQuery')}
                             className="input input-bordered w-full pl-10"
