@@ -10,6 +10,7 @@ import RenderEmbed from './renderEmbed';
 import InfoTooltip from '@/components/InfoTooltip';
 import { isEqual } from 'lodash';
 import { AddIcon } from '@/components/Icons';
+import DeleteModal from '@/components/UI/DeleteModal';
 
 const PreEmbedList = ({ params, searchParams }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
@@ -46,7 +47,11 @@ const PreEmbedList = ({ params, searchParams }) => {
         setVariablesPath(variables_path[preFunctionName] || {});
         openModal(MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL)
     }
-
+   const handleOpenDeleteModal = (functionId, functionName) => {
+        setPreFunctionId(functionId);
+        setPreFunctionName(functionName);
+        openModal(MODAL_TYPE.DELETE_PRE_TOOL_MODAL);
+    };
     const onFunctionSelect = (id) => {
         dispatch(updateApiAction(params.id, {
             pre_tools: [id],
@@ -65,7 +70,7 @@ const PreEmbedList = ({ params, searchParams }) => {
             pre_tools: [],
             version_id: searchParams?.version
         }))
-        closeModal(MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL)
+        closeModal(MODAL_TYPE.DELETE_PRE_TOOL_MODAL)
     }
     const handleSavePreFunctionData = () => {
         if (!isEqual(preToolData, preFunctionData)) {
@@ -105,6 +110,15 @@ const PreEmbedList = ({ params, searchParams }) => {
                     variablesPath={variablesPath}
                     setVariablesPath={setVariablesPath}
                     variables_path={variables_path}
+                />
+                <DeleteModal
+                    onConfirm={removePreFunction}
+                    item={preFunctionId}
+                    name={preFunctionName}
+                    title="Are you sure?"
+                    description={"This action Remove the selected Pre Tool from the bridge."}
+                    buttonTitle="Remove Pre Tool"
+                    modalType={`${MODAL_TYPE.DELETE_PRE_TOOL_MODAL}`}
                 />
 
                 <div className="label flex-col items-start w-full">
@@ -154,6 +168,7 @@ const PreEmbedList = ({ params, searchParams }) => {
                             params={params}
                             name="preFunction"
                             handleRemoveEmbed={removePreFunction}
+                            handleOpenDeleteModal={handleOpenDeleteModal}
                         />
                     </div>
 

@@ -8,16 +8,18 @@ import { ClipboardXIcon } from '../Icons';
 const DeleteModal = ({   
   onConfirm = () => {}, 
   item,
+  name,
   title = "Are you sure?",
   description = "This action cannot be undone. This will permanently delete selected file.",
-  buttonTitle = "Delete"
+  buttonTitle = "Delete",
+  modalType = MODAL_TYPE.DELETE_MODAL
 }) => {
 const handleClose=()=>{
-    closeModal(MODAL_TYPE.DELETE_MODAL);
+    closeModal(modalType);
 }
 
   return (
-    <Modal MODAL_ID={MODAL_TYPE.DELETE_MODAL}>
+    <Modal MODAL_ID={modalType}>
     <div 
       className=" flex items-center justify-center "
     >
@@ -45,7 +47,7 @@ const handleClose=()=>{
           <button
             type="button"
             onClick={()=>{
-                onConfirm(item)
+                onConfirm(name,item)
             }}
             className="btn btn-error text-white"
           >

@@ -11,6 +11,7 @@ import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
 import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
+import DeleteModal from '@/components/UI/DeleteModal';
 
 const ConnectedAgentList = ({ params, searchParams }) => {
     const dispatch = useDispatch();
@@ -81,7 +82,10 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         handleSaveAgent(bridge)
         
     }
-
+    const handleOpenDeleteModal = (name, item) => {
+        setSelectedBridge({ name: name, ...item })
+        openModal(MODAL_TYPE?.DELETE_AGENT_MODAL)
+    }
     const handleOpenAgentVariable = useCallback((name, item) => {
         setSelectedBridge({ name: name, ...item })
         const { fields, required_params } = (item?.variables && Object.keys(item?.variables)?.length > 0) ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
@@ -96,6 +100,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
     const handleRemoveAgent = (name, item) => {
+        console.log(name,item,"hello")
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params?.id,
@@ -114,7 +119,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 }
             })
         ).then(() => {
-            closeModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL)
+            closeModal(MODAL_TYPE?.DELETE_AGENT_MODAL)
             setCurrentVariable(null)
             setSelectedBridge(null)
         })
@@ -222,7 +227,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                handleRemoveAgent(name, item);
+                                handleOpenDeleteModal(name,item);
                             }}
                             className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
@@ -281,7 +286,15 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                
             </div>
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
-
+            <DeleteModal
+                onConfirm={handleRemoveAgent}
+                item={selectedBridge}
+                name={bridgeData?.find(bridge => bridge._id === selectedBridge?.bridge_id)?.name}
+                title="Are you sure?"
+                description={"This action Remove the selected Agent from the bridge."}
+                buttonTitle="Remove Agent"
+                modalType={`${MODAL_TYPE.DELETE_AGENT_MODAL}`}
+            />
             <FunctionParameterModal
                 name="Agent"
                 Model_Name={MODAL_TYPE?.AGENT_VARIABLE_MODAL}
