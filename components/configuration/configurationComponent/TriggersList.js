@@ -136,7 +136,7 @@ export default function TriggersList({ params, isEmbedUser}) {
                                         </p> */}
                                 </div>
                                 <div className="mt-2">
-                                    <span className={`mr-2 inline-block  rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(trigger?.status)}`}>
+                                <span className={`shrink-0 inline-block rounded-full mb-2 capitalize px-2 py-0 text-[10px]  font-medium  ${getStatusClass(trigger?.status)}`}>
                                         {trigger?.status || "Draft"}
                                     </span>
                                 </div>
@@ -145,7 +145,6 @@ export default function TriggersList({ params, isEmbedUser}) {
                     )
                 })) : null) : null}
             </div>
-            <div className="divider my-1"></div>
         </div>
     )
 }
