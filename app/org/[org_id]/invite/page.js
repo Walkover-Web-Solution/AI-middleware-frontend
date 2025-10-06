@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { UserCircleIcon } from '@/components/Icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import SearchItems from '@/components/UI/SearchItems';
+import { useCustomSelector } from '@/customHooks/customSelector';
 
 export const runtime = 'edge';
 
