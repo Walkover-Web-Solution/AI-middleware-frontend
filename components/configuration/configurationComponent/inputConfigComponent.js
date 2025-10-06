@@ -205,10 +205,17 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             setHasUnsavedChanges(false);
         }
 
+        if (value.trim() !== reduxPrompt.trim()) {
+            setHasUnsavedChanges(true);
+        } else {
+            setHasUnsavedChanges(false);
+        }
+
         const cursorPos = e.target.selectionStart;
         const lastChar = value.slice(cursorPos - 1, cursorPos);
         const lastTwoChars = value.slice(cursorPos - 2, cursorPos);
 
+        // Only trigger suggestions for relevant characters
         // Only trigger suggestions for relevant characters
         if (lastChar === '{' || lastTwoChars === '{{') {
             triggerSuggestions(true, cursorPos);
@@ -218,8 +225,16 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             if (!isInVariablePattern || (lastChar !== '{' && lastChar !== '}')) {
             triggerSuggestions(false);
             }
+            triggerSuggestions(true, cursorPos);
+        } else if (showSuggestions) {
+            // Close suggestions when user starts typing any character (except when still in variable pattern)
+            const isInVariablePattern = value.slice(0, cursorPos).match(/\{\{[^}]*$/);
+            if (!isInVariablePattern || (lastChar !== '{' && lastChar !== '}')) {
+            triggerSuggestions(false);
+            }
         }
     }, [reduxPrompt, showSuggestions, triggerSuggestions]);
+
 
     const handleKeyDown = useCallback((e) => {
         if (e.key === 'Tab' && isPromptHelperOpen) {

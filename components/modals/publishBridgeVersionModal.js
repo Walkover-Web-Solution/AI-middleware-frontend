@@ -6,7 +6,7 @@ import {
   updateBridgeAction,
 } from "@/store/action/bridgeAction";
 import { MODAL_TYPE } from "@/utils/enums";
-import { closeModal, sendDataToParent } from "@/utils/utility";
+import { closeModal, openModal, sendDataToParent } from "@/utils/utility";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
 import Modal from "../UI/Modal";
@@ -14,22 +14,25 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import Protected from "../protected";
 import PublishVersionDataComparisonView from "../comparison/PublishVersionDataComparisonView";
 import { DIFFERNCE_DATA_DISPLAY_NAME, KEYS_TO_COMPARE } from "@/jsonFiles/bridgeParameter";
+import PromptSummaryModal from "./PromptSummaryModal";
 
 function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_description, isEmbedUser }) {
 
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [autoGenerateSummary, setAutoGenerateSummary] = useState(false);
   const [isPublicAgent, setIsPublicAgent] = useState(false);
   const [error, setError] = useState(null);
   const [showComparison, setShowComparison] = useState(false);
 
-  const { bridge, versionData, bridgeData, apikeyData, functionData, knowledgeBaseData } = useCustomSelector((state) => ({
+  const { bridge, versionData, bridgeData, apikeyData, functionData, knowledgeBaseData, bridge_summary } = useCustomSelector((state) => ({
     bridge: state.bridgeReducer.allBridgesMap?.[params?.id]?.page_config,
     versionData: state.bridgeReducer.bridgeVersionMapping?.[params?.id]?.[searchParams?.version],
     bridgeData: state.bridgeReducer.allBridgesMap?.[params?.id],
     apikeyData: state?.bridgeReducer?.apikeys[params.org_id] || [],
     functionData: state?.bridgeReducer?.org[params.org_id]?.functionData || {},
-    knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params.org_id] || []
+    knowledgeBaseData: state?.knowledgeBaseReducer?.knowledgeBaseData?.[params.org_id] || [],
+    bridge_summary: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridge_summary,
   }));
 
   const toggleComparison = () => setShowComparison(prev => !prev); 
@@ -38,10 +41,10 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     keysToExtract?.forEach(key => {
       if ((key in data)) {
         filteredItem[key] = data[key];
-      }
-    });
+        }
+      });
     return filteredItem;
-  };
+    };
 
   const filteredBridgeData = filterDataByKeys(bridgeData, KEYS_TO_COMPARE);
   const filteredVersionData = filterDataByKeys(versionData, KEYS_TO_COMPARE);
@@ -199,7 +202,13 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     setIsLoading(true);
 
     try {
-      // If user wants to make it a public agent, first save the configuration
+      // Require a summary before publishing
+      if (!bridge_summary || (typeof bridge_summary === 'string' && bridge_summary.trim().length === 0)) {
+        openModal(MODAL_TYPE.PROMPT_SUMMARY);
+        setIsLoading(false);
+        return;
+      }
+
       if (isPublicAgent) {
         if (!formData.url_slugname.trim()) {
           toast.error("Slug Name is required.");
@@ -254,7 +263,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     } finally {
       setIsLoading(false);
     }
-  }, [dispatch, params, isPublicAgent, formData, agent_name, agent_description, isEmbedUser]);
+  }, [dispatch, params, isPublicAgent, formData, agent_name, agent_description, isEmbedUser, bridge_summary]);
 
   return (
     <Modal MODAL_ID={MODAL_TYPE.PUBLISH_BRIDGE_VERSION}>
@@ -279,6 +288,27 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
               </button>
             </div>
           </div>
+
+          {/* Summary required alert */}
+          {(!bridge_summary || (typeof bridge_summary === 'string' && bridge_summary.trim().length === 0)) && (
+            <div className="alert alert-warning bg-warning border border-warning/30 mb-4 w-full flex justify-between">
+              <div className="flex items-start gap-3 w-full">
+                <AlertTriangle className="h-5 w-5 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-medium">Summary required</h4>
+                  <p className="text-sm opacity-80">You need to add a prompt summary for this agent before publishing.</p>
+                </div>
+                <button
+                  className="btn btn-sm bg-base-200 btn-outline"
+                  onClick={() => {
+                    setAutoGenerateSummary(true);
+                    openModal(MODAL_TYPE.PROMPT_SUMMARY_PUBLISH);
+                  }}                >
+                  Generate Prompt Summary
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Warning Section */}
           {!showComparison && <div className="alert bg-base/70 mb-6">
@@ -554,7 +584,16 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       </div>
 
       <div className="modal-backdrop" onClick={handleCloseModal}></div>
-    </Modal>
+
+      {/* Prompt Summary Modal (mounted so we can open it on-demand) */}
+      <PromptSummaryModal 
+        modalType={MODAL_TYPE.PROMPT_SUMMARY_PUBLISH}
+        params={params} 
+        searchParams={searchParams} 
+        autoGenerateSummary={autoGenerateSummary}
+        setAutoGenerateSummary={setAutoGenerateSummary}
+      />
+          </Modal>
   );
 }
 
