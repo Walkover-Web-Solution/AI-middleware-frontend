@@ -19,9 +19,10 @@ const Page = ({ params }) => {
   const resolvedParams = use(params);
   
   const dispatch = useDispatch();
-  const { integrationData } = useCustomSelector((state) =>
+  const { integrationData, descriptions } = useCustomSelector((state) =>
   ({
     integrationData: state?.integrationReducer?.integrationData?.[resolvedParams?.org_id] || [],
+    descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
   })
   );
   const [selectedIntegration, setSelectedIntegration] = useState(null);
@@ -64,30 +65,39 @@ const Page = ({ params }) => {
   };
 
   return (
-    <MainLayout>
-      <div className="w-full">
+    <div className="w-full">
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-4 pt-4">
+        <div className="px-2 pt-4">
+
+          <MainLayout >
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full">
           <PageHeader
             title=" GTWY Embed Integration"
             docLink="https://app.docstar.io/p/features/gtwy-embed--1?collectionId=inYU67SKiHgW"
-            description="Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."
+            description={descriptions?.['Gtwy as Embed'] || "Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."}
           />
-          <div className="flex-shrink-0 mt-4 sm:mt-0">
-            <button 
-              className="btn btn-primary" 
-              onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}
-            >
-              + Create New Integration
-            </button>
-          </div>
+          
         </div>
+          </MainLayout>
 
         {/* Controls Section */}
         
         {/* Content Section */}
         <div className="w-full">
-          <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="integration" />
+        <div className="flex flex-row gap-4 justify-between ">
+
+          <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="Integration" />
+          <div className="flex-shrink-0">
+            <button 
+              className="btn btn-primary mr-2" 
+              onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}
+              >
+              + Create New Integration
+            </button>
+          </div>
+              </div>
+              </div>
+          </div>
           {filterIntegration.length > 0 ? (
               <div className="w-full">
                 <CustomTable
@@ -105,11 +115,11 @@ const Page = ({ params }) => {
               <p className="text-gray-500 text-lg">No integration entries found</p>
             </div>
           )}
-        </div>
-      </div>
+       
       <IntegrationModal params={resolvedParams}/>
       <GtwyIntegrationGuideSlider data={selectedIntegration} handleCloseSlider={toggleGtwyIntegraionSlider}/>
-    </MainLayout>
+    
+    </div>
   );
 };
 

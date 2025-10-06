@@ -93,7 +93,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
         const list = Array.isArray(prebuiltToolsData) ? prebuiltToolsData : [];
         const selected = new Set(Array.isArray(toolsVersionData) ? toolsVersionData : []);
         return list.filter((t) => !selected.has(t.value) && (t?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase() || '')));
-    }, [prebuiltToolsData, toolsVersionData, searchQuery]);
+    }, [prebuiltToolsData, toolsVersionData, searchQuery,]);
 
     return (
         <div className="dropdown dropdown-left mt-8">
@@ -120,8 +120,7 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                         ) : (
                             <li className="text-center mt-2">No tools found</li>
                         )}
-                        {/* Prebuilt Tools Section */}
-                        <li className="text-sm font-semibold disabled mt-2">Prebuilt Tools</li>
+                       {name != "preFunction" &&<><li className="text-sm font-semibold disabled mt-2">Prebuilt Tools</li>
                         {availablePrebuiltTools.length > 0 ? (
                             availablePrebuiltTools.map((item) => (
                                 <li key={item?._id} onClick={() => handlePrebuiltToolClick(item)}>
@@ -142,6 +141,8 @@ function EmbedListSuggestionDropdownMenu({ params, searchParams, name, hideCreat
                         ) : (
                             <li className="text-center mt-2">No prebuilt tools</li>
                         )}
+                    </>}
+                    
                         {!hideCreateFunction && <li className="border-t border-base-300 w-full sticky bottom-0 bg-base-100 py-2" onClick={() => openViasocket(undefined,
                             {
                                 embedToken,
