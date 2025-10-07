@@ -127,15 +127,12 @@ export default function TriggersList({ params, isEmbedUser}) {
                         <div key={trigger?.id} onClick={() => { openTrigger(trigger?.id) }}
                             className="group flex h-full p-2 w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative hover:bg-base-200 transition-colors duration-200">
                             <div className="flex items-center gap-2">
-                                <div className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
-                                <div className="tooltip" data-tip={trigger?.title?.length > 24 ? trigger?.title : ""}>
-                                {trigger?.title}
+                                <div className="flex-1 min-w-0 text-[9px] sm:text-[5px] md:text-[12px] lg:text-[13px] font-bold truncate">
+                                    <p className="overflow-hidden text-ellipsis whitespace-normal break-words">
+                                        {trigger?.title}
+                                    </p>
                                 </div>
-                                    {/* <p className="mt-3 text-xs sm:text-sm line-clamp-3">
-                                        {trigger?.description || "No description provided."}
-                                        </p> */}
-                                </div>
-                                <div className="mt-2">
+                                <div className="">
                                 <span className={`shrink-0 inline-block rounded-full mb-2 capitalize px-2 py-0 text-[10px]  font-medium  ${getStatusClass(trigger?.status)}`}>
                                         {trigger?.status || "Draft"}
                                     </span>
