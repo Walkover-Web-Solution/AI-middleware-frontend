@@ -58,11 +58,11 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             versionId: searchParams?.version,
             dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== item?._id) }
         }));
-         closeModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL);
+         closeModal(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
     };
     const handleOpenDeleteModal = (item) => {
         setSelectedKnowledgebase(item);
-        openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL);
+        openModal(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
     };
     const handleTutorial = () => {
         setTutorialState(prev => ({
@@ -218,7 +218,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             <div className="flex flex-col gap-2 w-full ">
             {renderKnowledgebase}
             </div>
-            <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.KNOWLEDGE_BASE_MODAL} />
+            <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} />
             <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true} />
         </div>
     );
