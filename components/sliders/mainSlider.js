@@ -106,6 +106,7 @@ function MainSlider({ isEmbedUser }) {
   const [isMobile, setIsMobile] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMobileVisible, setIsMobileVisible] = useState(false); // New state for mobile visibility
+  const [showContent, setShowContent] = useState(isSideBySideMode); // Control content visibility with delay
 
   // Effect to detect mobile screen size
   useEffect(() => {
@@ -187,33 +188,39 @@ function MainSlider({ isEmbedUser }) {
 
   /** Toggle handler - modified for side-by-side mode */
   const handleToggle = e => {
-    if (isSideBySideMode) {
-      // In side-by-side mode, allow both opening and closing
-      setIsOpen(prev => !prev);
-      setHovered(null);
-    } else {
-      // Normal toggle behavior for other modes
-      if (e.detail === 2 && !isMobile) {
-        setIsOpen(true);
-        setHovered(null);
-      } else {
+    // Clear any hover states immediately for smoother transition
+    setHovered(null);
+    
+    // Use requestAnimationFrame for smoother state transitions
+    requestAnimationFrame(() => {
+      if (isSideBySideMode) {
+        // In side-by-side mode, allow both opening and closing
         setIsOpen(prev => !prev);
-        setHovered(null);
+      } else {
+        // Normal toggle behavior for other modes
+        if (e.detail === 2 && !isMobile) {
+          setIsOpen(true);
+        } else {
+          setIsOpen(prev => !prev);
+        }
       }
-    }
+    });
   };
 
-  /** Close sidebar on outside click when in sub-routes */
+  // Close sidebar on outside click when in sub-routes
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (pathParts.length > 4 && (isOpen || isMobileVisible)) {
-        const sidebar = document.querySelector('.sidebar'); // Assuming sidebar has this class
+        const sidebar = document.querySelector('.sidebar');
         if (sidebar && !sidebar.contains(e.target)) {
-          if (isMobile) {
-            setIsMobileVisible(false);
-          } else {
-            setIsOpen(false);
-          }
+          // Add a small delay to ensure smooth transition
+          requestAnimationFrame(() => {
+            if (isMobile) {
+              setIsMobileVisible(false);
+            } else {
+              setIsOpen(false);
+            }
+          });
         }
       }
     };
@@ -240,6 +247,25 @@ function MainSlider({ isEmbedUser }) {
   useEffect(() => {
     if (isOpen && !isMobile) setHovered(null);
   }, [isOpen, isMobile]);
+
+  // Handle content visibility with delay for smooth transitions
+  useEffect(() => {
+    if (isOpen && !isMobile) {
+      // Show content immediately when opening
+      setShowContent(true);
+    } else if (!isOpen && !isMobile) {
+      // Hide content after animation completes when closing
+      const timer = setTimeout(() => {
+        setShowContent(false);
+      }, 300); // Match the CSS transition duration
+      return () => clearTimeout(timer);
+    }
+    
+    // Handle side-by-side mode - always show content when in this mode
+    if (isSideBySideMode && isOpen) {
+      setShowContent(true);
+    }
+  }, [isOpen, isMobile, isSideBySideMode]);
 
   // Close on backdrop click (mobile)
   const handleBackdropClick = () => {
@@ -269,8 +295,8 @@ function MainSlider({ isEmbedUser }) {
 
   // Mobile menu toggle handler
   const handleMobileMenuToggle = () => {
-    setIsMobileVisible(prev => !prev);
     setHovered(null);
+    setIsMobileVisible(prev => !prev);
   };
 
   const betaBadge = () =>{
@@ -292,15 +318,15 @@ function MainSlider({ isEmbedUser }) {
   const sidebarPositioning = isSideBySideMode ? 'relative' : 'fixed';
   const sidebarZIndex = (isMobile || isMobileVisible) ? 'z-50' : 'z-30';
 
-  // Determine if sidebar should show content (expanded view)
-  const showSidebarContent = isMobile ? false : isOpen; // Mobile always shows collapsed view
+  // Determine if sidebar should show content (expanded view) with delayed hiding
+  const showSidebarContent = isMobile ? false : showContent; // Mobile always shows collapsed view
 
   return (
     <>
       {/* Mobile backdrop */}
       {isMobile && isMobileVisible && (
         <div
-          className="fixed inset-0 bg-black/50 lg:hidden z-40 sidebar"
+          className="fixed inset-0 bg-black/50 lg:hidden z-40 sidebar transition-opacity duration-300 ease-in-out"
           onClick={handleBackdropClick}
         />
       )}
@@ -320,12 +346,13 @@ function MainSlider({ isEmbedUser }) {
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 transition-all duration-200 ease-in-out my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
           style={{ 
-            width: isMobile ? (isMobileVisible ? '56px' : '0px') : (isOpen ? '220px' : '50px'),
+            width: isMobile ? (isMobileVisible ? '56px' : '50px') : (isOpen ? '220px' : '50px'),
             transform: (!isSideBySideMode && pathParts.length > 3) ? (isMobile && !isMobileVisible ? 'translateX(-100%)' : 'translateX(0)') : 'none',
             opacity: (isMobile && !isMobileVisible) ? '0' : '1',
-            visibility: (isMobile && !isMobileVisible) ? 'hidden' : 'visible'
+            transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+            transitionProperty: 'width, transform, opacity'
           }}
         >
           {/* Mobile close button - positioned at the top-right corner */}
@@ -568,7 +595,13 @@ function MainSlider({ isEmbedUser }) {
         {/* ------------------------------------------------------------------ */}
         {/* Only show spacer in side-by-side mode */}
         {isSideBySideMode && (
-          <div className="transition-all duration-300 hidden lg:block" style={{ width: spacerW }} />
+          <div 
+            className="hidden lg:block" 
+            style={{ 
+              width: spacerW,
+              transition: 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)'
+            }} 
+          />
         )}
 
         {/* ------------------------------------------------------------------ */}
