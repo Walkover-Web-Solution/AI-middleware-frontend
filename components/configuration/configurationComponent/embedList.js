@@ -95,7 +95,7 @@ const EmbedList = ({ params, searchParams }) => {
     }
   };
 
-  const handleRemoveFunctionFromBridge = (name, id) => {
+  const handleRemoveFunctionFromBridge = (id, name) => {
     dispatch(
       updateBridgeVersionAction({
         bridgeId: params.id,
@@ -150,7 +150,7 @@ const EmbedList = ({ params, searchParams }) => {
   };
 
   // Handle removing a prebuilt tool from built_in_tools
-  const handleDeletePrebuiltTool = (name,item) => {
+  const handleDeletePrebuiltTool = (item,name) => {
     if (!item?.value) return;
     dispatch(updateBridgeVersionAction({
       versionId: searchParams?.version,

@@ -53,8 +53,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             }
         }, 0);
     };
-    const handleDeleteKnowledgebase = (name,item) => {
-        console.log(item)
+    const handleDeleteKnowledgebase = (item) => {
         dispatch(updateBridgeVersionAction({
             versionId: searchParams?.version,
             dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== item?._id) }
