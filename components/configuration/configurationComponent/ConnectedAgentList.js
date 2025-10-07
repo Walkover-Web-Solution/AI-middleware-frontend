@@ -99,7 +99,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
-    const handleRemoveAgent = (name, item) => {
+    const handleRemoveAgent = (item,name) => {
         console.log(name,item,"hello")
         dispatch(
             updateBridgeVersionAction({
