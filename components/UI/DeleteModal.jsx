@@ -47,7 +47,7 @@ const handleClose=()=>{
           <button
             type="button"
             onClick={()=>{
-                onConfirm(name,item)
+                onConfirm(item,name)
             }}
             className="btn btn-error text-white"
           >
