@@ -87,21 +87,36 @@ const ToneDropdown = ({ params, searchParams }) => {
 
     if (toneValue !== reduxTone?.value) {
       setSelectedTone(toneValue);
-      const tone = TONES.find((tone) => tone.value === toneValue) || {};
-      if (tone) {
+      
+      // Handle "None" option - send empty string
+      if (toneValue === "") {
         dispatch(
           updateBridgeVersionAction({
             versionId: searchParams?.version,
             dataToSend: {
               configuration: {
-                tone: {
-                  value: tone.value,
-                  prompt: tone.prompt,
-                },
+                tone: "",
               },
             },
           })
         );
+      } else {
+        const tone = TONES.find((tone) => tone.value === toneValue) || {};
+        if (tone) {
+          dispatch(
+            updateBridgeVersionAction({
+              versionId: searchParams?.version,
+              dataToSend: {
+                configuration: {
+                  tone: {
+                    value: tone.value,
+                    prompt: tone.prompt,
+                  },
+                },
+              },
+            })
+          );
+        }
       }
     }
   };
@@ -123,6 +138,9 @@ const ToneDropdown = ({ params, searchParams }) => {
         >
           <option value="" disabled>
             Select a tone
+          </option>
+          <option value="">
+            None
           </option>
           {TONES.map((tone) => (
             <option key={tone.value} value={tone.value}>
