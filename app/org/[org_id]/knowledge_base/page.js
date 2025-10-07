@@ -93,7 +93,7 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
             <PageHeader
               title="Knowledge Base"
               description={descriptions?.['Knowledge Base'] || "A knowledge base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."}
-              docLink="https://blog.gtwy.ai/features/knowledgebase"
+              docLink="https://gtwy.ai/blogs/features/knowledgebase"
             />
             
           </div>
