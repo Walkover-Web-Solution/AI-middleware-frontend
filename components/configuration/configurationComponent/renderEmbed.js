@@ -9,6 +9,7 @@ const RenderEmbed = ({
   embedToken,
   params,
   handleRemoveEmbed,
+  handleOpenDeleteModal
 }) => {
   const renderEmbed = useMemo(() => {
     return bridgeFunctions?.slice()
@@ -63,7 +64,7 @@ const RenderEmbed = ({
                 </p>
               </div>
             </div>
-            
+
             {/* Action buttons that appear on hover */}
             <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
               <button
@@ -79,7 +80,7 @@ const RenderEmbed = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleRemoveEmbed(value?._id, value?.function_name);
+                  handleOpenDeleteModal(value?._id, value?.function_name);
                 }}
                 className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
                 title="Remove"
