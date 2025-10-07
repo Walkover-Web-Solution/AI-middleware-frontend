@@ -20,7 +20,17 @@ export const getSingleModels = async () => {
     throw new Error(error)
   }
 }
-
+export const getPrebuiltPrompts = async ()=>{
+  try{
+     const getPrebuiltPrompts = await axios.get(`${PYTHON_URL}/prebuilt_prompt`)
+     console.log(getPrebuiltPrompts,"getPrebuiltPrompts")
+     return getPrebuiltPrompts
+  }
+  catch(error){
+    console.error(error)
+    throw error
+  }
+}
 export const getSingleMessage = async ({ bridge_id, message_id }) => {
   try {
     const messageData = await axios.get(`${URL}/api/v1/config/systemprompt/gethistory/${bridge_id}/${message_id}`)
