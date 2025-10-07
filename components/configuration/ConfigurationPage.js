@@ -137,9 +137,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     </div>
                 )}
             </div>
-            {((isEmbedUser && !hideAdvancedParameters) || !isEmbedUser) && (
-                <AdvancedParameters params={params} searchParams={searchParams} />
-            )}
+                <AdvancedParameters params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} hideAdvancedParameters={hideAdvancedParameters}/>
         </>
     );
 

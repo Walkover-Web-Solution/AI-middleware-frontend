@@ -13,7 +13,7 @@ import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
 import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 
-const AdvancedParameters = ({ params, searchParams }) => {
+const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters}) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState();
   const [searchQuery, setSearchQuery] = useState('');
@@ -569,7 +569,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
       {tutorialState.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
-      {level1Parameters.length > 0 && (
+      {(level1Parameters.length > 0 && (!isEmbedUser || (isEmbedUser && hideAdvancedParameters)))&& (
         <div className={`w-full gap-3 cursor-default flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
           {/* Level 1 Parameters - Inside Accordion */}
           {level1Parameters.map(([key, paramConfig]) => (
