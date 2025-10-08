@@ -79,13 +79,13 @@ const CommandPalette = ({isEmbedUser}) => {
     const authGroup = filterBy(authData, ["name", "service", "_id"]).map((d) => ({
       id: d._id,
       title: d.name || d._id,
-      subtitle: "Auth Key",
-      type: "auths",
+      subtitle: "Pauth Key",
+      type: "Pauths",
     }));
 
-    const orchestralFlowGroup = filterBy(orchestralFlowData, ["name", "_id"]).map((d) => ({
+    const orchestralFlowGroup = filterBy(orchestralFlowData, ["flow_name", "_id"]).map((d) => ({
       id: d._id,
-      title: d.name || d._id,
+      title: d.flow_name || d._id,
       subtitle: "Orchestral Flow",
       type: "flows",
     }));
@@ -108,7 +108,7 @@ const CommandPalette = ({isEmbedUser}) => {
       ...items.docs.map((it) => ({ group: "Knowledge Base", ...it })),
       ...items.functions.map((it) => ({ group: "Functions", ...it })),
       ...items.integrations.map((it) => ({ group: "Integrations", ...it })),
-      ...items.auths.map((it) => ({ group: "Auth Keys", ...it })),
+      ...items.auths.map((it) => ({ group: "Pauth Keys", ...it })),
       ...items.flows.map((it) => ({ group: "Orchestral Flows", ...it })),
     ];
   }, [items]);
@@ -123,6 +123,12 @@ const CommandPalette = ({isEmbedUser}) => {
   }, [flatResults]);
 
   const openPalette = useCallback(() => {
+    // Check if any DaisyUI modal is currently open
+    const openModals = document.querySelectorAll('.modal-open, dialog[open]');
+    if (openModals.length > 0) {
+      return; // Don't open if any modal is already open
+    }
+    
     setOpen(true);
     setQuery("");
     setActiveIndex(0);
@@ -168,7 +174,7 @@ const CommandPalette = ({isEmbedUser}) => {
       case "integrations":
         router.push(`/org/${orgId}/integration`);
         break;
-      case "auths":
+      case "Pauths":
         router.push(`/org/${orgId}/pauthkey`);
         break;
       case "flows":
@@ -201,7 +207,7 @@ const CommandPalette = ({isEmbedUser}) => {
       case 'integrations':
         router.push(`/org/${orgId}/integration`);
         break;
-      case 'auths':
+      case 'Pauths':
         router.push(`/org/${orgId}/pauthkey`);
         break;
       case 'flows':
@@ -218,10 +224,30 @@ const CommandPalette = ({isEmbedUser}) => {
     const results = flatResults;
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveIndex((i) => Math.min(i + 1, Math.max(0, results.length - 1)));
+      setActiveIndex((i) => {
+        const newIndex = Math.min(i + 1, Math.max(0, results.length - 1));
+        // Scroll the active item into view
+        setTimeout(() => {
+          const activeElement = document.querySelector(`[data-result-index="${newIndex}"]`);
+          if (activeElement) {
+            activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }, 0);
+        return newIndex;
+      });
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIndex((i) => Math.max(0, i - 1));
+      setActiveIndex((i) => {
+        const newIndex = Math.max(0, i - 1);
+        // Scroll the active item into view
+        setTimeout(() => {
+          const activeElement = document.querySelector(`[data-result-index="${newIndex}"]`);
+          if (activeElement) {
+            activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }, 0);
+        return newIndex;
+      });
     } else if (e.key === "Enter") {
       e.preventDefault();
       const sel = results[activeIndex];
@@ -240,7 +266,7 @@ const CommandPalette = ({isEmbedUser}) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-start justify-center bg-black/40 p-4" onClick={closePalette}>
+    <div className="fixed inset-0 flex items-start justify-center bg-black/40 p-4" onClick={closePalette} style={{zIndex: 999999}}>
       <div className="w-full max-w-2xl rounded-xl bg-base-100 shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2 border-b border-base-300 p-3">
           <Search className="w-4 h-4 opacity-70" />
@@ -267,7 +293,7 @@ const CommandPalette = ({isEmbedUser}) => {
                   { key: 'docs', label: 'Knowledge Base', desc: 'Documents and sources' },
                   { key: 'functions', label: 'Functions', desc: 'Tools and endpoints' },
                   { key: 'integrations', label: 'Gtwy as Embed', desc: 'Configure integrations' },
-                  { key: 'auths', label: 'Pauth Keys', desc: 'Configure Pauth Keys' },
+                  { key: 'Pauths', label: 'Pauth Keys', desc: 'Configure Pauth Keys' },
                   { key: 'flows', label: 'Orchestral Flows', desc: 'Configure Orchestral Flows' },
                 ].map((c) => (
                   <button
@@ -281,12 +307,6 @@ const CommandPalette = ({isEmbedUser}) => {
                     </div>
                   </button>
                 ))}
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2 px-2 text-xs opacity-70">
-                <span className="badge">Cmd/Ctrl + K</span>
-                <span className="badge">Shift + ?</span>
-                <span className="badge">Enter to open</span>
-                <span className="badge">Esc to close</span>
               </div>
             </div>
           ) : (
@@ -304,6 +324,7 @@ const CommandPalette = ({isEmbedUser}) => {
                         return (
                           <li
                             key={`${row.type}-${row.id}`}
+                            data-result-index={globalIdx}
                             onClick={() => navigateTo(row)}
                             className={`cursor-pointer rounded px-3 py-2 ${active ? "bg-base-200" : "hover:bg-base-200"}`}
                           >
