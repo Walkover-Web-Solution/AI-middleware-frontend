@@ -12,7 +12,7 @@ import { useSearchParams } from 'next/navigation';
     return date.toISOString().slice(0, 16); // Format to 'YYYY-MM-DDTHH:MM'
   };
 
-const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage}) => {
+const DateRangePicker = ({ params, setFilterOption, setHasMore, setPage, selectedVersion, filterOption, isErrorTrue}) => {
   const dispatch = useDispatch();
   const [startingDate, setStartingDate] = useState(getDefaultDate());
   const [endingDate, setEndingDate] = useState(getDefaultDate());
