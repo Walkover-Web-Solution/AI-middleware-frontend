@@ -298,8 +298,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       if (agent?.haveToPublish) {
         // For agents that need publishing, find the published version from agentList
         const parentAgent = agentList?.filter(oneAgent => oneAgent.versions.includes(agentId))[0];
-        const publishedVersionId = parentAgent?.published_version_id;
-        const versionIndex = parentAgent?.versions?.findIndex(version => version === publishedVersionId);
+        const versionIndex = parentAgent?.versions?.findIndex(version => version === agentId);
         return versionIndex !== -1 ? versionIndex + 1 : 'None';
       } else {
         // For regular agents, use their own published_version_id
