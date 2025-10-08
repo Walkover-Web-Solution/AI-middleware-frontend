@@ -3,7 +3,7 @@ import { MODAL_TYPE } from '@/utils/enums'
 import Modal from '../UI/Modal'
 import { Zap } from 'lucide-react'
 
-const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handleImprovePrompt}) => {
+const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handleImprovePrompt,isImprovingPrompt}) => {
   return (
     <Modal MODAL_ID={MODAL_TYPE.EDIT_MESSAGE_MODAL}>
     <div className="bg-base-100 rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-[50%] p-6">
@@ -11,8 +11,8 @@ const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handl
       
       {/* Instructions */}
       <div className="alert alert-info mb-4">
-        <div className="text-sm">
-          <strong>💡 Tip:</strong> Edit your prompt above, then click "Update Response" to regenerate the AI response with your improved prompt.
+        <div className="text-sm text-white">
+          <strong>💡 Tip:</strong> Edit your Response first, then click on 'Improve Prompt' regenerate the updated prompt with your improved Response.
         </div>
       </div>
 
@@ -34,11 +34,20 @@ const EditMessageModal = ({setModalInput,handleClose,handleSave,modalInput,handl
         <div className="mt-3">
           <button 
             className="btn btn-outline btn-sm gap-2"
-            disabled={modalInput?.content?.trim() === ''}
+            disabled={modalInput?.content?.trim() === '' || isImprovingPrompt}
             onClick={handleImprovePrompt}
           >
-            <Zap />
-            Improve Prompt
+            {isImprovingPrompt ? (
+              <>
+                <span className="loading loading-spinner loading-xs"></span>
+                Improving...
+              </>
+            ) : (
+              <>
+                <Zap />
+                Improve Prompt
+              </>
+            )}
           </button>
         </div>
       </div>
