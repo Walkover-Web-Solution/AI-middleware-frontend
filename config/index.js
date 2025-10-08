@@ -33,7 +33,7 @@ export const getPrebuiltPrompts = async ()=>{
 export const updatePrebuiltPrompt = async (dataToSend) => {
   try {
     const response= await axios.put(`${PYTHON_URL}/prebuilt_prompt`, dataToSend)
-    return response?.data?.updatedPrompt
+    return response?.data?.data
   } catch (error) {
     console.error(error)
     throw error

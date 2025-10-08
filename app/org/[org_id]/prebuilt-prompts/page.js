@@ -13,7 +13,7 @@ import { resetPrebuiltPromptAction, updatePrebuiltPromptAction } from '@/store/a
 export default function PrebuiltPromptsPage() {
   const dispatch = useDispatch();
   const prebuiltPrompts = useCustomSelector((state) => state.prebuiltPromptReducer.PrebuiltPrompts || []);
-  
+  console.log(prebuiltPrompts,'2345')
   // Convert array of objects to a more usable format
   const processedPrompts = React.useMemo(() => {
     const processed = {};
@@ -44,7 +44,6 @@ export default function PrebuiltPromptsPage() {
     });
     setPrompts(initialPrompts);
   }, [processedPrompts]);
-  
   const handlePromptChange = (agentKey, value) => {
     setPrompts(prev => ({
       ...prev,
@@ -52,7 +51,7 @@ export default function PrebuiltPromptsPage() {
     }));
     setHasChanges(prev => ({
       ...prev,
-      [agentKey]: value !== processedPrompts[agentKey]?.originalPrompt
+      [agentKey]: value !== processedPrompts[agentKey]?.prompt
     }));
   };
 

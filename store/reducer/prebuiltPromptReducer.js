@@ -14,8 +14,14 @@ const prebuiltPromptReducer = createSlice({
             state.PrebuiltPrompts = action.payload;
         },
         updatePrebuiltPromptData: (state, action) => {
-            state.PrebuiltPrompts = { ...state.PrebuiltPrompts, [action.payload.key]: action.payload.value };
-        },
+
+            const index = state.PrebuiltPrompts.findIndex(item => item[action.payload.key] !== undefined);
+            if (index !== -1) {
+                state.PrebuiltPrompts[index][action.payload.key] = action.payload.value;
+            } else {
+                state.PrebuiltPrompts.push({ [action.payload.key]: action.payload.value });
+            }
+        }
     },
   });
   
