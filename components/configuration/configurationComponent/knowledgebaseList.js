@@ -3,7 +3,7 @@ import { CircleAlertIcon, AddIcon, EllipsisVerticalIcon, TrashIcon } from '@/com
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { GetFileTypeIcon, openModal } from '@/utils/utility';
+import { closeModal, GetFileTypeIcon, openModal } from '@/utils/utility';
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from '@/utils/enums';
 import KnowledgeBaseModal from '@/components/modals/knowledgeBaseModal';
 import { truncate } from '@/components/historyPageComponents/assistFile';
@@ -12,6 +12,7 @@ import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
 import { getAllKnowBaseDataAction } from '@/store/action/knowledgeBaseAction';
+import DeleteModal from '@/components/UI/DeleteModal';
 
 const KnowledgebaseList = ({ params, searchParams }) => {
     const { knowledgeBaseData, knowbaseVersionData, isFirstKnowledgeBase, shouldToolsShow, model } = useCustomSelector((state) => {
@@ -29,7 +30,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             model: modelName
         };
     });
-
+    const [selectedKnowledgebase, setSelectedKnowledgebase] = useState(null);
     const dispatch = useDispatch();
     const [searchQuery, setSearchQuery] = useState('');
     const [tutorialState, setTutorialState] = useState({
@@ -52,13 +53,17 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             }
         }, 0);
     };
-    const handleDeleteKnowledgebase = (id) => {
+    const handleDeleteKnowledgebase = (item) => {
         dispatch(updateBridgeVersionAction({
             versionId: searchParams?.version,
-            dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== id) }
+            dataToSend: { doc_ids: knowbaseVersionData.filter(docId => docId !== item?._id) }
         }));
+         closeModal(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
     };
-
+    const handleOpenDeleteModal = (item) => {
+        setSelectedKnowledgebase(item);
+        openModal(MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL);
+    };
     const handleTutorial = () => {
         setTutorialState(prev => ({
             ...prev,
@@ -114,7 +119,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                handleDeleteKnowledgebase(item?._id);
+                               handleOpenDeleteModal(item);
                             }}
                             className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
                             title="Remove"
@@ -213,6 +218,7 @@ const KnowledgebaseList = ({ params, searchParams }) => {
             <div className="flex flex-col gap-2 w-full ">
             {renderKnowledgebase}
             </div>
+            <DeleteModal onConfirm={handleDeleteKnowledgebase} item={selectedKnowledgebase} name="knowledgebase" title="Are you sure?" description="This action Remove the selected Knowledgebase from the Agent." buttonTitle="Remove" modalType={MODAL_TYPE?.DELETE_KNOWLEDGE_BASE_MODAL} />
             <KnowledgeBaseModal params={params} searchParams={searchParams} knowbaseVersionData={knowbaseVersionData} addToVersion={true} />
         </div>
     );
