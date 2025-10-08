@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import { deleteTestCaseAction, getAllTestCasesOfBridgeAction, runTestCaseAction } from '@/store/action/testCasesAction';
 
 
-const TestCaseSidebar = ({ params, resolvedParams }) => {
+const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
   const [runningTests, setRunningTests] = useState(new Set());
   const [expandedTests, setExpandedTests] = useState(new Set());
   const [expandedVersions, setExpandedVersions] = useState({});
@@ -73,6 +73,12 @@ const TestCaseSidebar = ({ params, resolvedParams }) => {
     }));
   };
 
+  const handleTestCaseClick = (testCase) => {
+    if (onTestCaseClick && testCase.conversation) {
+      onTestCaseClick(testCase.conversation, testCase.expected);
+    }
+  };
+
   useEffect(() => {
     if (versions && versions.length > 0 && !selectedVersion) {
       setSelectedVersion(versions[0]);
@@ -125,7 +131,9 @@ const TestCaseSidebar = ({ params, resolvedParams }) => {
             return (
               <div
                 key={testCase._id}
-                className={`border rounded-lg p-3 transition-all duration-200 ${getStatusColor(testCase._id)}`}
+                className={`border rounded-lg p-3 transition-all duration-200 cursor-pointer hover:bg-base-200/50 hover:border-primary/50 ${getStatusColor(testCase._id)}`}
+                onClick={() => handleTestCaseClick(testCase)}
+                title="Click to load this test case conversation into chat"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2">
@@ -135,6 +143,7 @@ const TestCaseSidebar = ({ params, resolvedParams }) => {
                     <span className="font-medium text-sm">
                       <span className="font-medium">Input:</span> {testCase.conversation?.[0]?.content || 'No input'}
                     </span>
+                    <span className="text-xs text-primary/70 ml-2">Click to load</span>
 
                     {/* Current version score display */}
                     {!runningTests.has(testCase._id) && (
@@ -149,14 +158,20 @@ const TestCaseSidebar = ({ params, resolvedParams }) => {
                   </div>
                   <div className="flex items-center space-x-1">
                     <button
-                      onClick={() => toggleExpanded(testCase._id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleExpanded(testCase._id);
+                      }}
                       className="p-1 hover:bg-base-300 rounded hover:text-base-content"
                       title={isExpanded ? "Collapse" : "Expand"}
                     >
                       {isExpanded ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                     <button
-                      onClick={() => runSingleTest(testCase._id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        runSingleTest(testCase._id);
+                      }}
                       disabled={runningTests.has(testCase._id)}
                       className={runningTests.has(testCase._id) ? 'bg-transparent' : 'p-1.5 rounded hover:bg-success disabled:opacity-50 disabled:cursor-not-allowed relative bg-success/80'}
                       title="Run Test"
@@ -168,7 +183,10 @@ const TestCaseSidebar = ({ params, resolvedParams }) => {
                       )}
                     </button>
                     <button
-                      onClick={() => handleDeleteTestCase(testCase._id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTestCase(testCase._id);
+                      }}
                       className="p-1 hover:bg-base-300 rounded hover:text-base-content"
                       title="Delete Test"
                     >

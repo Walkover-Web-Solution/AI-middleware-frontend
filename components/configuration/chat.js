@@ -8,8 +8,8 @@ import { dryRun } from "@/config";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { truncate } from "../historyPageComponents/assistFile";
 import { AlertIcon, CloseCircleIcon } from "@/components/Icons";
-import { FINISH_REASON_DESCRIPTIONS, MODAL_TYPE } from '@/utils/enums';
-import { ExternalLink, Menu, PlayIcon, PlusIcon, TestTube, Zap, CheckCircle, XCircle, Target, ToggleLeft, ToggleRight } from "lucide-react";
+import { FINISH_REASON_DESCRIPTIONS } from '@/utils/enums';
+import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X } from "lucide-react";
 import TestCaseSidebar from "./TestCaseSidebar";
 import AddTestCaseModal from "../modals/AddTestCaseModal";
 import { createConversationForTestCase } from "@/utils/utility";
@@ -34,6 +34,9 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
   const [currentRunIndex, setCurrentRunIndex] = useState(null);
   const [isRunningTestCase, setIsRunningTestCase] = useState(false);
   const [showTestCaseResults, setShowTestCaseResults] = useState({});
+  const [isLoadingTestCase, setIsLoadingTestCase] = useState(false);
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [editContent, setEditContent] = useState('');
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,6 +46,98 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
     setTestCaseId(null);
     setMessages([]);
     setConversation([]);
+    setEditingMessage(null);
+    setEditContent('');
+  }
+
+  const handleEditMessage = (messageId, currentContent) => {
+    setEditingMessage(messageId);
+    setEditContent(currentContent);
+  };
+
+  const handleSaveEdit = (messageId) => {
+    const updatedMessages = messages.map(msg =>
+      msg.id === messageId ? { ...msg, content: editContent, isEdited: true } : msg
+    );
+    setMessages(updatedMessages);
+
+    // Also update the conversation array for backend
+    const editedMessage = messages.find(msg => msg.id === messageId);
+    if (editedMessage && editedMessage.sender !== 'expected') {
+      // Create updated conversation from current messages
+      const updatedConversation = [];
+      updatedMessages.forEach(msg => {
+        if (msg.sender === 'user' || msg.sender === 'assistant') {
+          updatedConversation.push({
+            role: msg.sender === 'user' ? 'user' : 'assistant',
+            content: msg.content
+          });
+        }
+      });
+      setConversation(updatedConversation);
+    }
+
+    setEditingMessage(null);
+    setEditContent('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
+    setEditContent('');
+  };
+
+  const handleTestCaseClick = async (testCaseConversation, expected) => {
+    setIsLoadingTestCase(true);
+
+    try {
+      // Add a small delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // Convert testcase conversation to chat messages format
+      const convertedMessages = [];
+      let messageId = 1;
+
+      testCaseConversation.forEach((msg, index) => {
+        const chatMessage = {
+          id: messageId++,
+          sender: msg.role === 'user' ? 'user' : 'assistant',
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
+        };
+        convertedMessages.push(chatMessage);
+      });
+
+      if (expected?.response) {
+        const expectedMessage = {
+          id: messageId++,
+          sender: 'expected',
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          content: expected.response,
+          isExpected: true,
+        };
+        convertedMessages.push(expectedMessage);
+      }
+
+      // Set the messages and conversation
+      setMessages(convertedMessages);
+
+      // Convert to conversation format for the backend
+      const backendConversation = testCaseConversation.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+      setConversation(backendConversation);
+
+      // Close testcase sidebar
+      setShowTestCases(false);
+    } finally {
+      setIsLoadingTestCase(false);
+    }
   }
 
   const handleSendMessageForOrchestralModel = async (userMessage) => {
@@ -133,19 +228,19 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
     const { conversation, expected } = createConversationForTestCase(conversationForTestCase)
     setCurrentRunIndex(index)
     setIsRunningTestCase(true)
-    const testCaseData =  {
+    const testCaseData = {
       conversation,
       expected,
       matching_type: selectedStrategy
     }
     try {
-     const data =  await dispatch(runTestCaseAction({versionId: searchParams.version, bridgeId: null, testcase_id: null, testCaseData}))
-     const updatedMessages = [...messages]
-     updatedMessages[index + 1] = {
-       ...updatedMessages[index + 1],
-       testCaseResult: data?.results?.[0]
-     }
-     setMessages(updatedMessages)
+      const data = await dispatch(runTestCaseAction({ versionId: searchParams.version, bridgeId: null, testcase_id: null, testCaseData }))
+      const updatedMessages = [...messages]
+      updatedMessages[index + 1] = {
+        ...updatedMessages[index + 1],
+        testCaseResult: data?.results?.[0]
+      }
+      setMessages(updatedMessages)
     } finally {
       setIsRunningTestCase(false)
       setCurrentRunIndex(null)
@@ -199,13 +294,23 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
 
             {/* Sidebar */}
             <div className="relative w-[70%] h-full border border-base-content/30 rounded-md bg-base-100 shadow-lg z-30 animate-slideIn">
-              <TestCaseSidebar params={params} resolvedParams={searchParams} />
+              <TestCaseSidebar params={params} resolvedParams={searchParams} onTestCaseClick={handleTestCaseClick} />
             </div>
           </div>
         )}
 
         {/* Chat Section */}
-        <div className="w-full flex-grow min-w-0">
+        <div className="w-full flex-grow min-w-0 relative">
+          {/* Loading overlay for testcase loading */}
+          {isLoadingTestCase && (
+            <div className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-md z-50">
+              <div className="flex items-center gap-3 bg-base-100 p-4 rounded-lg shadow-lg border border-base-content/20">
+                <span className="loading loading-spinner loading-md text-primary"></span>
+                <span className="text-base font-medium">Loading test case conversation...</span>
+              </div>
+            </div>
+          )}
+
           <div className="sm:p-2 justify-between flex flex-col h-full border border-base-content/30 rounded-md w-full z-low">
             <div className="flex flex-col w-full h-full overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2">
               {messages.map((message, index) => {
@@ -220,7 +325,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                   >
                     <div className="chat-image avatar"></div>
                     <div className="chat-header">
-                      {message.sender}
+                      {message.sender === "expected" ? "Expected Response" : message.sender}
+                      {message.isEdited && (
+                        <span className="text-xs text-warning ml-2 font-medium">(edited)</span>
+                      )}
                       <time className="text-xs opacity-50 pl-2">
                         {message.time}
                       </time>
@@ -361,9 +469,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                       )}
 
                     {(message.sender === "user" ||
-                      message.sender === "assistant") &&
+                      message.sender === "assistant" ||
+                      message.sender === "expected") &&
                       message?.content && (
-                        <div className="flex gap-2 show-on-hover justify-center items-center relative">
+                        <div className={`flex gap-2 show-on-hover justify-center items-center relative ${editingMessage === message.id && message.sender === "assistant" ? 'w-[500px]' : ''}`}>
                           {message?.sender === "user" && message?.content && (
                             <button
                               className="btn btn-xs btn-outline hover:btn-primary see-on-hover flex mt-2"
@@ -374,11 +483,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                               <span>Run</span>
                             </button>
                           )}
-                          
+
                           {/* Show either assistant message or test case result */}
                           {message?.testCaseResult && showTestCaseResults[message.id] ? (
                             /* Test Case Result Display */
-                            <div className="chat-bubble gap-0 relative">
+                            <div className="chat-bubble gap-0 relative min-w-full">
                               <div className="bg-neutral/90 border border-neutral-content/20 rounded-lg p-4 text-neutral-content">
                                 {/* Header */}
                                 <div className="flex items-center gap-2 mb-4">
@@ -388,17 +497,16 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                                     <CheckCircle className="h-4 w-4 text-success ml-auto" />
                                   )}
                                 </div>
-                                
+
                                 {/* Similarity Score */}
                                 <div className="flex items-center justify-between mb-3">
                                   <span className="text-sm font-medium text-neutral-content/80">SIMILARITY SCORE</span>
                                   <div className="flex items-center gap-2">
                                     <div className="w-12 bg-neutral-content/20 rounded-full h-1.5">
-                                      <div 
-                                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                                          message.testCaseResult.score >= 0.8 ? 'bg-success' :
-                                          message.testCaseResult.score >= 0.6 ? 'bg-warning' : 'bg-error'
-                                        }`}
+                                      <div
+                                        className={`h-1.5 rounded-full transition-all duration-300 ${message.testCaseResult.score >= 0.8 ? 'bg-success' :
+                                            message.testCaseResult.score >= 0.6 ? 'bg-warning' : 'bg-error'
+                                          }`}
                                         style={{ width: `${Math.max(message.testCaseResult.score * 100, 8)}%` }}
                                       ></div>
                                     </div>
@@ -423,7 +531,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                                     {message.testCaseResult.expected?.response || 'No expected response'}
                                   </div>
                                 </div>
-                                
+
                                 {/* Actual */}
                                 <div>
                                   <span className="text-sm font-medium text-neutral-content/80 block mb-2">ACTUAL</span>
@@ -434,8 +542,8 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                               </div>
                             </div>
                           ) : (
-                            /* Regular Assistant Message */
-                            <div className="chat-bubble break-all gap-0 relative">
+                            /* Regular Assistant/User/Expected Message */
+                            <div className={`chat-bubble break-all gap-0 relative w-full`}>
                               {/* Show loader overlay if this is the message being tested */}
                               {isRunningTestCase && currentRunIndex !== null && index === currentRunIndex + 1 && (
                                 <div className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-10">
@@ -445,31 +553,80 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                                   </div>
                                 </div>
                               )}
-                              <ReactMarkdown
-                                components={{
-                                  code: ({
-                                    node,
-                                    inline,
-                                    className,
-                                    children,
-                                    ...props
-                                  }) => (
-                                    <CodeBlock
-                                      inline={inline}
-                                      className={className}
-                                      isDark={true}
-                                      {...props}
+
+                              {/* Edit Mode */}
+                              {editingMessage === message.id ? (
+                                <div className="w-full">
+                                  <textarea
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    className="textarea textarea-bordered w-full min-h-[100px] resize-y"
+                                    placeholder="Edit message content..."
+                                  />
+                                  <div className="flex gap-2 mt-2">
+                                    <button
+                                      onClick={() => handleSaveEdit(message.id)}
+                                      className="btn btn-xs btn-success"
                                     >
-                                      {children}
-                                    </CodeBlock>
-                                  ),
-                                }}
-                              >
-                                {message.content}
-                              </ReactMarkdown>
+                                      <Save className="h-3 w-3" />
+                                      Save
+                                    </button>
+                                    <button
+                                      onClick={handleCancelEdit}
+                                      className="btn btn-xs btn-error"
+                                    >
+                                      <X className="h-3 w-3" />
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                /* Display Mode */
+                                <div className="relative group">
+                                  {/* Edit Button for Assistant Messages */}
+                                  {message.sender === "assistant" && (
+                                    <button
+                                      onClick={() => handleEditMessage(message.id, message.content)}
+                                      className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity btn btn-xs btn-circle btn-ghost"
+                                      title="Edit message"
+                                    >
+                                      <Edit2 className="h-3 w-3" />
+                                    </button>
+                                  )}
+
+                                  {message.sender === "expected" ? (
+                                    /* Expected Response - Plain text display with label */
+                                    <div className="whitespace-pre-wrap">{message.content}</div>
+                                  ) : (
+                                    /* Regular message with markdown */
+                                    <ReactMarkdown
+                                      components={{
+                                        code: ({
+                                          node,
+                                          inline,
+                                          className,
+                                          children,
+                                          ...props
+                                        }) => (
+                                          <CodeBlock
+                                            inline={inline}
+                                            className={className}
+                                            isDark={true}
+                                            {...props}
+                                          >
+                                            {children}
+                                          </CodeBlock>
+                                        ),
+                                      }}
+                                    >
+                                      {message.content}
+                                    </ReactMarkdown>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           )}
-                          
+
                           {/* Absolute Toggle Button for Test Case Results */}
                           {message?.testCaseResult && (
                             <button
@@ -488,10 +645,9 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                                 <>
                                   <ToggleLeft className="h-3 w-3" />
                                   <span>Test Result</span>
-                                  <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs font-medium ${
-                                    message.testCaseResult.score >= 0.8 ? 'bg-success/20 text-success' :
-                                    message.testCaseResult.score >= 0.6 ? 'bg-warning/20 text-warning' : 'bg-error/20 text-error'
-                                  }`}>
+                                  <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs font-medium ${message.testCaseResult.score >= 0.8 ? 'bg-success/20 text-success' :
+                                      message.testCaseResult.score >= 0.6 ? 'bg-warning/20 text-warning' : 'bg-error/20 text-error'
+                                    }`}>
                                     {(message.testCaseResult.score * 100).toFixed(1)}%
                                   </span>
                                 </>
