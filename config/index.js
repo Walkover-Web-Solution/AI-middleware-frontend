@@ -23,10 +23,26 @@ export const getSingleModels = async () => {
 export const getPrebuiltPrompts = async ()=>{
   try{
      const getPrebuiltPrompts = await axios.get(`${PYTHON_URL}/prebuilt_prompt`)
-     console.log(getPrebuiltPrompts,"getPrebuiltPrompts")
-     return getPrebuiltPrompts
+     return getPrebuiltPrompts?.data?.data
   }
   catch(error){
+    console.error(error)
+    throw error
+  }
+}
+export const updatePrebuiltPrompt = async (dataToSend) => {
+  try {
+    const response= await axios.put(`${PYTHON_URL}/prebuilt_prompt`, dataToSend)
+    return response?.data?.updatedPrompt
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
+ export const resetPrebuiltPrompt = async (dataToSend) => {
+  try {
+    return await axios.post(`${PYTHON_URL}/prebuilt_prompt/reset`, dataToSend)
+  } catch (error) {
     console.error(error)
     throw error
   }
