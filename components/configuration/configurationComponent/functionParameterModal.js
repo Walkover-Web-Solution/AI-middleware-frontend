@@ -58,11 +58,11 @@ const ParameterCard = ({
     <div className={`${bgColor} border border-base-300 rounded-lg p-4`}>
       {/* Parameter Header */}
       <div className="flex items-center justify-between ">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-between w-full">
           <input
             type="text"
             value={editingName}
-            className={` font-medium bg-transparent p-0 focus:outline-none `}
+            className={` w-1/2 font-medium bg-transparent p-0 focus:outline-none `}
             readOnly={false}
             onChange={(e) => {
               setEditingName(e.target.value);
@@ -81,7 +81,7 @@ const ParameterCard = ({
             }}
             placeholder="Parameter name"
           />
-          <div className="flex items-center ml-2 gap-4">
+          <div className="flex items-center mr-8 gap-4">
             <label className="flex items-center gap-1 text-xs">
               <input
                 type="checkbox"
@@ -110,7 +110,7 @@ const ParameterCard = ({
                 })()}
                 onChange={() => onRequiredChange(currentPath)}
               />
-              <span className="text-green-600">Required</span>
+              <span className="text-base-content">Required</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -156,67 +156,22 @@ const ParameterCard = ({
       </div>
 
       {/* Fill with AI and Value Path Options - Moved to Top */}
-      {param.type !== "object" && (
-        <div className="mb-3 p-2 bg-base-50 rounded border border-base-200">
-          {/* Fill with AI Option */}
-          <div className="flex items-center gap-2 text-xs mb-2">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-xs"
-                checked={!(currentPath in variablesPath)}
-                disabled={name === "Pre Tool"}
-                onChange={() => {
-                  const updatedVariablesPath = { ...variablesPath };
-                  if (currentPath in updatedVariablesPath) {
-                    delete updatedVariablesPath[currentPath];
-                  } else {
-                    updatedVariablesPath[currentPath] = "";
-                  }
-                  onVariablePathChange(updatedVariablesPath);
-                }}
-              />
-              Fill with AI
-            </label>
-          </div>
-
-          {/* Value Path Input */}
-          {((name === 'orchestralAgent' && !isMasterAgent) || (name !== 'orchestralAgent')) && (
-            <div className="mb-1">
-              <label className="block text-xs mb-1">Value Path:</label>
-              <input
-                type="text"
-                placeholder="your_path"
-                className={`input input-sm input-bordered w-full ${
-                  name === "Pre Tool" && !variablesPath[currentPath] ? "border-red-500" : ""
-                }`}
-                value={variablesPath[currentPath] || ""}
-                onChange={(e) => {
-                  const updatedVariablesPath = { ...variablesPath };
-                  updatedVariablesPath[currentPath] = e.target.value;
-                  onVariablePathChange(updatedVariablesPath);
-                }}
-              />
-            </div>
-          )}
-        </div>
-      )}
+      
 
       {/* Description */}
       <div className="">
         <textarea
           placeholder="Description of argument..."
           className="col-[1] row-[1] m-0 w-full overflow-y-hidden whitespace-pre-wrap break-words outline-none bg-transparent p-0  caret-black placeholder:text-quaternary dark:caret-slate-200 text-sm resize-none"
-          rows={2}
           value={param.description || ""}
           onChange={(e) => onDescriptionChange(currentPath, e.target.value)}
         />
       </div>
 
       {/* Additional Options */}
+        <div className={`flex flex-row ${param.type !== "object" ? 'justify-between' : 'justify-end'}`}>
       {param.type !== "object" && (
-        <div className="">
-          <label className="flex items-center gap-2 text-xs mb-2">
+          <div className="flex items-center gap-2 text-xs mb-2">
             <input
               type="checkbox"
               className="checkbox checkbox-xs"
@@ -230,12 +185,12 @@ const ParameterCard = ({
               }}
             />
             Set allowed values
-          </label>
+          
           {param.hasOwnProperty('enum') && (
             <input
               type="text"
               placeholder="['a','b','c']"
-              className="input input-sm input-bordered w-full"
+              className="input input-sm input-bordered"
               value={editingEnum}
               onChange={(e) => {
                 setEditingEnum(e.target.value);
@@ -250,8 +205,28 @@ const ParameterCard = ({
               }}
             />
           )}
+          </div>
+           )}
+          {((name === 'orchestralAgent' && !isMasterAgent) || (name !== 'orchestralAgent')) && (
+            <div className="mb-1 flex flex-row ml-2 items-center justify-end  ">
+              <label className="block text-xs mb-1 mr-2">Value Path:</label>
+              <input
+                type="text"
+                placeholder="your_path"
+                className={`input input-sm input-bordered ${
+                  name === "Pre Tool" && !variablesPath[currentPath] ? "border-red-500" : ""
+                }`}
+                value={variablesPath[currentPath] || ""}
+                onChange={(e) => {
+                  const updatedVariablesPath = { ...variablesPath };
+                  updatedVariablesPath[currentPath] = e.target.value;
+                  onVariablePathChange(updatedVariablesPath);
+                }}
+              />
+            </div>
+          )}
         </div>
-      )}
+     
 
       {/* Properties Section for Objects */}
       {param.type === "object" && (
@@ -343,6 +318,7 @@ function FunctionParameterModal({
   }, [toolData, tool_name, isToolNameManuallyChanged]);
 
   const properties = useMemo(() => function_details?.fields || {}, [function_details?.fields]);
+  console.log("properties", properties);
   const isDataAvailable = useMemo(() => Object.keys(properties).length > 0, [properties]);
 
   const [isModified, setIsModified] = useState(false);
@@ -909,41 +885,17 @@ function FunctionParameterModal({
       <div className="modal-box max-w-5xl overflow-x-hidden text-sm h-[600px] flex flex-col">
         {/* Modal Header */}
         <div className="flex items-start flex-col mb-4 pb-3 border-b gap-2 border-base-300">
+          <div className="flex justify-between w-full items-center">
           <h2 className="text-xl font-semibold">Config {name}</h2>
-      
-          <span className="flex flex-row items-center gap-2">
-            {(name === 'Tool' || name === 'Pre Tool') && (
-              <div className="flex flex-row gap-1">
-                <InfoIcon size={14} />
-                <span className="label-text-alt">
-                  Function used in {(function_details?.bridge_ids || [])?.length} bridges, changes may affect all bridges.
-                </span>
-              </div>
-            )}
-          </span>
-          <p className="flex items-center gap-1 whitespace-nowrap text-xs mb-2">
-            <InfoIcon size={14} /> You can change the data in raw json format. For more info click{" "}
-            <a
-              href="/faq/jsonformatdoc"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link link-primary underline cursor-pointer"
-            >
-              here
-            </a>
-          </p>
-        </div>
-        
-        {/* Editor Selection Dropdown */}
-        {isDataAvailable && (
+          {isDataAvailable && (
           <div className="flex justify-end gap-2 mt-1">
             <div className="dropdown">
               <div 
                 tabIndex={0} 
                 role="button" 
-                className="btn btn-sm btn-outline flex items-center justify-between gap-2 min-w-20 text-xs"
+                className="btn btn-xs btn-outline flex items-center justify-between gap-2 min-w-20 text-xs"
               >
-                <span className="text-xs">{isTextareaVisible ? 'JSON' : 'Editor'}</span>
+                <span className="text-xs">{isTextareaVisible ? 'Advance' : 'Simple'}</span>
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   width="12" 
@@ -974,7 +926,7 @@ function FunctionParameterModal({
                     }}
                     className={`text-xs py-1 px-2 ${!isTextareaVisible ? 'active' : ''}`}
                   >
-                    Editor
+                    Simple
                   </a>
                 </li>
                 <li>
@@ -986,7 +938,7 @@ function FunctionParameterModal({
                     }}
                     className={`text-xs py-1 px-2 ${isTextareaVisible ? 'active' : ''}`}
                   >
-                    JSON
+                    Advance
                   </a>
                 </li>
               </ul>
@@ -1002,6 +954,32 @@ function FunctionParameterModal({
             )}
           </div>
         )}
+        </div>
+          <span className="flex flex-row items-center gap-2">
+            {(name === 'Tool' || name === 'Pre Tool') && (
+              <div className="flex flex-row gap-1">
+                <InfoIcon size={14} />
+                <span className="label-text-alt">
+                  Function used in {(function_details?.bridge_ids || [])?.length} bridges, changes may affect all bridges.
+                </span>
+              </div>
+            )}
+          </span>
+          <p className="flex items-center gap-1 whitespace-nowrap text-xs mb-2">
+            <InfoIcon size={14} /> You can change the data in raw json format. For more info click{" "}
+            <a
+              href="/faq/jsonformatdoc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link link-primary underline cursor-pointer"
+            >
+              here
+            </a>
+          </p>
+        </div>
+        
+        {/* Editor Selection Dropdown */}
+        
 
         {/* Name and Description Form - Only show when not in JSON mode */}
         {!isTextareaVisible && (
@@ -1142,13 +1120,13 @@ function FunctionParameterModal({
           {!isTextareaVisible ? (
               <> 
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold text-lg">Arguments</h3>
+              <h3 className="font-semibold text-lg">Parameters</h3>
               <button
                 onClick={handleAddParameter}
                 className="btn btn-sm btn-primary gap-1"
               >
                 <PlusCircleIcon size={16} />
-                Argument
+                Parameter
               </button>
             </div>
             <div className="space-y-4">
