@@ -11,6 +11,7 @@ import OpenRouter from "@/icons/OpenRouter";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { WebSearchIcon } from "@/icons/webSearchIcon";
 import { cloneDeep } from "lodash";
+import { Image } from "lucide-react";
 
 export const updatedData = (obj1, obj2 = {}, type) => {
     // Deep clone obj1 to avoid mutating the original object
@@ -205,7 +206,10 @@ export function getStatusClass(status) {
             return 'bg-yellow-100';
         case 'paused':
             return 'bg-red-100';
+        case '1':
+            return 'bg-green-100';
         case 'active':
+            return 'bg-green-100';
         case 'published':
             return 'bg-green-100';
         case 'rejected':
@@ -320,6 +324,8 @@ export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
     switch (preBuiltTools) {
         case 'web_search':
             return <WebSearchIcon height={height} width={width} />;
+        case 'image_generation':
+            return <Image size={12} />;
         default:
             return null;
     }
@@ -647,3 +653,52 @@ function getDomain() {
     }
   };
   
+/**
+ * Mark that the current tab is initiating an agent update
+ * Call this BEFORE making your API call
+ */
+export function markUpdateInitiatedByCurrentTab(agentId) {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    sessionStorage.setItem('initiated_update_' + agentId, 'true');
+    sessionStorage.setItem('last_initiated_update', JSON.stringify({
+      agentId: String(agentId),
+      timestamp: Date.now()
+    }));
+  } catch (error) {
+    console.error('Error marking update initiation:', error);
+  }
+}
+
+/**
+ * Check if the current tab initiated a specific agent update
+ */
+export function didCurrentTabInitiateUpdate(agentId) {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    const lastInitiated = sessionStorage.getItem('last_initiated_update');
+    if (!lastInitiated) return false;
+    
+    const { agentId: lastAgentId, timestamp } = JSON.parse(lastInitiated);
+    const now = Date.now();
+    const timeWindow = 5000; // 5 seconds window for multiple events
+    
+    // Check if this agent was recently updated by current tab and within time window
+    if (String(lastAgentId) === String(agentId) && (now - timestamp) < timeWindow) {
+      return true;
+    }
+    
+    // Clean up expired entries
+    if ((now - timestamp) >= timeWindow) {
+      sessionStorage.removeItem('last_initiated_update');
+      sessionStorage.removeItem('initiated_update_' + lastAgentId);
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking update initiation:', error);
+    return false;
+  }
+}

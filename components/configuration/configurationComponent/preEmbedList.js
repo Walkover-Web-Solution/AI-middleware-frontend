@@ -1,6 +1,6 @@
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateApiAction, updateBridgeVersionAction, updateFuntionApiAction } from '@/store/action/bridgeAction';
-import { getStatusClass, openModal } from '@/utils/utility';
+import { closeModal, getStatusClass, openModal } from '@/utils/utility';
 import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EmbedListSuggestionDropdownMenu from './embedListSuggestionDropdownMenu';
@@ -9,6 +9,8 @@ import { MODAL_TYPE } from '@/utils/enums';
 import RenderEmbed from './renderEmbed';
 import InfoTooltip from '@/components/InfoTooltip';
 import { isEqual } from 'lodash';
+import { AddIcon } from '@/components/Icons';
+import DeleteModal from '@/components/UI/DeleteModal';
 
 const PreEmbedList = ({ params, searchParams }) => {
     const [preFunctionData, setPreFunctionData] = useState(null);
@@ -45,12 +47,22 @@ const PreEmbedList = ({ params, searchParams }) => {
         setVariablesPath(variables_path[preFunctionName] || {});
         openModal(MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL)
     }
-
+   const handleOpenDeleteModal = (functionId, functionName) => {
+        setPreFunctionId(functionId);
+        setPreFunctionName(functionName);
+        openModal(MODAL_TYPE.DELETE_PRE_TOOL_MODAL);
+    };
     const onFunctionSelect = (id) => {
         dispatch(updateApiAction(params.id, {
             pre_tools: [id],
             version_id: searchParams?.version
-        }))
+        }));
+        // Close dropdown after selection
+        setTimeout(() => {
+            if (typeof document !== 'undefined') {
+                document.activeElement?.blur?.();
+            }
+        }, 0);
     }
 
     const removePreFunction = () => {
@@ -58,6 +70,7 @@ const PreEmbedList = ({ params, searchParams }) => {
             pre_tools: [],
             version_id: searchParams?.version
         }))
+        closeModal(MODAL_TYPE.DELETE_PRE_TOOL_MODAL)
     }
     const handleSavePreFunctionData = () => {
         if (!isEqual(preToolData, preFunctionData)) {
@@ -81,59 +94,88 @@ const PreEmbedList = ({ params, searchParams }) => {
         }
     };
 
-    return (bridge_pre_tools?.length > 0 ?
-        <div>
-            <FunctionParameterModal
-                name="Pre Tool"
-                functionId={preFunctionId}
-                Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL}
-                embedToken={embedToken}
-                handleRemove={removePreFunction}
-                handleSave={handleSavePreFunctionData}
-                toolData={preToolData}
-                setToolData={setPreToolData}
-                function_details={preFunctionData}
-                functionName={preFunctionName}
-                variablesPath={variablesPath}
-                setVariablesPath={setVariablesPath}
-                variables_path={variables_path}
-            />
-            <div className="form-control inline-block">
-                <div className='flex gap-5 items-center ml-2 '>
-                    <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
-                        <p className="label-text font-medium whitespace-nowrap info">Pre Tool</p>
-                    </InfoTooltip>
-                </div>
-                <div className="label flex-col items-start">
-                    
-                        <div className="flex flex-wrap gap-4">
-                            <RenderEmbed
-                                bridgeFunctions={bridgePreFunctions}
-                                integrationData={integrationData}
-                                getStatusClass={getStatusClass}
-                                handleOpenModal={handleOpenModal}
-                                embedToken={embedToken}
-                                params={params}
-                                name="preFunction"
-                            />
-                        </div>
-                </div>
-            </div>
-        </div> :
-        (
-            <div className='flex'>
-                <EmbedListSuggestionDropdownMenu
-                    params={params}
-                    searchParams={searchParams}
-                    name={"preFunction"}
-                    hideCreateFunction={false}
-                    onSelect={onFunctionSelect}
-                    connectedFunctions={bridge_pre_tools}
-                    shouldToolsShow={true}
-                    modelName={model}
+    return (
+        <>
+            <div>
+                <FunctionParameterModal
+                    name="Pre Tool"
+                    functionId={preFunctionId}
+                    Model_Name={MODAL_TYPE.PRE_FUNCTION_PARAMETER_MODAL}
+                    embedToken={embedToken}
+                    handleSave={handleSavePreFunctionData}
+                    toolData={preToolData}
+                    setToolData={setPreToolData}
+                    function_details={preFunctionData}
+                    functionName={preFunctionName}
+                    variablesPath={variablesPath}
+                    setVariablesPath={setVariablesPath}
+                    variables_path={variables_path}
                 />
+                <DeleteModal
+                    onConfirm={removePreFunction}
+                    item={preFunctionId}
+                    name={preFunctionName}
+                    title="Are you sure?"
+                    description={"This action Remove the selected Pre Tool from the Agent."}
+                    buttonTitle="Remove Pre Tool"
+                    modalType={`${MODAL_TYPE.DELETE_PRE_TOOL_MODAL}`}
+                />
+
+                <div className="label flex-col items-start w-full">
+                    <div className="dropdown dropdown-right w-full flex items-center">
+                        {bridge_pre_tools.length > 0 ? (
+                            <div className="flex items-center gap-1 flex-row mb-2">
+                                <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
+
+                                    <p className="label-text info font-medium whitespace-nowrap">Pre Tool</p>
+                                </InfoTooltip>
+                                <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 ml-4">
+                                    <AddIcon className="w-2 h-2" />
+                                    <span className="text-xs font-medium">{bridge_pre_tools.length > 0 ? "change" : "Add"}</span>
+                                </button>
+                            </div>
+                        ) : (
+                            <InfoTooltip tooltipContent="A prefunction prepares data before passing it to the main function for the GPT call.">
+
+
+                                <button
+                                tabIndex={0}
+                                className=" flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
+                            >
+                                <AddIcon className="w-4 h-4" />
+                                <p className="label-text font-medium whitespace-nowrap">Pre Tool</p>
+                            </button>
+                            </InfoTooltip>
+                        )}
+                        <EmbedListSuggestionDropdownMenu
+                            params={params}
+                            searchParams={searchParams}
+                            name={"preFunction"}
+                            hideCreateFunction={false}
+                            onSelect={onFunctionSelect}
+                            connectedFunctions={bridge_pre_tools}
+                            shouldToolsShow={true}
+                            modelName={model}
+                        />
+                    </div>
+                    <div className="w-full">
+                        <RenderEmbed
+                            bridgeFunctions={bridgePreFunctions}
+                            integrationData={integrationData}
+                            getStatusClass={getStatusClass}
+                            handleOpenModal={handleOpenModal}
+                            embedToken={embedToken}
+                            params={params}
+                            name="preFunction"
+                            handleRemoveEmbed={removePreFunction}
+                            handleOpenDeleteModal={handleOpenDeleteModal}
+                        />
+                    </div>
+
+
+                </div>
             </div>
-        )
+        </>
     );
 }
 

@@ -15,7 +15,7 @@ function ActionList({ params, searchParams }) {
     }));
 
     const dispatch = useDispatch();
-    const [selectedKey, setSelectedKey] = useState(null);
+    const [selectedKey, setSelectedKey] = useState({});
 
     const handleRemoveAction = useCallback((actionId, type, description, data, e) => {
         e.stopPropagation();

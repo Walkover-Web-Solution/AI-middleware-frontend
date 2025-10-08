@@ -12,7 +12,7 @@ import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
 
-const AdvancedParameters = ({ params, searchParams }) => {
+const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters}) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   const [objectFieldValue, setObjectFieldValue] = useState();
   const [searchQuery, setSearchQuery] = useState('');
@@ -169,12 +169,6 @@ const AdvancedParameters = ({ params, searchParams }) => {
       dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: { ...updatedDataToSend } }));
     }
   };
-
-  const debouncedSelectChange = useCallback(
-    debounce(handleSelectChange, 500),
-    [configuration, params?.id, params?.version]
-  );
-
   const toggleAccordion = () => {
     setIsAccordionOpen((prevState) => !prevState);
   };
@@ -212,29 +206,38 @@ const AdvancedParameters = ({ params, searchParams }) => {
     const description = ADVANCED_BRIDGE_PARAMETERS?.[key]?.description || '';
     let error = false;
     return (
-      <div key={key} className="form-control w-full">
-        <label className="label">
+      <div key={key} className=" w-full">
+        <div className="label cursor-default">
           <div className='flex gap-2'>
+          <div className="ml-auto flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-sm cursor-pointer"
+                title={configuration?.[key] === 'default' ? 'Set to custom value' : 'Set to default'}
+                checked={configuration?.[key] !== 'default'}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  if (!checked) {
+                    setSliderValue("default", key)
+                  } else {
+                    const fallback = modelInfoData?.[key]?.default ?? inputConfiguration?.[key] ?? configuration?.[key] ?? null;
+                    setSliderValue(fallback, key)
+                  }
+                }}
+              />
+            </div>
             <div className='flex flex-row gap-2 items-center'>
               {description ? <InfoTooltip tooltipContent={description}>
                 <span className="label-text capitalize info">{name || key}</span>
               </InfoTooltip> : <span className="label-text capitalize">{name || key}</span>}
             </div>
-            <div>
-              <ul className="menu menu-xs menu-horizontal lg:menu-horizontal bg-base-200 p-1 rounded-md text-xs">
-                {field === 'slider' && (<li><a onClick={() => setSliderValue("min", key)} className={configuration?.[key] === "min" ? 'bg-base-content text-base-100' : ''}>Min</a></li>)}
-                <InfoTooltip tooltipContent="If you set default, this key will not be send">
-                  <li><a onClick={() => setSliderValue("default", key)} className={configuration?.[key] === "default" ? 'bg-base-content text-base-100 ' : ''} >Default</a></li>
-                </InfoTooltip>
-                {field === 'slider' && (<li><a onClick={() => setSliderValue("max", key)} className={configuration?.[key] === "max" ? 'bg-base-content text-base-100' : ''}> Max</a></li>)}
-              </ul>
-            </div>
+            
           </div>
-          {((field === 'slider') && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
-          {field === 'slider' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
+          {((field === 'slider') && configuration?.[key] !== 'default' && !(min <= configuration?.[key] && configuration?.[key] <= max)) && (configuration?.['key']?.type === "string") && (error = true)}
+          {field === 'slider' && configuration?.[key] !== 'default' && <p className={`text-right ${error ? 'text-error' : ''}`} id={`sliderValue-${key}`}>{(configuration?.[key] === 'min' || configuration?.[key] === 'max' || configuration?.[key] === 'default') ?
             modelInfoData?.[key]?.[configuration?.[key]] : configuration?.[key]}</p>}
-        </label>
-        {field === 'dropdown' && (
+        </div>
+        {field === 'dropdown' && configuration?.[key] !== 'default' && (
           <div className="w-full">
             <div className="relative">
               <div
@@ -340,8 +343,9 @@ const AdvancedParameters = ({ params, searchParams }) => {
           </div>
         )}
 
-        {field === 'slider' && (
-          <div>
+        {field === 'slider' && configuration?.[key] !== 'default' && (
+          <div className="flex items-center gap-2">
+            <button type="button" className="btn btn-xs" onClick={() => setSliderValue('min', key)}>Min</button>
             <input
               type="range"
               min={min || 0}
@@ -360,9 +364,10 @@ const AdvancedParameters = ({ params, searchParams }) => {
               className="range range-accent range-sm h-3 range-extra-small-thumb"
               name={key}
             />
+            <button type="button" className="btn btn-xs" onClick={() => setSliderValue('max', key)}>Max</button>
           </div>
         )}
-        {field === 'text' && (
+        {field === 'text' && configuration?.[key] !== 'default' && (
           <input
             type="text"
             value={inputConfiguration?.[key] === 'default' ? '' : inputConfiguration?.[key] || ''}
@@ -377,7 +382,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
             name={key}
           />
         )}
-        {field === 'number' && (
+        {field === 'number' && configuration?.[key] !== 'default' && (
           <input
             type="number"
             min={min}
@@ -395,7 +400,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
             name={key}
           />
         )}
-        {field === 'boolean' && (
+        {field === 'boolean' && configuration?.[key] !== 'default' && (
           <label className='flex items-center justify-start w-fit gap-4 bg-base-100 text-base-content'>
             <input
               name={key}
@@ -406,7 +411,7 @@ const AdvancedParameters = ({ params, searchParams }) => {
             />
           </label>
         )}
-        {field === 'select' && (
+        {field === 'select' && configuration?.[key] !== 'default' && (
           <label className='items-center justify-start gap-4 bg-base-100 text-base-content'>
             <select
               value={configuration?.[key] === 'default' ? 'default' : (configuration?.[key]?.[defaultValue?.key] || configuration?.[key])}
@@ -465,13 +470,13 @@ const AdvancedParameters = ({ params, searchParams }) => {
     <div className="z-very-low mt-4 text-base-content w-full cursor-pointer" tabIndex={0}>
       {/* Level 2 Parameters - Displayed Outside Accordion */}
       {level2Parameters.length > 0 && (
-        <div className="w-full gap-3 flex flex-col px-3 py-2 border border-base-content/20 rounded-lg mb-4">
+        <div className="w-full gap-3 flex flex-col px-3 py-2 border border-base-content/20 rounded-lg mb-4 cursor-default">
           {level2Parameters.map(([key, paramConfig]) => (
             renderParameterField(key, paramConfig)
           ))}
         </div>
       )}
-      {level1Parameters.length > 0 && (
+      {(level1Parameters.length > 0 && (!isEmbedUser || (isEmbedUser && !hideAdvancedParameters))) && (
         <div className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`} onClick={() => {
           handleTutorial()
           toggleAccordion()
@@ -489,8 +494,8 @@ const AdvancedParameters = ({ params, searchParams }) => {
       {tutorialState.showTutorial && (
         <OnBoarding setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))} video={ONBOARDING_VIDEOS.AdvanceParameter} flagKey={"AdvanceParameter"} />
       )}
-      {level1Parameters.length > 0 && (
-        <div className={`w-full gap-3 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+      {(level1Parameters.length > 0 && (!isEmbedUser || (isEmbedUser && !hideAdvancedParameters)))&& (
+        <div className={`w-full gap-3 cursor-default flex flex-col px-3 py-2 ${isAccordionOpen ? 'border border-base-content/20-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'}  transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? ' opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
           {/* Level 1 Parameters - Inside Accordion */}
           {level1Parameters.map(([key, paramConfig]) => (
             renderParameterField(key, paramConfig)

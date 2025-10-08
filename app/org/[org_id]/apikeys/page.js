@@ -23,8 +23,9 @@ const Page = () => {
   const dispatch = useDispatch();
   const path = pathName?.split('?')[0].split('/');
   const orgId = path[2] || '';
-  const { apikeyData } = useCustomSelector((state) => ({
-    apikeyData: state?.bridgeReducer?.apikeys[orgId] || []
+  const { apikeyData, descriptions } = useCustomSelector((state) => ({
+    apikeyData: state?.bridgeReducer?.apikeys[orgId] || [],
+    descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
   }));
   const [filterApiKeys, setFilterApiKeys] = useState(apikeyData);
 
@@ -111,27 +112,33 @@ const Page = () => {
 
   return (
     <div className="w-full">
+     <div className="px-2">
       <MainLayout>
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4 px-2 pt-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full pt-4 ">
           <PageHeader
             title="ApiKeys"
-            description="Add your model-specific API keys to enable and use different AI models in your chat."
-            docLink="https://app.docstar.io/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
+            description={descriptions?.['Provider Keys'] || "Add your model-specific API keys to enable and use different AI models in your chat."}
+            docLink="https://techdoc.walkover.in/p/serviceapi-key?collectionId=1YnJD-Bzbg4C"
           />
-          <div className="flex-shrink-0 mt-4 sm:mt-0 flex gap-2">
+        
+        </div>
+      </MainLayout>
+      <div className="flex flex-row gap-4 justify-between ">
+
+      <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="ApiKeys"/>
+      <div className="flex-shrink-0 flex gap-4 mr-2">
             <button 
               className="btn" 
               onClick={() => toggleSidebar("Api-Keys-guide-slider","right")}
             >
-             <BookIcon />  API Key Guide
+             <BookIcon />  APIKey Guide
             </button>
             <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.API_KEY_MODAL)}>
-              + Add New Api Key
+              + Add New ApiKey
             </button>
           </div>
-        </div>
-      </MainLayout>
-      <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="Api keys"/>
+      </div>
+      </div>
       {Object.entries(
         dataWithIcons.reduce((acc, item) => {
           const service = item.service.props.children[1].props.children;
@@ -142,8 +149,8 @@ const Page = () => {
           return acc;
         }, {})
       ).map(([service, items]) => (
-        <div key={service} className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 capitalize flex items-center gap-2 pl-3">
+        <div key={service} className="mb-2 mt-4">
+          <h2 className="text-xl font-semibold capitalize flex items-center gap-2 pl-4">
             {getIconOfService(service.toLowerCase(), 24, 24)}
             {service}
           </h2>
