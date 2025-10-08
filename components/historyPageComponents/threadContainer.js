@@ -119,7 +119,8 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
       const variables = {};
       thread.forEach((item) => {
         if (item.Id === modalInput?.Id) {
-          const conversation = prevConv?.AiConfig?.input
+          debugger
+          const conversation = prevConv?.AiConfig?.input || prevConv.AiConfig?.messages
           const filteredConversation = conversation.filter((value) => {
             if (value.role === 'developer') {
               variables['prompt'] = value.content;
