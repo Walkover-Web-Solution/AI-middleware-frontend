@@ -60,6 +60,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   const [promotToUpdate, setPromptToUpdate] = useState(null);
   const [modalInput, setModalInput] = useState(null);
   const [updateMessageAgentVariables, setUpdateMessageAgentVariables] = useState([]);
+  const [isImprovingPrompt, setIsImprovingPrompt] = useState(false);
 
   const formatDateAndTime = useCallback((created_at) => {
     const date = new Date(created_at);
@@ -112,35 +113,40 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
   }, [modalInput, dispatch, bridgeId, orgId, thread]);
 
   const handleImprovePrompt = async () => {
-    let prevConv;
-    const variables = {};
-    thread.forEach((item) => {
-      if (item.Id === modalInput?.Id) {
-        const conversation = prevConv?.AiConfig?.input
-        const filteredConversation = conversation.filter((value) => {
-          if (value.role === 'developer') {
-            variables['prompt'] = value.content;
-          }
-          return value.role !== 'developer';
-        })
-        filteredConversation.push({
-          role: 'assistant',
-          content: modalInput.originalContent
-        })
-        variables["conversation_history"] = filteredConversation;
-      }
-      prevConv = item
-    })
-    variables["updated_response"] = modalInput.content;
-    let data;
+    setIsImprovingPrompt(true);
     try {
-      data = await improvePrompt(variables)
-    } catch (error) {
-      console.error(error)
-    }
-    if (data) {
-      setPromptToUpdate(data?.updated_prompt)
-      openModal(MODAL_TYPE?.HISTORY_PAGE_PROMPT_UPDATE_MODAL)
+      let prevConv;
+      const variables = {};
+      thread.forEach((item) => {
+        if (item.Id === modalInput?.Id) {
+          const conversation = prevConv?.AiConfig?.input
+          const filteredConversation = conversation.filter((value) => {
+            if (value.role === 'developer') {
+              variables['prompt'] = value.content;
+            }
+            return value.role !== 'developer';
+          })
+          filteredConversation.push({
+            role: 'assistant',
+            content: modalInput.originalContent
+          })
+          variables["conversation_history"] = filteredConversation;
+        }
+        item.role === 'user' ? prevConv = item : null
+      })
+      variables["updated_response"] = modalInput.content;
+      let data;
+      try {
+        data = await improvePrompt(variables)
+      } catch (error) {
+        console.error(error)
+      }
+      if (data) {
+        setPromptToUpdate(data?.updated_prompt)
+        openModal(MODAL_TYPE?.HISTORY_PAGE_PROMPT_UPDATE_MODAL)
+      }
+    } finally {
+      setIsImprovingPrompt(false);
     }
   }
 
@@ -466,6 +472,7 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
         handleSave={handleSave}
         modalInput={modalInput}
         handleImprovePrompt={handleImprovePrompt}
+        isImprovingPrompt={isImprovingPrompt}
       />
     </div>
   );

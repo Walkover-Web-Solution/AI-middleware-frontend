@@ -364,11 +364,11 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                       {item.chatbot_message && (
                         <li>
                           <button
-                            className={`px-2 py-1 ${messageType === 0 ? "bg-primary text-white rounded-md" : ""
+                            className={`px-2 py-1 ${messageType === 0 ? "bg-primary text-base-content rounded-md" : ""
                               }`}
                             onClick={() => selectMessageType(0)}
                           >
-                            <div className="tooltip tooltip-left" data-tip="Chatbot Response">
+                            <div className="tooltip tooltip-right" data-tip="Chatbot Response">
                               <BotIcon className="text-base-100" size={16} />
                             </div>
                           </button>
@@ -376,11 +376,11 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                       )}
                       <li>
                         <button
-                          className={`px-2 py-1 ${messageType === 1 ? "bg-primary text-white rounded-md" : ""
+                          className={`px-2 py-1 ${messageType === 1 ? "bg-primary text-base-content rounded-md" : ""
                             }`}
                           onClick={() => selectMessageType(1)}
                         >
-                          <div className="tooltip tooltip-left" data-tip="Normal Response">
+                          <div className="tooltip tooltip-right" data-tip="Normal Response">
                             <CodeMessageIcon className="text-base-100" size={16} />
                           </div>
                         </button>
@@ -388,11 +388,11 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                       {item.updated_message && (
                         <li>
                           <button
-                            className={`px-2 py-1 ${messageType === 2 ? "bg-primary text-white rounded-md" : ""
+                            className={`px-2 py-1 ${messageType === 2 ? "bg-primary text-text-base-content rounded-md" : ""
                               }`}
                             onClick={() => selectMessageType(2)}
                           >
-                            <div className="tooltip tooltip-left" data-tip="Updated Message">
+                            <div className="tooltip tooltip-right" data-tip="Updated Message">
                               <PencilIcon className="text-base-100" size={16} />
                             </div>
                           </button>
