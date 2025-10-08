@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useParams, usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 
@@ -17,6 +17,7 @@ import HistoryPagePromptUpdateModal from '../modals/historyPagePromptUpdateModal
 import { ChatLoadingSkeleton } from './ChatLayoutLoader';
 import { clearThreadData } from '@/store/reducer/historyReducer';
 import EditMessageModal from '../modals/EditMessageModal';
+import { improvePrompt } from '@/config';
 
 // ------------------------------------
 // Constants
@@ -24,7 +25,7 @@ import EditMessageModal from '../modals/EditMessageModal';
 const PAGE_SIZE = 40;
 const SCROLL_BOTTOM_THRESHOLD = 16; // px
 
-const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId,
+const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMore, searchMessageId, setSearchMessageId,
   pathName: pathNameProp, search, historyData, threadHandler, setLoading, threadPage, setThreadPage,
   hasMoreThreadData, setHasMoreThreadData, selectedVersion, previousPrompt, isErrorTrue,
 }) => {
@@ -58,6 +59,8 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
   const [loadingData, setLoadingData] = useState(false);
   const [promotToUpdate, setPromptToUpdate] = useState(null);
   const [modalInput, setModalInput] = useState(null);
+  const [updateMessageAgentVariables, setUpdateMessageAgentVariables] = useState([]);
+  const [isImprovingPrompt, setIsImprovingPrompt] = useState(false);
 
   const formatDateAndTime = useCallback((created_at) => {
     const date = new Date(created_at);
@@ -97,7 +100,7 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
       alert('Message cannot be empty.');
       return;
     }
-    dispatch(
+    const result = dispatch(
       updateContentHistory({
         id: modalInput?.Id,
         bridge_id: bridgeId ?? orgId, // prefer explicit bridgeId, fallback to orgId if needed
@@ -107,7 +110,45 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
     );
     setModalInput('');
     closeModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
-  }, [modalInput, dispatch, bridgeId, orgId]);
+  }, [modalInput, dispatch, bridgeId, orgId, thread]);
+
+  const handleImprovePrompt = async () => {
+    setIsImprovingPrompt(true);
+    try {
+      let prevConv;
+      const variables = {};
+      thread.forEach((item) => {
+        if (item.Id === modalInput?.Id) {
+          const conversation = prevConv?.AiConfig?.input || prevConv.AiConfig?.messages
+          const filteredConversation = conversation.filter((value) => {
+            if (value.role === 'developer') {
+              variables['prompt'] = value.content;
+            }
+            return value.role !== 'developer';
+          })
+          filteredConversation.push({
+            role: 'assistant',
+            content: modalInput.originalContent
+          })
+          variables["conversation_history"] = filteredConversation;
+        }
+        item.role === 'user' ? prevConv = item : null
+      })
+      variables["updated_response"] = modalInput.content;
+      let data;
+      try {
+        data = await improvePrompt(variables)
+      } catch (error) {
+        console.error(error)
+      }
+      if (data) {
+        setPromptToUpdate(data?.updated_prompt)
+        openModal(MODAL_TYPE?.HISTORY_PAGE_PROMPT_UPDATE_MODAL)
+      }
+    } finally {
+      setIsImprovingPrompt(false);
+    }
+  }
 
   const handleClose = useCallback(() => {
     setModalInput('');
@@ -430,6 +471,8 @@ const ThreadContainer = ({thread, filterOption, isFetchingMore, setIsFetchingMor
         handleClose={handleClose}
         handleSave={handleSave}
         modalInput={modalInput}
+        handleImprovePrompt={handleImprovePrompt}
+        isImprovingPrompt={isImprovingPrompt}
       />
     </div>
   );

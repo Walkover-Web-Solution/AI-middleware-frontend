@@ -1,6 +1,6 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { InfoIcon } from "@/components/Icons";
+import { AlertIcon, InfoIcon } from "@/components/Icons";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
@@ -8,6 +8,7 @@ import { getServiceAction } from "@/store/action/serviceAction";
 import Protected from "@/components/protected";
 import { getIconOfService } from "@/utils/utility";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import InfoTooltip from "@/components/InfoTooltip";
 
 function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser }) {
     const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey, shouldPromptShow, showDefaultApikeys, apiKeyObjectIdData } = useCustomSelector((state) => {
@@ -105,6 +106,18 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
         };
     }, [dropdownOpen]);
 
+    // Coordinate with other dropdowns (e.g., ModelDropdown)
+    useEffect(() => {
+        const handler = (e) => {
+            const source = e?.detail?.type;
+            if (source && source !== 'service') {
+                setDropdownOpen(false);
+            }
+        };
+        window.addEventListener('open-dropdown', handler);
+        return () => window.removeEventListener('open-dropdown', handler);
+    }, []);
+
     const handleServiceChange = useCallback((serviceValue) => {
         const newService = serviceValue;
         const defaultModel = DEFAULT_MODEL?.[newService]?.model;
@@ -182,19 +195,24 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
                     role="button" 
                     className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full justify-between ${isDisabled ? 'btn-disabled' : ''}`}
                     disabled={isDisabled}
-                    onClick={() => !isDisabled && setDropdownOpen(!dropdownOpen)}
+                    onClick={() => {
+                        if (isDisabled) return;
+                        // announce opening to close other dropdowns
+                        window.dispatchEvent(new CustomEvent('open-dropdown', { detail: { type: 'service' } }));
+                        setDropdownOpen(!dropdownOpen)
+                    }}
                 >
                     <div className="flex items-center gap-2">
                         {selectedService && getIconOfService(selectedService, 16, 16)}
                         <span>{selectedService ? getServiceDisplayName(selectedService) : 'Select a Service'}</span>
                     </div>
-                    {dropdownOpen ? <ChevronUp className="text-base-content" size={16}/> : <ChevronDown className="text-base-content" size={16}/>}
+                    {dropdownOpen ? <ChevronUp className="text-base-content" size={16}/> : <ChevronDown className="text-base-content" size={16}/>}            
                 </div>
                 
                 {!isDisabled && dropdownOpen && (
                     <ul 
                         tabIndex={0} 
-                        className="dropdown-content menu bg-base-100 rounded-box w-full p-1 shadow border border-base-300"
+                        className="dropdown-content menu bg-base-100 rounded-box w-full p-1 shadow border border-base-300 z-low"
                     >
                         {Array.isArray(availableServices) && availableServices.map((serviceItem) => {
                             const value = serviceItem.value;
@@ -221,48 +239,23 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
     return (
         <div className="space-y-4 w-full">
             <div className="form-control">
-                <div className="gap-2 max-w-xl">
-                    <div className="label max-w-xs flex justify-between items-center gap-10">
-                        <span className="label-text font-medium items-end">LLM Provider</span>
-                        {(shouldPromptShow) && (
-                            <button
-                                className="label-text capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text hover:opacity-80 transition-opacity"
-                                onClick={handleGetRecommendations}
-                                disabled={isLoadingRecommendations}
-                            >
-                                {isLoadingRecommendations ? 'Loading...' : 'Get Recommended Model'}
-                            </button>
-                        )}
-                    </div>
-                </div>
-                {modelRecommendations && (
-                    <div className="mb-2 p-4 bg-base-100 rounded-lg border border-base-content/20 max-w-xs">
-                        {modelRecommendations.error ? (
-                            <p className="text-red-500 text-sm">{modelRecommendations.error}</p>
-                        ) : (
-                            <div className="space-y-2">
-                                <p className="text-base-content">
-                                    <span className="font-medium">Recommended Service:</span> {modelRecommendations?.available?.service}
-                                </p>
-                                <p className="text-base-content">
-                                    <span className="font-medium">Recommended Model:</span> {modelRecommendations?.available?.model}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                )}
+                <div className="gap-2 flex items-center max-w-xl">
+                    <div className="label gap-2">
 
-                <div className="flex items-center gap-2 z-medium">
+                        {isDisabled && (
+                            <InfoTooltip tooltipContent="Batch API is only applicable for OpenAI">
+                              <AlertIcon size={16} className="text-warning" />
+                            </InfoTooltip>
+                        )}
+                        <span className="label-text font-medium items-end">LLM Provider</span>
+                        </div>   
+                </div>
+                
+
+                <div className="flex items-center gap-2 z-auto">
                     {renderDaisyUIDropdown()}
 
-                    {isDisabled && (
-                        <div role="alert" className="alert p-2 flex items-center gap-2 w-auto">
-                            <InfoIcon size={16} className="flex-shrink-0 mt-0.5" />
-                            <span className='label-text-alt text-xs leading-tight'>
-                                Batch API is only applicable for OpenAI services.
-                            </span>
-                        </div>
-                    )}
+                    
                 </div>
             </div>
         </div>

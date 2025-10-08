@@ -6,10 +6,15 @@ import { toast } from 'react-toastify';
 import { UserCircleIcon } from '@/components/Icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import SearchItems from '@/components/UI/SearchItems';
+import { useCustomSelector } from '@/customHooks/customSelector';
 
 export const runtime = 'edge';
 
-function InvitePage() {
+function InvitePage({ params }) {
+  const {userEmailData, descriptions} = useCustomSelector((state) => ({
+    userEmailData: state?.userDetailsReducer?.userDetails?.email,
+    descriptions: state.flowDataReducer.flowData?.descriptionsData?.descriptions || {},
+  }))
   const [email, setEmail] = useState('');
   const [invitedMembers, setInvitedMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -152,7 +157,7 @@ function InvitePage() {
       {/* Header */}
       <div className="mb-4">
         <h1 className="text-3xl font-bold mb-2">Invite Team Members</h1>
-        <p className="text-base-content/70">Add new team members to your Organization</p>
+        <p className="text-base-content/70"> {descriptions?.['Members'] || "Add new team members to your Organization"}</p>
       </div>
 
       {/* Invite Form */}

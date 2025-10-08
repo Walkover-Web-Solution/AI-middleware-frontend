@@ -3,7 +3,7 @@ import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
-import { CircleAlertIcon, SettingsIcon } from '@/components/Icons';
+import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
 import { toast } from 'react-toastify';
@@ -11,6 +11,7 @@ import AgentDescriptionModal from '@/components/modals/AgentDescriptionModal';
 import FunctionParameterModal from './functionParameterModal';
 import { useRouter } from 'next/navigation';
 import InfoTooltip from '@/components/InfoTooltip';
+import DeleteModal from '@/components/UI/DeleteModal';
 
 const ConnectedAgentList = ({ params, searchParams }) => {
     const dispatch = useDispatch();
@@ -72,16 +73,25 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         setSelectedBridge(bridge)
         openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
     }
-
+    const handleOpenDeleteModal = (name, item) => {
+        setSelectedBridge({ name: name, ...item })
+        openModal(MODAL_TYPE?.DELETE_AGENT_MODAL)
+    }
     const handleOpenAgentVariable = useCallback((name, item) => {
         setSelectedBridge({ name: name, ...item })
-        const {fields, required_params} =(item?.variables && Object.keys(item?.variables)?.length>0) ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
-        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params })
-        setAgentTools({ name: item?.bridge_id, description: item?.description, fields: fields, required_params: required_params, thread_id: item?.thread_id?item?.thread_id:false, version_id: item?.version_id || '' })
+        const { fields, required_params } = (item?.variables && Object.keys(item?.variables)?.length > 0) ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
+        const threadId = item?.thread_id ? item?.thread_id : false;
+        const versionId = item?.version_id || '';
+        // Ensure function_details (currentVariable) and toolData (agentTools) have the same shape
+        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields, required_params, thread_id: threadId, version_id: versionId })
+        setAgentTools({ name: item?.bridge_id, description: item?.description, fields, required_params, thread_id: threadId, version_id: versionId })
+        // Initialize variablesPath for this agent to avoid false diffs in modal
+        setVariablesPath(variables_path[item?.bridge_id] || {})
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
 
-    const handleRemoveAgent = () => {
+    const handleRemoveAgent = (item,name) => {
+        console.log(name,item,"hello")
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params?.id,
@@ -89,10 +99,10 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 dataToSend: {
                     agents: {
                         connected_agents: {
-                            [selectedBridge?.name]: {
-                                "description": selectedBridge?.description,
-                                "bridge_id": selectedBridge?.bridge_id,
-                                "agent_variables": selectedBridge?.agent_variables,
+                            [name]: {
+                                "description": item?.description,
+                                "bridge_id": item?.bridge_id,
+                                "agent_variables": item?.agent_variables,
                                 "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
                             }
                         }
@@ -100,7 +110,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 }
             })
         ).then(() => {
-            closeModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL)
+            closeModal(MODAL_TYPE?.DELETE_AGENT_MODAL)
             setCurrentVariable(null)
             setSelectedBridge(null)
         })
@@ -120,7 +130,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 "agent_variables": selectedBridge?.agent_variables,
                                 "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params },
                                 "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false,
-                                "version_id":agentTools?.version_id ? agentTools?.version_id : ""
+                                "version_id": agentTools?.version_id ? agentTools?.version_id : ""
                             }
                         },
                         agent_status: "1"
@@ -164,34 +174,56 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`flex w-[250px] flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200`}
+                    className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
                 >
                     <div
-                        className="p-4 w-full h-full flex flex-col justify-between"
+                        className="p-2 w-full h-full flex flex-col justify-between"
                         onClick={() => handleAgentClicked(item)}
                     >
                         <div>
-                            <div className="flex justify-between items-center">
-                                <h1 className="text-base sm:text-lg font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-48 text-base-content flex items-center gap-2">
-                                    <div className="tooltip" data-tip={name?.length > 10 ? name : ""}>
-                                        <span>{name?.length > 10 ? `${name.slice(0, 15)}...` : name}</span>
+                            <div className="flex items-center gap-2">
+                                
+                                <span className="flex-1 min-w-0 text-[9px] md:text-[12px] lg:text-[13px] font-bold truncate">
+                                    <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
+                                        <span>{ bridgeData?.find(bridge => bridge._id === item.bridge_id)?.name}</span>
+                                        <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!item?.description ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
+                                    {!item?.description ? "Description Required" : "Active"}
+                                    
+                                </span>
                                     </div>
-                                </h1>
+                                </span>
                                 {item?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
                             </div>
-                            <p className="mt-3 text-xs sm:text-sm line-clamp-3">
-                                {item?.description || "A description is required for proper functionality."}
-                            </p>
-                        </div>
-                        <div className="mt-4">
-                            <span className={`mr-2 inline-block rounded-full capitalize px-3 py-1 text-[10px] sm:text-xs font-semibold text-black bg-green-100`}>
-                                {!item?.description ? "Description Required" : "Active"}
-                            </span>
+                            <div className="w-full flex justify-between flex-row">
+                                <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
+                                    {item?.description || "A description is required for proper functionality."}
+                                </p>
+                                
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-center justify-center absolute right-1 top-1">
-                        <button className="btn bg-transparent shadow-none border-none outline-none hover:bg-base-200 pr-1" onClick={() => handleOpenAgentVariable(name, item)}>
-                            <SettingsIcon size={18} />
+                    
+                    {/* Action buttons that appear on hover */}
+                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenAgentVariable(name, item);
+                            }}
+                            className="btn btn-ghost btn-xs p-1 hover:bg-base-300"
+                            title="Config"
+                        >
+                            <SettingsIcon size={16} />
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenDeleteModal(name,item);
+                            }}
+                            className="btn btn-ghost btn-xs p-1 hover:bg-red-100 hover:text-error"
+                            title="Remove"
+                        >
+                            <TrashIcon size={16} />
                         </button>
                     </div>
                 </div>
@@ -201,21 +233,59 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
     return (
         <div>
-            <div className="label flex-col items-start mb-2">
-                {shouldToolsShow && Object.keys(connect_agents).length > 0 && (
+            <div className="label p-0 flex-col items-start mb-0">
+             
                     <>
-                        <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
-                            <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
-                        </InfoTooltip>
-                        <div className="flex flex-wrap gap-4">
+                        <div className="dropdown dropdown-right w-full flex items-center">
+                            {Object?.entries(connect_agents)?.length > 0 ? (
+                         <>
+                            <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                                <p className="label-text mb-2 font-medium whitespace-nowrap info">Agents</p>
+                            </InfoTooltip>
+                            <button
+                                tabIndex={0}
+                                className="ml-4 flex items-center gap-1 px-3 py-1 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-md active:scale-95 transition-all duration-150 mb-2"
+                            >
+                                <AddIcon className="w-2 h-2" />
+                                <span className="text-xs">Add</span>
+                            </button>
+                        </>
+                            ):(
+                                <InfoTooltip tooltipContent="To handle different or complex tasks, one agent can use other agents.">
+                                <button
+                                    tabIndex={0}
+                                    className=" flex items-center gap-1 px-3 py-1 mt-2 rounded-lg bg-base-200 text-base-content text-sm font-medium shadow hover:shadow-lg active:scale-95 transition-all duration-150 mb-2"
+                                >
+                                    <AddIcon className="w-2 h-2" />
+                                    <p className="label-text text-sm whitespace-nowrap">Agent</p>
+                                </button>
+                                </InfoTooltip>
+                            )}
+                            <ConnectedAgentListSuggestion 
+                                params={params} 
+                                handleSelectAgents={handleSelectAgents} 
+                                connect_agents={connect_agents} 
+                                shouldToolsShow={shouldToolsShow} 
+                                modelName={model} 
+                                bridges={bridgeData} 
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2 w-full ">
                             {renderEmbed}
                         </div>
                     </>
-                )}
-        
+               
             </div>
-            <ConnectedAgentListSuggestion params={params} handleSelectAgents={handleSelectAgents} connect_agents={connect_agents} shouldToolsShow={shouldToolsShow} modelName={model} bridges={bridgeData} />
             <AgentDescriptionModal setDescription={setDescription} handleSaveAgent={handleSaveAgent} description={description} />
+            <DeleteModal
+                onConfirm={handleRemoveAgent}
+                item={selectedBridge}
+                name={bridgeData?.find(bridge => bridge._id === selectedBridge?.bridge_id)?.name}
+                title="Are you sure?"
+                description={"This action Remove the selected Agent from the Agent."}
+                buttonTitle="Remove Agent"
+                modalType={`${MODAL_TYPE.DELETE_AGENT_MODAL}`}
+            />
             <FunctionParameterModal
                 name="Agent"
                 Model_Name={MODAL_TYPE?.AGENT_VARIABLE_MODAL}
@@ -231,6 +301,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                 variables_path={variables_path}
                 params={params}
                 searchParams={searchParams}
+                tool_name={bridgeData?.find(bridge => bridge._id === selectedBridge?.bridge_id)?.name}
             />
         </div>
     );

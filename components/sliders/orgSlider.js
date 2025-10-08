@@ -72,7 +72,7 @@ function OrgSlider() {
                 </div>
                 <input
                     type="text"
-                    placeholder="Search org..."
+                    placeholder="Search Org by Name"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="border border-base-300 rounded p-2 w-full"

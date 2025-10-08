@@ -2,7 +2,7 @@ import { addorRemoveResponseIdInBridge, archiveBridgeApi, createBridge, createBr
 import { toast } from "react-toastify";
 import { createBridgeReducer, createBridgeVersionReducer, deleteBridgeReducer, duplicateBridgeReducer, fetchAllBridgeReducer, fetchAllFunctionsReducer, fetchSingleBridgeReducer, fetchSingleBridgeVersionReducer, getPrebuiltToolsReducer, integrationReducer, isError, isPending, publishBrigeVersionReducer, removeFunctionDataReducer, updateBridgeReducer, updateBridgeToolsReducer, updateBridgeVersionReducer, updateFunctionReducer } from "../reducer/bridgeReducer";
 import { getAllResponseTypeSuccess } from "../reducer/responseTypeReducer";
-
+import { markUpdateInitiatedByCurrentTab } from "@/utils/utility";
 //   ---------------------------------------------------- ADMIN ROUTES ---------------------------------------- //
 export const getSingleBridgesAction = ({ id, version }) => async (dispatch, getState) => {
   try {
@@ -161,6 +161,7 @@ export const getAllResponseTypesAction = (orgId) => async (dispatch, getState) =
 export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch) => {
   try {
     dispatch(isPending());
+    markUpdateInitiatedByCurrentTab(bridgeId);
     const data = await updateBridge({ bridgeId, dataToSend });
     dispatch(updateBridgeReducer({ bridges: data.data.bridge, functionData: dataToSend?.functionData || null }));
     return { success: true };
@@ -174,6 +175,7 @@ export const updateBridgeAction = ({ bridgeId, dataToSend }) => async (dispatch)
 export const updateBridgeVersionAction = ({ versionId, dataToSend }) => async (dispatch) => {
   try {
     dispatch(isPending());
+    markUpdateInitiatedByCurrentTab(versionId);
     const data = await updateBridgeVersionApi({ versionId, dataToSend });
     if (data?.success) {
       dispatch(updateBridgeVersionReducer({ bridges: data.bridge, functionData: dataToSend?.functionData || null }));
@@ -219,6 +221,7 @@ export const createApiAction = (org_id, dataFromEmbed) => async (dispatch) => {
 
 export const updateApiAction = (bridge_id, dataFromEmbed) => async (dispatch) => {
   try {
+    markUpdateInitiatedByCurrentTab(dataFromEmbed?.version_id);
     const data = await updateapi(bridge_id, dataFromEmbed);
     // dispatch(updateBridgeReducer({ bridges: data?.data?.bridge }));
     dispatch(updateBridgeVersionReducer({ bridges: data?.data?.bridge }));
