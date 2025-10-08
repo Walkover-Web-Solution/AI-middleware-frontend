@@ -52,7 +52,7 @@ const InfoTooltip = ({ video = "", children, tooltipContent,docLink }) => {
         ref={refs.setReference}
         onMouseEnter={handleOpenWithDelay}
         onMouseLeave={handleClose}
-        className="inline-block relative"
+        className="inline-block"
       >
         {children}
 
