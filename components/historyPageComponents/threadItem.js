@@ -369,7 +369,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                             onClick={() => selectMessageType(0)}
                           >
                             <div className="tooltip tooltip-right" data-tip="Chatbot Response">
-                              <BotIcon className="text-base-100" size={16} />
+                              <BotIcon className={`${messageType !== 0 ? "text-base-content" : "text-white"}`} size={16} />
                             </div>
                           </button>
                         </li>
@@ -381,7 +381,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                           onClick={() => selectMessageType(1)}
                         >
                           <div className="tooltip tooltip-right" data-tip="Normal Response">
-                            <CodeMessageIcon className="text-base-100" size={16} />
+                            <CodeMessageIcon className={`${messageType !== 1 ? "text-base-content" : "text-white"}`} size={16} />
                           </div>
                         </button>
                       </li>
@@ -393,7 +393,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                             onClick={() => selectMessageType(2)}
                           >
                             <div className="tooltip tooltip-right" data-tip="Updated Message">
-                              <PencilIcon className="text-base-100" size={16} />
+                              <PencilIcon className={`${messageType !== 2 ? "text-base-content" : "text-white"}`} size={16} />
                             </div>
                           </button>
                         </li>
