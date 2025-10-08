@@ -1272,3 +1272,13 @@ export const publishBulkVersionApi = async (version_ids) => {
     throw new Error(error);
   }
 }
+
+export const improvePrompt =  async (variables) =>{
+  try {
+    const response = await axios.post(`${PYTHON_URL}/utils/improve_prompt`, {variables})
+    return response?.data;
+  } catch (error) {
+    console.error(error)
+    throw new Error(error);
+  }
+}

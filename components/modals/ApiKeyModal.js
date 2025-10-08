@@ -24,7 +24,7 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
         event.preventDefault();
         const formData = new FormData(event.target);
         const data = {
-            name: formData.get('name').trim().replace(/\s+/g, ''),
+            name: formData.get('name'),
             service: service || formData.get('service'),
             apikey: formData.get('apikey'),
             comment: formData.get('comment'),

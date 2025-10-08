@@ -27,6 +27,7 @@ export const updateContentHistory = ({ id, bridge_id, message, index }) => async
   try {
     const data = await updateHistoryMessage({ id, bridge_id, message });
     dispatch(updateHistoryMessageReducer({ data: data?.result?.[0], index }));
+    return data;
   } catch (error) {
     console.error(error)
   }
