@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
+import { AlertIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/Icons';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import ResponseFormatSelector from './responseFormatSelector';
@@ -21,7 +21,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
 
   const dispatch = useDispatch();
 
-  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration, serviceModels, currentService, fallbackModel, DefaultModel } = useCustomSelector((state) => {
+  const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration, serviceModels, currentService, fallbackModel, DefaultModel , currentModel } = useCustomSelector((state) => {
     const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
     const apikeys = state?.bridgeReducer?.apikeys || {};
     const user = state.userDetailsReducer.userDetails;
@@ -36,8 +36,10 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
       isFirstConfiguration: user?.meta?.onboarding?.AdvancedConfiguration,
       serviceModels: state?.modelReducer?.serviceModels || {},
       currentService: service,
-      fallbackModel: versionData?.fallback_model,
+      currentModel: versionData?.configuration?.model,
+      fallbackModel: versionData?.fall_back,
       DefaultModel: state?.serviceReducer?.default_model,
+
     };
   });
   useEffect(() => {
@@ -105,6 +107,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
     setFallbackModelName(fallbackModel?.model ||DefaultModel[currentService]?.model);
     setIsFallbackEnabled(fallbackModel?.is_enable||false);
   }, [fallbackModel]);
+
   const handleFallbackServiceChange = useCallback((service) => {
     const newDefaultModel = DefaultModel[service]?.model || null;
     setFallbackService(service);
@@ -252,6 +255,17 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
                   ))}
                 </ul>
               </details>
+              
+
+              {/* Alert for same model selection */}
+              {fallbackModelName && currentModel && fallbackModelName === currentModel && (
+                <div className="alert alert-warning mb-1 py-2 px-2">
+                  <div className="flex items-center gap-2">
+                    <AlertIcon size={12} />
+                    <span className="text-xs">This model is already selected please change the model</span>
+                  </div>
+                </div>
+              )}
 
               {/* Fallback Model Dropdown (styled like ModelDropdown) */}
               <details id="model-dropdown" className="dropdown w-full"
@@ -281,15 +295,18 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
                           {Object.keys(options || {}).map((option) => {
                             const modelName = options?.[option]?.configuration?.model?.default || option;
                             const selected = fallbackModelName === modelName || fallbackModelName === option;
+                            
+                            if (currentModel === modelName || currentModel === option) return null;
+                            
                             return (
                               <li key={`${group}-${option}`}
-                                  className={`hover:bg-base-200 rounded-md py-1 ${selected ? 'bg-base-200' : ''}`}
-                                  onClick={(e) => {
-                                    handleFallbackModelChange(group, modelName)
-                                    const details = e.currentTarget.closest('details');
-                                    if (details) details.removeAttribute('open');
-                                  }}
-                                  >
+                                className={`hover:bg-base-200 rounded-md py-1 ${selected ? 'bg-base-200' : ''}`}
+                                onClick={(e) => {
+                                  handleFallbackModelChange(group, modelName)
+                                  const details = e.currentTarget.closest('details');
+                                  if (details) details.removeAttribute('open');
+                                }}
+                              >
                                 {selected && <span className="flex-shrink-0 ml-2">✓</span>}
                                 <span className={`truncate flex-1 pl-2 ${!selected ? 'ml-4' : ''}`}>
                                   {truncateText(modelName || option, 30)}
