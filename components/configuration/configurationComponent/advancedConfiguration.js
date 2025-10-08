@@ -188,7 +188,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
 
       
 
-      <div className={`w-full gap-4 flex flex-col px-3 py-2 ${isAccordionOpen ? 'border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'} transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
+      <div className={`w-full gap-4 flex flex-col transition-all duration-300 ease-in-out ${isAccordionOpen ? 'px-3 py-2 border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg opacity-100' : 'max-h-0 opacity-0 overflow-hidden border border-base-content/20 rounded-lg p-0'}`}>
       <div className=' mt-4'> 
       <GuardrailSelector params={params} searchParams={searchParams} />
       </div>
@@ -227,7 +227,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
                 >
                   <div className="flex items-center gap-2 truncate">
                     {fallbackService && getIconOfService(fallbackService, 16, 16)}
-                    <span className="truncate">
+                    <span className="">
                       {fallbackService ? (SERVICES?.find(s => s.value === fallbackService)?.displayName || fallbackService) : 'Select a Service'}
                     </span>
                   </div>
@@ -261,7 +261,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
                   role="button"
                   className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
                 >
-                  <span className="truncate">{fallbackModelName ? truncateText(fallbackModelName, 30) : 'Select a Model'}</span>
+                  <span className="">{fallbackModelName ? truncateText(fallbackModelName, 30) : 'Select a Model'}</span>
                   <ChevronDownIcon size={16} />
                 </summary>
                 <ul
