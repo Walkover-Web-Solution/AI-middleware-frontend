@@ -4,7 +4,6 @@ import { getAllPrebuiltPrompts, updatePrebuiltPromptData } from "../reducer/preb
 export const getPrebuiltPromptsAction = () => async (dispatch) => {
   try {
     const response = await getPrebuiltPrompts()
-    console.log(response,"response")
     dispatch(getAllPrebuiltPrompts(response))
       } catch (error) {
     console.error(error);
@@ -13,8 +12,7 @@ export const getPrebuiltPromptsAction = () => async (dispatch) => {
 export const updatePrebuiltPromptAction = (dataToSend) => async (dispatch) => {
   try {
     const response = await updatePrebuiltPrompt(dataToSend)
-    console.log(response,"response")
-    
+        
     // Transform response to match reducer expectations
     if (response && typeof response === 'object') {
       Object.keys(response).forEach(key => {
@@ -30,8 +28,7 @@ export const updatePrebuiltPromptAction = (dataToSend) => async (dispatch) => {
 }
 export const resetPrebuiltPromptAction = (dataToSend) => async (dispatch) => {
   try {
-    const response = await resetPrebuiltPrompt(dataToSend)
-    console.log(response,"response")
+    const response = await resetPrebuiltPrompt(dataToSend);
     
     // Transform response to match reducer expectations
     if (response && typeof response === 'object') {
@@ -43,6 +40,6 @@ export const resetPrebuiltPromptAction = (dataToSend) => async (dispatch) => {
       });
     }
   } catch (error) {
-    console.error(error);
+    console.error('Reset action error:', error);
   }
 }

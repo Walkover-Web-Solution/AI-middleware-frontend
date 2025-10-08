@@ -41,7 +41,10 @@ export const updatePrebuiltPrompt = async (dataToSend) => {
 }
  export const resetPrebuiltPrompt = async (dataToSend) => {
   try {
-    return await axios.post(`${PYTHON_URL}/prebuilt_prompt/reset`, dataToSend)
+    const response= await axios.post(`${PYTHON_URL}/prebuilt_prompt/reset`, dataToSend)
+     
+     return response?.data?.data
+
   } catch (error) {
     console.error(error)
     throw error

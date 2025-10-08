@@ -13,7 +13,6 @@ import { resetPrebuiltPromptAction, updatePrebuiltPromptAction } from '@/store/a
 export default function PrebuiltPromptsPage() {
   const dispatch = useDispatch();
   const prebuiltPrompts = useCustomSelector((state) => state.prebuiltPromptReducer.PrebuiltPrompts || []);
-  console.log(prebuiltPrompts,'2345')
   // Convert array of objects to a more usable format
   const processedPrompts = React.useMemo(() => {
     const processed = {};
@@ -21,7 +20,7 @@ export default function PrebuiltPromptsPage() {
       const key = Object.keys(promptObj)[0];
       const value = promptObj[key];
       processed[key] = {
-        name: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        name: key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
         description: `${key.replace(/_/g, ' ')} agent configuration`,
         prompt: value,
       };
@@ -32,56 +31,52 @@ export default function PrebuiltPromptsPage() {
   const availableKeys = Object.keys(processedPrompts);
   const [selectedAgent, setSelectedAgent] = useState(availableKeys[0] || '');
   const [prompts, setPrompts] = useState({});
-  const [isEditing, setIsEditing] = useState({});
-  const [hasChanges, setHasChanges] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [savebtnEnabled, setSavebtnEnabled] = useState(false);
   // Initialize prompts with actual data from reducer
+  useEffect(()=>{
+    setSelectedAgent(availableKeys[0] || '');
+  },[])
   useEffect(() => {
     const initialPrompts = {};
     Object.keys(processedPrompts).forEach(key => {
       initialPrompts[key] = processedPrompts[key].prompt;
     });
     setPrompts(initialPrompts);
-  }, [processedPrompts]);
+    // Reset save button state when Redux data changes
+    setSavebtnEnabled(false);
+  }, [processedPrompts, prebuiltPrompts]);
   const handlePromptChange = (agentKey, value) => {
     setPrompts(prev => ({
       ...prev,
       [agentKey]: value
     }));
-    setHasChanges(prev => ({
-      ...prev,
-      [agentKey]: value !== processedPrompts[agentKey]?.prompt
-    }));
+    setSavebtnEnabled(true);
   };
 
   // Dummy action for updating prebuilt prompts
   const updatePrebuiltPrompt = async (dataToUpdate) => {
-    console.log(dataToUpdate,'dataToUpdate')
-     dispatch(updatePrebuiltPromptAction(dataToUpdate));
+    await dispatch(updatePrebuiltPromptAction(dataToUpdate));
   };
 
   // Dummy action for resetting prebuilt prompts
   const resetPrebuiltPrompt = async (agentKey) => {
-     dispatch(resetPrebuiltPromptAction({
-      agentKey
-    }));
+     await dispatch(resetPrebuiltPromptAction(
+      {"prompt_id":agentKey}
+    ));
   };
   
   const handleSave = async (agentKey) => {
     setIsLoading(true);
-    console.log(agentKey,'ewhllo')
     try {
       const dataToUpdate = {
         [agentKey]: prompts[agentKey],
       }
       await updatePrebuiltPrompt(dataToUpdate);
+      setSavebtnEnabled(false);
       
       toast.success((processedPrompts[agentKey]?.name || 'Agent') + ' prompt updated successfully!');
-      setHasChanges(prev => ({
-        ...prev,
-        [agentKey]: false
-      }));
+     
       
       // Update the original prompt to the new saved value
       processedPrompts[agentKey].prompt = prompts[agentKey];
@@ -96,15 +91,7 @@ export default function PrebuiltPromptsPage() {
   const handleReset = async (agentKey) => {
     try {
       await resetPrebuiltPrompt(agentKey);
-      
-      setPrompts(prev => ({
-        ...prev,
-        [agentKey]: processedPrompts[agentKey]?.prompt
-      }));
-      setHasChanges(prev => ({
-        ...prev,
-        [agentKey]: false
-      }));
+      setSavebtnEnabled(false);
       toast.info((processedPrompts[agentKey]?.name || 'Agent') + ' prompt reset to default.');
     } catch (error) {
       toast.error('Failed to reset prompt. Please try again.');
@@ -130,136 +117,113 @@ export default function PrebuiltPromptsPage() {
         <div className="text-center">
           <div className="text-6xl mb-4">🤖</div>
           <h2 className="text-2xl font-bold mb-2">No Prebuilt Agents Found</h2>
-          <p className="text-base-content/60">Loading agent configurations...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-base-100 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Prebuilt Agent Prompts</h1>
-          <p className="text-base-content/60">
-            Customize and manage prompts for your prebuilt AI agents
-          </p>
-        </div>
+    <div className="min-h-screen bg-base-100">
+      {/* Header */}
+      <div className="bg-base-200 border-b border-base-300 sticky top-5 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header Top */}
+          <div className="py-4 border-b border-base-300">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold">Prebuilt Agent Prompts</h1>
+                <p className="text-sm text-base-content/60 mt-1">
+                  Customize and manage prompts for your prebuilt AI agents
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-base-content/60">
+                <span>{Object.keys(processedPrompts).length} agents available</span>
+              </div>
+            </div>
+          </div>
 
-        {/* Agent Selection Tabs */}
-        <div className="mb-6">
-          <div className="tabs tabs-boxed bg-base-200 overflow-x-auto">
-            <div className="flex flex-nowrap min-w-max">
+          {/* Agent Selection Tabs */}
+          <div className="py-4">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               {Object.entries(processedPrompts).map(([key, agent]) => (
                 <button
                   key={key}
-                  className={'tab tab-lg whitespace-nowrap flex-shrink-0 ' + (selectedAgent === key ? 'tab-active' : '')}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                    selectedAgent === key 
+                      ? 'bg-primary text-primary-content' 
+                      : 'bg-base-100 hover:bg-base-300 border border-base-300'
+                  }`}
                   onClick={() => setSelectedAgent(key)}
                 >
-                  <span className="truncate max-w-[150px]">{agent.name}</span>
-                  {hasChanges[key] && (
-                    <div className="ml-2 w-2 h-2 bg-warning rounded-full flex-shrink-0"></div>
-                  )}
+                  <span className="truncate max-w-[120px] sm:max-w-none">{agent.name}</span>
                 </button>
               ))}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Main Editor */}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-6">
         {selectedAgent && (
-          <div className="card bg-base-200 shadow-lg">
-            <div className="card-body">
-              {/* Editor Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="card-title text-xl">
-                    {processedPrompts[selectedAgent]?.name}
-                  </h2>
-                  <p className="text-sm text-base-content/60 mt-1">
-                    {processedPrompts[selectedAgent]?.description}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {hasChanges[selectedAgent] && (
-                    <div className="badge badge-warning">Unsaved Changes</div>
-                  )}
-                  <button
-                    onClick={() => handleCopy(selectedAgent)}
-                    className="btn btn-sm btn-ghost"
-                    title="Copy prompt"
-                  >
-                    <CopyIcon size={16} />
-                  </button>
-                  <button
-                    onClick={() => toggleEdit(selectedAgent)}
-                    className={'btn btn-sm ' + (isEditing[selectedAgent] ? 'btn-primary' : 'btn-outline')}
-                  >
-                    <PencilIcon size={16} />
-                    {isEditing[selectedAgent] ? 'Editing' : 'Edit'}
-                  </button>
-                </div>
+          <div className="h-[calc(100vh-160px)] flex flex-col">
+            {/* Top Action Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3 bg-base-200 p-3 rounded-lg">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-semibold">
+                  {processedPrompts[selectedAgent]?.name}
+                </h2>
+                <span className="text-xs text-base-content/60 bg-base-300 px-2 py-1 rounded">
+                  {(prompts[selectedAgent] || '').length} chars
+                </span>
               </div>
-
-              {/* Prompt Content */}
-              <div className="space-y-4">
-                {isEditing[selectedAgent] ? (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium">Edit Agent Prompt</label>
-                      <span className="text-xs text-base-content/50">
-                        Customize the behavior and instructions for this agent
-                      </span>
-                    </div>
-                    <textarea
-                      className="textarea textarea-bordered w-full h-96 font-mono text-sm"
-                      value={prompts[selectedAgent] || ''}
-                      onChange={(e) => handlePromptChange(selectedAgent, e.target.value)}
-                      placeholder="Enter agent prompt here..."
-                    />
-                  </div>
-                ) : (
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Current Agent Prompt</label>
-                    <div className="bg-base-100 p-4 rounded-lg border min-h-96 font-mono text-sm whitespace-pre-wrap overflow-auto">
-                      {prompts[selectedAgent] || (
-                        <div className="text-center text-base-content/50 mt-32">
-                          <div className="text-4xl mb-2">🤖</div>
-                          <p>No prompt configured</p>
-                          <p className="text-xs mt-1">Click Edit to get started</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div className="text-sm text-base-content/60">
-                    {(prompts[selectedAgent] || '').length} characters
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleReset(selectedAgent)}
-                      className="btn btn-sm btn-ghost"
-                      disabled={!hasChanges[selectedAgent]}
-                    >
-                      <RefreshIcon size={16} />
-                      Reset to Default
-                    </button>
-                    <button
-                      onClick={() => handleSave(selectedAgent)}
-                      className="btn btn-sm btn-primary"
-                      disabled={!hasChanges[selectedAgent] || isLoading}
-                    >
-                      {isLoading && <span className="loading loading-spinner loading-sm"></span>}
-                      <SaveAllIcon size={16} />
-                      Save Changes
-                    </button>
-                  </div>
-                </div>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleCopy(selectedAgent)}
+                  className="btn btn-xs btn-ghost"
+                  title="Copy prompt"
+                >
+                  <CopyIcon size={14} />
+                  <span className="ml-1">Copy</span>
+                </button>
+                <button
+                  onClick={() => handleReset(selectedAgent)}
+                  className="btn btn-xs btn-ghost"
+                >
+                  <RefreshIcon size={14} />
+                  <span className="ml-1">Reset</span>
+                </button>
+                <button
+                  onClick={() => handleSave(selectedAgent)}
+                  className="btn btn-xs btn-primary"
+                  disabled={!savebtnEnabled || isLoading}
+                >
+                  {isLoading && <span className="loading loading-spinner loading-xs mr-1"></span>}
+                  <SaveAllIcon size={14} />
+                  <span className="ml-1">Save</span>
+                </button>
               </div>
+            </div>
+
+            {/* Full Height Textarea */}
+            <div className="flex-1 flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-base-content/80">
+                  Agent Prompt Configuration
+                </label>
+                <span className="text-xs text-base-content/50">
+                  {processedPrompts[selectedAgent]?.description}
+                </span>
+              </div>
+              
+              <textarea
+                className="textarea textarea-bordered flex-1 w-full font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                value={prompts[selectedAgent] || ''}
+                onChange={(e) => handlePromptChange(selectedAgent, e.target.value)}
+                placeholder="Enter your agent prompt configuration here..."
+                style={{ minHeight: 'calc(100vh - 280px)' }}
+              />
             </div>
           </div>
         )}
