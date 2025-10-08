@@ -54,7 +54,6 @@ const ParameterCard = ({
   const childCount = hasChildren ? Object.keys(param.parameter).length : 0;
   const bgColor = depth % 2 === 0 ? "bg-base-100" : "bg-base-200"
   
-  
   return (
     <div className={`${bgColor} border border-base-300 rounded-lg p-4`}>
       {/* Parameter Header */}
@@ -62,20 +61,16 @@ const ParameterCard = ({
         <div className="flex items-center gap-2">
           <input
             type="text"
-            value={depth > 0 ? editingName : paramKey}
-            className={`input input-sm font-medium bg-transparent p-0 focus:outline-none ${
-              depth > 0 ? "border-2 border-primary/30 hover:border-primary" : "border-none"
-            }`}
-            readOnly={depth === 0}
+            value={editingName}
+            className={` font-medium bg-transparent p-0 focus:outline-none `}
+            readOnly={false}
             onChange={(e) => {
-              if (depth > 0) {
-                setEditingName(e.target.value);
-              }
+              setEditingName(e.target.value);
             }}
             onBlur={(e) => {
-              if (depth > 0 && onParameterNameChange && e.target.value.trim() !== paramKey && e.target.value.trim() !== '') {
+              if (onParameterNameChange && e.target.value.trim() !== paramKey && e.target.value.trim() !== '') {
                 onParameterNameChange(currentPath, e.target.value.trim(), paramKey);
-              } else if (depth > 0 && e.target.value.trim() === '') {
+              } else if (e.target.value.trim() === '') {
                 setEditingName(paramKey); // Reset to original if empty
               }
             }}
@@ -84,9 +79,9 @@ const ParameterCard = ({
                 e.target.blur(); // Trigger onBlur to save
               }
             }}
-            placeholder={depth > 0 ? "Parameter name" : ""}
+            placeholder="Parameter name"
           />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center ml-2 gap-4">
             <label className="flex items-center gap-1 text-xs">
               <input
                 type="checkbox"
@@ -117,6 +112,24 @@ const ParameterCard = ({
               />
               <span className="text-green-600">Required</span>
             </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-xs"
+                checked={!(currentPath in variablesPath)}
+                disabled={name === "Pre Tool"}
+                onChange={() => {
+                  const updatedVariablesPath = { ...variablesPath };
+                  if (currentPath in updatedVariablesPath) {
+                    delete updatedVariablesPath[currentPath];
+                  } else {
+                    updatedVariablesPath[currentPath] = "";
+                  }
+                  onVariablePathChange(updatedVariablesPath);
+                }}
+              />
+              Fill with AI
+            </label>
           </div>
         </div>
         
@@ -141,6 +154,53 @@ const ParameterCard = ({
           </button>
         </div>
       </div>
+
+      {/* Fill with AI and Value Path Options - Moved to Top */}
+      {param.type !== "object" && (
+        <div className="mb-3 p-2 bg-base-50 rounded border border-base-200">
+          {/* Fill with AI Option */}
+          <div className="flex items-center gap-2 text-xs mb-2">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-xs"
+                checked={!(currentPath in variablesPath)}
+                disabled={name === "Pre Tool"}
+                onChange={() => {
+                  const updatedVariablesPath = { ...variablesPath };
+                  if (currentPath in updatedVariablesPath) {
+                    delete updatedVariablesPath[currentPath];
+                  } else {
+                    updatedVariablesPath[currentPath] = "";
+                  }
+                  onVariablePathChange(updatedVariablesPath);
+                }}
+              />
+              Fill with AI
+            </label>
+          </div>
+
+          {/* Value Path Input */}
+          {((name === 'orchestralAgent' && !isMasterAgent) || (name !== 'orchestralAgent')) && (
+            <div className="mb-1">
+              <label className="block text-xs mb-1">Value Path:</label>
+              <input
+                type="text"
+                placeholder="your_path"
+                className={`input input-sm input-bordered w-full ${
+                  name === "Pre Tool" && !variablesPath[currentPath] ? "border-red-500" : ""
+                }`}
+                value={variablesPath[currentPath] || ""}
+                onChange={(e) => {
+                  const updatedVariablesPath = { ...variablesPath };
+                  updatedVariablesPath[currentPath] = e.target.value;
+                  onVariablePathChange(updatedVariablesPath);
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Description */}
       <div className="">
@@ -264,7 +324,10 @@ function FunctionParameterModal({
   params = {},
   tool_name = "",
 }) {
-  const [toolName, setToolName] = useState((name === "Agent" || name === "orchestralAgent") ? tool_name : toolData?.title || toolData?.endpoint_name);
+  const [toolName, setToolName] = useState(
+    (name === "Agent" || name === "orchestralAgent") ? tool_name : toolData?.title || toolData?.endpoint_name
+  );
+  const [isToolNameManuallyChanged, setIsToolNameManuallyChanged] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDescriptionEditing, setIsDescriptionEditing] = useState(false);
   const dispatch = useDispatch();
@@ -273,8 +336,11 @@ function FunctionParameterModal({
   }));
 
   useEffect(() => {
-    setToolName(name === "Agent" ? tool_name : toolData?.title || toolData?.endpoint_name);
-  }, [toolData, tool_name]);
+    // Only reset toolName if user hasn't manually changed it
+    if (!isToolNameManuallyChanged) {
+      setToolName(name === "Agent" ? tool_name : toolData?.title || toolData?.endpoint_name);
+    }
+  }, [toolData, tool_name, isToolNameManuallyChanged]);
 
   const properties = useMemo(() => function_details?.fields || {}, [function_details?.fields]);
   const isDataAvailable = useMemo(() => Object.keys(properties).length > 0, [properties]);
@@ -293,8 +359,11 @@ function FunctionParameterModal({
   }, [function_details]);
 
   useEffect(() => {
-    setToolName(name === "Agent" ? tool_name : toolData?.title || toolData?.endpoint_name);
-  }, [tool_name]);
+    // Only reset toolName if user hasn't manually changed it
+    if (!isToolNameManuallyChanged) {
+      setToolName(name === "Agent" ? tool_name : toolData?.title || toolData?.endpoint_name);
+    }
+  }, [tool_name, isToolNameManuallyChanged]);
 
   useEffect(() => {
     const newVariablesPath = variables_path[functionName] || {};
@@ -627,6 +696,7 @@ function FunctionParameterModal({
     setIsTextareaVisible(false);
     setIsDescriptionEditing(false);
     setIsModified(false);
+    setIsToolNameManuallyChanged(false);
   }, [function_details]);
 
   const handleCloseModal = useCallback(() => {
@@ -952,6 +1022,7 @@ function FunctionParameterModal({
                   <input className="input input-bordered w-full" value={toolName}
                     onChange={(e) => {
                       setToolName(e.target.value);
+                      setIsToolNameManuallyChanged(true);
                       setIsModified(true);
                     }}
                     maxLength={50}
