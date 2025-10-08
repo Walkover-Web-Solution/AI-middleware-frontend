@@ -375,25 +375,42 @@ function FunctionParameterModal({
   }, []);
 
   const copyToolCallFormat = useCallback(() => {
-    const toolCallFormat = {
-      type: "function",
-      function: {
-        name: function_details?.["function_name"],
-        description:
-          (function_details?.["endpoint_name"]
-            ? "Name: " + function_details["endpoint_name"] + ", "
-            : "") +
-          "Description: " +
-          function_details?.["description"],
-        parameters: {
-          type: "object",
-          properties: JSON.parse(objectFieldValue) || {},
-          required_params: function_details?.["required_params"] || [],
-          additionalProperties: false,
+    try {
+      const parsedData = JSON.parse(objectFieldValue) || {};
+      
+      // Check if the JSON has the new structure (name, description, fields) or old structure (just fields)
+      let properties, toolDescription, toolName;
+      
+      if (parsedData.hasOwnProperty('fields') || parsedData.hasOwnProperty('name') || parsedData.hasOwnProperty('description')) {
+        // New structure
+        properties = parsedData.fields || {};
+        toolDescription = parsedData.description || function_details?.["description"] || "";
+        toolName = parsedData.name || function_details?.["endpoint_name"] || function_details?.["function_name"];
+      } else {
+        // Old structure - treat as fields only
+        properties = parsedData;
+        toolDescription = function_details?.["description"] || "";
+        toolName = function_details?.["endpoint_name"] || function_details?.["function_name"];
+      }
+      
+      const toolCallFormat = {
+        type: "function",
+        function: {
+          name: function_details?.["function_name"],
+          description: toolName ? `Name: ${toolName}, Description: ${toolDescription}` : `Description: ${toolDescription}`,
+          parameters: {
+            type: "object",
+            properties: properties,
+            required_params: function_details?.["required_params"] || [],
+            additionalProperties: false,
+          },
         },
-      },
-    };
-    copyToClipboard(JSON.stringify(toolCallFormat, undefined, 4));
+      };
+      copyToClipboard(JSON.stringify(toolCallFormat, undefined, 4));
+    } catch (error) {
+      toast.error("Invalid JSON format. Cannot copy tool call format.");
+      console.error("JSON Parsing Error:", error.message);
+    }
   }, [function_details, objectFieldValue, copyToClipboard]);
 
   const updateField = useCallback((fields, keyParts, updateFn) => {
@@ -789,18 +806,39 @@ function FunctionParameterModal({
 
   const handleToggleChange = useCallback((e) => {
     if (e.target.checked) {
-      setObjectFieldValue(JSON.stringify(toolData["fields"], undefined, 4));
+      // Include name, description, and fields in the JSON
+      const toolDataForJson = {
+        name: toolName,
+        description: toolData?.description || "",
+        fields: toolData["fields"] || {}
+      };
+      setObjectFieldValue(JSON.stringify(toolDataForJson, undefined, 4));
       setIsTextareaVisible((prev) => !prev);
     } else if (!e.target.checked) {
       try {
-        const updatedField = JSON.parse(objectFieldValue);
-        if (typeof updatedField !== "object" || updatedField === null) {
+        const updatedData = JSON.parse(objectFieldValue);
+        if (typeof updatedData !== "object" || updatedData === null) {
           throw new Error("Invalid JSON format. Please enter a valid object.");
         }
+        
+        // Extract name, description, and fields from the JSON
+        const { name, description, fields, ...rest } = updatedData;
+        
+        // Update toolData with fields and description
         setToolData((prevToolData) => ({
           ...prevToolData,
-          fields: updatedField,
+          ...(fields && { fields }),
+          ...(description !== undefined && { description }),
+          ...rest // Include any other properties from JSON
         }));
+        
+        // Update toolName if provided in JSON
+        if (name && name !== toolName) {
+          setToolName(name);
+          setIsToolNameManuallyChanged(true);
+          setIsModified(true);
+        }
+        
         setIsTextareaVisible((prev) => !prev);
       } catch (error) {
         toast.error("Invalid JSON format. Please correct the data.");
@@ -809,23 +847,45 @@ function FunctionParameterModal({
     } else {
       toast.error("Must be valid json");
     }
-  }, [toolData, objectFieldValue]);
+  }, [toolData, objectFieldValue, toolName]);
 
   const handleTextFieldChange = useCallback(() => {
     try {
-      const updatedField = JSON.parse(objectFieldValue);
-      if (typeof updatedField !== "object" || updatedField === null) {
+      const updatedData = JSON.parse(objectFieldValue);
+      if (typeof updatedData !== "object" || updatedData === null) {
         throw new Error("Invalid JSON format. Please enter a valid object.");
       }
-      setToolData((prevToolData) => ({
-        ...prevToolData,
-        fields: updatedField,
-      }));
+      
+      // Check if the JSON has the new structure (name, description, fields) or old structure (just fields)
+      if (updatedData.hasOwnProperty('fields') || updatedData.hasOwnProperty('name') || updatedData.hasOwnProperty('description')) {
+        // New structure with name, description, and fields
+        const { name, description, fields, ...rest } = updatedData;
+        
+        setToolData((prevToolData) => ({
+          ...prevToolData,
+          ...(fields && { fields }),
+          ...(description !== undefined && { description }),
+          ...rest
+        }));
+        
+        // Update toolName if provided in JSON
+        if (name && name !== toolName) {
+          setToolName(name);
+          setIsToolNameManuallyChanged(true);
+          setIsModified(true);
+        }
+      } else {
+        // Old structure - treat the entire JSON as fields
+        setToolData((prevToolData) => ({
+          ...prevToolData,
+          fields: updatedData,
+        }));
+      }
     } catch (error) {
       toast.error("Invalid JSON format. Please correct the data.");
       console.error("JSON Parsing Error:", error.message);
     }
-  }, [objectFieldValue]);
+  }, [objectFieldValue, toolName]);
 
   const handleVariablePathChange = useCallback((updatedPath) => {
     name === "orchestralAgent" && setIsModified(true);
