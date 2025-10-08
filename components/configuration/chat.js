@@ -543,7 +543,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                             </div>
                           ) : (
                             /* Regular Assistant/User/Expected Message */
-                            <div className={`chat-bubble break-all gap-0 relative w-full`}>
+                            <div className={`chat-bubble break-all gap-0 relative w-full ${message.sender === "assistant" ? "mr-8" : ""}`}>
                               {/* Show loader overlay if this is the message being tested */}
                               {isRunningTestCase && currentRunIndex !== null && index === currentRunIndex + 1 && (
                                 <div className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-10">
@@ -560,7 +560,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                                   <textarea
                                     value={editContent}
                                     onChange={(e) => setEditContent(e.target.value)}
-                                    className="textarea textarea-bordered w-full min-h-[100px] resize-y"
+                                    className="textarea textarea-bordered w-full min-h-[100px] resize-y text-base-content bg-base-100"
                                     placeholder="Edit message content..."
                                   />
                                   <div className="flex gap-2 mt-2">
@@ -587,10 +587,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                                   {message.sender === "assistant" && (
                                     <button
                                       onClick={() => handleEditMessage(message.id, message.content)}
-                                      className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity btn btn-xs btn-circle btn-ghost"
+                                      className="absolute -top-2 -right-5 opacity-0 group-hover:opacity-100 transition-opacity btn btn-xs btn-circle btn-ghost"
                                       title="Edit message"
                                     >
-                                      <Edit2 className="h-3 w-3" />
+                                      <Edit2 className="h-4 w-4" />
                                     </button>
                                   )}
 
