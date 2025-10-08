@@ -120,16 +120,18 @@ const Page = () => {
         >
           <SquarePenIcon size={16} />
         </div>
-        <div className="dropdown dropdown-left bg-transparent">
-          <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
-          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-very-high w-52 p-2 shadow">
-            <li><a onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              resetUsage(row);
-            }}><RefreshIcon className="mr-2" size={16} />Reset Usage</a></li>
-          </ul>
-        </div>
+        {row?.apikey_quota && (
+          <div className="dropdown dropdown-left bg-transparent">
+            <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
+            <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-very-high w-52 p-2 shadow">
+              <li><a onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                resetUsage(row);
+              }}><RefreshIcon className="mr-2" size={16} />Reset Usage</a></li>
+            </ul>
+          </div>
+        )}
       </div>
     );
   };
