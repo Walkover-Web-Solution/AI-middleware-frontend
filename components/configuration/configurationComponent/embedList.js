@@ -37,7 +37,7 @@ const EmbedList = ({ params, searchParams }) => {
   const [function_name, setFunctionName] = useState("");
   const [variablesPath, setVariablesPath] = useState({});
   const dispatch = useDispatch();
-  const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData } = useCustomSelector((state) => {
+  const { integrationData, bridge_functions, function_data, modelType, model, shouldToolsShow, embedToken, variables_path, prebuiltToolsData, toolsVersionData, showInbuiltTools } = useCustomSelector((state) => {
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const orgData = state?.bridgeReducer?.org?.[params?.org_id];
     const modelReducer = state?.modelReducer?.serviceModels;
@@ -51,6 +51,7 @@ const EmbedList = ({ params, searchParams }) => {
       modelType: modelTypeName,
       model: modelName,
       shouldToolsShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.tools,
+      showInbuiltTools: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.inbuilt_tools,
       embedToken: orgData?.embed_token,
       variables_path: versionData?.variables_path || {},
       prebuiltToolsData: state?.bridgeReducer?.prebuiltTools,
@@ -204,8 +205,8 @@ const EmbedList = ({ params, searchParams }) => {
         {shouldToolsShow && (
           <>
             <div className="dropdown dropdown-right w-full flex items-center">
-                            {(bridgeFunctions?.length>0||selectedPrebuiltTools.length > 0)?(
-                                <>
+              {(bridgeFunctions?.length > 0 || selectedPrebuiltTools.length > 0) ? (
+                <>
                   <InfoTooltip video={ONBOARDING_VIDEOS.FunctionCreation} tooltipContent="Tool calling lets LLMs use external tools to get real-time data and perform complex tasks.">
                     <p className="label-text mb-2 font-medium whitespace-nowrap info">Tools</p>
                   </InfoTooltip>
@@ -243,6 +244,7 @@ const EmbedList = ({ params, searchParams }) => {
                 asDropdownContent
                 prebuiltToolsData={prebuiltToolsData}
                 toolsVersionData={toolsVersionData}
+                showInbuiltTools={showInbuiltTools}
               />
             </div>
             <div className="flex flex-col gap-2 w-full">

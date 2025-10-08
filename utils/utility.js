@@ -325,7 +325,7 @@ export const GetPreBuiltToolTypeIcon = (preBuiltTools, height, width) => {
         case 'web_search':
             return <WebSearchIcon height={height} width={width} />;
         case 'image_generation':
-            return <Image size={12} />;
+            return <Image height={height} width={width} />;
         default:
             return null;
     }

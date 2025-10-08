@@ -11,6 +11,7 @@ import { openModal } from "@/utils/utility";
 import { MODAL_TYPE, FINISH_REASON_DESCRIPTIONS } from "@/utils/enums";
 import { PdfIcon } from "@/icons/pdfIcon";
 import { ExternalLink } from "lucide-react";
+import { original } from "@reduxjs/toolkit";
 
 // Helper function to normalize image data with enhanced fallback
 const normalizeImageUrls = (imageData) => {
@@ -125,16 +126,15 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
     setMessageType(item?.updated_message ? 2 : item?.chatbot_message ? 0 : 1);
   }, [item]);
 
-  const handleEdit = useCallback(() => {
+  const handleEdit = () => {
     setModalInput({
       content: item.updated_message || item.content,
+      originalContent: item.content,
       index,
       Id: item.Id
     });
     openModal(MODAL_TYPE.EDIT_MESSAGE_MODAL);
-  }, [item]);
-
-
+  };
 
   const getMessageToDisplay = useCallback(() => {
     switch (messageType) {
@@ -341,7 +341,7 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
         <div className="show-on-hover" >
           <div className={`chat ${item.role === "assistant" ? "chat-start" : "chat-end"}`}>
             <div className="chat-image avatar flex justify-center items-center">
-              <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors">
+              <div className="w-100 p-2 rounded-full bg-base-300 flex justify-center items-center hover:bg-base-300/80 transition-colors mb-7">
                 <div className="relative rounded-full bg-base-300 flex justify-center items-center">
                   {item.role === "assistant" ? (
                     <div>
@@ -364,36 +364,36 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                       {item.chatbot_message && (
                         <li>
                           <button
-                            className={`px-2 py-1 ${messageType === 0 ? "bg-primary text-white rounded-md" : ""
+                            className={`px-2 py-1 ${messageType === 0 ? "bg-primary text-base-content rounded-md" : ""
                               }`}
                             onClick={() => selectMessageType(0)}
                           >
-                            <div className="tooltip tooltip-left" data-tip="Chatbot Response">
-                              <BotIcon className="text-base-100" size={16} />
+                            <div className="tooltip tooltip-right" data-tip="Chatbot Response">
+                              <BotIcon className={`${messageType !== 0 ? "text-base-content" : "text-white"}`} size={16} />
                             </div>
                           </button>
                         </li>
                       )}
                       <li>
                         <button
-                          className={`px-2 py-1 ${messageType === 1 ? "bg-primary text-white rounded-md" : ""
+                          className={`px-2 py-1 ${messageType === 1 ? "bg-primary text-base-content rounded-md" : ""
                             }`}
                           onClick={() => selectMessageType(1)}
                         >
-                          <div className="tooltip tooltip-left" data-tip="Normal Response">
-                            <CodeMessageIcon className="text-base-100" size={16} />
+                          <div className="tooltip tooltip-right" data-tip="Normal Response">
+                            <CodeMessageIcon className={`${messageType !== 1 ? "text-base-content" : "text-white"}`} size={16} />
                           </div>
                         </button>
                       </li>
                       {item.updated_message && (
                         <li>
                           <button
-                            className={`px-2 py-1 ${messageType === 2 ? "bg-primary text-white rounded-md" : ""
+                            className={`px-2 py-1 ${messageType === 2 ? "bg-primary text-text-base-content rounded-md" : ""
                               }`}
                             onClick={() => selectMessageType(2)}
                           >
-                            <div className="tooltip tooltip-left" data-tip="Updated Message">
-                              <PencilIcon className="text-base-100" size={16} />
+                            <div className="tooltip tooltip-right" data-tip="Updated Message">
+                              <PencilIcon className={`${messageType !== 2 ? "text-base-content" : "text-white"}`} size={16} />
                             </div>
                           </button>
                         </li>
@@ -407,10 +407,20 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
               {messageType === 2 && <p className="text-xs opacity-50 badge badge-sm badge-outline">Edited</p>}
             </div>
 
-            <div className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1 `}
-              style={{ overflowWrap: "normal" }}>
-              <div className={`${item.role === "assistant" ? "bg-base-200 text-base-content pr-10" : "chat-bubble-primary "} chat-bubble transition-all ease-in-out duration-300 relative group`}>
-
+            <div
+              className={`flex justify-start ${item.role === "user" ? "flex-row-reverse" : ""} items-center gap-1`}
+              style={{
+                width: "-webkit-fill-available",
+              }}
+            >
+              <div
+                className={`${item.role === "assistant" ? "bg-base-200 text-base-content pr-10 mb-7" : "chat-bubble-primary"}  chat-bubble transition-all ease-in-out duration-300 relative group break-words`}
+                style={{
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  whiteSpace: "pre-line",
+                }}
+              >
                 {/* Render assistant images with enhanced fallback */}
                 {item?.role === "assistant" && renderAssistantImages()}
 
@@ -514,7 +524,6 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 <ReactMarkdown components={{
                   code: ({ node, inline, className, children, ...props }) => (
                     <CodeBlock
-                      inline={inline}
                       className={className}
                       {...props}
                     >
@@ -526,10 +535,11 @@ const ThreadItem = ({ index, item, threadHandler, formatDateAndTime, integration
                 </ReactMarkdown>
 
                 {/* Edit button for assistant messages */}
-                {item?.role === 'assistant' && !item?.fromRTLayer && !item?.image_urls && (
+                {item?.role === 'assistant' && item?.image_urls.length === 0 && !item?.fromRTLayer && (
+
                   <div className="tooltip absolute top-2 right-2 text-sm cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" data-tip="Edit response">
                     <button
-                      className="btn btn-xs btn-circle btn-ghost hover:btn-primary"
+                      className="btn btn-xs btn-circle btn-ghost hover:btn-primary text-base-content"
                       onClick={handleEdit}
                     >
                       <PencilIcon
