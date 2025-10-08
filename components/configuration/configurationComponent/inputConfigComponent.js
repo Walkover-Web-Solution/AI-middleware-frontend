@@ -12,6 +12,9 @@ import InfoTooltip from '@/components/InfoTooltip';
 import PromptHelper from '../../PromptHelper';
 import { setIsFocusReducer, setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
+import dynamic from 'next/dynamic';
+
+const MarkdownEditor = dynamic(() => import('@/components/markdown/MarkdownEditor'), { ssr: false });
 
 const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbedUser }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
@@ -60,6 +63,8 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -451,22 +456,27 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                 </div>
             </div>
             <div className="form-control h-full">
-                <textarea
-                    ref={textareaRef}
-                    className={`textarea border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none transition-none !duration-0 ${isPromptHelperOpen
-                            ? "h-[calc(100vh-60px)] border-primary shadow-md"
-                            : "min-h-96"
-                    }`}
-                      value={prompt}
-                    onChange={handlePromptChange}
-                    onFocus={() => {
-                        if (!isPromptHelperOpen) {
-                                    setIsPromptHelperOpen(true);
-                            if (typeof window.closeTechDoc === 'function') {
-                                window.closeTechDoc();
-                            }
-                        }
-                    }}
+                <MarkdownEditor
+                  value={prompt}
+                  onChange={(v) => {
+                    setPrompt(v);
+                    if (v.trim() !== reduxPrompt.trim()) {
+                      setHasUnsavedChanges(true);
+                    } else {
+                      setHasUnsavedChanges(false);
+                    }
+                    // Note: caret-based suggestions are temporarily disabled for md-editor-rt.
+                  }}
+                  height={isPromptHelperOpen ? 'calc(100vh - 60px)' : 384}
+                  className={`border border-base-content/20 w-full relative bg-transparent z-low rounded-b-none ${isPromptHelperOpen ? 'border-primary shadow-md' : ''}`}
+                  onFocus={() => {
+                    if (!isPromptHelperOpen) {
+                      setIsPromptHelperOpen(true);
+                      if (typeof window.closeTechDoc === 'function') {
+                        window.closeTechDoc();
+                      }
+                    }
+                  }}
                 />
                 {showSuggestions && renderSuggestions()}
                 <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none">
