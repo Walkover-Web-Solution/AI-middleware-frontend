@@ -296,7 +296,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
             Advance Filter
           </div>
           <div className="collapse-content">
-            <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} />
+            <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} selectedVersion={selectedVersion} filterOption={filterOption} isErrorTrue={isErrorTrue}/>
             <div className="p-2 mt-4 bg-base-300 rounded-md text-center">
               <p className="text-center m-2 font-semibold">Filter Response</p>
               <div className="flex items-center justify-center mb-2 gap-4">
