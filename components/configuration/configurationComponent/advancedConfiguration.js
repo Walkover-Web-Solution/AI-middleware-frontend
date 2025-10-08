@@ -165,7 +165,6 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
   }, [dispatch, params.id, searchParams?.version, isFallbackEnabled, fallbackModel, fallbackService, fallbackModelName]);
 
   const computedModelsList = serviceModels?.[fallbackService] || {};
-
   return (
     <div className="z-very-low text-base-content w-full cursor-pointer mt-2" tabIndex={0}>
 
@@ -283,10 +282,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
                   className="dropdown-content mb-6 z-high p-2 shadow bg-base-100 rounded-lg mt-1 max-h-[340px] w-[260px] overflow-y-auto border border-base-300"
                 >
                   {Object.entries(computedModelsList || {}).map(([group, options]) => {
-                    const isInvalidGroup =
-                      group === 'models' ||
-                      (bridgeType === 'chatbot' && group === 'embedding') ||
-                      (bridgeType === 'batch' && (group === 'image' || group === 'embedding'));
+                    const isInvalidGroup = group==="image"  
                     if (isInvalidGroup) return null;
                     return (
                       <li key={group} className="px-2 py-1 cursor-pointer">
