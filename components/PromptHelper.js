@@ -251,7 +251,7 @@ const PromptHelper = ({
         )}
        
         {/* Notes Section - Now on RIGHT */}
-        {!isEmbedUser && showNotes && (
+        { showNotes && (
         <div className={`${getNotesWidth()} h-full transition-all duration-500 ease-in-out transform`}
          tabIndex={0}
        >

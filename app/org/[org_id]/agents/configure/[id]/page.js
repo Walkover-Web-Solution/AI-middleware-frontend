@@ -78,9 +78,9 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
 
   useEffect(() => {
     if (isPromptHelperOpen)
-      setLeftWidth(44);
+        setLeftWidth(44);
     else
-      setLeftWidth(50);
+        setLeftWidth(50);
   }, [isPromptHelperOpen])
 
   const leftPanelScrollRef = useRef(null);
@@ -324,13 +324,13 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   return (
     <div
       ref={containerRef} // Add ref to the main container
-      className={`w-full h-full overflow-x-hidden ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : ' overflow-y-hidden'} ${isDesktop ? 'flex flex-row overflow-x-hidden overflow-y-hidden' : 'overflow-y-auto'}`}
+      className={`w-full h-full transition-all duration-700 ease-in-out overflow-x-hidden ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : ' overflow-y-hidden'} ${isDesktop ? 'flex flex-row overflow-x-hidden overflow-y-hidden' : 'overflow-y-auto'}`}
     >
       {/* Configuration Panel */}
       <div
         className={`
           ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen border-b border-base-300'} 
-          bg-base-100 transition-all duration-300 ease-in-out transform
+          bg-base-100 transition-all duration-700 ease-in-out transform
         `}
         style={isDesktop ? { width: `${isFocus? `${getConfigurationWidth()}%` : `${leftWidth}%`}` } : {}}
       >
@@ -364,14 +364,14 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
       {/* Desktop Resizer */}
       {isDesktop && (
         <div
-          className={`w-1 hover:bg-blue-400 cursor-col-resize transition-colors duration-200 flex-shrink-0 resizer ${isResizing ? 'bg-blue-500' : 'bg-base-200'}`}
+          className={`w-1 hover:bg-blue-400 cursor-col-resize transition-colors duration-700 flex-shrink-0 resizer ${isResizing ? 'bg-blue-500' : 'bg-base-200'}`}
         />
       )}
       {/* Chat Panel (Right Side) */}
       <div
         className={`
           ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen'} 
-          relative transition-all duration-300 ease-in-out transform
+          relative transition-all duration-700 ease-in-out transform
         `}
         style={isDesktop ? { width: `${isFocus ? `${100 - getConfigurationWidth()}%` : `${100 - leftWidth}%`}` } : {}}
         id="parentChatbot"
@@ -409,9 +409,9 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                   setShowPromptHelper={setShowPromptHelper}
                 />) : null}
             {!sessionStorage.getItem('orchestralUser') ? <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
-              {bridgeType === 'batch' && versionService === 'openai' ? (
+              {bridgeType === 'batch' && versionService === 'openai' && !isPromptHelperOpen ? (
                 <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
-              )  : bridgeType === 'chatbot' ? (
+              )  : bridgeType === 'chatbot' && !isPromptHelperOpen ? (
                 <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
               ) : (
                !isPromptHelperOpen && <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
