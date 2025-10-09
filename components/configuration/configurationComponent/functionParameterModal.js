@@ -92,25 +92,141 @@ const ParameterCard = ({
                     // For top-level parameters, check in toolData.required_params
                     return (toolData?.required_params || []).includes(paramKey);
                   } else {
-                    // For nested parameters, we need to traverse to the parent and check its required_params
+                    // For nested parameters, navigate to the direct parent field
                     const parentKeyParts = keyParts.slice(0, -1);
-                    let parentField = toolData?.fields;
+                    let currentField = toolData?.fields;
                     
-                    // Navigate to the parent field
-                    for (const key of parentKeyParts) {
-                      if (parentField?.[key]?.type === "array") {
-                        parentField = parentField[key]?.items;
+                    // Navigate to the parent field that contains this parameter
+                    for (let i = 0; i < parentKeyParts.length; i++) {
+                      const key = parentKeyParts[i];
+                      if (currentField?.[key]?.type === "array") {
+                        currentField = currentField[key]?.items;
                       } else {
-                        parentField = parentField?.[key]?.parameter;
+                        if (i === parentKeyParts.length - 1) {
+                          // This is the direct parent - check its required_params
+                          currentField = currentField?.[key];
+                        } else {
+                          // Navigate deeper into nested structure
+                          currentField = currentField?.[key]?.parameter;
+                        }
                       }
                     }
                     
-                    return (parentField?.required_params || []).includes(paramKey);
+                    return (currentField?.required_params || []).includes(paramKey);
+                  }
+                })()}
+                disabled={(() => {
+                  const keyParts = currentPath.split(".");
+                  if (keyParts.length === 1) {
+                    // Top-level parameters are always enabled
+                    return false;
+                  } else {
+                    // For nested parameters, check if all parent parameters are required
+                    let isParentRequired = true;
+                    let currentField = toolData?.fields;
+                    
+                    // Check each level of parent to ensure they are all required
+                    for (let i = 0; i < keyParts.length - 1; i++) {
+                      const key = keyParts[i];
+                      
+                      if (i === 0) {
+                        // Check if top-level parent is required
+                        isParentRequired = (toolData?.required_params || []).includes(key);
+                      } else {
+                        // Check if nested parent is required
+                        const parentPath = keyParts.slice(0, i);
+                        let parentField = toolData?.fields;
+                        
+                        // Navigate to the field that should contain the required_params
+                        for (let j = 0; j < parentPath.length; j++) {
+                          const parentKey = parentPath[j];
+                          if (parentField?.[parentKey]?.type === "array") {
+                            parentField = parentField[parentKey]?.items;
+                          } else {
+                            if (j === parentPath.length - 1) {
+                              parentField = parentField?.[parentKey];
+                            } else {
+                              parentField = parentField?.[parentKey]?.parameter;
+                            }
+                          }
+                        }
+                        
+                        isParentRequired = isParentRequired && (parentField?.required_params || []).includes(key);
+                      }
+                      
+                      if (!isParentRequired) break;
+                    }
+                    
+                    return !isParentRequired;
                   }
                 })()}
                 onChange={() => onRequiredChange(currentPath)}
               />
-              <span className="text-base-content">Required</span>
+              <span className={`text-base-content ${(() => {
+                const keyParts = currentPath.split(".");
+                if (keyParts.length > 1) {
+                  // Check if parent is required to determine text opacity
+                  let isParentRequired = true;
+                  for (let i = 0; i < keyParts.length - 1; i++) {
+                    const key = keyParts[i];
+                    if (i === 0) {
+                      isParentRequired = (toolData?.required_params || []).includes(key);
+                    } else {
+                      const parentPath = keyParts.slice(0, i);
+                      let parentField = toolData?.fields;
+                      for (let j = 0; j < parentPath.length; j++) {
+                        const parentKey = parentPath[j];
+                        if (parentField?.[parentKey]?.type === "array") {
+                          parentField = parentField[parentKey]?.items;
+                        } else {
+                          if (j === parentPath.length - 1) {
+                            parentField = parentField?.[parentKey];
+                          } else {
+                            parentField = parentField?.[parentKey]?.parameter;
+                          }
+                        }
+                      }
+                      isParentRequired = isParentRequired && (parentField?.required_params || []).includes(key);
+                    }
+                    if (!isParentRequired) break;
+                  }
+                  return !isParentRequired ? 'opacity-50' : '';
+                }
+                return '';
+              })()}`}>
+                Required {(() => {
+                  const keyParts = currentPath.split(".");
+                  if (keyParts.length > 1) {
+                    // Check if parent is required
+                    let isParentRequired = true;
+                    for (let i = 0; i < keyParts.length - 1; i++) {
+                      const key = keyParts[i];
+                      if (i === 0) {
+                        isParentRequired = (toolData?.required_params || []).includes(key);
+                      } else {
+                        const parentPath = keyParts.slice(0, i);
+                        let parentField = toolData?.fields;
+                        for (let j = 0; j < parentPath.length; j++) {
+                          const parentKey = parentPath[j];
+                          if (parentField?.[parentKey]?.type === "array") {
+                            parentField = parentField[parentKey]?.items;
+                          } else {
+                            if (j === parentPath.length - 1) {
+                              parentField = parentField?.[parentKey];
+                            } else {
+                              parentField = parentField?.[parentKey]?.parameter;
+                            }
+                          }
+                        }
+                        isParentRequired = isParentRequired && (parentField?.required_params || []).includes(key);
+                      }
+                      if (!isParentRequired) break;
+                    }
+                    return !isParentRequired ? '(parent must be required first)' : '';
+                  }
+                  return '';
+                })()}
+              </span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -161,7 +277,7 @@ const ParameterCard = ({
       {/* Description */}
       <div className="">
         <textarea
-          placeholder="Description of argument..."
+          placeholder="Description of parameter..."
           className="col-[1] row-[1] m-0 w-full overflow-y-hidden whitespace-pre-wrap break-words outline-none bg-transparent p-0  caret-black placeholder:text-quaternary dark:caret-slate-200 text-sm resize-none"
           value={param.description || ""}
           onChange={(e) => onDescriptionChange(currentPath, e.target.value)}
