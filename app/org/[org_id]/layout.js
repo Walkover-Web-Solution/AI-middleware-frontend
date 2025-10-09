@@ -28,6 +28,7 @@ import { getAllOrchestralFlowAction } from "@/store/action/orchestralFlowAction"
 import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { getAuthDataAction } from "@/store/action/authAction";
+import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
 function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
@@ -223,6 +224,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     if (isValidOrg && resolvedParams?.org_id) {
       dispatch(getAllApikeyAction(resolvedParams?.org_id));
       dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id))
+      dispatch(getPrebuiltPromptsAction())
       dispatch(getPrebuiltToolsAction())
       dispatch(getAllOrchestralFlowAction(resolvedParams.org_id));
       dispatch(getAuthDataAction(resolvedParams?.org_id))

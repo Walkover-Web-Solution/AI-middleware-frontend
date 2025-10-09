@@ -20,7 +20,36 @@ export const getSingleModels = async () => {
     throw new Error(error)
   }
 }
+export const getPrebuiltPrompts = async ()=>{
+  try{
+     const getPrebuiltPrompts = await axios.get(`${PYTHON_URL}/prebuilt_prompt`)
+     return getPrebuiltPrompts?.data?.data
+  }
+  catch(error){
+    console.error(error)
+    throw error
+  }
+}
+export const updatePrebuiltPrompt = async (dataToSend) => {
+  try {
+    const response= await axios.put(`${PYTHON_URL}/prebuilt_prompt`, dataToSend)
+    return response?.data?.data
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
+ export const resetPrebuiltPrompt = async (dataToSend) => {
+  try {
+    const response= await axios.post(`${PYTHON_URL}/prebuilt_prompt/reset`, dataToSend)
+     
+     return response?.data?.data
 
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
 export const getSingleMessage = async ({ bridge_id, message_id }) => {
   try {
     const messageData = await axios.get(`${URL}/api/v1/config/systemprompt/gethistory/${bridge_id}/${message_id}`)
