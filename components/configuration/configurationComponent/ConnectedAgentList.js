@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import ConnectedAgentListSuggestion from './ConnectAgentListSuggestion';
 import { useDispatch } from 'react-redux';
 import isEqual, { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import { updateBridgeAction, updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { AddIcon, CircleAlertIcon, EllipsisVerticalIcon, SettingsIcon, TrashIcon } from '@/components/Icons';
 import { closeModal, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
@@ -38,13 +38,14 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
         };
     });
-    const handleSaveAgent = (overrideBridge = null) => {
+    const handleSaveAgent = (overrideBridge = null, bridgeData) => {
         try {
-            const sb = overrideBridge || selectedBridge;
-            if (((!description && !sb?.description) && !bridges?.[sb?._id]?.bridge_summary)) {
+            const sb = overrideBridge ? overrideBridge : selectedBridge
+            if ((!description && !sb?.bridge_summary && !sb?.connected_agent_details?.description)) {
                 toast?.error("Description Required")
                 return;
             }
+            const bridgeItem = bridgeData?.find((bridge) => { if (bridge?._id === sb?._id) { return bridge } });
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
                 versionId: searchParams?.version,
@@ -52,13 +53,19 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                     agents: {
                         connected_agents: {
                             [sb?.name]: {
-                                "description": description ? description : sb?.description ? sb?.description : bridges?.[sb?._id]?.bridge_summary,
-                                "bridge_id": sb?._id || sb?.bridge_id,
-                                "agent_variables": sb?.agent_variables,
-                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
+                                "bridge_id": sb?._id || sb?.bridge_id
                             }
                         },
                         agent_status: "1"
+                    }
+                }
+            }))
+            dispatch(updateBridgeAction({
+                bridgeId: sb?._id || sb?.bridge_id,
+                dataToSend: {
+                    connected_agent_details: {
+                        ...bridgeItem?.connected_agent_details,
+                        description: description ? description : sb?.bridge_summary ? sb?.bridge_summary : sb?.connected_agent_details?.description
                     }
                 }
             }))
@@ -71,33 +78,28 @@ const ConnectedAgentList = ({ params, searchParams }) => {
             console.error(error)
         }
     }
-    const handleSelectAgents = (bridge) => {
+    const handleSelectAgents = (bridge, bridgeData) => {
         setSelectedBridge(bridge)
-        if (!bridges?.[bridge?._id]?.bridge_summary) {
-            // Ask for description first, do not save yet
-        openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
+        if (!bridge?.connected_agent_details?.description && !bridge?.bridge_summary) {
+            openModal(MODAL_TYPE?.AGENT_DESCRIPTION_MODAL)
             return;
         }
-        // If summary already exists, proceed to save immediately using the fresh bridge reference
-        handleSaveAgent(bridge)
-        
+        handleSaveAgent(bridge, bridgeData)
     }
     const handleOpenDeleteModal = (name, item) => {
         setSelectedBridge({ name: name, ...item })
         openModal(MODAL_TYPE?.DELETE_AGENT_MODAL)
     }
     const handleOpenAgentVariable = useCallback((name, item) => {
-        setSelectedBridge({ name: name, ...item })
-        const { fields, required_params } = (item?.variables && Object.keys(item?.variables)?.length > 0) ? item?.variables : transformAgentVariableToToolCallFormat(item?.agent_variables || {})
-        const threadId = item?.thread_id ? item?.thread_id : false;
-        const versionId = item?.version_id || '';
-        // Ensure function_details (currentVariable) and toolData (agentTools) have the same shape
-        setCurrentVariable({ name: item?.bridge_id, description: item?.description, fields, required_params, thread_id: threadId, version_id: versionId })
-        setAgentTools({ name: item?.bridge_id, description: item?.description, fields, required_params, thread_id: threadId, version_id: versionId })
-        // Initialize variablesPath for this agent to avoid false diffs in modal
-        setVariablesPath(variables_path[item?.bridge_id] || {})
+        const bridgeItem = bridgeData?.find((bridge) => { if (bridge?._id === item?.bridge_id) { return bridge } });
+        setSelectedBridge({ name: name, ...item });
+        const agent_variables = bridgeItem?.connected_agent_details?.agent_variables || {};
+        const description = bridgeItem?.connected_agent_details?.description || "";
+        const { fields, required_params } = agent_variables;
+        setCurrentVariable({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params });
+        setAgentTools({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params, thread_id: item?.thread_id || false, version_id: item?.version_id || '' });
         openModal(MODAL_TYPE?.AGENT_VARIABLE_MODAL);
-    }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools, transformAgentVariableToToolCallFormat])
+    }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools]);
 
     const handleRemoveAgent = (item,name) => {
         console.log(name,item,"hello")
@@ -109,10 +111,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                     agents: {
                         connected_agents: {
                             [name]: {
-                                "description": item?.description,
-                                "bridge_id": item?.bridge_id,
-                                "agent_variables": item?.agent_variables,
-                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params }
+                                "bridge_id": item?.bridge_id
                             }
                         }
                     }
@@ -127,6 +126,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
     const handleSaveAgentVariable = () => {
         try {
+            // on Save the bridge and thread id in version only
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
                 versionId: searchParams?.version,
@@ -134,15 +134,24 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                     agents: {
                         connected_agents: {
                             [selectedBridge?.name]: {
-                                "description": agentTools?.description ? agentTools?.description : selectedBridge?.description,
                                 "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
-                                "agent_variables": selectedBridge?.agent_variables,
-                                "variables": { fields: agentTools?.fields, required_params: agentTools?.required_params },
                                 "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false,
                                 "version_id": agentTools?.version_id ? agentTools?.version_id : ""
                             }
                         },
                         agent_status: "1"
+                    }
+                }
+            }))
+            dispatch(updateBridgeAction({
+                bridgeId: selectedBridge?._id || selectedBridge?.bridge_id,
+                dataToSend: {
+                    connected_agent_details:{
+                        agent_variables : {
+                            fields: agentTools?.fields,
+                            required_params: agentTools?.required_params
+                        },
+                        description: agentTools?.description
                     }
                 }
             }))
@@ -165,7 +174,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     }
 
     const handleAgentClicked = (item) => {
-        const bridge = bridgeData?.find((bridge) => bridge?._id === item?.bridge_id)
+        const bridge = bridgeData?.find((bd) => bd?._id === item?.bridge_id)
         if (bridge) {
             const isCmdOrCtrlClicked = (window.event && (window.event.ctrlKey || window.event.metaKey));
             if (isCmdOrCtrlClicked) {
@@ -179,11 +188,12 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
     const renderEmbed = useMemo(() => (
         connect_agents && Object.entries(connect_agents).map(([name, item]) => {
+            const bridge = bridgeData?.find((bd) => bd?._id === item?.bridge_id)
             return (
                 <div
                     key={item?.bridge_id}
                     id={item?.bridge_id}
-                    className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${item?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
+                    className={`group flex w-full flex-col items-start rounded-md border border-base-300 md:flex-row cursor-pointer bg-base-100 relative ${bridge?.description?.trim() === "" ? "border-red-600" : ""} hover:bg-base-200 transition-colors duration-200`}
                 >
                     <div
                         className="p-2 w-full h-full flex flex-col justify-between"
@@ -194,14 +204,14 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 
                                 <span className="flex-1 min-w-0  text-[9px]  md:text-[12px] lg:text-[13px] font-bold truncate">
                                     <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
-                                        <span>{ bridgeData?.find(bridge => bridge._id === item.bridge_id)?.name}</span>
-                                        <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!item?.description ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                                    {!item?.description ? "Description Required" : "Active"}
+                                        <span>{ bridge?.name}</span>
+                                        <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${!bridge?.connected_agent_details?.description ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
+                                    {!bridge?.connected_agent_details?.description ? "Description Required" : "Active"}
                                     
                                 </span>
                                     </div>
                                 </span>
-                                {item?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
+                                {bridge?.connected_agent_details?.description?.trim() === "" && <CircleAlertIcon color='red' size={16} />}
                             </div>
                             <div className="w-full flex justify-between flex-row">
                                 <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
@@ -277,6 +287,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 shouldToolsShow={shouldToolsShow} 
                                 modelName={model} 
                                 bridges={bridgeData} 
+                                bridgeData={bridgeData}
                             />
                         </div>
                         <div className="flex flex-col gap-2 w-full ">
