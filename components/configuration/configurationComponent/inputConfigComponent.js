@@ -2,7 +2,7 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { MODAL_TYPE } from '@/utils/enums';
 import { generateRandomID, openModal } from '@/utils/utility';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
@@ -32,8 +32,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     const [isMobileView, setIsMobileView] = useState(window.innerWidth < 640);
     const [oldContent, setOldContent] = useState(reduxPrompt);
     const [newContent, setNewContent] = useState('');
-    const [keyName, setKeyName] = useState('');
-    const suggestionListRef = useRef(null);
+    
     const textareaRef = useRef(null);
     const editorRef = useRef(null);
     const easyMDERef = useRef(null);
@@ -41,16 +40,10 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     const [prompt, setPrompt] = useState(reduxPrompt);
     const [editorHeight, setEditorHeight] = useState(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
     const [messages, setMessages] = useState([]);
     const [isPromptHelperOpen, setIsPromptHelperOpen] = useState(false);
 
-    // Memoize coordinates to prevent recalculation on every render
-    const [suggestionCoords, setSuggestionCoords] = useState({ top: 0, left: 0 });
-
-    // Debounce timer ref
-    const debounceTimerRef = useRef(null);
+    
 
     const initialThreadId = bridge?.thread_id || generateRandomID();
     const [thread_id, setThreadId] = useState(initialThreadId);
@@ -132,7 +125,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
 
     const savePrompt = useCallback((newPrompt) => {
         const newValue = (newPrompt || "").trim();
-        setShowSuggestions(false);
 
         if (newValue !== reduxPrompt.trim()) {
             dispatch(updateBridgeVersionAction({
@@ -146,40 +138,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         }
     }, [dispatch, searchParams?.version, reduxPrompt]);
 
-    // Optimized caret position calculation with caching for EasyMDE
-    const getCaretCoordinatesAdjusted = useCallback(() => {
-        if (!easyMDERef.current) return { top: 0, left: 0 };
-
-        const cm = easyMDERef.current.codemirror;
-        const cursor = cm.getCursor();
-        const coords = cm.cursorCoords(cursor, 'local');
-        const editorRect = cm.getWrapperElement().getBoundingClientRect();
-        
-        return {
-            top: coords.top + 20,
-            left: coords.left
-        };
-    }, []);
-
-    // Debounced suggestion trigger to prevent excessive calculations
-    const triggerSuggestions = useCallback((shouldShow, cursorPos = 0) => {
-        // Clear existing timer
-        if (debounceTimerRef.current) {
-            clearTimeout(debounceTimerRef.current);
-        }
-
-        if (shouldShow) {
-            // Small delay to batch multiple character inputs
-            debounceTimerRef.current = setTimeout(() => {
-                const coords = getCaretCoordinatesAdjusted();
-                setSuggestionCoords(coords);
-                setShowSuggestions(true);
-                setActiveSuggestionIndex(0);
-            }, 50); // 50ms debounce
-        } else {
-            setShowSuggestions(false);
-        }
-    }, [getCaretCoordinatesAdjusted]);
+    
 
     // This function is now handled by EasyMDE change event
     const handlePromptChange = useCallback((value) => {
@@ -197,63 +156,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         // This is now handled in the EasyMDE initialization
     }, []);
 
-    const handleSuggestionClick = useCallback((suggestion) => {
-        if (!easyMDERef.current) return;
-
-        const cm = easyMDERef.current.codemirror;
-        const cursor = cm.getCursor();
-        const line = cm.getLine(cursor.line);
-        const cursorPosition = cursor.ch;
-        let newText;
-        let newCursorPos;
-
-        if (suggestion === 'add_variable') {
-            const handleTabKey = (cm, event) => {
-                if (event.key === 'Tab') {
-                    event.preventDefault();
-                    const currentValue = easyMDERef.current.value();
-                    const start = currentValue.lastIndexOf('{{', cursorPosition);
-                    const end = currentValue.indexOf('}}', cursorPosition);
-
-                    if (start !== -1 && end !== -1) {
-                        const textBetweenBraces = currentValue.slice(start + 2, end);
-                        setKeyName(textBetweenBraces);
-                        openModal(MODAL_TYPE.CREATE_VARIABLE);
-                    }
-                    cm.off('keydown', handleTabKey);
-                }
-            };
-
-            cm.on('keydown', handleTabKey);
-            const isDoubleBrace = line.slice(cursorPosition - 2, cursorPosition) === '{{';
-            const beforeCursor = isDoubleBrace ? line.slice(0, cursorPosition - 2) : line.slice(0, cursorPosition - 1);
-            const afterCursor = line.slice(cursorPosition);
-            newText = `${beforeCursor}{{}}${afterCursor}`;
-            newCursorPos = isDoubleBrace ? cursorPosition : cursorPosition + 1;
-        } else {
-            const isDoubleBrace = line.slice(cursorPosition - 2, cursorPosition) === '{{';
-            const beforeCursor = isDoubleBrace ? line.slice(0, cursorPosition - 2) : line.slice(0, cursorPosition - 1);
-            const afterCursor = line.slice(cursorPosition);
-            newText = `${beforeCursor}{{${suggestion}}}${afterCursor}`;
-            newCursorPos = beforeCursor.length + suggestion.length + 4;
-        }
-
-        // Replace the line content
-        cm.replaceRange(newText, { line: cursor.line, ch: 0 }, { line: cursor.line, ch: line.length });
-        
-        setShowSuggestions(false);
-        setActiveSuggestionIndex(0);
-
-        // Set cursor position
-        requestAnimationFrame(() => {
-            cm.setCursor({ line: cursor.line, ch: newCursorPos });
-            cm.focus();
-        });
-    }, []);
-
-    const handleMouseDownOnSuggestion = useCallback((e) => {
-        e.preventDefault();
-    }, []);
+    
 
     const updateEditorLayout = useCallback(() => {
         if (typeof window === 'undefined') return;
@@ -325,65 +228,9 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         return () => clearTimeout(timeoutId);
     }, [isPromptHelperOpen, updateEditorLayout]);
 
-    // Memoize suggestions to prevent unnecessary re-renders
-    const suggestionItems = useMemo(() => {
-        return variablesKeyValue?.map((variable, index) => ({
-            key: variable.key,
-            index,
-            isActive: index === activeSuggestionIndex
-        })) || [];
-    }, [variablesKeyValue, activeSuggestionIndex]);
+    
 
-    const renderSuggestions = () => {
-        if (!showSuggestions) return null;
-
-        return (
-            <div
-                className="dropdown dropdown-open z-high"
-                style={{
-                    position: 'absolute',
-                    top: suggestionCoords.top + 4,
-                    left: suggestionCoords.left + 8,
-                    willChange: 'transform', // Optimize for animations
-                }}
-            >
-                <ul
-                    ref={suggestionListRef}
-                    tabIndex={0}
-                    role="listbox"
-                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-high w-60 p-2 shadow-xl border border-base-300 overflow-scroll overflow-y-auto"
-                >
-                    <div className="flex flex-col w-full">
-                        <label className="label label-text-alt">Available variables</label>
-                        {suggestionItems.map((item) => (
-                            <li
-                                key={item.key}
-                                tabIndex={-1}
-                                className={`list-item ${item.isActive ? 'bg-base-200' : ''}`}
-                                onMouseDown={handleMouseDownOnSuggestion}
-                                onClick={() => handleSuggestionClick(item.key)}
-                            >
-                                <a className='gap-3'>
-                                    <span className="inline-block w-2 h-2 bg-primary rounded-full"></span>
-                                    <span className="text-base-content">{item.key}</span>
-                                </a>
-                            </li>
-                        ))}
-                        <li
-                            tabIndex={-1}
-                            className={`list-item ${variablesKeyValue?.length === activeSuggestionIndex ? 'bg-base-200' : ''}`}
-                            onMouseDown={handleMouseDownOnSuggestion}
-                            onClick={() => handleSuggestionClick('add_variable')}
-                        >
-                            <a className='flex flex-col items-start'>
-                                <span>+ Add New variable</span>
-                            </a>
-                        </li>
-                    </div>
-                </ul>
-            </div>
-        );
-    };
+    
     const togglePromptHelper = useCallback(() => {
         const newState = !isPromptHelperOpen;
         setIsPromptHelperOpen(newState);
@@ -444,24 +291,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                     const currentReduxPrompt = reduxPrompt;
                     return value.trim() !== currentReduxPrompt.trim();
                 });
-
-                // Handle variable suggestions
-                const cursor = easyMDE.codemirror.getCursor();
-                const line = easyMDE.codemirror.getLine(cursor.line);
-                const cursorPos = cursor.ch;
-                const lastChar = line.slice(cursorPos - 1, cursorPos);
-                const lastTwoChars = line.slice(cursorPos - 2, cursorPos);
-
-                if (lastChar === '{' || lastTwoChars === '{{') {
-                    // Use setTimeout to avoid blocking typing
-                    setTimeout(() => triggerSuggestions(true, cursorPos), 0);
-                } else {
-                    // Check if we should close suggestions
-                    const isInVariablePattern = line.slice(0, cursorPos).match(/\{\{[^}]*$/);
-                    if (!isInVariablePattern || (lastChar !== '{' && lastChar !== '}')) {
-                        setTimeout(() => triggerSuggestions(false), 0);
-                    }
-                }
             });
 
             easyMDE.codemirror.on('focus', () => {
@@ -473,29 +302,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                 }
             });
 
-            easyMDE.codemirror.on('keydown', (cm, event) => {
-                // Only handle suggestion-related keys when suggestions are visible
-                if (showSuggestions && suggestionListRef.current) {
-                    const suggestionItems = suggestionListRef.current.querySelectorAll('.list-item');
-                    const totalItems = suggestionItems.length;
-                    
-                    if (totalItems > 0) {
-                        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-                            event.preventDefault();
-                            setActiveSuggestionIndex((prevIndex) => {
-                                return event.key === 'ArrowDown'
-                                    ? (prevIndex + 1) % totalItems
-                                    : (prevIndex - 1 + totalItems) % totalItems;
-                            });
-                        } else if (event.key === 'Enter') {
-                            event.preventDefault();
-                            suggestionItems[activeSuggestionIndex]?.click();
-                        } else if (event.key === 'Escape') {
-                            setShowSuggestions(false);
-                        }
-                    }
-                }
-            });
 
             easyMDERef.current = easyMDE;
             textareaRef.current = easyMDE.codemirror.getInputField();
@@ -514,14 +320,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         };
     }, []); // Only initialize once
 
-    // Cleanup debounce timer on unmount
-    useEffect(() => {
-        return () => {
-            if (debounceTimerRef.current) {
-                clearTimeout(debounceTimerRef.current);
-            }
-        };
-    }, []);
+    
 
     if (service === "google" && serviceType === "chat") return null;
 
@@ -592,7 +391,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                         defaultValue={prompt}
                     />
                 </div>
-                {showSuggestions && renderSuggestions()}
                 <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none">
                     <input type="checkbox" className="min-h-[0.75rem]" />
                     <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
@@ -634,6 +432,15 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                                     </span>
                                 </div>
                             </div>
+                            <div className="mt-3 pt-3 border-t border-base-300 space-y-2">
+                                <div className="font-medium">Prompt formatting tips (Markdown)</div>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li><span className="font-medium">Headings</span>: <code># H1</code>, <code>## H2</code>, <code>### H3</code></li>
+                                    <li><span className="font-medium">Bold</span>: <code>**bold**</code>  <span className="font-medium">Italic</span>: <code>*italic*</code></li>
+                                    <li><span className="font-medium">Lists</span>: <code>- item</code> or numbered <code>1. item</code></li>
+                                    <li><span className="font-medium">Inline code</span>: <code>`code`</code></li>
+                                </ul>
+                             </div>
                         </div>
                     </div>
                 </div>
