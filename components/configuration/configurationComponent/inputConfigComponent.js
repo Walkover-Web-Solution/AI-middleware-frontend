@@ -11,7 +11,6 @@ import ToneDropdown from './toneDropdown';
 import ResponseStyleDropdown from './responseStyleDropdown';
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
-import { setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 
 
@@ -46,23 +45,13 @@ const InputConfigComponent = ({
     }));
     
     const [oldContent, setOldContent] = useState(reduxPrompt);
-    const [newContent, setNewContent] = useState('');
-    
+    const initailPrompt = prompt;
     const textareaRef = useRef(null);
     const editorRef = useRef(null);
     const easyMDERef = useRef(null);
     const editorContainerRef = useRef(null);
+    const changeUpdateTimerRef = useRef(null);
     const [editorHeight, setEditorHeight] = useState(null);
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-    const [messages, setMessages] = useState([]);
-    const [isPromptHelperOpen, setIsPromptHelperOpen] = useState(false);
-
-    
-
-    const dispatch = useDispatch();
-
-
-
     // Separate effect to update EasyMDE when reduxPrompt changes
     useEffect(() => {
         if (easyMDERef.current && easyMDERef.current.value() !== reduxPrompt) {
@@ -108,42 +97,7 @@ const InputConfigComponent = ({
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, [isMobileView, isPromptHelperOpen]);
-
-    const savePrompt = useCallback((newPrompt) => {
-        const newValue = (newPrompt || "").trim();
-
-        if (newValue !== reduxPrompt.trim()) {
-            dispatch(updateBridgeVersionAction({
-                versionId: searchParams?.version,
-                dataToSend: {
-                    configuration: {
-                        prompt: newValue
-                    }
-                }
-            }));
-        }
-    }, [dispatch, searchParams?.version, reduxPrompt]);
-
-    
-
-    // This function is now handled by EasyMDE change event
-    const handlePromptChange = useCallback((value) => {
-        setPrompt(value);
-
-        if (value.trim() !== reduxPrompt.trim()) {
-            setHasUnsavedChanges(true);
-        } else {
-            setHasUnsavedChanges(false);
-        }
-    }, [reduxPrompt]);
-
-    // This function is now handled by EasyMDE keydown event
-    const handleKeyDown = useCallback((e) => {
-        // This is now handled in the EasyMDE initialization
-    }, []);
-
-    
+    }, [isMobileView, isPromptHelperOpen]);    
 
     const updateEditorLayout = useCallback(() => {
         if (typeof window === 'undefined') return;
@@ -188,7 +142,7 @@ const InputConfigComponent = ({
 
             cmInstance.refresh();
         }
-    }, [isPromptHelperOpen]);
+    }, [isPromptHelperOpen, prompt]);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -215,27 +169,6 @@ const InputConfigComponent = ({
         return () => clearTimeout(timeoutId);
     }, [isPromptHelperOpen, updateEditorLayout]);
 
-    
-
-    
-    const togglePromptHelper = useCallback(() => {
-        const newState = !isPromptHelperOpen;
-        setIsPromptHelperOpen(newState);
-
-        if (!newState && !isMobileView && typeof window.openTechDoc === 'function') {
-            window.openTechDoc();
-        } else if (newState && typeof window.closeTechDoc === 'function') {
-            window.closeTechDoc();
-        }
-    }, [isPromptHelperOpen, isMobileView]);
-
-    const handleCloseTextAreaFocus = useCallback(() => {
-        if (typeof window.closeTechDoc === 'function') {
-            window.closeTechDoc();
-        }
-        setIsPromptHelperOpen(false);
-    }, []);
-
     const handleSavePrompt = useCallback(() => {
         savePrompt(prompt);
         setOldContent(prompt);
@@ -247,13 +180,11 @@ const InputConfigComponent = ({
     const handleOpenDiffModal = () => {
         openModal(MODAL_TYPE?.DIFF_PROMPT);
     };
-    // Initialize EasyMDE
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (editorRef.current && !easyMDERef.current) {
             const easyMDE = new EasyMDE({
                 element: editorRef.current,
-                initialValue: prompt || '',
+                initialValue: initailPrompt || '',
                 spellChecker: false,
                 status: false,
                 toolbar: false, // Remove toolbar completely
@@ -265,18 +196,20 @@ const InputConfigComponent = ({
                 styleSelectedText: false,
                 forceSync: true
             });
-
-            // EasyMDE is now ready for use
-
             easyMDE.codemirror.on('change', () => {
                 const value = easyMDE.value();
-                setPrompt(value);
-                
-                // Use a callback to get the latest reduxPrompt value
-                setHasUnsavedChanges(prev => {
-                    const currentReduxPrompt = reduxPrompt;
-                    return value.trim() !== currentReduxPrompt.trim();
-                });
+                // Debounce updates to allow editor to settle and avoid rapid state churn
+                if (changeUpdateTimerRef.current) {
+                    clearTimeout(changeUpdateTimerRef.current);
+                }
+                changeUpdateTimerRef.current = setTimeout(() => {
+                    setPrompt(value);
+                    // Use a callback to get the latest reduxPrompt value
+                    setHasUnsavedChanges(prev => {
+                        const currentReduxPrompt = reduxPrompt;
+                        return value.trim() !== currentReduxPrompt.trim();
+                    });
+                }, 250);
             });
 
             easyMDE.codemirror.on('focus', () => {
@@ -299,12 +232,15 @@ const InputConfigComponent = ({
         }
 
         return () => {
+            if (changeUpdateTimerRef.current) {
+                clearTimeout(changeUpdateTimerRef.current);
+            }
             if (easyMDERef.current) {
                 easyMDERef.current.toTextArea();
                 easyMDERef.current = null;
             }
         };
-    }, []); // Only initialize once
+    }, [initailPrompt]); // Only initialize once
 
     
 
