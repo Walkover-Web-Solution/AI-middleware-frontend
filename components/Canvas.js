@@ -21,10 +21,13 @@ function Canvas({
   const [loading, setLoading] = useState(false);
   const [appliedMessages, setAppliedMessages] = useState(new Set());
   const [copiedMessageId, setCopiedMessageId] = useState(null);
-  
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest"
+    });
   }, [messages]);
 
   const handleResetChat = () => {
@@ -266,7 +269,7 @@ function Canvas({
               <textarea
                 ref={textareaRef}
                 className="w-full px-4 py-3 text-sm bg-base-100 border border-base-content/40 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none transition-all duration-200 shadow-sm hover:shadow-md min-h-[44px] max-h-32 placeholder-gray-400"
-                placeholder={`Describe how you'd like to improve your ${label}...`}
+                placeholder={` how you'd like to improve your ${label}...`}
                 value={instruction}
                 rows={1}
                 onChange={(e) => {

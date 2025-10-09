@@ -202,9 +202,7 @@ const ModelDropdown = ({ params, searchParams }) => {
     return (
         <div className="flex flex-col items-start gap-4 relative">
             <div className="w-full max-w-xs">
-                <div className="label">
-                    <span className="label-text text-base-content">LLM Model</span>
-                </div>
+                
                 <div className="dropdown w-full font-normal" ref={dropdownRef}>
                     <div
                         tabIndex={0}

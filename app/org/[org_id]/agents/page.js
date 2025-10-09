@@ -179,29 +179,29 @@ function Home({ params, isEmbedUser }) {
     };
 
     document.addEventListener('keydown', handleKeyDown);
-
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
   return (
-    <div className="w-full overflow-x-hidden">
-      {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"} />}
-      {tutorialState?.showTutorial && (
-        <OnBoarding
-          setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
-          video={ONBOARDING_VIDEOS.bridgeCreation}
-          flagKey={"bridgeCreation"}
+    <div className="w-full overflow-x-hidden flex justify-start">
+      <div className="w-full max-w-full">
+        {tutorialState?.showSuggestion && <TutorialSuggestionToast setTutorialState={setTutorialState} flagKey={"bridgeCreation"} TutorialDetails={"Agent Creation"} />}
+        {tutorialState?.showTutorial && (
+          <OnBoarding
+            setShowTutorial={() => setTutorialState(prev => ({ ...prev, showTutorial: false }))}
+            video={ONBOARDING_VIDEOS.bridgeCreation}
+            flagKey={"bridgeCreation"}
 
-        />
-      )}
-      <CreateNewBridge orgid={resolvedParams.org_id}/>
-      {!allBridges.length && isLoading && <LoadingSpinner />}
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col items-start justify-start">
-        <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
-          <div className="w-full">
+          />
+        )}
+        <CreateNewBridge orgid={resolvedParams.org_id}/>
+        {!allBridges.length && isLoading && <LoadingSpinner />}
+        <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+        <div className="drawer-content flex flex-col items-start justify-start">
+          <div className="flex w-full justify-start gap-4 lg:gap-16 items-start">
+            <div className="w-full">
             {allBridges.length === 0 ? (
               <AgentEmptyState orgid={resolvedParams.org_id} isEmbedUser={isEmbedUser}/>
             ) : (
@@ -263,6 +263,7 @@ function Home({ params, isEmbedUser }) {
                 )}
               </div>
             )}
+            </div>
           </div>
         </div>
       </div>
