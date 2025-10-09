@@ -78,7 +78,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       setExpandedThreads([searchParams?.thread_id]);
       dispatch(clearSubThreadData());
       setLoadingSubThreads(true);
-      dispatch(getSubThreadsAction({ thread_id: searchParams?.thread_id, error: isErrorTrue, bridge_id: params.id }));
+      dispatch(getSubThreadsAction({ thread_id: searchParams?.thread_id, error: isErrorTrue, bridge_id: params.id, version_id: selectedVersion}));
     }
   }, [  searchParams?.thread_id]);
 
@@ -138,7 +138,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     try {
       const searchValue = searchRef?.current?.value || "";
       const result = await dispatch(
-        getHistoryAction(params?.id, null, null, 1, searchValue)
+        getHistoryAction(params?.id, null, null, 1, searchValue, filterOption, isErrorTrue, selectedVersion)
       );
       router.push(
         `${pathName}?version=${searchParams?.version}`,
@@ -213,7 +213,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
     } else {
       setExpandedThreads([threadId]);
       setLoadingSubThreads(true);
-      await dispatch(getSubThreadsAction({ thread_id: threadId, error: isErrorTrue, bridge_id: params.id }));
+      await dispatch(getSubThreadsAction({ thread_id: threadId, error: isErrorTrue, bridge_id: params.id, version_id: selectedVersion }));
       setLoadingSubThreads(false);
     }
   };
@@ -268,7 +268,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.set('error', 'true');
       const queryString = newSearchParams.toString();
-      await dispatch(getHistoryAction(params.id, null, null, 1, null, filterOption, true));
+      await dispatch(getHistoryAction(params.id, null, null, 1, null, filterOption, true, selectedVersion));
       setThreadPage(1);
       setIsErrorTrue(true);
       setHasMore(true);
@@ -280,7 +280,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.delete('error');
       const queryString = newSearchParams.toString();
-      await dispatch(getHistoryAction(params.id, null, null, 1, null, filterOption));
+      await dispatch(getHistoryAction(params.id, null, null, 1, null, filterOption, false, selectedVersion));
       setThreadPage(1);
       setHasMore(true);
       window.history.replaceState(null, '', `?${queryString}`);
@@ -297,7 +297,7 @@ const Sidebar = memo(({ historyData, threadHandler, fetchMoreData, hasMore, load
             Advance Filter
           </div>
           <div className="collapse-content">
-            <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} />
+            <DateRangePicker params={params} setFilterOption={setFilterOption} setHasMore={setHasMore} setPage={setPage} selectedVersion={selectedVersion} filterOption={filterOption} isErrorTrue={isErrorTrue}/>
             <div className="p-2 mt-4 bg-base-300 rounded-md text-center">
               <p className="text-center m-2 font-semibold">Filter Response</p>
               <div className="flex items-center justify-center mb-2 gap-4">

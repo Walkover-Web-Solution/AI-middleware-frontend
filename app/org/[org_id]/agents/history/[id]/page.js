@@ -84,7 +84,7 @@ function Page({params, searchParams }) {
        dispatch(clearThreadData());
       const startDate = resolvedSearchParams?.start;
       const endDate = resolvedSearchParams?.end;
-     const result =  await dispatch(getHistoryAction(resolvedParams.id, startDate, endDate, 1, null, filterOption, isErrorTrue));
+     const result =  await dispatch(getHistoryAction(resolvedParams.id, startDate, endDate, 1, null, filterOption, isErrorTrue, selectedVersion));
       if(resolvedSearchParams?.thread_id) {
         const threadId = resolvedSearchParams?.thread_id;
         const thread = result?.find(item => item?.thread_id === threadId);
