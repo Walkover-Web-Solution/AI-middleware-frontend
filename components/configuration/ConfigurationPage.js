@@ -207,9 +207,7 @@ const ConfigurationPage = ({
             )}
             {renderCommonComponents()}
             <AddVariable params={params} searchParams={searchParams} />
-            {((isEmbedUser && !hideAdvancedParameters) || !isEmbedUser) && (
-                <AdvancedParameters params={params} searchParams={searchParams} />
-            )}
+            <AdvancedParameters params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} hideAdvancedParameters={hideAdvancedParameters}/>
             {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
                 <AdvancedConfiguration 
                     params={params} 
@@ -228,9 +226,7 @@ const ConfigurationPage = ({
             {modelType === "image" ? (
                 <>
                 {renderCommonComponents()}
-                {((isEmbedUser && !hideAdvancedParameters) || !isEmbedUser) && (
-                    <AdvancedParameters params={params} searchParams={searchParams} />
-                )}
+                <AdvancedParameters params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} hideAdvancedParameters={hideAdvancedParameters}/>
                 </>
             ) : (
                 renderNonImageComponents()
