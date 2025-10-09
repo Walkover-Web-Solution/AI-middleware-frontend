@@ -11,8 +11,7 @@ import ToneDropdown from './toneDropdown';
 import ResponseStyleDropdown from './responseStyleDropdown';
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
-import PromptHelper from '../../PromptHelper';
-import { setIsFocusReducer, setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
+import { setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 
 
@@ -20,7 +19,24 @@ const COLLAPSED_MIN_HEIGHT = 200;
 const COLLAPSED_MAX_HEIGHT = 384;
 const FULLSCREEN_TOP_OFFSET = 60;
 
-const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbedUser }) => {
+const InputConfigComponent = ({ 
+    params, 
+    searchParams, 
+    promptTextAreaRef, 
+    // PromptHelper props
+    isPromptHelperOpen,
+    setIsPromptHelperOpen,
+    prompt,
+    setPrompt,
+    setThreadId,
+    hasUnsavedChanges,
+    setHasUnsavedChanges,
+    setNewContent,
+    handleCloseTextAreaFocus,
+    savePrompt,
+    isMobileView,
+    newContent
+}) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type || "",
@@ -29,7 +45,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || ""
     }));
     
-    const [isMobileView, setIsMobileView] = useState(window.innerWidth < 640);
     const [oldContent, setOldContent] = useState(reduxPrompt);
     const [newContent, setNewContent] = useState('');
     
@@ -37,7 +52,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     const editorRef = useRef(null);
     const easyMDERef = useRef(null);
     const editorContainerRef = useRef(null);
-    const [prompt, setPrompt] = useState(reduxPrompt);
     const [editorHeight, setEditorHeight] = useState(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [messages, setMessages] = useState([]);
@@ -45,35 +59,9 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
 
     
 
-    const initialThreadId = bridge?.thread_id || generateRandomID();
-    const [thread_id, setThreadId] = useState(initialThreadId);
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        dispatch(setIsFocusReducer(isPromptHelperOpen));
-    }, [isPromptHelperOpen, dispatch]);
 
-    // Ensure thread_id exists in Redux for this bridge/version on mount
-    useEffect(() => {
-        if (!bridge?.thread_id && initialThreadId) {
-            setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
-                bridgeId: params?.id,
-                versionId: searchParams?.version,
-                thread_id: initialThreadId,
-            }));
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            const textareaElement = promptTextAreaRef?.current?.querySelector('textarea') || promptTextAreaRef?.current?.querySelector('.CodeMirror');
-            if (textareaElement && isPromptHelperOpen) {
-                promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
-            }
-        }, 100);
-        return () => clearTimeout(timeoutId);
-    }, [isPromptHelperOpen, prompt]);
 
     // Separate effect to update EasyMDE when reduxPrompt changes
     useEffect(() => {
@@ -87,10 +75,10 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             }
         } else if (!easyMDERef.current) {
             // If editor not initialized yet, just update the state
-            setPrompt(reduxPrompt);
-            setHasUnsavedChanges(false);
+            setOldContent(reduxPrompt);
+            setThreadId(bridge?.thread_id || generateRandomID());
         }
-    }, [reduxPrompt]);
+    }, [reduxPrompt, bridge?.thread_id]);
 
     useEffect(() => {
         const handleBeforeUnload = (event) => {
@@ -108,13 +96,12 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
 
     useEffect(() => {
         const handleResize = () => {
-            const isSmallScreen = window.innerWidth < 710; // Changed to 640 to match initial state
+            const isSmallScreen = window.innerWidth < 710;
             if (!isMobileView && !isSmallScreen && typeof window.openTechDoc === 'function' && isPromptHelperOpen) {
                 window.openTechDoc();
             } else if (isMobileView && isSmallScreen && typeof window.closeTechDoc === 'function') {
                 window.closeTechDoc();
             }
-            setIsMobileView(isSmallScreen);
         };
         handleResize();
         window.addEventListener('resize', handleResize);
@@ -259,8 +246,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
 
     const handleOpenDiffModal = () => {
         openModal(MODAL_TYPE?.DIFF_PROMPT);
-    }
-
+    };
     // Initialize EasyMDE
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
@@ -294,7 +280,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             });
 
             easyMDE.codemirror.on('focus', () => {
-                if (!isPromptHelperOpen) {
+                if (!isPromptHelperOpen && window.innerWidth>710) {
                     setIsPromptHelperOpen(true);
                     if (typeof window.closeTechDoc === 'function') {
                         window.closeTechDoc();
@@ -323,7 +309,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     
 
     if (service === "google" && serviceType === "chat") return null;
-
+      console.log(isPromptHelperOpen,"hello")
     return (
         <div ref={promptTextAreaRef}>
             <div className="flex justify-between items-center mb-2">
@@ -362,14 +348,9 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                             >
                                 Diff
                             </button>}
-                            <button
-                                className={`btn text-xs sm:text-sm btn-sm btn-error`}
-                                onClick={handleCloseTextAreaFocus}
-                            >
-                                Close
-                            </button>
-                        </>
-                    }
+                            
+                        </>}
+
                 </div>
             </div>
             <div className="form-control h-full">
@@ -454,30 +435,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             <Diff_Modal oldContent={oldContent} newContent={newContent} />
             <PromptSummaryModal modalType={MODAL_TYPE.PROMPT_SUMMARY} params={params} searchParams={searchParams} />
 
-            <PromptHelper
-                isVisible={isPromptHelperOpen && !isMobileView}
-                params={params}
-                onClose={handleCloseTextAreaFocus}
-                savePrompt={savePrompt}
-                setPrompt={setPrompt}
-                messages={messages}
-                setMessages={setMessages}
-                thread_id={thread_id}
-                onResetThreadId={() => {
-                    const newId = generateRandomID();
-                    setThreadId(newId);
-                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
-                        bridgeId: params?.id,
-                        versionId: searchParams?.version,
-                        thread_id: newId,
-                    }));
-                }}
-                prompt={prompt}
-                hasUnsavedChanges={hasUnsavedChanges}
-                setHasUnsavedChanges={setHasUnsavedChanges}
-                setNewContent={setNewContent}
-                isEmbedUser={isEmbedUser}
-            />
         </div>
     );
 };

@@ -216,111 +216,116 @@ const CustomTable = ({
         const tableClass = viewportWidth < 1024 ? "table-compact" : "";
         
         return (
-            <div className="overflow-x-auto">
-                <table className={`table ${tableClass} min-w-full bg-base-100 shadow-md rounded-lg overflow-hidden`}>
-                    <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
-                        <tr className="hover">
-                            {showRowSelection &&
-                                <th className="w-10">
-                                    <input
-                                        type="checkbox"
-                                        className="h-4 w-4 cursor-pointer"
-                                        checked={selectAll}
-                                        onChange={toggleSelectAll}
-                                    />
-                                </th>
-                            }
-                            {visibleColumns.map((column) => (
-                                <th
-                                    key={column}
-                                    className="capitalize"
-                                >
-                                    <div className="flex items-center">
-                                        {sorting && sortableColumns.includes(column) && (
-                                            <MoveDownIcon
-                                                className={`w-4 h-4 cursor-pointer ${activeColumn === column
-                                                    ? "text-black"
-                                                    : "text-[#BCBDBE] group-hover:text-black"
-                                                    } ${ascending ? "rotate-180" : "rotate-0"}`}
+            <div className="flex justify-start w-full">
+                <div className="overflow-x-auto max-w-fit">
+                    <table className={`table ${tableClass} w-auto bg-base-100 shadow-md rounded-lg overflow-hidden`}>
+                        <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
+                            <tr className="hover">
+                                {showRowSelection &&
+                                    <th className="w-auto px-3 text-center">
+                                        <input
+                                            type="checkbox"
+                                            className="h-4 w-4 cursor-pointer"
+                                            checked={selectAll}
+                                            onChange={toggleSelectAll}
+                                        />
+                                    </th>
+                                }
+                                {visibleColumns.map((column) => (
+                                    <th
+                                        key={column}
+                                        className={`w-auto px-3 whitespace-nowrap ${column==='averageResponseTime'||column==='totalTokens'?'camelCase':'capitalize'}`}
+                                    >
+                                        <div className="flex items-center justify-center">
+                                            {sorting && sortableColumns.includes(column) && (
+                                                <MoveDownIcon
+                                                    className={`w-4 h-4 cursor-pointer ${activeColumn === column
+                                                        ? "text-black"
+                                                        : "text-[#BCBDBE] group-hover:text-black"
+                                                        } ${ascending ? "rotate-180" : "rotate-0"}`}
+                                                    onClick={() => sortByColumn(column)}
+                                                />
+                                            )}
+                                            <span
+                                                className="cursor-pointer pl-1"
                                                 onClick={() => sortByColumn(column)}
-                                            />
-                                        )}
-                                        <span
-                                            className="cursor-pointer pl-1"
-                                            onClick={() => sortByColumn(column)}
-                                        >
-                                            {column}
-                                        </span>
-                                    </div>
-                                </th>
-                            ))}
-                            {endComponent && <th></th>}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sortedData?.length > 0 ? (
-                            sortedData?.map((row, index) => (
-                                <tr 
-                                    key={row.id || row?._id || index} 
-                                    className="border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer group" 
-                                    onClick={() =>
-                                        handleRowClick(
-                                            keysToExtractOnRowClick.reduce((acc, key) => {
-                                                acc[key] = row[key];
-                                                return acc;
-                                            }, {})
-                                        )
-                                    }
-                                >
-                                    {showRowSelection &&
-                                        <td className="w-10 text-center">
-                                            <input
-                                                type="checkbox"
-                                                className="h-4 w-4 cursor-pointer"
-                                                checked={selectedRows.includes(row.id || row['_id'])}
-                                                onChange={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleSelectRow(row.id || row['_id']);
-                                                }}
-                                            />
-                                        </td>
-                                    }
-                                    {visibleColumns?.map((column) => (
-                                        <td
-                                            key={column}
-                                        >
-                                            {getDisplayValue(row, column)}
-                                        </td>
-                                    ))}
-                                    {endComponent && (
-                                        <td>
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {endComponent({row: row})}
-                                            </div>
-                                        </td>
-                                    )}
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td
-                                    colSpan={visibleColumns.length + (showRowSelection ? 1 : 0) + (endComponent ? 1 : 0)}
-                                    className="py-4 text-center"
-                                >
-                                    No data available
-                                </td>
+                                            >
+                                                {column}
+                                            </span>
+                                        </div>
+                                    </th>
+                                ))}
+                                {endComponent && <th className="w-auto px-3"></th>}
                             </tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {sortedData?.length > 0 ? (
+                                sortedData?.map((row, index) => (
+                                    <tr 
+                                        key={row.id || row?._id || index} 
+                                        className="border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer group" 
+                                        onClick={() =>
+                                            handleRowClick(
+                                                keysToExtractOnRowClick.reduce((acc, key) => {
+                                                    acc[key] = row[key];
+                                                    return acc;
+                                                }, {})
+                                            )
+                                        }
+                                    >
+                                        {showRowSelection &&
+                                            <td className="w-auto px-3 text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    className="h-4 w-4 cursor-pointer"
+                                                    checked={selectedRows.includes(row.id || row['_id'])}
+                                                    onChange={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleSelectRow(row.id || row['_id']);
+                                                    }}
+                                                />
+                                            </td>
+                                        }
+                                        {visibleColumns?.map((column) => (
+                                            <td
+                                                className="px-3 py-2 whitespace-nowrap"
+                                                key={column}
+                                            >
+                                                {getDisplayValue(row, column)}
+                                            </td>
+                                        ))}
+                                        {endComponent && (
+                                            <td className="px-3 py-2">
+                                                <div className="flex justify-end">
+                                                    {endComponent({row: row})}
+                                                </div>
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td
+                                        colSpan={visibleColumns.length + (showRowSelection ? 1 : 0) + (endComponent ? 1 : 0)}
+                                        className="py-4 text-center"
+                                    >
+                                        No data available
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         );
     };
 
     return (
-        <div className="bg-base-100 rounded-lg p-2 md:p-4">
-            {/* Responsive view switching */}
-            {isSmallScreen ? renderCardView() : renderTableView()}
+        <div className="w-full flex justify-start">
+            <div className="bg-base-100 rounded-lg p-2 md:p-4 w-full max-w-fit">
+                {/* Responsive view switching */}
+                {isSmallScreen ? renderCardView() : renderTableView()}
+            </div>
         </div>
     );
 };

@@ -223,7 +223,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                     </div>
                     
                     {/* Action buttons that appear on hover */}
-                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
+                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
