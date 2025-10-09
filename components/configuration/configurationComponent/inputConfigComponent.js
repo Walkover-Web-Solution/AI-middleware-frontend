@@ -56,15 +56,27 @@ const InputConfigComponent = ({
     // Separate effect to update EasyMDE when reduxPrompt changes
     useEffect(() => {
         if (easyMDERef.current && easyMDERef.current.value() !== reduxPrompt) {
+            // Store cursor position before updating value
+            const cmInstance = easyMDERef.current.codemirror;
+            const cursorPos = cmInstance.getCursor();
+            
             // Temporarily disable change event to avoid infinite loop
             const currentValue = easyMDERef.current.value();
-            if (currentValue !== reduxPrompt) {
+            if (currentValue !== reduxPrompt && !hasUnsavedChanges) {
+                // Only update if there are no unsaved changes to prevent cursor jumping
                 easyMDERef.current.value(reduxPrompt);
                 if (editorRef.current) {
                     editorRef.current.value = reduxPrompt;
                 }
                 setPrompt(reduxPrompt);
                 setHasUnsavedChanges(false);
+                
+                // Restore cursor position after a brief delay
+                setTimeout(() => {
+                    if (cmInstance && cursorPos) {
+                        cmInstance.setCursor(cursorPos);
+                    }
+                }, 10);
             }
         } else if (!easyMDERef.current) {
             // If editor not initialized yet, just update the state
@@ -75,7 +87,7 @@ const InputConfigComponent = ({
                 editorRef.current.value = reduxPrompt;
             }
         }
-    }, [reduxPrompt, bridge?.thread_id]);
+    }, [reduxPrompt, bridge?.thread_id, hasUnsavedChanges]);
 
     useEffect(() => {
         const handleBeforeUnload = (event) => {
@@ -146,6 +158,9 @@ const InputConfigComponent = ({
                 el.style.height = `${nextHeight}px`;
                 el.style.maxHeight = `${appliedMaxHeight}px`;
                 el.style.minHeight = isPromptHelperOpen ? `${fullscreenTargetHeight}px` : '';
+                if (el === scrollerEl) {
+                    el.style.paddingBottom = '20px';
+                }
             });
 
             cmInstance.refresh();
@@ -209,12 +224,23 @@ const InputConfigComponent = ({
             if (!editorInstance) return;
 
             const nextValue = typeof prompt === 'string' ? prompt : (reduxPrompt || '');
-            if (editorInstance.value() !== nextValue) {
+            if (editorInstance.value() !== nextValue && !hasUnsavedChanges) {
+                // Store cursor position before updating
+                const cmInstance = editorInstance.codemirror;
+                const cursorPos = cmInstance.getCursor();
+                
                 editorInstance.value(nextValue);
                 editorInstance.codemirror.refresh();
                 if (editorRef.current) {
                     editorRef.current.value = nextValue;
                 }
+                
+                // Restore cursor position
+                setTimeout(() => {
+                    if (cmInstance && cursorPos) {
+                        cmInstance.setCursor(cursorPos);
+                    }
+                }, 10);
             }
         }, 120);
 
@@ -224,7 +250,7 @@ const InputConfigComponent = ({
                 promptSyncTimerRef.current = null;
             }
         };
-    }, [prompt, reduxPrompt]);
+    }, [prompt, reduxPrompt, hasUnsavedChanges]);
 
     useEffect(() => {
         if (editorRef.current && !easyMDERef.current) {
@@ -242,7 +268,13 @@ const InputConfigComponent = ({
                 styleSelectedText: false,
                 forceSync: true
             });
-            easyMDE.codemirror.on('change', () => {
+            
+            // Add bottom padding to the editor's scroller element
+            const scrollerEl = easyMDE.codemirror.getScrollerElement();
+            if (scrollerEl) {
+                scrollerEl.style.paddingBottom = '20px';
+            }
+            easyMDE.codemirror.on('change', (instance, changeObj) => {
                 const value = easyMDE.value();
                 if (editorRef.current) {
                     editorRef.current.value = value;
@@ -301,7 +333,7 @@ const InputConfigComponent = ({
     if (service === "google" && serviceType === "chat") return null;
       console.log(isPromptHelperOpen,"hello")
     return (
-        <div ref={promptTextAreaRef}>
+        <div ref={promptTextAreaRef} className="pb-6">
             <div className="flex justify-between items-center mb-2">
                 <div className="label flex items-center gap-2">
                     <span className="label-text capitalize font-medium">Prompt</span>
@@ -348,12 +380,13 @@ const InputConfigComponent = ({
                     ref={editorContainerRef}
                     className={`relative w-full EasyMDEContainer transition-all duration-300 ${
                         isPromptHelperOpen
-                            ? "fixed left-0 right-0 bottom-0 z-40 bg-base-100"
+                            ? "fixed left-0 right-0 bottom-0 z-40 bg-base-100 pb-4"
                             : "relative max-h-[384px]"
                     }`}
                     style={{
                         height: editorHeight ? `${editorHeight}px` : undefined,
                         maxHeight: !isPromptHelperOpen ? `${COLLAPSED_MAX_HEIGHT}px` : undefined,
+                        paddingBottom: isPromptHelperOpen ? '20px' : undefined,
                     }}
                 >
                     <textarea
