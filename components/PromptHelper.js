@@ -179,7 +179,7 @@ const PromptHelper = ({
   return (
     <div 
       ref={modalRef} 
-      className=" w-full bottom-2 bg-base-100 h-full rounded-l-md shadow-lg transition-all duration-300 ease-in-out z-30"
+      className=" z-very-high w-full bottom-2 bg-base-100 h-full rounded-l-md shadow-lg transition-all duration-300 ease-in-out z-30"
       onBlur={handleModalBlur}
       tabIndex={-1}
     >
