@@ -256,7 +256,7 @@ const PromptHelper = ({
          tabIndex={0}
        >
          
-          <div className="p-3 mt-2 h-[609px]" 
+          <div className="p-3 mt-2 h-[92vh]" 
               
                >
             <div id='notes-embed' className='w-full h-full' >
