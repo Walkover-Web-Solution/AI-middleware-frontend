@@ -55,15 +55,16 @@ const PromptSummaryModal = ({ modalType, params, searchParams, autoGenerateSumma
         setSummary(bridge_summary)
     }
     const handleSaveSummary = useCallback(() => {
+        setIsGeneratingSummary(true)
         const newValue = textareaRef.current?.value || summary || "";
         const dataToSend = { bridge_summary: newValue };
         setSummary(newValue);
         dispatch(updateBridgeAction({ bridgeId: params.id, dataToSend })).then((data) => {
             if (data.success) {
+                closeModal(modalType);
                 toast.success('Summary updated successfully');
             }
         });
-        closeModal(modalType);
         setIsEditing(false);
     }, [dispatch, params.id, summary]);
 
