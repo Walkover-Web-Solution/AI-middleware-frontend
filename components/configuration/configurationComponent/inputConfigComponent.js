@@ -16,6 +16,10 @@ import { setIsFocusReducer, setThreadIdForVersionReducer } from '@/store/reducer
 import Diff_Modal from '@/components/modals/Diff_Modal';
 
 
+const COLLAPSED_MIN_HEIGHT = 200;
+const COLLAPSED_MAX_HEIGHT = 384;
+const FULLSCREEN_TOP_OFFSET = 60;
+
 const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbedUser }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
@@ -255,17 +259,23 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         if (typeof window === 'undefined') return;
 
         const viewportHeight = window.innerHeight;
-        const containerElement = editorContainerRef.current;
-        const containerRect = containerElement?.getBoundingClientRect();
-        const containerTop = containerRect?.top ?? 0;
-        const bottomOffset = isPromptHelperOpen ? 0 : 24;
-        const minHeight = isPromptHelperOpen ? 320 : 500;
+        const fullscreenTargetHeight = Math.max(320, viewportHeight - FULLSCREEN_TOP_OFFSET);
 
-        let nextHeight = viewportHeight - containerTop - bottomOffset;
-        if (!Number.isFinite(nextHeight)) {
-            nextHeight = minHeight;
+        let nextHeight;
+
+        if (isPromptHelperOpen) {
+            nextHeight = fullscreenTargetHeight;
         } else {
-            nextHeight = Math.max(minHeight, nextHeight);
+            const containerElement = editorContainerRef.current;
+            const containerRect = containerElement?.getBoundingClientRect();
+            const containerTop = containerRect?.top ?? 0;
+            const bottomOffset = 24;
+            const computedHeight = viewportHeight - containerTop - bottomOffset;
+            const maxHeight = COLLAPSED_MAX_HEIGHT;
+            const minHeight = COLLAPSED_MIN_HEIGHT;
+            nextHeight = Number.isFinite(computedHeight)
+                ? Math.min(Math.max(minHeight, computedHeight), maxHeight)
+                : maxHeight;
         }
 
         setEditorHeight((prev) => (prev === nextHeight ? prev : nextHeight));
@@ -274,20 +284,17 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             const cmInstance = easyMDERef.current.codemirror;
             const wrapperEl = cmInstance.getWrapperElement();
             const scrollerEl = cmInstance.getScrollerElement();
+            const sizerEl = wrapperEl?.querySelector('.CodeMirror-sizer');
+            const appliedMaxHeight = isPromptHelperOpen ? fullscreenTargetHeight : COLLAPSED_MAX_HEIGHT;
 
             cmInstance.setSize('100%', nextHeight);
 
-            if (wrapperEl) {
-                wrapperEl.style.height = `${nextHeight}px`;
-                wrapperEl.style.minHeight = `${nextHeight}px`;
-                wrapperEl.style.maxHeight = `${nextHeight}px`;
-            }
-
-            if (scrollerEl) {
-                scrollerEl.style.height = `${nextHeight}px`;
-                scrollerEl.style.minHeight = `${nextHeight}px`;
-                scrollerEl.style.maxHeight = `${nextHeight}px`;
-            }
+            [wrapperEl, scrollerEl, sizerEl].forEach((el) => {
+                if (!el) return;
+                el.style.height = `${nextHeight}px`;
+                el.style.maxHeight = `${appliedMaxHeight}px`;
+                el.style.minHeight = isPromptHelperOpen ? `${fullscreenTargetHeight}px` : '';
+            });
 
             cmInstance.refresh();
         }
@@ -572,10 +579,11 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                     className={`relative w-full EasyMDEContainer transition-all duration-300 ${
                         isPromptHelperOpen
                             ? "fixed left-0 right-0 bottom-0 z-40 bg-base-100"
-                            : "relative"
+                            : "relative max-h-[384px]"
                     }`}
                     style={{
                         height: editorHeight ? `${editorHeight}px` : undefined,
+                        maxHeight: !isPromptHelperOpen ? `${COLLAPSED_MAX_HEIGHT}px` : undefined,
                     }}
                 >
                     <textarea
