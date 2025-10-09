@@ -23,11 +23,34 @@ const PromptHelper = ({
   hasUnsavedChanges,
   setHasUnsavedChanges,
   setNewContent,
-  isEmbedUser
+  isEmbedUser,
+  // Toggle states from parent
+  showNotes,
+  setShowNotes,
+  showPromptHelper,
+  setShowPromptHelper
 }) => {
   const dispatch = useDispatch();
   const [focusedSection, setFocusedSection] = useState(null); // 'notes', 'promptBuilder', or null for 50/50
   const [optimizedPrompt, setOptimizedPrompt] = useState('');
+  
+  // Ensure at least one section is always visible
+  const handleNotesToggle = (checked) => {
+    if (!checked && !showPromptHelper) {
+      // If trying to hide notes but prompt helper is already hidden, keep notes visible
+      return;
+    }
+    setShowNotes(checked);
+  };
+  
+  const handlePromptHelperToggle = (checked) => {
+    if (!checked && !showNotes) {
+      // If trying to hide prompt helper but notes is already hidden, keep prompt helper visible
+      return;
+    }
+    setShowPromptHelper(checked);
+  };
+  
   const pathname = usePathname();
   const pathParts = pathname.split('?')[0].split('/');
   const bridgeId = pathParts[5];
@@ -84,24 +107,24 @@ const PromptHelper = ({
 
   useEffect(() => {
     setTimeout(() => {
-      if(isVisible){
+      if(isVisible && showNotes){
         handleScriptLoad();
       }
     }, 100);
-  }, [isVisible]);
+  }, [isVisible,showNotes]);
 
   
-  // Calculate heights based on focus
-  const getNotesHeight = () => {
-    if (focusedSection === 'notes') return 'h-3/4'; // 75% when focused
-    if (focusedSection === 'promptBuilder') return 'h-1/4'; // 25% when prompt builder is focused
-    return 'h-1/2'; // 50% when nothing is focused (default state)
+  // Calculate widths based on toggle states
+  const getNotesWidth = () => {
+    if (!showNotes) return 'w-0 hidden'; // Hidden
+    if (!showPromptHelper) return 'w-full'; // Full width when prompt helper is hidden
+    return 'w-1/2'; // 50% when both are visible
   };
   
-  const getPromptBuilderHeight = () => {
-    if (focusedSection === 'promptBuilder') return 'h-3/4'; // 75% when focused
-    if (focusedSection === 'notes') return 'h-1/4'; // 25% when notes is focused
-    return 'h-1/2'; // 50% when nothing is focused (default state)
+  const getPromptHelperWidth = () => {
+    if (!showPromptHelper) return 'w-0 hidden'; // Hidden
+    if (!showNotes) return 'w-full'; // Full width when notes is hidden
+    return 'w-1/2'; // 50% when both are visible
   };
   
   const modalRef = React.createRef();
@@ -156,40 +179,50 @@ const PromptHelper = ({
   return (
     <div 
       ref={modalRef} 
-      className="fixed right-0 top-0 w-[49%] bottom-2 bg-base-100 border-l border-base-content/30 h-full rounded-l-md shadow-lg transition-all duration-300 ease-in-out z-30"
+      className=" w-full bottom-2 bg-base-100 h-full rounded-l-md shadow-lg transition-all duration-300 ease-in-out z-30"
       onBlur={handleModalBlur}
       tabIndex={-1}
     >
-      {/* Content Area - Split into two sections */}
-      <div className="flex flex-col h-full">
-      
-        {/* Notes Section */}
-        {isEmbedUser ? null : (
-        <div className={`${getNotesHeight()} transition-all duration-300 ease-in-out border-b mt-3`}
-         onFocus={() => setFocusedSection('notes')}
-         onBlur={() => setFocusedSection(null)}
-         tabIndex={0}
-       >
-          <div className=" pb-6 pl-4 border-b bg-base-100">
-            <div className="flex items-center gap-2">
-              <BookIcon size={14} />
-              <span className="text-md font-semibold">Notes</span>
-            </div>
-          </div>
-          <div className="p-3 h-[calc(100%-30px)]" 
-              
-               >
-            <div id='notes-embed' className='w-full h-full' >
-              {/* This will be populated by the docstar script */}
-            </div>   
-          </div>
+      {/* Toggle Controls Header */}
+      <div className="flex items-center justify-between p-3 pb-7 border-b  ">
+        <div className="flex items-center w-96 justify-between">
+          <label className="flex items-center gap-1 cursor-pointer">
+            <input
+              type="checkbox"
+              className="checkbox checkbox-xs"
+              checked={showNotes}
+              disabled={!showPromptHelper}
+              onChange={(e) => handleNotesToggle(e.target.checked)}
+            />
+            <BookIcon size={14} />
+            <span className="text-xs">Notes</span>
+          </label>
+          <label className="flex items-center gap-1 cursor-pointer">
+            <input
+              type="checkbox"
+              className="checkbox checkbox-xs"
+              checked={showPromptHelper}
+              onChange={(e) => handlePromptHelperToggle(e.target.checked)}
+              disabled={!showNotes}
+            />
+            <BrainIcon size={14} />
+            <span className="text-xs">Prompt Helper</span>
+          </label>
         </div>
-        )}
-       
-        {/* Prompt Builder Section */}
-        <div className={`${isEmbedUser ? 'h-full' : getPromptBuilderHeight()} transition-all duration-300 ease-in-out`}
-        onFocus={() => setFocusedSection('promptBuilder')}
-        onBlur={() => setFocusedSection(null)}
+        <button
+          onClick={onClose}
+          className="btn btn-ghost btn-xs"
+        >
+          <CloseIcon size={14} />
+        </button>
+      </div>
+
+      {/* Content Area - Split into two sections */}
+      <div className="flex flex-row w-full h-full">
+      
+        {/* Prompt Builder Section - Now on LEFT */}
+        {showPromptHelper && (
+        <div className={`${getPromptHelperWidth()} h-full transition-all duration-500 ease-in-out border-r border-base-content/20 transform`}
         tabIndex={0}
         >
          
@@ -200,7 +233,7 @@ const PromptHelper = ({
             {/* Prompt Builder layout - side by side */}
             <div className="flex flex-row h-full gap-2">
               {/* Canvas for chat interactions */}
-              <div className="flex-1 flex flex-col max-h-full">
+              <div className="flex-1 mb-12  flex flex-col max-h-full">
                 <Canvas 
                   OptimizePrompt={handleOptimizePrompt}
                   messages={messages} 
@@ -215,6 +248,23 @@ const PromptHelper = ({
               </div>
           </div>
         </div>
+        )}
+       
+        {/* Notes Section - Now on RIGHT */}
+        {!isEmbedUser && showNotes && (
+        <div className={`${getNotesWidth()} h-full transition-all duration-500 ease-in-out transform`}
+         tabIndex={0}
+       >
+         
+          <div className="p-3 mt-2 h-[609px]" 
+              
+               >
+            <div id='notes-embed' className='w-full h-full' >
+              {/* This will be populated by the docstar script */}
+            </div>   
+          </div>
+        </div>
+        )}
       </div>
     </div>
   );

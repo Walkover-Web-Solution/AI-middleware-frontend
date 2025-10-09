@@ -19,7 +19,6 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
         bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",
         versionDescription: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.version_description || "",
     }));
-
     useEffect(() => {
         const timer = setInterval(() => {
             if (typeof SendDataToChatbot !== 'undefined' && searchParams?.version) {
@@ -60,13 +59,13 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
     }
     return (
         <div className='flex items-center gap-2'>
+        {publishedVersion?.length > 0 && (
             <div className="dropdown dropdown-bottom dropdown-end mr-2">
                 <div tabIndex={0} role="button" className={`btn ${searchParams?.version === publishedVersion ? 'bg-green-100 hover:bg-green-200 text-base-content' : ''}`}>
                     <span className={`${searchParams?.version === publishedVersion ? 'text-black' : 'text-base-content'}`}>V{bridgeVersionsArray.indexOf(searchParams?.version) + 1 || 'Select'}</span>
                     {searchParams?.version === publishedVersion &&
                         <span className="relative inline-flex items-center ml-2">
                             <span className="text-green-600 ml-1">●</span>
-                            <span className="animate-ping absolute inline-flex h-5 w-5 rounded-full bg-green-500 opacity-75"></span>
                         </span>
                     }
                 </div>
@@ -79,16 +78,20 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
                             </a>
                         </li>
                     ))}
-                    <li>
-                        <button
-                            className="btn mt-3 w-full text-left"
-                            onClick={()=>openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
-                        >
-                            Create New Version <span className='ml-1'>&rarr;</span>
-                        </button>
-                    </li>
+                    {/* Only show Create New Version button if first version is published */}
+                    
+                        <li>
+                            <button
+                                className="btn mt-3 w-full text-left"
+                                onClick={()=>openModal(MODAL_TYPE.VERSION_DESCRIPTION_MODAL)}
+                            >
+                                Create New Version <span className='ml-1'>&rarr;</span>
+                            </button>
+                        </li>
+                  
                 </ul>
             </div>
+        )}
             <PublishBridgeVersionModal params={params} searchParams={searchParams} agent_name={bridgeName}  agent_description = {versionDescription}/>
             <VersionDescriptionModal versionDescriptionRef={versionDescriptionRef} handleCreateNewVersion={handleCreateNewVersion}/>
         </div>
