@@ -45,12 +45,13 @@ const InputConfigComponent = ({
     }));
     
     const [oldContent, setOldContent] = useState(reduxPrompt);
-    const initailPrompt = prompt;
     const textareaRef = useRef(null);
     const editorRef = useRef(null);
     const easyMDERef = useRef(null);
     const editorContainerRef = useRef(null);
     const changeUpdateTimerRef = useRef(null);
+    const promptSyncTimerRef = useRef(null);
+    const initialPromptRef = useRef(prompt);
     const [editorHeight, setEditorHeight] = useState(null);
     // Separate effect to update EasyMDE when reduxPrompt changes
     useEffect(() => {
@@ -59,6 +60,9 @@ const InputConfigComponent = ({
             const currentValue = easyMDERef.current.value();
             if (currentValue !== reduxPrompt) {
                 easyMDERef.current.value(reduxPrompt);
+                if (editorRef.current) {
+                    editorRef.current.value = reduxPrompt;
+                }
                 setPrompt(reduxPrompt);
                 setHasUnsavedChanges(false);
             }
@@ -66,6 +70,10 @@ const InputConfigComponent = ({
             // If editor not initialized yet, just update the state
             setOldContent(reduxPrompt);
             setThreadId(bridge?.thread_id || generateRandomID());
+            initialPromptRef.current = reduxPrompt;
+            if (editorRef.current) {
+                editorRef.current.value = reduxPrompt;
+            }
         }
     }, [reduxPrompt, bridge?.thread_id]);
 
@@ -181,10 +189,48 @@ const InputConfigComponent = ({
         openModal(MODAL_TYPE?.DIFF_PROMPT);
     };
     useEffect(() => {
+        if (!easyMDERef.current) {
+            initialPromptRef.current = prompt;
+            if (editorRef.current) {
+                editorRef.current.value = prompt;
+            }
+        }
+    }, [prompt]);
+
+    useEffect(() => {
+        if (!easyMDERef.current) return;
+
+        if (promptSyncTimerRef.current) {
+            clearTimeout(promptSyncTimerRef.current);
+        }
+
+        promptSyncTimerRef.current = setTimeout(() => {
+            const editorInstance = easyMDERef.current;
+            if (!editorInstance) return;
+
+            const nextValue = typeof prompt === 'string' ? prompt : (reduxPrompt || '');
+            if (editorInstance.value() !== nextValue) {
+                editorInstance.value(nextValue);
+                editorInstance.codemirror.refresh();
+                if (editorRef.current) {
+                    editorRef.current.value = nextValue;
+                }
+            }
+        }, 120);
+
+        return () => {
+            if (promptSyncTimerRef.current) {
+                clearTimeout(promptSyncTimerRef.current);
+                promptSyncTimerRef.current = null;
+            }
+        };
+    }, [prompt, reduxPrompt]);
+
+    useEffect(() => {
         if (editorRef.current && !easyMDERef.current) {
             const easyMDE = new EasyMDE({
                 element: editorRef.current,
-                initialValue: initailPrompt || '',
+                initialValue: initialPromptRef.current || '',
                 spellChecker: false,
                 status: false,
                 toolbar: false, // Remove toolbar completely
@@ -198,6 +244,9 @@ const InputConfigComponent = ({
             });
             easyMDE.codemirror.on('change', () => {
                 const value = easyMDE.value();
+                if (editorRef.current) {
+                    editorRef.current.value = value;
+                }
                 // Debounce updates to allow editor to settle and avoid rapid state churn
                 if (changeUpdateTimerRef.current) {
                     clearTimeout(changeUpdateTimerRef.current);
@@ -235,12 +284,17 @@ const InputConfigComponent = ({
             if (changeUpdateTimerRef.current) {
                 clearTimeout(changeUpdateTimerRef.current);
             }
+            if (promptSyncTimerRef.current) {
+                clearTimeout(promptSyncTimerRef.current);
+                promptSyncTimerRef.current = null;
+            }
             if (easyMDERef.current) {
                 easyMDERef.current.toTextArea();
                 easyMDERef.current = null;
             }
         };
-    }, [initailPrompt]); // Only initialize once
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Only initialize once
 
     
 
