@@ -4,6 +4,8 @@ import { MODAL_TYPE } from '@/utils/enums';
 import { generateRandomID, openModal } from '@/utils/utility';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import EasyMDE from 'easymde';
+import 'easymde/dist/easymde.min.css';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import ToneDropdown from './toneDropdown';
 import ResponseStyleDropdown from './responseStyleDropdown';
@@ -12,6 +14,11 @@ import InfoTooltip from '@/components/InfoTooltip';
 import PromptHelper from '../../PromptHelper';
 import { setIsFocusReducer, setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
+
+
+const COLLAPSED_MIN_HEIGHT = 200;
+const COLLAPSED_MAX_HEIGHT = 384;
+const FULLSCREEN_TOP_OFFSET = 60;
 
 const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbedUser }) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
@@ -28,7 +35,11 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     const [keyName, setKeyName] = useState('');
     const suggestionListRef = useRef(null);
     const textareaRef = useRef(null);
+    const editorRef = useRef(null);
+    const easyMDERef = useRef(null);
+    const editorContainerRef = useRef(null);
     const [prompt, setPrompt] = useState(reduxPrompt);
+    const [editorHeight, setEditorHeight] = useState(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
@@ -63,7 +74,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            const textareaElement = promptTextAreaRef?.current?.querySelector('textarea');
+            const textareaElement = promptTextAreaRef?.current?.querySelector('textarea') || promptTextAreaRef?.current?.querySelector('.CodeMirror');
             if (textareaElement && isPromptHelperOpen) {
                 promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
             }
@@ -71,9 +82,21 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         return () => clearTimeout(timeoutId);
     }, [isPromptHelperOpen, prompt]);
 
+    // Separate effect to update EasyMDE when reduxPrompt changes
     useEffect(() => {
-        setPrompt(reduxPrompt);
-        setHasUnsavedChanges(false);
+        if (easyMDERef.current && easyMDERef.current.value() !== reduxPrompt) {
+            // Temporarily disable change event to avoid infinite loop
+            const currentValue = easyMDERef.current.value();
+            if (currentValue !== reduxPrompt) {
+                easyMDERef.current.value(reduxPrompt);
+                setPrompt(reduxPrompt);
+                setHasUnsavedChanges(false);
+            }
+        } else if (!easyMDERef.current) {
+            // If editor not initialized yet, just update the state
+            setPrompt(reduxPrompt);
+            setHasUnsavedChanges(false);
+        }
     }, [reduxPrompt]);
 
     useEffect(() => {
@@ -123,56 +146,19 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         }
     }, [dispatch, searchParams?.version, reduxPrompt]);
 
-    // Optimized caret position calculation with caching
+    // Optimized caret position calculation with caching for EasyMDE
     const getCaretCoordinatesAdjusted = useCallback(() => {
-        if (!textareaRef.current) return { top: 0, left: 0 };
+        if (!easyMDERef.current) return { top: 0, left: 0 };
 
-        const textarea = textareaRef.current;
-        const { selectionStart, scrollTop, scrollLeft, offsetTop, offsetLeft } = textarea;
-
-        // Create a temporary element only once
-        const div = document.createElement('div');
-        const tempContainer = document.body;
-        tempContainer.appendChild(div);
-
-        try {
-            // Copy the styles of the textarea to the temporary div
-            const styles = window.getComputedStyle(textarea);
-            // Only copy essential styles for performance
-            const essentialStyles = ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'wordSpacing', 'padding', 'border', 'boxSizing'];
-
-            essentialStyles.forEach(style => {
-                div.style[style] = styles[style];
-            });
-
-            // Set specific styles for accurate position calculation
-            div.style.position = 'absolute';
-            div.style.visibility = 'hidden';
-            div.style.whiteSpace = 'pre-wrap';
-            div.style.overflow = 'hidden';
-            div.style.top = '-9999px';
-            div.style.left = '-9999px';
-
-            // Copy text up to the caret position to the div
-            const text = textarea.value.substring(0, selectionStart);
-            div.textContent = text;
-
-            // Insert a special character to mark the caret position
-            const caretMarker = document.createElement('span');
-            caretMarker.textContent = '|';
-            div.appendChild(caretMarker);
-
-            // Get the position of the caret marker
-            const { offsetTop: markerTop, offsetLeft: markerLeft } = caretMarker;
-
-            return {
-                top: markerTop + offsetTop - scrollTop,
-                left: markerLeft + offsetLeft - scrollLeft,
-            };
-        } finally {
-            // Clean up by removing the temporary element
-            tempContainer.removeChild(div);
-        }
+        const cm = easyMDERef.current.codemirror;
+        const cursor = cm.getCursor();
+        const coords = cm.cursorCoords(cursor, 'local');
+        const editorRect = cm.getWrapperElement().getBoundingClientRect();
+        
+        return {
+            top: coords.top + 20,
+            left: coords.left
+        };
     }, []);
 
     // Debounced suggestion trigger to prevent excessive calculations
@@ -195,8 +181,8 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         }
     }, [getCaretCoordinatesAdjusted]);
 
-    const handlePromptChange = useCallback((e) => {
-        const value = e.target.value;
+    // This function is now handled by EasyMDE change event
+    const handlePromptChange = useCallback((value) => {
         setPrompt(value);
 
         if (value.trim() !== reduxPrompt.trim()) {
@@ -204,102 +190,140 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         } else {
             setHasUnsavedChanges(false);
         }
+    }, [reduxPrompt]);
 
-        const cursorPos = e.target.selectionStart;
-        const lastChar = value.slice(cursorPos - 1, cursorPos);
-        const lastTwoChars = value.slice(cursorPos - 2, cursorPos);
-
-        // Only trigger suggestions for relevant characters
-        if (lastChar === '{' || lastTwoChars === '{{') {
-            triggerSuggestions(true, cursorPos);
-        } else if (showSuggestions) {
-            // Close suggestions when user starts typing any character (except when still in variable pattern)
-            const isInVariablePattern = value.slice(0, cursorPos).match(/\{\{[^}]*$/);
-            if (!isInVariablePattern || (lastChar !== '{' && lastChar !== '}')) {
-            triggerSuggestions(false);
-            }
-        }
-    }, [reduxPrompt, showSuggestions, triggerSuggestions]);
-
+    // This function is now handled by EasyMDE keydown event
     const handleKeyDown = useCallback((e) => {
-        if (e.key === 'Tab' && isPromptHelperOpen) {
-            e.preventDefault();
-            return;
-        }
-
-        if (!showSuggestions || !suggestionListRef.current) return;
-
-        const suggestionItems = suggestionListRef.current.querySelectorAll('.list-item');
-        const totalItems = suggestionItems.length;
-        if (totalItems === 0) return;
-
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            e.preventDefault();
-            setActiveSuggestionIndex((prevIndex) => {
-                return e.key === 'ArrowDown'
-                    ? (prevIndex + 1) % totalItems
-                    : (prevIndex - 1 + totalItems) % totalItems;
-            });
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            suggestionItems[activeSuggestionIndex]?.click();
-        } else if (e.key === 'Escape') {
-            setShowSuggestions(false);
-        }
-    }, [activeSuggestionIndex, showSuggestions,isPromptHelperOpen]);
+        // This is now handled in the EasyMDE initialization
+    }, []);
 
     const handleSuggestionClick = useCallback((suggestion) => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
+        if (!easyMDERef.current) return;
 
-        const cursorPosition = textarea.selectionStart;
-        let newPrompt;
-        let newCursorPosition;
+        const cm = easyMDERef.current.codemirror;
+        const cursor = cm.getCursor();
+        const line = cm.getLine(cursor.line);
+        const cursorPosition = cursor.ch;
+        let newText;
+        let newCursorPos;
 
         if (suggestion === 'add_variable') {
-            const handleTabKey = (e) => {
-                if (e.key === 'Tab') {
-                    e.preventDefault();
-                    const start = textarea.value.lastIndexOf('{{', cursorPosition);
-                    const end = textarea.value.indexOf('}}', cursorPosition);
+            const handleTabKey = (cm, event) => {
+                if (event.key === 'Tab') {
+                    event.preventDefault();
+                    const currentValue = easyMDERef.current.value();
+                    const start = currentValue.lastIndexOf('{{', cursorPosition);
+                    const end = currentValue.indexOf('}}', cursorPosition);
 
                     if (start !== -1 && end !== -1) {
-                        const textBetweenBraces = textarea.value.slice(start + 2, end);
+                        const textBetweenBraces = currentValue.slice(start + 2, end);
                         setKeyName(textBetweenBraces);
                         openModal(MODAL_TYPE.CREATE_VARIABLE);
                     }
-                    textarea.removeEventListener('keydown', handleTabKey);
+                    cm.off('keydown', handleTabKey);
                 }
             };
 
-            textarea.addEventListener('keydown', handleTabKey);
-            const isDoubleBrace = prompt.slice(cursorPosition - 2, cursorPosition) === '{{';
-            const beforeCursor = isDoubleBrace ? prompt.slice(0, cursorPosition - 2) : prompt.slice(0, cursorPosition - 1);
-            const afterCursor = prompt.slice(cursorPosition);
-            newPrompt = `${beforeCursor}{{}}${afterCursor}`;
-            newCursorPosition = isDoubleBrace ? cursorPosition : cursorPosition + 1;
+            cm.on('keydown', handleTabKey);
+            const isDoubleBrace = line.slice(cursorPosition - 2, cursorPosition) === '{{';
+            const beforeCursor = isDoubleBrace ? line.slice(0, cursorPosition - 2) : line.slice(0, cursorPosition - 1);
+            const afterCursor = line.slice(cursorPosition);
+            newText = `${beforeCursor}{{}}${afterCursor}`;
+            newCursorPos = isDoubleBrace ? cursorPosition : cursorPosition + 1;
         } else {
-            const isDoubleBrace = prompt.slice(cursorPosition - 2, cursorPosition) === '{{';
-            const beforeCursor = isDoubleBrace ? prompt.slice(0, cursorPosition - 2) : prompt.slice(0, cursorPosition - 1);
-            const afterCursor = prompt.slice(cursorPosition);
-            newPrompt = `${beforeCursor}{{${suggestion}}}${afterCursor}`;
-            newCursorPosition = beforeCursor.length + suggestion.length + 4;
+            const isDoubleBrace = line.slice(cursorPosition - 2, cursorPosition) === '{{';
+            const beforeCursor = isDoubleBrace ? line.slice(0, cursorPosition - 2) : line.slice(0, cursorPosition - 1);
+            const afterCursor = line.slice(cursorPosition);
+            newText = `${beforeCursor}{{${suggestion}}}${afterCursor}`;
+            newCursorPos = beforeCursor.length + suggestion.length + 4;
         }
 
-        setPrompt(newPrompt);
+        // Replace the line content
+        cm.replaceRange(newText, { line: cursor.line, ch: 0 }, { line: cursor.line, ch: line.length });
+        
         setShowSuggestions(false);
         setActiveSuggestionIndex(0);
 
-        // Use requestAnimationFrame for smoother DOM updates
+        // Set cursor position
         requestAnimationFrame(() => {
-            textarea.focus();
-            textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+            cm.setCursor({ line: cursor.line, ch: newCursorPos });
+            cm.focus();
         });
-    }, [prompt]);
+    }, []);
 
     const handleMouseDownOnSuggestion = useCallback((e) => {
         e.preventDefault();
     }, []);
+
+    const updateEditorLayout = useCallback(() => {
+        if (typeof window === 'undefined') return;
+
+        const viewportHeight = window.innerHeight;
+        const fullscreenTargetHeight = Math.max(320, viewportHeight - FULLSCREEN_TOP_OFFSET);
+
+        let nextHeight;
+
+        if (isPromptHelperOpen) {
+            nextHeight = fullscreenTargetHeight;
+        } else {
+            const containerElement = editorContainerRef.current;
+            const containerRect = containerElement?.getBoundingClientRect();
+            const containerTop = containerRect?.top ?? 0;
+            const bottomOffset = 24;
+            const computedHeight = viewportHeight - containerTop - bottomOffset;
+            const maxHeight = COLLAPSED_MAX_HEIGHT;
+            const minHeight = COLLAPSED_MIN_HEIGHT;
+            nextHeight = Number.isFinite(computedHeight)
+                ? Math.min(Math.max(minHeight, computedHeight), maxHeight)
+                : maxHeight;
+        }
+
+        setEditorHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+
+        if (easyMDERef.current) {
+            const cmInstance = easyMDERef.current.codemirror;
+            const wrapperEl = cmInstance.getWrapperElement();
+            const scrollerEl = cmInstance.getScrollerElement();
+            const sizerEl = wrapperEl?.querySelector('.CodeMirror-sizer');
+            const appliedMaxHeight = isPromptHelperOpen ? fullscreenTargetHeight : COLLAPSED_MAX_HEIGHT;
+
+            cmInstance.setSize('100%', nextHeight);
+
+            [wrapperEl, scrollerEl, sizerEl].forEach((el) => {
+                if (!el) return;
+                el.style.height = `${nextHeight}px`;
+                el.style.maxHeight = `${appliedMaxHeight}px`;
+                el.style.minHeight = isPromptHelperOpen ? `${fullscreenTargetHeight}px` : '';
+            });
+
+            cmInstance.refresh();
+        }
+    }, [isPromptHelperOpen]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const handleResize = () => {
+            window.requestAnimationFrame(updateEditorLayout);
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [updateEditorLayout]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (easyMDERef.current) {
+                easyMDERef.current.codemirror.refresh();
+            }
+            updateEditorLayout();
+        }, 150);
+
+        return () => clearTimeout(timeoutId);
+    }, [isPromptHelperOpen, updateEditorLayout]);
 
     // Memoize suggestions to prevent unnecessary re-renders
     const suggestionItems = useMemo(() => {
@@ -360,7 +384,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             </div>
         );
     };
-
     const togglePromptHelper = useCallback(() => {
         const newState = !isPromptHelperOpen;
         setIsPromptHelperOpen(newState);
@@ -391,6 +414,106 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         openModal(MODAL_TYPE?.DIFF_PROMPT);
     }
 
+    // Initialize EasyMDE
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        if (editorRef.current && !easyMDERef.current) {
+            const easyMDE = new EasyMDE({
+                element: editorRef.current,
+                initialValue: prompt || '',
+                spellChecker: false,
+                status: false,
+                toolbar: false, // Remove toolbar completely
+                placeholder: 'Enter your prompt here...',
+                autofocus: false,
+                tabSize: 4,
+                indentWithTabs: false,
+                lineWrapping: true,
+                styleSelectedText: false,
+                forceSync: true
+            });
+
+            // EasyMDE is now ready for use
+
+            easyMDE.codemirror.on('change', () => {
+                const value = easyMDE.value();
+                setPrompt(value);
+                
+                // Use a callback to get the latest reduxPrompt value
+                setHasUnsavedChanges(prev => {
+                    const currentReduxPrompt = reduxPrompt;
+                    return value.trim() !== currentReduxPrompt.trim();
+                });
+
+                // Handle variable suggestions
+                const cursor = easyMDE.codemirror.getCursor();
+                const line = easyMDE.codemirror.getLine(cursor.line);
+                const cursorPos = cursor.ch;
+                const lastChar = line.slice(cursorPos - 1, cursorPos);
+                const lastTwoChars = line.slice(cursorPos - 2, cursorPos);
+
+                if (lastChar === '{' || lastTwoChars === '{{') {
+                    // Use setTimeout to avoid blocking typing
+                    setTimeout(() => triggerSuggestions(true, cursorPos), 0);
+                } else {
+                    // Check if we should close suggestions
+                    const isInVariablePattern = line.slice(0, cursorPos).match(/\{\{[^}]*$/);
+                    if (!isInVariablePattern || (lastChar !== '{' && lastChar !== '}')) {
+                        setTimeout(() => triggerSuggestions(false), 0);
+                    }
+                }
+            });
+
+            easyMDE.codemirror.on('focus', () => {
+                if (!isPromptHelperOpen) {
+                    setIsPromptHelperOpen(true);
+                    if (typeof window.closeTechDoc === 'function') {
+                        window.closeTechDoc();
+                    }
+                }
+            });
+
+            easyMDE.codemirror.on('keydown', (cm, event) => {
+                // Only handle suggestion-related keys when suggestions are visible
+                if (showSuggestions && suggestionListRef.current) {
+                    const suggestionItems = suggestionListRef.current.querySelectorAll('.list-item');
+                    const totalItems = suggestionItems.length;
+                    
+                    if (totalItems > 0) {
+                        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                            event.preventDefault();
+                            setActiveSuggestionIndex((prevIndex) => {
+                                return event.key === 'ArrowDown'
+                                    ? (prevIndex + 1) % totalItems
+                                    : (prevIndex - 1 + totalItems) % totalItems;
+                            });
+                        } else if (event.key === 'Enter') {
+                            event.preventDefault();
+                            suggestionItems[activeSuggestionIndex]?.click();
+                        } else if (event.key === 'Escape') {
+                            setShowSuggestions(false);
+                        }
+                    }
+                }
+            });
+
+            easyMDERef.current = easyMDE;
+            textareaRef.current = easyMDE.codemirror.getInputField();
+            if (typeof window !== 'undefined') {
+                window.requestAnimationFrame(() => {
+                    updateEditorLayout();
+                });
+            }
+        }
+
+        return () => {
+            if (easyMDERef.current) {
+                easyMDERef.current.toTextArea();
+                easyMDERef.current = null;
+            }
+        };
+    }, []); // Only initialize once
+
     // Cleanup debounce timer on unmount
     useEffect(() => {
         return () => {
@@ -403,7 +526,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     if (service === "google" && serviceType === "chat") return null;
 
     return (
-        <div ref={promptTextAreaRef} onKeyDown={handleKeyDown}>
+        <div ref={promptTextAreaRef}>
             <div className="flex justify-between items-center mb-2">
                 <div className="label flex items-center gap-2">
                     <span className="label-text capitalize font-medium">Prompt</span>
@@ -446,28 +569,29 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                             >
                                 Close
                             </button>
-                        </>}
-
+                        </>
+                    }
                 </div>
             </div>
             <div className="form-control h-full">
-                <textarea
-                    ref={textareaRef}
-                    className={`textarea border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none transition-none !duration-0 ${isPromptHelperOpen
-                            ? "h-[calc(100vh-60px)] border-primary shadow-md"
-                            : "min-h-96"
+                <div
+                    ref={editorContainerRef}
+                    className={`relative w-full EasyMDEContainer transition-all duration-300 ${
+                        isPromptHelperOpen
+                            ? "fixed left-0 right-0 bottom-0 z-40 bg-base-100"
+                            : "relative max-h-[384px]"
                     }`}
-                      value={prompt}
-                    onChange={handlePromptChange}
-                    onFocus={() => {
-                        if (!isPromptHelperOpen) {
-                                    setIsPromptHelperOpen(true);
-                            if (typeof window.closeTechDoc === 'function') {
-                                window.closeTechDoc();
-                            }
-                        }
+                    style={{
+                        height: editorHeight ? `${editorHeight}px` : undefined,
+                        maxHeight: !isPromptHelperOpen ? `${COLLAPSED_MAX_HEIGHT}px` : undefined,
                     }}
-                />
+                >
+                    <textarea
+                        ref={editorRef}
+                        className="hidden"
+                        defaultValue={prompt}
+                    />
+                </div>
                 {showSuggestions && renderSuggestions()}
                 <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none">
                     <input type="checkbox" className="min-h-[0.75rem]" />

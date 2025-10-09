@@ -207,3 +207,70 @@ html {
 .animate-slideIn {
   animation: slideIn 0.3s ease-out forwards;
 }
+
+/* EasyMDE Theming */
+.EasyMDEContainer {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.EasyMDEContainer .CodeMirror,
+.EasyMDEContainer .CodeMirror-scroll {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+html[data-theme='dark'] .EasyMDEContainer .cm-s-easymde.CodeMirror,
+html[data-theme='dark'] .EasyMDEContainer .cm-s-easymde .CodeMirror-scroll,
+html[data-theme='dark'] .EasyMDEContainer .cm-s-easymde .CodeMirror-lines,
+html[data-theme='dark'] .EasyMDEContainer .editor-preview,
+html[data-theme='dark'] .EasyMDEContainer .editor-preview-side {
+  background-color: var(--b1);
+  color: var(--bc);
+}
+
+html[data-theme='dark'] .EasyMDEContainer .CodeMirror-gutters {
+  background-color: var(--b2);
+  border-right-color: var(--b3);
+  border-right-color: color-mix(in srgb, var(--b3) 40%, transparent);
+  color: var(--bc);
+  color: color-mix(in srgb, var(--bc) 60%, transparent);
+}
+
+html[data-theme='dark'] .EasyMDEContainer .CodeMirror-cursor {
+  border-left: 1px solid var(--bc);
+}
+
+html[data-theme='dark'] .EasyMDEContainer .CodeMirror-selected,
+html[data-theme='dark'] .EasyMDEContainer .CodeMirror-line::selection,
+html[data-theme='dark'] .EasyMDEContainer .CodeMirror-line > span::selection,
+html[data-theme='dark'] .EasyMDEContainer .CodeMirror-line > span > span::selection {
+  background: rgba(111, 178, 255, 0.35);
+  background: color-mix(in srgb, var(--p) 45%, transparent);
+}
+
+html[data-theme='dark'] .EasyMDEContainer .CodeMirror-line::-moz-selection,
+html[data-theme='dark'] .EasyMDEContainer .CodeMirror-line > span::-moz-selection,
+html[data-theme='dark'] .EasyMDEContainer .CodeMirror-line > span > span::-moz-selection {
+  background: rgba(111, 178, 255, 0.35);
+  background: color-mix(in srgb, var(--p) 45%, transparent);
+}
+
+html[data-theme='dark'] .EasyMDEContainer .CodeMirror pre.CodeMirror-placeholder {
+  color: rgba(255, 255, 255, 0.45);
+  color: color-mix(in srgb, var(--bc) 45%, transparent);
+}
+
+html[data-theme='dark'] .EasyMDEContainer .cm-s-easymde .CodeMirror-line,
+html[data-theme='dark'] .EasyMDEContainer .cm-s-easymde .cm-tag,
+html[data-theme='dark'] .EasyMDEContainer .cm-s-easymde .cm-quote,
+html[data-theme='dark'] .EasyMDEContainer .cm-s-easymde .cm-header {
+  color: inherit;
+}
+
+
+.EasyMDEContainer .CodeMirror {
+  border-radius: 4px;
+  border-color: color-mix(in srgb, var(--b3) 10%, transparent);
+}
