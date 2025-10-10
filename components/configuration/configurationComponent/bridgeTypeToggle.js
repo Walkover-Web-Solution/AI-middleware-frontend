@@ -70,7 +70,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
                             </InfoTooltip>
                         </div>
                         
-                        <div className="flex items-center gap-2 min-w-0">
+                        {/* <div className="flex items-center gap-2 min-w-0">
                             <InfoTooltip tooltipContent="ChatBot enables you to create conversational AI agents that can interact with users in natural language.">
                                 <label className="flex items-center cursor-pointer min-w-0">
                                     <input
@@ -87,7 +87,7 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
                                     </div>
                                 </label>
                             </InfoTooltip>
-                        </div>
+                        </div> */}
                         
                         <div className="flex items-center gap-2 min-w-0">
                             <InfoTooltip tooltipContent="Batch api automates and executes multiple tasks simultaneously for greater efficiency.">

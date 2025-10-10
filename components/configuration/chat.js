@@ -9,7 +9,7 @@ import { PdfIcon } from "@/icons/pdfIcon";
 import { truncate } from "../historyPageComponents/assistFile";
 import { AlertIcon, CloseCircleIcon } from "@/components/Icons";
 import { FINISH_REASON_DESCRIPTIONS } from '@/utils/enums';
-import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X } from "lucide-react";
+import { ExternalLink, Menu, PlayIcon, PlusIcon, Zap, CheckCircle, Target, ToggleLeft, ToggleRight, Edit2, Save, X, Bot } from "lucide-react";
 import TestCaseSidebar from "./TestCaseSidebar";
 import AddTestCaseModal from "../modals/AddTestCaseModal";
 import { createConversationForTestCase } from "@/utils/utility";
@@ -52,6 +52,14 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
     setEditingMessage(null);
     setEditContent('');
   }
+
+  useEffect(()=>{
+    if(window.sendDataToChatbot){
+      window.sendDataToChatbot({
+        'parentId': 'parentChatbot'
+      })
+    }
+  },[])
 
   const handleEditMessage = (messageId, currentContent) => {
     setEditingMessage(messageId);
@@ -267,6 +275,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
         </button>
         <span className="label-text">Experiments</span>
         <div className="flex items-center gap-2">
+          
           {messages?.length > 0 && (
             <div className="flex items-center gap-2 justify-center">
               <select
@@ -283,7 +292,21 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
           )}
           {/* Test Cases Toggle Button */}
         </div>
+        <button
+            className="btn btn-sm btn-primary"
+            onClick={() => {
+              if (typeof window !== 'undefined' && typeof window.openChatbot === 'function') {
+                window.openChatbot();
+              }
+            }}
+            title="Open Chatbot"
+          >
+            <div className="tooltip tooltip-left" data-tip="Open Chatbot">
+              <Bot />
+            </div>
+          </button>
       </div>
+      
 
       <div className="flex mt-4 h-[83vh] overflow-hidden relative">
         {/* Overlay Test Cases Sidebar */}
@@ -313,7 +336,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
               </div>
             </div>
           )}
-
+          
           <div className="sm:p-2 justify-between flex flex-col h-full min-h-0 border border-base-content/30 rounded-md w-full z-low">
             <div ref={messagesContainerRef} className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2">
               {messages.map((message, index) => {

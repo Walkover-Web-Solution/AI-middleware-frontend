@@ -428,7 +428,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
               {bridgeType === 'batch' && versionService === 'openai' && !isPromptHelperOpen ? (
                 <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
               )  : bridgeType === 'chatbot' && !isPromptHelperOpen ? (
-                <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
+               null
               ) : (
                !isPromptHelperOpen && <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
               )}
@@ -438,6 +438,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
           </div>
         </div>
       </div>
+      <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
     </div>
   );
 };
