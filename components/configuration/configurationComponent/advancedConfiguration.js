@@ -179,7 +179,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
           className="cursor-pointer mr-2"
         >
           <div className="cursor-pointer label-text inline-block ml-1">
-            <span className="cursor-pointer label-text inline-block mr-1">LLM Advanced Configuration</span>
+            <span className="cursor-pointer label-text inline-block mr-1">Advanced Configuration</span>
             <span className="text-base-content/50 text-xs">
               (Prompt guard, Fallback model, Add multiple API keys...)
             </span>
