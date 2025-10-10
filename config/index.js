@@ -1252,6 +1252,15 @@ export const privateAgentLoginApi = async (user_id) => {
   }
 } 
 
+export const publishBulkVersionApi = async (version_ids) => {
+  try {
+    const response = await axios.post(`${PYTHON_URL}/bridge/versions/bulk_publish`, { version_ids });
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+}
 
 export const improvePrompt =  async (variables) =>{
   try {

@@ -158,7 +158,12 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     const handleAgentClicked = (item) => {
         const bridge = bridgeData?.find((bridge) => bridge?._id === item?.bridge_id)
         if (bridge) {
-            router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
+            const isCmdOrCtrlClicked = (window.event && (window.event.ctrlKey || window.event.metaKey));
+            if (isCmdOrCtrlClicked) {
+                window.open(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`, "_blank");
+            } else {
+                router.push(`/org/${params?.org_id}/agents/configure/${bridge?._id}?version=${bridge?.published_version_id}`)
+            }
         }
     }
 

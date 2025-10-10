@@ -203,7 +203,7 @@ const PublishVersionDataComparisonView = ({ oldData, newData, params }) => {
   }, [flattenedDifferences]);
 
   return (
-    <div className="bg-base-100 max-h-[70vh] overflow-auto">
+    <div className="bg-base-100 overflow-auto">
       {!hasDifferences ? (
         <div className="alert alert-success">
           <Check />
