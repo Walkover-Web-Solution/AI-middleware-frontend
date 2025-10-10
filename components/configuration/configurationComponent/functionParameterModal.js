@@ -1058,7 +1058,7 @@ function FunctionParameterModal({
 
   return (
     <Modal MODAL_ID={Model_Name}>
-      <div className="modal-box max-w-5xl overflow-x-hidden text-sm h-[600px] flex flex-col">
+      <div className="modal-box max-w-6xl overflow-x-hidden text-sm h-[600px] flex flex-col">
         {/* Modal Header */}
         <div className="flex items-start flex-col mb-4 pb-3 border-b gap-2 border-base-300">
           <div className="flex justify-between w-full items-center">
