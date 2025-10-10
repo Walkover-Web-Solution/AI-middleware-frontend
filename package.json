@@ -16,7 +16,6 @@
     "@xyflow/react": "^12.8.2",
     "axios": "^1.6.7",
     "debounce": "^2.0.0",
-    "easymde": "^2.20.0",
     "interface-chatbot": "^1.0.14",
     "lodash": "^4.17.21",
     "lodash.clonedeep": "^4.5.0",

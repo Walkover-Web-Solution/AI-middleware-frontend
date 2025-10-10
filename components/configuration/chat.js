@@ -18,7 +18,7 @@ import { useDispatch } from "react-redux";
 
 
 function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) {
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
   const [errorMessage, setErrorMessage] = useState("");
@@ -39,7 +39,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
   const [editContent, setEditContent] = useState('');
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = messagesContainerRef.current;
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
   }, [messages]);
 
   const handleResetChat = () => {
@@ -311,13 +314,12 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
             </div>
           )}
 
-          <div className="sm:p-2 justify-between flex flex-col h-full border border-base-content/30 rounded-md w-full z-low">
-            <div className="flex flex-col w-full h-full overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2">
+          <div className="sm:p-2 justify-between flex flex-col h-full min-h-0 border border-base-content/30 rounded-md w-full z-low">
+            <div ref={messagesContainerRef} className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-1 mb-4 pr-2">
               {messages.map((message, index) => {
                 return (
                   <div
                     key={index}
-                    ref={index === messages.length - 1 ? messagesEndRef : null}
                     className={`chat show-on-hover ${message.sender === "user"
                       ? "chat-end flex flex-col mt-2"
                       : "chat-start"
