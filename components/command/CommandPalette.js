@@ -141,10 +141,6 @@ const CommandPalette = ({isEmbedUser}) => {
         e.preventDefault();
         openPalette();
       }
-      if (e.shiftKey && e.key === "?" && !isEmbedUser) {
-        e.preventDefault();
-        openPalette();
-      }
       if (e.key === "Escape") {
         setOpen(false);
       }
@@ -342,7 +338,7 @@ const CommandPalette = ({isEmbedUser}) => {
         </div>
         <div className="flex items-center justify-between border-t border-base-300 p-2 text-xs opacity-70">
           <div>Navigate with ↑ ↓ · Enter to open · Esc to close</div>
-          <div>Cmd/Ctrl + K · Shift + ?</div>
+          <div>Cmd/Ctrl + K</div>
         </div>
       </div>
     </div>
