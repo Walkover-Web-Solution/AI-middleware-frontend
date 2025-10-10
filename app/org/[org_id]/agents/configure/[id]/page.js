@@ -33,7 +33,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   // Ref for the main container to calculate percentage-based width
   const containerRef = useRef(null);
 
-  const { bridgeType, versionService, bridgeName, allbridges, isFocus, reduxPrompt, bridge } = useCustomSelector((state) => {
+  const { bridgeType, versionService, bridgeName, allbridges, isFocus, reduxPrompt, bridge,initialFall_back,fall_back } = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[resolvedParams?.id];
     const allbridges = state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || [];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version];
@@ -45,11 +45,27 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
       allbridges,
       isFocus,
       reduxPrompt: versionData?.configuration?.prompt || "",
-      bridge: versionData || {}
+      bridge: versionData || {},
+      initialFall_back: state?.bridgeReducer?.org[resolvedParams?.org_id].orgs.find((org)=>org?._id===resolvedParams?.id)?.configuration?.fall_back||{},
+      fall_back: versionData?.fall_back,
+
     };
   });
-
-
+  const handleFallback_ModelChange = useCallback((group, model,is_enable) => {
+      dispatch(updateBridgeVersionAction({
+        versionId: resolvedSearchParams?.version,
+        dataToSend: {
+           fall_back:{
+              model:model,
+              service:group,
+              is_enable:is_enable
+           }
+        }
+      }));
+  }, []);
+  useEffect(()=>{
+    handleFallback_ModelChange(fall_back?.service||initialFall_back?.service,fall_back?.model||initialFall_back?.model,fall_back?.is_enable||initialFall_back?.is_enable)
+  },[])
   // PromptHelper state management
   const [isMobileView, setIsMobileView] = useState(typeof window !== 'undefined' ? window.innerWidth < 710 : false);
   const [isPromptHelperOpen, setIsPromptHelperOpen] = useState(false);
