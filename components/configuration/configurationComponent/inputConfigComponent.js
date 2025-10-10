@@ -39,28 +39,13 @@ const InputConfigComponent = ({
     }));
     
     const [oldContent, setOldContent] = useState(reduxPrompt);
-    const [keyName, setKeyName] = useState('');
-    const suggestionListRef = useRef(null);
     const textareaRef = useRef(null);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
 
-    const [suggestionCoords, setSuggestionCoords] = useState({ top: 0, left: 0 });
 
     // Debounce timer ref
     const debounceTimerRef = useRef(null);
 
     const dispatch = useDispatch();
-
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            const textareaElement = promptTextAreaRef?.current?.querySelector('textarea');
-            // if (textareaElement && isPromptHelperOpen) {
-            //     promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
-            // }
-        }, 100);
-        return () => clearTimeout(timeoutId);
-    }, [isPromptHelperOpen, prompt]);
 
     useEffect(() => {
         setOldContent(reduxPrompt);
@@ -149,25 +134,7 @@ const InputConfigComponent = ({
         }
     }, []);
 
-    // Debounced suggestion trigger to prevent excessive calculations
-    const triggerSuggestions = useCallback((shouldShow, cursorPos = 0) => {
-        // Clear existing timer
-        if (debounceTimerRef.current) {
-            clearTimeout(debounceTimerRef.current);
-        }
-
-        if (shouldShow) {
-            // Small delay to batch multiple character inputs
-            debounceTimerRef.current = setTimeout(() => {
-                const coords = getCaretCoordinatesAdjusted();
-                setSuggestionCoords(coords);
-                setShowSuggestions(true);
-                setActiveSuggestionIndex(0);
-            }, 50); // 50ms debounce
-        } else {
-            setShowSuggestions(false);
-        }
-    }, [getCaretCoordinatesAdjusted]);
+    
 
     const handlePromptChange = useCallback((e) => {
         const value = e.target.value;
@@ -179,21 +146,8 @@ const InputConfigComponent = ({
             setHasUnsavedChanges(false);
         }
 
-        const cursorPos = e.target.selectionStart;
-        const lastChar = value.slice(cursorPos - 1, cursorPos);
-        const lastTwoChars = value.slice(cursorPos - 2, cursorPos);
-
-        // Only trigger suggestions for relevant characters
-        if (lastChar === '{' || lastTwoChars === '{{') {
-            triggerSuggestions(true, cursorPos);
-        } else if (showSuggestions) {
-            // Close suggestions when user starts typing any character (except when still in variable pattern)
-            const isInVariablePattern = value.slice(0, cursorPos).match(/\{\{[^}]*$/);
-            if (!isInVariablePattern || (lastChar !== '{' && lastChar !== '}')) {
-            triggerSuggestions(false);
-            }
-        }
-    }, [reduxPrompt, showSuggestions, triggerSuggestions]);
+        
+    }, [reduxPrompt]);
 
     const handleKeyDown = useCallback((e) => {
         if (e.key === 'Tab' && isPromptHelperOpen) {
@@ -208,26 +162,8 @@ const InputConfigComponent = ({
             return;
         }
 
-        if (!showSuggestions || !suggestionListRef.current) return;
-
-        const suggestionItems = suggestionListRef.current.querySelectorAll('.list-item');
-        const totalItems = suggestionItems.length;
-        if (totalItems === 0) return;
-
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            e.preventDefault();
-            setActiveSuggestionIndex((prevIndex) => {
-                return e.key === 'ArrowDown'
-                    ? (prevIndex + 1) % totalItems
-                    : (prevIndex - 1 + totalItems) % totalItems;
-            });
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            suggestionItems[activeSuggestionIndex]?.click();
-        } else if (e.key === 'Escape') {
-            setShowSuggestions(false);
-        }
-    }, [activeSuggestionIndex, showSuggestions,isPromptHelperOpen]);
+       
+    }, [isPromptHelperOpen]);
 
     const handleSuggestionClick = useCallback((suggestion) => {
         const textarea = textareaRef.current;
@@ -278,69 +214,6 @@ const InputConfigComponent = ({
         });
     }, [prompt]);
 
-    const handleMouseDownOnSuggestion = useCallback((e) => {
-        e.preventDefault();
-    }, []);
-
-    // Memoize suggestions to prevent unnecessary re-renders
-    const suggestionItems = useMemo(() => {
-        return variablesKeyValue?.map((variable, index) => ({
-            key: variable.key,
-            index,
-            isActive: index === activeSuggestionIndex
-        })) || [];
-    }, [variablesKeyValue, activeSuggestionIndex]);
-
-    const renderSuggestions = () => {
-        if (!showSuggestions) return null;
-
-        return (
-            <div
-                className="dropdown dropdown-open z-high"
-                style={{
-                    position: 'absolute',
-                    top: suggestionCoords.top + 4,
-                    left: suggestionCoords.left + 8,
-                    willChange: 'transform', // Optimize for animations
-                }}
-            >
-                <ul
-                    ref={suggestionListRef}
-                    tabIndex={0}
-                    role="listbox"
-                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-high w-60 p-2 shadow-xl border border-base-300 overflow-scroll overflow-y-auto"
-                >
-                    <div className="flex flex-col w-full">
-                        <label className="label label-text-alt">Available variables</label>
-                        {suggestionItems.map((item) => (
-                            <li
-                                key={item.key}
-                                tabIndex={-1}
-                                className={`list-item ${item.isActive ? 'bg-base-200' : ''}`}
-                                onMouseDown={handleMouseDownOnSuggestion}
-                                onClick={() => handleSuggestionClick(item.key)}
-                            >
-                                <a className='gap-3'>
-                                    <span className="inline-block w-2 h-2 bg-primary rounded-full"></span>
-                                    <span className="text-base-content">{item.key}</span>
-                                </a>
-                            </li>
-                        ))}
-                        <li
-                            tabIndex={-1}
-                            className={`list-item ${variablesKeyValue?.length === activeSuggestionIndex ? 'bg-base-200' : ''}`}
-                            onMouseDown={handleMouseDownOnSuggestion}
-                            onClick={() => handleSuggestionClick('add_variable')}
-                        >
-                            <a className='flex flex-col items-start'>
-                                <span>+ Add New variable</span>
-                            </a>
-                        </li>
-                    </div>
-                </ul>
-            </div>
-        );
-    };
 
     const handleSavePrompt = useCallback(() => {
         savePrompt(prompt);
@@ -363,7 +236,6 @@ const InputConfigComponent = ({
     }, []);
 
     if (service === "google" && serviceType === "chat") return null;
-      console.log(isPromptHelperOpen,"hello")
     return (
         <div ref={promptTextAreaRef} onKeyDown={handleKeyDown}>
             <div className="flex justify-between items-center mb-2">
@@ -427,7 +299,6 @@ const InputConfigComponent = ({
                         }
                     }}
                 />
-                {showSuggestions && renderSuggestions()}
                 <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none">
                     <input type="checkbox" className="min-h-[0.75rem]" />
                     <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
