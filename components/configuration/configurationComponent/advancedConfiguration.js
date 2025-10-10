@@ -166,7 +166,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
 
   const computedModelsList = serviceModels?.[fallbackService] || {};
   return (
-    <div className="z-very-low text-base-content w-full cursor-pointer mt-2" tabIndex={0}>
+    <div className="z-very-low text-base-content w-full cursor-pointer" tabIndex={0}>
 
       <div
         className={`info p-2 ${isAccordionOpen ? 'border border-base-content/20 rounded-x-lg rounded-t-lg' : 'border border-base-content/20 rounded-lg'} flex items-center justify-between font-medium w-full !cursor-pointer`}
@@ -179,7 +179,10 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
           className="cursor-pointer mr-2"
         >
           <div className="cursor-pointer label-text inline-block ml-1">
-            Advanced Configuration <span className="text-base-content/50 text-xs">(Prompt guard, Response format,Tool call limit ,Add multiple API keys )</span>
+            <span className="font-semibold">Advanced Configuration </span>
+            <span className="text-base-content/50 text-xs">
+              (Prompt guard, Fallback model, Add multiple API keys...)
+            </span>
           </div>
         </InfoTooltip>
 
@@ -190,8 +193,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
 
       
 
-      <div className={`w-full gap-4 flex flex-col px-3  ${isAccordionOpen ? 'py-2 border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg' : 'border border-base-content/20 rounded-lg'} transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 p-0'}`}>
-      <div className=' mt-4'> 
+      <div className={`w-full gap-4 flex flex-col transition-all duration-300 ease-in-out ${isAccordionOpen ? 'px-3 py-2 border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg opacity-100' : 'max-h-0 opacity-0 overflow-hidden border border-base-content/20 rounded-lg p-0'}`}>      <div className=' mt-4'> 
       <GuardrailSelector params={params} searchParams={searchParams} />
       </div>
       <div className="form-control w-full  border border-base-content/20 rounded-md ">
