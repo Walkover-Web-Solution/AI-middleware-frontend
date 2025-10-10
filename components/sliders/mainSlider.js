@@ -19,7 +19,8 @@ import {
   User,
   Workflow,
   FileSliders,
-  AlignJustify
+  AlignJustify,
+  FileText
 } from 'lucide-react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -562,6 +563,17 @@ function MainSlider({ isEmbedUser }) {
                   >
                     <AddIcon size={14} className="shrink-0" />
                     <span className="truncate text-xs">Add new Model</span>
+                  </button>
+
+                  <button
+                    onClick={()=>{
+                      router.push(`/org/${orgId}/prebuilt-prompts`);
+                      if (isMobile) setIsMobileVisible(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-2 rounded hover:bg-base-300 transition-colors text-sm"
+                  >
+                    <FileText size={14} className="shrink-0" />
+                    <span className="truncate text-xs">Prebuilt Prompts</span>
                   </button>
 
                   <ThemeToggle/>
