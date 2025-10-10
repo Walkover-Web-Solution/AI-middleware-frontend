@@ -94,7 +94,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
         const bridgeItem = bridgeData?.find((bridge) => { if (bridge?._id === item?.bridge_id) { return bridge } });
         setSelectedBridge({ name: name, ...item });
         const agent_variables = bridgeItem?.connected_agent_details?.agent_variables || {};
-        const description = bridgeItem?.connected_agent_details?.description || "";
+        const description = bridgeItem?.connected_agent_details?.description || item?.description || "";
         const { fields, required_params } = agent_variables;
         setCurrentVariable({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params });
         setAgentTools({ name: item?.bridge_id, description: description, fields: fields, required_params: required_params, thread_id: item?.thread_id || false, version_id: item?.version_id || '' });
@@ -102,7 +102,6 @@ const ConnectedAgentList = ({ params, searchParams }) => {
     }, [bridgeData, openModal, setSelectedBridge, setCurrentVariable, setAgentTools]);
 
     const handleRemoveAgent = (item,name) => {
-        console.log(name,item,"hello")
         dispatch(
             updateBridgeVersionAction({
                 bridgeId: params?.id,
@@ -126,22 +125,25 @@ const ConnectedAgentList = ({ params, searchParams }) => {
 
     const handleSaveAgentVariable = () => {
         try {
+            const dataToSend = {
+                agents: {
+                    connected_agents: {
+                        [selectedBridge?.name]: {
+                            "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
+                            "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false,
+                        }
+                    },
+                    agent_status: "1"
+                }
+            }
+            if(agentTools?.version_id){
+                dataToSend.agents.connected_agents[selectedBridge?.name].version_id = agentTools?.version_id
+            }
             // on Save the bridge and thread id in version only
             dispatch(updateBridgeVersionAction({
                 bridgeId: params?.id,
                 versionId: searchParams?.version,
-                dataToSend: {
-                    agents: {
-                        connected_agents: {
-                            [selectedBridge?.name]: {
-                                "bridge_id": selectedBridge?._id || selectedBridge?.bridge_id,
-                                "thread_id": agentTools?.thread_id ? agentTools?.thread_id : false,
-                                "version_id": agentTools?.version_id ? agentTools?.version_id : ""
-                            }
-                        },
-                        agent_status: "1"
-                    }
-                }
+                dataToSend
             }))
             dispatch(updateBridgeAction({
                 bridgeId: selectedBridge?._id || selectedBridge?.bridge_id,
@@ -205,13 +207,11 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                 <span className="flex-1 min-w-0  text-[9px]  md:text-[12px] lg:text-[13px] font-bold truncate">
                                     <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
                                         <span>{ bridge?.name}</span>
-                                        <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${(!bridge?.connected_agent_details?.description && item.description) ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                                    {!bridge?.connected_agent_details?.description ? "Description Required" : "Active"}
-                                    
+                                        <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${(!bridge?.connected_agent_details?.description && !item.description) ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
+                                    {!(bridge?.connected_agent_details?.description && !item.description) ? "Description Required" : "Active"}
                                 </span>
                                     </div>
                                 </span>
-                                {(bridge?.connected_agent_details?.description?.trim() === "" && !item.description)&& <CircleAlertIcon color='red' size={16} />}
                             </div>
                             <div className="w-full flex justify-between flex-row">
                                 <p className="mt-1 text-[11px] sm:text-xs text-base-content/70 line-clamp-1">
