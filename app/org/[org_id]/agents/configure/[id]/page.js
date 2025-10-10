@@ -6,8 +6,8 @@ import Chatbot from "@/components/configuration/chatbot";
 import LoadingSpinner from "@/components/loadingSpinner";
 import Protected from "@/components/protected";
 import { useCustomSelector } from "@/customHooks/customSelector";
-import { getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
-import { useEffect, useRef, useState, use } from "react";
+import { getAllBridgesAction, getSingleBridgesAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
+import { useEffect, useRef, useState, use, useCallback } from "react";
 import WebhookForm from "@/components/BatchApi";
 import { useDispatch } from "react-redux";
 import { updateTitle } from "@/utils/utility";
@@ -31,7 +31,7 @@ const Page = ({params, searchParams }) => {
   // Ref for the main container to calculate percentage-based width
   const containerRef = useRef(null); 
 
-  const { bridgeType, versionService, bridgeName, allbridges, isFocus} = useCustomSelector((state) => {
+  const { bridgeType, versionService, bridgeName, allbridges, isFocus, initialFall_back,fall_back } = useCustomSelector((state) => {
     const bridgeData = state?.bridgeReducer?.allBridgesMap?.[resolvedParams?.id];
     const allbridges = state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || [];
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version];
@@ -41,9 +41,27 @@ const Page = ({params, searchParams }) => {
       versionService: versionData?.service,
       bridgeName: bridgeData?.name,
       allbridges,
-      isFocus
+      isFocus,
+      initialFall_back: state?.bridgeReducer?.org[resolvedParams?.org_id].orgs.find((org)=>org?._id===resolvedParams?.id)?.configuration?.fall_back||{},
+      fall_back: versionData?.fall_back,
+
     };
   });
+  const handleFallback_ModelChange = useCallback((group, model,is_enable) => {
+      dispatch(updateBridgeVersionAction({
+        versionId: resolvedSearchParams?.version,
+        dataToSend: {
+           fall_back:{
+              model:model,
+              service:group,
+              is_enable:is_enable
+           }
+        }
+      }));
+  }, []);
+  useEffect(()=>{
+    handleFallback_ModelChange(fall_back?.service||initialFall_back?.service,fall_back?.model||initialFall_back?.model,fall_back?.is_enable||initialFall_back?.is_enable)
+  },[])
   
   // Enhanced responsive detection
   useEffect(() => {
