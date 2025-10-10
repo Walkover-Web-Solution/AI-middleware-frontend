@@ -291,7 +291,7 @@ const InputConfigComponent = ({
                     
                     onFocus={() => {
                     
-                        if (!isPromptHelperOpen) {
+                        if (!isPromptHelperOpen && window.innerWidth>710) {
                                     setIsPromptHelperOpen(true);
                             if (typeof window.closeTechDoc === 'function') {
                                 window.closeTechDoc();
