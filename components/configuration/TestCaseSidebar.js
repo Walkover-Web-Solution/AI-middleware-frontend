@@ -135,8 +135,8 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                 onClick={() => handleTestCaseClick(testCase)}
                 title="Click to load this test case conversation into chat"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start space-x-2">
                     {runningTests.has(testCase._id) ?
                       <Clock className="w-4 h-4 text-yellow-500 animate-spin" /> :
                       getStatusIcon(testCase._id)}

@@ -178,6 +178,20 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
         content: newMessage,
       };
       setMessages(prevMessages => [...prevMessages, newChat]);
+
+      // Insert a temporary assistant "typing" message
+      const tempAssistantId = conversation.length + 2;
+      const loadingAssistant = {
+        id: tempAssistantId,
+        sender: "assistant",
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        content: "",
+        isLoading: true,
+      };
+      setMessages(prev => [...prev, loadingAssistant]);
       responseData = await dryRun({
         localDataToSend: {
 
@@ -204,7 +218,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
 
       setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
       const newChatAssist = {
-        id: conversation.length + 2,
+        id: tempAssistantId,
         sender: "assistant",
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
@@ -218,10 +232,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
         finish_reason: assistConversation?.finish_reason
       };
 
-      setMessages(prevMessages => [...prevMessages, newChatAssist]);
+      // Replace the temporary loading message with the actual response
+      setMessages(prevMessages => prevMessages.map(m => m.id === tempAssistantId ? newChatAssist : m));
     } catch (error) {
       console.log(error);
       setErrorMessage("Something went wrong. Please try again.");
+      // Remove the temporary loading assistant message on error
+      setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
     } finally {
       setLoading(false);
       setUploadedImages([]);
@@ -290,9 +307,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
               <button className="btn btn-sm" onClick={handleResetChat}> <PlusIcon size={14} />Create Test Case</button>
             </div>
           )}
-          {/* Test Cases Toggle Button */}
-        </div>
-        <button
+          <button
             className="btn btn-sm btn-primary"
             onClick={() => {
               if (typeof window !== 'undefined' && typeof window.openChatbot === 'function') {
@@ -302,9 +317,12 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
             title="Open Chatbot"
           >
             <div className="tooltip tooltip-left" data-tip="Open Chatbot">
-              <Bot />
+              <Bot size={14}/>
             </div>
           </button>
+          {/* Test Cases Toggle Button */}
+        </div>
+        
       </div>
       
 
@@ -496,7 +514,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                     {(message.sender === "user" ||
                       message.sender === "assistant" ||
                       message.sender === "expected") &&
-                      message?.content && (
+                      (message?.content || message?.isLoading) && (
                         <div className={`flex gap-2 show-on-hover justify-center items-center relative ${editingMessage === message.id && message.sender === "assistant" ? 'w-[500px]' : ''}`}>
                           {message?.sender === "user" && message?.content && (
                             <button
@@ -609,7 +627,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                                 /* Display Mode */
                                 <div className="relative group">
                                   {/* Edit Button for Assistant Messages */}
-                                  {message.sender === "assistant" && (
+                                  {message.sender === "assistant" && !message.isLoading && (
                                     <button
                                       onClick={() => handleEditMessage(message.id, message.content)}
                                       className="absolute -top-2 -right-5 opacity-0 group-hover:opacity-100 transition-opacity btn btn-xs btn-circle btn-ghost"
@@ -619,7 +637,12 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                                     </button>
                                   )}
 
-                                  {message.sender === "expected" ? (
+                                  {/* Loading state for assistant message */}
+                                  {message.isLoading ? (
+                                    <div className="py-1">
+                                      <span className="loading loading-dots loading-sm"></span>
+                                    </div>
+                                  ) : message.sender === "expected" ? (
                                     /* Expected Response - Plain text display with label */
                                     <div className="whitespace-pre-wrap">{message.content}</div>
                                   ) : (

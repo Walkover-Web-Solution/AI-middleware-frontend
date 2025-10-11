@@ -114,6 +114,19 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     files: uploadedFiles,
                 };
                 setMessages(prevMessages => [...prevMessages, newChat]);
+                // Insert temporary assistant typing message
+                const tempAssistantId = conversation.length + 2;
+                const loadingAssistant = {
+                    id: tempAssistantId,
+                    sender: "assistant",
+                    time: new Date().toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    }),
+                    content: "",
+                    isLoading: true,
+                };
+                setMessages(prev => [...prev, loadingAssistant]);
                 responseData = await dryRun({
                     localDataToSend: {
                         version_id: versionId,
@@ -129,12 +142,34 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     },
                     bridge_id: params?.id,
                 });
+                // Handle unsuccessful response: rollback loading placeholder and user message
+                if (!responseData || !responseData.success) {
+                    inputRef.current.value = data.content;
+                    // remove loading placeholder if present
+                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
+                    setMessages(prevMessages => prevMessages.slice(0, -1));
+                    setLoading(false);
+                    return;
+                }
             } else if (modelType === "embedding") {
                 data = {
                     role: "user",
                     content: newMessage
                 };
                 setMessages(prevMessages => [...prevMessages, newChat]);
+                // Insert temporary assistant typing message for embedding as well
+                const tempAssistantId = conversation.length + 2;
+                const loadingAssistant = {
+                    id: tempAssistantId,
+                    sender: "assistant",
+                    time: new Date().toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    }),
+                    content: "",
+                    isLoading: true,
+                };
+                setMessages(prev => [...prev, loadingAssistant]);
                 responseData = await dryRun({
                     localDataToSend: {
                         version_id: versionId,
@@ -147,10 +182,30 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     },
                     bridge_id: params?.id
                 });
+                if (!responseData || !responseData.success) {
+                    inputRef.current.value = data.content;
+                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
+                    setMessages(prevMessages => prevMessages.slice(0, -1));
+                    setLoading(false);
+                    return;
+                }
             } else if (modelType !== "image") {
                 if(testCaseId){
                     testcase_data.testcase_id = testCaseId;
                 }
+                // Insert temporary assistant typing message for completion path as well
+                const tempAssistantId = conversation.length + 2;
+                const loadingAssistant = {
+                    id: tempAssistantId,
+                    sender: "assistant",
+                    time: new Date().toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    }),
+                    content: "",
+                    isLoading: true,
+                };
+                setMessages(prev => [...prev, loadingAssistant]);
                 responseData = await dryRun({
                     localDataToSend: {
                         ...localDataToSend,
@@ -163,6 +218,12 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     },
                     bridge_id: params?.id
                 });
+                if (!responseData || !responseData.success) {
+                    // remove loading placeholder if present
+                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
+                    setLoading(false);
+                    return;
+                }
             }
             // if(Object.entries(responseData?.response?.data?.tools_data)?.length>0)
             // {
@@ -177,11 +238,8 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             //     }
             //     setMessages(prevMessages => [...prevMessages, toolData]);
             // }
+            // success is ensured in branches above for non-completion and embedding
             if (!responseData || !responseData.success) {
-                if (modelType !== 'completion' && modelType !== 'embedding') {
-                    inputRef.current.value = data.content;
-                    setMessages(prevMessages => prevMessages.slice(0, -1));
-                }
                 setLoading(false);
                 return;
             }
@@ -205,8 +263,10 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             } else if (modelType === 'embedding') {
                 setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
             }
+            // Replace the temporary loading message with the actual response (for all non-image paths)
+            const tempAssistantIdFinal = conversation.length + 2;
             const newChatAssist = {
-                id: conversation.length + 2,
+                id: tempAssistantIdFinal,
                 sender: "assistant",
                 time: new Date().toLocaleTimeString([], {
                     hour: "2-digit",
@@ -219,31 +279,21 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 firstAttemptError: response?.firstAttemptError,
                 modelName : assistConversation?.model
             };
-
-            // Show alert for non-completed finish_reason
-            // const finishReason = assistConversation?.finish_reason;
-            // if (finishReason && finishReason !== "completed" && finishReason !== "no_reason") {
-            //     const description = FINISH_REASON_DESCRIPTIONS[finishReason] || 
-            //                        FINISH_REASON_DESCRIPTIONS["other"];
-            //     toast.warning(`${finishReason}: ${description}`, {
-            //         position: "bottom-right",
-            //         autoClose: 5000,
-            //         hideProgressBar: false,
-            //         closeOnClick: true,
+            // Replace loading placeholder with actual assistant message for all paths we inserted placeholder
+            setMessages(prev => prev.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m));
             //         pauseOnHover: true,
             //         draggable: true,
             //         progress: undefined,
             //         icon: () => <AlertIcon size={20} className="text-warning" />
             //     });
-            // }
-
-            setMessages(prevMessages => [...prevMessages, newChatAssist]);
+             
         } catch (error) {
             console.log(error);
             setErrorMessage("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
-            setUploadedImages([]);
+            // Remove the redundant append of newChatAssist since we already replace the loading placeholder with it.
+            // setMessages(prevMessages => [...prevMessages, newChatAssist]);
             setUploadedFiles([]);
         }
     };
