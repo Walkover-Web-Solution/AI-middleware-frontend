@@ -75,6 +75,11 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
     return apikeydata.filter(apiKey => apiKey?.service === service);
   };
 
+  // Check if a service has available API keys
+  const hasApiKeysForService = (service) => {
+    return filterApiKeysByService(service).length > 0;
+  };
+
   const handleSelectionChange = useCallback((service, apiKeyId) => {
     setSelectedApiKeys(prev => {
       const updated = { ...prev, [service]: apiKeyId };
@@ -241,19 +246,32 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
                   tabIndex={0}
                   className="dropdown-content z-high menu bg-base-100 rounded-box w-full p-1 shadow border border-base-300 max-h-80 overflow-y-auto"
                 >
-                  {Array.isArray(SERVICES) && SERVICES.map((svc) => (
-                    <li key={svc.value}>
-                      <a className={`flex items-center gap-2 ${fallbackService === svc.value ? 'active' : ''}`}
-                         onClick={(e) => {
-                          handleFallbackServiceChange(svc.value)
-                          const details = e.currentTarget.closest('details');
-                          if (details) details.removeAttribute('open');
-                         }}>
-                        {getIconOfService(svc.value, 16, 16)}
-                        <span className="capitalize">{svc.displayName || svc.value}</span>
-                      </a>
-                    </li>
-                  ))}
+                  {Array.isArray(SERVICES) && SERVICES.map((svc) => {
+                    const hasApiKeys = hasApiKeysForService(svc.value);
+                    return (
+                      <li key={svc.value}>
+                        {hasApiKeys ? (
+                          <a className={`flex items-center gap-2 ${fallbackService === svc.value ? 'active' : ''}`}
+                             onClick={(e) => {
+                              handleFallbackServiceChange(svc.value)
+                              const details = e.currentTarget.closest('details');
+                              if (details) details.removeAttribute('open');
+                             }}>
+                            {getIconOfService(svc.value, 16, 16)}
+                            <span className="capitalize">{svc.displayName || svc.value}</span>
+                          </a>
+                        ) : (
+                          <div className="tooltip tooltip-right" data-tip={`No API key available for ${svc.displayName || svc.value}. Please add an API key first.`}>
+                            <a className="flex items-center gap-2 opacity-50 cursor-not-allowed pointer-events-none">
+                              {getIconOfService(svc.value, 16, 16)}
+                              <span className="capitalize">{svc.displayName || svc.value}</span>
+                              <span className="text-xs text-error ml-auto">No API Key Available</span>
+                            </a>
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </details>
               
