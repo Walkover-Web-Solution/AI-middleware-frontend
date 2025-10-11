@@ -56,8 +56,11 @@ const Navbar = ({ isEmbedUser }) => {
       { id: 'configure', label: 'Configure', icon: FileSliders, shortLabel: 'Config' },
       { id: 'history', label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
     ];
+    if (!isEmbedUser) {
+      baseTabs.splice(1, 0, { id: 'testcase', label: 'Test Cases', icon: TestTube, shortLabel: 'Tests' });
+    }
     return baseTabs;
-  }, []);
+  }, [isEmbedUser]);
 
   const agentName = useMemo(() => bridgeData?.name || 'Customer Support AI', [bridgeData?.name]);
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Acme Corp', [organizations, orgId]);
@@ -65,7 +68,7 @@ const Navbar = ({ isEmbedUser }) => {
   const shouldShowNavbar = useCallback(() => {
     const depth = pathParts.length;
     if (depth === 3) return false;
-    return ['configure', 'history'].some(seg => pathname.includes(seg));
+    return ['configure', 'history', 'testcase'].some(seg => pathname.includes(seg));
   }, [pathParts.length, pathname]);
 
   // Close ellipsis menu when clicking outside
