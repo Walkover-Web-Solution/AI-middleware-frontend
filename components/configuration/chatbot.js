@@ -85,20 +85,11 @@ const Chatbot = ({ params, searchParams }) => {
           "threadId": bridgeName?.replaceAll(" ", "_"),
           "parentId": 'parentChatbot',
           "fullScreen": true,
-          "hideCloseButton": true,
+          "hideCloseButton": false,
           "hideIcon": true,
           "version_id": searchParams?.version,
           "variables": variables || {}
         });
-
-        setTimeout(() => {
-          if (bridgeType === 'chatbot' && !sessionStorage.getItem('orchestralUser')) {
-            if (window.openChatbot()) {
-              setIsLoading(false);
-            }
-          }
-        }, 500);
-
         clearInterval(intervalId);
       }
     }, 300);
@@ -110,14 +101,7 @@ const Chatbot = ({ params, searchParams }) => {
 
   return (
     <>
-      {isLoading ? (
-        <div
-          id="chatbot-loader"
-          className="flex flex-col gap-4 justify-center items-center h-full w-full bg-base-100 text-base-content"
-        >
-          <p className="text-lg font-semibold animate-pulse">Loading chatbot...</p>
-        </div>
-      ) : null}
+      
     </>
   );
 };
