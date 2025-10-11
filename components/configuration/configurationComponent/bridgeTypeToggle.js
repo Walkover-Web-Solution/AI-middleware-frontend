@@ -33,6 +33,15 @@ const BridgeTypeToggle = ({ params, searchParams, isEmbedUser }) => {
         }));
     };
     
+   useEffect(()=>{
+    if(bridgeType === 'chatbot'){
+        dispatch(updateBridgeAction({
+            bridgeId: params.id,
+            dataToSend: { bridgeType: 'api' }
+        }));
+    }
+   },[bridgeType]) 
+   
    useEffect(() => {
     if (!service || !bridgeType) return; 
     if (service !== 'openai' && bridgeType === 'batch') {

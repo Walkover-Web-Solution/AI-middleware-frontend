@@ -200,8 +200,8 @@ function Page() {
                                 <label className="block text-sm font-medium text-gray-700">
                                     Agent Type
                                 </label>
-                                <div className="flex gap-4">
-                                    {['api', 'chatbot'].map((type) => (
+                                {/* <div className="flex gap-4">
+                                    {['api'].map((type) => (
                                         <label
                                             key={type}
                                             className="flex items-center space-x-2 cursor-pointer"
@@ -219,7 +219,7 @@ function Page() {
                                             </span>
                                         </label>
                                     ))}
-                                </div>
+                                </div> */}
                             </div>
 
                             {/* Name Fields */}
