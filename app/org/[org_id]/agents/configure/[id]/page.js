@@ -410,11 +410,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
             {!sessionStorage.getItem('orchestralUser') ? <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
               {bridgeType === 'batch' && versionService === 'openai' && !isPromptHelperOpen ? (
                 <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
-              )  : bridgeType === 'chatbot' && !isPromptHelperOpen ? (
-               null
-              ) : (
-               !isPromptHelperOpen && <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
-              )}
+              )  : <Chat params={resolvedParams} searchParams={resolvedSearchParams} />}
             </div> : <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
               <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
             </div>}

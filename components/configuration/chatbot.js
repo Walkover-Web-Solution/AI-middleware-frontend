@@ -78,7 +78,7 @@ const Chatbot = ({ params, searchParams }) => {
     }
 
     const intervalId = setInterval(() => {
-      if (window?.SendDataToChatbot && window.openChatbot) {
+      if (window?.SendDataToChatbot) {
         // Send all configuration data
         window.SendDataToChatbot({
           "bridgeName": bridgeSlugName,
