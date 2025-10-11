@@ -31,7 +31,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
     return {
       bridge: bridgeMap,
       apikeydata: apikeys[params?.org_id] || [],
-      bridgeApikey_object_id: bridgeMap?.apikey_object_id,
+      bridgeApikey_object_id: bridgeMap?.apikey_object_id||{},
       SERVICES: state?.serviceReducer?.services,
       isFirstConfiguration: user?.meta?.onboarding?.AdvancedConfiguration,
       serviceModels: state?.modelReducer?.serviceModels || {},
