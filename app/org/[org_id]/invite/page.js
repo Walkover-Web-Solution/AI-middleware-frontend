@@ -244,12 +244,12 @@ function InvitePage({ params }) {
                       </div>
                     </div>
                     <div>
-                    {userEmailData !==member?.email && <button
+                    <button
                       onClick={() => {setMemberToDelete(member); openModal(MODAL_TYPE.DELETE_MODAL)}}
                       className="btn-sm text-error"
                     >
                       <TrashIcon size={20}/>
-                    </button>}
+                    </button>
                     </div>
                   </div>
                 ))

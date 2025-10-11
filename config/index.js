@@ -339,6 +339,7 @@ export const removeUsersFromOrg = async (user_id) =>{
       data:{user_id}});
     return response.data;
   }catch(error){
+    toast.error(error.response.data.message);
     console.error(error);
     return error;
   }
