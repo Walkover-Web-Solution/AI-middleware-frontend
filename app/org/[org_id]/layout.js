@@ -53,8 +53,8 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     doctstar_embed_token: state?.bridgeReducer?.org?.[resolvedParams.org_id]?.doctstar_embed_token || "",
   }));
   useEffect(() => {
+    dispatch(getTutorialDataAction()); 
     if (pathName.endsWith("agents") && !isEmbedUser) {
-      dispatch(getTutorialDataAction()); 
       dispatch(getGuardrailsTemplatesAction());
       dispatch(userDetails());
       dispatch(getDescriptionsAction());
