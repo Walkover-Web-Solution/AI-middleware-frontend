@@ -42,6 +42,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
 
     };
   });
+  console.log(bridge,"bridge")
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -72,11 +73,12 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
   };
 
   const filterApiKeysByService = (service) => {
-    return apikeydata.filter(apiKey => apiKey?.service === service);
+          return Object.keys(bridgeApikey_object_id).filter(key => key === service);
   };
 
   // Check if a service has available API keys
   const hasApiKeysForService = (service) => {
+    if(service==='ai_ml') return true;
     return filterApiKeysByService(service).length > 0;
   };
 
