@@ -53,7 +53,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                     </div>
                 </div>
 
-                {/* Chatbot Card
+                {/* Chatbot Card */}
                 {!isModal && <div
                     className={`card bg-base-100 hover:shadow-xl transition-all duration-300 cursor-pointer border border-base-200 rounded-xl border-base-content/30 min-w-[280px] md:min-w-0 ${selectedBridgeTypeCard === "chatbot"
                         ? "ring-2 ring-green-500"
@@ -82,7 +82,7 @@ const BridgeTypeCards = ({ selectedBridgeTypeCard, handleBridgeTypeSelection, va
                             customizable and easy to deploy.
                         </p>
                     </div>
-                </div>} */}
+                </div>} 
 
                 {/* Batch API Card */}
                 {!isModal && <div

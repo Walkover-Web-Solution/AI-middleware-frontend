@@ -15,9 +15,11 @@ import AddTestCaseModal from "../modals/AddTestCaseModal";
 import { createConversationForTestCase } from "@/utils/utility";
 import { runTestCaseAction } from "@/store/action/testCasesAction";
 import { useDispatch } from "react-redux";
+import { useCustomSelector } from "@/customHooks/customSelector";
+import Protected from "../protected";
 
 
-function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) {
+function Chat({ params, userMessage, isOrchestralModel = false, searchParams, isEmbedUser }) {
   const messagesContainerRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
@@ -37,6 +39,8 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
   const [isLoadingTestCase, setIsLoadingTestCase] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editContent, setEditContent] = useState('');
+
+  const bridgeType = useCustomSelector((state) => state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType);
 
   useEffect(() => {
     const el = messagesContainerRef.current;
@@ -307,7 +311,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
               <button className="btn btn-sm" onClick={handleResetChat}> <PlusIcon size={14} />Create Test Case</button>
             </div>
           )}
-          {!isOrchestralModel && <button
+          {!isOrchestralModel && !isEmbedUser && bridgeType === 'chatbot' && <button
             className="btn btn-sm btn-primary"
             onClick={() => {
               if (typeof window !== 'undefined' && typeof window.openChatbot === 'function') {
@@ -750,4 +754,4 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
   );
 }
 
-export default Chat;
+export default Protected(Chat);
