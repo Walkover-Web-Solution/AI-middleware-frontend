@@ -266,12 +266,12 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
                             <span className="capitalize">{svc.displayName || svc.value}</span>
                           </a>
                         ) : (
-                          <div className="tooltip tooltip-right" data-tip={`No API key available for ${svc.displayName || svc.value}. Please add an API key first.`}>
+                          <div className="w-full flex justify-between" >
                             <a className="flex items-center gap-2 opacity-50 cursor-not-allowed pointer-events-none">
                               {getIconOfService(svc.value, 16, 16)}
                               <span className="capitalize">{svc.displayName || svc.value}</span>
-                              <span className="text-xs text-error ml-auto">No API Key Available</span>
                             </a>
+                            <span className="text-xs text-error ml-auto">No API Key Available</span>
                           </div>
                         )}
                       </li>
