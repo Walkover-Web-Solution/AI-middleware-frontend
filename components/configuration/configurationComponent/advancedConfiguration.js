@@ -38,7 +38,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
       currentService: service,
       currentModel: versionData?.configuration?.model,
       fallbackModel: versionData?.fall_back,
-      DefaultModel: state?.serviceReducer?.default_model||"",
+      DefaultModel: state?.serviceReducer?.default_model||[],
 
     };
   });
