@@ -76,6 +76,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
     if (textAreaPurposeRef?.current) {
       textAreaPurposeRef.current.value = '';
     }
+    closeModal(MODAL_TYPE.CREATE_BRIDGE_MODAL);
   }, []);
 
   // Effects

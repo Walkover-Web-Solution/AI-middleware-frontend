@@ -26,20 +26,14 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
   const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState();
   const [filterKnowledgeBase, setFilterKnowledgeBase] = useState(knowledgeBaseData);
   const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
-  
-  useEffect(() => {
-    dispatch(getAllKnowBaseDataAction(resolvedParams?.org_id));
-    setFilterKnowledgeBase(knowledgeBaseData);
-  }, []);
-
-
+ 
   const tableData = filterKnowledgeBase.map(item => ({
     ...item,
     actualName: item?.name,
     name: <div className="flex gap-2">
       <div className="flex items-center gap-2">
-        {GetFileTypeIcon(item?.type, 24, 24)}
-      </div>
+        {GetFileTypeIcon(item?.source?.data?.type||item.source?.type, 14, 14)}
+        </div>
       <div className="tooltip" data-tip={item.name}>
         {truncate(item.name, 30)}
       </div>
@@ -93,9 +87,9 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
 
   return (
     <div className="w-full">
-      <div className="px-4 pt-4">
+      <div className="px-2 pt-4">
         <MainLayout>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between w-full gap-2">
             <PageHeader
               title="Knowledge Base"
               description={descriptions?.['Knowledge Base'] || "A knowledge base is a collection of useful info like docs and FAQs. You can add it via files, URLs, or websites. Agents use this data to generate dynamic, context-aware responses without hardcoding."}

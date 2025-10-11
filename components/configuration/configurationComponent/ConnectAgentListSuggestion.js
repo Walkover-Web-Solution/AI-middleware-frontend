@@ -4,21 +4,21 @@ import React, { useMemo, useState } from 'react';
 import { InfoIcon } from 'lucide-react';
 import InfoTooltip from '@/components/InfoTooltip';
 
-function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () => { }, connect_agents = [], shouldToolsShow, modelName, bridges }) {
+function ConnectedAgentListSuggestion({ params, handleSelectAgents = () => { }, connect_agents = [], bridges, bridgeData }) {
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleInputChange = (e) => {
         setSearchQuery(e?.target?.value || "");
     };
 
-    const handleItemClick = (bridge) => {
-        handleSelectAgents(bridge);
+    const handleItemClick = (bridge, bridgeData) => {
+        handleSelectAgents(bridge, bridgeData);
     };
 
     const renderBridgeSuggestions = useMemo(() => (
         Object.values(bridges)
             .filter(bridge => {
-                const isActive = bridge?.status === 1 || bridge?.bridge_status === 0;
+                const isActive = bridge?.status === 1 && (bridge?.bridge_status === 1 || bridge?.bridge_status === undefined);
                 const matchesSearch = bridge?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase());
                 const isNotConnected = connect_agents && Object.keys(connect_agents).some(agentName => agentName === bridge?.name);
                 const notSameBridge = bridge?._id !== params?.id
@@ -32,7 +32,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
             })
             .map((bridge) => {
                 return (
-                    <li key={bridge?._id} onClick={() => bridge?.published_version_id ? handleItemClick(bridge) : null}>
+                    <li key={bridge?._id} onClick={() => bridge?.published_version_id ? handleItemClick(bridge, bridgeData) : null}>
                         <div className={`flex justify-between items-center w-full ${!bridge?.published_version_id ? 'opacity-50' : ''}`}>
                             <p className="overflow-hidden text-ellipsis whitespace-pre-wrap" title={bridge?.name?.length > 20 ? bridge?.name : ""}>
                                 {bridge?.name?.length > 20 ? `${bridge?.name.slice(0, 20)}...` : bridge?.name || 'Untitled'}
@@ -43,8 +43,8 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
                                         unpublished
                                     </span>
                                 ) : (
-                                    <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(bridge?.bridge_status === 1 ? "paused" : bridge?.status === 0 ? "archived" : "active")}`}>
-                                        {bridge?.bridge_status ? (bridge?.bridge_status === 1 && "paused") : (bridge?.status === 0 ? "archived" : "active")}
+                                    <span className={`rounded-full capitalize bg-base-200 px-3 py-1 text-[10px] sm:text-xs font-semibold text-black ${getStatusClass(bridge?.bridge_status === 0 ? "paused" : bridge?.status === 0 ? "archived" : "active")}`}>
+                                        {bridge?.bridge_status ? (bridge?.bridge_status === 0 && "paused") : (bridge?.status === 0 ? "archived" : "active")}
                                     </span>
                                 )}
                             </div>
@@ -52,7 +52,7 @@ function ConnectedAgentListSuggestion({ params, name, handleSelectAgents = () =>
                     </li>
                 )
             })
-    ), [bridges, searchQuery, connect_agents]);
+    ), [bridges, searchQuery, connect_agents, bridgeData]);
 
     return (
         <div className="dropdown dropdown-left mt-8">

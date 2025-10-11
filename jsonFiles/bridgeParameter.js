@@ -51,7 +51,8 @@ export const KEYS_TO_COMPARE = [
     "user_reference",
     "doc_ids",
     "guardrails",
-    'gpt_memory_context'
+    'gpt_memory_context',
+    'fall_back'
   ]
 
 export const DIFFERNCE_DATA_DISPLAY_NAME = (key) => {
@@ -71,6 +72,7 @@ export const DIFFERNCE_DATA_DISPLAY_NAME = (key) => {
         case 'user_reference': return 'Rich Text context';
         case 'is_rich_text': return 'Rich Text';
         case 'actions': return 'Actions';
+        case 'fall_back': return 'Fallback Model';
         default: return key;
       }
     };

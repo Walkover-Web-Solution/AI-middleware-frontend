@@ -1,12 +1,5 @@
 
-import {
-  Upload, Save, TestTube, Play, ChevronRight, Loader2, Plus, X, Search, Bot, PlusIcon, Settings, Zap, MessageSquare, Globe,
-  File,
-  FileSlidersIcon,
-  CircleArrowOutUpRight,
-  ChevronUp,
-  ChevronDown
-} from 'lucide-react';
+import { Save, TestTube, Bot, PlusIcon, Zap, MessageSquare, Globe, FileSlidersIcon, CircleArrowOutUpRight, ChevronUp, ChevronDown, ClipboardX, X, ArrowLeft } from 'lucide-react';
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import AgentDescriptionModal from "./modals/AgentDescriptionModal";
 import { closeModal, getFromCookies, openModal, transformAgentVariableToToolCallFormat } from '@/utils/utility';
@@ -16,6 +9,7 @@ import Link from 'next/link';
 import GenericTable from './table/table';
 import CopyButton from './copyButton/copyButton';
 import CreateNewOrchestralFlowModal from './modals/CreateNewOrchestralFlowModal';
+import { useRouter } from 'next/navigation';
 /* Global stack to make only the topmost handle ESC/overlay */
 const SlideStack = {
   stack: [],
@@ -87,7 +81,7 @@ function SlideOver({
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e) => {
-      if (e.key === 'Escape' && SlideStack.top() === instanceId) {
+      if (e.key === 'Escape') {
         onClose && onClose();
       }
     };
@@ -146,9 +140,9 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
       node => node.type === 'agentNode' && node.data?.selectedAgent
     );
     if (nodes.length === 0) throw new Error('No agent nodes found in the flow');
-    if(nodes.length ==1){
+    if (nodes.length == 1) {
       return {
-        agents:{},
+        agents: {},
         master_agent: {},
         status: metadata.status || 'draft',
         flow_name: metadata.name || 'Untitled Flow',
@@ -219,9 +213,7 @@ export function serializeAgentFlow(nodes, edges, metadata = {}) {
       master_agent:
         masterNode?.id ||
         masterNode?.data?.selectedAgent?.id ||
-        masterNode?.data?.selectedAgent?.bridge_id ||
-        masterNode?.data?.selectedAgent?.name ||
-        Object.keys(agents)[0],
+        masterNode?.data?.selectedAgent?.bridge_id || "",
       status: metadata.status || 'draft',
       flow_name: metadata.name || 'Untitled Flow',
       flow_description: metadata.description || '',
@@ -432,14 +424,14 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
     setIsCreating(true);
     window.GtwyEmbed.sendDataToGtwy({
       parent_id: 'gtwyParentId',
-      [creationType === 'name' ? 'agent_name' : 'agent_purpose']: inputValue
     })
     setOpenAgentConfigSidebar(true);
     setInputValue('');
     onClose();
     setTimeout(() => {
-      window.openGtwy();
+      window.openGtwy({[creationType === 'name' ? 'agent_name' : 'agent_purpose']: inputValue});
     }, 3000);
+    setIsCreating(false);
   };
 
   const handleTypeChange = (type) => {
@@ -493,10 +485,10 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
 
   const handleEventListener = useCallback((event) => {
     const { type, status, data } = event.data
-    if (type === 'gtwy' && status === "published") {      
+    if (type === 'gtwy' && status === "published") {
       let bridge = agents.find((a) => a._id === data.agent_id);
       let node = nodes.find((n) => n?.id === data.agent_id);
-      if(node){
+      if (node) {
         return
       }
       if (bridge) {
@@ -527,7 +519,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
       setOpenAgentConfigSidebar(false);
       onClose();
       setSelectAgent({ nameToCreate: "", org_id: params?.org_id });
-      if(window.closeGtwy) window.closeGtwy();
+      if (window.closeGtwy) window.closeGtwy();
     }
   }, []);
 
@@ -589,7 +581,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
             >
               <div className="avatar placeholder mr-2">
                 <div className="bg-primary-content text-primary rounded-full w-6 h-6 flex items-center justify-center">
-                  <span className="text-sm"><PlusIcon size={16} /></span>
+                  <span className="text-sm"><PlusIcon size={18} /></span>
                 </div>
               </div>
               Create New Agent
@@ -648,8 +640,8 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                     onClick={handleCreateAgent}
                     disabled={!inputValue.trim() || isCreating}
                     className={`btn btn-sm w-full ${!inputValue.trim() || isCreating
-                        ? 'btn-disabled'
-                        : 'btn-primary'
+                      ? 'btn-disabled'
+                      : 'btn-primary'
                       }`}
                   >
                     {isCreating ? (
@@ -766,7 +758,7 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
                               onClick={(e) => { e.stopPropagation(); handleOpenAgentConfigSidebar(agent) }}
                               className="btn btn-circle btn-primary btn-outline btn-sm opacity-0 group-hover:opacity-100 transition-all duration-200"
                             >
-                              <CircleArrowOutUpRight size={16} />
+                              <CircleArrowOutUpRight size={18} />
                             </button>
                           </div>
                         </div>
@@ -806,9 +798,11 @@ export function FlowControlPanel({
   params,
   isVariableModified,
   openIntegrationGuide,
+  isEmbedUser,
 }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [userMessage, setUserMessage] = useState('');
+  const router = useRouter()
   const [saveData, setSaveData] = useState({
     name: name || '',
     description: description || '',
@@ -831,8 +825,6 @@ export function FlowControlPanel({
   };
 
   const handleDiscard = () => {
-    const ok = confirm('Discard all unsaved changes?');
-    if (!ok) return;
     if (typeof onDiscard === 'function') {
       onDiscard();
       return;
@@ -864,16 +856,20 @@ export function FlowControlPanel({
 
   return (
     <div className="relative z-[9990]">
+      {/* Back button */}
+      {isEmbedUser && <button className="btn btn-outline absolute top-4 left-4 cursor-pointer tooltip tooltip-right btn-sm" data-tip="Back to flows list" onClick={() => router.push(`/org/${params?.org_id}/orchestratal_model`)}>
+        <ArrowLeft size={16}/>
+      </button>}
       {/* Top-right Controls */}
       <div className="absolute top-4 right-4 flex items-center gap-2">
         {/* Discard button: show only when createdFlow && isModified */}
 
-        {createdFlow && <button
+        {createdFlow && !isEmbedUser && <button
           className="btn btn-outline"
           onClick={openIntegrationGuide}
           title="Integration Guide"
         >
-          <FileSlidersIcon /> Integration Guide
+          <FileSlidersIcon size={18}/> Integration Guide
         </button>}
 
         {createdFlow && (isModified || isVariableModified) && (
@@ -882,23 +878,20 @@ export function FlowControlPanel({
             onClick={handleDiscard}
             title="Discard unsaved changes"
           >
-            Discard
+          <ClipboardX size={18}/> Discard
           </button>
         )}
 
         {/* Publish/Update button */}
         <button
-          className="btn btn-primary bg-success shadow-lg text-base-content"
+          className="btn bg-green-200 hover:bg-green-300 shadow-lg text-base-content"
           disabled={!isModified && !isVariableModified}
           title="Publish Flow"
           onClick={() => openModal(MODAL_TYPE?.CREATE_ORCHESTRAL_FLOW_MODAL)}
         >
-          <span className="text-white">
-            <Save className="mr-2 h-4 w-4" />
-          </span>
-          <span className="text-white">
-            Publish Flow
-          </span>
+          <div className="text-black flex items-center gap-2">
+            <Save size={18}/> <span>Publish Flow</span>
+          </div>
         </button>
       </div>
 
@@ -977,7 +970,7 @@ export function AgentConfigSidebar({ isOpen, onClose, agent, instanceId }) {
   }, [agent])
   useEffect(() => {
     return () => {
-      if(window.closeGtwy) window.closeGtwy();
+      if (window.closeGtwy) window.closeGtwy();
     }
   }, [isOpen])
   return (
@@ -1017,9 +1010,9 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
     `curl --location '${process.env.NEXT_PUBLIC_PYTHON_SERVER_WITH_PROXY_URL}/api/v2/model/chat/completion' \\\n` +
     `--header 'pauthkey: YOUR_GENERATED_PAUTHKEY' \\\n` +
     `--header 'Content-Type: application/json' \\\n` +
-    `--data '{\\n` +
-    `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",\\n` +
-    `    "user": "YOUR_USER_QUESTION"\\n` +
+    `--data '{` +
+    `    "orchestrator_id": "${p?.orchestralId ?? 'YOUR_ORCHESTRATOR_ID'}",` +
+    `    "user": "YOUR_USER_QUESTION"` +
     `}'`
   )
 
@@ -1058,7 +1051,7 @@ export function IntegrationGuide({ isOpen, onClose, params }) {
         <div className="flex items-center justify-between px-6 py-4 border-b border-base-200">
           <h2 className="text-xl font-semibold textbase">Integration Guide</h2>
           <button onClick={onClose} className="btn btn-ghost btn-circle btn-sm" aria-label="Close sidebar">
-            <X className="w-4 h-4" />
+            <X size={18}/>
           </button>
         </div>
       }

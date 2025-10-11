@@ -6,8 +6,9 @@ import { updateUserDetialsForEmbedUser } from '@/store/reducer/userDetailsReduce
 import { useDispatch } from 'react-redux';
 import { getServiceAction } from '@/store/action/serviceAction';
 import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/store/action/bridgeAction';
-import { generateRandomID, sendDataToParent, toBoolean } from '@/utils/utility';
+import { generateRandomID, getFromCookies, sendDataToParent, setInCookies, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import { isPending } from '@/store/reducer/bridgeReducer';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -39,6 +40,7 @@ const Layout = ({ children }) => {
       bridgeType: 'api',
       type: 'chat',
     };
+    dispatch(isPending())
     dispatch(
       createBridgeAction({ dataToSend, orgid: orgId }, response => {
         if (response?.data?.bridge) {
@@ -63,9 +65,11 @@ const Layout = ({ children }) => {
 
   const navigateToExistingAgent = useCallback((agent, orgId) => {
     const version = agent?.published_version_id || agent?.versions?.[0];
-    router.push(
-      `/org/${orgId}/agents/configure/${agent._id}?version=${version}`
-    );
+    if(agent?._id && orgId && version){
+      router.push(
+        `/org/${orgId}/agents/configure/${agent._id}?version=${version}`
+      );
+    }
     setIsLoading(false);
     setProcessedAgentName(agent.name);
   }, [router]);
@@ -130,6 +134,11 @@ const Layout = ({ children }) => {
              key === "apikey_object_id" ? dispatch(updateUserDetialsForEmbedUser({ [key]: value })) : dispatch(updateUserDetialsForEmbedUser({ [key]: toBoolean(value)}));
             }
           });
+        }
+        if(urlParamsObj?.config?.configureGtwyRedirection === 'orchestral_page'){
+          setIsLoading(true);
+          router.push(`/org/${urlParamsObj.org_id}/orchestratal_model`);
+          return;
         }
 
         if (urlParamsObj?.agent_name) {

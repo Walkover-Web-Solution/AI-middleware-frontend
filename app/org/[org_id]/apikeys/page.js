@@ -35,7 +35,8 @@ const Page = () => {
 
   const [selectedApiKey, setSelectedApiKey] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedDataToDelete, setselectedDataToDelete] = useState(null);
+  const [selectedDataToDelete, setselectedDataToDelete] = useState(null)
+  const selectedService = apikeyData?.find(item => item._id === selectedApiKey?._id)?.service;
   const [selectedApiKeyForAgents, setSelectedApiKeyForAgents] = useState(null);
 
   useEffect(() => {
@@ -161,17 +162,16 @@ const Page = () => {
             sortingColumns={["name"]}
             keysToWrap={["apikey", "comment"]}
             endComponent={EndComponent}
-            handleRowClick={(data) => showConnectedAgents(items.find(item => item._id === data._id))}
-            keysToExtractOnRowClick={["_id"]}
+            handleRowClick={(data) => showConnectedAgents(data)}
+            keysToExtractOnRowClick={["_id", "name", "version_ids"]}
           />
         </div>
       ))}
-      <ApiKeyModal orgId={orgId} isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} />
+      <ApiKeyModal orgId={orgId} isEditing={isEditing} selectedApiKey={selectedApiKey} setSelectedApiKey={setSelectedApiKey} setIsEditing={setIsEditing} apikeyData={apikeyData} selectedService={selectedService} />
       
       <ApiKeyGuideSlider/>
-      <DeleteModal onConfirm={deleteApikey} item={selectedDataToDelete} title="Delete API Key" description={`Are you sure you want to delete the API key "${selectedDataToDelete?.name}"? This action cannot be undone.`}
-      />
-      <ConnectedAgentsModal apiKey={selectedApiKeyForAgents} orgId={orgId} />
+      <DeleteModal onConfirm={deleteApikey} item={selectedDataToDelete} title="Delete API Key" description={`Are you sure you want to delete the API key "${selectedDataToDelete?.name}"? This action cannot be undone.`}/>
+      <ConnectedAgentsModal apiKey={selectedApiKeyForAgents} orgId={orgId} key={selectedApiKeyForAgents}/>
     </div>
   );
 };

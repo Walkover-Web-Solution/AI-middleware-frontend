@@ -21,10 +21,13 @@ function Canvas({
   const [loading, setLoading] = useState(false);
   const [appliedMessages, setAppliedMessages] = useState(new Set());
   const [copiedMessageId, setCopiedMessageId] = useState(null);
-  
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest"
+    });
   }, [messages]);
 
   const handleResetChat = () => {
@@ -56,20 +59,31 @@ function Canvas({
     } catch (e) {
       // If not JSON, return original content
       return {
-        isJson: false,
         formatted: content
       };
     }
   };
 
-  // Handle copy to clipboard
   const handleCopy = (messageId, content) => {
-    navigator.clipboard.writeText(content || '');
-    setCopiedMessageId(messageId);
+    let textToCopy = content || '';
     
-    setTimeout(() => {
-      setCopiedMessageId(null);
-    }, 2000);
+    // If content is an object, stringify it
+    if (typeof content === 'object' && content !== null) {
+      try {
+        textToCopy = JSON.stringify(content, null, 2);
+      } catch (e) {
+        textToCopy = String(content);
+      }
+    }
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setCopiedMessageId(messageId);
+      setTimeout(() => {
+        setCopiedMessageId(null);
+      }, 2000);
+    }).catch((err) => {
+      console.error(err);
+    });
   };
 
   const handleSend = async () => {
@@ -81,14 +95,6 @@ function Canvas({
     const userMessage = {
       id: Date.now(),
       sender: "user",
-      content: instruction.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInstruction("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
     }
     setErrorMessage("");
     setLoading(true);
@@ -266,7 +272,7 @@ function Canvas({
               <textarea
                 ref={textareaRef}
                 className="w-full px-4 py-3 text-sm bg-base-100 border border-base-content/40 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none transition-all duration-200 shadow-sm hover:shadow-md min-h-[44px] max-h-32 placeholder-gray-400"
-                placeholder={`Describe how you'd like to improve your ${label}...`}
+                placeholder={` how you'd like to improve your ${label}...`}
                 value={instruction}
                 rows={1}
                 onChange={(e) => {

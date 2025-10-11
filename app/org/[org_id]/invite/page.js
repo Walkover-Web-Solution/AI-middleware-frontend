@@ -1,12 +1,14 @@
 "use client";
-import { getInvitedUsers, inviteUser } from '@/config';
+import { getInvitedUsers, inviteUser, removeUsersFromOrg } from '@/config';
 import Protected from '@/components/protected';
 import { useCallback, useEffect, useState, useMemo} from 'react';
 import { toast } from 'react-toastify';
-import { UserCircleIcon } from '@/components/Icons';
+import { TrashIcon, UserCircleIcon } from '@/components/Icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import SearchItems from '@/components/UI/SearchItems';
 import { useCustomSelector } from '@/customHooks/customSelector';
+import DeleteModal from '@/components/UI/DeleteModal';
+import { closeModal, openModal } from '@/utils/utility';
+import { MODAL_TYPE } from '@/utils/enums';
 
 export const runtime = 'edge';
 
@@ -22,6 +24,7 @@ function InvitePage({ params }) {
   const [page, setPage] = useState(1);
   const [isInviting, setIsInviting] = useState(false);
   const [totalMembers, setTotalMembers] = useState(0);
+  const [memberToDelete, setMemberToDelete] = useState();
   const ITEMS_PER_PAGE = 20;
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -150,6 +153,22 @@ function InvitePage({ params }) {
   const loadMoreMembers = () => {
       const nextPage = page + 1;
       fetchInvitedMembers(nextPage, false);
+    }
+  
+
+  const deleteUser = async (member) => {
+    try {
+      const response = await removeUsersFromOrg(member?.id)
+        if(response)
+        {
+          setInvitedMembers([]);
+          fetchInvitedMembers(1,true);
+        }
+    } catch (error) {
+      toast.error('An error occurred while deleting member.');
+    } finally {
+      closeModal(MODAL_TYPE.DELETE_MODAL)
+    }
   };
 
   return (
@@ -215,7 +234,7 @@ function InvitePage({ params }) {
                 invitedMembers.map((member, index) => (
                   <div
                     key={member.id || `member-${index}`}
-                    className="flex items-center justify-between p-4 border border-base-200 rounded-box hover:bg-base-200"
+                    className="flex items-center justify-between p-2 border border-base-200 rounded-box hover:bg-base-200"
                   >
                     <div className="flex items-center gap-3">
                       <UserCircleIcon size={20} className="text-base-content/70" />
@@ -223,6 +242,14 @@ function InvitePage({ params }) {
                         <div className="font-medium">{member.name}</div>
                         <div className="text-sm text-base-content/70">{member.email}</div>
                       </div>
+                    </div>
+                    <div>
+                    <button
+                      onClick={() => {setMemberToDelete(member); openModal(MODAL_TYPE.DELETE_MODAL)}}
+                      className="btn-sm text-error"
+                    >
+                      <TrashIcon size={20}/>
+                    </button>
                     </div>
                   </div>
                 ))
@@ -246,8 +273,9 @@ function InvitePage({ params }) {
           </InfiniteScroll>
         </div>
       </div>
+      <DeleteModal onConfirm={deleteUser} item={memberToDelete} description={`Are you sure you want to remove the "${memberToDelete?.name}" from your organization.`} title='Remove User From Organization' />
     </div>
   );
-}
+};
 
 export default Protected(InvitePage);

@@ -117,7 +117,7 @@ const maskAuthKey = (authkey) => {
         <div
           className="tooltip tooltip-primary"
           onClick={() => copyToClipboard(row["originalAuthkey"])}
-          data-tip="copy auth key"
+          data-tip="copy"
         >
           <CopyIcon size={16} />
         </div>

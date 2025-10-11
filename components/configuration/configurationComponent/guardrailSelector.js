@@ -209,7 +209,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                         {/* Predefined Guardrails */}
                                         {Object.entries(GUARDRAILS_TEMPLATES || {}).map(([key, { name, description }]) => (
                                             <div key={key} className="form-control">
-                                                <div className="label justify-start gap-2">
+                                                <div className="label cursor-pointer justify-start gap-2">
                                                     <input 
                                                         type="checkbox" 
                                                         className="checkbox checkbox-sm" 
@@ -225,7 +225,7 @@ const GuardrailSelector = ({ params, searchParams }) => {
                                         
                                         {/* Custom Guardrail */}
                                         <div className="form-control col-span-full">
-                                            <div className="label justify-start gap-2">
+                                            <div className="label cursor-pointer justify-start gap-2">
                                                 <input 
                                                     type="checkbox" 
                                                     className="checkbox checkbox-sm" 

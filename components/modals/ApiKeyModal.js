@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import Modal from '../UI/Modal';
 
-const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id }) => {
+const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelectedApiKey = () => { }, setIsEditing = () => { }, apikeyData, service, bridgeApikey_object_id, selectedService }) => {
     const pathName = usePathname();
     const path = pathName?.split('?')[0].split('/');
     const orgId = path[2] || '';
@@ -23,28 +23,27 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
     const handleSubmit = useCallback(async (event) => {
         event.preventDefault();
         const formData = new FormData(event.target);
-
         const data = {
-            name: formData.get('name').trim().replace(/\s+/g, ''),
-            service: service === 'openai_response' ? 'openai' : service || formData.get('service'),
+            name: formData.get('name'),
+            service: service || formData.get('service'),
             apikey: formData.get('apikey'),
             comment: formData.get('comment'),
             _id: selectedApiKey ? selectedApiKey._id : null
         };
-
         if (isEditing) {
             const isIdChange = apikeyData.some(item => item.apikey === data.apikey);
             const isNameChange = apikeyData.some(item => item.name === data.name);
             const isCommentChange = apikeyData.some(item => item.comment === data.comment);
-
             if (!isIdChange) {
-                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, apikey: data.apikey, comment: data.comment };
+                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, apikey: data.apikey, comment: data.comment,service:selectedService};
                 dispatch(updateApikeyAction(dataToSend));
             }
             if (!isNameChange || !isCommentChange) {
-                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, comment: data.comment };
+                const dataToSend = { org_id: orgId, apikey_object_id: data._id, name: data.name, comment: data.comment,service:selectedService};
                 dispatch(updateApikeyAction(dataToSend));
             }
+            
+
         } else {
             const response = await dispatch(saveApiKeysAction(data, orgId));
             if (service && response?._id) {
@@ -82,7 +81,6 @@ const ApiKeyModal = ({ params, searchParams, isEditing, selectedApiKey, setSelec
                             name={field}
                             placeholder={`Enter ${field}`}
                             defaultValue={selectedApiKey ? selectedApiKey[field] : ''}
-                            readOnly={field === 'apikey' && isEditing}
                             {...(field !== 'apikey' && { maxLength: 40 })}
                         />
                     </div>

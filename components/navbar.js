@@ -1,4 +1,3 @@
-
 'use client'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { FileSliders, TestTube, MessageCircleMore, Pause, Play, ClipboardX, BookCheck, Bot, Building, ChevronRight, MoreVertical, History, Clock, Zap, Home, HistoryIcon, ArchiveRestore, Archive } from 'lucide-react';
@@ -57,14 +56,8 @@ const Navbar = ({ isEmbedUser }) => {
       { id: 'configure', label: 'Configure', icon: FileSliders, shortLabel: 'Config' },
       { id: 'history', label: 'Chat History', icon: MessageCircleMore, shortLabel: 'History' }
     ];
-
-    // Only add test cases for non-embed users
-    if (!isEmbedUser) {
-      baseTabs.splice(1, 0, { id: 'testcase', label: 'Test Cases', icon: TestTube, shortLabel: 'Tests' });
-    }
-
     return baseTabs;
-  }, [isEmbedUser]);
+  }, []);
 
   const agentName = useMemo(() => bridgeData?.name || 'Customer Support AI', [bridgeData?.name]);
   const orgName = useMemo(() => organizations?.[orgId]?.name || 'Acme Corp', [organizations, orgId]);
@@ -72,7 +65,7 @@ const Navbar = ({ isEmbedUser }) => {
   const shouldShowNavbar = useCallback(() => {
     const depth = pathParts.length;
     if (depth === 3) return false;
-    return ['configure', 'history', 'testcase'].some(seg => pathname.includes(seg));
+    return ['configure', 'history'].some(seg => pathname.includes(seg));
   }, [pathParts.length, pathname]);
 
   // Close ellipsis menu when clicking outside
@@ -165,16 +158,10 @@ const Navbar = ({ isEmbedUser }) => {
   }, [router, orgId, bridgeId, searchParams]);
 
   const toggleOrgSidebar = useCallback(() => router.push(`/org`), [router]);
-  const toggleBridgeSidebar = useCallback(() => {
-    const version = searchParams?.get('version');
-    router.push(`/org/${orgId}/agents${version ? `?version=${version}` : ''}`);
-  }, [router, orgId, searchParams]);
+  const toggleBridgeSidebar = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
   const toggleConfigHistorySidebar = () => toggleSidebar("default-config-history-slider", "right");
   const toggleIntegrationGuideSlider = () => toggleSidebar("integration-guide-slider", "right");
-  const handleHomeClick = useCallback(() => {
-    const version = searchParams?.get('version');
-    router.push(`/org/${orgId}/agents${version ? `?version=${version}` : ''}`);
-  }, [router, orgId, searchParams]);
+  const handleHomeClick = useCallback(() => router.push(`/org/${orgId}/agents`), [router]);
 
   const breadcrumbItems = useMemo(() => ([
     {

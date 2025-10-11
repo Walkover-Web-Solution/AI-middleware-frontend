@@ -1,19 +1,32 @@
 import { createOrgAction } from '@/store/action/orgAction';
 import { userDetails } from '@/store/action/userDetailsAction';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import LoadingSpinner from './loadingSpinner';
 import { MODAL_TYPE } from '@/utils/enums';
 import { closeModal } from '@/utils/utility';
 import timezoneData from '@/utils/timezoneData';
+import { ChevronDown } from 'lucide-react';
 
 const CreateOrg = ({ handleSwitchOrg }) => {
     const [orgDetails, setOrgDetails] = useState({ name: '', about: '', timezone: 'Asia/Kolkata' });
     const [isLoading, setIsLoading] = useState(false);
+    const [timezoneSearch, setTimezoneSearch] = useState('');
+    const [filteredTimezones, setFilteredTimezones] = useState(timezoneData);
+    const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false);
     const dispatch = useDispatch();
     const route = useRouter();
+
+    useEffect(() => {
+        // Filter timezones based on search term
+        const filtered = timezoneData.filter(timezone => 
+            timezone.identifier.toLowerCase().includes(timezoneSearch.toLowerCase()) ||
+            timezone.offSet.toLowerCase().includes(timezoneSearch.toLowerCase())
+        );
+        setFilteredTimezones(filtered);
+    }, [timezoneSearch]);
 
     const handleChange = useCallback((e) => {
         const { name, value } = e.target;
@@ -22,6 +35,12 @@ const CreateOrg = ({ handleSwitchOrg }) => {
             [name]: value,
         }));
     }, []);
+
+    const selectTimezone = (timezone) => {
+        setOrgDetails(prev => ({ ...prev, timezone: timezone.identifier }));
+        setShowTimezoneDropdown(false);
+        setTimezoneSearch(''); // Reset search when selecting
+    };
 
     const createOrgHandler = useCallback(async (e) => {
         e.preventDefault();
@@ -88,19 +107,54 @@ const CreateOrg = ({ handleSwitchOrg }) => {
                             maxLength={400}
                         />
                         <label className='label-text mb-1'>Timezone *</label>
-                        <select
-                            className="select select-bordered w-full mb-4"
-                            value={orgDetails.timezone}
-                            onChange={(e) => setOrgDetails(prev => ({ ...prev, timezone: e.target.value }))}
-                            required
-                        >
-                            <option value="">Select a timezone</option>
-                            {timezoneData.map((timezone) => (
-                                <option key={timezone.identifier} value={timezone.identifier}>
-                                    {timezone.identifier} ({timezone.offSet})
-                                </option>
-                            ))}
-                        </select>
+                        
+                        <div className={`transition-all duration-300 ${showTimezoneDropdown ? 'mb-64' : 'mb-4'}`}>
+                            <div className="relative">
+                                <div 
+                                    className={`relative w-full cursor-pointer ${showTimezoneDropdown ? 'border-t border-x border-base-content/30 rounded-t-lg rounded-x-lg' : 'border border-base-content/10 rounded-lg'} p-2  flex items-center justify-between`}
+                                    onClick={() => setShowTimezoneDropdown(!showTimezoneDropdown)}
+                                >
+                                    <span>
+                                        {orgDetails.timezone ? 
+                                            `${orgDetails.timezone} (${timezoneData.find(tz => tz.identifier === orgDetails.timezone)?.offSet})` : 
+                                            "Select a timezone"}
+                                    </span>
+                                    <span className={`transition-transform duration-200 ${showTimezoneDropdown ? 'rotate-180' : ''}`}><ChevronDown size={16}/></span>
+                                </div>
+                                
+                                {showTimezoneDropdown && (
+                                    <div className={`absolute min-h-[250px] z-10 w-full bg-base-100 max-h-60 overflow-y-auto ${showTimezoneDropdown ? 'border-x border-b border-base-content/30 rounded-lg rounded-t-none rounded-x-lg' : ''}`}>
+                                        <div className="sticky top-0 bg-base-100 p-2 z-20">
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search timezone..."
+                                                    className="input outline-none input-sm flex-grow py-2 px-3 text-sm"
+                                                    value={timezoneSearch}
+                                                    onChange={(e) => setTimezoneSearch(e.target.value)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    autoFocus
+                                                />
+                                            </div>
+                                        </div>
+                                        {filteredTimezones.length === 0 ? (
+                                            <div className="p-2 mx-auto w-full text-center text-base-content/30">No timezones found</div>
+                                        ) : (
+                                            filteredTimezones.map((timezone) => (
+                                                <div 
+                                                    key={timezone.identifier} 
+                                                    className={`p-2 hover:bg-base-200 cursor-pointer ${orgDetails.timezone === timezone.identifier ? 'bg-primary text-white' : ''}`}
+                                                    onClick={() => selectTimezone(timezone)}
+                                                >
+                                                    {timezone.identifier} ({timezone.offSet})
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="modal-action">
                             <button type="button" onClick={() => closeModal(MODAL_TYPE.CREATE_ORG_MODAL)} className="btn">Close</button>
                             <button type="submit" className="btn btn-primary">Create</button>

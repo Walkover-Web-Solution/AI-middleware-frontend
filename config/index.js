@@ -333,6 +333,18 @@ export const getInvitedUsers = async ({page, limit, search}) => {
   }
 }
 
+export const removeUsersFromOrg = async (user_id) =>{
+  try{
+    const response = await axios.delete(`${URL}/user/deleteUser`, {
+      data:{user_id}});
+    return response.data;
+  }catch(error){
+    toast.error(error.response.data.message);
+    console.error(error);
+    return error;
+  }
+}
+
 export const getMetricsData = async (org_id, startDate, endDate) => {
   try {
     const response = await axios.get(`${URL}/api/v1/metrics/${org_id}`, {
@@ -965,9 +977,9 @@ export const createTestCaseApi = async ({ bridgeId, data }) => {
   }
 }
 
-export const runTestCaseApi = async ({ versionId }) => {
+export const runTestCaseApi = async ({ versionId, testcase_id, testCaseData, bridgeId }) => {
   try {
-    const response = await axios.post(`${PYTHON_URL}/api/v2/model/testcases/${versionId}`, { "version_id": versionId });
+    const response = await axios.post(`${PYTHON_URL}/api/v2/model/testcases`, { "version_id": versionId, "testcases": true, "testcase_id": testcase_id, "testcase_data": testCaseData, "bridge_id": bridgeId });
     return response.data;
   } catch (error) {
     toast.error(error?.response?.data?.detail?.error ? error?.response?.data?.detail?.error : "Error while running the testcases")

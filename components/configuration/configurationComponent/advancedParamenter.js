@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import OnBoarding from '@/components/OnBoarding';
 import TutorialSuggestionToast from '@/components/tutorialSuggestoinToast';
 import InfoTooltip from '@/components/InfoTooltip';
+import {setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 
 const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedParameters}) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -23,29 +24,47 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     showSuggestion: false
   });
   const [messages, setMessages] = useState([]);
-  const thread_id = useMemo(() => generateRandomID(), []);
   const dispatch = useDispatch();
 
-  const { service, version_function_data, configuration, integrationData, isFirstParameter } = useCustomSelector((state) => {
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
-    const integrationData = state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
-    const user = state.userDetailsReducer.userDetails
+  const {service,version_function_data,configuration,integrationData,isFirstParameter,connected_agents,modelInfoData,bridge } = useCustomSelector((state) => {
+    const versionData =state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const integrationData =state?.bridgeReducer?.org?.[params?.org_id]?.integrationData || {};
+    const user = state.userDetailsReducer.userDetails;
+    const bridge=state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
+    const service = versionData?.service;
+    const configuration = versionData?.configuration;
+    const type = configuration?.type;
+    const model = configuration?.model;
+    const modelInfoData =state?.modelReducer?.serviceModels?.[service]?.[type]?.[model]?.configuration?.additional_parameters;
     return {
       version_function_data: versionData?.apiCalls,
       integrationData,
-      service: versionData?.service,
-      configuration: versionData?.configuration,
-      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter
+      service,
+      configuration,
+      isFirstParameter: user?.meta?.onboarding?.AdvanceParameter,
+      connected_agents: versionData?.connected_agents,
+      modelInfoData,
+      bridge
     };
   });
   const [inputConfiguration, setInputConfiguration] = useState(configuration);
   const { tool_choice: tool_choice_data, type, model } = configuration || {};
-  const { modelInfoData } = useCustomSelector((state) => ({
-    modelInfoData: state?.modelReducer?.serviceModels?.[service]?.[type]?.[configuration?.model]?.configuration?.additional_parameters,
-  }));
+  const initialThreadId = bridge?.thread_id || generateRandomID();
+  const [thread_id, setThreadId] = useState(initialThreadId);
+
+    useEffect(() => {
+          if (!bridge?.thread_id && initialThreadId) {
+            setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                  bridgeId: params?.id,
+                  versionId: searchParams?.version,
+                  thread_id: initialThreadId,
+              }));
+          }
+      }, []);
   useEffect(() => {
     setInputConfiguration(configuration);
   }, [configuration]);
+  
   // Filter parameters by level
   const getParametersByLevel = (level) => {
     if (!modelInfoData) return [];
@@ -64,11 +83,48 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
   const level1Parameters = getParametersByLevel(1); // Accordion parameters  
   const level2Parameters = getParametersByLevel(2); // Outside accordion parameters
 
+  // Generate preview text for accordion parameters
+  const getParametersPreview = useMemo(() => {
+    if (level1Parameters.length === 0) return '';
+    
+    // Define priority order for important parameters (these will show first)
+    const priorityParams = ['temperature', 'max_tokens', 'top_p', 'frequency_penalty', 'presence_penalty', 'tool_choice', 'parallel_tool_calls', 'logprobs'];
+    
+    // Sort parameters by priority, then alphabetically
+    const sortedParams = level1Parameters.sort(([keyA], [keyB]) => {
+      const priorityA = priorityParams.indexOf(keyA);
+      const priorityB = priorityParams.indexOf(keyB);
+      
+      // If both are priority params, sort by priority order
+      if (priorityA !== -1 && priorityB !== -1) {
+        return priorityA - priorityB;
+      }
+      // If only A is priority, A comes first
+      if (priorityA !== -1) return -1;
+      // If only B is priority, B comes first
+      if (priorityB !== -1) return 1;
+      // Neither are priority, sort alphabetically
+      return keyA.localeCompare(keyB);
+    });
+    
+    // Get readable names for parameters
+    const paramNames = sortedParams.slice(0, 3).map(([key]) => {
+      const name = ADVANCED_BRIDGE_PARAMETERS?.[key]?.name || key;
+      // Capitalize first letter and make it more readable
+      return name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' ');
+    });
+    
+    // Create preview text
+    const preview = paramNames.join(', ');
+    const hasMore = level1Parameters.length > 3;
+    
+    return ` (${preview}${hasMore ? '...' : ''})`;
+  }, [level1Parameters]);
+
   const handleTutorial = () => {
     setTutorialState(prev => ({
       ...prev,
       showSuggestion: isFirstParameter
-
     }))
   };
 
@@ -92,8 +148,20 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
           id: value?._id
         }))
       : [];
-    setSelectedOptions(selectedFunctiondata);
-  }, [tool_choice_data])
+      const selectedAgentData = connected_agents && typeof connected_agents === 'object'
+        ? Object.entries(connected_agents)
+          .filter(([name, item]) => {
+            const toolChoice = typeof tool_choice_data === 'string' ? tool_choice_data : '';
+            return toolChoice === item.bridge_id;
+          })
+          .map(([name, item]) => ({
+            name,
+            id: item.bridge_id
+          }))
+        : [];
+      setSelectedOptions(selectedAgentData?.length > 0 ? selectedAgentData : selectedFunctiondata);
+    
+  }, [tool_choice_data]);
 
   const debounce = (func, delay) => {
     let timeoutId;
@@ -173,12 +241,18 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     setIsAccordionOpen((prevState) => !prevState);
   };
 
-  const setSliderValue = (value, key) => {
+  const setSliderValue = (value, key, isDeafaultObject = true) => {
     setInputConfiguration((prev) => ({
       ...prev,
       [key]: value,
     }))
-    let updatedDataToSend = {
+    let updatedDataToSend = (isDeafaultObject && value !== "default") ? {
+      configuration: {
+        [key]:{
+          [value?.key]: value[value?.key]
+        }
+      }
+    } : {
       configuration: {
         [key]: value
       }
@@ -197,7 +271,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     };
     dispatch(updateBridgeVersionAction({ bridgeId: params?.id, versionId: searchParams?.version, dataToSend: updatedDataToSend }));
   }, [dispatch, params?.id, searchParams?.version]);
-
+  
   // Helper function to render parameter fields
   const renderParameterField = (key, { field, min = 0, max, step, default: defaultValue, options }) => {
     const isDeafaultObject = typeof modelInfoData?.[key]?.default === 'object';
@@ -218,10 +292,10 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 onChange={(e) => {
                   const checked = e.target.checked;
                   if (!checked) {
-                    setSliderValue("default", key)
+                   setSliderValue("default", key, isDeafaultObject)
                   } else {
                     const fallback = modelInfoData?.[key]?.default ?? inputConfiguration?.[key] ?? configuration?.[key] ?? null;
-                    setSliderValue(fallback, key)
+                    setSliderValue(fallback, key, isDeafaultObject)
                   }
                 }}
               />
@@ -336,7 +410,42 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                         );
                       })
                   )}
-
+                  {connected_agents && typeof connected_agents === 'object' && (
+                    <>
+                      <div className="px-2 pt-2 pb-1 text-xs font-semibold text-base-content/70">Agents</div>
+                      {Object.entries(connected_agents)
+                        .filter(([name, item]) => {
+                          const label = name || item?.description || '';
+                          return label?.toLowerCase()?.includes(searchQuery?.toLowerCase());
+                        })
+                        .sort(([aName], [bName]) => (aName || '').localeCompare(bName || ''))
+                        .map(([name, item]) => {
+                          const title = name || 'Untitled';
+                          const isSelected = selectedOptions?.some(opt => opt?.id === item?.bridge_id);
+                          return (
+                            <div
+                              key={item?.bridge_id}
+                              className="p-2 hover:bg-base-200 cursor-pointer max-h-[40px] overflow-y-auto"
+                              onClick={() => {
+                                setSelectedOptions(isSelected ? [] : [{ name, id: item?.bridge_id }]);
+                                handleDropdownChange(isSelected ? null : item?.bridge_id, key);
+                                setShowDropdown(false);
+                              }}
+                            >
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  name="agent-select"
+                                  checked={isSelected}
+                                  className="radio radio-sm"
+                                />
+                                <span>{title}</span>
+                              </label>
+                            </div>
+                          );
+                        })}
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -456,7 +565,18 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                   placeholder="Enter valid JSON object here..."
                 />
 
-                <JsonSchemaModal params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} />
+                <JsonSchemaModal params={params} searchParams={searchParams} messages={messages} setMessages={setMessages} thread_id={thread_id} 
+                
+                           onResetThreadId={() => {
+                                    const newId = generateRandomID();
+                                    setThreadId(newId);
+                                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                                        bridgeId: params?.id,
+                                        versionId: searchParams?.version,
+                                        thread_id: newId,
+                                    }));
+                                }} 
+                                />
               </>
             )}
 
@@ -483,7 +603,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
         }}>
           <InfoTooltip tooltipContent="Advanced parameters allow you to fine-tune the behavior of your AI model, such as adjusting response length, quality, or response type." className="cursor-pointer mr-2">
             <div className="cursor-pointer label-text inline-block ml-1">
-              Advanced Parameters
+              LLM Advanced Parameters <span className="text-base-content/50 text-xs">{getParametersPreview}</span>
             </div>
           </InfoTooltip>
 

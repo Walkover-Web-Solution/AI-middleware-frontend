@@ -14,12 +14,9 @@ import InputConfigComponent from "./configurationComponent/inputConfigComponent"
 import ModelDropdown from "./configurationComponent/modelDropdown";
 import PreEmbedList from "./configurationComponent/preEmbedList";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
-import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
-import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
-import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import TriggersList from "./configurationComponent/TriggersList";
 import AddVariable from "../addVariable";
@@ -29,12 +26,34 @@ import Protected from "../protected";
 import AdvancedConfiguration from "./configurationComponent/advancedConfiguration";
 import RecommendedModal from "./configurationComponent/RecommendedModal";
 
-const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAreaRef, searchParams }) => {
+const ConfigurationPage = ({ 
+    params, 
+    isEmbedUser, 
+    apiKeySectionRef, 
+    promptTextAreaRef, 
+    searchParams,
+    // PromptHelper props
+    isPromptHelperOpen,
+    setIsPromptHelperOpen,
+    prompt,
+    setPrompt,
+    messages,
+    setMessages,
+    thread_id,
+    setThreadId,
+    hasUnsavedChanges,
+    setHasUnsavedChanges,
+    setNewContent,
+    handleCloseTextAreaFocus,
+    savePrompt,
+    isMobileView,
+    newContent
+}) => {
     const router = useRouter();
     const view = searchParams?.view || 'config';
     const [currentView, setCurrentView] = useState(view);
     
-    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, prompt, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, hideAdvancedParameters, hideAdvancedConfigurations, service ,hidePreTool } = useCustomSelector((state) => {
+    const { bridgeType, modelType, reduxPrompt, modelName, showConfigType, bridgeApiKey, shouldPromptShow, bridge_functions, connect_agents, knowbaseVersionData, showDefaultApikeys, shouldToolsShow, hideAdvancedParameters, hideAdvancedConfigurations, service ,hidePreTool } = useCustomSelector((state) => {
         const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
         const service = versionData?.service;
         const modelReducer = state?.modelReducer?.serviceModels;
@@ -52,7 +71,6 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             bridgeApiKey: versionData?.apikey_object_id?.[
                 service === 'openai_response' ? 'openai' : service
             ],
-            prompt: versionData?.configuration?.prompt || "",
             shouldPromptShow: modelReducer?.[serviceName]?.[modelTypeName]?.[modelName]?.validationConfig?.system_prompt,
             bridge_functions: versionData?.function_ids || [],
             connect_agents: versionData?.connected_agents || {},
@@ -119,7 +137,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 service={service} 
                 deafultApiKeys={showDefaultApikeys}
             />
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 items-start">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4 items-start">
                 <div className="w-full min-w-0 md:order-1">
                     <ServiceDropdown
                         params={params}
@@ -137,7 +155,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     </div>
                 )}
             </div>
-                <AdvancedParameters params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} hideAdvancedParameters={hideAdvancedParameters}/>
+            
         </>
     );
 
@@ -151,7 +169,23 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                 params={params} 
                 searchParams={searchParams} 
                 promptTextAreaRef={promptTextAreaRef} 
-                isEmbedUser={isEmbedUser} 
+                isEmbedUser={isEmbedUser}
+                // PromptHelper props
+                isPromptHelperOpen={isPromptHelperOpen}
+                setIsPromptHelperOpen={setIsPromptHelperOpen}
+                prompt={prompt}
+                setPrompt={setPrompt}
+                messages={messages}
+                setMessages={setMessages}
+                thread_id={thread_id}
+                setThreadId={setThreadId}
+                hasUnsavedChanges={hasUnsavedChanges}
+                setHasUnsavedChanges={setHasUnsavedChanges}
+                setNewContent={setNewContent}
+                handleCloseTextAreaFocus={handleCloseTextAreaFocus}
+                savePrompt={savePrompt}
+                isMobileView={isMobileView}
+                newContent={newContent}
             />
             {shouldToolsShow ? (
                 <>
@@ -170,6 +204,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             )}
             {renderCommonComponents()}
             <AddVariable params={params} searchParams={searchParams} />
+            <AdvancedParameters params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} hideAdvancedParameters={hideAdvancedParameters}/>
             {((isEmbedUser && !hideAdvancedConfigurations) || !isEmbedUser) && (
                 <AdvancedConfiguration 
                     params={params} 
@@ -186,12 +221,15 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
         <>
             {bridgeType === 'trigger' && !isEmbedUser && <TriggersList params={params} />}
             {modelType === "image" ? (
-                renderCommonComponents()
+                <>
+                {renderCommonComponents()}
+                <AdvancedParameters params={params} searchParams={searchParams} isEmbedUser={isEmbedUser} hideAdvancedParameters={hideAdvancedParameters}/>
+                </>
             ) : (
                 renderNonImageComponents()
             )}
         </>
-    ), [bridgeType, modelType, params, modelName, bridgeApiKey]);
+    ), [bridgeType, modelType, params, modelName, bridgeApiKey,isPromptHelperOpen,prompt]);
 
     const renderChatbotConfigView = useMemo(() => () => (
         <>
@@ -210,16 +248,16 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
             {((isEmbedUser && showConfigType) || !isEmbedUser) && <BridgeTypeToggle params={params} searchParams={searchParams} />}
             {<div className="absolute right-0 top-0">
                 <div className="flex items-center">
-                    <BridgeVersionDropdown params={params} searchParams={searchParams} />
+                     <BridgeVersionDropdown params={params} searchParams={searchParams} />
                     {((isEmbedUser && showConfigType) || !isEmbedUser) && <div className="join group flex">
-                        {bridgeType === 'chatbot' && <button
+                        {bridgeType === 'api' && <button
                             onClick={() => handleNavigation('config')}
                             className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
                             <SettingsIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
                         </button>}
-                        {bridgeType === 'chatbot' &&
+                        {bridgeType === 'api' &&
                             <button
                                 onClick={() => handleNavigation('chatbot-config')}
                                 className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
@@ -238,7 +276,7 @@ const ConfigurationPage = ({ params, isEmbedUser, apiKeySectionRef, promptTextAr
                     </div>}
                 </div>
             </div>}
-            {currentView === 'chatbot-config' && bridgeType === 'chatbot' ? renderChatbotConfigView() : renderSetupView()}
+            {currentView === 'chatbot-config' ? renderChatbotConfigView() : renderSetupView()}
             {renderNeedHelp()}
         </div>
     );

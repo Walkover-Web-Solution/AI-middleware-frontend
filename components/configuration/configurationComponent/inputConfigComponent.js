@@ -9,11 +9,27 @@ import ToneDropdown from './toneDropdown';
 import ResponseStyleDropdown from './responseStyleDropdown';
 import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
 import InfoTooltip from '@/components/InfoTooltip';
-import PromptHelper from '../../PromptHelper';
-import { setIsFocusReducer, setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
+import { setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
 
-const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbedUser }) => {
+const InputConfigComponent = ({ 
+    params, 
+    searchParams, 
+    promptTextAreaRef, 
+    // PromptHelper props
+    isPromptHelperOpen,
+    setIsPromptHelperOpen,
+    prompt,
+    setPrompt,
+    setThreadId,
+    hasUnsavedChanges,
+    setHasUnsavedChanges,
+    setNewContent,
+    handleCloseTextAreaFocus,
+    savePrompt,
+    isMobileView,
+    newContent
+}) => {
     const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
         serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type || "",
@@ -22,59 +38,19 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || ""
     }));
     
-    const [isMobileView, setIsMobileView] = useState(window.innerWidth < 640);
     const [oldContent, setOldContent] = useState(reduxPrompt);
-    const [newContent, setNewContent] = useState('');
-    const [keyName, setKeyName] = useState('');
-    const suggestionListRef = useRef(null);
     const textareaRef = useRef(null);
-    const [prompt, setPrompt] = useState(reduxPrompt);
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
-    const [messages, setMessages] = useState([]);
-    const [isPromptHelperOpen, setIsPromptHelperOpen] = useState(false);
 
-    // Memoize coordinates to prevent recalculation on every render
-    const [suggestionCoords, setSuggestionCoords] = useState({ top: 0, left: 0 });
 
     // Debounce timer ref
     const debounceTimerRef = useRef(null);
 
-    const initialThreadId = bridge?.thread_id || generateRandomID();
-    const [thread_id, setThreadId] = useState(initialThreadId);
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(setIsFocusReducer(isPromptHelperOpen));
-    }, [isPromptHelperOpen, dispatch]);
-
-    // Ensure thread_id exists in Redux for this bridge/version on mount
-    useEffect(() => {
-        if (!bridge?.thread_id && initialThreadId) {
-            setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
-                bridgeId: params?.id,
-                versionId: searchParams?.version,
-                thread_id: initialThreadId,
-            }));
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            const textareaElement = promptTextAreaRef?.current?.querySelector('textarea');
-            if (textareaElement && isPromptHelperOpen) {
-                promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
-            }
-        }, 100);
-        return () => clearTimeout(timeoutId);
-    }, [isPromptHelperOpen, prompt]);
-
-    useEffect(() => {
-        setPrompt(reduxPrompt);
-        setHasUnsavedChanges(false);
-    }, [reduxPrompt]);
+        setOldContent(reduxPrompt);
+        setThreadId(bridge?.thread_id || generateRandomID());
+    }, [reduxPrompt, bridge?.thread_id]);
 
     useEffect(() => {
         const handleBeforeUnload = (event) => {
@@ -92,13 +68,12 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
 
     useEffect(() => {
         const handleResize = () => {
-            const isSmallScreen = window.innerWidth < 710; // Changed to 640 to match initial state
+            const isSmallScreen = window.innerWidth < 710;
             if (!isMobileView && !isSmallScreen && typeof window.openTechDoc === 'function' && isPromptHelperOpen) {
                 window.openTechDoc();
             } else if (isMobileView && isSmallScreen && typeof window.closeTechDoc === 'function') {
                 window.closeTechDoc();
             }
-            setIsMobileView(isSmallScreen);
         };
         handleResize();
         window.addEventListener('resize', handleResize);
@@ -106,22 +81,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             window.removeEventListener('resize', handleResize);
         };
     }, [isMobileView, isPromptHelperOpen]);
-
-    const savePrompt = useCallback((newPrompt) => {
-        const newValue = (newPrompt || "").trim();
-        setShowSuggestions(false);
-
-        if (newValue !== reduxPrompt.trim()) {
-            dispatch(updateBridgeVersionAction({
-                versionId: searchParams?.version,
-                dataToSend: {
-                    configuration: {
-                        prompt: newValue
-                    }
-                }
-            }));
-        }
-    }, [dispatch, searchParams?.version, reduxPrompt]);
 
     // Optimized caret position calculation with caching
     const getCaretCoordinatesAdjusted = useCallback(() => {
@@ -175,25 +134,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         }
     }, []);
 
-    // Debounced suggestion trigger to prevent excessive calculations
-    const triggerSuggestions = useCallback((shouldShow, cursorPos = 0) => {
-        // Clear existing timer
-        if (debounceTimerRef.current) {
-            clearTimeout(debounceTimerRef.current);
-        }
-
-        if (shouldShow) {
-            // Small delay to batch multiple character inputs
-            debounceTimerRef.current = setTimeout(() => {
-                const coords = getCaretCoordinatesAdjusted();
-                setSuggestionCoords(coords);
-                setShowSuggestions(true);
-                setActiveSuggestionIndex(0);
-            }, 50); // 50ms debounce
-        } else {
-            setShowSuggestions(false);
-        }
-    }, [getCaretCoordinatesAdjusted]);
+    
 
     const handlePromptChange = useCallback((e) => {
         const value = e.target.value;
@@ -205,28 +146,15 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             setHasUnsavedChanges(false);
         }
 
-        const cursorPos = e.target.selectionStart;
-        const lastChar = value.slice(cursorPos - 1, cursorPos);
-        const lastTwoChars = value.slice(cursorPos - 2, cursorPos);
-
-        // Only trigger suggestions for relevant characters
-        if (lastChar === '{' || lastTwoChars === '{{') {
-            triggerSuggestions(true, cursorPos);
-        } else if (showSuggestions) {
-            // Close suggestions when user starts typing any character (except when still in variable pattern)
-            const isInVariablePattern = value.slice(0, cursorPos).match(/\{\{[^}]*$/);
-            if (!isInVariablePattern || (lastChar !== '{' && lastChar !== '}')) {
-            triggerSuggestions(false);
-            }
-        }
-    }, [reduxPrompt, showSuggestions, triggerSuggestions]);
+        
+    }, [reduxPrompt]);
 
     const handleKeyDown = useCallback((e) => {
         if (e.key === 'Tab' && isPromptHelperOpen) {
             e.preventDefault();
             return;
         }
-        if(e.key === 'Escape' && isPromptHelperOpen){
+        if (e.key === 'Escape' && isPromptHelperOpen) {
 
             e.preventDefault();
             setIsPromptHelperOpen(false);
@@ -234,26 +162,8 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             return;
         }
 
-        if (!showSuggestions || !suggestionListRef.current) return;
-
-        const suggestionItems = suggestionListRef.current.querySelectorAll('.list-item');
-        const totalItems = suggestionItems.length;
-        if (totalItems === 0) return;
-
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            e.preventDefault();
-            setActiveSuggestionIndex((prevIndex) => {
-                return e.key === 'ArrowDown'
-                    ? (prevIndex + 1) % totalItems
-                    : (prevIndex - 1 + totalItems) % totalItems;
-            });
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            suggestionItems[activeSuggestionIndex]?.click();
-        } else if (e.key === 'Escape') {
-            setShowSuggestions(false);
-        }
-    }, [activeSuggestionIndex, showSuggestions,isPromptHelperOpen]);
+       
+    }, [isPromptHelperOpen]);
 
     const handleSuggestionClick = useCallback((suggestion) => {
         const textarea = textareaRef.current;
@@ -304,87 +214,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
         });
     }, [prompt]);
 
-    const handleMouseDownOnSuggestion = useCallback((e) => {
-        e.preventDefault();
-    }, []);
-
-    // Memoize suggestions to prevent unnecessary re-renders
-    const suggestionItems = useMemo(() => {
-        return variablesKeyValue?.map((variable, index) => ({
-            key: variable.key,
-            index,
-            isActive: index === activeSuggestionIndex
-        })) || [];
-    }, [variablesKeyValue, activeSuggestionIndex]);
-
-    const renderSuggestions = () => {
-        if (!showSuggestions) return null;
-
-        return (
-            <div
-                className="dropdown dropdown-open z-high"
-                style={{
-                    position: 'absolute',
-                    top: suggestionCoords.top + 4,
-                    left: suggestionCoords.left + 8,
-                    willChange: 'transform', // Optimize for animations
-                }}
-            >
-                <ul
-                    ref={suggestionListRef}
-                    tabIndex={0}
-                    role="listbox"
-                    className="dropdown-content menu menu-dropdown-toggle bg-base-100 rounded-md z-high w-60 p-2 shadow-xl border border-base-300 overflow-scroll overflow-y-auto"
-                >
-                    <div className="flex flex-col w-full">
-                        <label className="label label-text-alt">Available variables</label>
-                        {suggestionItems.map((item) => (
-                            <li
-                                key={item.key}
-                                tabIndex={-1}
-                                className={`list-item ${item.isActive ? 'bg-base-200' : ''}`}
-                                onMouseDown={handleMouseDownOnSuggestion}
-                                onClick={() => handleSuggestionClick(item.key)}
-                            >
-                                <a className='gap-3'>
-                                    <span className="inline-block w-2 h-2 bg-primary rounded-full"></span>
-                                    <span className="text-base-content">{item.key}</span>
-                                </a>
-                            </li>
-                        ))}
-                        <li
-                            tabIndex={-1}
-                            className={`list-item ${variablesKeyValue?.length === activeSuggestionIndex ? 'bg-base-200' : ''}`}
-                            onMouseDown={handleMouseDownOnSuggestion}
-                            onClick={() => handleSuggestionClick('add_variable')}
-                        >
-                            <a className='flex flex-col items-start'>
-                                <span>+ Add New variable</span>
-                            </a>
-                        </li>
-                    </div>
-                </ul>
-            </div>
-        );
-    };
-
-    const togglePromptHelper = useCallback(() => {
-        const newState = !isPromptHelperOpen;
-        setIsPromptHelperOpen(newState);
-
-        if (!newState && !isMobileView && typeof window.openTechDoc === 'function') {
-            window.openTechDoc();
-        } else if (newState && typeof window.closeTechDoc === 'function') {
-            window.closeTechDoc();
-        }
-    }, [isPromptHelperOpen, isMobileView]);
-
-    const handleCloseTextAreaFocus = useCallback(() => {
-        if (typeof window.closeTechDoc === 'function') {
-            window.closeTechDoc();
-        }
-        setIsPromptHelperOpen(false);
-    }, []);
 
     const handleSavePrompt = useCallback(() => {
         savePrompt(prompt);
@@ -396,8 +225,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
 
     const handleOpenDiffModal = () => {
         openModal(MODAL_TYPE?.DIFF_PROMPT);
-    }
-
+    };
     // Cleanup debounce timer on unmount
     useEffect(() => {
         return () => {
@@ -408,7 +236,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
     }, []);
 
     if (service === "google" && serviceType === "chat") return null;
-
     return (
         <div ref={promptTextAreaRef} onKeyDown={handleKeyDown}>
             <div className="flex justify-between items-center mb-2">
@@ -447,12 +274,7 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                             >
                                 Diff
                             </button>}
-                            <button
-                                className={`btn text-xs sm:text-sm btn-sm btn-error`}
-                                onClick={handleCloseTextAreaFocus}
-                            >
-                                Close
-                            </button>
+                            
                         </>}
 
                 </div>
@@ -461,13 +283,15 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                 <textarea
                     ref={textareaRef}
                     className={`textarea border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none transition-none !duration-0 ${isPromptHelperOpen
-                            ? "h-[calc(100vh-60px)] border-primary shadow-md"
+                            ? "h-[calc(100vh-60px)] w-[700px] border-primary shadow-md"
                             : "min-h-96"
                     }`}
                       value={prompt}
                     onChange={handlePromptChange}
+                    
                     onFocus={() => {
-                        if (!isPromptHelperOpen) {
+                    
+                        if (!isPromptHelperOpen && window.innerWidth > 710) {
                                     setIsPromptHelperOpen(true);
                             if (typeof window.closeTechDoc === 'function') {
                                 window.closeTechDoc();
@@ -475,7 +299,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                         }
                     }}
                 />
-                {showSuggestions && renderSuggestions()}
                 <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none">
                     <input type="checkbox" className="min-h-[0.75rem]" />
                     <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
@@ -499,25 +322,17 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
                                     <span className="ml-2">- To access the current date and time</span>
                                 </div>
 
-                {/* Uncomment if needed later
-                      <div className="flex items-center gap-1">
-                        <span className="inline-block w-1 h-1 bg-yellow-500 rounded-full"></span>
-                          <span>&#123;&#123;memory&#125;&#125;</span>
-                           <span>- Access GPT memory context when enabled</span>
-                     </div> 
-                 */}
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-1 h-1 bg-black rounded-full"></span>
+                                    <span>&#123;&#123;pre_function&#125;&#125;</span>
+                                    <span>- Use this variable if you are using the pre_function</span>
+                                </div>
 
-                <div className="flex items-center gap-1">
-                  <span className="inline-block w-1 h-1 bg-black rounded-full"></span>
-                  <span>&#123;&#123;pre_function&#125;&#125;</span>
-                  <span>- Use this variable if you are using the pre_function</span>
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <span className="inline-block w-1 h-1 bg-black  rounded-full"></span>
-                  <span>&#123;&#123;timezone&#125;&#125;</span>
-                  <span>- Access the timezone using a timezone identifier</span>
-                </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-1 h-1 bg-black  rounded-full"></span>
+                                    <span>&#123;&#123;timezone&#125;&#125;</span>
+                                    <span>- Access the timezone using a timezone identifier</span>
+                                </div>
 
                                 <div className="flex items-center gap-1">
                                     <span>
@@ -538,30 +353,6 @@ const InputConfigComponent = ({ params, searchParams, promptTextAreaRef, isEmbed
             <Diff_Modal oldContent={oldContent} newContent={newContent} />
             <PromptSummaryModal modalType={MODAL_TYPE.PROMPT_SUMMARY} params={params} searchParams={searchParams} />
 
-            <PromptHelper
-                isVisible={isPromptHelperOpen && !isMobileView}
-                params={params}
-                onClose={handleCloseTextAreaFocus}
-                savePrompt={savePrompt}
-                setPrompt={setPrompt}
-                messages={messages}
-                setMessages={setMessages}
-                thread_id={thread_id}
-                onResetThreadId={() => {
-                    const newId = generateRandomID();
-                    setThreadId(newId);
-                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
-                        bridgeId: params?.id,
-                        versionId: searchParams?.version,
-                        thread_id: newId,
-                    }));
-                }}
-                prompt={prompt}
-                hasUnsavedChanges={hasUnsavedChanges}
-                setHasUnsavedChanges={setHasUnsavedChanges}
-                setNewContent={setNewContent}
-                isEmbedUser={isEmbedUser}
-            />
         </div>
     );
 };
