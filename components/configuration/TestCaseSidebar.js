@@ -199,12 +199,23 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                 </div>
 
                 {/* Test Preview */}
-                <div className="text-xs mb-2">
+                <div className="text-xs mb-2"
+                style={{
+                  wordBreak: 'break-all'
+                }}>
                   <p className="">
-                    <span className="font-bold">Expected:</span> {testCase.expected?.response || 'No input'}
+                    <span className="font-bold"
+                    style={{
+                      wordBreak: 'break-all'
+                    }}
+                    >Expected:</span> {testCase.expected?.response || 'No input'}
                   </p>
                   <p className="mt-1">
-                    <span className="font-bold">Model Response:</span> {testCase?.version_history?.[resolvedParams.version]?.[testCase?.version_history?.[resolvedParams.version].length - 1]?.model_output}
+                    <span className="font-bold"
+                    style={{
+                      wordBreak: 'break-all'
+                    }}
+                    >Model Response:</span> {testCase?.version_history?.[resolvedParams.version]?.[testCase?.version_history?.[resolvedParams.version].length - 1]?.model_output}
                   </p>
                 </div>
 
@@ -213,9 +224,17 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                   <div className="mt-3 p-3 bg-base-100 rounded">
                     <div className="space-y-2 text-xs">
                       <div>
-                        <span className="font-bold text-base-content">Expected Response:</span>
+                        <span className="font-bold text-base-content"
+                        style={{
+                          wordBreak: 'break-all'
+                        }}
+                        >Expected Response:</span>
                         <div className="mt-1 p-2 bg-base-100 rounded max-h-20 overflow-y-auto">
-                          <p className="text-base-content text-xs">{testCase.expected?.response}</p>
+                          <p className="text-base-content text-xs"
+                          style={{
+                            wordBreak: 'break-all'
+                          }}
+                          >{testCase.expected?.response}</p>
                         </div>
                       </div>
 

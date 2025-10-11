@@ -515,7 +515,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                       message.sender === "assistant" ||
                       message.sender === "expected") &&
                       (message?.content || message?.isLoading) && (
-                        <div className={`flex gap-2 show-on-hover justify-center items-center relative ${editingMessage === message.id && message.sender === "assistant" ? 'w-[500px]' : ''}`}>
+                        <div className={`flex gap-2 show-on-hover justify-start max-w-[700px] items-center relative ${editingMessage === message.id && message.sender === "assistant" ? 'w-[500px]' : ''}`}>
                           {message?.sender === "user" && message?.content && (
                             <button
                               className="btn btn-xs btn-outline hover:btn-primary see-on-hover flex mt-2"
@@ -586,7 +586,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
                             </div>
                           ) : (
                             /* Regular Assistant/User/Expected Message */
-                            <div className={`chat-bubble break-all gap-0 relative w-full ${message.sender === "assistant" ? "mr-8" : ""}`}>
+                            <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${message.sender === "assistant" ? "mr-8" : ""}`}>
                               {/* Show loader overlay if this is the message being tested */}
                               {isRunningTestCase && currentRunIndex !== null && index === currentRunIndex + 1 && (
                                 <div className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-10">

@@ -241,12 +241,18 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     setIsAccordionOpen((prevState) => !prevState);
   };
 
-  const setSliderValue = (value, key) => {
+  const setSliderValue = (value, key, isDeafaultObject = true) => {
     setInputConfiguration((prev) => ({
       ...prev,
       [key]: value,
     }))
-    let updatedDataToSend = {
+    let updatedDataToSend = (isDeafaultObject && value !== "default") ? {
+      configuration: {
+        [key]:{
+          [value?.key]: value[value?.key]
+        }
+      }
+    } : {
       configuration: {
         [key]: value
       }
@@ -286,10 +292,10 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
                 onChange={(e) => {
                   const checked = e.target.checked;
                   if (!checked) {
-                    setSliderValue("default", key)
+                   setSliderValue("default", key, isDeafaultObject)
                   } else {
                     const fallback = modelInfoData?.[key]?.default ?? inputConfiguration?.[key] ?? configuration?.[key] ?? null;
-                    setSliderValue(fallback, key)
+                    setSliderValue(fallback, key, isDeafaultObject)
                   }
                 }}
               />
