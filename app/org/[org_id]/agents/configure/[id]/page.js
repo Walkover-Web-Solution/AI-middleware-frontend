@@ -64,7 +64,9 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
       }));
   }, []);
   useEffect(()=>{
+    if(!fall_back){
     handleFallback_ModelChange(fall_back?.service||initialFall_back?.service,fall_back?.model||initialFall_back?.model,fall_back?.is_enable||initialFall_back?.is_enable)
+    }
   },[])
   // PromptHelper state management
   const [isMobileView, setIsMobileView] = useState(typeof window !== 'undefined' ? window.innerWidth < 710 : false);

@@ -59,20 +59,31 @@ function Canvas({
     } catch (e) {
       // If not JSON, return original content
       return {
-        isJson: false,
         formatted: content
       };
     }
   };
 
-  // Handle copy to clipboard
   const handleCopy = (messageId, content) => {
-    navigator.clipboard.writeText(content || '');
-    setCopiedMessageId(messageId);
+    let textToCopy = content || '';
     
-    setTimeout(() => {
-      setCopiedMessageId(null);
-    }, 2000);
+    // If content is an object, stringify it
+    if (typeof content === 'object' && content !== null) {
+      try {
+        textToCopy = JSON.stringify(content, null, 2);
+      } catch (e) {
+        textToCopy = String(content);
+      }
+    }
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setCopiedMessageId(messageId);
+      setTimeout(() => {
+        setCopiedMessageId(null);
+      }, 2000);
+    }).catch((err) => {
+      console.error(err);
+    });
   };
 
   const handleSend = async () => {
@@ -84,14 +95,6 @@ function Canvas({
     const userMessage = {
       id: Date.now(),
       sender: "user",
-      content: instruction.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInstruction("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
     }
     setErrorMessage("");
     setLoading(true);
