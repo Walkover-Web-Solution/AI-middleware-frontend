@@ -42,7 +42,6 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
 
     };
   });
-  console.log(bridge,"bridge")
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
