@@ -14,12 +14,9 @@ import InputConfigComponent from "./configurationComponent/inputConfigComponent"
 import ModelDropdown from "./configurationComponent/modelDropdown";
 import PreEmbedList from "./configurationComponent/preEmbedList";
 import ServiceDropdown from "./configurationComponent/serviceDropdown";
-import SlugNameInput from "./configurationComponent/slugNameInput";
 import UserRefernceForRichText from "./configurationComponent/userRefernceForRichText";
 import GptMemory from "./configurationComponent/gptmemory";
 import VersionDescriptionInput from "./configurationComponent/VersionDescriptionInput";
-import { AVAILABLE_MODEL_TYPES } from "@/utils/enums";
-import BatchApiGuide from "./configurationComponent/BatchApiGuide";
 import KnowledgebaseList from "./configurationComponent/knowledgebaseList";
 import TriggersList from "./configurationComponent/TriggersList";
 import AddVariable from "../addVariable";
@@ -253,14 +250,14 @@ const ConfigurationPage = ({
                 <div className="flex items-center">
                      <BridgeVersionDropdown params={params} searchParams={searchParams} />
                     {((isEmbedUser && showConfigType) || !isEmbedUser) && <div className="join group flex">
-                        {bridgeType === 'chatbot' && <button
+                        {bridgeType === 'api' && <button
                             onClick={() => handleNavigation('config')}
                             className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
                             <SettingsIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Agent Config</span>
                         </button>}
-                        {bridgeType === 'chatbot' &&
+                        {bridgeType === 'api' &&
                             <button
                                 onClick={() => handleNavigation('chatbot-config')}
                                 className={`${currentView === 'chatbot-config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
@@ -279,7 +276,7 @@ const ConfigurationPage = ({
                     </div>}
                 </div>
             </div>}
-            {currentView === 'chatbot-config' && bridgeType === 'chatbot' ? renderChatbotConfigView() : renderSetupView()}
+            {currentView === 'chatbot-config' ? renderChatbotConfigView() : renderSetupView()}
             {renderNeedHelp()}
         </div>
     );

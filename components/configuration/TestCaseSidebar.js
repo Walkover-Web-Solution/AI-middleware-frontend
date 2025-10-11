@@ -140,7 +140,10 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
                     {runningTests.has(testCase._id) ?
                       <Clock className="w-4 h-4 text-yellow-500 animate-spin" /> :
                       getStatusIcon(testCase._id)}
-                    <span className="font-medium text-sm">
+                    <span className="font-medium text-sm"
+                    style={{
+                      wordBreak: 'break-all'
+                    }}>
                       <span className="font-medium">Input:</span> {testCase.conversation?.[0]?.content || 'No input'}
                     </span>
                     <span className="text-xs text-primary/70 ml-2">Click to load</span>
@@ -231,10 +234,10 @@ const TestCaseSidebar = ({ params, resolvedParams, onTestCaseClick }) => {
 
                       {/* Version History Section */}
                       {testCase.version_history && Object.keys(testCase.version_history).length > 0 && (
-                        <div>
+                        <div onClick={(e) => { e.stopPropagation();}}>
                           <div
                             className="flex items-center justify-between cursor-pointer py-1"
-                            onClick={() => toggleVersionHistory(testCase._id)}
+                            onClick={(e) => { e.stopPropagation(); toggleVersionHistory(testCase._id) }}
                           >
                             <div className="flex items-center">
                               <History className="w-3 h-3 mr-1 text-base-content" />
