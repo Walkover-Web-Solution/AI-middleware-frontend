@@ -9,25 +9,30 @@ import Protected from "@/components/protected";
 import TutorialSuggestionToast from "@/components/tutorialSuggestoinToast";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import OpenAiIcon from "@/icons/OpenAiIcon";
-import { archiveBridgeAction } from "@/store/action/bridgeAction";
+import { archiveBridgeAction, updateBridgeAction } from "@/store/action/bridgeAction";
 import { MODAL_TYPE, ONBOARDING_VIDEOS } from "@/utils/enums";
 import { filterBridges, getIconOfService, openModal, } from "@/utils/utility";
 import { ClockIcon, EllipsisIcon } from "@/components/Icons";
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import SearchItems from "@/components/UI/SearchItems";
 import AgentEmptyState from "@/components/AgentEmptyState";
+import { Archive, ArchiveRestore, Pause, Play } from "lucide-react";
 
 export const runtime = 'edge';
 
+const BRIDGE_STATUS = {
+  ACTIVE: 1,
+  PAUSED: 0
+};
 function Home({ params, isEmbedUser }) {
   const resolvedParams = use(params);
   const dispatch = useDispatch();
   const inputRef = useRef(null);
   const router = useRouter();
-  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions } = useCustomSelector((state) => {
+  const { allBridges, averageResponseTime, isLoading, isFirstBridgeCreation, descriptions, bridgeStatus } = useCustomSelector((state) => {
     const orgData = state.bridgeReducer.org[resolvedParams.org_id] || {};
     const user = state.userDetailsReducer.userDetails
     return {
@@ -36,6 +41,8 @@ function Home({ params, isEmbedUser }) {
       isLoading: state.bridgeReducer.loading,
       isFirstBridgeCreation: user.meta?.onboarding?.bridgeCreation || "",
       descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
+      bridgeStatus: state.bridgeReducer.allBridgesMap,
+
     };
   });
   const [filterBridges,setFilterBridges]=useState(allBridges);
@@ -119,13 +126,29 @@ function Home({ params, isEmbedUser }) {
     bridge_status: item.bridge_status,
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
-    averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>
+    averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
+   
   }));
 
   const onClickConfigure = (id, versionId) => {
     router.push(`/org/${resolvedParams.org_id}/agents/configure/${id}?version=${versionId}`);
   };
-
+  const handlePauseBridge = async (bridgeId) => {
+      const newStatus = bridgeStatus[bridgeId]?.bridge_status === BRIDGE_STATUS.PAUSED
+        ? BRIDGE_STATUS.ACTIVE
+        : BRIDGE_STATUS.PAUSED;
+  
+      try {
+        await dispatch(updateBridgeAction({
+          bridgeId,
+          dataToSend: { bridge_status: newStatus }
+        }));
+        toast.success(`Agent ${newStatus === BRIDGE_STATUS.ACTIVE ? 'resumed' : 'paused'} successfully`);
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to update agent status');
+      }
+    };
   const archiveBridge = (bridgeId, newStatus = 0) => {
     try {
       dispatch(archiveBridgeAction(bridgeId, newStatus)).then((bridgeStatus) => {
@@ -144,17 +167,16 @@ function Home({ params, isEmbedUser }) {
   const EndComponent = ({ row }) => {
     return (
       <div className="flex items-center mr-4">
+       <div className="flex items-center gap-2">
+      <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        router.push(`/org/${resolvedParams.org_id}/agents/history/${item._id}?version=${item?.published_version_id || item?.versions?.[0]}`);
+      }}>
+        History
+      </button>
+    </div> 
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          {!isEmbedUser && <button
-            className="btn btn-outline btn-ghost btn-sm"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              router.push(`/org/${resolvedParams.org_id}/agents/testcase/${row._id}?version=${row?.versionId || null}`);
-            }}
-          >
-            Test Case
-          </button>}
         </div>
         <div className="dropdown dropdown-left bg-transparent">
           <div tabIndex={0} role="button" className="hover:bg-base-200 rounded-lg p-3" onClick={(e) => e.stopPropagation()}><EllipsisIcon className="rotate-90" size={16} /></div>
@@ -163,7 +185,27 @@ function Home({ params, isEmbedUser }) {
               e.preventDefault();
               e.stopPropagation();
               archiveBridge(row._id, row.status != undefined ? Number(!row?.status) : undefined)
-            }}>{(row?.status === 0) ? 'Un-archive Agent' : 'Archive Agent'}</a></li>
+            }}>{(row?.status === 0) ? <><ArchiveRestore size={14} className="mr-2 text-green-600" />Un-archive Agent</> : <><Archive size={14} className="mr-2 text-red-600" />Archive Agent</>}</a></li>
+            <li> <button
+              onClick={(e) =>{
+                e.preventDefault();
+                e.stopPropagation();
+                handlePauseBridge(row._id)
+              }}
+              className={`w-full px-4 py-2 text-left text-sm hover:bg-base-200 flex items-center gap-2`}
+            >
+              {bridgeStatus[row._id]?.bridge_status === BRIDGE_STATUS.PAUSED ? (
+                <>
+                  <Play size={14} className="text-green-600" />
+                  Resume Agent
+                </>
+              ) : (
+                <>
+                  <Pause size={14} className="text-red-600" />
+                  Pause Agent
+                </>
+              )}
+            </button></li>
           </ul>
         </div>
       </div>

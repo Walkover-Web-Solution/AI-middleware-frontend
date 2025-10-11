@@ -150,7 +150,7 @@ const CustomTable = ({
                         sortedData.map((row, index) => (
                             <div 
                                 key={row.id || row?._id || index}
-                                className="bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all"
+                                className="bg-base-100 border border-base-300 shadow-sm p-4 cursor-pointer hover:shadow-md transition-all"
                                 onClick={() => handleRowClick(
                                     keysToExtractOnRowClick.reduce((acc, key) => {
                                         acc[key] = row[key];
@@ -202,7 +202,7 @@ const CustomTable = ({
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-6 bg-base-100 rounded-lg shadow-sm">
+                        <div className="text-center py-6 bg-base-100 shadow-sm">
                             <p className="text-base-content/70">No data available</p>
                         </div>
                     )}
@@ -217,11 +217,11 @@ const CustomTable = ({
         
         return (
             <div className="overflow-x-auto">
-                <table className={`table ${tableClass} min-w-full bg-base-100 shadow-md rounded-lg overflow-hidden`}>
+                <table className={`table ${tableClass} w-full bg-base-100 shadow-md overflow-hidden table-auto`}>
                     <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                         <tr className="hover">
                             {showRowSelection &&
-                                <th className="w-10">
+                                <th className="w-8 px-1 py-2 text-center">
                                     <input
                                         type="checkbox"
                                         className="h-4 w-4 cursor-pointer"
@@ -233,7 +233,7 @@ const CustomTable = ({
                             {visibleColumns.map((column) => (
                                 <th
                                     key={column}
-                                    className="capitalize"
+                                        className={`px-1 py-2 whitespace-nowrap text-left ${column==='averageResponseTime'||column==='totalTokens'?'camelCase':'capitalize'}`}
                                 >
                                     <div className="flex items-center">
                                         {sorting && sortableColumns.includes(column) && (
@@ -254,7 +254,7 @@ const CustomTable = ({
                                     </div>
                                 </th>
                             ))}
-                            {endComponent && <th></th>}
+                            {endComponent && <th className="px-1 py-2 text-center w-20">Action</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -273,7 +273,7 @@ const CustomTable = ({
                                     }
                                 >
                                     {showRowSelection &&
-                                        <td className="w-10 text-center">
+                                        <td className="w-8 px-1 py-2 text-center">
                                             <input
                                                 type="checkbox"
                                                 className="h-4 w-4 cursor-pointer"
@@ -288,13 +288,14 @@ const CustomTable = ({
                                     {visibleColumns?.map((column) => (
                                         <td
                                             key={column}
+                                            className="px-1 py-2 text-left"
                                         >
                                             {getDisplayValue(row, column)}
                                         </td>
                                     ))}
                                     {endComponent && (
-                                        <td>
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <td className="px-1 py-2 text-center w-20">
+                                                <div className="">
                                                 {endComponent({row: row})}
                                             </div>
                                         </td>
@@ -318,7 +319,7 @@ const CustomTable = ({
     };
 
     return (
-        <div className="bg-base-100 rounded-lg p-2 md:p-4">
+        <div className="bg-base-100 p-2 md:p-4">
             {/* Responsive view switching */}
             {isSmallScreen ? renderCardView() : renderTableView()}
         </div>
