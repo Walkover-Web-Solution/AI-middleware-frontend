@@ -95,7 +95,10 @@ function Canvas({
     const userMessage = {
       id: Date.now(),
       sender: "user",
+      content: instruction,
     }
+    setMessages(prev => [...prev, userMessage]);
+    setInstruction("");
     setErrorMessage("");
     setLoading(true);
 
