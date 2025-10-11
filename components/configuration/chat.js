@@ -307,7 +307,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
               <button className="btn btn-sm" onClick={handleResetChat}> <PlusIcon size={14} />Create Test Case</button>
             </div>
           )}
-          <button
+          {!isOrchestralModel && <button
             className="btn btn-sm btn-primary"
             onClick={() => {
               if (typeof window !== 'undefined' && typeof window.openChatbot === 'function') {
@@ -319,7 +319,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams }) 
             <div className="tooltip tooltip-left" data-tip="Open Chatbot">
               <Bot size={14}/>
             </div>
-          </button>
+          </button>}
           {/* Test Cases Toggle Button */}
         </div>
         
