@@ -46,7 +46,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
       isFocus,
       reduxPrompt: versionData?.configuration?.prompt || "",
       bridge: versionData || {},
-      initialFall_back: state?.bridgeReducer?.org[resolvedParams?.org_id].orgs.find((org)=>org?._id===resolvedParams?.id)?.configuration?.fall_back||{},
+      initialFall_back: state?.bridgeReducer?.org[resolvedParams?.org_id]?.orgs?.find((org)=>org?._id===resolvedParams?.id)?.configuration?.fall_back||{},
       fall_back: versionData?.fall_back,
 
     };
