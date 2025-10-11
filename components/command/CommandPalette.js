@@ -48,6 +48,27 @@ const CommandPalette = ({isEmbedUser}) => {
       type: "agents",
     }));
 
+    // Also support searching by version_id: include results when the query matches
+    // any entry of the agent's versions array or its published_version_id.
+    const agentsVersionMatches = !q
+      ? []
+      : (agentList || []).flatMap((a) => {
+          const versionsArr = Array.isArray(a?.versions) ? a.versions : [];
+          const published = a?.published_version_id ? [a.published_version_id] : [];
+          const candidates = [...versionsArr, ...published].map((v) => String(v || ""));
+          // Filter candidates that contain the query (case-insensitive)
+          const matches = candidates.filter((v) => v.toLowerCase().includes(q));
+          // De-duplicate matches
+          const unique = Array.from(new Set(matches));
+          return unique.map((v) => ({
+            id: a._id,
+            title: a.name || a.slugName || a._id,
+            subtitle: `Version ${v}`,
+            type: "agents",
+            versionId: v,
+          }));
+        });
+
     const apikeysGroup = filterBy(apikeys, ["name", "service", "_id"]).map((k) => ({
       id: k._id,
       title: k.name || k._id,
@@ -91,7 +112,8 @@ const CommandPalette = ({isEmbedUser}) => {
     }));
 
     return {
-      agents: agentsGroup,
+      // Combine normal agent matches with version-id based matches
+      agents: [...agentsGroup, ...agentsVersionMatches],
       apikeys: apikeysGroup,
       docs: kbGroup,
       functions: functionsGroup,
@@ -156,7 +178,12 @@ const CommandPalette = ({isEmbedUser}) => {
     }
     switch (item.type) {
       case "agents":
-        router.push(`/org/${orgId}/agents/configure/${item.id}`);
+        // If a specific version was matched in search, deep-link to that version
+        if (item.versionId) {
+          router.push(`/org/${orgId}/agents/configure/${item.id}?version=${item.versionId}`);
+        } else {
+          router.push(`/org/${orgId}/agents/configure/${item.id}`);
+        }
         break;
       case "apikeys":
         router.push(`/org/${orgId}/apikeys`);

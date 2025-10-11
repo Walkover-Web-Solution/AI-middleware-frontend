@@ -250,7 +250,7 @@ const ConfigurationPage = ({
                 <div className="flex items-center">
                      <BridgeVersionDropdown params={params} searchParams={searchParams} />
                     {((isEmbedUser && showConfigType) || !isEmbedUser) && <div className="join group flex">
-                        {bridgeType === 'api' && <button
+                        {bridgeType === 'chatbot' && <button
                             onClick={() => handleNavigation('config')}
                             className={`${currentView === 'config' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
@@ -266,13 +266,13 @@ const ConfigurationPage = ({
                                 <span className={`${currentView === 'chatbot-config' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Chatbot Config</span>
                             </button>
                         }
-                        {((isEmbedUser && showGuide) || (!isEmbedUser && bridgeType !== 'trigger')) && <button
+                        {/* {((isEmbedUser && showGuide) || (!isEmbedUser && bridgeType !== 'trigger')) && <button
                             onClick={() => handleNavigation('guide')}
                             className={`${currentView === 'guide' ? "btn-primary w-32" : "w-14"} btn join-item hover:w-32 transition-all duration-200 overflow-hidden flex flex-col items-center gap-1 group/btn`}
                         >
                             <FilterSliderIcon size={16} className="shrink-0" />
                             <span className={`${currentView === 'guide' ? "opacity-100" : "opacity-0 group-hover/btn:opacity-100"} transition-opacity duration-200`}>Integration Guide</span>
-                        </button>}
+                        </button>} */}
                     </div>}
                 </div>
             </div>}
