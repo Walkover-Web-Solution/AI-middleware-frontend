@@ -49,10 +49,86 @@ const ParameterCard = ({
     setEditingEnum(JSON.stringify(param.enum || []));
   }, [param.enum]);
   
-  const currentPath = [...path, paramKey].join(".");
+  // For child properties, path already includes the parameter key
+  // For main parameters, we need to add paramKey
+  const currentPath = path.length === 0 ? paramKey : path.join(".");
+  
+  // Helper function to find deepest object parameter in nested arrays
+  const findDeepestObjectParameter = (items) => {
+    if (!items) return null;
+    if (items.type === "object" && items.parameter) {
+      return items;
+    }
+    if (items.type === "array" && items.items) {
+      return findDeepestObjectParameter(items.items);
+    }
+    return null;
+  };
+  
+  // Helper function to calculate correct path for nested array items
+  const calculateNestedPath = (baseParam, basePath) => {
+    if (baseParam.type === "object") {
+      return basePath;
+    }
+    
+    // For arrays, we need to traverse through items to find the object
+    let currentPath = [...basePath];
+    let current = baseParam;
+    
+    while (current && current.type === "array" && current.items) {
+      currentPath.push("items");
+      current = current.items;
+      if (current && current.type === "object") {
+        break;
+      }
+    }
+    
+    return currentPath;
+  };
+
+  // Check if parameter has children (object or array with object items)
   const hasChildren = param.type === "object" && param.parameter;
-  const childCount = hasChildren ? Object.keys(param.parameter).length : 0;
-  const bgColor = depth % 2 === 0 ? "bg-base-100" : "bg-base-200"
+  const hasArrayItems = param.type === "array" && param.items;
+  const deepestObjectParam = hasArrayItems ? findDeepestObjectParameter(param.items) : null;
+  const hasNestedObjectParameters = deepestObjectParam && deepestObjectParam.parameter;
+  
+  const childCount = hasChildren 
+    ? Object.keys(param.parameter).length 
+    : hasNestedObjectParameters 
+    ? Object.keys(deepestObjectParam.parameter).length 
+    : 0;
+    
+  const bgColor = depth % 2 === 0 ? "bg-base-100" : "bg-base-200";
+  
+  // Recursive function to render nested array item types
+  const renderNestedArrayItems = (items, currentPath, onTypeChange, depth = 0) => {
+    if (!items || items.type !== "array") return null;
+    
+    return (
+      <div>
+      <div className={`mt-3 flex flex-row w-full justify-between`}>
+        <label className="block text-sm font-medium mb-2">Item Type</label>
+        <select
+          className="select select-sm select-bordered"
+          value={items.items?.type || "string"}
+          onChange={(e) => {
+            const itemsPath = Array(depth + 2).fill('items').join('.');
+            onTypeChange(currentPath, "nested_array_item", itemsPath, e.target.value);
+          }}
+        >
+          <option value="string">String</option>
+          <option value="object">Object</option>
+          <option value="array">Array</option>
+          <option value="number">Number</option>
+          <option value="boolean">Boolean</option>
+        </select>
+        
+        {/* Recursive call for unlimited nesting */}
+      </div>
+        {items.items?.type === "array" && renderNestedArrayItems(items.items, currentPath, onTypeChange, depth + 1)}
+      </div>
+    );
+  };
   
   return (
     <div className={`${bgColor} border border-base-300 rounded-lg p-4`}>
@@ -285,7 +361,7 @@ const ParameterCard = ({
       </div>
 
       {/* Additional Options */}
-        <div className={`flex flex-row ${param.type !== "object" ? 'justify-between' : 'justify-end'}`}>
+        <div className={`flex flex-col ${param.type !== "object" ? 'justify-between' : 'justify-end'}`}>
       {param.type !== "object" && (
           <div className="flex items-center gap-2 text-xs mb-2">
             <input
@@ -323,7 +399,7 @@ const ParameterCard = ({
           )}
           </div>
            )}
-          {((name === 'orchestralAgent' && !isMasterAgent) || (name !== 'orchestralAgent')) && (
+           {((name === 'orchestralAgent' && !isMasterAgent) || (name !== 'orchestralAgent')) && (
             <div className="mb-1 flex flex-row ml-2 items-center justify-end  ">
               <label className="block text-xs mb-1 mr-2">Value Path:</label>
               <input
@@ -341,11 +417,35 @@ const ParameterCard = ({
               />
             </div>
           )}
+      {/* Array Item Type Selection */}
+      {param.type === "array" && (
+        <div>
+        <div className="mt-3 flex flex-row w-full justify-between">
+          <label className="block text-sm font-medium mb-2">Item Type</label>
+          <select
+            className="select select-sm select-bordered"
+            value={param.items?.type || "string"}
+            onChange={(e) => onTypeChange(currentPath, "nested_array_item", "items", e.target.value)}
+          >
+            <option value="string">String</option>
+            <option value="object">Object</option>
+            <option value="array">Array</option>
+            <option value="number">Number</option>
+            <option value="boolean">Boolean</option>
+          </select>
+          
+          {/* Recursive nested array item types */}
+        </div>
+          {param.items && renderNestedArrayItems(param.items, currentPath, onTypeChange, 0)}
+        </div>
+      )}
+      
+          
         </div>
      
 
-      {/* Properties Section for Objects */}
-      {param.type === "object" && (
+      {/* Properties Section for Objects and Array Items */}
+      {(param.type === "object" || hasNestedObjectParameters) && (
         <div className="">
           <div className="flex items-center justify-between ">
             <button
@@ -353,7 +453,7 @@ const ParameterCard = ({
               className="flex items-center gap-1 text-sm font-medium"
             >
               {isExpanded ? <ChevronDownIcon size={16} /> : <ChevronRightIcon size={16} />}
-              Properties
+              {param.type === "object" ? "Properties" : "Array Item Properties"}
             </button>
             <button
               onClick={() => onAddChild(currentPath)}
@@ -366,15 +466,37 @@ const ParameterCard = ({
           </div>
 
           {/* Child Properties */}
-          {isExpanded && hasChildren && (
+          {isExpanded && (hasChildren || hasNestedObjectParameters) && (
             <div className="space-y-3">
-              {Object.entries(param.parameter).map(([childKey, childParam], index) => (
-                <ParameterCard
+              {Object.entries(
+                param.type === "object" 
+                  ? param.parameter 
+                  : deepestObjectParam?.parameter || {}
+              ).map(([childKey, childParam], index) => {
+                // Calculate correct path for nested array item properties
+                let childPath = [...path];
+                if (param.type === "object") {
+                  // For object parameters, add paramKey and then childKey
+                  childPath.push(paramKey, childKey);
+                } else if (param.type === "array") {
+                  // For array items, add paramKey, then traverse items, then childKey
+                  childPath.push(paramKey);
+                  let current = param.items;
+                  while (current && current.type === "array") {
+                    childPath.push("items");
+                    current = current.items;
+                  }
+                  if (current && current.type === "object") {
+                    childPath.push("items", childKey);
+                  }
+                }
+                return (
+                  <ParameterCard
                   key={childKey}
                   paramKey={childKey}
                   param={childParam}
                   depth={depth + 1}
-                  path={[...path, paramKey]}
+                  path={childPath}
                   onDelete={onDelete}
                   onAddChild={onAddChild}
                   onRequiredChange={onRequiredChange}
@@ -389,7 +511,8 @@ const ParameterCard = ({
                   background_color={index % 2 === 1 ? "bg-black" : "bg-base-200"}
                   toolData={toolData}
                 />
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -434,7 +557,6 @@ function FunctionParameterModal({
   }, [toolData, tool_name, isToolNameManuallyChanged]);
 
   const properties = useMemo(() => function_details?.fields || {}, [function_details?.fields]);
-  console.log("properties", properties);
   const isDataAvailable = useMemo(() => Object.keys(properties).length > 0, [properties]);
 
   const [isModified, setIsModified] = useState(false);
@@ -534,16 +656,26 @@ function FunctionParameterModal({
 
     const _updateField = (currentFields, remainingKeyParts) => {
       if (remainingKeyParts.length === 1) {
-        currentFields[remainingKeyParts[0]] = updateFn(
-          currentFields[remainingKeyParts[0]]
+        const fieldKey = remainingKeyParts[0];
+        currentFields[fieldKey] = updateFn(
+          currentFields[fieldKey] || null
         );
       } else {
         const [head, ...tail] = remainingKeyParts;
-        if (currentFields[head]) {
+        if (head === "items") {
+          // Handle direct "items" key
+          currentFields.items = _updateField(
+            currentFields.items || {},
+            tail
+          );
+        } else if (currentFields[head]) {
           const isArray = currentFields[head].type === "array";
           const nestedKey = isArray ? "items" : "parameter";
+          if (!currentFields[head][nestedKey]) {
+            currentFields[head][nestedKey] = isArray ? { type: "string" } : {};
+          }
           currentFields[head][nestedKey] = _updateField(
-            currentFields[head][nestedKey] || {},
+            currentFields[head][nestedKey],
             tail
           );
         }
@@ -584,18 +716,55 @@ function FunctionParameterModal({
         prevToolData.fields,
         parentPath.split("."),
         (field) => {
-          if (!field.parameter) {
-            field.parameter = {};
+          // Helper function to find and initialize the deepest object parameter
+          const findAndInitializeDeepestObjectParameter = (items) => {
+            if (!items) return null;
+            if (items.type === "object") {
+              if (!items.parameter) {
+                items.parameter = {};
+              }
+              if (!items.required_params) {
+                items.required_params = [];
+              }
+              return items;
+            }
+            if (items.type === "array" && items.items) {
+              return findAndInitializeDeepestObjectParameter(items.items);
+            }
+            return null;
+          };
+
+          let targetField = field;
+          
+          // If this is an array parameter, find the deepest object parameter
+          if (field.type === "array" && field.items) {
+            const deepestObjectParam = findAndInitializeDeepestObjectParameter(field.items);
+            if (deepestObjectParam) {
+              targetField = deepestObjectParam;
+            } else {
+              // If no object found, create one at the first level
+              if (!field.items.parameter) {
+                field.items.type = "object";
+                field.items.parameter = {};
+                field.items.required_params = [];
+              }
+              targetField = field.items;
+            }
+          } else {
+            // For object parameters, ensure parameter object exists
+            if (!targetField.parameter) {
+              targetField.parameter = {};
+            }
           }
 
           let counter = 0;
           let newKey = `new${counter}`;
-          while (field.parameter[newKey]) {
+          while (targetField.parameter[newKey]) {
             counter++;
             newKey = `new${counter}`;
           }
 
-          field.parameter[newKey] = {
+          targetField.parameter[newKey] = {
             type: "string",
             description: "",
           };
@@ -623,10 +792,14 @@ function FunctionParameterModal({
         let current = newFields;
         for (let i = 0; i < keyParts.length - 1; i++) {
           const key = keyParts[i];
-          if (current[key].type === "array") {
+          if (key === "items") {
+            current = current.items;
+          } else if (current[key] && current[key].type === "array") {
             current = current[key].items;
-          } else {
+          } else if (current[key] && current[key].parameter) {
             current = current[key].parameter;
+          } else if (current[key]) {
+            current = current[key];
           }
         }
         delete current[keyParts[keyParts.length - 1]];
@@ -813,29 +986,98 @@ function FunctionParameterModal({
     closeModal(Model_Name);
   }, [resetModalData, Model_Name]);
 
-  const handleTypeChange = useCallback((key, newType) => {
+  const handleTypeChange = useCallback((key, newType, itemsPath, arrayItemType) => {
+    // Handle nested array item type changes
+    if (newType === "nested_array_item" && itemsPath && arrayItemType) {
+      const pathParts = itemsPath.split('.');
+      const updatedField = updateField(
+        toolData?.fields,
+        key.split("."),
+        (field) => {
+          if (!field) {
+            // If field doesn't exist, create a new one
+            field = { type: "string", description: "" };
+          }
+          
+          let current = field;
+          // Navigate through nested items structure
+          for (let i = 0; i < pathParts.length; i++) {
+            if (pathParts[i] === 'items') {
+              if (!current.items) {
+                current.items = { type: "string" };
+              }
+              current = current.items;
+            }
+          }
+          
+          // Set the new type for the nested array item
+          current.type = arrayItemType;
+          if (arrayItemType === "object") {
+            current.parameter = {};
+            current.required_params = [];
+          } else if (arrayItemType === "array") {
+            current.items = { type: "string" };
+          } else {
+            // Clean up object/array specific properties for primitive types
+            delete current.parameter;
+            delete current.required_params;
+            delete current.items;
+          }
+          
+          return field;
+        }
+      );
+      
+      setToolData((prevToolData) => ({
+        ...prevToolData,
+        fields: updatedField,
+      }));
+      setIsModified(true);
+      return;
+    }
     let updatedField;
     if (newType === "array") {
       updatedField = updateField(
         toolData?.fields,
         key?.split("."),
-        (field) => ({
-          ...field,
-          type: newType,
-          items: { type: "string" },
-          required_params: [],
-          ...(field?.parameter ? { parameter: undefined } : {}),
-        })
+        (field) => {
+          if (!field) {
+            return {
+              type: newType,
+              items: { type: "string" },
+              required_params: [],
+              description: "",
+            };
+          }
+          return {
+            ...field,
+            type: newType,
+            items: { type: "string" },
+            required_params: [],
+            ...(field?.parameter ? { parameter: undefined } : {}),
+          };
+        }
       );
     } else {
       updatedField = updateField(toolData?.fields, key.split("."), (field) => {
+        if (!field) {
+          // If field doesn't exist, create a new one
+          return {
+            type: newType,
+            description: "",
+            ...(newType === "object" ? { parameter: {}, required_params: [] } : {}),
+            ...(newType === "array" ? { items: { type: "string" } } : {}),
+          };
+        }
+        
         const { items, parameter, ...rest } = field;
         const isParameterOrItemsPresent = parameter;
         return {
           ...rest,
           type: newType,
           parameter: newType === "string" ? undefined : newType === "object" ? (isParameterOrItemsPresent || {}) : undefined,
-          ...(newType === "object" ? { enum: [], description: "" } : {}),
+          ...(newType === "object" ? { parameter: {}, required_params: [] } : {}),
+          ...(newType === "array" ? { items: { type: "string" } } : {}),
         };
       });
     }
