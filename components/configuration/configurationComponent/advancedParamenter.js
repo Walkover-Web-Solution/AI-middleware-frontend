@@ -241,7 +241,7 @@ const AdvancedParameters = ({ params, searchParams, isEmbedUser, hideAdvancedPar
     setIsAccordionOpen((prevState) => !prevState);
   };
 
-  const setSliderValue = (value, key, isDeafaultObject = true) => {
+  const setSliderValue = (value, key, isDeafaultObject = false) => {
     setInputConfiguration((prev) => ({
       ...prev,
       [key]: value,
