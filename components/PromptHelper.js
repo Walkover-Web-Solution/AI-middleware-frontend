@@ -85,11 +85,12 @@ const PromptHelper = ({
   }, [promptParams, thread_id]);
 
   // Apply optimized prompt
-  const handleApplyOptimizedPrompt = () => {
-    if (optimizedPrompt && setPrompt) {
-      setPrompt(optimizedPrompt);
+  const handleApplyOptimizedPrompt = (promptToApply) => {
+    const promptContent = promptToApply || optimizedPrompt;
+    if (promptContent && setPrompt) {
+      setPrompt(promptContent);
       setHasUnsavedChanges(true);
-      setNewContent(optimizedPrompt);
+      setNewContent(promptContent);
     }
   };
 
