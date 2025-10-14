@@ -173,9 +173,20 @@ const ThreadContainer = ({ thread, filterOption, isFetchingMore, setIsFetchingMo
     const container = historyRef.current;
     if (!container) return;
     const { scrollTop, clientHeight, scrollHeight } = container;
-    const nearBottom = scrollTop + clientHeight >= scrollHeight - SCROLL_BOTTOM_THRESHOLD;
+    
+    let nearBottom;
+    
+    if (flexDirection === 'column-reverse') {
+      // In reverse mode, scrollTop = 0 means at bottom, negative values are bounce
+      nearBottom = scrollTop <= SCROLL_BOTTOM_THRESHOLD && scrollTop >= -50;
+    } else {
+      // Normal mode: check distance from bottom
+      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+      nearBottom = distanceFromBottom <= SCROLL_BOTTOM_THRESHOLD;
+    }
+    
     setShowScrollToBottom(!nearBottom);
-  }, []);
+  }, [flexDirection]);
 
   // ------------------------------------
   // Effects: mount / cleanup
