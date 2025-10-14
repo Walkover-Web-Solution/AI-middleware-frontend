@@ -208,7 +208,7 @@ const ConnectedAgentList = ({ params, searchParams }) => {
                                     <div className="tooltip" data-tip={name?.length > 24 ? name : ""}>
                                         <span>{ bridge?.name}</span>
                                         <span className={`shrink-0 inline-block rounded-full capitalize px-2 py-0 text-[10px] ml-2 font-medium border ${(!bridge?.connected_agent_details?.description && !item.description) ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                                    {!(bridge?.connected_agent_details?.description && !item.description) ? "Description Required" : "Active"}
+                                    {(!bridge?.connected_agent_details?.description && !item.description) ? "Description Required" : "Active"}
                                 </span>
                                     </div>
                                 </span>
