@@ -548,6 +548,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
         return node;
       })
     );
+    debouncedSave()
 
     setIsModified(true);
     setIsVariableModified(true);
@@ -555,10 +556,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
 
   useEffect(() => {
     setIsModified(
-      isDrafted ||
-      (!(orchestralData.length > 0)
-        ? nodes.length !== orchestralData?.nodes?.length || edges.length !== orchestralData?.edges?.length
-        : nodes.length > 0)
+      isDrafted 
     );
   }, [nodes, edges, isDrafted, orchestralData]);
 
@@ -630,6 +628,7 @@ function Flow({ params, orchestralData, name, description, createdFlow, setIsLoa
     });
     setIsDiscard((v) => !v);
     setIsVariableModified(false);
+    debouncedSave();
   }, [discardedData]);
 
   /* Load/replace flow runtime */
