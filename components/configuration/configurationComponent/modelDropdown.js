@@ -210,7 +210,7 @@ const ModelDropdown = ({ params, searchParams }) => {
                         className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
                         onClick={toggleDropdown}
                     >
-                        {model?.length > 20 ? `${model.substring(0, 20)}...` : model|| "Select a Model"}
+                        {model?.length >15 ? `${model.substring(0, 15)}...` : model|| "Select a Model"}
                         {isDropdownOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                     </div>
                     {isDropdownOpen && (
@@ -244,7 +244,7 @@ const ModelDropdown = ({ params, searchParams }) => {
                                                         >
                                                             {modelName === model && <span className="flex-shrink-0 ml-2">✓</span>}
                                                             <span className={`truncate flex-1 pl-2 ${modelName !== model && 'ml-4'}`}>
-                                                                {modelName?.length > 30 ? `${modelName.substring(0, 30)}...` : modelName}
+                                                                {modelName?.length > 15 ? `${modelName.substring(0, 15)}...` : modelName}
                                                             </span>
                                                         </li>
                                                     );
