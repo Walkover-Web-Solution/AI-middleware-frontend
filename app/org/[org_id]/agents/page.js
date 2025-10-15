@@ -39,6 +39,7 @@ function Home({ params, isEmbedUser }) {
     };
   });
   const [filterBridges,setFilterBridges]=useState(allBridges);
+  const [loadingAgentId, setLoadingAgentId] = useState(null);
   const [tutorialState, setTutorialState] = useState({
     showTutorial: false,
     showSuggestion: isFirstBridgeCreation
@@ -46,6 +47,13 @@ function Home({ params, isEmbedUser }) {
 
   useEffect(() => {
     setFilterBridges(allBridges)
+  }, []);
+
+  // Reset loading state when component unmounts or navigation completes
+  useEffect(() => {
+    return () => {
+      setLoadingAgentId(null);
+    };
   }, []);
 
   
@@ -57,12 +65,18 @@ function Home({ params, isEmbedUser }) {
     model: item.configuration?.model || "",
     name: <div className="flex gap-3 items-center">
       <div className="flex gap-2 items-center">
-        {getIconOfService(item.service, 30, 30)}
+        {loadingAgentId === item._id ? (
+          <div className="loading loading-spinner loading-sm"></div>
+        ) : (
+          getIconOfService(item.service, 30, 30)
+        )}
       </div>
       <div className="flex-col" title={item.name}>
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            {item.name.length > 20 ? item.name.slice(0, 17) + '...' : item.name}
+            <span className={loadingAgentId === item._id ? "opacity-50" : ""}>
+              {item.name.length > 20 ? item.name.slice(0, 17) + '...' : item.name}
+            </span>
             {item.bridge_status === 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
                   <ClockIcon size={12}/>
@@ -82,7 +96,8 @@ function Home({ params, isEmbedUser }) {
     bridge_status: item.bridge_status,
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens ? item?.total_tokens : 0,
-    averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h"
+    averageResponseTime: averageResponseTime[item?._id] ? averageResponseTime[item?._id] : "Not used in 24h",
+    isLoading: loadingAgentId === item._id
   }));
 
   const ArchivedBridges = filteredArchivedBridges.filter((item) => item.status === 0).map((item) => ({
@@ -90,12 +105,21 @@ function Home({ params, isEmbedUser }) {
     model: item.configuration?.model || "",
     name: <div className="flex gap-3">
       <div className="flex gap-2 items-center">
-        {getIconOfService(item.service, 30, 30)}
+        {loadingAgentId === item._id ? (
+          <div className="loading loading-spinner loading-sm"></div>
+        ) : (
+          getIconOfService(item.service, 30, 30)
+        )}
       </div>
       <div className="flex-col">
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            {item.name}
+            <span className={loadingAgentId === item._id ? "opacity-50" : ""}>
+              {item.name}
+            </span>
+            {loadingAgentId === item._id && (
+              <span className="text-xs text-primary opacity-70">Loading...</span>
+            )}
           </div>
           <div className="flex items-center gap-2 mt-1">
             <p className="opacity-60 text-xs">
@@ -119,10 +143,15 @@ function Home({ params, isEmbedUser }) {
     bridge_status: item.bridge_status,
     versionId: item?.published_version_id || item?.versions?.[0],
     totalTokens: item?.total_tokens,
-    averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>
+    averageResponseTime: averageResponseTime[item?._id] === 0 ? <div className="text-xs">Not used in 24h</div> : <div className="text-xs">{averageResponseTime[item?._id]} sec</div>,
+    isLoading: loadingAgentId === item._id
   }));
 
   const onClickConfigure = (id, versionId) => {
+    // Prevent multiple clicks while loading
+    if (loadingAgentId) return;
+    
+    setLoadingAgentId(id);
     router.push(`/org/${resolvedParams.org_id}/agents/configure/${id}?version=${versionId}`);
   };
 

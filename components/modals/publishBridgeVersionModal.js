@@ -111,27 +111,50 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     return result.concat(nestedResults.flat());
   }, [dispatch]);
 
-  useEffect(() => {
-    const fetchConnectedAgents = async () => {
-      if (!params?.id || !versionData || !agentList.length) {
-        setAllConnectedAgents([]);
-        return;
-      }
+  const fetchConnectedAgents = useCallback(async () => {
+    if (!params?.id || !versionData || !agentList.length) {
+      setAllConnectedAgents([]);
+      return;
+    }
 
-      setIsLoadingAgents(true);
-      try {
-        const agents = await getAllConnectedAgents(params.id, versionData, agentList, true);
-        setAllConnectedAgents(Array.isArray(agents) ? agents : []);
-      } catch (error) {
-        console.error('Error fetching connected agents:', error);
-        setAllConnectedAgents([]);
-      } finally {
-        setIsLoadingAgents(false);
-      }
-    };
-    
-    fetchConnectedAgents();
+    setIsLoadingAgents(true);
+    try {
+      const agents = await getAllConnectedAgents(params.id, versionData, agentList, true);
+      setAllConnectedAgents(Array.isArray(agents) ? agents : []);
+    } catch (error) {
+      console.error('Error fetching connected agents:', error);
+      setAllConnectedAgents([]);
+    } finally {
+      setIsLoadingAgents(false);
+    }
   }, [params?.id, versionData, agentList, getAllConnectedAgents]);
+
+  // Listen for modal open events using MutationObserver
+  useEffect(() => {
+    const modalElement = document.getElementById(MODAL_TYPE.PUBLISH_BRIDGE_VERSION);
+    if (!modalElement) return;
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'open') {
+          const isOpen = modalElement.hasAttribute('open');
+          if (isOpen) {
+            // Modal just opened, fetch connected agents
+            fetchConnectedAgents();
+          }
+        }
+      });
+    });
+
+    // Observe changes to the 'open' attribute
+    observer.observe(modalElement, {
+      attributes: true,
+      attributeFilter: ['open']
+    });
+
+    // Cleanup observer on unmount
+    return () => observer.disconnect();
+  }, [fetchConnectedAgents]);
 
   const { filteredBridgeData, filteredVersionData } = useMemo(() => {
     const filterData = (data, keys) => {
@@ -144,7 +167,6 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       });
       return filtered;
     };
-
     return {
       filteredBridgeData: filterData(bridgeData, KEYS_TO_COMPARE),
       filteredVersionData: filterData(versionData, KEYS_TO_COMPARE)

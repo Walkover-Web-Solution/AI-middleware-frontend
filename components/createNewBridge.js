@@ -30,9 +30,8 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { allBridgeList, modelsList, SERVICES, showAgentType, hideCreateManuallyButton } = useCustomSelector((state) => ({
+  const { modelsList, SERVICES, showAgentType, hideCreateManuallyButton } = useCustomSelector((state) => ({
     SERVICES: state?.serviceReducer?.services,
-    allBridgeList: state.bridgeReducer.org[orgid]?.orgs || [],
     modelsList: state?.modelReducer?.serviceModels[state.selectedService],
     showAgentType: state?.userDetailsReducer?.userDetails?.showAgentTypeOnCreateAgent,
     hideCreateManuallyButton: state?.userDetailsReducer?.userDetails?.hideCreateManuallyButton
@@ -88,7 +87,7 @@ function CreateNewBridge({ orgid, isEmbedUser }) {
 
   useEffect(() => {
     if (state.selectedService && !modelsList) {
-      dispatch(getModelAction({ service: state.selectedService }));
+      // dispatch(getModelAction({ service: state.selectedService }));
     }
   }, [state.selectedService, modelsList, dispatch]);
 

@@ -1,348 +1,148 @@
-import { useCustomSelector } from '@/customHooks/customSelector';
-import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
+import { usePromptSelector } from '@/customHooks/useOptimizedSelector';
 import { MODAL_TYPE } from '@/utils/enums';
-import { generateRandomID, openModal } from '@/utils/utility';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { openModal } from '@/utils/utility';
 import PromptSummaryModal from '../../modals/PromptSummaryModal';
 import ToneDropdown from './toneDropdown';
 import ResponseStyleDropdown from './responseStyleDropdown';
-import { ChevronDownIcon, InfoIcon } from '@/components/Icons';
-import InfoTooltip from '@/components/InfoTooltip';
-import { setThreadIdForVersionReducer } from '@/store/reducer/bridgeReducer';
 import Diff_Modal from '@/components/modals/Diff_Modal';
+import PromptHeader from './PromptHeader';
+import PromptTextarea from './PromptTextarea';
+import VariablesSuggestions from './VariablesSuggestions';
+import DefaultVariablesSection from './DefaultVariablesSection';
 
-const InputConfigComponent = ({ 
+// Ultra-smooth InputConfigComponent with ref-based approach
+const InputConfigComponent = memo(({ 
     params, 
     searchParams, 
     promptTextAreaRef, 
-    // PromptHelper props
-    isPromptHelperOpen,
-    setIsPromptHelperOpen,
-    prompt,
-    setPrompt,
-    setThreadId,
-    hasUnsavedChanges,
-    setHasUnsavedChanges,
-    setNewContent,
+    // Consolidated state props
+    uiState,
+    updateUiState,
+    promptState,
+    setPromptState,
     handleCloseTextAreaFocus,
     savePrompt,
-    isMobileView,
-    newContent
+    isMobileView
 }) => {
-    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = useCustomSelector((state) => ({
-        prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.prompt || "",
-        serviceType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration?.type || "",
-        service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service || "",
-        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
-        bridge: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || ""
-    }));
+    // Optimized Redux selector with memoization and shallow comparison
+    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = usePromptSelector(params, searchParams);
     
-    const [oldContent, setOldContent] = useState(reduxPrompt);
-    const textareaRef = useRef(null);
-
-
-    // Debounce timer ref
+    // Refs for zero-render typing experience
     const debounceTimerRef = useRef(null);
+    const oldContentRef = useRef(reduxPrompt);
+    const currentValueRef = useRef(reduxPrompt);
+    const hasUnsavedChangesRef = useRef(false);
+    const textareaRef = useRef(null);
+    // Update refs when redux prompt changes (external updates)
+    if (oldContentRef.current !== reduxPrompt) {
+        oldContentRef.current = reduxPrompt;
+        currentValueRef.current = reduxPrompt;
+        hasUnsavedChangesRef.current = false;
+    }
+    // Zero-render prompt change handler using refs only
+    const handlePromptChange = useCallback((value) => {
+        // Update refs immediately - no re-render
+        currentValueRef.current = value;
+        const hasChanges = value.trim() !== reduxPrompt.trim();
+        hasUnsavedChangesRef.current = hasChanges;
+        // Update save button state only when needed
+        if (hasChanges !== promptState.hasUnsavedChanges) {
+            setPromptState(prev => ({
+                ...prev,
+                hasUnsavedChanges: hasChanges
+            }));
+        }
+        
+        // Debounced updates for diff modal only
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+        
+        debounceTimerRef.current = setTimeout(() => {
+            setPromptState(prev => ({
+                ...prev,
+                newContent: value
+            }));
+        }, 500); // Longer debounce since it's just for diff modal
+    }, [reduxPrompt, promptState.hasUnsavedChanges, setPromptState]);
+    
+    // Optimized save handler using current ref value
+    const handleSavePrompt = useCallback(() => {
+        const currentValue = currentValueRef.current;
+        savePrompt(currentValue);
+        oldContentRef.current = currentValue;
+        hasUnsavedChangesRef.current = false;
+        
+        // Update state only for UI elements that need it
+        setPromptState(prev => ({
+            ...prev,
+            prompt: currentValue,
+            newContent: '',
+            hasUnsavedChanges: false
+        }));
+        handleCloseTextAreaFocus();
+    }, [savePrompt, handleCloseTextAreaFocus, setPromptState]);
 
-    const dispatch = useDispatch();
+    // Memoized handlers to prevent unnecessary re-renders
+    const handleOpenDiffModal = useCallback(() => {
+        openModal(MODAL_TYPE?.DIFF_PROMPT);
+    }, []);
 
-    useEffect(() => {
-        setOldContent(reduxPrompt);
-        setThreadId(bridge?.thread_id || generateRandomID());
-    }, [reduxPrompt, bridge?.thread_id]);
-
-    useEffect(() => {
-        const handleBeforeUnload = (event) => {
-            if (hasUnsavedChanges) {
-                event.preventDefault();
-                event.returnValue = '';
-            }
-        };
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, [hasUnsavedChanges]);
-
-    useEffect(() => {
-        const handleResize = () => {
-            const isSmallScreen = window.innerWidth < 710;
-            if (!isMobileView && !isSmallScreen && typeof window.openTechDoc === 'function' && isPromptHelperOpen) {
-                window.openTechDoc();
-            } else if (isMobileView && isSmallScreen && typeof window.closeTechDoc === 'function') {
+    const handleTextareaFocus = useCallback(() => {
+        if (!uiState.isPromptHelperOpen && window.innerWidth > 710) {
+            updateUiState({ isPromptHelperOpen: true });
+            if (typeof window.closeTechDoc === 'function') {
                 window.closeTechDoc();
             }
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, [isMobileView, isPromptHelperOpen]);
-
-    // Optimized caret position calculation with caching
-    const getCaretCoordinatesAdjusted = useCallback(() => {
-        if (!textareaRef.current) return { top: 0, left: 0 };
-
-        const textarea = textareaRef.current;
-        const { selectionStart, scrollTop, scrollLeft, offsetTop, offsetLeft } = textarea;
-
-        // Create a temporary element only once
-        const div = document.createElement('div');
-        const tempContainer = document.body;
-        tempContainer.appendChild(div);
-
-        try {
-            // Copy the styles of the textarea to the temporary div
-            const styles = window.getComputedStyle(textarea);
-            // Only copy essential styles for performance
-            const essentialStyles = ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'wordSpacing', 'padding', 'border', 'boxSizing'];
-
-            essentialStyles.forEach(style => {
-                div.style[style] = styles[style];
-            });
-
-            // Set specific styles for accurate position calculation
-            div.style.position = 'absolute';
-            div.style.visibility = 'hidden';
-            div.style.whiteSpace = 'pre-wrap';
-            div.style.overflow = 'hidden';
-            div.style.top = '-9999px';
-            div.style.left = '-9999px';
-
-            // Copy text up to the caret position to the div
-            const text = textarea.value.substring(0, selectionStart);
-            div.textContent = text;
-
-            // Insert a special character to mark the caret position
-            const caretMarker = document.createElement('span');
-            caretMarker.textContent = '|';
-            div.appendChild(caretMarker);
-
-            // Get the position of the caret marker
-            const { offsetTop: markerTop, offsetLeft: markerLeft } = caretMarker;
-
-            return {
-                top: markerTop + offsetTop - scrollTop,
-                left: markerLeft + offsetLeft - scrollLeft,
-            };
-        } finally {
-            // Clean up by removing the temporary element
-            tempContainer.removeChild(div);
         }
-    }, []);
+    }, [uiState.isPromptHelperOpen, updateUiState]);
+    
+    // Memoized values to prevent recalculation
+    const isDisabled = useMemo(() => 
+        !promptState.hasUnsavedChanges, 
+        [promptState.hasUnsavedChanges]
+    );
 
+    // Early return for unsupported service types
+    const handleKeyDown = useCallback((event) => {
+        // Disable Tab key when PromptHelper is open
+        if (event.key === 'Tab' && uiState.isPromptHelperOpen) {
+            event.preventDefault();
+            return;
+        }
+        
+        // Close PromptHelper on Escape key
+        if (event.key === 'Escape' && uiState.isPromptHelperOpen) {
+            event.preventDefault();
+            updateUiState({ isPromptHelperOpen: false });
+            return;
+        }
+    }, [uiState.isPromptHelperOpen, updateUiState]);
     
 
-    const handlePromptChange = useCallback((e) => {
-        const value = e.target.value;
-        setPrompt(value);
-
-        if (value.trim() !== reduxPrompt.trim()) {
-            setHasUnsavedChanges(true);
-        } else {
-            setHasUnsavedChanges(false);
-        }
-
-        
-    }, [reduxPrompt]);
-
-    const handleKeyDown = useCallback((e) => {
-        if (e.key === 'Tab' && isPromptHelperOpen) {
-            e.preventDefault();
-            return;
-        }
-        if (e.key === 'Escape' && isPromptHelperOpen) {
-
-            e.preventDefault();
-            setIsPromptHelperOpen(false);
-            textareaRef.current.blur();
-            return;
-        }
-
-       
-    }, [isPromptHelperOpen]);
-
-    const handleSuggestionClick = useCallback((suggestion) => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-
-        const cursorPosition = textarea.selectionStart;
-        let newPrompt;
-        let newCursorPosition;
-
-        if (suggestion === 'add_variable') {
-            const handleTabKey = (e) => {
-                if (e.key === 'Tab') {
-                    e.preventDefault();
-                    const start = textarea.value.lastIndexOf('{{', cursorPosition);
-                    const end = textarea.value.indexOf('}}', cursorPosition);
-
-                    if (start !== -1 && end !== -1) {
-                        const textBetweenBraces = textarea.value.slice(start + 2, end);
-                        setKeyName(textBetweenBraces);
-                        openModal(MODAL_TYPE.CREATE_VARIABLE);
-                    }
-                    textarea.removeEventListener('keydown', handleTabKey);
-                }
-            };
-
-            textarea.addEventListener('keydown', handleTabKey);
-            const isDoubleBrace = prompt.slice(cursorPosition - 2, cursorPosition) === '{{';
-            const beforeCursor = isDoubleBrace ? prompt.slice(0, cursorPosition - 2) : prompt.slice(0, cursorPosition - 1);
-            const afterCursor = prompt.slice(cursorPosition);
-            newPrompt = `${beforeCursor}{{}}${afterCursor}`;
-            newCursorPosition = isDoubleBrace ? cursorPosition : cursorPosition + 1;
-        } else {
-            const isDoubleBrace = prompt.slice(cursorPosition - 2, cursorPosition) === '{{';
-            const beforeCursor = isDoubleBrace ? prompt.slice(0, cursorPosition - 2) : prompt.slice(0, cursorPosition - 1);
-            const afterCursor = prompt.slice(cursorPosition);
-            newPrompt = `${beforeCursor}{{${suggestion}}}${afterCursor}`;
-            newCursorPosition = beforeCursor.length + suggestion.length + 4;
-        }
-
-        setPrompt(newPrompt);
-        setShowSuggestions(false);
-        setActiveSuggestionIndex(0);
-
-        // Use requestAnimationFrame for smoother DOM updates
-        requestAnimationFrame(() => {
-            textarea.focus();
-            textarea.setSelectionRange(newCursorPosition, newCursorPosition);
-        });
-    }, [prompt]);
-
-
-    const handleSavePrompt = useCallback(() => {
-        savePrompt(prompt);
-        setOldContent(prompt);
-        setNewContent('');
-        setHasUnsavedChanges(false);
-        handleCloseTextAreaFocus();
-    }, [prompt, savePrompt, handleCloseTextAreaFocus]);
-
-    const handleOpenDiffModal = () => {
-        openModal(MODAL_TYPE?.DIFF_PROMPT);
-    };
-    // Cleanup debounce timer on unmount
-    useEffect(() => {
-        return () => {
-            if (debounceTimerRef.current) {
-                clearTimeout(debounceTimerRef.current);
-            }
-        };
-    }, []);
-
-    if (service === "google" && serviceType === "chat") return null;
     return (
-        <div ref={promptTextAreaRef} onKeyDown={handleKeyDown}>
-            <div className="flex justify-between items-center mb-2">
-                <div className="label flex items-center gap-2">
-                    <span className="label-text capitalize font-medium">Prompt</span>
-                    <div className="h-4 w-px bg-base-300 mx-2"></div>
-                    <div className="flex items-center justify-center">
-                        <button
-                            onClick={() => {
-                                openModal(MODAL_TYPE?.PROMPT_SUMMARY);
-                            }}
-                        >
-                            <InfoTooltip tooltipContent={"Prompt Summary is a brief description of the agent's prompt and applies to all versions of the agent, not just one."}>
-                                <span className='label-text  capitalize font-medium bg-gradient-to-r from-blue-800 to-orange-600 text-transparent bg-clip-text'>Prompt Summary</span>
-                            </InfoTooltip>
-                        </button>
-
-                    </div>
-                </div>
-
-                <div
-                    className="label cursor-pointer gap-1 sm:gap-2"
-                >
-                    <button
-                        className={`btn btn-sm ${hasUnsavedChanges ? 'btn-primary' : 'btn-disabled'}`}
-                        onClick={handleSavePrompt}
-                        disabled={!hasUnsavedChanges || prompt.trim() === reduxPrompt.trim()}
-                    >
-                        Save
-                    </button>
-                    {isPromptHelperOpen &&
-                        <>
-                            {!isMobileView && <button
-                                className={`btn text-xs sm:text-sm btn-sm`}
-                                onClick={handleOpenDiffModal}
-                            >
-                                Diff
-                            </button>}
-                            
-                        </>}
-
-                </div>
-            </div>
-            <div className="form-control h-full">
-                <textarea
+        <div ref={promptTextAreaRef}>
+            <PromptHeader
+                hasUnsavedChanges={promptState.hasUnsavedChanges}
+                onSave={handleSavePrompt}
+                isPromptHelperOpen={uiState.isPromptHelperOpen}
+                isMobileView={isMobileView}
+                onOpenDiff={handleOpenDiffModal}
+                disabled={isDisabled}
+            />
+            
+            <div className="form-control h-full relative">
+                <PromptTextarea
                     ref={textareaRef}
-                    className={`textarea border border-base-content/20 w-full resize-y relative bg-transparent z-low caret-base-content p-2 rounded-b-none transition-none !duration-0 ${isPromptHelperOpen
-                            ? "h-[calc(100vh-60px)] w-[700px] border-primary shadow-md"
-                            : "min-h-96"
-                    }`}
-                      value={prompt}
+                    initialValue={reduxPrompt}
                     onChange={handlePromptChange}
-                    
-                    onFocus={() => {
-                    
-                        if (!isPromptHelperOpen && window.innerWidth > 710) {
-                                    setIsPromptHelperOpen(true);
-                            if (typeof window.closeTechDoc === 'function') {
-                                window.closeTechDoc();
-                            }
-                        }
-                    }}
+                    onFocus={handleTextareaFocus}
+                    isPromptHelperOpen={uiState.isPromptHelperOpen}
+                    onKeyDown={handleKeyDown}
                 />
-                <div className="collapse bg-gradient-to-r bg-base-1 border-t-0 border border-base-300 rounded-t-none">
-                    <input type="checkbox" className="min-h-[0.75rem]" />
-                    <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
-                        <div className="flex items-center gap-2 ">
-                            <span className="text-nowrap">Default Variables</span>
-                            <p role="alert" className="label-text-alt alert p-2 bg-base-200">
-                                <InfoIcon size={16} className="" />
-                                Use these variables in prompt to get their functionality
-                            </p>
-                        </div>
-                        <div className="ml-auto">
-                            <ChevronDownIcon className="collapse-arrow" size={12} />
-                        </div>
-                    </div>
-                    <div className="collapse-content">
-                        <div className="text-xs">
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center gap-1">
-                                    <span className="inline-block w-1 h-1 bg-black rounded-full"></span>
-                                    <span>&#123;&#123;current_time_and_date&#125;&#125;</span>
-                                    <span className="ml-2">- To access the current date and time</span>
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                    <span className="inline-block w-1 h-1 bg-black rounded-full"></span>
-                                    <span>&#123;&#123;pre_function&#125;&#125;</span>
-                                    <span>- Use this variable if you are using the pre_function</span>
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                    <span className="inline-block w-1 h-1 bg-black  rounded-full"></span>
-                                    <span>&#123;&#123;timezone&#125;&#125;</span>
-                                    <span>- Access the timezone using a timezone identifier</span>
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                    <span>
-                                        Use custom variables like <code>&#123;&#123;your_custom_variable&#125;&#125;</code>, created from the <strong>Add Variable</strong> section, to insert dynamic values.
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
+                <DefaultVariablesSection />
             </div>
 
             <div className='flex flex-row gap-2 mt-8'>
@@ -350,11 +150,12 @@ const InputConfigComponent = ({
                 <ResponseStyleDropdown params={params} searchParams={searchParams} />
             </div>
 
-            <Diff_Modal oldContent={oldContent} newContent={newContent} />
+            <Diff_Modal oldContent={oldContentRef.current} newContent={promptState.newContent} />
             <PromptSummaryModal modalType={MODAL_TYPE.PROMPT_SUMMARY} params={params} searchParams={searchParams} />
-
         </div>
     );
-};
+});
+
+InputConfigComponent.displayName = 'InputConfigComponent';
 
 export default InputConfigComponent;

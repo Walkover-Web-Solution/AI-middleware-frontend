@@ -38,7 +38,7 @@ function Table({ data }) {
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <tr key={index} className="hover-row hover">
+            <tr key={index} className="hover cursor-pointer">
               {columnNames.map((columnName) => (
                 <td key={columnName} className="py-4 px-6">
                   {columnName === 'created_at' ? formatDate(item[columnName]) : item[columnName]}

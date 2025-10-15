@@ -150,7 +150,9 @@ const CustomTable = ({
                         sortedData.map((row, index) => (
                             <div 
                                 key={row.id || row?._id || index}
-                                className="bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all"
+                                className={`bg-base-100 border border-base-300 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all ${
+                                    row.isLoading ? 'opacity-60 cursor-wait' : ''
+                                }`}
                                 onClick={() => handleRowClick(
                                     keysToExtractOnRowClick.reduce((acc, key) => {
                                         acc[key] = row[key];
@@ -262,7 +264,9 @@ const CustomTable = ({
                             sortedData?.map((row, index) => (
                                 <tr 
                                     key={row.id || row?._id || index} 
-                                    className="border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer group" 
+                                    className={`border-b border-base-300 hover:bg-base-200 transition-colors cursor-pointer group ${
+                                        row.isLoading ? 'opacity-60 cursor-wait' : ''
+                                    }`}
                                     onClick={() =>
                                         handleRowClick(
                                             keysToExtractOnRowClick.reduce((acc, key) => {

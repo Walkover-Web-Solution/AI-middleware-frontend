@@ -11,7 +11,7 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
 
     const { bridge, apikeydata, bridgeApikey_object_id, currentService } = useCustomSelector((state) => {
         const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
-        const apikeys = state?.bridgeReducer?.apikeys || {};
+        const apikeys = state?.apiKeysReducer?.apikeys || {};
 
         return {
             bridge: bridgeMap,
@@ -97,4 +97,4 @@ const ApiKeyInput = ({ params, searchParams, apiKeySectionRef }) => {
     );
 };
 
-export default ApiKeyInput;
+export default React.memo(ApiKeyInput);

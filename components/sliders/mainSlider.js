@@ -7,18 +7,14 @@ import React, {
   useMemo
 } from 'react';
 import {
-  BookOpen, MessageSquare, Building2, ChevronDown,
-  Cog, Database, Shield, BarChart3, LogOut, Mail, MessageSquareMore,
-  Settings2, AlertTriangle, UserPlus,
+  Building2, ChevronDown,
+  Cog, LogOut, Mail,
+  Settings2,
   ChevronRight, ChevronLeft,
-  Bot,
   MonitorPlayIcon,
   MessageCircleMoreIcon,
   MessageSquareMoreIcon,
-  Blocks,
   User,
-  Workflow,
-  FileSliders,
   AlignJustify,
   FileText
 } from 'lucide-react';
@@ -36,44 +32,7 @@ import Protected from '../protected';
 import BridgeSlider from './bridgeSlider';
 import { AddIcon, KeyIcon } from '../Icons';
 import ThemeToggle from '../UI/ThemeUi';
-
-/* -------------------------------------------------------------------------- */
-/*                                    Consts                                  */
-/* -------------------------------------------------------------------------- */
-
-const ITEM_ICONS = {
-  org: <Building2 size={16} />,
-  agents: <Bot size={16} />,
-  orchestratal_model: <Workflow size={16} />,
-  chatbotConfig: <FileSliders size={16} />,
-  chatbot: <MessageSquare size={16} />,
-  pauthkey: <Shield size={16} />,
-  apikeys: <Database size={16} />,
-  alerts: <AlertTriangle size={16} />,
-  invite: <UserPlus size={16} />,
-  metrics: <BarChart3 size={16} />,
-  knowledge_base: <BookOpen size={16} />,
-  feedback: <MessageSquareMore size={16} />,
-  RAG_embed: <Blocks size={16} /> ,
-  integration: <Blocks size={16} />
-};
-
-const NAV_SECTIONS = [
-  { items: ['agents', 'orchestratal_model', 'chatbotConfig','knowledge_base'] },
-  { title: 'SECURITY & ACCESS', items: ['pauthkey', 'apikeys'] },
-  { title: 'MONITORING & SUPPORT', items: ['alerts', 'metrics'] },
-  { title: 'Developer', items: ['integration', 'RAG_embed'] },
-  { title: 'TEAM & COLLABORATION', items: ['invite'] }
-];
-
-/* -------------------------------------------------------------------------- */
-/*                               Helper Components                            */
-/* -------------------------------------------------------------------------- */
-
-/** Small horizontal rule visible only when sidebar is collapsed */
-const HRCollapsed = () => (
-  <hr className="my-2 w-6 border-base-content/30 mx-auto" />
-);
+import { BetaBadge, DISPLAY_NAMES, HRCollapsed, ITEM_ICONS, NAV_SECTIONS } from '@/utils/mainSliderHelper';
 
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */
@@ -87,8 +46,6 @@ function MainSlider({ isEmbedUser }) {
 
   const pathParts = pathname.split('?')[0].split('/');
   const orgId = pathParts[2];
-  const bridgeId = pathParts[5];
-  const versionId = searchParams.get('version');
 
   const { userdetails, organizations } = useCustomSelector(state => ({
     userdetails: state.userDetailsReducer.userDetails,
@@ -147,27 +104,6 @@ function MainSlider({ isEmbedUser }) {
       setIsMobileVisible(false);
     }
   }, [isSideBySideMode, pathParts.length, isMobile]);
-
-  /* ------------------------------------------------------------------------ */
-  /*                                 Helpers                                  */
-  /* ------------------------------------------------------------------------ */
-
-  /** Nice display names for items */
-  const displayName = key => {
-    const names = {
-      orchestratal_model: 'Orchestral Model',
-      knowledge_base: 'Knowledge base',
-      chatbotConfig: 'Configure Chatbot',
-      feedback: 'Feedback',
-      tutorial: 'Tutorial',
-      'speak-to-us': 'Speak to Us',
-      integration: 'GTWY as Embed',
-      settings: 'Settings',
-      RAG_embed: 'RAG as Embed',
-      invite: 'Members'
-    };
-    return names[key] || key.charAt(0).toUpperCase() + key.slice(1);
-  };
 
   /** Logout handler */
   const handleLogout = useCallback(async () => {
@@ -300,12 +236,6 @@ function MainSlider({ isEmbedUser }) {
     setIsMobileVisible(prev => !prev);
   };
 
-  const betaBadge = () =>{
-    return(
-      <span className="badge badge-success mb-1 text-base-100 text-xs">Beta</span>
-    )
-  }
-
   /* ------------------------------------------------------------------------ */
   /*                                  Render                                  */
   /* ------------------------------------------------------------------------ */
@@ -435,8 +365,8 @@ function MainSlider({ isEmbedUser }) {
                           <div className="shrink-0">{ITEM_ICONS[key]}</div>
                           {showSidebarContent && (
                            <div className='flex items-center gap-2 justify-center'>
-                             <span className="font-medium text-sm truncate">{displayName(key)}</span> 
-                             <span>{key === 'orchestratal_model' && betaBadge()}</span>
+                             <span className="font-medium text-sm truncate">{DISPLAY_NAMES(key)}</span> 
+                             <span>{key === 'orchestratal_model' && <BetaBadge/>}</span>
                            </div>
                           )}
                         </button>
@@ -625,7 +555,7 @@ function MainSlider({ isEmbedUser }) {
             style={{ top: tooltipPos.top - 20, left: tooltipPos.left }}
           >
             <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-base-300 border rotate-45 -left-1 border-r-0 border-b-0 border-base-300" />
-            {displayName(hovered)}
+            {DISPLAY_NAMES(hovered)}
           </div>
         )}
 

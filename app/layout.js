@@ -1,5 +1,6 @@
 import { Syne } from "next/font/google";
 import "./globals.css";
+import "../styles/performance-optimizations.css";
 import Wrapper from "@/wrapper/Wrapper";
 import Head from "next/head";
 import Script from "next/script";
