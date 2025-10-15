@@ -120,7 +120,7 @@ function AddTestCaseModal({ testCaseConversation, setTestCaseConversation }) {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start z-low-medium min-w-[100vw] min-h-[100vh] overflow-auto py-4">
                 <form onSubmit={handleSubmit} className="bg-base-200 rounded-lg shadow-2xl max-w-5xl w-[90vw] overflow-auto relative flex flex-col">
                     <div className="flex justify-between items-center p-6 pb-0 sticky top-0 bg-base-100 z-low">
-                        <h3 className="text-xl font-semibold">Create Test Case</h3>
+                        <h3 className="text-xl font-semibold">Add Test Case</h3>
                         <button type="button" className="btn btn-circle btn-ghost btn-sm" onClick={handleClose}>✕</button>
                     </div>
                     

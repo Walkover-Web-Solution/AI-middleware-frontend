@@ -304,10 +304,16 @@ const InputConfigComponent = ({
                     <div className="collapse-title min-h-[0.75rem] text-xs font-medium flex items-center gap-1 p-2">
                         <div className="flex items-center gap-2 ">
                             <span className="text-nowrap">Default Variables</span>
-                            <p role="alert" className="label-text-alt alert p-2 bg-base-200">
-                                <InfoIcon size={16} className="" />
-                                Use these variables in prompt to get their functionality
+                                                        <p role="alert" className="label-text-alt alert p-2 bg-base-200">
+
+                             &#123;&#123;current_time_and_date&#125;&#125;,
+                                
+                                &#123;&#123;pre_function&#125;&#125;,
+                                
+                                &#123;&#123;timezone&#125;&#125;
+                               
                             </p>
+                            
                         </div>
                         <div className="ml-auto">
                             <ChevronDownIcon className="collapse-arrow" size={12} />
@@ -316,6 +322,10 @@ const InputConfigComponent = ({
                     <div className="collapse-content">
                         <div className="text-xs">
                             <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-1">
+                                <InfoIcon size={14} className="mb-1" />
+                            Use these variables in prompt to get their functionality
+                                </div>
                                 <div className="flex items-center gap-1">
                                     <span className="inline-block w-1 h-1 bg-black rounded-full"></span>
                                     <span>&#123;&#123;current_time_and_date&#125;&#125;</span>
