@@ -1,0 +1,147 @@
+/* Performance optimizations for MainSlider and other components */
+
+/* GPU acceleration for sidebar animations */
+.sidebar {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Optimize transitions for low-end devices */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Performance optimizations for devices with limited hardware */
+@media (max-width: 768px) and (max-device-memory: 2GB) {
+  .sidebar {
+    transition-duration: 150ms !important;
+    transition-timing-function: ease-out !important;
+  }
+  
+  .sidebar .transition-all {
+    transition-property: background-color !important;
+    transition-duration: 100ms !important;
+  }
+}
+
+/* Optimize for devices with low CPU cores */
+@supports (not (backdrop-filter: blur(1px))) {
+  .sidebar {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+/* Force hardware acceleration on capable devices */
+.sidebar-optimized {
+  will-change: transform, width, opacity;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Disable expensive effects on low-end devices */
+@media (max-width: 768px) and (max-device-memory: 1GB) {
+  .sidebar {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  
+  .sidebar .shadow-lg {
+    box-shadow: none !important;
+  }
+  
+  .sidebar .rounded-xl {
+    border-radius: 0 !important;
+  }
+}
+
+/* Optimize scrolling performance */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Reduce paint operations */
+.sidebar-item {
+  contain: layout style paint;
+}
+
+/* Optimize hover effects */
+.sidebar-item:hover {
+  transform: translateZ(0);
+}
+
+/* CSS-only animations for very low-end devices */
+.sidebar-css-only {
+  transition: width 100ms linear !important;
+}
+
+.sidebar-css-only * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Ultra-smooth mode for very low frame rates */
+.sidebar-ultra-smooth {
+  transition: width 80ms linear !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+/* Very aggressive optimizations for extremely low-end devices */
+@media (max-width: 768px) and (max-device-memory: 1GB) {
+  .sidebar {
+    transition: width 80ms linear !important;
+    transform: none !important;
+    will-change: auto !important;
+    contain: strict !important;
+    backdrop-filter: none !important;
+    filter: none !important;
+  }
+  
+  .sidebar * {
+    transition-duration: 50ms !important;
+    transition-timing-function: linear !important;
+  }
+  
+  .sidebar-item {
+    contain: layout style !important;
+    transform: none !important;
+  }
+  
+  .sidebar .blur {
+    backdrop-filter: none !important;
+    filter: none !important;
+  }
+}
+
+/* Frame rate specific optimizations */
+@media (prefers-reduced-motion: no-preference) {
+  .sidebar-high-fps {
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .sidebar-medium-fps {
+    transition: all 150ms ease-out;
+  }
+  
+  .sidebar-low-fps {
+    transition: width 100ms linear;
+  }
+  
+  .sidebar-very-low-fps {
+    transition: width 80ms linear;
+    transform: none !important;
+    will-change: auto !important;
+  }
+}

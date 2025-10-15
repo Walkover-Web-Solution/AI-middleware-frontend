@@ -9,6 +9,7 @@ import Protected from "@/components/protected";
 import { getIconOfService } from "@/utils/utility";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import InfoTooltip from "@/components/InfoTooltip";
+import React from "react";
 
 function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser }) {
     const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey, shouldPromptShow, showDefaultApikeys, apiKeyObjectIdData } = useCustomSelector((state) => {
@@ -256,4 +257,5 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
         </div>
     );
 }
-export default Protected(ServiceDropdown);
+
+export default Protected(React.memo(ServiceDropdown));

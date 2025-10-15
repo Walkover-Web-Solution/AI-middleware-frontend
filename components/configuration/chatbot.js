@@ -9,7 +9,7 @@ const Chatbot = ({ params, searchParams }) => {
     bridgeSlugName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.slugName,
     bridgeType: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.bridgeType,
     chatbot_token: state?.ChatBot?.chatbot_token || '',
-    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
+    variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[searchParams?.version]?.variables || [],
     configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.configuration,
     service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version]?.service,
   }));
@@ -73,7 +73,7 @@ const Chatbot = ({ params, searchParams }) => {
 
   // Initialize chatbot when all required data is available
   useEffect(() => {
-    if (!bridgeName || !bridgeSlugName || !bridgeType || !searchParams?.version) {
+    if (!bridgeName || !bridgeSlugName || !searchParams?.version) {
       return;
     }
 
@@ -94,10 +94,7 @@ const Chatbot = ({ params, searchParams }) => {
       }
     }, 300);
 
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [chatbot_token]);
+  }, [chatbot_token, searchParams?.version, bridgeSlugName, bridgeName, variables]);
 
   return (
     <>

@@ -1,7 +1,7 @@
 "use client";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
-import { updateVariables } from "@/store/reducer/bridgeReducer";
+import { updateVariables } from "@/store/reducer/variableReducer";
 import { sendDataToParent, } from "@/utils/utility";
 import { ChevronUpIcon, ChevronDownIcon, InfoIcon, TrashIcon } from "@/components/Icons";
 import { useEffect, useRef, useState } from "react";
@@ -15,7 +15,7 @@ import Protected from "./protected";
 const AddVariable = ({ params, isEmbedUser, searchParams }) => {
   const versionId = searchParams?.version;
   const { variablesKeyValue, prompt, isFirstVariable, bridgeName } = useCustomSelector((state) => ({
-    variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.variables || [],
+    variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[versionId]?.variables || [],
     prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.prompt || "",
     isFirstVariable: state.userDetailsReducer.userDetails?.meta?.onboarding?.Addvariables || "",
     bridgeName: state?.bridgeReducer?.allBridgesMap?.[params?.id]?.name || "",

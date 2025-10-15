@@ -24,7 +24,7 @@ const Page = () => {
   const path = pathName?.split('?')[0].split('/');
   const orgId = path[2] || '';
   const { apikeyData, descriptions } = useCustomSelector((state) => ({
-    apikeyData: state?.bridgeReducer?.apikeys[orgId] || [],
+    apikeyData: state?.apiKeysReducer?.apikeys?.[orgId] || [],
     descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
   }));
   const [filterApiKeys, setFilterApiKeys] = useState(apikeyData);

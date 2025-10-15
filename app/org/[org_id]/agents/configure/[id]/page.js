@@ -1,20 +1,22 @@
 "use client";
 
-import ConfigurationPage from "@/components/configuration/ConfigurationPage";
-import Chat from "@/components/configuration/chat";
-import Chatbot from "@/components/configuration/chatbot";
+import dynamic from "next/dynamic";
 import Protected from "@/components/protected";
+import { useConfigurationSelector } from "@/customHooks/useOptimizedSelector";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { getAllBridgesAction, getSingleBridgesAction } from "@/store/action/bridgeAction";
-import { useEffect, useRef, useState, use, useCallback } from "react";
-import WebhookForm from "@/components/BatchApi";
+import { useEffect, useRef, useState, use, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
-import { updateTitle, generateRandomID } from "@/utils/utility";
-import AgentSetupGuide from "@/components/AgentSetupGuide";
-import { useRouter } from "next/navigation";
-import PromptHelper from "@/components/PromptHelper";
-import { setIsFocusReducer, setThreadIdForVersionReducer } from "@/store/reducer/bridgeReducer";
 import { updateBridgeVersionAction } from "@/store/action/bridgeAction";
+import { setIsFocusReducer, setThreadIdForVersionReducer } from "@/store/reducer/bridgeReducer";
+import { updateTitle, generateRandomID } from "@/utils/utility";
+import { useRouter } from "next/navigation";
+import Chatbot from "@/components/configuration/chatbot";
+import AgentSetupGuide from "@/components/AgentSetupGuide";
+const ConfigurationPage = dynamic(() => import("@/components/configuration/ConfigurationPage"));
+const Chat = dynamic(() => import("@/components/configuration/chat"), { loading: () => null, });
+const WebhookForm = dynamic(() => import("@/components/BatchApi"), { ssr: false, });
+const PromptHelper = dynamic(() => import("@/components/PromptHelper"), { ssr: false, });
 
 export const runtime = 'edge';
 
@@ -26,69 +28,112 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   const router = useRouter();
   const mountRef = useRef(false);
   const dispatch = useDispatch();
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [leftWidth, setLeftWidth] = useState(50); // Width of the left panel in percentage
-  const [isResizing, setIsResizing] = useState(false);
+  
+  // Consolidated UI state - reduced from 15+ individual states
+  const [uiState, setUiState] = useState(() => ({
+    isDesktop: typeof window !== 'undefined' ? window.innerWidth >= 710 : false,
+    leftWidth: 50,
+    isResizing: false,
+    isPromptHelperOpen: false,
+    showNotes: true,
+    showPromptHelper: true
+  }));
 
   // Ref for the main container to calculate percentage-based width
   const containerRef = useRef(null);
 
-  const { bridgeType, versionService, bridgeName, allbridges, isFocus, reduxPrompt, bridge} = useCustomSelector((state) => {
-    const bridgeData = state?.bridgeReducer?.allBridgesMap?.[resolvedParams?.id];
-    const allbridges = state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || [];
-    const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[resolvedParams?.id]?.[resolvedSearchParams?.version];
-    const isFocus = state?.bridgeReducer?.isFocus;
-    return {
-      bridgeType: bridgeData?.bridgeType,
-      versionService: versionData?.service,
-      bridgeName: bridgeData?.name,
-      allbridges,
-      isFocus,
-      reduxPrompt: versionData?.configuration?.prompt || "",
-      bridge: versionData || {},
+  // Optimized selector with better memoization
+  const { bridgeType, versionService, bridgeName, isFocus, reduxPrompt, bridge } = useConfigurationSelector(resolvedParams, resolvedSearchParams);
+  
+  // Separate selector for allbridges to prevent unnecessary re-renders
+  const allbridges = useCustomSelector(
+    useCallback((state) => state?.bridgeReducer?.org?.[resolvedParams?.org_id]?.orgs || [], [resolvedParams?.org_id])
+  );
+  // Consolidated prompt state - reduced from 8 individual states
+  const [promptState, setPromptState] = useState(() => ({
+    prompt: "",
+    thread_id: bridge?.thread_id || generateRandomID(),
+    messages: [],
+    hasUnsavedChanges: false,
+    newContent: ''
+  }));
 
+  // Memoized mobile view detection
+  const isMobileView = useMemo(() => 
+    typeof window !== 'undefined' ? window.innerWidth < 710 : false, 
+    [uiState.isDesktop]
+  );
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleGlobalKeyDown = (event) => {
+      // Close PromptHelper on Escape key (global)
+      if(event.key ==='tab' && uiState.isPromptHelperOpen){
+        event.preventDefault();
+        // setUiState(prev => ({ ...prev, isPromptHelperOpen: false }));
+      }
+      if (event.key === 'Escape' && uiState.isPromptHelperOpen) {
+        event.preventDefault();
+        setUiState(prev => ({ ...prev, isPromptHelperOpen: false }));
+        // Remove focus from textarea when PromptHelper closes
+        if (promptTextAreaRef.current) {
+          const textarea = promptTextAreaRef.current.querySelector('textarea');
+          if (textarea) {
+            textarea.blur();
+          }
+        }
+      }
     };
-  });
-  // PromptHelper state management
-  const [isMobileView, setIsMobileView] = useState(typeof window !== 'undefined' ? window.innerWidth < 710 : false);
-  const [isPromptHelperOpen, setIsPromptHelperOpen] = useState(false);
-  const [prompt, setPrompt] = useState("");
-  const initialThreadId = bridge?.thread_id || generateRandomID();
-  const [thread_id, setThreadId] = useState(initialThreadId);
-  const [messages, setMessages] = useState([]);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [newContent, setNewContent] = useState('');
 
-  // Track PromptHelper section visibility states
-  const [showNotes, setShowNotes] = useState(true);
-  const [showPromptHelper, setShowPromptHelper] = useState(true);
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [uiState.isPromptHelperOpen]);
 
-  // Calculate width based on visible sections
-  const getConfigurationWidth = () => {
-    if (!isPromptHelperOpen) return leftWidth; // Normal resizable behavior when closed
-    
-    // When PromptHelper is open, check which sections are visible
-    if (showNotes && showPromptHelper) {
-      return 33.33; // 1/3 when both sections are visible
-    } else {
-      return 50; // 1/2 when only one section is visible
+  // Remove focus from textarea when PromptHelper closes (any method)
+  useEffect(() => {
+    if (!uiState.isPromptHelperOpen && promptTextAreaRef.current) {
+      const textarea = promptTextAreaRef.current.querySelector('textarea');
+      if (textarea && document.activeElement === textarea) {
+        textarea.blur();
+      }
     }
-  };
+  }, [uiState.isPromptHelperOpen]);
+  // Memoized width calculation to prevent unnecessary recalculations
+  const configurationWidth = useMemo(() => {
+    if (!uiState.isPromptHelperOpen) return uiState.leftWidth;
+    
+    if (uiState.showNotes && uiState.showPromptHelper) {
+      return 33.33;
+    } else {
+      return 50;
+    }
+  }, [uiState.isPromptHelperOpen, uiState.leftWidth, uiState.showNotes, uiState.showPromptHelper]);
+
+  // Optimized UI state updates
+  const updateUiState = useCallback((updates) => {
+    setUiState(prev => ({ ...prev, ...updates }));
+  }, []);
 
   useEffect(() => {
-    if (isPromptHelperOpen)
-        setLeftWidth(44);
-    else
-        setLeftWidth(50);
-  }, [isPromptHelperOpen])
+    updateUiState({ 
+      leftWidth: uiState.isPromptHelperOpen ? 44 : 50 
+    });
+  }, [uiState.isPromptHelperOpen, updateUiState]);
 
   const leftPanelScrollRef = useRef(null);
   const handleCloseTextAreaFocus = useCallback(() => {
     if (typeof window.closeTechDoc === 'function') {
       window.closeTechDoc();
     }
-    setIsPromptHelperOpen(false);
-  }, [isPromptHelperOpen]);
+    updateUiState({ isPromptHelperOpen: false });
+    // Remove focus from textarea when PromptHelper closes
+    if (promptTextAreaRef.current) {
+      const textarea = promptTextAreaRef.current.querySelector('textarea');
+      if (textarea) {
+        textarea.blur();
+      }
+    }
+  }, [updateUiState]);
   const savePrompt = useCallback((newPrompt) => {
     const newValue = (newPrompt || "").trim();
 
@@ -103,48 +148,49 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
       }));
     }
   }, [dispatch, resolvedSearchParams?.version, reduxPrompt]);
-  
+
   const scrollContainer = leftPanelScrollRef.current;
   const scrollToTextarea = () => {
     if (leftPanelScrollRef.current && promptTextAreaRef.current) {
       const textareaContainer = promptTextAreaRef.current;
-      
 
-      
+
+
       // Check if elements exist and are in the DOM
       if (!scrollContainer.contains(textareaContainer)) {
         return;
       }
-      
+
       // Get the offset position of textarea container relative to scroll container
       let offsetTop = 0;
       let element = textareaContainer;
-      
+
       // Calculate the total offset from the textarea container to the scroll container
       while (element && element !== scrollContainer) {
         offsetTop += element.offsetTop;
         element = element.offsetParent;
         if (element === scrollContainer) break;
       }
-      
-      
+
+
       // Scroll to position with some padding from top
       const targetScrollTop = offsetTop; // 50px padding from top
-    
-      
+
+
       scrollContainer.scrollTo({
         top: Math.max(0, targetScrollTop),
         behavior: 'smooth'
       });
     }
   };
-  useEffect(()=>{
-    if(!isDesktop){
-    setIsPromptHelperOpen(false)
-    }
-  },[isDesktop])
   useEffect(() => {
-    if (isPromptHelperOpen) {
+    if (!uiState.isDesktop) {
+      updateUiState({ isPromptHelperOpen: false });
+    }
+  }, [uiState.isDesktop, updateUiState]);
+  useEffect(() => {
+    const scrollContainer = leftPanelScrollRef.current;
+    if (uiState.isPromptHelperOpen) {
       const timeoutId = setTimeout(() => {
         scrollToTextarea();
       }, 200);
@@ -155,14 +201,14 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     } else {
       if (scrollContainer) {
         scrollContainer.style.overflowY = 'auto';
-        scrollContainer.style.overflowX='hidden'
+        scrollContainer.style.overflowX = 'hidden'
       }
     }
-  }, [isPromptHelperOpen]);
+  }, [uiState.isPromptHelperOpen]);
   // PromptHelper effects
   useEffect(() => {
-    dispatch(setIsFocusReducer(isPromptHelperOpen));
-  }, [isPromptHelperOpen, dispatch]);
+    dispatch(setIsFocusReducer(uiState.isPromptHelperOpen));
+  }, [uiState.isPromptHelperOpen, dispatch]);
 
   // Ensure thread_id exists in Redux for this bridge/version on mount
   useEffect(() => {
@@ -170,27 +216,34 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
       dispatch(setThreadIdForVersionReducer({
         bridgeId: resolvedParams.id,
         versionId: resolvedSearchParams.version,
-        thread_id: initialThreadId,
+        thread_id: promptState.thread_id,
       }));
     }
-  }, [dispatch, resolvedParams?.id, resolvedSearchParams?.version, initialThreadId]);
+  }, [dispatch, resolvedParams?.id, resolvedSearchParams?.version, promptState.thread_id]);
 
   // Update prompt state when reduxPrompt changes
   useEffect(() => {
-    setPrompt(reduxPrompt);
+    setPromptState(prev => ({ ...prev, prompt: reduxPrompt }));
   }, [reduxPrompt]);
 
-  // Enhanced responsive detection
+  // Enhanced responsive detection with throttling
   useEffect(() => {
+    let timeoutId;
     const handleResize = () => {
-      const desktop = window.innerWidth >= 710;
-      setIsDesktop(desktop);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        const desktop = window.innerWidth >= 710;
+        updateUiState({ isDesktop: desktop });
+      }, 100); // Throttle resize events
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeoutId);
+    };
+  }, [updateUiState]);
 
   useEffect(() => {
     if (bridgeName) {
@@ -202,12 +255,23 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
   useEffect(() => {
     (async () => {
       let bridges = allbridges;
-      if (allbridges?.length === 0) {
-        await dispatch(getAllBridgesAction((data) => {
-          bridges = data
-        }));
+      if (!Array.isArray(bridges) || bridges.length === 0) {
+        await dispatch(
+          getAllBridgesAction((data) => {
+            // Normalize data from callback to an array
+            if (Array.isArray(data)) {
+              bridges = data;
+            } else if (Array.isArray(data?.orgs)) {
+              bridges = data.orgs;
+            } else {
+              bridges = [];
+            }
+          })
+        );
       }
-      const agentName = bridges?.find((bridge) => bridge._id === resolvedParams?.id)
+      const agentName = Array.isArray(bridges)
+        ? bridges.find((bridge) => bridge?._id === resolvedParams?.id)
+        : null;
       if (!agentName) {
         router.push(`/org/${resolvedParams?.org_id}/agents`);
         return
@@ -256,7 +320,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
 
   // --- REFACTORED RESIZER LOGIC ---
   useEffect(() => {
-    if (!isDesktop) return;
+    if (!uiState.isDesktop) return;
 
     const resizer = document.querySelector(".resizer");
     const container = containerRef.current;
@@ -268,7 +332,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
 
     const mouseDownHandler = (e) => {
       e.preventDefault(); // Prevent text selection
-      setIsResizing(true);
+      updateUiState({ isResizing: true });
       x = e.clientX;
 
       const leftSide = resizer.previousElementSibling;
@@ -296,11 +360,11 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
 
       // Constrain the width and update the React state
       const constrainedWidth = Math.max(25, Math.min(newPercentageWidth, 75));
-      setLeftWidth(constrainedWidth);
+      updateUiState({ leftWidth: constrainedWidth });
     };
 
     const mouseUpHandler = () => {
-      setIsResizing(false);
+      updateUiState({ isResizing: false });
 
       // Clean up the overlay and event listeners
       if (overlay) {
@@ -317,107 +381,108 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
     return () => {
       resizer.removeEventListener("mousedown", mouseDownHandler);
     };
-  }, [isDesktop]); // Rerun when switching between desktop/mobile
+  }, [uiState.isDesktop, updateUiState]); // Rerun when switching between desktop/mobile
 
 
   return (
     <div
       ref={containerRef} // Add ref to the main container
-      className={`w-full h-full transition-all duration-700 ease-in-out overflow-x-hidden ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : ' overflow-y-hidden'} ${isDesktop ? 'flex flex-row overflow-x-hidden overflow-y-hidden' : 'overflow-y-auto'}`}
+      className={`w-full h-full transition-all duration-700 ease-in-out overflow-x-hidden ${!isFocus ? 'max-h-[calc(100vh-4rem)]' : ' overflow-y-hidden'} ${uiState.isDesktop ? 'flex flex-row overflow-x-hidden overflow-y-hidden' : 'overflow-y-auto'}`}
     >
       {/* Configuration Panel */}
       <div
         className={`
-          ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen border-b border-base-300'} 
+          ${uiState.isDesktop ? 'h-full flex flex-col' : 'min-h-screen border-b border-base-300'} 
           bg-base-100 transition-all duration-700 ease-in-out transform
         `}
-        style={isDesktop ? { width: `${isFocus? `${getConfigurationWidth()}%` : `${leftWidth}%`}` } : {}}
+        style={uiState.isDesktop ? { width: `${isFocus ? `${configurationWidth}%` : `${uiState.leftWidth}%`}` } : {}}
       >
-        <div ref={leftPanelScrollRef} className={`${isDesktop ? ' flex-1 overflow-y-auto overflow-x-hidden' : ''} px-4 py-4 transition-all duration-700 ease-in-out transform`}>
+        <div ref={leftPanelScrollRef} className={`${uiState.isDesktop ? ' flex-1 overflow-y-auto overflow-x-hidden' : ''} px-4 py-4 transition-all duration-700 ease-in-out transform`}>
           <ConfigurationPage
             apiKeySectionRef={apiKeySectionRef}
             promptTextAreaRef={promptTextAreaRef}
             params={resolvedParams}
             searchParams={resolvedSearchParams}
             isEmbedUser={isEmbedUser}
-            // PromptHelper props
-            isPromptHelperOpen={isPromptHelperOpen}
-            setIsPromptHelperOpen={setIsPromptHelperOpen}
-            prompt={prompt}
-            setPrompt={setPrompt}
-            messages={messages}
-            setMessages={setMessages}
-            thread_id={thread_id}
-            setThreadId={setThreadId}
-            hasUnsavedChanges={hasUnsavedChanges}
-            setHasUnsavedChanges={setHasUnsavedChanges}
-            setNewContent={setNewContent}
+            uiState={uiState}
+            updateUiState={updateUiState}
+            promptState={promptState}
+            setPromptState={setPromptState}
             handleCloseTextAreaFocus={handleCloseTextAreaFocus}
             savePrompt={savePrompt}
             isMobileView={isMobileView}
-            newContent={newContent}
           />
         </div>
       </div>
 
       {/* Desktop Resizer */}
-      {isDesktop && (
+      {uiState.isDesktop && (
         <div
-          className={`w-1 hover:bg-blue-400 cursor-col-resize transition-colors duration-700 flex-shrink-0 resizer ${isResizing ? 'bg-blue-500' : 'bg-base-200'}`}
+          className={`w-1 hover:bg-blue-400 cursor-col-resize transition-colors duration-700 flex-shrink-0 resizer ${uiState.isResizing ? 'bg-blue-500' : 'bg-base-200'}`}
         />
       )}
       {/* Chat Panel (Right Side) */}
       <div
         className={`
-          ${isDesktop ? 'h-full flex flex-col' : 'min-h-screen'} 
+          ${uiState.isDesktop ? 'h-full flex flex-col' : 'min-h-screen'} 
           relative transition-all duration-700 ease-in-out transform
         `}
-        style={isDesktop ? { width: `${isFocus ? `${100 - getConfigurationWidth()}%` : `${100 - leftWidth}%`}` } : {}}
         id="parentChatbot"
+        style={uiState.isDesktop ? { width: `${isFocus ? `${100 - configurationWidth}%` : `${100 - uiState.leftWidth}%`}` } : {}}
       >
-        <div className={`${isDesktop && !isFocus ? 'flex-1 overflow-y-auto overflow-x-hidden' : ' h-full'}`}>
-          <div className={`${isDesktop ? 'h-full flex flex-col' : ''}`}>
-            {!isPromptHelperOpen ? <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} /> : null}
-            {isPromptHelperOpen ? ( <PromptHelper
-                  isVisible={isPromptHelperOpen && !isMobileView}
-                  params={resolvedParams}
-                  onClose={handleCloseTextAreaFocus}
-                  savePrompt={savePrompt}
-                  setPrompt={setPrompt}
-                  messages={messages}
-                  setMessages={setMessages}
-                  thread_id={thread_id}
-                  onResetThreadId={() => {
-                    const newId = generateRandomID();
-                    setThreadId(newId);
-                    setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
-                      bridgeId: resolvedParams?.id,
-                      versionId: resolvedSearchParams?.version,
-                      thread_id: newId,
-                    }));
-                  }}
-                  prompt={prompt}
-                  hasUnsavedChanges={hasUnsavedChanges}
-                  setHasUnsavedChanges={setHasUnsavedChanges}
-                  setNewContent={setNewContent}
-                  isEmbedUser={isEmbedUser}
-                  // Toggle states
-                  showNotes={showNotes}
-                  setShowNotes={setShowNotes}
-                  showPromptHelper={showPromptHelper}
-                  setShowPromptHelper={setShowPromptHelper}
-                />) : null}
-            {!sessionStorage.getItem('orchestralUser') ? <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
-              {bridgeType === 'batch' && versionService === 'openai' && !isPromptHelperOpen ? (
+        <div className={`${uiState.isDesktop && !isFocus ? 'flex-1 overflow-y-auto overflow-x-hidden' : ' h-full'}`}>
+          <div className={`${uiState.isDesktop ? 'h-full flex flex-col' : ''}`}>
+            {!uiState.isPromptHelperOpen ? <AgentSetupGuide apiKeySectionRef={apiKeySectionRef} promptTextAreaRef={promptTextAreaRef} params={resolvedParams} searchParams={resolvedSearchParams} /> : null}
+            {uiState.isPromptHelperOpen ? (() => {
+              return (<PromptHelper
+                isVisible={uiState.isPromptHelperOpen && !isMobileView}
+                params={resolvedParams}
+                onClose={handleCloseTextAreaFocus}
+                savePrompt={savePrompt}
+                setPrompt={(value) => {
+                  setPromptState(prev => ({ ...prev, prompt: value }));
+                  savePrompt(value);
+                }}
+                messages={promptState.messages}
+              setMessages={(value) => {
+                if (typeof value === 'function') {
+                  setPromptState(prev => ({ ...prev, messages: value(prev.messages) }));
+                } else {
+                  setPromptState(prev => ({ ...prev, messages: value }));
+                }
+              }}
+              thread_id={promptState.thread_id}
+              onResetThreadId={() => {
+                const newId = generateRandomID();
+                setPromptState(prev => ({ ...prev, thread_id: newId }));
+                setThreadIdForVersionReducer && dispatch(setThreadIdForVersionReducer({
+                  bridgeId: resolvedParams?.id,
+                  versionId: resolvedSearchParams?.version,
+                  thread_id: newId,
+                }));
+              }}
+              prompt={promptState.prompt}
+              hasUnsavedChanges={promptState.hasUnsavedChanges}
+              setHasUnsavedChanges={(value) => setPromptState(prev => ({ ...prev, hasUnsavedChanges: value }))}
+              setNewContent={(value) => setPromptState(prev => ({ ...prev, newContent: value }))}
+              isEmbedUser={isEmbedUser}
+              showNotes={uiState.showNotes}
+              setShowNotes={(value) => updateUiState({ showNotes: value })}
+              showPromptHelper={uiState.showPromptHelper}
+              setShowPromptHelper={(value) => updateUiState({ showPromptHelper: value })}
+            />);
+            })() : null}
+            {!sessionStorage.getItem('orchestralUser') ? <div className={`${uiState.isDesktop ? 'flex-1 min-h-0' : ''}`}>
+              {bridgeType === 'batch' && versionService === 'openai' && !uiState.isPromptHelperOpen ? (
                 <WebhookForm params={resolvedParams} searchParams={resolvedSearchParams} />
-              )  : <Chat params={resolvedParams} searchParams={resolvedSearchParams} />}
-            </div> : <div className={`${isDesktop ? 'flex-1 min-h-0' : ''}`}>
+              ) : <Chat params={resolvedParams} searchParams={resolvedSearchParams} />}
+            </div> : <div className={`${uiState.isDesktop ? 'flex-1 min-h-0' : ''}`}>
               <Chat params={resolvedParams} searchParams={resolvedSearchParams} />
             </div>}
           </div>
         </div>
+        <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
       </div>
-      <Chatbot params={resolvedParams} searchParams={resolvedSearchParams} />
     </div>
   );
 };
