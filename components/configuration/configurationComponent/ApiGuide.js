@@ -64,10 +64,10 @@ const ApiGuide = ({ params, searchParams, modelType, isEmbedUser }) => {
   return (
     <div className="min-h-screen gap-4 flex flex-col">
       {!isEmbedUser && <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-md p-4">
-        <Section title="Step 1" caption="Create `pauthkey`" />
+        <Section title="Step 1" caption="Create Auth Key" />
         <p className=" text-sm">
-          Follow the on-screen instructions to create a new API key. Ignore if already created
-          <br /> <Link href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create pauthkey</Link>
+          Follow the on-screen instructions to create a new Auth Key. Ignore if already created
+          <br /> <Link href={`/org/${params.org_id}/pauthkey`} target='_blank' className="link link-primary">Create Auth Key</Link>
         </p>
       </div>}
       <div className="flex flex-col gap-4 bg-base-100 rounded-lg shadow-md p-4">

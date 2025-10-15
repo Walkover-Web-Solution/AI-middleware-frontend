@@ -90,17 +90,7 @@ const ResponseStyleDropdown = ({ params, searchParams }) => {
 
   return (
     <label className="form-control w-full">
-      <div className="flex items-center pb-1">
         <InfoTooltip tooltipContent={"Select the depth of response (optional)."} >
-          <div
-            className="label-text info"
-          >
-            Response Style
-          </div>
-        </InfoTooltip>
-      </div>
-
-
       <div className="flex items-center gap-2">
         <select
           value={selectedStyle}
@@ -120,6 +110,7 @@ const ResponseStyleDropdown = ({ params, searchParams }) => {
           ))}
         </select>
       </div>
+      </InfoTooltip>
     </label>
   );
 };
