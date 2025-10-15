@@ -44,7 +44,8 @@ const{knowledgeBaseData, descriptions} = useCustomSelector((state) => ({
     actual_name: item?.name,
   }));
   const handleUpdateKnowledgeBase = (item) => {
-    setSelectedKnowledgeBase(item);
+    const originalItem = knowledgeBaseData.find(kb => kb._id === item._id);
+    setSelectedKnowledgeBase(originalItem);
     openModal(MODAL_TYPE?.KNOWLEDGE_BASE_MODAL)
   };
 
