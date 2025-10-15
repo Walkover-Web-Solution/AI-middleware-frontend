@@ -17,7 +17,7 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
     <dialog className="modal modal-middle mx-auto outline-none" ref={toolsDataModalRef}>
       <div className="relative bg-base-100 rounded-lg shadow-lg p-6 w-[80%] max-w-[80vw] overscroll-none">
         <h2 className="font-bold mb-1">Function Data:</h2>
-        <div className="overflow-y-scroll max-h-[70vh] max-w-auto overflow-x-hidden">
+        <div className="overflow-y-scroll max-h-[70vh] max-w-auto break-words">
           {toolsData ? (
             <>
               <div className="mt-4">
@@ -30,11 +30,9 @@ const ToolsDataModal = ({ toolsData, handleClose, toolsDataModalRef, integration
                           {integrationData[value]?.title}<span>({value})</span>
                         </p>
                       ) : (
-                        <div className="max-w-full ">
-                          <pre className="text-sm bg-base-200 p-2 rounded ">
-                            {formatValue(value)}
-                          </pre>
-                        </div>
+                        <pre className="text-sm bg-base-200 p-2   rounded whitespace-pre-wrap break-words">
+                          {formatValue(value)}
+                        </pre>
                       )}
                     </span>
                   </div>
