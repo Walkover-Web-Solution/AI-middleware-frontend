@@ -59,7 +59,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     }
   }, [bridge]);
   
-  const getAllConnectedAgents = useCallback(async (agentId, versionData, agentList, useVersionData = false, visited = new Set()) => {
+  const getAllConnectedAgents = useCallback(async (agentId, versionData, agentList, useVersionData = false, visited = new Set(), level = 0) => {
     if (!agentId || visited.has(agentId)) return [];  
     visited.add(agentId);
     let agent = useVersionData ? versionData : agentList?.find(a => a._id === agentId);
@@ -72,6 +72,13 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
         isVersionData: true
       };
     }
+    
+    // Add hierarchy information
+    agent = {
+      ...agent,
+      hierarchyLevel: level,
+      children: []
+    };
     
     let result = [agent];
     const connectedAgents = agent?.connected_agents || {};
@@ -98,17 +105,32 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
         updatedVersionData = versionData ? { ...versionData } : null;
       }
       
-      return getAllConnectedAgents(
+      const childAgents = await getAllConnectedAgents(
         connectedId,
         updatedVersionData,
         agentList,
         hasVersionId,
-        new Set([...visited])
+        new Set([...visited]),
+        level + 1
       );
+      
+      // Add children to parent agent
+      if (childAgents.length > 0) {
+        agent.children.push(...childAgents);
+      }
+      
+      return childAgents; // Return children for recursive building
     });
     
     const nestedResults = await Promise.all(nestedPromises);
-    return result.concat(nestedResults.flat());
+    
+    // If this is the root call (level 0), only return direct children, not the root agent itself
+    if (level === 0) {
+      return nestedResults.flat();
+    }
+    
+    // For nested calls, return the current agent with its children
+    return result;
   }, [dispatch]);
 
   useEffect(() => {
@@ -254,8 +276,24 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
     }));
   }, []);
 
+  // Helper function to get all agents recursively (flattened for operations)
+  const getAllAgentsFlat = useCallback((agents) => {
+    const result = [];
+    const traverse = (agentList) => {
+      agentList.forEach(agent => {
+        result.push(agent);
+        if (agent.children && agent.children.length > 0) {
+          traverse(agent.children);
+        }
+      });
+    };
+    traverse(agents);
+    return result;
+  }, []);
+
   const toggleAgentSelection = useCallback((agentId) => {
-    const agent = allConnectedAgents.find(a => a._id === agentId);
+    const flatAgents = getAllAgentsFlat(allConnectedAgents);
+    const agent = flatAgents.find(a => a._id === agentId);
     if (!agent?.haveToPublish) return;
     
     setSelectedAgentsToPublish(prev => {
@@ -267,27 +305,108 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       }
       return newSet;
     });
-  }, [allConnectedAgents]);
-  
+  }, [allConnectedAgents, getAllAgentsFlat]);
+
   const toggleSelectAllAgents = useCallback(() => {
-    const publishableAgents = allConnectedAgents
+    const flatAgents = getAllAgentsFlat(allConnectedAgents);
+    const publishableAgents = flatAgents
       .filter(agent => agent._id !== params?.id && agent?.haveToPublish)
       .map(agent => agent._id);
       
-    if (publishableAgents.length === 0) return;
-    
-    const allSelected = publishableAgents.every(agentId => selectedAgentsToPublish.has(agentId));
+    const allSelected = publishableAgents.every(agentId => 
+      selectedAgentsToPublish.has(agentId)
+    );
     
     if (allSelected) {
       setSelectedAgentsToPublish(new Set());
     } else {
       setSelectedAgentsToPublish(new Set(publishableAgents));
     }
-  }, [allConnectedAgents, params?.id, selectedAgentsToPublish]);
-
-  const toggleComparison = useCallback(() => {
+  }, [allConnectedAgents, params?.id, selectedAgentsToPublish, getAllAgentsFlat]);
+ const toggleComparison = useCallback(() => {
     setShowComparison(prev => !prev);
   }, []);
+  // Recursive function to render agents with hierarchy
+  const renderAgentHierarchy = useCallback((agents, level = 0) => {
+    return agents
+      .filter(agent => agent._id !== params?.id && !agentList.filter(oneAgent => oneAgent._id === params?.id)?.[0]?.versions.includes(agent._id))
+      .map(agent => {
+        const isSelected = selectedAgentsToPublish.has(agent._id);
+        const indentLevel = level * 24; // 24px per level
+        
+        return (
+          <div key={agent._id} className="relative">
+            {/* Connection lines for hierarchy visualization */}
+            {level > 0 && (
+              <>
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-base-300" style={{ left: `${indentLevel - 12}px` }}></div>
+                <div className="absolute top-6 w-3 h-px bg-base-300" style={{ left: `${indentLevel - 12}px` }}></div>
+              </>
+            )}
+            
+            <div 
+              className="card bg-base-100 shadow-sm border border-base-300 mb-3"
+              style={{ marginLeft: `${indentLevel}px` }}
+            >
+              <div className="card-body p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <Bot className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h5 className="font-medium text-sm">{agent.name}</h5>
+                        {agent?.haveToPublish ? (
+                          <div className="badge badge-warning badge-sm text-white">Needs Publish</div>
+                        ) : (
+                          <div className="badge badge-success badge-sm text-white">Already Published</div>
+                        )}
+                      </div>
+                      <p className="text-xs text-base-content/70 mt-1">
+                        Service: {agent.service} | Model: {agent.configuration?.model || 'N/A'}
+                      </p>
+                      {agent.slugName && (
+                        <p className="text-xs text-base-content/50">
+                          Slug: {agent.slugName}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {agent?.haveToPublish && (
+                    <div className="flex items-center gap-2">
+                      {agent?.haveToPublish && isSelected && (
+                        <div className="flex items-center gap-1 text-warning text-sm">
+                          <AlertTriangle className="w-3 h-3" />
+                          Version {getVersionIndexToPublish(agent._id, agent?.haveToPublish)} will be Published | 
+                        </div>
+                      )}
+                      <span className="text-xs text-base-content/70">Include in publish</span>
+                      <input
+                        type="checkbox"
+                        className="toggle toggle-primary toggle-sm"
+                        checked={isSelected}
+                        onChange={() => toggleAgentSelection(agent._id)}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* Render children recursively */}
+            {agent.children && agent.children.length > 0 && (
+              <div className="ml-6">
+                {renderAgentHierarchy(agent.children, level + 1)}
+              </div>
+            )}
+          </div>
+        );
+      });
+  }, [params?.id, agentList, selectedAgentsToPublish, toggleAgentSelection, isLoading]);
 
   const getVersionIndexToPublish = useCallback((agentId, isPublishedVersion = false) => {
     // For agents that need to be published (version data)
@@ -557,63 +676,7 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
                   </div>
                 
                   <div className="space-y-3">
-                    {allConnectedAgents
-                      .filter(agent => agent._id !== params?.id && !agentList.filter(oneAgent => oneAgent._id === params?.id)?.[0]?.versions.includes(agent._id))
-                      .map(agent => {
-                        const isSelected = selectedAgentsToPublish.has(agent._id);
-                        
-                        return (
-                          <div key={agent._id} className="card bg-base-100 shadow-sm border border-base-300">
-                            <div className="card-body p-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className="bg-primary/10 p-2 rounded-full">
-                                    <Bot className="w-4 h-4 text-primary" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <h5 className="font-medium text-sm">{agent.name}</h5>
-                                      {agent?.haveToPublish ? (
-                                        <div className="badge badge-warning badge-sm text-white">Needs Publish</div>
-                                      ) : (
-                                        <div className="badge badge-success badge-sm text-white">Already Published</div>
-                                      )}
-                                    </div>
-                                    <p className="text-xs text-base-content/70 mt-1">
-                                      Service: {agent.service} | Model: {agent.configuration?.model || 'N/A'}
-                                    </p>
-                                    {agent.slugName && (
-                                      <p className="text-xs text-base-content/50">
-                                        Slug: {agent.slugName}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                {agent?.haveToPublish && (
-                                  <div className="flex items-center gap-2">
-                                    {agent?.haveToPublish && isSelected && (
-                                    <div className="flex items-center gap-1 text-warning text-sm">
-                                      <AlertTriangle className="w-3 h-3" />
-                                      Version {getVersionIndexToPublish(agent._id, agent?.haveToPublish)} will be Published | 
-
-                                    </div>
-                                  )}
-                                    <span className="text-xs text-base-content/70">Include in publish</span>
-                                    <input
-                                      type="checkbox"
-                                      className="toggle toggle-primary toggle-sm"
-                                      checked={isSelected}
-                                      onChange={() => toggleAgentSelection(agent._id)}
-                                      disabled={isLoading}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    {renderAgentHierarchy(allConnectedAgents)}
                   </div>
                 </div>
               ) : null}
