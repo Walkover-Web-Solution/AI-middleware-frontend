@@ -11,6 +11,7 @@ import { filterOrganizations, getFromCookies, openModal, setInCookies } from '@/
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
+import SearchItems from '@/components/UI/SearchItems';
 
 /**
  * The organizations page that displays all the organizations
@@ -21,6 +22,7 @@ function Page() {
   const dispatch = useDispatch();
   const route = useRouter()
   const organizations = useCustomSelector(state => state.userDetailsReducer.organizations);
+  const [displayedOrganizations, setDisplayedOrganizations] = useState([]);
 
   const handleSwitchOrg = useCallback(async (id, name) => {
     try {
@@ -45,6 +47,16 @@ function Page() {
     dispatch(userDetails());
     dispatch(getServiceAction())
   }, []);
+
+  // Memoize organizations array to prevent infinite re-renders
+  const organizationsArray = useMemo(() => {
+    return organizations ? Object.values(organizations) : [];
+  }, [organizations]);
+
+  // Initialize displayed organizations when organizations data changes
+  useEffect(() => {
+    setDisplayedOrganizations(organizationsArray);
+  }, [organizationsArray]);
 
    // Theme initialization with full system theme support
     useEffect(() => {
@@ -89,10 +101,8 @@ function Page() {
       };
     }, []);
 
-  const filteredOrganizations = filterOrganizations(organizations,searchQuery);
-  
   const renderedOrganizations = useMemo(() => (
-    filteredOrganizations.slice().reverse().map((org, index) => (
+    displayedOrganizations.slice().reverse().map((org, index) => (
       <div
         key={index}
         onClick={() => handleSwitchOrg(org.id, org.name)}
@@ -103,7 +113,7 @@ function Page() {
         </div>
       </div>
     ))
-  ), [filteredOrganizations, handleSwitchOrg]);
+  ), [displayedOrganizations, handleSwitchOrg]);
 
   return (
     <div className="flex flex-col justify-start items-center min-h-screen bg-base-100 px-2 md:px-0">
@@ -117,13 +127,14 @@ function Page() {
             + Create New Organization
           </button>
         </div>
-        <input
-          type="text"
-          placeholder="Search organizations"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="border border-base-300 input input-bordered outline-none p-4 rounded-md  w-full mb-4"
-        />
+        {organizationsArray.length > 5 && (
+          <SearchItems
+            data={organizationsArray}
+            setFilterItems={setDisplayedOrganizations}
+            item="Organizations"
+            style="border border-base-300 input input-bordered outline-none  rounded-md w-full pr-10"
+          />
+        )}
         <div className="grid grid-rows-1 md:grid-rows-2 lg:grid-rows-3 gap-4 mb-8 cursor-pointer">
           {renderedOrganizations}
         </div>
