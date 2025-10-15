@@ -318,22 +318,22 @@ export const AVAILABLE_MODEL_TYPES = {
 };
 // Canonical descriptions for finish_reason values
 export const FINISH_REASON_DESCRIPTIONS = {
-  "completed": "Model completed naturally at a logical stopping point or due to a defined stop sequence.",
-  "truncated": "Response truncated because it exceeded the configured token limit.",
-  "tool_call": "Model stopped to invoke a function or external tool instead of continuing text.",
-  "safety_block": "Generation halted because content violated safety or policy filters.",
-  "no_reason": "No explicit finish reason provided (common for intermediate streaming chunks).",
-  "failure": "Generation failed due to an unexpected error (e.g., transient internal failure).",
-  "stop_sequence": "Model stopped after emitting a user-defined stop sequence.",
-  "timeout": "Processing time exceeded the allowed limit and was terminated.",
-  "end_of_context": "Model finished because the provided input context was fully processed.",
-  "recitation_block": "Generation halted because output closely matched training data to prevent regurgitation.",
-  "other": "Generation stopped for an unspecified or rare internal condition.",
-  "paused": "Operation paused for long-running external processing (e.g., search or tool).",
-  "eos": "Model emitted its end-of-sequence (EOS) token and ended naturally.",
-  "rate_limited": "Request halted due to service rate limits or quota being exceeded.",
-  "server_error": "Terminated due to a backend service error unrelated to the prompt.",
-  "cancelled": "Request was explicitly cancelled by the client or server."
+  "completed": "The model finished naturally at a logical stopping point or because a predefined stop condition was met.",
+  "truncated": "The response was cut off because it exceeded the maximum allowed token limit.",
+  "tool_call": "The model paused generation to call an external function or tool instead of continuing to produce text.",
+  "safety_block": "The output was stopped because it violated safety guidelines or policy filters.",
+  "no_reason": "No specific reason was given for stopping; common for partial or streaming responses.",
+  "failure": "The generation failed due to an unexpected internal error (e.g., temporary system issue).",
+  "stop_sequence": "The model stopped after encountering a user-defined stopping sequence.",
+  "timeout": "The processing time exceeded the allowed limit, so the request was terminated.",
+  "end_of_context": "The model finished because it processed the entire input context.",
+  "recitation_block": "Generation was halted because the output closely matched training data, to avoid verbatim copying.",
+  "other": "The model stopped for a rare or unspecified internal reason.",
+  "paused": "The operation was temporarily paused for external processing like search or tool execution.",
+  "eos": "The model emitted its end-of-sequence (EOS) token and stopped naturally.",
+  "rate_limited": "The request was stopped because service rate limits or quotas were exceeded.",
+  "server_error": "The request was terminated due to an internal backend service error unrelated to the input.",
+  "cancelled": "The request was explicitly cancelled by either the client or the server."
 };
 
 export const MODAL_TYPE = {
