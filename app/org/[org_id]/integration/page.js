@@ -80,9 +80,10 @@ const Page = ({ params }) => {
         {/* Content Section */}
         <div className="w-full">
         <div className="flex flex-row gap-4 justify-between ">
-
-          <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="Integration" />
-          <div className="flex-shrink-0">
+          {integrationData?.length>5 && (
+            <SearchItems data={integrationData} setFilterItems={setFilterIntegration} item="Integration" />
+          )}
+          <div className={`flex-shrink-0 ${integrationData?.length>5 ? 'mr-2' : 'ml-auto mr-2'}`}>
             <button 
               className="btn btn-primary mr-2" 
               onClick={() => openModal(MODAL_TYPE.INTEGRATION_MODAL)}

@@ -20,7 +20,7 @@ function Canvas({
   const [errorMessage, setErrorMessage] = useState("");
   const [instruction, setInstruction] = useState("");
   const [loading, setLoading] = useState(false);
-  const [appliedMessages, setAppliedMessages] = useState(new Set());
+  const [appliedMessages, setAppliedMessages] = useState("");
   const [copiedMessageId, setCopiedMessageId] = useState(null);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ function Canvas({
   const handleResetChat = () => {
     setMessages([]);
     setInstruction("");
-    setAppliedMessages(new Set());
+    setAppliedMessages("");
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
@@ -47,7 +47,7 @@ function Canvas({
     if (typeof handleApplyOptimizedPrompt === 'function') {
       handleApplyOptimizedPrompt(message.optimized);
     }
-    setAppliedMessages(prev => new Set(prev).add(message.id));
+    setAppliedMessages(message.id);
   };
 
   // Helper function to check if content is JSON and format it
@@ -217,7 +217,7 @@ function Canvas({
                   {message.sender === "assistant" && message.optimized && (
                     <div className="mt-4 flex justify-start">
                       <div className="flex items-center gap-2">
-                        {appliedMessages.has(message.id) ? (
+                        {appliedMessages === message.id ? (
                           <div className="flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-1 rounded-full">
                             <CheckIconComponent size={14}/>
                             Applied

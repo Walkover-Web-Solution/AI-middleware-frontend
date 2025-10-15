@@ -1,12 +1,17 @@
-const OrganizationSearch = ({ searchQuery, setSearchQuery }) => {
+import SearchItems from "../UI/SearchItems";
+
+const OrganizationSearch = ({ organizationsArray, setDisplayedOrganizations }) => {
     return (
-        <input
-            type="text"
-            placeholder="Search organizations"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="border border-base-300 input input-bordered outline-none p-4 rounded-md w-full mb-4"
-        />
+        <>
+        {organizationsArray?.length > 5 && (
+            <SearchItems
+              data={organizationsArray}
+              setFilterItems={setDisplayedOrganizations}
+              item="Organizations"
+              style="border border-base-300 input input-bordered outline-none  rounded-md w-full pr-10"
+            />
+            
+          )}</>
     );
 };
 

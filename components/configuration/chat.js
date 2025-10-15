@@ -76,7 +76,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       updatedMessages.forEach(msg => {
         if (msg.sender === 'user' || msg.sender === 'assistant') {
           updatedConversation.push({
-            role: msg.sender === 'user' ? 'user' : 'assistant',
+            role: msg.sender === 'user' ? 'user' : msg?.testCaseResult ? 'Model Answer' : 'assistant',
             content: msg.content
           });
         }
@@ -323,7 +323,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                 <option value="ai">AI</option>
                 <option value="exact">Exact</option>
               </select>
-              <button className="btn btn-sm" onClick={handleResetChat}> <PlusIcon size={14} />Create Test Case</button>
+              <button className="btn btn-sm" onClick={handleResetChat}> <PlusIcon size={14} />Add Test Case</button>
             </div>
           )}
           {!isOrchestralModel && !isEmbedUser && bridgeType === 'chatbot' && <button
@@ -383,7 +383,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                   >
                     <div className="chat-image avatar"></div>
                     <div className="chat-header">
-                      {message.sender === "expected" ? "Expected Response" : message.sender}
+                      {message.sender === "expected" ? "Expected Response" : message.testCaseResult ? "Model Answer" : message.sender}
                       {message.isEdited && (
                         <span className="text-xs text-warning ml-2 font-medium">(edited)</span>
                       )}
@@ -600,7 +600,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                               </div>
                             </div>
                           ) : (
-                            /* Regular Assistant/User/Expected Message */
+                            /* Regular Assistant/User/Expected Message - Show model answer if testcase was run */
                             <div className={`chat-bubble break-all gap-0 justify-start relative w-full ${message.sender === "assistant" ? "mr-8" : ""}`}>
                               {/* Show loader overlay if this is the message being tested */}
                               {isRunningTestCase && currentRunIndex !== null && index === currentRunIndex + 1 && (
@@ -682,7 +682,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                                         ),
                                       }}
                                     >
-                                      {message.content}
+                                      {/* Show model's actual response if testcase was run, otherwise show original content */}
+                                      {message.testCaseResult && message.sender === "assistant" 
+                                        ? message.testCaseResult.actual_result || message.content
+                                        : message.content}
                                     </ReactMarkdown>
                                   )}
                                 </div>
@@ -702,12 +705,12 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                               {showTestCaseResults[message.id] ? (
                                 <>
                                   <ToggleRight className="h-3 w-3" />
-                                  <span>Response</span>
+                                  <span>Model Answer</span>
                                 </>
                               ) : (
                                 <>
                                   <ToggleLeft className="h-3 w-3" />
-                                  <span>Test Result</span>
+                                  <span>Test Details</span>
                                   <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs font-medium ${message.testCaseResult.score >= 0.8 ? 'bg-success/20 text-success' :
                                       message.testCaseResult.score >= 0.6 ? 'bg-warning/20 text-warning' : 'bg-error/20 text-error'
                                     }`}>

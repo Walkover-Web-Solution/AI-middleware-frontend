@@ -126,8 +126,8 @@ const Page = () => {
       </MainLayout>
       <div className="flex flex-row gap-4 justify-between ">
 
-      <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="ApiKeys"/>
-      <div className="flex-shrink-0 flex gap-4 mr-2">
+      {apikeyData?.length>5 && <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="ApiKeys"/>}
+      <div className={`${apikeyData?.length<=5 ? 'ml-auto ' : ''} flex-shrink-0 flex gap-4 mr-2`}>
             <button 
               className="btn" 
               onClick={() => toggleSidebar("Api-Keys-guide-slider","right")}

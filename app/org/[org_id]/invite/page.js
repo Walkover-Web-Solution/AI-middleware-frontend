@@ -3,12 +3,13 @@ import { getInvitedUsers, inviteUser, removeUsersFromOrg } from '@/config';
 import Protected from '@/components/protected';
 import { useCallback, useEffect, useState, useMemo} from 'react';
 import { toast } from 'react-toastify';
-import { TrashIcon, UserCircleIcon } from '@/components/Icons';
+import { InfoIcon, TrashIcon, UserCircleIcon } from '@/components/Icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import DeleteModal from '@/components/UI/DeleteModal';
 import { closeModal, openModal } from '@/utils/utility';
 import { MODAL_TYPE } from '@/utils/enums';
+import InfoTooltip from '@/components/InfoTooltip';
 
 export const runtime = 'edge';
 
@@ -206,14 +207,23 @@ function InvitePage({ params }) {
           <h2 className="text-md font-semibold">
             Team Members ({totalMembers})
           </h2>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            placeholder="Search members..."
+          
+            <div className='relative'>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search..."
             className="input input-bordered w-96"
           />
-        </div>
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <InfoTooltip tooltipContent="Search Members by Name and Email">
+                        <InfoIcon className='w-4 h-4 cursor-help text-base-content/60 hover:text-base-content' />
+                      </InfoTooltip>
+                    </div>
+            </div>
+        
+          </div>
 
         {/* Members List - Scrollable Container */}
         <div id="scrollableDiv" className="h-[65vh] overflow-y-auto">

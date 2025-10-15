@@ -64,7 +64,7 @@ const ConfigurationPage = ({
         return (
             <div className="mb-4 mt-4">
                 {!isEmbedUser && <a
-                    href="/faq/how-to-use-gtwy-ai"
+                    href="https://techdoc.walkover.in/p?collectionId=inYU67SKiHgW"
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"

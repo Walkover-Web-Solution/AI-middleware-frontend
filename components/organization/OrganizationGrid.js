@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
-const OrganizationGrid = ({ filteredOrganizations, handleSwitchOrg }) => {
+const OrganizationGrid = ({ displayedOrganizations, handleSwitchOrg }) => {
     const renderedOrganizations = useMemo(() => (
-        filteredOrganizations.slice().reverse().map((org, index) => (
+        displayedOrganizations.slice().reverse().map((org, index) => (
             <div
                 key={index}
                 onClick={() => handleSwitchOrg(org.id, org.name)}
@@ -13,7 +13,7 @@ const OrganizationGrid = ({ filteredOrganizations, handleSwitchOrg }) => {
                 </div>
             </div>
         ))
-    ), [filteredOrganizations, handleSwitchOrg]);
+    ), [displayedOrganizations, handleSwitchOrg]);
 
     return (
         <div className="grid grid-rows-1 md:grid-rows-2 lg:grid-rows-3 gap-4 mb-8 cursor-pointer">
