@@ -26,7 +26,7 @@ const InputConfigComponent = memo(({
     isMobileView
 }) => {
     // Optimized Redux selector with memoization and shallow comparison
-    const { prompt: reduxPrompt, service, serviceType, variablesKeyValue, bridge } = usePromptSelector(params, searchParams);
+    const { prompt: reduxPrompt } = usePromptSelector(params, searchParams);
     
     // Refs for zero-render typing experience
     const debounceTimerRef = useRef(null);
