@@ -295,7 +295,7 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
                   onChange={() => handleRadioChange('rawData')}
                 />
                 <label htmlFor="rawData" className="ml-2 cursor-pointer">
-                  Raw Data
+                  Bulk Insert
                 </label>
               </div>
             </div>
@@ -311,28 +311,18 @@ const AddVariable = ({ params, isEmbedUser, searchParams }) => {
               />
             ) : (
               <div className="flex flex-col gap-4 max-h-56 overflow-y-auto mt-4 w-full items-start">
-                {keyValuePairs.length > 0 && <div className="flex items-center gap-2 w-full">
-                  <InfoTooltip
-                    tooltipContent="Mark checkbox if it is required"
-                    className="cursor-pointer"
-                  >
-                    <button className="btn btn-sm p-1 bg-base-200 border border-base-300 rounded-full hover:bg-base-300">
-                      <InfoIcon className="w-4 h-4 text-base-content/70" />
-                    </button>
-                  </InfoTooltip>
-                  <div className="grid grid-cols-2 gap-4 w-full px-4 bg-base-200/30 py-2 rounded-lg">
-                    <span className="text-sm font-medium text-base-content/80">Key</span>
-                    <span className="text-sm font-medium text-base-content/80">Value</span>
-                  </div>
-                </div>}
+                
                 {keyValuePairs?.map((pair, index) => (
                   <div key={index} className="flex items-center gap-4 w-full">
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-sm w-20"
-                      checked={pair.required}
-                      onChange={() => handleCheckKeyValuePair(index)}
-                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-sm"
+                        checked={pair.required}
+                        onChange={() => handleCheckKeyValuePair(index)}
+                      />
+                      <label className="text-sm text-base-content/70">Required</label>
+                    </div>
                     <input
                       type="text"
                       className="input input-bordered border-base-300 input-sm w-full"

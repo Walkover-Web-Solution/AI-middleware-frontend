@@ -92,7 +92,7 @@ function TestCases({ params }) {
       <div className="">
           <h1 className="text-2xl font-semibold text-base-content mb-2">Test Cases</h1>
             <p className="text-base-content text-sm leading-relaxed ">
-              Test cases are used to compare outputs from different versions with varying prompts and models. You can create test cases from chat history and choose a comparison type - Exact, AI, or Cosine to measure accuracy.
+              Test cases are used to compare outputs from different versions with varying prompts and models. You can add test cases from chat history and choose a comparison type - Exact, AI, or Cosine to measure accuracy.
             </p>
             <a href="https://gtwy.ai/blogs/features/testcases"
               className="inline-flex mb-4 items-center gap-2 text-sm text-primary hover:text-primary-dark transition-colors font-medium group"
