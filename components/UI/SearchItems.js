@@ -21,7 +21,7 @@ const SearchItems = ({ data, setFilterItems ,item, style='' }) => {
     if (item === 'Agents') {
       return 'Search Agents by Name, SlugName, Service, or ID';
     } else if (item === 'ApiKeys') {
-      return 'Search ApiKeys by Name, or Service';
+      return 'Search ApiKeys by Name or Service';
     } else if (item === 'Organizations') {
       return 'Search Organizations by Name or ID';
     } else {
