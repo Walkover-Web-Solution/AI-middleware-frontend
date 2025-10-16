@@ -53,6 +53,8 @@ const PromptSummaryModal = ({ modalType, params, searchParams, autoGenerateSumma
         closeModal(modalType); 
         setErrorMessage("");
         setSummary(bridge_summary)
+        setAutoGenerateSummary(false); // Reset the flag
+
     }
     const handleSaveSummary = useCallback(() => {
         setIsGeneratingSummary(true)
