@@ -161,7 +161,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
     }));
   }, [dispatch, params.id, searchParams?.version, fallbackModel, isFallbackEnabled, fallbackModelName]);
 
-  const handleFallbackModelChange = useCallback((group, model) => {
+  const handleFallbackModelChange = useCallback(( model) => {
     setFallbackModelName(model);
     const enableNext = true;
     if (!isFallbackEnabled) setIsFallbackEnabled(true);
@@ -360,7 +360,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
                               <li key={`${group}-${option}`}
                                 className={`hover:bg-base-200 rounded-md py-1 ${selected ? 'bg-base-200' : ''}`}
                                 onClick={(e) => {
-                                  handleFallbackModelChange(group, modelName)
+                                  handleFallbackModelChange( modelName)
                                   const details = e.currentTarget.closest('details');
                                   if (details) details.removeAttribute('open');
                                 }}

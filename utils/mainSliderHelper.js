@@ -50,6 +50,8 @@ export const DISPLAY_NAMES = (key) => {
       return 'RAG as Embed';
     case 'invite':
       return 'Members';
+    case 'pauthkey':
+      return 'authKey';
     default:
       return key;
   }
