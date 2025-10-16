@@ -437,6 +437,7 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
               return (<PromptHelper
                 isVisible={uiState.isPromptHelperOpen && !isMobileView}
                 params={resolvedParams}
+                searchParams={resolvedSearchParams}
                 onClose={handleCloseTextAreaFocus}
                 savePrompt={savePrompt}
                 setPrompt={(value) => {
