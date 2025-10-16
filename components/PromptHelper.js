@@ -11,6 +11,7 @@ import { optimizePromptApi } from '@/config';
 const PromptHelper = ({
   isVisible,
   params,
+  searchParams,
   onClose,
   setPrompt,
   messages,
@@ -45,24 +46,19 @@ const PromptHelper = ({
   const pathParts = pathname.split('?')[0].split('/');
   const bridgeId = pathParts[5];
 
-  const promptParams = params || {
-    id: bridgeId || pathParts[3],
-    version: pathParts[7] || pathParts[5],
-  };
-
   const handleOptimizePrompt = useCallback(async (instructionText) => {
     try {
       const response = await optimizePromptApi({
         query: instructionText,
         thread_id,
-        bridge_id: promptParams.id,
-        version_id: promptParams.version,
+        bridge_id: params.id,
+        version_id: searchParams.version,
       });
 
       const result = typeof response === 'string' ? JSON.parse(response) : response?.data ?? response;
       if (result?.updated) {
         setOptimizedPrompt(result.updated);
-        dispatch(optimizePromptReducer({ bridgeId: promptParams.id, prompt: result.updated }));
+        dispatch(optimizePromptReducer({ bridgeId: params.id, prompt: result.updated }));
       }
 
       return result;
@@ -70,7 +66,7 @@ const PromptHelper = ({
       console.error("Error optimizing prompt:", error);
       return { description: "Failed to optimize prompt. Please try again." };
     }
-  }, [promptParams, thread_id]);
+  }, [params.id, searchParams.version, thread_id]);
 
   // Apply optimized prompt
   const handleApplyOptimizedPrompt = (promptToApply) => {
@@ -100,7 +96,7 @@ const PromptHelper = ({
         handleScriptLoad();
       }
     }, 100);
-  }, [isVisible, showNotes]);
+  }, [isVisible, showNotes, params.id, searchParams.version]);
 
 
   // Calculate widths based on toggle states
