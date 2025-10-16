@@ -76,6 +76,7 @@ function BridgeVersionDropdown({ params, searchParams, isEmbedUser }) {
     const handleVersionChange = useCallback((version) => {
         if (searchParams?.version === version) return;
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${version}`);
+        fetchVersionData(version);
     }, [searchParams?.version, params.org_id, params.id, router]);
 
     const handleCreateNewVersion = () => {
