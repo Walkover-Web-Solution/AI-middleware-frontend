@@ -440,8 +440,8 @@ const Page = ({ params, searchParams, isEmbedUser }) => {
                 onClose={handleCloseTextAreaFocus}
                 savePrompt={savePrompt}
                 setPrompt={(value) => {
-                  setPromptState(prev => ({ ...prev, prompt: value }));
-                  savePrompt(value);
+                  setPromptState(prev => ({ ...prev, newContent: value }));
+                  promptTextAreaRef.current.querySelector('textarea').value = value;
                 }}
                 messages={promptState.messages}
               setMessages={(value) => {
