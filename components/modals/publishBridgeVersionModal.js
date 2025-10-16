@@ -80,9 +80,8 @@ function PublishBridgeVersionModal({ params, searchParams, agent_name, agent_des
       const connectedId = agentInfo.bridge_id;
       if (!connectedId) return [];
       
-      const hasVersionId = agentInfo?.version_id !== undefined;
+      const hasVersionId = agentInfo?.version_id !== undefined && agentInfo?.version_id !== "";
       let updatedVersionData;
-      
       if (hasVersionId) {
         try {
           const fetchedData = await dispatch(getBridgeVersionAction({
