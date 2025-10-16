@@ -7,11 +7,16 @@ import Image from 'next/image';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { CloseCircleIcon, SendHorizontalIcon, UploadIcon } from '@/components/Icons';
+import { CloseCircleIcon, SendHorizontalIcon, UploadIcon, LinkIcon, PlayIcon } from '@/components/Icons';
+import { Paperclip } from 'lucide-react';
 import { PdfIcon } from '@/icons/pdfIcon';
 
 function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploadedImages, setUploadedImages, conversation, setConversation, uploadedFiles, setUploadedFiles, handleSendMessageForOrchestralModel, isOrchestralModel, inputRef, loading, setLoading, searchParams, setTestCaseId, testCaseId, selectedStrategy}) {
     const [uploading, setUploading] = useState(false);
+    const [uploadedVideos, setUploadedVideos] = useState(null);
+    const [mediaUrls, setMediaUrls] = useState(null);
+    const [showUrlInput, setShowUrlInput] = useState(false);
+    const [urlInput, setUrlInput] = useState('');
     const dispatch = useDispatch();
     const [fileInput, setFileInput] = useState(null); // Use state for the file input element
     const versionId = searchParams?.version;
@@ -41,12 +46,13 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
     
     const [localDataToSend, setLocalDataToSend] = useState(dataToSend);
     
-    const { isVision, isFileSupported } = useMemo(() => {
+    const { isVision, isFileSupported, isVideoSupported} = useMemo(() => {
         const validationConfig = modelInfo?.[service]?.[configuration?.type]?.[configuration?.model]?.validationConfig || {};
         
         return {
           isVision: validationConfig.vision,
           isFileSupported: validationConfig.files,
+          isVideoSupported: validationConfig.video || validationConfig.vision || service === 'gemini'
         };
       }, [modelInfo, service, configuration?.type, configuration?.model]);
 
@@ -63,6 +69,15 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         }, {});
     }, [variablesKeyValue]);
 
+    const clearState = () => {
+        setUploadedImages([]);
+            setUploadedFiles([]);
+            setUploadedVideos(null);
+            setMediaUrls(null);
+            setShowUrlInput(false);
+            setUrlInput('');
+    }
+
     const handleSendMessage = async (e) => {
         if (inputRef.current) {
             inputRef.current.style.height = '40px'; // Set initial height
@@ -72,15 +87,21 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             return;
         }
         const newMessage = inputRef?.current?.value.replace(/\r?\n/g, '\n');
+        const images = uploadedImages?.length > 0 ? uploadedImages : [];
+        const files = uploadedFiles?.length > 0 ? uploadedFiles : [];
+        const videos = uploadedVideos ? uploadedVideos : null;
+        const urls = mediaUrls ? mediaUrls : null;
 
-        if (uploadedFiles?.length > 0 && newMessage?.trim() === "") {
-            setErrorMessage("A message is required when uploading a PDF.");
+        clearState();
+
+        if ((videos?.length > 0 || urls?.length > 0) && newMessage?.trim() === "") {
+            setErrorMessage("A message is required when uploading files or videos.");
             return;
         }
 
         if (modelType !== 'completion' && modelType !== 'embedding') {
-            if (newMessage?.trim() === "" && uploadedImages?.length === 0 && uploadedFiles?.length === 0) {
-                setErrorMessage("Message cannot be empty");
+            if (newMessage?.trim() === "" && images?.length === 0 && files?.length === 0 && videos?.length === 0 && urls?.length === 0) {
+                setErrorMessage("Message is required");
                 return;
             }
         }
@@ -102,8 +123,10 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     minute: "2-digit",
                 }),
                 content: newMessage.replace(/\n/g, "  \n"), // Markdown line break
-                images: uploadedImages, // Store images in the user role
-                files: uploadedFiles,
+                images: images, // Store images in the user role
+                files: files,
+                video_data: videos, // Store videos
+                youtube_url: urls, // Store media URLs
             };           
             let response, responseData;
             let data;
@@ -111,8 +134,10 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 data = {
                     role: "user",
                     content: newMessage,
-                    images: uploadedImages, // Include images in the data
-                    files: uploadedFiles,
+                    images: images, // Include images in the data
+                    files: files,
+                    video_data: videos, // Include videos in the data
+                    youtube_url: urls, // Include media URLs in the data
                 };
                 setMessages(prevMessages => [...prevMessages, newChat]);
                 // Insert temporary assistant typing message
@@ -137,8 +162,10 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                             type: modelType
                         },
                         user: data.content,
-                        images: uploadedImages,
-                        files: uploadedFiles,
+                        images: images,
+                        files: files,
+                        video_data: videos,
+                        youtube_url: urls,
                         variables
                     },
                     bridge_id: params?.id,
@@ -307,9 +334,6 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             ));
         } finally {
             setLoading(false);
-            // Remove the redundant append of newChatAssist since we already replace the loading placeholder with it.
-            // setMessages(prevMessages => [...prevMessages, newChatAssist]);
-            setUploadedFiles([]);
         }
     };
 
@@ -336,15 +360,17 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             toast.error('Each file should be less than 35MB.');
             return;
         }
-
         const newPdfs = files.filter(file => file.type === 'application/pdf');
-        const newImages = files.filter(file => file.type !== 'application/pdf');
+        const newVideos = files.filter(file => file.type.startsWith('video/'));
+        const newImages = files.filter(file => file.type.startsWith('image/'));
     
         const totalPdfs = uploadedFiles.length + newPdfs.length;
         const totalImages = uploadedImages.length + newImages.length;
-    
-        if (totalPdfs > 2) {
-            toast.error('Only two PDFs are allowed.');
+        const hasExistingVideo = uploadedVideos !== null;
+        const totalVideos = (hasExistingVideo ? 1 : 0) + newVideos.length;
+
+        if (totalVideos > 1) {
+            toast.error('Only one video is allowed.');
             return;
         }
     
@@ -357,16 +383,29 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             setUploading(true);
     
             for (let file of files) {
-                const formData = new FormData();
-                formData.append('image', file);
-                const result = await dispatch(uploadImageAction(formData));
-    
-                if (result.success) {
-                    if (file.type === 'application/pdf') {
-                        setUploadedFiles(prev => [...prev, result.image_url]);
+                try {
+                    const formData = new FormData();
+                    const isVedio = file.type.startsWith('video/');
+                    formData.append(isVedio ? 'video' : 'image', file);
+                    const result = await dispatch(uploadImageAction(formData, isVedio));
+        
+                    if (result.success) {
+                        if (file.type === 'application/pdf') {
+                            setUploadedFiles(prev => [...prev, result.image_url]);
+                        } else if (file.type.startsWith('video/')) {
+                            setUploadedVideos(result.file_data); // Replace existing video
+                        } else if (file.type.startsWith('image/')) {
+                            setUploadedImages(prev => [...prev, result.image_url]);
+                        }
                     } else {
-                        setUploadedImages(prev => [...prev, result.image_url]);
+                        toast.error(result?.data?.error || result?.error || 'Upload failed');
                     }
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                    toast.error(`Failed to upload: ${error.message || 'Unknown error'}`);
+                }
+                finally{
+                    setUploading(false);
                 }
             }
     
@@ -377,56 +416,230 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             fileInput.value = "";
         }
     };
-    
+
+    const addMediaUrl = () => {
+        if (urlInput.trim() && !mediaUrls) {
+            // Basic URL validation
+            try {
+                new URL(urlInput.trim());
+                setMediaUrls(urlInput.trim());
+                setUrlInput('');
+                setShowUrlInput(false);
+            } catch {
+                toast.error('Please enter a valid URL.');
+            }
+        } else if (mediaUrls) {
+            toast.error('Only one YouTube URL is allowed.');
+        }
+    };
+
+    const removeUrl = () => {
+        setMediaUrls(null);
+    };
+
+
+    const handleAttachmentOption = (type) => {
+        switch(type) {
+            case 'images':
+                if (fileInput) {
+                    fileInput.accept = 'image/*';
+                    fileInput.click();
+                }
+                break;
+            case 'videos':
+                if (fileInput) {
+                    fileInput.accept = 'video/*';
+                    fileInput.click();
+                }
+                break;
+            case 'files':
+                if (fileInput) {
+                    fileInput.accept = '.pdf';
+                    fileInput.click();
+                }
+                break;
+            case 'url':
+                setShowUrlInput(true);
+                break;
+            default:
+                if (fileInput) {
+                    fileInput.accept = isVision && isFileSupported && isVideoSupported 
+                        ? 'image/*,.pdf,video/*' 
+                        : isVision && isVideoSupported 
+                        ? 'image/*,video/*' 
+                        : isVision && isFileSupported 
+                        ? 'image/*,.pdf' 
+                        : isVision 
+                        ? 'image/*' 
+                        : isFileSupported 
+                        ? '.pdf' 
+                        : 'image/*,.pdf,video/*';
+                    fileInput.click();
+                }
+        }
+    };
 
     return (
-        <div className="input-group flex justify-end items-end gap-2 w-full relative">
-            {/* --- CORRECTED PREVIEW CONTAINER --- */}
-            {(uploadedImages.length > 0 || uploadedFiles.length > 0) && (
-                <div className="absolute bottom-16 left-0 w-full flex flex-nowrap overflow-x-auto items-end gap-2 p-2 bg-base-100 border-t rounded-t-lg">
-                    {/* Image Previews */}
-                    {uploadedImages.map((url, index) => (
-                        <div key={index} className="relative flex-shrink-0">
-                            <Image
-                                src={url}
-                                alt={`Uploaded Preview ${index + 1}`}
-                                width={64}
-                                height={64}
-                                className="w-16 h-16 object-cover bg-base-300 p-1 rounded-lg"
-                            />
-                            <button
-                                className="absolute -top-2 -right-2 text-white rounded-full"
-                                onClick={() => {
-                                    const newImages = uploadedImages.filter((_, i) => i !== index);
-                                    setUploadedImages(newImages);
-                                }}
-                            >
-                                <CloseCircleIcon className='text-base-content bg-base-200 rounded-full' size={20} />
-                            </button>
-                        </div>
-                    ))}
-                    {/* File Previews */}
-                    {uploadedFiles.map((url, index) => (
-                        <div key={index} className="relative flex-shrink-0">
-                            <div className="flex items-center h-16 gap-2 bg-base-300 p-2 rounded-lg">
-                                <PdfIcon height={24} width={24} />
-                                <p className='text-sm max-w-[120px] truncate' title={url}>{url.split('/').pop()}</p>
+        <div className="w-full space-y-2">
+            {/* Simplified Media Preview Container */}
+            {(uploadedImages.length > 0 || uploadedFiles.length > 0 || uploadedVideos || mediaUrls) && (
+                <div className="mb-2 p-3 bg-base-200 rounded-lg border border-base-content/30">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-base-content/70">
+                            Attached Media ({uploadedImages.length + uploadedFiles.length + (uploadedVideos ? 1 : 0) + (mediaUrls ? 1 : 0)})
+                        </span>
+                        <button 
+                            className="text-xs text-error hover:text-error-focus"
+                            onClick={() => {
+                                setUploadedImages([]);
+                                setUploadedFiles([]);
+                                setUploadedVideos(null);
+                                setMediaUrls(null);
+                            }}
+                        >
+                            Clear All
+                        </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {/* Image Previews */}
+                        {uploadedImages.map((url, index) => (
+                            <div key={`image-${index}`} className="relative">
+                                <Image
+                                    src={url}
+                                    alt={`Image ${index + 1}`}
+                                    width={50}
+                                    height={50}
+                                    className="w-12 h-12 object-cover rounded-lg border"
+                                />
+                                <button
+                                    className="absolute -top-1 -right-1 w-4 h-4 bg-error text-error-content rounded-full flex items-center justify-center text-xs"
+                                    onClick={() => {
+                                        const newImages = uploadedImages.filter((_, i) => i !== index);
+                                        setUploadedImages(newImages);
+                                    }}
+                                    title="Remove"
+                                >
+                                    ×
+                                </button>
                             </div>
-                            <button
-                                className="absolute -top-2 -right-2 text-white rounded-full"
-                                onClick={() => {
-                                    const newFiles = uploadedFiles.filter((_, i) => i !== index);
-                                    setUploadedFiles(newFiles);
-                                }}
-                            >
-                                <CloseCircleIcon className='text-base-content bg-base-200 rounded-full' size={20} />
-                            </button>
-                        </div>
-                    ))}
+                        ))}
+                        {/* File Previews */}
+                        {uploadedFiles.map((url, index) => (
+                            <div key={`file-${index}`} className="relative flex items-center gap-2 bg-base-100 border rounded-lg p-2">
+                                <PdfIcon height={16} width={16} className="text-orange-500" />
+                                <span className="text-xs">PDF</span>
+                                <button
+                                    className="absolute -top-1 -right-1 w-4 h-4 bg-error text-error-content rounded-full flex items-center justify-center text-xs"
+                                    onClick={() => {
+                                        const newFiles = uploadedFiles.filter((_, i) => i !== index);
+                                        setUploadedFiles(newFiles);
+                                    }}
+                                    title="Remove"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))}
+                        {/* Video Previews */}
+                        {uploadedVideos && (
+                            <div key={`video-`} className="relative">
+                                <div className="relative w-12 h-12 bg-black rounded-lg overflow-hidden border">
+                                    <video
+                                        src={uploadedVideos}
+                                        className="w-full h-full object-cover"
+                                        muted
+                                        preload="metadata"
+                                        onLoadedMetadata={(e) => {
+                                            // Seek to 1 second to get a frame for thumbnail
+                                            e.target.currentTime = 1;
+                                        }}
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                        <PlayIcon size={16} className="text-white" />
+                                    </div>
+                                </div>
+                                <button
+                                    className="absolute top-0 -right-1 w-4 h-4 bg-error text-error-content rounded-full flex items-center justify-center text-xs"
+                                    onClick={() => setUploadedVideos(null)}
+                                    title="Remove"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        )}
+                        {/* URL Previews */}
+                        {mediaUrls && (
+                            <div key="url" className="relative flex items-center gap-2 bg-base-100 border rounded-lg p-2 max-w-[120px]">
+                                <LinkIcon size={16} className="text-blue-500" />
+                                <span className="text-xs truncate" title={mediaUrls}>YouTube URL</span>
+                                <button
+                                    className="absolute -top-1 -right-1 w-4 h-4 bg-error text-error-content rounded-full flex items-center justify-center text-xs"
+                                    onClick={() => removeUrl()}
+                                    title="Remove"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
-            
-            {(modelType !== "completion") && (modelType !== 'image') && (
+
+            {/* URL Input Modal */}
+            {showUrlInput && (
+                <div className="w-full bg-base-100 border border-base-300 rounded-lg shadow-lg">
+                    <div className="p-2">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="p-1.5 bg-base-200 rounded-lg">
+                                <LinkIcon size={16} className="text-base-content" />
+                            </div>
+                            <h3 className="text-sm font-semibold text-base-content">Add Youtube URL</h3>
+                        </div>
+                        
+                        <div className="space-y-1 mt-2">
+                            <div>
+                                <input
+                                    type="url"
+                                    value={urlInput}
+                                    onChange={(e) => setUrlInput(e.target.value)}
+                                    placeholder="https://www.youtube.com/watch?v=VIDEO_ID"
+                                    className="input input-bordered w-full focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                    autoFocus
+                                />
+                            </div>
+                            
+                            <div className="flex gap-2 justify-between items-center">
+                            <p className="text-xs text-base-content/60">
+                                    Support Youtube videos url only
+                                </p>
+                            <div className="flex gap-2 items-center">
+                            <button
+                                    className="btn btn-ghost btn-sm"
+                                    onClick={() => {
+                                        setShowUrlInput(false);
+                                        setUrlInput('');
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="btn btn-primary btn-sm"
+                                    onClick={addMediaUrl}
+                                    disabled={!urlInput.trim()}
+                                >
+                                    <LinkIcon size={14} />
+                                    Add URL
+                                </button>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Input Group */}
+            <div className="input-group flex justify-end items-end gap-2 w-full relative">
+                {(modelType !== "completion") && (modelType !== 'image') && (
                 <textarea
                     ref={inputRef}
                     placeholder="Type here"
@@ -442,30 +655,132 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             <input
                 ref={(el) => setFileInput(el)} // Use callback ref to set the state
                 type="file"
-                accept={isVision && isFileSupported ? 'image/*,.pdf' : isVision ? 'image/*' : isFileSupported ? '.pdf' : 'image/*,.pdf'}
-                multiple={isVision || isFileSupported}
+                accept={
+                    isVision && isFileSupported && isVideoSupported 
+                        ? 'image/*,.pdf,video/*' 
+                        : isVision && isVideoSupported 
+                        ? 'image/*,video/*' 
+                        : isVision && isFileSupported 
+                        ? 'image/*,.pdf' 
+                        : isVision 
+                        ? 'image/*' 
+                        : isFileSupported 
+                        ? '.pdf' 
+                        : 'image/*,.pdf,video/*'
+                }
+                multiple={isVision || isFileSupported || isVideoSupported}
                 onChange={handleFileChange}
                 className="hidden"
                 data-max-size="35MB"
             />
-            {(isVision || isFileSupported) && <button
-                className="btn btn-ghost btn-circle"
-                onClick={() => fileInput && fileInput.click()} // Use state variable to trigger click
-                disabled={loading || uploading}
-            >
-                <UploadIcon />
-            </button>}
-            <button
-                className="btn btn-primary btn-circle"
-                onClick={() => {isOrchestralModel ? handleSendMessageForOrchestralModel() : handleSendMessage()}}
-                disabled={loading || uploading || (modelType === 'image')}
-            >
-                {(loading || uploading) ? (
-                    <span className="loading loading-dots loading-md"></span>
-                ) : (
-                    <SendHorizontalIcon/>
-                )}
-            </button>
+            {/* DaisyUI Dropdown for Attachments */}
+            {(isVision || isFileSupported || isVideoSupported) && (
+                <div className="dropdown dropdown-top dropdown-end">
+                    <div className="tooltip tooltip-top" data-tip="Attach files">
+                        <label 
+                            tabIndex={0} 
+                            className={`btn btn-circle transition-all duration-200 ${
+                                uploading 
+                                    ? 'btn-disabled bg-base-300' 
+                                    : 'btn-ghost hover:btn-primary hover:scale-105'
+                            }`}
+                            disabled={loading || uploading}
+                        >
+                            {uploading ? (
+                                <span className="loading loading-spinner loading-sm"></span>
+                            ) : (
+                                <Paperclip size={18} />
+                            )}
+                        </label>
+                    </div>
+
+                    {/* DaisyUI Dropdown Content */}
+                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-base-100 rounded-box w-60 border border-base-300">
+                        <li className="menu-title">
+                            <span className="text-xs font-semibold text-base-content/60">Attach files</span>
+                        </li>
+                        
+                        {/* Images Option */}
+                        {isVision && (
+                            <li>
+                                <a onClick={() => handleAttachmentOption('images')} className="flex items-center gap-3 p-3">
+                                    <div className="p-1.5 bg-base-100 rounded-lg">
+                                        <UploadIcon size={16} className="text-base-content" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-medium">Upload Images</div>
+                                        <div className="text-xs text-base-content/60">JPG, PNG, GIF, WebP</div>
+                                    </div>
+                                </a>
+                            </li>
+                        )}
+
+                        {/* Videos Option */}
+                        {isVideoSupported && (
+                            <li>
+                                <a onClick={() => handleAttachmentOption('videos')} className="flex items-center gap-3 p-3">
+                                    <div className="p-1.5 bg-base-100 rounded-lg">
+                                        <PlayIcon size={16} className="text-base-content" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-medium">Upload Video</div>
+                                        <div className="text-xs text-base-content/60">MP4, WebM, AVI (1 max)</div>
+                                    </div>
+                                </a>
+                            </li>
+                        )}
+
+                        {/* Files Option */}
+                        {isFileSupported && (
+                            <li>
+                                <a onClick={() => handleAttachmentOption('files')} className="flex items-center gap-3 p-3">
+                                    <div className="p-1.5 bg-base-100 rounded-lg">
+                                        <PdfIcon height={16} width={16} className="text-base-content" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-medium">Upload Documents</div>
+                                        <div className="text-xs text-base-content/60">PDF files</div>
+                                    </div>
+                                </a>
+                            </li>
+                        )}
+
+                        {/* URL Option */}
+                        {(isVision || isVideoSupported) && (
+                            <li>
+                                <a onClick={() => handleAttachmentOption('url')} className="flex items-center gap-3 p-3">
+                                    <div className="p-1.5 bg-base-100 rounded-lg">
+                                        <LinkIcon size={16} className="text-base-content" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-medium">Add from URL</div>
+                                        <div className="text-xs text-base-content/60">Image or video URL</div>
+                                    </div>
+                                </a>
+                            </li>
+                        )}
+                    </ul>
+                </div>
+            )}
+            {/* Enhanced Send Button */}
+            <div className="tooltip tooltip-top" data-tip="Send message">
+                <button
+                    className={`btn btn-circle transition-all duration-200 ${
+                        loading || uploading || (modelType === 'image')
+                            ? 'btn-disabled'
+                            : 'btn-primary hover:btn-primary-focus hover:scale-105 shadow-lg hover:shadow-xl'
+                    }`}
+                    onClick={() => {isOrchestralModel ? handleSendMessageForOrchestralModel() : handleSendMessage()}}
+                    disabled={loading || uploading || (modelType === 'image')}
+                >
+                    {(loading || uploading) ? (
+                        <span className="loading loading-dots loading-md"></span>
+                    ) : (
+                        <SendHorizontalIcon size={18} />
+                    )}
+                </button>
+            </div>
+            </div>
         </div>
     )
 }
