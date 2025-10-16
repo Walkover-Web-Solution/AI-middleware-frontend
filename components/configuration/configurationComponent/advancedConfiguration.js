@@ -118,8 +118,32 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
     setIsFallbackEnabled(fallbackModel?.is_enable||false);
   }, [fallbackModel]);
 
-  const handleFallbackServiceChange = useCallback((service) => {
-    const newDefaultModel = DefaultModel[service]?.model || null;
+  // Check if batch API has non-OpenAI service selected and show alert
+ useEffect(() => {
+  if (bridgeType === 'batch' && fallbackService && fallbackService !== 'openai') {
+
+    const openaiModels = serviceModels?.openai || {};
+    let selectedModel = DefaultModel['openai']?.model;
+
+    if (selectedModel === currentModel) {
+      // Flatten all models in one array and find the first different one
+      const allModels = Object.values(openaiModels)
+        .flatMap(modelsObj => Object.entries(modelsObj))
+        .map(([modelKey, modelData]) => 
+          modelData?.configuration?.model?.default || modelKey
+        );
+
+      const differentModel = allModels.find(modelName => modelName !== currentModel);
+      if (differentModel) selectedModel = differentModel;
+    }
+           handleFallbackServiceChange('openai',selectedModel);
+
+  }
+}, [bridgeType, fallbackService, currentModel, serviceModels, DefaultModel]);
+
+
+  const handleFallbackServiceChange = useCallback((service,model) => {
+    const newDefaultModel = model || DefaultModel[service]?.model || null;
     setFallbackService(service);
     setFallbackModelName(newDefaultModel);
     // Persist immediately using explicit values (avoid stale state)
@@ -137,7 +161,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
     }));
   }, [dispatch, params.id, searchParams?.version, fallbackModel, isFallbackEnabled, fallbackModelName]);
 
-  const handleFallbackModelChange = useCallback((group, model) => {
+  const handleFallbackModelChange = useCallback(( model) => {
     setFallbackModelName(model);
     const enableNext = true;
     if (!isFallbackEnabled) setIsFallbackEnabled(true);
@@ -203,7 +227,8 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
 
       
 
-      <div className={`w-full gap-4 flex flex-col transition-all duration-300 ease-in-out ${isAccordionOpen ? 'px-3 py-2 border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg opacity-100' : 'max-h-0 opacity-0 overflow-hidden border border-base-content/20 rounded-lg p-0'}`}>      <div className=' mt-4'> 
+      <div className={`w-full gap-4 flex flex-col transition-all duration-300 ease-in-out ${isAccordionOpen ? 'px-3 py-2 border-x border-b border-base-content/20 rounded-x-lg rounded-b-lg opacity-100' : 'max-h-0 opacity-0 overflow-hidden border border-base-content/20 rounded-lg p-0'}`}>
+        <div className='mt-4'> 
       <GuardrailSelector params={params} searchParams={searchParams} />
       </div>
       <div className="form-control w-full  border border-base-content/20 rounded-md ">
@@ -222,31 +247,34 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
           {isFallbackEnabled && (
             <div className="w-full p-2" ref={dropdownContainerRef}>
               {/* Fallback Service Dropdown (styled like ServiceDropdown) */}
-              <details id='service-dropdown' className="dropdown  dropdown-end w-full mb-2"
-              onToggle={(e) => {
-                if (e.currentTarget.open) {
-                  // close model dropdown if service is opened
-                  const modelDropdown = document.getElementById("model-dropdown");
-                  if (modelDropdown) modelDropdown.removeAttribute("open");
-                }
+              <div className="relative w-full mb-2">
+                <details id='service-dropdown' className="dropdown  dropdown-end w-full"
+                onToggle={(e) => {
+                  if (e.currentTarget.open) {
+                    // close model dropdown if service is opened
+                    const modelDropdown = document.getElementById("model-dropdown");
+                    if (modelDropdown) modelDropdown.removeAttribute("open");
+                  }
 
-               
+                 
+                }
+                
               }
-            }
-              >
-                <summary
-                  tabIndex={0}
-                  role="button"
-                  className="btn btn-sm border-base-content/20 bg-base-100 capitalize w-full justify-between"
+              disabled={bridgeType === 'batch'}
                 >
-                  <div className="flex items-center gap-2 truncate">
-                    {fallbackService && getIconOfService(fallbackService, 16, 16)}
-                    <span className="">
-                      {fallbackService ? (SERVICES?.find(s => s.value === fallbackService)?.displayName || fallbackService) : 'Select a Service'}
-                    </span>
-                  </div>
-                  <ChevronDownIcon size={16} />
-                </summary>
+                  <summary
+                    tabIndex={0}
+                    role="button"
+                    className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full justify-between ${bridgeType === 'batch' ? 'btn-disabled cursor-not-allowed opacity-50' : ''}`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      {fallbackService && getIconOfService(fallbackService, 16, 16)}
+                      <span className="">
+                        {fallbackService ? (SERVICES?.find(s => s.value === fallbackService)?.displayName || fallbackService) : 'Select a Service'}
+                      </span>
+                    </div>
+                    <ChevronDownIcon size={16} />
+                  </summary>
                 <ul
                   tabIndex={0}
                   className="dropdown-content z-high menu bg-base-100 rounded-box w-full p-1 shadow border border-base-300 max-h-80 overflow-y-auto"
@@ -278,8 +306,17 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
                     );
                   })}
                 </ul>
-              </details>
-              
+                </details>
+                
+                {/* Alert Icon for batch API restriction */}
+                {bridgeType === 'batch' && (
+                  <div className="absolute right-8 top-1/2 transform -translate-y-1/2 z-10">
+                    <InfoTooltip tooltipContent="Batch API is only applicable for OpenAI">
+                      <AlertIcon size={16} className="text-warning" />
+                    </InfoTooltip>
+                  </div>
+                )}
+              </div>
 
               {/* Alert for same model selection */}
               {fallbackModelName && currentModel && fallbackModelName === currentModel && (
@@ -323,7 +360,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
                               <li key={`${group}-${option}`}
                                 className={`hover:bg-base-200 rounded-md py-1 ${selected ? 'bg-base-200' : ''}`}
                                 onClick={(e) => {
-                                  handleFallbackModelChange(group, modelName)
+                                  handleFallbackModelChange( modelName)
                                   const details = e.currentTarget.closest('details');
                                   if (details) details.removeAttribute('open');
                                 }}
