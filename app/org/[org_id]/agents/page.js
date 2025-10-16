@@ -46,7 +46,7 @@ function Home({ params, isEmbedUser }) {
 
   useEffect(() => {
     setFilterBridges(allBridges)
-  }, []);
+  }, [allBridges]);
 
   
   const filteredArchivedBridges = filterBridges?.filter((item) => item.status === 0);
@@ -208,7 +208,7 @@ function Home({ params, isEmbedUser }) {
               <div className="flex flex-col lg:mx-0">
                 <div className="px-2 pt-4">
                   <MainLayout>
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full ">
                       <PageHeader
                         title="Agents"
                         description={descriptions?.Agents || "Agents connect your app to AI models like Openai with zero boilerplate, smart prompt handling, and real-time context awareness.Focus on what your agent should do.Agents handle the rest."}
@@ -220,8 +220,10 @@ function Home({ params, isEmbedUser }) {
                   </MainLayout>
                   
                   <div className="flex flex-row gap-4 justify-between ">
-                    <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
-                    <div className="mr-2">
+                    {allBridges.length > 5 && (
+                      <SearchItems data={allBridges} setFilterItems={setFilterBridges} item="Agents"/>
+                    )}
+                    <div className={`${allBridges.length > 5 ? 'mr-2' : 'ml-auto mr-2'}`}>
                         <button className="btn btn-primary " onClick={() => openModal(MODAL_TYPE?.CREATE_BRIDGE_MODAL)}>+ Create New Agent</button>
                       </div>
                   </div>

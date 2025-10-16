@@ -12,6 +12,7 @@ import DeleteModal from '@/components/UI/DeleteModal';
 import MainLayout from '@/components/layoutComponents/MainLayout';
 import PageHeader from '@/components/Pageheader';
 import CreateNewOrchestralFlowModal from '@/components/modals/CreateNewOrchestralFlowModal';
+import SearchItems from '@/components/UI/SearchItems';
 
 export const runtime = 'edge';
 
@@ -26,7 +27,6 @@ export default function FlowsPage({ params, isEmbedUser }) {
   })
   const dispatch = useDispatch();
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
 
   // Get orchestral flow data from reducer
   const orchestralFlowData = useCustomSelector((state) =>
@@ -132,10 +132,7 @@ export default function FlowsPage({ params, isEmbedUser }) {
     statusFilter !== 'all' ? setFilterFlows(orchestralFlowData.filter((flow) => flow.status === statusFilter)) : setFilterFlows(orchestralFlowData)
   }, [statusFilter]);
 
-  useEffect(() => {
-      const filtered = orchestralFlowData?.filter(item =>(item?.flow_name && item?.flow_name?.toLowerCase()?.includes(searchTerm.toLowerCase().trim()))) || [];
-      setFilterFlows(filtered);
-    }, [orchestralFlowData, searchTerm]);
+ 
   return (
     <div className="px-2 pt-4">
       <MainLayout>
@@ -179,13 +176,14 @@ export default function FlowsPage({ params, isEmbedUser }) {
           {/* Search and Filter Bar */}
           <div className="flex gap-4 items-center mb-4">
             <div className="flex-1 relative">
-              <input
-                type="text"
-                placeholder={`Search Flows by Name`}
-                className={`input input-bor0dered w-[60%]  mb-3 border border-base-content/50`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              {orchestralFlowData?.length>5 && ( 
+                <SearchItems
+                  data={orchestralFlowData}
+                  setFilterItems={setFilterFlows}
+                  item='Flows'
+                />
+              )}
+           
             </div>
 
             <div className="flex items-center gap-2">
