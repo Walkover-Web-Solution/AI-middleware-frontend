@@ -41,7 +41,7 @@ function Page({ params }) {
   // Custom hooks
   const { allBridges, apikeyData, descriptions } = useCustomSelector((state) => ({
     allBridges: state.bridgeReducer.org[orgId]?.orgs || [],
-    apikeyData: state?.bridgeReducer?.apikeys[orgId] || [],
+    apikeyData: state?.apiKeysReducer?.apikeys[orgId] || [],
     descriptions: state.flowDataReducer?.flowData?.descriptionsData?.descriptions||{},
   }));
 

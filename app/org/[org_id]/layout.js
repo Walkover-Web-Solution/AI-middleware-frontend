@@ -126,7 +126,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   }, []);
   
 
-  useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
+  // useEmbedScriptLoader(pathName.includes('agents') ? embedToken : pathName.includes('alerts') && !isEmbedUser ? alertingEmbedToken : '', isEmbedUser);
   useRtLayerEventHandler();
 
   // Theme initialization with full system theme support
@@ -229,39 +229,39 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   const scriptSrc = process.env.NEXT_PUBLIC_CHATBOT_SCRIPT_SRC;
 
 
-  useEffect(() => {
-    if (isValidOrg) {
-      const updateScript = (token) => {
-        const existingScript = document.getElementById(scriptId);
-        if (existingScript) {
-          document.head.removeChild(existingScript);
-        }
-        if (token) {
-          const script = document.createElement("script");
-          script.setAttribute("embedToken", token);
-          script.setAttribute("hideIcon", true);
-          script.setAttribute("eventsToSubscribe", JSON.stringify(["MESSAGE_CLICK"]));
-          script.id = scriptId;
-          script.src = scriptSrc;
-          document.head.appendChild(script);
-        }
-      };
+  // useEffect(() => {
+  //   if (isValidOrg) {
+  //     const updateScript = (token) => {
+  //       const existingScript = document.getElementById(scriptId);
+  //       if (existingScript) {
+  //         document.head.removeChild(existingScript);
+  //       }
+  //       if (token) {
+  //         const script = document.createElement("script");
+  //         script.setAttribute("embedToken", token);
+  //         script.setAttribute("hideIcon", true);
+  //         script.setAttribute("eventsToSubscribe", JSON.stringify(["MESSAGE_CLICK"]));
+  //         script.id = scriptId;
+  //         script.src = scriptSrc;
+  //         document.head.appendChild(script);
+  //       }
+  //     };
 
-      dispatch(getAllChatBotAction(resolvedParams.org_id)).then(e => {
-        const chatbotToken = e?.chatbot_token
-        if (chatbotToken && !pathName.includes('/history')) updateScript(chatbotToken);
-      })
+  //     dispatch(getAllChatBotAction(resolvedParams.org_id)).then(e => {
+  //       const chatbotToken = e?.chatbot_token
+  //       if (chatbotToken && !pathName.includes('/history')) updateScript(chatbotToken);
+  //     })
 
-      return () => {
-        if (!pathName.includes('/history')) {
-          const existingScript = document.getElementById(scriptId);
-          if (existingScript) {
-            // document.head.removeChild(existingScript);
-          }
-        }
-      };
-    }
-  }, [isValidOrg]);
+  //     return () => {
+  //       if (!pathName.includes('/history')) {
+  //         const existingScript = document.getElementById(scriptId);
+  //         if (existingScript) {
+  //           // document.head.removeChild(existingScript);
+  //         }
+  //       }
+  //     };
+  //   }
+  // }, [isValidOrg]);
 
   useEffect(() => {
     const onFocus = async () => {
@@ -301,19 +301,19 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
   const docstarScriptId = "docstar-main-script";
   const docstarScriptSrc = "https://techdoc.walkover.in/scriptProd.js";
 
-  useEffect(() => {
-    const existingScript = document.getElementById(docstarScriptId);
-    if (existingScript) {
-      document.head.removeChild(existingScript);
-    }
-    if (doctstar_embed_token) {
-      const script = document.createElement("script");
-      script.setAttribute("embedToken", doctstar_embed_token);
-      script.id = docstarScriptId;
-      script.src = docstarScriptSrc;
-      document.head.appendChild(script);
-    }
-  }, [doctstar_embed_token]);
+  // useEffect(() => {
+  //   const existingScript = document.getElementById(docstarScriptId);
+  //   if (existingScript) {
+  //     document.head.removeChild(existingScript);
+  //   }
+  //   if (doctstar_embed_token) {
+  //     const script = document.createElement("script");
+  //     script.setAttribute("embedToken", doctstar_embed_token);
+  //     script.id = docstarScriptId;
+  //     script.src = docstarScriptSrc;
+  //     document.head.appendChild(script);
+  //   }
+  // }, [doctstar_embed_token]);
 
   useEffect(() => {
     if (isValidOrg) {
