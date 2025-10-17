@@ -10,7 +10,7 @@ import { switchOrg, switchUser } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { setCurrentOrgIdAction } from '@/store/action/orgAction';
 import { filterOrganizations, setInCookies } from '@/utils/utility';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from "react-redux";
 import SearchItems from '@/components/UI/SearchItems';
@@ -23,6 +23,7 @@ function Page() {
   const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const route = useRouter();
+  const searchParams = useSearchParams();
   const organizations = useCustomSelector(state => state.userDetailsReducer.organizations);
   const [displayedOrganizations, setDisplayedOrganizations] = useState([]);
 
@@ -56,11 +57,12 @@ function Page() {
 
   // Auto-redirect if there's only one organization
   useEffect(() => {
-    if (organizationsArray.length === 1) {
+    const allowRedirection = searchParams.get('redirection') !== 'false';
+    if (organizationsArray.length === 1 && allowRedirection) {
       const singleOrg = organizationsArray[0];
       handleSwitchOrg(singleOrg.id, singleOrg.name);
     }
-  }, [organizationsArray, handleSwitchOrg]);
+  }, [organizationsArray, handleSwitchOrg, searchParams]);
 
   return (
     <div className="flex flex-col justify-start items-center min-h-screen bg-base-100 px-2 md:px-0">
