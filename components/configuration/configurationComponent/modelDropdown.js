@@ -189,6 +189,7 @@ const ModelDropdown = ({ params, searchParams }) => {
                     value={model || ''}
                     onChange={handleSelect}
                     onOptionHover={handleOptionHover}
+                    showGroupHeaders
                     placeholder="Select a Model"
                     size="sm"
                     className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"

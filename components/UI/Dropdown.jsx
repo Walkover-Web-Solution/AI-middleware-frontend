@@ -24,6 +24,7 @@ import { ChevronDown } from 'lucide-react';
  * - placement: 'bottom-start' | 'bottom-end'
  * - onOptionHover: (option|null) => void (called when hovering an option; null on leave)
  * - onMenuClose: () => void (called when the menu closes)
+ * - showGroupHeaders: boolean (if options contain meta.group, render section headers)
  * - children: custom trigger (for wrapper mode). If provided, acts as wrapper-mode.
  */
 const Dropdown = ({
@@ -44,6 +45,7 @@ const Dropdown = ({
   placement = 'bottom-start',
   onOptionHover,
   onMenuClose,
+  showGroupHeaders = false,
   children,
 }) => {
   const [open, setOpen] = useState(false);
@@ -222,41 +224,95 @@ const Dropdown = ({
               {filteredOptions.length === 0 && (
                 <li className="px-3 py-2 text-sm text-base-content/10">No options</li>
               )}
-              {filteredOptions.map((opt) => {
-                const Icon = opt.icon;
-                const isActive = String(opt.value) === String(value);
-                return (
-                  <li key={String(opt.value)} className="whitespace-nowrap">
-                    <a
-                      className={cx('flex items-start gap-2 w-full rounded-md hover:bg-base-200', isActive ? 'active text-primary' : '')}
-                      onClick={() => handleSelect(opt.value, opt)}
-                      onMouseEnter={() => onOptionHover && onOptionHover(opt)}
-                      role="option"
-                      aria-selected={isActive}
-                    >
-                      {Icon && <Icon className="h-4 w-4 mt-0.5 opacity-80" />}
-                      <div className="flex flex-col min-w-0">
-                        {(() => {
-                          let titleText = '';
-                          let content = opt.label;
-                          if (typeof opt.label === 'string') {
-                            titleText = opt.label;
-                            content = opt.label.length > maxItemLabelLength
-                              ? opt.label.slice(0, maxItemLabelLength) + '...'
-                              : opt.label;
-                          }
-                          return (
-                            <span className="truncate" title={titleText}>{content}</span>
-                          );
-                        })()}
-                        {opt.description && (
-                          <span className="truncate text-xs text-base-content/60">{opt.description}</span>
-                        )}
-                      </div>
-                    </a>
+              {(() => {
+                if (!showGroupHeaders) {
+                  return filteredOptions.map((opt) => {
+                    const Icon = opt.icon;
+                    const isActive = String(opt.value) === String(value);
+                    return (
+                      <li key={String(opt.value)} className="whitespace-nowrap">
+                        <a
+                          className={cx('flex items-start gap-2 w-full rounded-md hover:bg-base-200', isActive ? 'active text-primary' : '')}
+                          onClick={() => handleSelect(opt.value, opt)}
+                          onMouseEnter={() => onOptionHover && onOptionHover(opt)}
+                          role="option"
+                          aria-selected={isActive}
+                        >
+                          {Icon && <Icon className="h-4 w-4 mt-0.5 opacity-80" />}
+                          <div className="flex flex-col min-w-0">
+                            {(() => {
+                              let titleText = '';
+                              let content = opt.label;
+                              if (typeof opt.label === 'string') {
+                                titleText = opt.label;
+                                content = opt.label.length > maxItemLabelLength
+                                  ? opt.label.slice(0, maxItemLabelLength) + '...'
+                                  : opt.label;
+                              }
+                              return (
+                                <span className="truncate" title={titleText}>{content}</span>
+                              );
+                            })()}
+                            {opt.description && (
+                              <span className="truncate text-xs text-base-content/60">{opt.description}</span>
+                            )}
+                          </div>
+                        </a>
+                      </li>
+                    );
+                  });
+                }
+
+                // Grouped rendering
+                const groups = new Map();
+                filteredOptions.forEach((opt) => {
+                  const g = opt?.meta?.group || 'Other';
+                  if (!groups.has(g)) groups.set(g, []);
+                  groups.get(g).push(opt);
+                });
+                return Array.from(groups.entries()).map(([groupLabel, opts]) => (
+                  <li key={`group-${groupLabel}`} className="px-2 py-1">
+                    <div className="text-xs text-base-content/70 mb-1 capitalize">{groupLabel}</div>
+                    <ul>
+                      {opts.map((opt) => {
+                        const Icon = opt.icon;
+                        const isActive = String(opt.value) === String(value);
+                        return (
+                          <li key={String(opt.value)} className="whitespace-nowrap">
+                            <a
+                              className={cx('flex items-start gap-2 w-full rounded-md hover:bg-base-200', isActive ? 'active text-primary' : '')}
+                              onClick={() => handleSelect(opt.value, opt)}
+                              onMouseEnter={() => onOptionHover && onOptionHover(opt)}
+                              role="option"
+                              aria-selected={isActive}
+                            >
+                              {Icon && <Icon className="h-4 w-4 mt-0.5 opacity-80" />}
+                              <div className="flex flex-col min-w-0">
+                                {(() => {
+                                  let titleText = '';
+                                  let content = opt.label;
+                                  if (typeof opt.label === 'string') {
+                                    titleText = opt.label;
+                                    content = opt.label.length > maxItemLabelLength
+                                      ? opt.label.slice(0, maxItemLabelLength) + '...'
+                                      : opt.label;
+                                  }
+                                  return (
+                                    <span className="truncate" title={titleText}>{content}</span>
+                                  );
+                                })()}
+                                {opt.description && (
+                                  <span className="truncate text-xs text-base-content/60">{opt.description}</span>
+                                )}
+                              </div>
+                            </a>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </li>
-                );
-              })}
+                ));
+              })()}
             </ul>
           </div>
         </div>
