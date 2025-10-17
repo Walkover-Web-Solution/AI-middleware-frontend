@@ -17,7 +17,6 @@ const ConfigurationPage = ({
     apiKeySectionRef, 
     promptTextAreaRef, 
     searchParams,
-    // Consolidated state props
     uiState,
     updateUiState,
     promptState,
@@ -31,7 +30,7 @@ const ConfigurationPage = ({
     const [currentView, setCurrentView] = useState(view);
     
     const configState = useConfigurationState(params, searchParams);
-    const { bridgeType, reduxPrompt } = configState;
+    const { bridgeType } = configState;
     useEffect(() => {
         if (bridgeType === 'trigger' || bridgeType == 'api' || bridgeType === 'batch') {
             if (currentView === 'chatbot-config' || bridgeType === 'trigger') {
@@ -41,20 +40,6 @@ const ConfigurationPage = ({
         }
     }, [bridgeType, currentView, params.org_id, params.id, searchParams.version, router]);
 
-    useEffect(() => {
-        const shouldScrollAndFocus = (bridgeType === 'api' || bridgeType === 'chatbot' || bridgeType === 'batch') && reduxPrompt?.trim() === "";
-        if (!shouldScrollAndFocus) return;
-        const timeoutId = setTimeout(() => {
-            const textareaElement = promptTextAreaRef?.current?.querySelector('textarea');
-            if (textareaElement) {
-                promptTextAreaRef.current.scrollIntoView({ behavior: 'smooth' });
-                setTimeout(() => {
-                    textareaElement.focus();
-                }, 500);
-            }
-        }, 1000);
-        return () => clearTimeout(timeoutId);
-    }, [bridgeType, reduxPrompt]);
     const handleNavigation = useCallback((target) => {
         setCurrentView(target);
         router.push(`/org/${params.org_id}/agents/configure/${params.id}?version=${searchParams?.version}&view=${target}`);
@@ -83,7 +68,6 @@ const ConfigurationPage = ({
         isEmbedUser,
         apiKeySectionRef,
         promptTextAreaRef,
-        // Consolidated state props
         uiState,
         updateUiState,
         promptState,
