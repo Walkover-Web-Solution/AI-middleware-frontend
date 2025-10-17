@@ -55,6 +55,13 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     setConversation([]);
     setEditingMessage(null);
     setEditContent('');
+    
+    // Focus on input field after reset
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
   }
 
   const handleEditMessage = (messageId, currentContent) => {
