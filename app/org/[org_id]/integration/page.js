@@ -68,7 +68,7 @@ const Page = ({ params }) => {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full">
           <PageHeader
             title=" GTWY Embed Integration"
-            docLink="https://app.docstar.io/p/features/gtwy-embed--1?collectionId=inYU67SKiHgW"
+            docLink="https://gtwy.ai/blogs/features/gtwy-embed--1"
             description={descriptions?.['Gtwy as Embed'] || "Embedded GTWY allows you to seamlessly integrate the full GTWY AI interface directly into any product or website."}
           />
           

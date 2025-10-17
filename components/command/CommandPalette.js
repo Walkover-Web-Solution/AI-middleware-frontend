@@ -23,7 +23,7 @@ const CommandPalette = ({isEmbedUser}) => {
 
   const { agentList, apikeys, knowledgeBase, functionData, integrationData, authData, orchestralFlowData } = useCustomSelector((state) => ({
     agentList: state?.bridgeReducer?.org?.[orgId]?.orgs || [],
-    apikeys: state?.bridgeReducer?.apikeys?.[orgId] || [],
+    apikeys: state?.apiKeysReducer?.apikeys?.[orgId] || [],
     knowledgeBase: state?.knowledgeBaseReducer?.knowledgeBaseData?.[orgId] || [],
     functionData: state?.bridgeReducer?.org?.[orgId]?.functionData || {},
     integrationData: state?.integrationReducer?.integrationData?.[orgId] || [],

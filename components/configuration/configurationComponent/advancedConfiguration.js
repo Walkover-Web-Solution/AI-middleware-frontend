@@ -23,7 +23,7 @@ const AdvancedConfiguration = ({ params, searchParams, bridgeType, modelType }) 
 
   const { bridge, apikeydata, bridgeApikey_object_id, SERVICES, isFirstConfiguration, serviceModels, currentService, fallbackModel, DefaultModel , currentModel } = useCustomSelector((state) => {
     const bridgeMap = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version] || {};
-    const apikeys = state?.bridgeReducer?.apikeys || {};
+    const apikeys = state?.apiKeysReducer?.apikeys || {};
     const user = state.userDetailsReducer.userDetails;
     const versionData = state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[searchParams?.version];
     const service = versionData?.service;
