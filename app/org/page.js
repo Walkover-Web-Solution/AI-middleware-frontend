@@ -54,6 +54,14 @@ function Page() {
     setDisplayedOrganizations(organizationsArray);
   }, [organizationsArray]);
 
+  // Auto-redirect if there's only one organization
+  useEffect(() => {
+    if (organizationsArray.length === 1) {
+      const singleOrg = organizationsArray[0];
+      handleSwitchOrg(singleOrg.id, singleOrg.name);
+    }
+  }, [organizationsArray, handleSwitchOrg]);
+
   return (
     <div className="flex flex-col justify-start items-center min-h-screen bg-base-100 px-2 md:px-0">
       <ServiceInitializer />
