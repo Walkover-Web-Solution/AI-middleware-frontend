@@ -40,9 +40,8 @@ function Page({ params }) {
   });
 
   useEffect(() => {
-    dispatch(getAllAuthData())
     setFilterPauthKeys(authData)
-  }, [authData]); // Removed authData from dependencies to avoid infinite loop
+  }, [authData]);
 
 const maskAuthKey = (authkey) => {
   if (!authkey) return '';

@@ -57,6 +57,7 @@ const persistConfig = {
         'flowDataReducer',
         'apiKeysReducer',
         'variableReducer',
+        'orchestralFlowReducer',
         // Add/remove more slice keys as needed
     ],
 };

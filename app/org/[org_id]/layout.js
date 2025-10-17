@@ -26,6 +26,7 @@ import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { getAuthDataAction } from "@/store/action/authAction";
 import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
+import { getAllAuthData } from "@/store/action/authkeyAction";
 
 const Navbar = dynamic(() => import("@/components/navbar"), {loading: () => <LoadingSpinner />});
 const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), {loading: () => <LoadingSpinner />});
@@ -222,6 +223,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getAllOrchestralFlowAction(resolvedParams.org_id));
       dispatch(getAuthDataAction(resolvedParams?.org_id))
       dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
+      dispatch(getAllAuthData())
     }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 

@@ -11,7 +11,8 @@ const ServiceInitializer = () => {
     const pathname = usePathname();
     const SERVICES = useCustomSelector(state => state.serviceReducer.services);
     const MODELS = useCustomSelector(state => state.modelReducer.serviceModels);
-    const isOrgPage = pathname === '/org' || pathname.startsWith('/org/page') || pathname === '/org/';
+    const isOrgPage = pathname === '/org' || pathname.startsWith('/org') || pathname === '/org/';
+    const hasCalledAPIs = useRef(false);
 
     // Always run on org page - initial data fetch
     useEffect(() => {
@@ -20,6 +21,18 @@ const ServiceInitializer = () => {
             dispatch(getServiceAction());
         }
     }, [dispatch, isOrgPage]);
+
+    useEffect(() => {
+        if (!isOrgPage && !hasCalledAPIs.current) {
+            const hasServices = Array.isArray(SERVICES) && SERVICES.length > 0;
+            const hasModels = MODELS && Object.keys(MODELS).length > 0;
+            if (!hasServices || !hasModels) {
+                hasCalledAPIs.current = true;
+                dispatch(userDetails());
+                dispatch(getServiceAction());
+            }
+        }
+    }, [dispatch, isOrgPage, SERVICES, MODELS]);
 
     // Fetch models for each service and retry if models are missing
     useEffect(() => {
@@ -35,7 +48,7 @@ const ServiceInitializer = () => {
                 }
             });
         }
-    }, [SERVICES, MODELS, dispatch]);
+    }, [SERVICES]);
     // This component doesn't render anything
     return null;
 };

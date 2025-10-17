@@ -92,22 +92,38 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
 
     // Build options for global Dropdown
     const serviceOptions = useMemo(() => {
-        const availableServices = isEmbedUser && showDefaultApikeys
-            ? Object.keys(apiKeyObjectIdData).map(key => {
-                const svc = SERVICES && SERVICES.find((s) => s.value === key);
-                return svc ? svc : { value: key, displayName: key };
-            }).filter(Boolean)
-            : (SERVICES || []);
-
-        return (availableServices || []).map((svc) => ({
-            value: svc.value,
-            label: (
-                <div className="flex items-center gap-2">
-                    {getIconOfService(svc.value, 16, 16)}
-                    <span className="capitalize">{svc.displayName || svc.value}</span>
-                </div>
-            )
-        }));
+        let availableServices = [];
+        if (isEmbedUser && showDefaultApikeys) {
+            // Ensure apiKeyObjectIdData exists and is an object
+            if (apiKeyObjectIdData && typeof apiKeyObjectIdData === 'object') {
+                availableServices = Object.keys(apiKeyObjectIdData).map(key => {
+                    const svc = SERVICES && Array.isArray(SERVICES) && SERVICES.find((s) => s && s.value === key);
+                    return svc ? svc : { value: key, displayName: key };
+                }).filter(Boolean);
+            }
+        } else {
+            // Ensure SERVICES is an array
+            availableServices = Array.isArray(SERVICES) ? SERVICES : [];
+        }
+        // Ensure availableServices is an array before mapping
+        if (!Array.isArray(availableServices)) {
+            availableServices = [];
+        }
+        return availableServices.map((svc) => {
+            // Sanity checks
+            if (!svc || typeof svc !== 'object') return null;
+            if (!svc.value) return null;
+            
+            return {
+                value: svc.value,
+                label: (
+                    <div className="flex items-center gap-2">
+                        {getIconOfService(svc.value, 16, 16)}
+                        <span className="capitalize">{svc.displayName || svc.value}</span>
+                    </div>
+                )
+            };
+        }).filter(Boolean);
     }, [SERVICES, isEmbedUser, showDefaultApikeys, apiKeyObjectIdData]);
 
     const handleServiceChange = useCallback((serviceValue) => {
@@ -178,7 +194,7 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
             onChange={handleServiceChange}
             placeholder="Select a Service"
             size="sm"
-            className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full justify-between ${isDisabled ? 'btn-disabled' : ''}`}
+            className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full font-normal justify-between ${isDisabled ? 'btn-disabled' : ''}`}
             menuClassName="w-full max-w-xs"
           />
     );
@@ -186,9 +202,6 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
     return (
         <div className="space-y-4 w-full">
             <div className="form-control">
-                
-                
-
                 <div className="flex items-center gap-2 z-auto">
                 {isDisabled && (
                             <InfoTooltip tooltipContent="Batch API is only applicable for OpenAI">
@@ -196,8 +209,6 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
                             </InfoTooltip>
                         )}
                     {renderServiceDropdown()}
-
-                    
                 </div>
             </div>
         </div>

@@ -183,7 +183,7 @@ const ModelDropdown = ({ params, searchParams }) => {
 
     return (
         <div className="flex flex-col items-start gap-4 relative">
-            <div className="w-full max-w-xs" ref={dropdownRef}>
+            <div className="w-full sm:max-w-xs" ref={dropdownRef}>
                 <Dropdown
                     options={modelOptions}
                     value={model || ''}
@@ -192,8 +192,8 @@ const ModelDropdown = ({ params, searchParams }) => {
                     showGroupHeaders
                     placeholder="Select a Model"
                     size="sm"
-                    className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal"
-                    menuClassName="w-[260px] max-h-[500px]"
+                    className="btn btn-sm w-full justify-between border border-base-content/20 bg-base-100 hover:bg-base-200 font-normal min-h-[2.5rem] sm:min-h-[2rem]"
+                    menuClassName="w-full sm:w-[260px] max-h-[500px] min-w-[200px]"
                     maxLabelLength={20}
                 />
             </div>
@@ -202,7 +202,7 @@ const ModelDropdown = ({ params, searchParams }) => {
 
             {/* If model is fine-tuned model */}
             {modelType === 'fine-tune' && (
-                <div className="w-full max-w-xs">
+                <div className="w-full sm:max-w-xs">
                     <div className="label">
                         <span className="label-text text-base-content">Fine-Tune Model</span>
                     </div>
@@ -213,7 +213,7 @@ const ModelDropdown = ({ params, searchParams }) => {
                         defaultValue={fineTuneModel}
                         onBlur={handleFinetuneModelChange}
                         placeholder="Fine-tune model Name"
-                        className="input input-bordered input-sm w-full bg-base-100 text-base-content focus:border-primary focus:ring-1 focus:ring-primary"
+                        className="input input-bordered input-sm w-full bg-base-100 text-base-content focus:border-primary focus:ring-1 focus:ring-primary min-h-[2.5rem] sm:min-h-[2rem]"
                     />
                 </div>
             )}
