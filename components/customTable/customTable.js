@@ -53,7 +53,7 @@ const CustomTable = ({
                     return ascending ? a.totaltoken - b.totaltoken : b.totaltoken - a.totaltoken;
                 }
                 if (typeof valueA === 'string' && typeof valueB === 'string') {
-                    return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+                    return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueB);
                 }
                 
                 if (typeof valueA === 'number' && typeof valueB === 'number') {
@@ -204,7 +204,7 @@ const CustomTable = ({
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-6 bg-base-100 rounded-lg shadow-sm">
+                        <div className="text-left py-6 bg-base-100 shadow-sm">
                             <p className="text-base-content/70">No data available</p>
                         </div>
                     )}
@@ -219,11 +219,22 @@ const CustomTable = ({
         
         return (
             <div className="overflow-x-auto">
-                <table className={`table ${tableClass} min-w-full bg-base-100 shadow-md rounded-lg overflow-hidden`}>
+                <table className={`table ${tableClass} w-full bg-base-100 shadow-md overflow-hidden`} style={{tableLayout: 'auto'}}>
+                    <colgroup>
+                        {showRowSelection && <col style={{width: '40px'}} />}
+                        {visibleColumns.map((column, idx) => {
+                            if (column.toLowerCase() === 'name') {
+                                return <col key={column} style={{width: 'auto'}} />;
+                            }
+                            // Right side columns - minimal width based on content
+                            return <col key={column} style={{width: '1px'}} />;
+                        })}
+                        {endComponent && <col style={{width: '80px'}} />}
+                    </colgroup>
                     <thead className="bg-gradient-to-r from-base-200 to-base-300 text-base-content">
                         <tr className="hover">
                             {showRowSelection &&
-                                <th className="w-10">
+                                <th className=" py-2 text-left">
                                     <input
                                         type="checkbox"
                                         className="h-4 w-4 cursor-pointer"
@@ -235,28 +246,28 @@ const CustomTable = ({
                             {visibleColumns.map((column) => (
                                 <th
                                     key={column}
-                                    className="capitalize"
+                                    className={`py-2 text-left whitespace-nowrap capitalize`}
                                 >
-                                    <div className="flex items-center">
+                                    <div className={`flex items-center justify-start`}>
                                         {sorting && sortableColumns.includes(column) && (
                                             <MoveDownIcon
-                                                className={`w-4 h-4 cursor-pointer ${activeColumn === column
+                                                className={`w-4 h-4 cursor-pointer mr-1 ${activeColumn === column
                                                     ? "text-black"
                                                     : "text-[#BCBDBE] group-hover:text-black"
-                                                    } ${ascending ? "rotate-180" : "rotate-0"}`}
+                                                } ${ascending ? "rotate-180" : "rotate-0"}`}
                                                 onClick={() => sortByColumn(column)}
                                             />
                                         )}
                                         <span
-                                            className="cursor-pointer pl-1"
+                                            className="cursor-pointer"
                                             onClick={() => sortByColumn(column)}
                                         >
-                                            {column}
+                                            {column==="averageResponseTime"?"Average Response Time":column==="totalTokens"?"Total Tokens":column}
                                         </span>
                                     </div>
                                 </th>
                             ))}
-                            {endComponent && <th></th>}
+                            {endComponent && <th className=" py-2 text-left">Action</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -277,7 +288,7 @@ const CustomTable = ({
                                     }
                                 >
                                     {showRowSelection &&
-                                        <td className="w-10 text-center">
+                                        <td className=" py-2 text-left">
                                             <input
                                                 type="checkbox"
                                                 className="h-4 w-4 cursor-pointer"
@@ -292,13 +303,14 @@ const CustomTable = ({
                                     {visibleColumns?.map((column) => (
                                         <td
                                             key={column}
+                                            className="py-2 text-left whitespace-nowrap"
                                         >
                                             {getDisplayValue(row, column)}
                                         </td>
                                     ))}
                                     {endComponent && (
-                                        <td>
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <td className=" py-2 text-left">
+                                            <div className="">
                                                 {endComponent({row: row})}
                                             </div>
                                         </td>
@@ -309,7 +321,7 @@ const CustomTable = ({
                             <tr>
                                 <td
                                     colSpan={visibleColumns.length + (showRowSelection ? 1 : 0) + (endComponent ? 1 : 0)}
-                                    className="py-4 text-center"
+                                    className="py-4 text-left"
                                 >
                                     No data available
                                 </td>
@@ -322,7 +334,7 @@ const CustomTable = ({
     };
 
     return (
-        <div className="bg-base-100 rounded-lg p-2 md:p-4">
+        <div className="bg-base-100 p-2 md:p-4">
             {/* Responsive view switching */}
             {isSmallScreen ? renderCardView() : renderTableView()}
         </div>
