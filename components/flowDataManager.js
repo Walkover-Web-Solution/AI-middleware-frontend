@@ -555,133 +555,49 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
             </div>
           </div>
         }
-        bodyClassName="pb-6"
+        bodyClassName=""
         instanceId="agent-sidebar"
       >
-        <div className="p-4">
-          <div className="form-control">
-            <div className="input-group flex items-center gap-2">
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search agents..."
-                className="input input-bordered input-primary flex-1 focus:outline-offset-0 w-full"
-              />
+        <div className="flex flex-col h-full">
+          {/* Search Section - Fixed at top */}
+          <div className="p-4 flex-shrink-0">
+            <div className="form-control">
+              <div className="input-group flex items-center gap-2">
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Search agents..."
+                  className="input input-bordered input-primary flex-1 focus:outline-offset-0 w-full"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="px-4">
-          <div className="dropdown dropdown-bottom w-full">
-            <div
-              tabIndex={0}
-              role="button"
-              className="btn btn-primary w-full shadow-lg hover:shadow-xl transition-all duration-200"
-              onClick={() => setIsCreateDropdownOpen(!isCreateDropdownOpen)}
-            >
-              <div className="avatar placeholder mr-2">
-                <div className="bg-primary-content text-primary rounded-full w-6 h-6 flex items-center justify-center">
-                  <span className="text-sm"><PlusIcon size={18} /></span>
-                </div>
-              </div>
-              Create New Agent
-              {isCreateDropdownOpen ? <ChevronUp className="w-4 h-4 ml-auto transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 ml-auto transition-transform duration-200" />}
+          {/* Divider - Fixed */}
+          <div className="px-4 flex-shrink-0">
+            <div className="divider">
+              <span className="text-base-content/60 font-medium">Available Agents</span>
             </div>
-
-            {isCreateDropdownOpen && (
-              <div className="dropdown-content z-[1] card card-compact w-full bg-base-100 shadow-xl border border-primary/20 mt-2">
-                <div className="card-body space-y-4">
-                  {/* Creation Type Selector */}
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-medium text-sm">Creation Method</span>
-                    </label>
-                    <div className="join w-full">
-                      <button
-                        onClick={() => handleTypeChange('name')}
-                        className={`btn btn-sm join-item flex-1 ${creationType === 'name' ? 'btn-primary' : 'btn-outline btn-primary'
-                          }`}
-                      >
-                        📝 Name
-                      </button>
-                      <button
-                        onClick={() => handleTypeChange('purpose')}
-                        className={`btn btn-sm join-item flex-1 ${creationType === 'purpose' ? 'btn-primary' : 'btn-outline btn-primary'
-                          }`}
-                      >
-                        🎯 Purpose
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Input Field */}
-                  <div className="form-control">
-                    {creationType === 'name' ? (
-                      <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Enter agent name..."
-                        className="input input-bordered input-primary w-full"
-                      />
-                    ) : (
-                      <textarea
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Describe what the agent should do..."
-                        rows={2}
-                        className="textarea textarea-bordered textarea-primary w-full resize-none"
-                      />
-                    )}
-                  </div>
-
-                  {/* Create Button */}
-                  <button
-                    onClick={handleCreateAgent}
-                    disabled={!inputValue.trim() || isCreating}
-                    className={`btn btn-sm w-full ${!inputValue.trim() || isCreating
-                      ? 'btn-disabled'
-                      : 'btn-primary'
-                      }`}
-                  >
-                    {isCreating ? (
-                      <>
-                        <span className="loading loading-spinner loading-xs"></span>
-                        Creating...
-                      </>
-                    ) : (
-                      <>
-                        🚀 Create Agent
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
-        </div>
 
-        <div className="px-4">
-          <div className="divider">
-            <span className="text-base-content/60 font-medium">Available Agents</span>
-          </div>
-        </div>
-
-        <div className="px-4 max-h-[calc(100vh-300px)] overflow-y-auto">
+          {/* Scrollable Agent List - Takes remaining space */}
+          <div className="flex-1 h-full px-4 overflow-y-auto min-h-0">
           {list.length === 0 ? (
             <div className="card bg-base-100 shadow-md">
-              <div className="card-body text-center py-12">
+              <div className="card-body flex flex-row text-center py-12">
                 <div className="avatar placeholder mb-4">
                   <div className="bg-base-300 text-base-content rounded-full w-16">
                     <span className="text-2xl">🤖</span>
                   </div>
                 </div>
+                <div className="flex flex-col items-center">
                 <h3 className="text-lg font-semibold text-base-content/60 mb-2">
                   {q ? `No agents found for "${q}"` : 'No agents available'}
                 </h3>
                 <p className="text-sm text-base-content/50">
                   {q ? 'Try adjusting your search terms' : 'Create your first agent to get started'}
                 </p>
+                </div>
               </div>
             </div>
           ) : (
@@ -769,8 +685,99 @@ export function AgentSidebar({ isOpen, title, agents, onClose, nodes, onChoose, 
               })}
             </div>
           )}
-        </div>
+          </div>
 
+          {/* Fixed Create Button at Bottom */}
+          <div className="border-t border-base-300 mb-24 p-4 bg-base-100 flex-shrink-0">
+            <div className="dropdown dropdown-top w-full">
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn btn-primary w-full shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={() => setIsCreateDropdownOpen(!isCreateDropdownOpen)}
+            >
+              <div className="avatar placeholder mr-2">
+                <div className="bg-primary-content text-primary rounded-full w-6 h-6 flex items-center justify-center">
+                  <span className="text-sm"><PlusIcon size={18} /></span>
+                </div>
+              </div>
+              Create New Agent
+              {isCreateDropdownOpen ? <ChevronUp className="w-4 h-4 ml-auto transition-transform duration-200" /> : <ChevronDown className="w-4 h-4 ml-auto transition-transform duration-200" />}
+            </div>
+
+            {isCreateDropdownOpen && (
+              <div className="dropdown-content z-[1] card card-compact w-full bg-base-100 shadow-xl border border-primary/20 mb-2">
+                <div className="card-body space-y-4">
+                  {/* Creation Type Selector */}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium text-sm">Creation Method</span>
+                    </label>
+                    <div className="join w-full">
+                      <button
+                        onClick={() => handleTypeChange('name')}
+                        className={`btn btn-sm join-item flex-1 ${creationType === 'name' ? 'btn-primary' : 'btn-outline btn-primary'
+                          }`}
+                      >
+                        📝 Name
+                      </button>
+                      <button
+                        onClick={() => handleTypeChange('purpose')}
+                        className={`btn btn-sm join-item flex-1 ${creationType === 'purpose' ? 'btn-primary' : 'btn-outline btn-primary'
+                          }`}
+                      >
+                        🎯 Purpose
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Input Field */}
+                  <div className="form-control">
+                    {creationType === 'name' ? (
+                      <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Enter agent name..."
+                        className="input input-bordered input-primary w-full"
+                      />
+                    ) : (
+                      <textarea
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Describe what the agent should do..."
+                        rows={2}
+                        className="textarea textarea-bordered textarea-primary w-full resize-none"
+                      />
+                    )}
+                  </div>
+
+                  {/* Create Button */}
+                  <button
+                    onClick={handleCreateAgent}
+                    disabled={!inputValue.trim() || isCreating}
+                    className={`btn btn-sm w-full ${!inputValue.trim() || isCreating
+                      ? 'btn-disabled'
+                      : 'btn-primary'
+                      }`}
+                  >
+                    {isCreating ? (
+                      <>
+                        <span className="loading loading-spinner loading-xs"></span>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        🚀 Create Agent
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        </div>
         <AgentDescriptionModal
           setDescription={setDescription}
           handleSaveAgent={handleAddAgent}

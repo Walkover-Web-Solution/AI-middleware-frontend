@@ -157,7 +157,7 @@ const ApiKeysInput = ({ configuration, onChange, orgId }) => {
   const SERVICES = useCustomSelector((state) => state?.serviceReducer?.services);
 
   const { apikeydata } = useCustomSelector((state) => {
-    const apikeys = state?.bridgeReducer?.apikeys?.[orgId] || [];
+    const apikeys = state?.apiKeysReducer?.apikeys?.[orgId] || [];
     return { apikeydata: apikeys };
   });
 

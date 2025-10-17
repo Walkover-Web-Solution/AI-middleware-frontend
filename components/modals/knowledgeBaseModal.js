@@ -159,7 +159,7 @@ const KnowledgeBaseModal = ({ params, selectedKnowledgeBase = null, setSelectedK
                   maxLength={50}
                   disabled={isLoading}
                   key={selectedKnowledgeBase?._id}
-                  defaultValue={selectedKnowledgeBase?.actual_name || ''}
+                  defaultValue={selectedKnowledgeBase?.name || ''}
                 />
               </div>
 

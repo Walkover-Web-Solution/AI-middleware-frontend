@@ -40,9 +40,8 @@ function Page({ params }) {
   });
 
   useEffect(() => {
-    dispatch(getAllAuthData())
     setFilterPauthKeys(authData)
-  }, []); // Removed authData from dependencies to avoid infinite loop
+  }, [authData]);
 
 const maskAuthKey = (authkey) => {
   if (!authkey) return '';
@@ -147,7 +146,7 @@ const maskAuthKey = (authkey) => {
         <MainLayout>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between w-full pt-4">
             <PageHeader
-              title="PauthKey"
+              title="Auth Key"
               description={descriptions?.['Pauthkey'] || "A unique key used to validate API requests for sending and receiving messages securely."}
               docLink="https://gtwy.ai/blogs/features/pauthkey"
             />
@@ -155,10 +154,11 @@ const maskAuthKey = (authkey) => {
           </div>
         </MainLayout>
         <div className="flex flex-row gap-4 justify-between ">
-
-        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="PauthKey"/>
-        <div className="flex-shrink-0 mr-2">
-              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New PauthKey</button>
+      {authData?.length>5 && (
+        <SearchItems data={authData} setFilterItems={setFilterPauthKeys} item="Auth Key"/>
+      )}
+        <div className={`flex-shrink-0 ${authData?.length > 5 ? 'mr-2' : 'ml-auto mr-2'}`}>
+              <button className="btn btn-primary" onClick={() => openModal(MODAL_TYPE.PAUTH_KEY_MODAL)}>+ Create New Auth Key</button>
             </div>
             </div>
          </div>
@@ -190,7 +190,7 @@ const maskAuthKey = (authkey) => {
         className="modal modal-bottom sm:modal-middle"
       >
         <div className="modal-box">
-          <h3 className="font-bold text-lg mb-2">Create New PauthKey</h3>
+          <h3 className="font-bold text-lg mb-2">Create New Auth Key</h3>
           <label className="input input-bordered flex items-center gap-2">
             Name{RequiredItem()} :
             <input
@@ -222,7 +222,7 @@ const maskAuthKey = (authkey) => {
         </div>
       </dialog>
 
-      <DeleteModal onConfirm={DeleteAuth} item={selectedDataToDelete} description={`Are you sure you want to delete the Pauth key "${selectedDataToDelete?.name}"? This action cannot be undone.`} title='Delete API Key' />
+      <DeleteModal onConfirm={DeleteAuth} item={selectedDataToDelete} description={`Are you sure you want to delete the Auth key "${selectedDataToDelete?.name}"? This action cannot be undone.`} title='Delete Auth Key' />
     </div>
   );
 }

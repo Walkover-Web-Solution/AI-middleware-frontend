@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from 'react-markdown';
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import CodeBlock from "../codeBlock/codeBlock";
 import ChatTextInput from "./chatTextInput";
 import { dryRun } from "@/config";
@@ -17,6 +16,7 @@ import { runTestCaseAction } from "@/store/action/testCasesAction";
 import { useDispatch } from "react-redux";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import Protected from "../protected";
+import ReactMarkdown from "../LazyMarkdown";
 
 
 function Chat({ params, userMessage, isOrchestralModel = false, searchParams, isEmbedUser }) {
@@ -55,15 +55,14 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     setConversation([]);
     setEditingMessage(null);
     setEditContent('');
+    
+    // Focus on input field after reset
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
   }
-
-  useEffect(()=>{
-    if(window.sendDataToChatbot){
-      window.sendDataToChatbot({
-        'parentId': 'parentChatbot'
-      })
-    }
-  },[])
 
   const handleEditMessage = (messageId, currentContent) => {
     setEditingMessage(messageId);
@@ -109,11 +108,11 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       await new Promise(resolve => setTimeout(resolve, 500));
       // Convert testcase conversation to chat messages format
       const convertedMessages = [];
-      let messageId = 1;
+      const baseTimestamp = Date.now();
 
       testCaseConversation.forEach((msg, index) => {
         const chatMessage = {
-          id: messageId++,
+          id: `testcase_${msg.role}_${baseTimestamp}_${index}`,
           sender: msg.role === 'user' ? 'user' : 'assistant',
           time: new Date().toLocaleTimeString([], {
             hour: "2-digit",
@@ -126,7 +125,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
 
       if (expected?.response) {
         const expectedMessage = {
-          id: messageId++,
+          id: `testcase_expected_${baseTimestamp}`,
           sender: 'expected',
           time: new Date().toLocaleTimeString([], {
             hour: "2-digit",
@@ -165,8 +164,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     inputRef.current.value = "";
     setLoading(true);
     try {
+      // Generate unique IDs using timestamp to avoid conflicts
+      const timestamp = Date.now();
       const newChat = {
-        id: conversation.length + 1,
+        id: `user_${timestamp}`,
         sender: "user",
         playground: true,
         time: new Date().toLocaleTimeString([], {
@@ -184,7 +185,7 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       setMessages(prevMessages => [...prevMessages, newChat]);
 
       // Insert a temporary assistant "typing" message
-      const tempAssistantId = conversation.length + 2;
+      const tempAssistantId = `assistant_${timestamp}`;
       const loadingAssistant = {
         id: tempAssistantId,
         sender: "assistant",
@@ -220,7 +221,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
         finish_reason: response?.finish_reason
       };
 
-      setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
+      // Update conversation and keep only last 6 messages
+      const updatedConversation = [...conversation, cloneDeep(data), assistConversation].slice(-6);
+      setConversation(updatedConversation);
+
       const newChatAssist = {
         id: tempAssistantId,
         sender: "assistant",
@@ -237,7 +241,10 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
       };
 
       // Replace the temporary loading message with the actual response
-      setMessages(prevMessages => prevMessages.map(m => m.id === tempAssistantId ? newChatAssist : m));
+      setMessages(prevMessages => {
+        const updatedMessages = prevMessages.map(m => m.id === tempAssistantId ? newChatAssist : m);
+        return updatedMessages;
+      });
     } catch (error) {
       console.log(error);
       setErrorMessage("Something went wrong. Please try again.");
@@ -279,6 +286,21 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
     }
   };
 
+  // Opens the embedded chatbot panel and sends any necessary data beforehand
+  const handleOpenChatbot = () => {
+    // Send data first (if host page exposes the bridge functions)
+    if (typeof window !== 'undefined' && typeof window.sendDataToChatbot === 'function') {
+      window.sendDataToChatbot({ parentId: 'parentChatbot' });
+    }
+
+    // Then open after a short delay to ensure data is processed
+    setTimeout(() => {
+      if (typeof window !== 'undefined' && typeof window.openChatbot === 'function') {
+        window.openChatbot();
+      }
+    }, 200);
+  };
+
   return (
     <div className="px-4 pt-4 bg-base-100">
       <div className="w-full flex justify-between items-center px-2">
@@ -308,16 +330,12 @@ function Chat({ params, userMessage, isOrchestralModel = false, searchParams, is
                 <option value="ai">AI</option>
                 <option value="exact">Exact</option>
               </select>
-              <button className="btn btn-sm" onClick={handleResetChat}> <PlusIcon size={14} />Create Test Case</button>
+              <button className="btn btn-sm" onClick={handleResetChat}> <PlusIcon size={14} />Add Test Case</button>
             </div>
           )}
           {!isOrchestralModel && !isEmbedUser && bridgeType === 'chatbot' && <button
             className="btn btn-sm btn-primary"
-            onClick={() => {
-              if (typeof window !== 'undefined' && typeof window.openChatbot === 'function') {
-                window.openChatbot();
-              }
-            }}
+            onClick={handleOpenChatbot}
             title="Open Chatbot"
           >
             <div className="tooltip tooltip-left" data-tip="Open Chatbot">

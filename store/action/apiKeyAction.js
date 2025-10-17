@@ -1,5 +1,5 @@
 import { deleteApikey, getAllApikey, saveApiKeys, updateApikey } from "@/config";
-import { apikeyDataReducer, apikeyDeleteReducer, apikeyRollBackReducer, apikeyUpdateReducer, backupApiKeysReducer, createApiKeyReducer } from "../reducer/bridgeReducer";
+import { apikeyDataReducer, apikeyDeleteReducer, apikeyRollBackReducer, apikeyUpdateReducer, backupApiKeysReducer, createApiKeyReducer } from "../reducer/apiKeysReducer";
 import { toast } from "react-toastify";
 
 

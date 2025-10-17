@@ -4,12 +4,7 @@
 body {
   @apply font-sans;
 }
-:root::-webkit-scrollbar {
-  display: none;
-}
-body {
-  font-family: sans-serif;
-}
+
 /* global.css or index.css */
 .info {
   @apply font-medium text-gray-500 cursor-help underline decoration-dotted underline-offset-2 decoration-gray-400 hover:decoration-gray-600;
@@ -45,23 +40,6 @@ body {
 /* Show the button container when the row is hovered */
 .hover-row:hover .button-container {
   visibility: visible;
-}
-
-/* Style for the buttons (customize as needed) */
-.table-button {
-  margin-left: 5px;
-  /* Space between buttons */
-  /* Add more styling here */
-}
-
-/* Ensure the row has a cursor pointer to indicate it's interactive */
-.hover-row {
-  cursor: pointer;
-}
-
-body {
-  /* overflow: visible !important; */
-  overflow-x: hidden;
 }
 
 .line-clamp-5 {
@@ -142,7 +120,6 @@ html {
 #parentChatbot{
   z-index: 1;
 }
-
 
 .z-very-low {
   z-index: 0;

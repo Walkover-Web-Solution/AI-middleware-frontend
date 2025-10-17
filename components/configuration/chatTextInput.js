@@ -1,7 +1,8 @@
 import { dryRun } from '@/config';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { uploadImageAction } from '@/store/action/bridgeAction';
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import omit from 'lodash/omit';
 import Image from 'next/image';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -19,7 +20,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         modelName: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.model?.toLowerCase(),
         modelType: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.type?.toLowerCase(),
         prompt: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration?.prompt,
-        variablesKeyValue: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.variables || [],
+        variablesKeyValue: state?.variableReducer?.VariableMapping?.[params?.id]?.[versionId]?.variables || [],
         configuration: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.configuration,
         modelInfo: state?.modelReducer?.serviceModels,
         service: state?.bridgeReducer?.bridgeVersionMapping?.[params?.id]?.[versionId]?.service?.toLowerCase(),
@@ -91,8 +92,10 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
         if (modelType !== "completion") inputRef.current.value = "";
         setLoading(true);
         try {
+            // Generate unique IDs using timestamp to avoid conflicts
+            const timestamp = Date.now();
             const newChat = {
-                id: conversation.length + 1,
+                id: `user_${timestamp}`,
                 sender: "user",
                 time: new Date().toLocaleTimeString([], {
                     hour: "2-digit",
@@ -102,8 +105,6 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 images: uploadedImages, // Store images in the user role
                 files: uploadedFiles,
             };           
-            setUploadedImages([]);
-            setUploadedFiles([]);
             let response, responseData;
             let data;
             if (modelType !== 'completion' && modelType !== 'embedding') {
@@ -115,7 +116,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 };
                 setMessages(prevMessages => [...prevMessages, newChat]);
                 // Insert temporary assistant typing message
-                const tempAssistantId = conversation.length + 2;
+                const tempAssistantId = `assistant_${timestamp}`;
                 const loadingAssistant = {
                     id: tempAssistantId,
                     sender: "assistant",
@@ -145,9 +146,8 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 // Handle unsuccessful response: rollback loading placeholder and user message
                 if (!responseData || !responseData.success) {
                     inputRef.current.value = data.content;
-                    // remove loading placeholder if present
-                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
-                    setMessages(prevMessages => prevMessages.slice(0, -1));
+                    // remove loading placeholder and the user message we just added
+                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId && m.id !== `user_${timestamp}`));
                     setLoading(false);
                     return;
                 }
@@ -158,7 +158,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 };
                 setMessages(prevMessages => [...prevMessages, newChat]);
                 // Insert temporary assistant typing message for embedding as well
-                const tempAssistantId = conversation.length + 2;
+                const tempAssistantId = `assistant_${timestamp}`;
                 const loadingAssistant = {
                     id: tempAssistantId,
                     sender: "assistant",
@@ -184,8 +184,8 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 });
                 if (!responseData || !responseData.success) {
                     inputRef.current.value = data.content;
-                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId));
-                    setMessages(prevMessages => prevMessages.slice(0, -1));
+                    // remove loading placeholder and the user message we just added
+                    setMessages(prev => prev.filter(m => m.id !== tempAssistantId && m.id !== `user_${timestamp}`));
                     setLoading(false);
                     return;
                 }
@@ -194,7 +194,7 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                     testcase_data.testcase_id = testCaseId;
                 }
                 // Insert temporary assistant typing message for completion path as well
-                const tempAssistantId = conversation.length + 2;
+                const tempAssistantId = `assistant_${timestamp}`;
                 const loadingAssistant = {
                     id: tempAssistantId,
                     sender: "assistant",
@@ -258,13 +258,8 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 model: response?.model
             };
 
-            if (modelType !== 'completion' && modelType !== 'embedding') {
-                setConversation(prevConversation => [...prevConversation, _.cloneDeep(_.omit(data, 'files')), assistConversation].slice(-6));
-            } else if (modelType === 'embedding') {
-                setConversation(prevConversation => [...prevConversation, _.cloneDeep(data), assistConversation].slice(-6));
-            }
-            // Replace the temporary loading message with the actual response (for all non-image paths)
-            const tempAssistantIdFinal = conversation.length + 2;
+            // Replace the temporary loading message with the actual response first
+            const tempAssistantIdFinal = `assistant_${timestamp}`;
             const newChatAssist = {
                 id: tempAssistantIdFinal,
                 sender: "assistant",
@@ -279,8 +274,26 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
                 firstAttemptError: response?.firstAttemptError,
                 modelName : assistConversation?.model
             };
-            // Replace loading placeholder with actual assistant message for all paths we inserted placeholder
-            setMessages(prev => prev.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m));
+
+            // Update conversation and messages together to maintain synchronization
+            if (modelType !== 'completion' && modelType !== 'embedding') {
+                const updatedConversation = [...conversation, cloneDeep(omit(data, 'files')), assistConversation].slice(-6);
+                setConversation(updatedConversation);
+                setMessages(prevMessages => {
+                    const updatedMessages = prevMessages.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m);
+                    return updatedMessages;
+                });
+            } else if (modelType === 'embedding') {
+                const updatedConversation = [...conversation, cloneDeep(data), assistConversation].slice(-6);
+                setConversation(updatedConversation);
+                setMessages(prevMessages => {
+                    const updatedMessages = prevMessages.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m); 
+                    return updatedMessages;
+                });
+            } else {
+                // For completion models, just replace the loading message
+                setMessages(prevMessages => prevMessages.map(m => m.id === tempAssistantIdFinal ? newChatAssist : m));
+            }
             //         pauseOnHover: true,
             //         draggable: true,
             //         progress: undefined,
@@ -288,8 +301,10 @@ function ChatTextInput({ setMessages, setErrorMessage, messages, params, uploade
             //     });
              
         } catch (error) {
-            console.log(error);
             setErrorMessage("Something went wrong. Please try again.");
+            setMessages(prev => prev.filter(m => 
+                m.id !== `assistant_${timestamp}` && m.id !== `user_${timestamp}`
+            ));
         } finally {
             setLoading(false);
             // Remove the redundant append of newChatAssist since we already replace the loading placeholder with it.

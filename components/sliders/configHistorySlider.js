@@ -13,7 +13,11 @@ function ConfigHistorySlider({ versionId }) {
   const pageSize = 10;
 
   const fetchHistory = useCallback(async () => {
-    if (!versionId) return;
+    // Check if slider is actually open before making API call
+    const sliderElement = document.getElementById("default-config-history-slider");
+    const isSliderOpen = sliderElement && !sliderElement.classList.contains("translate-x-full");
+    
+    if (!versionId || !isSliderOpen) return;
     
     setLoading(true);
     try {
@@ -30,17 +34,41 @@ function ConfigHistorySlider({ versionId }) {
     }
   }, [versionId, page, pageSize]);
 
+  // Listen for slider open/close events using MutationObserver
   useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+    const sliderElement = document.getElementById("default-config-history-slider");
+    if (!sliderElement) return;
 
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const isOpen = !sliderElement.classList.contains("translate-x-full");
+          if (isOpen && versionId) {
+            // Slider just opened, fetch history
+            setPage(1);
+            setHistoryData([]);
+            fetchHistory();
+          }
+        }
+      });
+    });
+
+    // Observe changes to the class attribute
+    observer.observe(sliderElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    // Cleanup observer on unmount
+    return () => observer.disconnect();
+  }, [versionId, fetchHistory]);
+
+  // Only fetch more data when page changes (for pagination)
   useEffect(() => {
-    if (versionId) {
-      setPage(1);
-      setHistoryData([]);
+    if (page > 1) {
       fetchHistory();
     }
-  }, [versionId]);
+  }, [page, fetchHistory]);
 
   const loadMore = () => {
     setPage(prev => prev + 1);

@@ -1,14 +1,15 @@
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { updateBridgeVersionAction } from '@/store/action/bridgeAction';
 import { AlertIcon, InfoIcon } from "@/components/Icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { modelSuggestionApi } from "@/config";
 import { getServiceAction } from "@/store/action/serviceAction";
 import Protected from "@/components/protected";
 import { getIconOfService } from "@/utils/utility";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import InfoTooltip from "@/components/InfoTooltip";
+import React from "react";
+import Dropdown from '@/components/UI/Dropdown';
 
 function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAreaRef, isEmbedUser }) {
     const { bridgeType, service, SERVICES, DEFAULT_MODEL, prompt, bridgeApiKey, shouldPromptShow, showDefaultApikeys, apiKeyObjectIdData } = useCustomSelector((state) => {
@@ -37,7 +38,7 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
     const [selectedService, setSelectedService] = useState(service);
     const [modelRecommendations, setModelRecommendations] = useState(null);
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
+    // Local state only for selected display and recommendations
     const dispatch = useDispatch();
 
     const resetBorder = (ref, selector) => {
@@ -89,40 +90,46 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
         }
     }, [SERVICES]);
 
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownOpen) {
-                const dropdown = event.target.closest('.dropdown');
-                if (!dropdown) {
-                    setDropdownOpen(false);
-                }
+    // Build options for global Dropdown
+    const serviceOptions = useMemo(() => {
+        let availableServices = [];
+        if (isEmbedUser && showDefaultApikeys) {
+            // Ensure apiKeyObjectIdData exists and is an object
+            if (apiKeyObjectIdData && typeof apiKeyObjectIdData === 'object') {
+                availableServices = Object.keys(apiKeyObjectIdData).map(key => {
+                    const svc = SERVICES && Array.isArray(SERVICES) && SERVICES.find((s) => s && s.value === key);
+                    return svc ? svc : { value: key, displayName: key };
+                }).filter(Boolean);
             }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [dropdownOpen]);
-
-    // Coordinate with other dropdowns (e.g., ModelDropdown)
-    useEffect(() => {
-        const handler = (e) => {
-            const source = e?.detail?.type;
-            if (source && source !== 'service') {
-                setDropdownOpen(false);
-            }
-        };
-        window.addEventListener('open-dropdown', handler);
-        return () => window.removeEventListener('open-dropdown', handler);
-    }, []);
+        } else {
+            // Ensure SERVICES is an array
+            availableServices = Array.isArray(SERVICES) ? SERVICES : [];
+        }
+        // Ensure availableServices is an array before mapping
+        if (!Array.isArray(availableServices)) {
+            availableServices = [];
+        }
+        return availableServices.map((svc) => {
+            // Sanity checks
+            if (!svc || typeof svc !== 'object') return null;
+            if (!svc.value) return null;
+            
+            return {
+                value: svc.value,
+                label: (
+                    <div className="flex items-center gap-2">
+                        {getIconOfService(svc.value, 16, 16)}
+                        <span className="capitalize">{svc.displayName || svc.value}</span>
+                    </div>
+                )
+            };
+        }).filter(Boolean);
+    }, [SERVICES, isEmbedUser, showDefaultApikeys, apiKeyObjectIdData]);
 
     const handleServiceChange = useCallback((serviceValue) => {
         const newService = serviceValue;
         const defaultModel = DEFAULT_MODEL?.[newService]?.model;
         setSelectedService(newService);
-        setDropdownOpen(false); 
         
         dispatch(updateBridgeVersionAction({
             bridgeId: params.id,
@@ -180,80 +187,32 @@ function ServiceDropdown({ params, searchParams, apiKeySectionRef, promptTextAre
         return value;
     };
 
-    const renderDaisyUIDropdown = () => {
-        const availableServices = isEmbedUser && showDefaultApikeys
-            ? Object.keys(apiKeyObjectIdData).map(key => {
-                const service = SERVICES && SERVICES.find((s) => s.value === key);
-                return service ? service : { value: key, displayName: key };
-            }).filter(Boolean)
-            : SERVICES || [];
-
-        return (
-            <div className={`dropdown ${dropdownOpen ? 'dropdown-open' : ''} w-full max-w-xs ${isDisabled ? 'pointer-events-none opacity-50' : ''}`}>
-                <div 
-                    tabIndex={0} 
-                    role="button" 
-                    className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full justify-between ${isDisabled ? 'btn-disabled' : ''}`}
-                    disabled={isDisabled}
-                    onClick={() => {
-                        if (isDisabled) return;
-                        // announce opening to close other dropdowns
-                        window.dispatchEvent(new CustomEvent('open-dropdown', { detail: { type: 'service' } }));
-                        setDropdownOpen(!dropdownOpen)
-                    }}
-                >
-                    <div className="flex items-center gap-2">
-                        {selectedService && getIconOfService(selectedService, 16, 16)}
-                        <span>{selectedService ? getServiceDisplayName(selectedService) : 'Select a Service'}</span>
-                    </div>
-                    {dropdownOpen ? <ChevronUp className="text-base-content" size={16}/> : <ChevronDown className="text-base-content" size={16}/>}            
-                </div>
-                
-                {!isDisabled && dropdownOpen && (
-                    <ul 
-                        tabIndex={0} 
-                        className="dropdown-content menu bg-base-100 rounded-box w-full p-1 shadow border border-base-300 z-low"
-                    >
-                        {Array.isArray(availableServices) && availableServices.map((serviceItem) => {
-                            const value = serviceItem.value;
-                            const displayName = serviceItem.displayName || value;
-                            
-                            return (
-                                <li key={value}>
-                                    <a 
-                                        className={`flex items-center gap-2 ${selectedService === value ? 'active' : ''}`}
-                                        onClick={() => handleServiceChange(value)}
-                                    >
-                                        {getIconOfService(value, 16, 16)}
-                                        <span className="capitalize">{displayName}</span>
-                                    </a>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                )}
-            </div>
-        );
-    };
+    const renderServiceDropdown = () => (
+        <Dropdown
+            options={serviceOptions}
+            value={selectedService || ''}
+            onChange={handleServiceChange}
+            placeholder="Select a Service"
+            size="sm"
+            className={`btn btn-sm border-base-content/20 bg-base-100 capitalize w-full font-normal justify-between ${isDisabled ? 'btn-disabled' : ''}`}
+            menuClassName="w-full max-w-xs"
+          />
+    );
 
     return (
         <div className="space-y-4 w-full">
             <div className="form-control">
-                
-                
-
                 <div className="flex items-center gap-2 z-auto">
                 {isDisabled && (
                             <InfoTooltip tooltipContent="Batch API is only applicable for OpenAI">
                               <AlertIcon size={16} className="text-warning" />
                             </InfoTooltip>
                         )}
-                    {renderDaisyUIDropdown()}
-
-                    
+                    {renderServiceDropdown()}
                 </div>
             </div>
         </div>
     );
 }
-export default Protected(ServiceDropdown);
+
+export default Protected(React.memo(ServiceDropdown));

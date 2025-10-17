@@ -1,19 +1,16 @@
 "use client";
+import dynamic from "next/dynamic";
 import ErrorPage from "@/app/not-found";
-import ChatDetails from "@/components/historyPageComponents/chatDetails";
 import LoadingSpinner from "@/components/loadingSpinner";
-import Navbar from "@/components/navbar";
 import Protected from "@/components/protected";
-import MainSlider from "@/components/sliders/mainSlider";
 import { getSingleMessage, switchOrg } from "@/config";
 import { useCustomSelector } from "@/customHooks/customSelector";
 import { useEmbedScriptLoader } from "@/customHooks/embedScriptLoader";
 import { getAllApikeyAction } from "@/store/action/apiKeyAction";
 import { createApiAction, deleteFunctionAction, getAllBridgesAction, getAllFunctions, getPrebuiltToolsAction, integrationAction, updateApiAction, updateBridgeVersionAction } from "@/store/action/bridgeAction";
 import { getAllChatBotAction } from "@/store/action/chatBotAction";
-import { getAllKnowBaseDataAction, getKnowledgeBaseTokenAction } from "@/store/action/knowledgeBaseAction";
+import { getAllKnowBaseDataAction } from "@/store/action/knowledgeBaseAction";
 import { updateUserMetaOnboarding } from "@/store/action/orgAction";
-import { getModelAction } from "@/store/action/modelAction";
 import { getServiceAction } from "@/store/action/serviceAction";
 import { MODAL_TYPE } from "@/utils/enums";
 import { getFromCookies, openModal, setInCookies } from "@/utils/utility";
@@ -29,6 +26,12 @@ import { storeMarketingRefUserAction } from "@/store/action/marketingRefAction";
 import { getAllIntegrationDataAction } from "@/store/action/integrationAction";
 import { getAuthDataAction } from "@/store/action/authAction";
 import { getPrebuiltPromptsAction } from "@/store/action/prebuiltPromptAction";
+import { getAllAuthData } from "@/store/action/authkeyAction";
+
+const Navbar = dynamic(() => import("@/components/navbar"), {loading: () => <LoadingSpinner />});
+const MainSlider = dynamic(() => import("@/components/sliders/mainSlider"), {loading: () => <LoadingSpinner />});
+const ChatDetails = dynamic(() => import("@/components/historyPageComponents/chatDetails"), {loading: () => <LoadingSpinner />});
+
 function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus }) {
   const dispatch = useDispatch();
   const pathName = usePathname();
@@ -210,15 +213,6 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
     }
   }, [isValidOrg, currentUser?.meta?.onboarding?.bridgeCreation]);
 
-  useEffect(() => {
-    if (isValidOrg) {
-      Array?.isArray(SERVICES) && SERVICES?.map((service) => {
-        dispatch(getModelAction({ service: service?.value }));
-        return null; // to satisfy map's return
-      });
-    }
-  }, [isValidOrg]);
-
 
   useEffect(() => {
     if (isValidOrg && resolvedParams?.org_id) {
@@ -229,6 +223,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
       dispatch(getAllOrchestralFlowAction(resolvedParams.org_id));
       dispatch(getAuthDataAction(resolvedParams?.org_id))
       dispatch(getAllIntegrationDataAction(resolvedParams.org_id));
+      dispatch(getAllAuthData())
     }
   }, [isValidOrg, dispatch, resolvedParams?.org_id]);
 
@@ -263,7 +258,7 @@ function layoutOrgPage({ children, params, searchParams, isEmbedUser, isFocus })
         if (!pathName.includes('/history')) {
           const existingScript = document.getElementById(scriptId);
           if (existingScript) {
-            document.head.removeChild(existingScript);
+            // document.head.removeChild(existingScript);
           }
         }
       };

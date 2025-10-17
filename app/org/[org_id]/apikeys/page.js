@@ -24,7 +24,7 @@ const Page = () => {
   const path = pathName?.split('?')[0].split('/');
   const orgId = path[2] || '';
   const { apikeyData, descriptions } = useCustomSelector((state) => ({
-    apikeyData: state?.bridgeReducer?.apikeys[orgId] || [],
+    apikeyData: state?.apiKeysReducer?.apikeys?.[orgId] || [],
     descriptions: state.flowDataReducer.flowData.descriptionsData?.descriptions||{},
   }));
   const [filterApiKeys, setFilterApiKeys] = useState(apikeyData);
@@ -126,8 +126,8 @@ const Page = () => {
       </MainLayout>
       <div className="flex flex-row gap-4 justify-between ">
 
-      <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="ApiKeys"/>
-      <div className="flex-shrink-0 flex gap-4 mr-2">
+      {apikeyData?.length>5 && <SearchItems data={apikeyData} setFilterItems={setFilterApiKeys} item="ApiKeys"/>}
+      <div className={`${apikeyData?.length<=5 ? 'ml-auto ' : ''} flex-shrink-0 flex gap-4 mr-2`}>
             <button 
               className="btn" 
               onClick={() => toggleSidebar("Api-Keys-guide-slider","right")}
