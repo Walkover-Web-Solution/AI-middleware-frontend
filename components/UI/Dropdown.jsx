@@ -22,6 +22,8 @@ import { ChevronDown } from 'lucide-react';
  * - className: string for trigger wrapper
  * - menuClassName: string for menu container
  * - placement: 'bottom-start' | 'bottom-end'
+ * - onOptionHover: (option|null) => void (called when hovering an option; null on leave)
+ * - onMenuClose: () => void (called when the menu closes)
  * - children: custom trigger (for wrapper mode). If provided, acts as wrapper-mode.
  */
 const Dropdown = ({
@@ -40,6 +42,8 @@ const Dropdown = ({
   className = '',
   menuClassName = '',
   placement = 'bottom-start',
+  onOptionHover,
+  onMenuClose,
   children,
 }) => {
   const [open, setOpen] = useState(false);
@@ -69,6 +73,14 @@ const Dropdown = ({
     };
   }, [open]);
 
+  // Notify on menu close
+  useEffect(() => {
+    if (!open) {
+      onMenuClose && onMenuClose();
+      onOptionHover && onOptionHover(null);
+    }
+  }, [open, onMenuClose, onOptionHover]);
+
   const selectedOption = useMemo(
     () => options.find((o) => String(o.value) === String(value)) || null,
     [options, value]
@@ -91,8 +103,9 @@ const Dropdown = ({
       onChange && onChange(val, opt);
       setOpen(false);
       setQuery('');
+      onMenuClose && onMenuClose();
     },
-    [onChange]
+    [onChange, onMenuClose]
   );
 
   // Keyboard support: close on escape
@@ -204,7 +217,7 @@ const Dropdown = ({
             </div>
           )}
 
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-64 overflow-y-auto" onMouseLeave={() => onOptionHover && onOptionHover(null)}>
             <ul className="menu menu-sm w-full p-1 columns-1">
               {filteredOptions.length === 0 && (
                 <li className="px-3 py-2 text-sm text-base-content/10">No options</li>
@@ -217,6 +230,7 @@ const Dropdown = ({
                     <a
                       className={cx('flex items-start gap-2 w-full rounded-md hover:bg-base-200', isActive ? 'active text-primary' : '')}
                       onClick={() => handleSelect(opt.value, opt)}
+                      onMouseEnter={() => onOptionHover && onOptionHover(opt)}
                       role="option"
                       aria-selected={isActive}
                     >
