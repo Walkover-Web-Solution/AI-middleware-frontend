@@ -57,7 +57,6 @@ const PromptSummaryModal = ({ modalType, params, searchParams, autoGenerateSumma
 
     }
     const handleSaveSummary = useCallback(() => {
-        setIsGeneratingSummary(true)
         const newValue = textareaRef.current?.value || summary || "";
         const dataToSend = { bridge_summary: newValue };
         setSummary(newValue);
