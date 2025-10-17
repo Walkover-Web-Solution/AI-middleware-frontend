@@ -84,11 +84,6 @@ function Home({ params, isEmbedUser }) {
         ) : (
           getIconOfService(item.service, 30, 30)
         )}
-        {loadingAgentId === item._id ? (
-          <div className="loading loading-spinner loading-sm"></div>
-        ) : (
-          getIconOfService(item.service, 30, 30)
-        )}
       </div>
       <div className="flex-col" title={item.name}>
         <div className="flex flex-col">
