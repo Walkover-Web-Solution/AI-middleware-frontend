@@ -9,12 +9,8 @@ import { useCustomSelector } from '@/customHooks/customSelector';
 const ServiceInitializer = () => {
     const dispatch = useDispatch();
     const pathname = usePathname();
-    const retryTimeoutRef = useRef(null);
-    const retryCountRef = useRef(0);
-    const maxRetries = 10; // Maximum number of retry attempts
-    
     const SERVICES = useCustomSelector(state => state.serviceReducer.services);
-    const MODELS = useCustomSelector(state => state.modelReducer.models);
+    const MODELS = useCustomSelector(state => state.modelReducer.serviceModels);
     const isOrgPage = pathname === '/org' || pathname.startsWith('/org/page') || pathname === '/org/';
 
     // Always run on org page - initial data fetch
@@ -40,52 +36,6 @@ const ServiceInitializer = () => {
             });
         }
     }, [SERVICES, MODELS, dispatch]);
-
-    // Retry mechanism - check every 5 seconds if models are still missing
-    useEffect(() => {
-        if (isOrgPage && Array.isArray(SERVICES) && SERVICES.length > 0) {
-            const checkAndRetryModels = () => {
-                if (retryCountRef.current >= maxRetries) {
-                    return;
-                }
-
-                let hasMissingModels = false;
-                
-                SERVICES.forEach((service) => {
-                    const serviceValue = service?.value;
-                    if (serviceValue) {
-                        const serviceModels = MODELS?.[serviceValue];
-                        
-                        if (!serviceModels || !Array.isArray(serviceModels) || serviceModels.length === 0) {
-                            hasMissingModels = true;
-                            dispatch(getModelAction({ service: serviceValue }));
-                        }
-                    }
-                });
-                if (hasMissingModels && retryCountRef.current < maxRetries) {
-                    retryCountRef.current += 1;
-                    retryTimeoutRef.current = setTimeout(checkAndRetryModels, 5000);
-                } else if (!hasMissingModels) {
-                    retryCountRef.current = 0;
-                }
-            };
-
-            if (retryTimeoutRef.current) {
-                clearTimeout(retryTimeoutRef.current);
-            }
-
-            // Start retry mechanism after initial delay
-            retryTimeoutRef.current = setTimeout(checkAndRetryModels, 3000);
-        }
-
-        // Cleanup timeout on unmount or dependency change
-        return () => {
-            if (retryTimeoutRef.current) {
-                clearTimeout(retryTimeoutRef.current);
-            }
-        };
-    }, [SERVICES, MODELS, dispatch, isOrgPage]);
-
     // This component doesn't render anything
     return null;
 };
