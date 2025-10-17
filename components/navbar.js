@@ -161,7 +161,7 @@ const Navbar = ({ isEmbedUser }) => {
     router.push(base + (version ? `?version=${version}` : ''));
   }, [router, orgId, bridgeId, searchParams]);
 
-  const toggleOrgSidebar = useCallback(() => router.push(`/org`), [router]);
+  const toggleOrgSidebar = useCallback(() => router.push(`/org?redirection=false`), [router]);
   const toggleBridgeSidebar = useCallback(() => router.push(`/org/${orgId}/agents`), [router, orgId]);
   const toggleConfigHistorySidebar = useCallback(() => toggleSidebar("default-config-history-slider", "right"), []);
   const toggleIntegrationGuideSlider = useCallback(() => toggleSidebar("integration-guide-slider", "right"), []);

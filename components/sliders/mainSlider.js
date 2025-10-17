@@ -314,7 +314,7 @@ function MainSlider({ isEmbedUser }) {
               {pathParts.length >= 4 && (
                 <button
                   onClick={() => {
-                    pathParts.length > 4 ? toggleSidebar('default-org-sidebar') : router.push('/org');
+                    pathParts.length > 4 ? toggleSidebar('default-org-sidebar') : router.push('/org?redirection=false');
                     if (isMobile) setIsMobileVisible(false);
                   }}
                   onMouseEnter={e => onItemEnter('org', e)}
@@ -365,7 +365,7 @@ function MainSlider({ isEmbedUser }) {
                           <div className="shrink-0">{ITEM_ICONS[key]}</div>
                           {showSidebarContent && (
                            <div className='flex items-center gap-2 justify-center'>
-                             <span className="font-medium text-sm truncate">{DISPLAY_NAMES(key)}</span> 
+                             <span className="font-medium text-sm capitalize truncate">{DISPLAY_NAMES(key)}</span> 
                              <span>{key === 'orchestratal_model' && <BetaBadge/>}</span>
                            </div>
                           )}
