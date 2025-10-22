@@ -479,6 +479,17 @@ function FunctionParameterModal({
     }
   }, [variablesPath, variables_path, functionName]);
 
+  useEffect(() => {
+    if (toolData) {
+      const jsonData = {
+        name: toolName,
+        description: toolData.description || "",
+        fields: toolData.fields || {}
+      };
+      setObjectFieldValue(JSON.stringify(jsonData, null, 2));
+    }
+  }, [toolData, toolName]);
+
   const copyToClipboard = useCallback((content) => {
     navigator.clipboard
       .writeText(content)
@@ -1058,12 +1069,11 @@ function FunctionParameterModal({
 
   return (
     <Modal MODAL_ID={Model_Name}>
-      <div className="modal-box max-w-6xl overflow-x-hidden text-sm h-[600px] flex flex-col">
+      <div className="modal-box max-w-6xl overflow-hidden text-sm h-[600px] flex flex-col">
         {/* Modal Header */}
         <div className="flex items-start flex-col mb-4 pb-3 border-b gap-2 border-base-300">
           <div className="flex justify-between w-full items-center">
           <h2 className="text-xl font-semibold">Config {name}</h2>
-          {isDataAvailable && (
           <div className="flex justify-end gap-2 mt-1">
             <div className="dropdown">
               <div 
@@ -1129,7 +1139,6 @@ function FunctionParameterModal({
               </div>
             )}
           </div>
-        )}
         </div>
           <span className="flex flex-row items-center gap-2">
             {(name === 'Tool' || name === 'Pre Tool') && (
@@ -1157,51 +1166,6 @@ function FunctionParameterModal({
         {/* Editor Selection Dropdown */}
         
 
-        {/* Name and Description Form - Only show when not in JSON mode */}
-        {!isTextareaVisible && (
-          <div className="space-y-4 ">
-            {/* Name Field */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Name
-              </label>
-              {name === "Orchestral Agent" ? (
-                <input
-                  type="text"
-                  className="input input-bordered w-full"
-                  value={tool_name}
-                  disabled
-                />
-              ) : (
-                  <input className="input input-bordered w-full" value={toolName}
-                    onChange={(e) => {
-                      setToolName(e.target.value);
-                      setIsToolNameManuallyChanged(true);
-                      setIsModified(true);
-                    }}
-                    maxLength={50}
-                    placeholder="Enter tool name"></input>
-              )}
-            </div>
-
-            {/* Description Field */}
-            <div>
-              <label className="block text-sm  mb-2">
-                Description
-              </label>
-              <textarea
-                className="textarea textarea-bordered w-full resize-none"
-                rows={3}
-                value={toolData?.description || ""}
-                onChange={(e) => {
-                  setToolData({ ...toolData, description: e.target.value });
-                  setIsModified(true);
-                }}
-                placeholder="Enter tool description"
-              />
-            </div>
-          </div>
-        )}
 
         <div className="flex flex-row mb-2">
           
@@ -1291,10 +1255,54 @@ function FunctionParameterModal({
         </div>
 
 
-        {/* Main Content Area - Flex grow to push buttons to bottom */}
-        <div className="flex-grow">
+        {/* Main Content Area - Scrollable center section */}
+        <div className={`flex-1 ${isTextareaVisible ? 'overflow-hidden' : ' overflow-x-hidden overflow-y-auto'}`}>
           {!isTextareaVisible ? (
               <> 
+            {/* Name and Description Form - Now inside scrollable area */}
+            <div className="space-y-4 mb-6">
+              {/* Name Field */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Name
+                </label>
+                {name === "Orchestral Agent" ? (
+                  <input
+                    type="text"
+                    className="input input-bordered w-full"
+                    value={tool_name}
+                    disabled
+                  />
+                ) : (
+                    <input className="input input-bordered w-full" value={toolName}
+                      onChange={(e) => {
+                        setToolName(e.target.value);
+                        setIsToolNameManuallyChanged(true);
+                        setIsModified(true);
+                      }}
+                      maxLength={50}
+                      placeholder="Enter tool name"></input>
+                )}
+              </div>
+
+              {/* Description Field */}
+              <div>
+                <label className="block text-sm mb-2">
+                  Description
+                </label>
+                <textarea
+                  className="textarea textarea-bordered w-full resize-none"
+                  rows={3}
+                  value={toolData?.description || ""}
+                  onChange={(e) => {
+                    setToolData({ ...toolData, description: e.target.value });
+                    setIsModified(true);
+                  }}
+                  placeholder="Enter tool description"
+                />
+              </div>
+            </div>
+            
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">Parameters</h3>
               <button
