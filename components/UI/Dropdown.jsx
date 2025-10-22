@@ -272,7 +272,7 @@ const Dropdown = ({
                 });
                 return Array.from(groups.entries()).map(([groupLabel, opts]) => (
                   <li key={`group-${groupLabel}`} className="px-2 py-1">
-                    <div className="text-xs text-base-content/70 mb-1 capitalize">{groupLabel}</div>
+                    <div className="text-xs text-base-content/70 mb-1">{groupLabel}</div>
                     <ul>
                       {opts.map((opt) => {
                         const Icon = opt.icon;

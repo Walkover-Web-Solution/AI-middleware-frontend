@@ -187,22 +187,27 @@ function MainSlider({ isEmbedUser }) {
 
   // Handle content visibility with delay for smooth transitions
   useEffect(() => {
-    if (isOpen && !isMobile) {
-      // Show content immediately when opening
-      setShowContent(true);
-    } else if (!isOpen && !isMobile) {
-      // Hide content after animation completes when closing
-      const timer = setTimeout(() => {
-        setShowContent(false);
-      }, 300); // Match the CSS transition duration
-      return () => clearTimeout(timer);
+    if (isMobile) {
+      // For mobile, show content immediately when visible
+      setShowContent(isMobileVisible);
+    } else {
+      if (isOpen) {
+        // Show content immediately when opening
+        setShowContent(true);
+      } else {
+        // Hide content after animation completes when closing
+        const timer = setTimeout(() => {
+          setShowContent(false);
+        }, 300); // Match the CSS transition duration
+        return () => clearTimeout(timer);
+      }
     }
     
     // Handle side-by-side mode - always show content when in this mode
     if (isSideBySideMode && isOpen) {
       setShowContent(true);
     }
-  }, [isOpen, isMobile, isSideBySideMode]);
+  }, [isOpen, isMobile, isMobileVisible, isSideBySideMode]);
 
   // Close on backdrop click (mobile)
   const handleBackdropClick = () => {
@@ -231,10 +236,12 @@ function MainSlider({ isEmbedUser }) {
   };
 
   // Mobile menu toggle handler
-  const handleMobileMenuToggle = () => {
+  const handleMobileMenuToggle = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
     setHovered(null);
     setIsMobileVisible(prev => !prev);
-  };
+  }, []);
 
   /* ------------------------------------------------------------------------ */
   /*                                  Render                                  */
@@ -250,14 +257,14 @@ function MainSlider({ isEmbedUser }) {
   const sidebarZIndex = (isMobile || isMobileVisible) ? 'z-50' : 'z-30';
 
   // Determine if sidebar should show content (expanded view) with delayed hiding
-  const showSidebarContent = isMobile ? false : showContent; // Mobile always shows collapsed view
+  const showSidebarContent = isMobile ? false : showContent;
 
   return (
     <>
       {/* Mobile backdrop */}
       {isMobile && isMobileVisible && (
         <div
-          className="fixed inset-0 bg-black/50 lg:hidden z-40 sidebar transition-opacity duration-300 ease-in-out"
+          className="fixed inset-0 bg-black/50 lg:none z-40 sidebar transition-opacity duration-300 ease-in-out"
           onClick={handleBackdropClick}
         />
       )}
@@ -277,11 +284,11 @@ function MainSlider({ isEmbedUser }) {
         {/*                              SIDE BAR                              */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`${sidebarPositioning} sidebar border border-base-content/30 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${barWidth} ${sidebarZIndex}`}
+          className={`${sidebarPositioning} sidebar border ${isMobile ? 'overflow-hidden' : ''} border-base-content/30 left-0 top-0 h-screen bg-base-100 my-3 ${isMobile?'mx-1':'mx-3'} shadow-lg rounded-xl flex flex-col pb-5 ${sidebarZIndex}`}
           style={{ 
-            width: isMobile ? (isMobileVisible ? '56px' : '50px') : (isOpen ? '220px' : '50px'),
-            transform: (!isSideBySideMode && pathParts.length > 3) ? (isMobile && !isMobileVisible ? 'translateX(-100%)' : 'translateX(0)') : 'none',
-            opacity: (isMobile && !isMobileVisible) ? '0' : '1',
+            width: isMobile ? (isMobileVisible ? '56px' : '0px') : (isOpen ? '220px' : '50px'),
+            transform: isMobile ? (isMobileVisible ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+            opacity: isMobile ? (isMobileVisible ? '1' : '0') : '1',
             transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
             transitionProperty: 'width, transform, opacity'
           }}
@@ -535,8 +542,8 @@ function MainSlider({ isEmbedUser }) {
         {/* ------------------------------------------------------------------ */}
         {/*                         CONTENT SPACER                             */}
         {/* ------------------------------------------------------------------ */}
-        {/* Only show spacer in side-by-side mode */}
-        {isSideBySideMode && (
+        {/* Only show spacer in side-by-side mode and desktop */}
+        {isSideBySideMode && !isMobile && (
           <div 
             className="hidden lg:block" 
             style={{ 

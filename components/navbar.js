@@ -37,7 +37,7 @@ const Navbar = ({ isEmbedUser }) => {
   const searchParams = useSearchParams();
   const { organizations, bridgeData, bridge, publishedVersion, isDrafted, bridgeStatus, bridgeType,  isPublishing, isUpdatingBridge, activeTab, isArchived, hideHomeButton, showHistory} = useCustomSelector(state => ({
     organizations: state.userDetailsReducer.organizations,
-    bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs.find((bridge) => bridge._id === bridgeId)||{},
+    bridgeData: state?.bridgeReducer?.org?.[orgId]?.orgs?.find((bridge) => bridge._id === bridgeId)||{},
     bridge: state.bridgeReducer.allBridgesMap[bridgeId] || {},
     publishedVersion: state.bridgeReducer.allBridgesMap?.[bridgeId]?.published_version_id ?? null,
     isDrafted: state.bridgeReducer.bridgeVersionMapping?.[bridgeId]?.[searchParams?.get('version')]?.is_drafted ?? false,
