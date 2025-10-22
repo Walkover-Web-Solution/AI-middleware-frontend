@@ -204,7 +204,7 @@ function Home({ params, isEmbedUser }) {
       <button className="btn btn-outline btn-ghost btn-sm" onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        router.push(`/org/${resolvedParams.org_id}/agents/history/${item._id}?version=${item?.published_version_id || item?.versions?.[0]}`);
+        router.push(`/org/${resolvedParams.org_id}/agents/history/${row._id}?version=${row?.versionId}`);
       }}>
         History
       </button>
