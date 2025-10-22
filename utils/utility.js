@@ -723,3 +723,25 @@ export function didCurrentTabInitiateUpdate(agentId) {
     
     return { conversation, expected: expected_response };
   }
+
+export const generateKeyValuePairs = (obj) => {
+    const result = {};
+    
+    for (const [key, value] of Object.entries(obj)) {
+      if (typeof value === 'string') {
+        result[key] = value; // Keep exact string value
+      } else if (typeof value === 'number') {
+        result[key] = value; // Keep exact number value
+      } else if (typeof value === 'boolean') {
+        result[key] = value; // Keep exact boolean value
+      } else if (Array.isArray(value)) {
+        result[key] = value; // Keep exact array with all elements
+      } else if (typeof value === 'object' && value !== null) {
+        result[key] = value; // Keep exact object with all properties
+      } else {
+        result[key] = value; // Keep any other value as-is
+      }
+    }
+    
+    return result;
+  };

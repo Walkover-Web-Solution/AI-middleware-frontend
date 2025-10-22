@@ -9,6 +9,7 @@ import { createBridgeAction, getAllBridgesAction, updateBridgeAction} from '@/st
 import { generateRandomID, getFromCookies, sendDataToParent, setInCookies, toBoolean } from '@/utils/utility';
 import { useCustomSelector } from '@/customHooks/customSelector';
 import { isPending } from '@/store/reducer/bridgeReducer';
+import ServiceInitializer from '@/components/organization/ServiceInitializer';
 
 const Layout = ({ children }) => {
   const searchParams = useSearchParams();
@@ -240,6 +241,7 @@ const Layout = ({ children }) => {
             </div>
           </div>
         </div>
+        <ServiceInitializer/>
       </div>
     );
   }
